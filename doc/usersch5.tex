@@ -4652,6 +4652,67 @@ and \kbd{y}
 \kbd{deplin=0}) or \kbd{F2m\_deplin} (if \kbd{deplin=1}), in place
 (destroys~\kbd{x}).
 
+\subsec{\kbd{F3c} / \kbd{F3v}, \kbd{F3m}}  An \kbd{F3v}~\kbd{v} is a
+\typ{VECSMALL} representing a vector over $\F_3$. Specifically \kbd{z[0]} is
+the usual codeword, \kbd{z[1]} is the number of components of $v$ and the
+coefficients are given by pair of adjacent bits of remaining words by
+increasing indices, with the coding $00\mapsto 0, 01\mapsto 1, 10\mapsto 2$ and
+$11$ is undefined.
+
+\fun{ulong}{F3v_coeff}{GEN x, long i} returns the coefficient $i\ge 1$ of $x$.
+
+\fun{void}{F3v_clear}{GEN x, long i} sets the coefficient $i\ge 1$ of $x$ to
+$0$.
+
+\fun{void}{F3v_set}{GEN x, long i, ulong n} sets the coefficient $i\ge 1$ of
+$x$ to $n<3$,
+
+\fun{ulong}{F3m_coeff}{GEN x, long i, long j} returns the coefficient $(i,j)$
+of $x$.
+
+\fun{void}{F3m_set}{GEN x, long i, long j, ulong n} sets the coefficient
+$(i,j)$ of $x$ to $n<3$.
+
+\fun{GEN}{F3m_copy}{GEN x} returns a copy of $x$.
+
+\fun{GEN}{F3m_transpose}{GEN x} returns the transpose of $x$.
+
+\fun{GEN}{F3m_row}{GEN x, long j} returns the \kbd{F3v} which corresponds
+to the $j$-th row of the \kbd{F3m} $x$.
+
+\fun{GEN}{F3m_ker}{GEN x}
+
+\fun{GEN}{F3m_ker_sp}{GEN x, long deplin}, as \kbd{F3m\_ker} (if
+\kbd{deplin=0}) or \kbd{F2m\_deplin} (if \kbd{deplin=1}), in place
+(destroys~\kbd{x}).
+
+\fun{GEN}{F3m_mul}{GEN x, GEN y} multiplies  \kbd{x} and \kbd{y} (assumed to
+have compatible dimensions).
+
+\fun{GEN}{zero_F3v}{long n} creates a \kbd{F3v} with \kbd{n} components set to
+$0$.
+
+\fun{GEN}{zero_F2m_copy}{long m, long n} creates a \kbd{F3m} with \kbd{m} x
+\kbd{n} components set to $0$.
+
+\fun{GEN}{F3v_to_Flv}{GEN x}
+
+\fun{GEN}{ZV_to_F3v}{GEN x}
+
+\fun{GEN}{RgV_to_F3v}{GEN x}
+
+\fun{GEN}{F3m_to_Flm}{GEN x}
+
+\fun{GEN}{F3m_to_ZM}{GEN x}
+
+\fun{GEN}{Flv_to_F3v}{GEN x}
+
+\fun{GEN}{Flm_to_F3m}{GEN x}
+
+\fun{GEN}{ZM_to_F3m}{GEN x}
+
+\fun{GEN}{RgM_to_F3m}{GEN x}
+
 \subsec{\kbd{FlxqV}, \kbd{FlxqC}, \kbd{FlxqM}}
 See \kbd{FqV}, \kbd{FqC}, \kbd{FqM} operations.
 

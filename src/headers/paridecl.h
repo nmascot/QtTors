@@ -261,6 +261,28 @@ const struct bb_group * get_F2xqE_group(void **E, GEN a2, GEN a6, GEN T);
 GEN     RgE_to_F2xqE(GEN x, GEN T);
 GEN     random_F2xqE(GEN a2, GEN a6, GEN T);
 
+/* F3v.c */
+
+GEN     F3m_ker(GEN x);
+GEN     F3m_ker_sp(GEN x, long deplin);
+GEN     F3m_mul(GEN x, GEN y);
+GEN     F3m_row(GEN x, long j);
+GEN     F3m_to_Flm(GEN z);
+GEN     F3m_to_ZM(GEN z);
+GEN     F3m_transpose(GEN x);
+GEN     F3v_to_Flv(GEN x);
+ulong   F3v_coeff(GEN x,long v);
+void    F3v_clear(GEN x, long v);
+void    F3v_set(GEN x, long v, ulong n);
+GEN     Flm_to_F3m(GEN x);
+GEN     Flv_to_F3v(GEN x);
+GEN     RgM_to_F3m(GEN x);
+GEN     RgV_to_F3v(GEN x);
+GEN     ZM_to_F3m(GEN x);
+GEN     ZV_to_F3v(GEN x);
+GEN     zero_F3m_copy(long m, long n);
+GEN     zero_F3v(long m);
+
 /* Fle.c */
 
 ulong   Fl_elldisc(ulong a4, ulong a6, ulong p);
@@ -5955,6 +5977,9 @@ INLINE GEN    F2m_copy(GEN x);
 INLINE GEN    F2v_copy(GEN x);
 INLINE GEN    F2x_copy(GEN x);
 INLINE GEN    F2v_ei(long n, long i);
+INLINE ulong  F3m_coeff(GEN x, long a, long b);
+INLINE void   F3m_set(GEN x, long a, long b, ulong c);
+INLINE GEN    F3m_copy(GEN x);
 INLINE GEN    Flm_copy(GEN x);
 INLINE GEN    Flv_copy(GEN x);
 INLINE int    Flx_equal1(GEN x);

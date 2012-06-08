@@ -2309,6 +2309,9 @@ INLINE GEN
 F2m_copy(GEN x) { return RgM_shallowcopy(x); }
 
 INLINE GEN
+F3m_copy(GEN x) { return RgM_shallowcopy(x); }
+
+INLINE GEN
 Flm_copy(GEN x) { return RgM_shallowcopy(x); }
 
 /* divisibility: return 1 if y[i] | x[i] for all i, 0 otherwise. Assume
@@ -2548,6 +2551,14 @@ F2m_set(GEN x, long a, long b) { F2v_set(gel(x,b), a); }
 
 INLINE void
 F2m_flip(GEN x, long a, long b) { F2v_flip(gel(x,b), a); }
+
+/* F3m */
+
+INLINE ulong
+F3m_coeff(GEN x, long a, long b) { return F3v_coeff(gel(x,b), a); }
+
+INLINE void
+F3m_set(GEN x, long a, long b, ulong c) { F3v_set(gel(x,b), a, c); }
 
 /* ARITHMETIC */
 INLINE GEN
