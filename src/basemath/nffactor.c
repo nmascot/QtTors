@@ -527,8 +527,7 @@ nf_pol_lift(GEN pol, GEN bound, nflift_t *L)
   GEN x = cgetg(l,t_POL);
 
   x[1] = pol[1];
-  gel(x,l-1) = mul_content(gel(pol,l-1), L->topowden);
-  for (i=l-2; i>1; i--)
+  for (i=l-1; i>1; i--)
   {
     GEN t = nf_bestlift_to_pol(gel(pol,i), bound, L);
     if (!t) return NULL;
@@ -1278,7 +1277,7 @@ ZqX_normalize(GEN P, GEN lt, nflift_t *L)
   return ZqX(R, L->pk, L->Tpk, L->ZqProj);
 }
 
-/* k allowing to reconstruct x, |x|^2 < C, from x mod pr^k */
+/* k allowing to reconstruct x, T_2(x)^2 < C, from x mod pr^k */
 /* return log [  2sqrt(C/d) * ( (3/2)sqrt(gamma) )^(d-1) ] ^d / log N(pr)
  * cf. Belabas relative van Hoeij algorithm, lemma 3.12 */
 static double
@@ -2185,4 +2184,176 @@ nfrootsof1(GEN nf)
   }
   if (nf) z = nf_to_scalar_or_basis(nf,z);
   return gerepilecopy(av, mkvec2(utoi(nbroots), z));
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*                           rnfgaloisconj                         */
+/*                                                                 */
+/*******************************************************************/
+
+static GEN
+rnffrobeniuslift(GEN nf, GEN P, GEN Tp, GEN p, GEN bound, GEN den, GEN iden, GEN T)
+{
+  GEN q, Tq, Pp, Pq, s, S;
+  long v = varn(P), e;
+  nflift_t L;
+  L.p = p; L.Tp = Tp;
+  L.tozk = nf_get_invzk(nf);
+  L.topow= nf_get_zkprimpart(nf);
+  L.topowden = nf_get_zkden(nf);
+  bestlift_init(0, nf, bound, &L);
+  q = L.pk; Tq = L.Tpk; e = L.k;
+  P = gmul(P,L.topowden);
+  Pq = ZqX(RgX_to_nfX(nf, P), q, Tq, L.ZqProj);
+  Pp = FqX_red(Pq, Tp, p);
+  s = FpXQXQ_pow(pol_x(v), powiu(p, degpol(Tp)), Pp, Tp, p);
+  S = ZqX_ZqXQ_liftroot(Pq, s, Pq, Tq, p, e);
+  den =  nf_to_Zq(den, Tq, q, shifti(q,-1), L.ZqProj);
+  S = FqX_Fq_mul(S,  den, Tq, q);
+  P = nf_pol_lift(S, bound, &L);
+  if (!P) return NULL;
+  return gdiv(QXQX_QXQ_mul(P, iden, T), L.topowden);
+}
+
+static GEN
+RgX_galconj_bound(GEN T, long prec)
+{
+  pari_sp av = avma;
+  GEN L = QX_complex_roots(T, prec);
+  GEN prep = vandermondeinverseinit(L);
+  GEN M = vandermondeinverse(L, RgX_gtofp(T, prec), gen_1, prep);
+  GEN z = gmul(matrixnorm(M, prec), gsupnorm(L, prec));
+  return gerepileupto(av, z);
+}
+
+static GEN
+rnfgaloisconj_bound(GEN P, GEN z, GEN den, long prec)
+{
+  pari_sp av = avma;
+  long i, l = lg(z);
+  GEN s = gen_0;
+  for (i = 1; i < l; i++)
+    s = gadd(s, gsqr(gmul(gabs(RgX_cxeval(den, gel(z,i), NULL),prec),
+                          RgX_galconj_bound(RgXY_cxevalx(P, gel(z,i), NULL), prec))));
+  return gerepileupto(av, ceil_safe(s));
+}
+
+static GEN
+FlxqXQV_fixedalg(GEN aut, GEN S, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  long d = get_FlxqX_degree(S), sv = get_Flx_var(T), v = get_FlxqX_var(S);
+  long i, l = lg(aut);
+  GEN A = RgX_to_FlxqX(gel(aut,1), T, p);
+  GEN M = FlxXV_to_FlxM(FlxqXQ_powers(A, d-1, S, T, p), d, sv);
+  GEN M2 = FlxM_Flx_add_shallow(M, Fl_to_Flx(p-1, sv), p);
+  GEN C = FlxM_to_FlxXV(FlxqM_ker(M2, T, p), v);
+  for (i = 2; i < l; i++)
+  {
+    GEN A = RgX_to_FlxqX(gel(aut,i), T, p);
+    GEN M = FlxXC_sub(FlxqXC_FlxqXQ_eval(C, A, S, T, p), C, p);
+    GEN K = FlxqM_ker(FlxXV_to_FlxM(M, d, sv), T, p);
+    C = FlxM_to_FlxXV(FlxqM_mul(FlxXV_to_FlxM(C, d, sv), K, T, p), v);
+  }
+  return gerepilecopy(av, C);
+}
+
+static long
+fixedalg_order(GEN aut, GEN S, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  long d = get_Flx_degree(T);
+  long e, i, l = lg(aut);
+  for(e = 1; ; e++, set_avma(av))
+  {
+    for (i = 1; i < l; i++, set_avma(av))
+      if (!gequal(FlxqXQ_pow(gel(aut,i), powuu(p, d*e), S, T, p), gel(aut,i)))
+        break;
+    if (i == l) return e;
+  }
+}
+
+static GEN
+rnfgaloisanalysis(GEN nf, GEN P, GEN aut, long m, GEN d, long *pt_o)
+{
+  GEN T = nf_get_pol(nf), R = NULL, den = nf_get_zkden(nf);
+  long n = degpol(P), omax = 0, try = 0;
+  GEN daut = lg(aut) > 1 ? Q_denom(aut) : NULL;
+  forprime_t S;
+  u_forprime_init(&S, 2, ULONG_MAX);
+  while(try <= n || omax < 2)
+  {
+    ulong p = u_forprime_next(&S);
+    GEN F, Tp;
+    long i, lF;
+    if ((d && dvdiu(d,p)) || dvdiu(den, p) || (daut && dvdiu(daut,p))) continue;
+    Tp = ZX_to_Flx(T, p);
+    if (!Flx_is_squarefree(Tp,p)) continue;
+    F = gel(Flx_factor(Tp, p),1); lF = lg(F);
+    for (i = 1; i < lF; i++)
+    {
+      pari_sp av = avma;
+      long o, d;
+      GEN D, Fi = gel(F,i);
+      GEN Pp = RgX_to_FlxqX(P, Fi, p);
+      if (degpol(Pp) < n ||  !FlxqX_is_squarefree(Pp, Fi, p))
+        continue;
+      D = FlxqX_nbfact_by_degree(Pp, &d, Fi, p);
+      o = n / d; /* d factors, all should have degree o */
+      if (D[o] != d)
+      {
+        if(DEBUGLEVEL) err_printf("rnfisabelian: not Galois at %lu: %Ps \n",p,D);
+        return NULL;
+      }
+      if (lg(aut) > 1)
+      {
+         GEN U = FlxqXQV_fixedalg(aut, Pp, Fi, p);
+         o = fixedalg_order(U, Pp, Fi, p);
+         d = m / o;
+      }
+      if (d == 1) { *pt_o = o; return mkvec2(Flx_to_ZX(Fi), utoi(p)); }
+      if (o > omax) { omax = o; R = mkvec2(Flx_to_ZX(Fi), utoi(p)); }
+      else set_avma(av);
+    }
+    try++;
+  }
+  *pt_o = omax;
+  return R;
+}
+
+GEN
+rnfabelianconjgen(GEN nf, GEN P)
+{
+  pari_sp av = avma;
+  long prec, m, i;
+  GEN bnd, den, iden, T, Pr, gen, orders, d;
+  nf = checknf(nf);
+  T = nf_get_pol(nf);
+  P = RgX_nffix("rnfgaloisconj", T, P, 1);
+  P = Q_remove_denom(P, &d);
+  Pr = RgX_to_nfX(nf, P);
+  prec = DEFAULTPREC + nbits2extraprec(expi(gsupnorm(Pr, DEFAULTPREC)) * degpol(T));
+  nf = nfnewprec_shallow(nf, prec);
+  den = nfX_disc(nf, P);
+  bnd = rnfgaloisconj_bound(P, nf_get_roots(nf), den, prec);
+  iden = QXQ_inv(den, T);
+  den = nf_to_scalar_or_basis(nf, den);
+  m = degpol(P);
+  gen = vectrunc_init(expu(m));
+  orders = cgetg(expu(m)+1,t_VECSMALL);
+  setlg(gen,1);
+  for(i = 1; m > 1 ;i++)
+  {
+    long o;
+    GEN S, Tp = rnfgaloisanalysis(nf, P, gen, m, d, &o);
+    if (!Tp) return gc_const(av, gen_0);
+    S = rnffrobeniuslift(nf, P, gel(Tp,1), gel(Tp, 2), bnd, den, iden, T);
+    if (!S) return gc_const(av, gen_0);
+    vectrunc_append(gen,S);
+    orders[i] = o;
+    m /= o;
+  }
+  setlg(orders,i);
+  return gerepilecopy(av, mkvec2(gen, orders));
 }
