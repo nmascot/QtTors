@@ -37,3 +37,4 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
 
   Added
 PMo  1- new syntax for forvec loops
+BA   2- [GP] genus2igusa

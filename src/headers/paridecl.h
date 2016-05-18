@@ -4059,6 +4059,7 @@ GEN     variables_vec(GEN x);
 /* genus2red.c */
 
 GEN     genus2red(GEN PQ, GEN p);
+GEN     genus2igusa(GEN P, long n);
 
 /* grossenchar.c */
 

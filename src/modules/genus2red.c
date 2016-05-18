@@ -16,6 +16,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define DEBUGLEVEL DEBUGLEVEL_genus2red
 
+/* extract coefficients of a polynomial a0 X^6 + ... + a6, of degree <= 6 */
+static void
+RgX_to_06(GEN q, GEN *a0, GEN *a1, GEN *a2, GEN *a3, GEN *a4, GEN *a5, GEN *a6)
+{
+  *a0 = gen_0;
+  *a1 = gen_0;
+  *a2 = gen_0;
+  *a3 = gen_0;
+  *a4 = gen_0;
+  *a5 = gen_0;
+  *a6 = gen_0;
+  switch(degpol(q))
+  {
+    case 6: *a0 = gel(q,8); /*fall through*/
+    case 5: *a1 = gel(q,7); /*fall through*/
+    case 4: *a2 = gel(q,6); /*fall through*/
+    case 3: *a3 = gel(q,5); /*fall through*/
+    case 2: *a4 = gel(q,4); /*fall through*/
+    case 1: *a5 = gel(q,3); /*fall through*/
+    case 0: *a6 = gel(q,2); /*fall through*/
+  }
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                       IGUSA INVARIANTS                         **/
@@ -103,6 +126,87 @@ gmul(gmul(gmul(gmulsg(2560, gsqr(a0)), a1), a5), gsqr(a6))),
 gmul(gmul(gmul(gmulsg(2240, a0), gsqr(a1)), gsqr(a5)), a6)),
 gmul(gmul(gmul(gmul(gmul(gmulsg(6528, a0), a1), a2), a4), a5), a6)),
 gmul(gmul(gmul(gmul(gmulsg(1568, a0), a2), gsqr(a3)), a4), a6)), -10));
+}
+
+static GEN
+igusaj8_fromj246(GEN j2, GEN j4, GEN j6)
+{
+  pari_sp av = avma;
+  GEN j42 = gsqr(j4);
+  GEN j2j6 = gmul(j2,j6);
+  return gerepileupto(av, gmul2n(gsub(j2j6,j42), -2));
+}
+
+static GEN
+igusaj8(GEN a0, GEN a1, GEN a2, GEN a3, GEN a4, GEN a5, GEN a6)
+{
+  pari_sp av = avma;
+  GEN j2 = igusaj2(a0,a1,a2,a3,a4,a5,a6);
+  GEN j4 = igusaj4(a0,a1,a2,a3,a4,a5,a6);
+  GEN j6 = igusaj6(a0,a1,a2,a3,a4,a5,a6);
+  GEN j42 = gsqr(j4);
+  GEN j2j6 = gmul(j2,j6);
+  return gerepileupto(av, gmul2n(gsub(j2j6,j42), -2));
+}
+
+static GEN
+igusaj10(GEN a0, GEN a1, GEN a2, GEN a3, GEN a4, GEN a5, GEN a6)
+{
+  pari_sp av = avma;
+  GEN polr = mkpoln(7, a0, a1, a2, a3, a4, a5, a6);
+  GEN disc = RgX_disc(polr);
+  GEN j10 = degpol(polr) < 6? gmul(gsqr(a1), disc): disc;
+  return gerepileupto(av, gmul2n(j10, -12));
+}
+
+static GEN
+igusaall(GEN a0, GEN a1, GEN a2, GEN a3, GEN a4, GEN a5, GEN a6)
+{
+  GEN j2, j4, j6;
+  GEN V = cgetg(6,t_VEC);
+  gel(V,1) = j2 = igusaj2(a0,a1,a2,a3,a4,a5,a6);
+  gel(V,2) = j4 = igusaj4(a0,a1,a2,a3,a4,a5,a6);
+  gel(V,3) = j6 = igusaj6(a0,a1,a2,a3,a4,a5,a6);
+  gel(V,4) = igusaj8_fromj246(j2, j4, j6);
+  gel(V,5) = igusaj10(a0,a1,a2,a3,a4,a5,a6);
+  return V;
+}
+
+GEN
+genus2igusa(GEN P, long n)
+{
+  pari_sp av = avma;
+  GEN a0, a1, a2, a3, a4, a5, a6, r;
+  if (typ(P) == t_VEC && lg(P) == 3)
+    P = gadd(gel(P,1), gmul2n(gsqr(gel(P,2)),2));
+  if (typ(P)!=t_POL || degpol(P)> 6)
+    pari_err_TYPE("genus2igusa",P);
+  RgX_to_06(P, &a0,&a1,&a2,&a3,&a4,&a5,&a6);
+  switch(n)
+  {
+    case 0:
+      r = igusaall(a0,a1,a2,a3,a4,a5,a6);
+      break;
+    case 2:
+      r = igusaj2(a0,a1,a2,a3,a4,a5,a6);
+      break;
+    case 4:
+      r = igusaj4(a0,a1,a2,a3,a4,a5,a6);
+      break;
+    case 6:
+      r = igusaj6(a0,a1,a2,a3,a4,a5,a6);
+      break;
+    case 8:
+      r = igusaj8(a0,a1,a2,a3,a4,a5,a6);
+      break;
+    case 10:
+      r = igusaj10(a0,a1,a2,a3,a4,a5,a6);
+      break;
+    default:
+      pari_err_FLAG("genus2igusa");
+      return NULL; /* LCOV_EXCL_LINE */
+  }
+  return gerepileupto(av, r);
 }
 
 /********************************************************************/
@@ -199,28 +303,6 @@ RgX_recip6(GEN x)
   for (i=8,j=2; j < lx; i--,j++) gel(y,i) = gel(x,j);
   for (       ; j <  9; i--,j++) gel(y,i) = gen_0;
   return normalizepol_lg(y, 9);
-}
-/* extract coefficients of a polynomial a0 X^6 + ... + a6, of degree <= 6 */
-static void
-RgX_to_06(GEN q, GEN *a0, GEN *a1, GEN *a2, GEN *a3, GEN *a4, GEN *a5, GEN *a6)
-{
-  *a0 = gen_0;
-  *a1 = gen_0;
-  *a2 = gen_0;
-  *a3 = gen_0;
-  *a4 = gen_0;
-  *a5 = gen_0;
-  *a6 = gen_0;
-  switch(degpol(q))
-  {
-    case 6: *a0 = gel(q,8); /*fall through*/
-    case 5: *a1 = gel(q,7); /*fall through*/
-    case 4: *a2 = gel(q,6); /*fall through*/
-    case 3: *a3 = gel(q,5); /*fall through*/
-    case 2: *a4 = gel(q,4); /*fall through*/
-    case 1: *a5 = gel(q,3); /*fall through*/
-    case 0: *a6 = gel(q,2); /*fall through*/
-  }
 }
 /* extract coefficients a0,...a3 of a polynomial a0 X^6 + ... + a6 */
 static void
