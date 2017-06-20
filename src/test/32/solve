@@ -16,7 +16,19 @@
 9, 94.651344040519886966597925815208153938, 95.87063422824530975874102921924
 6781695, 98.831194218193692233324420138622327821]
 3183
+0.69314718055994530941723212145817656808
+0.69314718055994530941723212145817656808
+0.69314718055994530941723212145817656807
   ***   at top-level: solvestep(x=1,100,-1,hardy(x))
   ***                                      ^---------
   ***   domain error in solvestep: step <= 0
+  ***   at top-level: solve(x=-oo,0,exp(x)-2)
+  ***                                     ^---
+  *** _-_: the PARI stack overflows !
+  current stack size: 8000000 (7.629 Mbytes)
+  [hint] set 'parisizemax' to a nonzero value in your GPRC
+
+  ***   at top-level: solve(x=2,oo,exp(x)-2)
+  ***                              ^---------
+  *** exp: overflow in expo().
 Total time spent: 176

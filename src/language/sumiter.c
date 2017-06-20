@@ -1320,15 +1320,62 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
   pari_sp av = avma;
   GEN c, d, e, tol, fa, fb, fc;
 
+  if (typ(a) == t_INFINITY && typ(b) != t_INFINITY) swap(a,b);
+  if (typ(a) == t_INFINITY && typ(b) == t_INFINITY)
+  {
+    long s = gsigne(eval(E, real_0(prec))), r = 0;
+    if (gidentical(gel(a,1), gel(b,1)))
+      pari_err_DOMAIN("solve", "a and b", "=", a, mkvec2(a, b));
+    a = real_m1(prec); /* domain = R */
+    b = real_1(prec);
+    for(;;)
+    {
+      fa = eval(E, a);
+      fb = eval(E, b);
+      if (gsigne(fa) != s)
+      {
+        if (r) b[1] = evalsigne(-1) | _evalexpo(r-1); else b = real_0(prec);
+        break;
+      }
+      if (gsigne(fb) != s)
+      {
+        if (r) a[1] = evalsigne(1) | _evalexpo(r-1); else a = real_0(prec);
+        break;
+      }
+      r++; setexpo(a, r); setexpo(b, r);
+    }
+    c = b;
+    goto SOLVE;
+  }
+  if (typ(b) == t_INFINITY)
+  { /* a real, b == [+-]oo */
+    long s, r, minf = inf_get_sign(b) < 0;
+    GEN inc;
+    if (typ(a) != t_REAL || realprec(a) < prec) a = gtofp(a, prec);
+    fa = eval(E, a);
+    s = gsigne(fa);
+    inc = minf ? real_m1(prec) : real_1(prec);
+    r = gsigne(a) ? expo(a) : 0;
+    for(;;)
+    {
+      setexpo(inc, r);
+      b = addrr(a, inc); fb = eval(E, b);
+      if (gsigne(fb) != s) break;
+      a = b; fa = fb; r++;
+    }
+    if (minf) { c = a; swap(a, b); swap(fa, fb);} else c = b;
+    goto SOLVE;
+  }
   if (typ(a) != t_REAL || realprec(a) < prec) a = gtofp(a, prec);
   if (typ(b) != t_REAL || realprec(b) < prec) b = gtofp(b, prec);
   sig = cmprr(b, a);
   if (!sig) return gerepileupto(av, a);
-  if (sig < 0) {c = a; a = b; b = c;} else c = b;
+  if (sig < 0) { c = a; swap(a, b); } else c = b;
   fa = eval(E, a);
   fb = eval(E, b);
   if (gsigne(fa)*gsigne(fb) > 0)
     pari_err_DOMAIN("solve", "f(a)f(b)", ">", gen_0, mkvec2(fa, fb));
+SOLVE:
   itmax = prec2nbits(prec) * 2 + 1;
   tol = real2n(5-prec2nbits(prec), LOWDEFAULTPREC);
   fc = fb;

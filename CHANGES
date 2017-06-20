@@ -128,6 +128,7 @@ BA  44- [libpari] RgXQ_minpoly
         uposquadclassnoF, coredisc2_fact, coredisc2u_fact, uquadclassnoF_fact
         quadclassnoF_fact
     46- new GP functions quadunitnorm, quadunitindex
+LGr 47- allow endpoints in solve() to by +oo or -oo
 
   Changed
 HC   1- faster implementation of eulervec + cache result
