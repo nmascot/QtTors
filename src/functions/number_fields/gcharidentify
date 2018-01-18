@@ -1,0 +1,29 @@
+Function: gcharidentify
+Section: number_fields
+C-Name: gchar_identify
+Prototype: GGGp
+Help: gcharidentify(gc,Lv,Lchiv): returns a Grossencharacter chi belonging to g
+  that approximately satisfies the constraints that chi_v is Lchiv[i] at the
+  place v=Lv[i].
+Doc: \var{gc} being a Grossencharacter group as output by \kbd{gcharinit}, $Lv$ being
+ \typ{VEC} of places~$v$ encoded by a \typ{INT} (infinite place) or a prime ideal
+ structure representing a prime not dividing the modulus of~$g$ (finite place),
+ and $Lchiv$ being a \typ{VEC} of local characters~$\chi_v$ encoded by $[k,\varphi]$
+ with~$k$ a \typ{INT} and $\varphi$ a \typ{REAL} representing~$x\mapsto
+ {\rm sign}(x)^k|x|^{i\varphi}$ (real place) or~$z\mapsto
+ (z/|z|)^k|z|^{2i\varphi}$(complex place) or by a \typ{REAL}~$\theta$
+ representing~$\goth{p} \mapsto \exp(2i\pi \theta)$ (finite place),
+ returns a Grossencharacter~$\psi$ belonging to~$g$ such that~$\psi_v \approx
+ \chi_v$ for all~$v$.
+
+ \bprog
+ ? bnf = bnfinit(x^2-5,1);
+ ? gc = gcharinit(bnf,1);
+ ? chi = gcharidentify(gc,[2],[[0,13.]]);
+ ? gcharparameters(gc,chi)[2]
+ % = 13.057005210545987626926134713745179631
+ ? pr = idealprimedec(bnf,11)[1];
+ ? chi = gcharidentify(gc,[pr],[0.3]);
+ ? chareval(gc,chi,pr)
+ % = 0.30000006229129706787363344444425752636
+ @eprog

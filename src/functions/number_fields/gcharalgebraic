@@ -1,0 +1,10 @@
+Function: gcharalgebraic
+Section: number_fields
+C-Name: gchar_algebraic
+Prototype: G
+Help: gcharalgebraic(gc): returns a matrix whose rows form a basis of the
+ algebraic Grossencharacters in gc.
+Doc: \var{gc} being the structure returned by \kbd{gcharinit}, return a \typ{MAT}
+ whose rows form a basis of the subgroup of algebraic Grossencharacters in \var{gc}
+ (Weil type A0).
+ The last component is interpreted as a power of the norm.

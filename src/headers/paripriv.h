@@ -240,7 +240,8 @@ enum { t_LFUN_GENERIC, t_LFUN_ZETA, t_LFUN_NF, t_LFUN_ELL, t_LFUN_KRONECKER,
        t_LFUN_CHIZ, t_LFUN_CHIGEN, t_LFUN_ETA,
        t_LFUN_DIV, t_LFUN_MUL, t_LFUN_CONJ,
        t_LFUN_SYMPOW_ELL, t_LFUN_QF, t_LFUN_ARTIN, t_LFUN_MFCLOS,
-       t_LFUN_GENUS2, t_LFUN_TWIST, t_LFUN_CLOSURE0, t_LFUN_SHIFT, t_LFUN_HGM};
+       t_LFUN_GENUS2, t_LFUN_TWIST, t_LFUN_CLOSURE0, t_LFUN_SHIFT,
+       t_LFUN_HGM, t_LFUN_HECKE};
 enum { t_LDESC_INIT, t_LDESC_THETA, t_LDESC_PRODUCT };
 
 /* Elliptic curves */
@@ -716,6 +717,16 @@ GEN     log_prk_units(GEN nf, GEN D, GEN sprk);
 GEN     log_prk_units_init(GEN bnf);
 GEN     veclog_prk(GEN nf, GEN v, GEN sprk);
 GEN     log_prk_init(GEN nf, GEN pr, long k, GEN mod);
+GEN     check_mod_factored(GEN nf, GEN ideal, GEN *fa, GEN *fa2, GEN *archp, GEN MOD);
+GEN     sprk_get_cyc(GEN s);
+GEN     sprk_get_expo(GEN s);
+GEN     sprk_get_gen(GEN s);
+GEN     sprk_get_prk(GEN s);
+GEN     sprk_get_ff(GEN s);
+GEN     sprk_get_pr(GEN s);
+void    sprk_get_AgL2(GEN s, GEN *A, GEN *g, GEN *L2);
+void    sprk_get_U2(GEN s, GEN *U1, GEN *U2);
+GEN     famat_zlog_pr(GEN nf, GEN g, GEN e, GEN sprk, GEN mod);
 
 /* base4.c */
 

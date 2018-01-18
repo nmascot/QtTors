@@ -1,0 +1,12 @@
+Function: gcharconductor
+Section: number_fields
+C-Name: gchar_conductor
+Prototype: GG
+Help: gcharconductor(gc,chi): returns the conductor of chi, as a modulus over gc.bnf.
+Doc: returns the conductor of \kbd{chi}, as a modulus over \kbd{gc.bnf}. This is
+ the minimum modulus $\goth{m}$ such that $U(\goth{m})\subset\ker(\var{chi})$
+ indicating the exact ramification of \var{chi}.
+
+ \item for a real place $v$, $v\mid \goth{m}$ iff $\chi_v(-1)=-1$.
+
+ \item for finite places, $\goth{p}^e\parallel \goth{m}$ if $\chi_{\goth p}(1+\goth{p}^e\Z_{\goth p})=1$.

@@ -2918,6 +2918,101 @@ bnr_get_gen(GEN bnr) {
   return gel(G,3);
 }
 
+/* localstar, used in gchar */
+INLINE GEN
+locs_get_cyc(GEN locs) { return gel(locs,1); }
+INLINE GEN
+locs_get_Lsprk(GEN locs) { return gel(locs,2); }
+INLINE GEN
+locs_get_Lgenfil(GEN locs) { return gel(locs,3); }
+INLINE GEN
+locs_get_mod(GEN locs) { return gel(locs,4); }
+/* pr dividing the modulus N of locs, 0 <= i < v_pr(N)
+ * return a t_MAT whose columns are the logs
+ * of generators of U_i(pr)/U_{i+1}(pr). */
+INLINE GEN
+locs_get_famod(GEN locs) { return gmael(locs,4,1); }
+INLINE GEN
+locs_get_m_infty(GEN locs) { return gmael(locs,4,2); }
+
+/* G a grossenchar group */
+INLINE GEN
+gchar_get_basis(GEN gc)  { return  gel(gc, 1); }
+INLINE GEN
+gchar_get_bnf(GEN gc)    { return  gel(gc, 2); }
+INLINE GEN
+gchar_get_zm(GEN gc)     { return  gel(gc, 3); }
+INLINE GEN
+gchar_get_mod(GEN gc)    { return  locs_get_mod(gel(gc, 3)); }
+INLINE GEN
+gchar_get_S(GEN gc)      { return  gel(gc, 4); }
+INLINE GEN
+gchar_get_valS(GEN gc)   { return  gel(gc, 5); }
+INLINE GEN
+gchar_get_Sunits(GEN gc) { return  gmael(gc, 6, 1); }
+INLINE GEN
+gchar_get_fu(GEN gc)    { return  gmael(gc, 6, 2); }
+INLINE GEN
+gchar_get_cyc(GEN gc)    { return  gel(gc, 8); }
+INLINE GEN
+gchar_get_hnf(GEN gc)    { return  gmael(gc, 9, 1); }
+INLINE GEN
+gchar_get_U(GEN gc)      { return  gmael(gc, 9, 2); }
+INLINE GEN
+gchar_get_Ui(GEN gc)     { return  gmael(gc, 9, 3); }
+INLINE GEN
+gchar_get_m0(GEN gc)     { return gel(gc, 10); }
+INLINE GEN
+gchar_get_u0(GEN gc)     { return gel(gc, 11); }
+INLINE long
+gchar_get_r1(GEN gc)     { return nf_get_r1(bnf_get_nf(gchar_get_bnf(gc))); }
+INLINE long
+gchar_get_r2(GEN gc)     { return nf_get_r2(bnf_get_nf(gchar_get_bnf(gc))); }
+INLINE GEN
+gchar_get_loccyc(GEN gc) { return locs_get_cyc(gchar_get_zm(gc)); }
+INLINE long
+gchar_get_nc(GEN gc)     { return lg(gchar_get_loccyc(gc))-1; }
+INLINE long
+gchar_get_ns(GEN gc)     { return lg(gchar_get_S(gc))-1; }
+INLINE long
+gchar_get_nm(GEN gc)     { return lg(gchar_get_basis(gc))-1; }
+INLINE long
+gchar_get_evalprec(GEN gc)   { return  gmael(gc, 7, 1)[1]; }
+INLINE long
+gchar_get_prec(GEN gc)   { return  gmael(gc, 7, 1)[2]; }
+INLINE long
+gchar_get_nfprec(GEN gc) { return  gmael(gc, 7, 1)[3]; }
+INLINE void
+gchar_set_evalprec(GEN gc, long prec) { gmael(gc, 7, 1)[1] = prec; }
+INLINE void
+gchar_set_prec(GEN gc, long prec) { gmael(gc, 7, 1)[2] = prec; }
+INLINE void
+gchar_set_nfprec(GEN gc, long prec) { gmael(gc, 7, 1)[3] = prec; }
+INLINE long
+gchar_get_ntors(GEN gc)   { return  gmael(gc, 7, 2)[1]; }
+INLINE long
+gchar_get_nfree(GEN gc)   { return  gmael(gc, 7, 2)[2]; }
+INLINE long
+gchar_get_nalg(GEN gc)   { return  gmael(gc, 7, 2)[3]; }
+INLINE void
+gchar_set_basis(GEN gc, GEN m_inv)  { gel(gc, 1) = m_inv; }
+INLINE void
+gchar_set_bnf(GEN gc, GEN bnf)      { gel(gc, 2) = bnf; }
+INLINE void
+gchar_set_ntors(GEN gc, long n)    { gmael(gc, 7, 2)[1] = n; }
+INLINE void
+gchar_set_nfree(GEN gc, long n)    { gmael(gc, 7, 2)[2] = n; }
+INLINE void
+gchar_set_nalg(GEN gc, long n)    { gmael(gc, 7, 2)[3] = n; }
+INLINE void
+gchar_set_cyc(GEN gc, GEN cyc)      { gel(gc, 8) = cyc; }
+INLINE void
+gchar_set_HUUi(GEN gc, GEN hnf, GEN U, GEN Ui) { gel(gc, 9) = mkvec3(hnf, U, Ui); }
+INLINE void
+gchar_set_m0(GEN gc, GEN m0)     { gel(gc, 10) = m0; }
+INLINE void
+gchar_set_u0(GEN gc, GEN u0)     { gel(gc, 11) = u0; }
+
 INLINE GEN
 bid_get_mod(GEN bid) { return gel(bid,1); }
 INLINE GEN

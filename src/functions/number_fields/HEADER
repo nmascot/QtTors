@@ -435,3 +435,41 @@ Doc:
 
  Note also that you can use an $\var{nf}$ instead of $P$, which avoids
  recomputing the integral basis and analogous quantities.
+
+
+ \subsec{Hecke Grossencharacters}\label{se:GCHAR}
+
+ Hecke Grossencharacters are continuous characters of the id\`eles class group,
+ they generalise classical Hecke characters on ray class groups obtained through
+ the $\var{bnr}$ structure.
+
+ Let $K$ be number field, $\A^\times$ its group of id\`eles, $\goth{m}$ a modulus
+ (an integral ideal and a finite set of real places). Let $U(\goth{m})$ be the subgroup
+ of id\`eles congruent to $1$ modulo $\goth{m}$
+ (units outside $\goth{m}$, equal to 1 on real places in $\goth{m}$).
+
+ The Hecke Grossencharacters defined modulo $\goth{m}$ are the characters of the id\`eles
+ class group $C_K(\goth{m})=\A^\times/(K^\times.U(\goth{m}))$,
+ that is a combination of an archimedean
+ character $\chi_\infty$ on the connected component $K_\infty^{\times \circ}$
+ and a Ray class group character
+ $\chi_f$ satisfying a compatibility condition
+ $\chi_\infty(a)\chi_f(a)=1$ for all units $a$ congruent to 1 modulo $\goth{m}$.
+
+ \varsidx{gchar} %
+
+ \item \var{gc} denotes a structure allowing to compute with Hecke Grossencharacters.
+
+ \item \kbd{gcharinit(\var{bnf},\var{mod})} initializes the structure \var{gc}.
+ The underlying number field and modulus can be accessed using \kbd{gc.bnf} and \kbd{gc.mod}.
+
+ \item \kbd{g.cyc} describes the finite abelian group structure of \var{gc},
+ the torsion part corresponding to finite order Ray class characters, and
+ the zeros correspond to a lattice of infinite order Grossencharacters.
+
+ \item a character on \kbd{gc=gcharinit(bnf,mod)} is described as a
+ row vector \var{chi} of components on the finitely generated abelian
+ group structure $\kbd{g.cyc}$.
+
+ \item Hecke Grossencharacters have L-functions and can be given to all \kbd{lfun} objects as a 2 components
+ vector \kbd{[\var{gc},\var{chi}]}.

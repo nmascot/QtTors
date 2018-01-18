@@ -21,6 +21,7 @@ enum {
   typ_NF,
   typ_BNF,
   typ_BNR,
+  typ_GCHAR, /* group of Hecke grossenchars */
   typ_ELL, /* elliptic curve */
   typ_QUA, /* quadclassunit  */
   typ_GAL, /* galoisinit     */

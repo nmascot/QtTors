@@ -1,0 +1,28 @@
+Function: gcharparameters
+Section: number_fields
+C-Name: gchar_parameters
+Prototype: GG
+Help: gcharparameters(gc,chi): return exponent vector of character chi
+ in R^n. We have chareval(g,chi,x) = gcharparameters(g,chi)*gcharideallog(g,x)
+Doc: Return internal exponent vector of character \kbd{chi}
+ in $\R^n$, so that for all \var{x}, we have
+ \kbd{chareval(\var{gc},\var{chi},\var{x}) = gcharparameters(\var{gc},\var{chi})*gcharideallog(\var{gc},\var{x})}
+
+ The components are organized as follows:
+
+ \item the first \kbd{ns} components are in~$\R$ and describe the character on
+ the class group generators: $\theta$ encodes~$\goth{p}\mapsto
+ \exp(2i\pi\theta)$,
+
+ \item the next \kbd{nc} components are in~$\R$ and describe the \kbd{idealstar}
+ group character via its image on generators: $\theta$ encodes the
+ image~$\exp(2i\pi\theta)$,
+
+ \item the next $r_1+r_2$ components are in $\R$ and correspond to characters
+ of $\R$ for each infinite place: $\varphi$ encodes~$x\mapsto |x|^{i\varphi}$ in
+ the real case and~$z\mapsto |z|^{2i\varphi}$ in the complex case,
+
+ \item the last $r_2$ components are in $\Z$ and correspond to characters of
+ $\R/\Z$ for each complex place: $k$ encodes~$z\mapsto (z/|z|)^k$.
+
+ See also \kbd{gcharideallog}.

@@ -2636,17 +2636,17 @@ sprkinit(GEN nf, GEN pr, long k, GEN x, GEN MOD)
   }
   return mkvecn(U? 6: 4, cyc, gen, prk, mkvec3(modpr,g0,ord0), L2, U);
 }
-static GEN
+GEN
 sprk_get_cyc(GEN s) { return gel(s,1); }
-static GEN
+GEN
 sprk_get_expo(GEN s) { return cyc_get_expo(sprk_get_cyc(s)); }
-static GEN
+GEN
 sprk_get_gen(GEN s) { return gel(s,2); }
-static GEN
+GEN
 sprk_get_prk(GEN s) { return gel(s,3); }
-static GEN
+GEN
 sprk_get_ff(GEN s) { return gel(s,4); }
-static GEN
+GEN
 sprk_get_pr(GEN s) { GEN ff = gel(s,4); return modpr_get_pr(gel(ff,1)); }
 /* L2 to 1 + pr / 1 + pr^k */
 static GEN
@@ -2654,13 +2654,17 @@ sprk_get_L2(GEN s) { return gmael(s,5,3); }
 /* lift to nf of primitive root of k(pr) */
 static GEN
 sprk_get_gnf(GEN s) { return gmael(s,5,2); }
-static void
+/* A = Npr-1, <g> = (Z_K/pr)^*, L2 to 1 + pr / 1 + pr^k */
+void
+sprk_get_AgL2(GEN s, GEN *A, GEN *g, GEN *L2)
+{ GEN v = gel(s,5); *A = gel(v,1); *g = gel(v,2); *L2 = gel(v,3); }
+void
 sprk_get_U2(GEN s, GEN *U1, GEN *U2)
 { GEN v = gel(s,6); *U1 = gel(v,1); *U2 = gel(v,2); }
-static int
+int
 sprk_is_prime(GEN s) { return lg(s) == 5; }
 
-static GEN
+GEN
 famat_zlog_pr(GEN nf, GEN g, GEN e, GEN sprk, GEN mod)
 {
   GEN x, expo = sprk_get_expo(sprk);
@@ -3068,13 +3072,13 @@ checkarchp(GEN v, long r1)
   return gc_long(av, 1);
 }
 
-/* True nf. Compute [[ideal,arch], [h,[cyc],[gen]], idealfact, [liste], U]
-   flag may include nf_GEN | nf_INIT */
-static GEN
-Idealstarmod_i(GEN nf, GEN ideal, long flag, GEN MOD)
+/* True nf. Put ideal to form [[ideal,arch]] and set fa and fa2 to its
+ * factorization, archp to the indices of arch places */
+GEN
+check_mod_factored(GEN nf, GEN ideal, GEN *fa_, GEN *fa2_, GEN *archp_, GEN MOD)
 {
-  long i, nbp, R1;
-  GEN y, cyc, U, u1 = NULL, fa, fa2, sprk, x, arch, archp, E, P, sarch, gen;
+  GEN arch, x, fa, fa2, archp;
+  long R1;
 
   R1 = nf_get_r1(nf);
   if (typ(ideal) == t_VEC && lg(ideal) == 3)
@@ -3124,6 +3128,26 @@ Idealstarmod_i(GEN nf, GEN ideal, long flag, GEN MOD)
   if (lg(x) == 1) pari_err_DOMAIN("Idealstar", "ideal","=",gen_0,x);
   if (typ(gcoeff(x,1,1)) != t_INT)
     pari_err_DOMAIN("Idealstar","denominator(ideal)", "!=",gen_1,x);
+
+  fa2 = famat_strip2(fa);
+  if (fa_ != NULL) *fa_ = fa;
+  if (fa2_ != NULL) *fa2_ = fa2;
+  if (fa2_ != NULL) *archp_ = archp;
+  return mkvec2(x, arch);
+}
+
+/* True nf. Compute [[ideal,arch], [h,[cyc],[gen]], idealfact, [liste], U]
+   flag may include nf_GEN | nf_INIT */
+static GEN
+Idealstarmod_i(GEN nf, GEN ideal, long flag, GEN MOD)
+{
+  long i, nbp;
+  GEN y, cyc, U, u1 = NULL, fa, fa2, sprk, x_arch, x, arch, archp, E, P, sarch, gen;
+
+  x_arch = check_mod_factored(nf, ideal, &fa, &fa2, &archp, MOD);
+  x = gel(x_arch, 1);
+  arch = gel(x_arch, 2);
+
   sarch = nfarchstar(nf, x, archp);
   fa2 = famat_strip2(fa);
   P = gel(fa2,1);

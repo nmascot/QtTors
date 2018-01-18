@@ -128,6 +128,8 @@ charorder(GEN cyc, GEN x)
     if (signe(gel(x,i)))
     {
       GEN c, o = gel(cyc,i);
+      if (!signe(o))
+        return gerepileupto(av,mkoo());
       c = gcdii(o, gel(x,i));
       if (!is_pm1(c)) o = diviiexact(o,c);
       f = lcmii(f, o);
@@ -303,6 +305,11 @@ chareval(GEN G, GEN chi, GEN x, GEN z)
     case typ_BIDZ:
       if (checkznstar_i(G)) return gerepileupto(av, znchareval(G, chi, x, z));
       /* don't implement chars on general bid: need an nf... */
+    case typ_GCHAR:
+      if (z == NULL)
+        return gerepilecopy(av, gchareval(G, chi, x, 0, NULL));
+      else
+        pari_err_IMPL("evaluation of grossenchar only given in R/Z");
     default:
       pari_err_TYPE("chareval", G);
       return NULL;/* LCOV_EXCL_LINE */

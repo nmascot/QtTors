@@ -2311,9 +2311,6 @@ fasmall_append(GEN fa, long p, long e)
   retmkvec2(vecsmall_append(P,p), vecsmall_append(E,e));
 }
 
-static GEN
-sprk_get_cyc(GEN s) { return gel(s,1); }
-
 /* sprk = sprkinit(pr,k), b zsimp with modulus coprime to pr */
 static GEN
 zsimpjoin(GEN b, GEN sprk, GEN U_pr, long prcode, long e)

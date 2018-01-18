@@ -169,6 +169,27 @@ Number field elements are \typ{INT}, \typ{FRAC}, \typ{POL}, \typ{POLMOD}, or
 \li{express element\ $x$ as a polmod}{nfbasistoalg$(\var{nf},x)$}
 
 \smallskip
+\subsec{Hecke Grossencharacters}
+Let $K$ be a number field and $m$ a modulus. A \var{gc} structure
+describes the group of Hecke characters having modulus $m$ as
+and allows computations with these characters. A character $\chi$
+is described by its components modulo \var{bnf}.cyc.
+\smallskip
+\li{init gchar structure for modulus \var{m}}{gcharinit$(\var{bnf},\var{m},\{cm\})$}
+\subsec{gchar members:}
+\beginindentedkeys
+\li{underlying \var{bnf}}{\var{gchar}.bnf}
+%\li{big ideal structure}{\var{bnr}.bid}
+\li{modulus}{\var{gchar}.mod}
+%\li{structure of $(\ZZ_K/m)^*$}{\var{bnr}.zkst}
+\li{elementary divisors (including 0s)}{\var{gchar}.cyc}
+\endindentedkeys
+\li{evaluate Hecke character \var{chi} at ideal \var{id}}{chareval$(\var{gchar},\var{chi},\var{id})$}
+\li{exponent column of \var{id} in $\RR^n$}{gcharideallog$(\var{gchar},\var{id})$}
+\li{exponent vector of $\chi$ in $\RR^n$}{gcharparameters$(\var{gchar},\var{chi})$}
+\li{L-function of $\chi$}{lfuncreate$([\var{gchar},\var{chi}])$}
+
+\smallskip
 \subsec{Dedekind Zeta Function $\zeta_K$, Hecke $L$ series}
 $R = [c,w,h]$ in initialization means we restrict $s\in \CC$
 to domain $|\Re(s)-c| < w$, $|\Im(s)| < h$; $R = [w,h]$ encodes $[1/2,w,h]$

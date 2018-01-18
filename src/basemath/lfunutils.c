@@ -2938,7 +2938,8 @@ lfunzetakinit_artin(GEN nf, GEN gal, GEN dom, long der, long bitprec)
 /**                    High-level Constructors                     **/
 /********************************************************************/
 enum { t_LFUNMISC_POL, t_LFUNMISC_CHIQUAD, t_LFUNMISC_CHICONREY,
-       t_LFUNMISC_CHIGEN, t_LFUNMISC_ELLINIT, t_LFUNMISC_ETAQUO };
+       t_LFUNMISC_CHIGEN, t_LFUNMISC_ELLINIT, t_LFUNMISC_ETAQUO,
+       t_LFUNMISC_HECKE };
 static long
 lfundatatype(GEN data)
 {
@@ -2948,11 +2949,13 @@ lfundatatype(GEN data)
     case t_INTMOD: return t_LFUNMISC_CHICONREY;
     case t_POL: return t_LFUNMISC_POL;
     case t_VEC:
-      switch(lg(data))
-      {
-        case 17: return t_LFUNMISC_ELLINIT;
-        case 3:  return t_LFUNMISC_CHIGEN;
-      }
+      if (checknf_i(data)) return t_LFUNMISC_POL;
+      long l = lg(data);
+      if (l == 17) return t_LFUNMISC_ELLINIT;
+      //if (l == 3 && typ(gel(data,1)) == t_VEC) return t_LFUNMISC_CHIGEN;
+      if (l == 3 && typ(gel(data,1)) == t_VEC)
+        return is_gchar_group(gel(data,1))? t_LFUNMISC_HECKE
+                                          : t_LFUNMISC_CHIGEN;
       break;
   }
   return -1;
@@ -2987,7 +2990,7 @@ lfunmisc_to_ldata_i(GEN ldata, long shallow)
       }
     }
     break;
-
+    case t_LFUNMISC_HECKE: return lfungchar(gel(ldata,1), gel(ldata,2));
     case t_LFUNMISC_ELLINIT: return lfunell(ldata);
   }
   if (shallow != 2) pari_err_TYPE("lfunmisc_to_ldata",ldata);
@@ -3041,6 +3044,7 @@ ldata_vecan(GEN van, long L, long prec)
     case t_LFUN_KRONECKER: an = vecan_Kronecker(an, L); break;
     case t_LFUN_CHIZ: an = vecan_chiZ(an, L, prec); break;
     case t_LFUN_CHIGEN: an = vecan_chigen(an, L, prec); break;
+    case t_LFUN_HECKE: an = vecan_gchar(an, L, prec); break;
     case t_LFUN_ARTIN: an = vecan_artin(an, L, prec); break;
     case t_LFUN_ETA: an = vecan_eta(an, L); break;
     case t_LFUN_QF: an = vecan_qf(an, L); break;
@@ -3077,6 +3081,14 @@ ldata_newprec(GEN ldata, long prec)
   switch (t)
   {
     case t_LFUN_CLOSURE0: return closure2ldata(an, prec);
+    case t_LFUN_HECKE:
+    {
+      /* warning chi in internal format */
+      GEN gc = gel(an, 1), chiw = gel(an, 2);
+      gc = gcharnewprec(gc, prec);
+      return gchari_lfun(gc, chiw, gen_0);
+      /*return lfungchar(gcharnewprec(gel(an, 1), prec), gel(an, 2));*/
+    }
     case t_LFUN_QF:
     {
       GEN eno = ldata_get_rootno(ldata);

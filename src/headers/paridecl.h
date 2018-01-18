@@ -3915,6 +3915,24 @@ GEN     variables_vec(GEN x);
 
 GEN     genus2red(GEN PQ, GEN p);
 
+/* grossenchar.c */
+
+int     is_gchar_group(GEN gc);
+GEN     gcharinit(GEN bnf, GEN mod, long prec);
+GEN     gchar_algebraic(GEN gc);
+GEN     gcharnewprec(GEN gc, long prec);
+GEN     gchareval(GEN gc, GEN chi, GEN x, long flag, GEN logx);
+GEN     gchar_conductor(GEN gc, GEN chi);
+GEN     lfungchar(GEN gc, GEN chi);
+GEN     gchari_lfun(GEN gc, GEN chi, GEN w);
+/* TODO remove (only exported for testing) */
+GEN     vecan_gchar(GEN an, long n, long prec);
+GEN     nfembedlog(GEN bnf, GEN x, long prec);
+GEN     gchar_logm(GEN bnf, GEN zm, GEN x);
+GEN     gchar_ideallog(GEN gc, GEN x, long prec);
+GEN     gchar_identify(GEN gc, GEN Lv, GEN Lchiv, long prec);
+GEN     gchar_parameters(GEN gc, GEN chi);
+
 /* groupid.c */
 
 long    group_ident(GEN G, GEN S);

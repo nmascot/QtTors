@@ -1901,8 +1901,6 @@ to_principal_unit(GEN nf, GEN x, GEN pr, GEN sprk)
   }
   return x;
 }
-static GEN
-sprk_get_pr(GEN s) { GEN ff = gel(s,4); return modpr_get_pr(gel(ff,1)); }
 static long
 ZV_iseven(GEN zlog)
 {

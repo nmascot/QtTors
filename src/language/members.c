@@ -199,6 +199,7 @@ member_mod(GEN x) /* modulus */
   switch(t) {
     case typ_GAL: return gal_get_mod(x);
     case typ_BNR: return bnr_get_mod(x);
+    case typ_GCHAR: return gchar_get_mod(x);
     case typ_BIDZ: return bid_get_ideal(x);
     case typ_BID: return bid_get_mod(x);
   }
@@ -449,6 +450,8 @@ member_cyc(GEN x) /* cyclic decomposition (SNF) of a group (of type clgp) */
     case t_ELL_Fp:
     case t_ELL_Fq: return ellgroup(x, NULL);
   }
+  if (t == typ_GCHAR)
+    return gchar_get_cyc(x);
   x = _check_clgp(x,y,t);
   return gc_const(av, abgrp_get_cyc(x));
 }
