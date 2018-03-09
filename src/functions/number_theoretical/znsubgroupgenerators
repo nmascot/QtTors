@@ -1,0 +1,52 @@
+Function: znsubgroupgenerators
+Section: number_theoretical
+C-Name: znsubgroupgenerators
+Prototype: GD0,L,
+Help: znsubgroupgenerators(H, {flag=0}): find generators of the subgroup H_F
+ of (Z/fZ)^* given by a vector H of 1/0 values: h[a] is 1 iff a belongs to H.
+Doc: Any abelian number field $F$ is a subfield of $\Q(\zeta_f)$ for
+ some $f\in{\Bbb N}$ and $G(\Q(\zeta_f)/F)$ corresponds to a subgroup $H_F$
+ of $(\Z/f\Z)^{\times}$. For instance, the functions
+ \kbd{galoissubcyclo},
+ \kbd{subcyclohminus}, \kbd{subcycloiwasawa} and \kbd{subcyclopclgp}
+ can receive $F$ as a pair $(f,H_F)$.
+ The function \kbd{rnfconductor} allows to get $f$ and $H_F$ corresponding to
+ $F$, but it is not easy in general to find a small set of generators for
+ $H_F$. This is the purpose of the present function.
+
+ The subgroup is given by a vector (or vectorsmall) $H$ of length $f$.
+ For $1\leq a\leq f$, \kbd{H[a]} is 1 or 0 according as $a\in H_F$
+ or $a\not\in H_F$. The function returns $[f, H_F]$ where $H_F$ is now
+ a small set of generators.
+ For example, if $H_F=\{\,1,4,11,14\,\}\subset(\Z/15\Z)^{\times}$,
+ then you can use \kbd{znsubgroupgenerators} in the following way:
+ \bprog
+ ? H = [1,0,0,1,0,0,0,0,0,0,1,0,0,1,0];
+ ? znsubgroupgenerators(H)
+ %1 = [15, [4, 11]]
+ @eprog\noindent
+ When $H_F$ is more complicated, some program is needed to create \kbd{H}.
+ The following GP script handles $F=\Q(\sqrt{m},\zeta_p)$:
+ \bprog
+ qp(m, p, flag = 0)=
+ { my(d = quaddisc(m), f = lcm(d, p), H);
+   H = vectorsmall(f, a, a % p == 1 && kronecker(d,a) > 0);
+   znsubgroupgenerators(H,flag);
+ }
+ @eprog
+ \bprog
+ ? qp(36322, 5)
+ %2 = [726440, [41, 61, 111, 131]]
+ @eprog\noindent
+ This shows that $F=\Q(\sqrt{36322},\zeta_5)$ is contained in
+ $\Q(\zeta_{726440})$ and $H_F=\langle 41, 61, 111, 131 \rangle$.
+ Note that $H_F=\langle 41\rangle\langle 61\rangle\langle 111 \rangle
+ \langle 131\rangle$ is not a direct product.
+ If $\fl=1$, then the function finds generators which decompose
+ $H_F$ to direct factors.
+ \bprog
+ ? qp(36322,5,1)
+ %3 = [726440, [41, 31261, 324611, 506221]]
+ @eprog\noindent
+ $H_F=\langle 41\rangle\times \langle 31261\rangle \times
+ \langle 324611 \rangle \times \langle 506221 \rangle$.

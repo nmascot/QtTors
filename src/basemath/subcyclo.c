@@ -612,23 +612,23 @@ bnr_to_abgrp(GEN bnr, long *cx)
   return mkvec3(bnr_get_no(bnr), bnr_get_cyc(bnr), v);
 }
 
-GEN
-galoissubcyclo(GEN N, GEN sg, long flag, long v)
+static long
+_itos(const char *fun, GEN n)
 {
-  pari_sp ltop= avma, av;
-  GEN H, V, B, zl, L, T, le, powz, O, Z = NULL;
-  long i, card, phi_n, val,l, n, cnd, complex=1;
-  pari_timer ti;
-
-  if (flag<0 || flag>3) pari_err_FLAG("galoissubcyclo");
-  if (v < 0) v = 0;
-  if (!sg) sg = gen_1;
+  if (is_bigint(n))
+    pari_err_IMPL(stack_sprintf("conductor f > %ld in %s", LONG_MAX, fun));
+  return itos(n);
+}
+long
+subcyclo_nH(const char *fun, GEN N, GEN *psg)
+{
+  GEN V, Z = NULL, H = *psg;
+  long i, l, n = 0, complex = 1;
   switch(typ(N))
   {
     case t_INT:
-      n = itos(N);
-      if (n < 1)
-        pari_err_DOMAIN("galoissubcyclo", "degree", "<=", gen_0, stoi(n));
+      n = _itos(fun, N);
+      if (n < 1) pari_err_DOMAIN(fun, "degree", "<=", gen_0, N);
       break;
     case t_VEC:
       if (lg(N)==7)
@@ -637,60 +637,65 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
         N = mkvec3(znstar_get_no(N), znstar_get_cyc(N),
                    gmodulo(znstar_get_gen(N), znstar_get_N(N)));
       if (lg(N)==4)
-      { /* znstar */
-        GEN gen = abgrp_get_gen(N);
+      { /* abgrp */
+        GEN gen = abgrp_get_gen(N), z;
+        if (typ(gen)!=t_VEC) pari_err_TYPE(fun,gen);
         Z = N;
-        if (typ(gen)!=t_VEC) pari_err_TYPE("galoissubcyclo",gen);
-        if (lg(gen) == 1) n = 1;
-        else if (typ(gel(gen,1)) == t_INTMOD)
-        {
-          GEN z = gel(gen,1);
-          n = itos(gel(z,1));
-        } else
-        {
-          pari_err_TYPE("galoissubcyclo",N);
-          return NULL;/*LCOV_EXCL_LINE*/
-        }
-        break;
+        if (lg(gen) == 1) { n = 1; break; }
+        z = gel(gen,1);
+        if (typ(z) == t_INTMOD) { n = _itos(fun, gel(z,1)); break; }
       }
     default: /*fall through*/
-      pari_err_TYPE("galoissubcyclo",N);
-      return NULL;/*LCOV_EXCL_LINE*/
+      pari_err_TYPE(fun,N);
+      return 0;/*LCOV_EXCL_LINE*/
   }
-  if (n==1)
-  {
-    set_avma(ltop);
-    if (flag == 1) return gen_1;
-    return gscycloconductor(deg1pol_shallow(gen_1, gen_m1, v), 1, flag);
-  }
-
-  switch(typ(sg))
+  if (!H) H = gen_1;
+  switch(typ(H))
   {
      case t_INTMOD: case t_INT:
-      V = mkvecsmall( lift_check_modulus(sg,n) );
+      V = mkvecsmall( lift_check_modulus(H,n) );
       break;
     case t_VECSMALL:
-      V = gcopy(sg);
-      for (i=1; i<lg(V); i++) { V[i] %= n; if (V[i] < 0) V[i] += n; }
+      l = lg(H); V = leafcopy(H);
+      for (i = 1; i < l; i++) { V[i] %= n; if (V[i] < 0) V[i] += n; }
       break;
-    case t_VEC:
-    case t_COL:
-      V = cgetg(lg(sg),t_VECSMALL);
-      for(i=1;i<lg(sg);i++) V[i] = lift_check_modulus(gel(sg,i),n);
+    case t_VEC: case t_COL:
+      l = lg(H); V = cgetg(l,t_VECSMALL);
+      for(i=1; i < l; i++) V[i] = lift_check_modulus(gel(H,i),n);
       break;
     case t_MAT:
-      if (lg(sg) == 1 || lg(sg) != lgcols(sg))
-        pari_err_TYPE("galoissubcyclo [H not in HNF]", sg);
-      if (!Z) pari_err_TYPE("galoissubcyclo [N not a bnrinit or znstar]", sg);
-      if ( lg(gel(Z,2)) != lg(sg) ) pari_err_DIM("galoissubcyclo");
-      V = znstar_hnf_generators(znstar_small(Z),sg);
+      l = lg(H);
+      if (l == 1 || l != lgcols(H))
+        pari_err_TYPE(stack_strcat(fun," [H not in HNF]"),H);
+      if (!Z) pari_err_TYPE(stack_strcat(fun," [N not a bnrinit or znstar]"),H);
+      if (lg(gel(Z,2)) != l) pari_err_DIM(fun);
+      V = znstar_hnf_generators(znstar_small(Z),H);
       break;
     default:
-      pari_err_TYPE("galoissubcyclo",sg);
-      return NULL;/*LCOV_EXCL_LINE*/
+      pari_err_TYPE(fun,H);
+      return 0;/*LCOV_EXCL_LINE*/
   }
-  if (!complex) V = vecsmall_append(V,n-1); /*add complex conjugation*/
-  H = znstar_generate(n,V);
+  if (!complex) V = vecsmall_append(V, n-1); /*add complex conjugation*/
+  *psg = V; return n;
+}
+
+GEN
+galoissubcyclo(GEN N, GEN sg, long flag, long v)
+{
+  pari_sp ltop = avma, av;
+  GEN H, B, zl, L, T, le, powz, O;
+  long i, card, phi_n, val,l, n, cnd, complex;
+  pari_timer ti;
+
+  if (flag<0 || flag>3) pari_err_FLAG("galoissubcyclo");
+  if (v < 0) v = 0;
+  n = subcyclo_nH("galoissubcyclo", N, &sg);
+  if (n==1)
+  {
+    set_avma(ltop); if (flag == 1) return gen_1;
+    return gscycloconductor(deg1pol_shallow(gen_1, gen_m1, v), 1, flag);
+  }
+  H = znstar_generate(n, sg);
   if (DEBUGLEVEL >= 6)
   {
     err_printf("Subcyclo: elements:");
@@ -707,7 +712,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   if (flag == 1)  { set_avma(ltop); return stoi(cnd); }
   if (cnd == 1)
   {
-    set_avma(ltop);
+    set_avma(ltop); if (flag == 1) return gen_1;
     return gscycloconductor(deg1pol_shallow(gen_1,gen_m1,v),1,flag);
   }
   if (n != cnd)

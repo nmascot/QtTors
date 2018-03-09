@@ -957,6 +957,7 @@ GEN     QXQX_homogenous_evalpow(GEN P, GEN A, GEN B, GEN T);
 /* subcyclo.c */
 
 GEN     galoiscyclo(long n, long v);
+long    subcyclo_nH(const char *fun, GEN N, GEN *psg);
 GEN     znstar_bits(long n, GEN H);
 long    znstar_conductor(GEN H);
 long    znstar_conductor_bits(GEN bits);

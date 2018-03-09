@@ -4791,6 +4791,13 @@ void    mt_sigint_unblock(void);
 void    pari_mt_init(void);
 void    pari_mt_close(void);
 
+/* pclgp.c */
+
+GEN     subcyclopclgp(GEN p, GEN fH, long flag);
+GEN     subcycloiwasawa(GEN p, GEN fH, long n);
+GEN     subcyclohminus(GEN fH, GEN p);
+GEN     znsubgroupgenerators(GEN H, long flag);
+
 /* plotport.c */
 
 void    color_to_rgb(GEN c, int *r, int *g, int *b);
