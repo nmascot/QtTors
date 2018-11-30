@@ -183,6 +183,201 @@ Zp_sqrt(GEN x, GEN p, long e)
   return gerepileuptoint(av, z);
 }
 
+/* Adapted from a C program of Xavier Caruso */
+
+/*  Compute the p-adic logarithm of a,
+    which is supposed to be congruent to 1 mod p
+
+Algorithm:
+1. we raise a at the power p^(v-1) (for a suitable v) in order
+to make it closer to 1
+2. we write the new a as a product
+1/a = (1 - a_0*p^v) (1 - a_1*p^(2*v) (1 - a_2*p^(4*v) ...
+with 0 <= a_i < p^(v*2^i).
+3. we compute each log(1 - a_i*p^(v*2^i)) using Taylor expansion
+and a binary spliting strategy.                                */
+
+GEN
+Zp_log(GEN arg, GEN p, ulong e)
+{
+  pari_sp av = avma;
+  ulong i, v, N, Np, trunc, step;
+  GEN pe, pv, trunc_mod, h, hpow, tmp;
+  GEN num, den;
+  GEN ans = gen_0;
+  ulong pp = itou_or_0(p);
+
+  /* First we make the argument closer to 1 by raising it to the p^(v-1) */
+  v = logint(utoi(e),p);  /* v here is v-1 */
+  pe = powiu(p,e); pv = powiu(p,v);
+  arg = Fp_pow(arg, pv, mulii(pe, pv));
+  e += v;
+
+  /* Where do we need to truncate the Taylor expansion */
+  N = e+v; N /= ++v;                 /* note the ++v */
+  Np = N;
+  while(1)
+  {
+    long etmp = Np + logint(utoi(N), p) / v;
+    if (etmp == N) break;
+    N = etmp;
+  }
+
+  /* We allocate memory and initialize variables */
+  num = cgetg(N+1, t_INT);
+  den = cgetg(N+1, t_INT);
+  trunc = v << 1;
+  trunc_mod = powiu(p, trunc);
+  while(1)
+  {
+    /* We compute f = 1 - a_i*p^((v+1)*2^i)
+       trunc_mod is p^((v+1)*2^(i+1)) */
+    GEN f = modii(arg, trunc_mod);
+
+    if (cmpiu(f, 1) != 0) {
+
+      f = subui(2, f);
+      arg = mulii(arg, f);
+
+      /* We compute the Taylor expansion of log(f)
+         For now, computations are carried out over the rationals */
+      for (i = 1; i <= N; i++) {
+        gel(num,i) = gen_1;
+        gel(den,i) = utoipos(i);
+      }
+      step = 1;
+      h = subui(1, f);   /* we write f = 1 - h, i.e. h = a_i*p^(2^i) */
+      hpow = h;
+      while(1)
+      {
+        for (i = 1; i <= N - step; i += step << 1)
+        {
+          tmp  = mulii(mulii(hpow, gel(num,i+step)), gel(den,i));
+          gel(num,i) = mulii(gel(num,i), gel(den,i+step));
+          gel(num,i) = addii(gel(num,i), tmp);
+          gel(den,i) = mulii(gel(den,i), gel(den,i+step));
+        }
+        step <<= 1;
+        if (step >= N) break;
+        hpow = sqri(hpow);
+      }
+
+      /* We simplify the fraction */
+      if (pp)
+      {
+        GEN d = powuu(pp, factorial_lval(N, pp));
+        gel(num,1) = diviiexact(gel(num,1), d);
+        gel(den,1) = diviiexact(gel(den,1), d);
+      }
+
+      h = diviiexact(h, pv);
+      ans = addii(ans, mulii(mulii(gel(num,1), h), Zp_inv(gel(den,1), p, e)));
+    }
+
+    if (trunc > e) break;
+
+    /* We update the variables for the next step */
+    trunc_mod = sqri(trunc_mod);
+    trunc <<= 1;
+    N >>= 1;
+  }
+  return gerepileuptoint(av, modii(ans, pe));
+}
+
+/* p-adic exponential */
+
+    /*  Compute the p-adic exponential of a, which is supposed
+         - to be congruent to 0 mod p if p > 2
+         - to be congruent to 0 mod 4 if p = 2
+
+        Algorithm:
+         1. we write a as a sum
+              a = a_0*p + a_1*p^2 + a_2*p^4 + ...
+            with 0 <= a_i < p^(2^i).
+         2. we compute each exp(a_i*p^(2^i)) using Taylor expansion
+            and a binary spliting strategy.                           */
+
+GEN
+Zp_exp(GEN arg, GEN p, ulong e)
+{
+  pari_sp av = avma;
+  ulong i, N, trunc, step;
+  GEN trunc_mod, h, hpow;
+  GEN denominator = gen_1;
+  GEN num, den;
+  GEN ans = gen_1;
+  ulong pp = itou_or_0(p);
+  GEN pe = powiu(p, e);
+  /* Where do we need to truncate the Taylor expansion */
+  if (equaliu(p,2))
+    N = e;
+  else
+    N = e + sdivsi(e,subis(p,2));
+
+  /* We allocate memory and initialize variables */
+  num = cgetg(N+2, t_VEC);
+  den = cgetg(N+2, t_VEC);
+  if (equaliu(p, 2)) {
+    trunc = 4;
+    trunc_mod = utoipos(16);
+  } else {
+    trunc = 2;
+    trunc_mod = sqri(p);
+  }
+  while(1)
+  {
+    GEN f = modii(arg, trunc_mod);
+    arg = subii(arg, f);
+    if (signe(f)) {
+
+      /* We compute the Taylor expansion of exp(f)
+         For now, computations are carried out over the rationals */
+      gel(num,1) = gen_1;
+      gel(den,1) = gen_1;
+      for (i = 2; i <= N+1; i++) {
+        gel(num,i) = gen_1;
+        gel(den,i) = utoipos(i-1);
+      }
+      step = 1;
+      h = f;
+      hpow = h;
+
+      while(1) {
+        for (i = 1; i <= N+1 - step; i += step << 1) {
+          gel(num,i) = mulii(gel(num,i), gel(den,i+step));
+          gel(num,i) = addii(gel(num,i), mulii(hpow, gel(num,i+step)));
+          gel(den,i) = mulii(gel(den,i), gel(den,i+step));
+        }
+        step <<= 1;
+        if (step > N) break;
+        hpow = sqri(hpow);
+      }
+
+      /* We simplify the fraction */
+      if (pp)
+      {
+        GEN d = powuu(pp, factorial_lval(N, pp));
+        gel(num,1) = diviiexact(gel(num,1), d);
+        gel(den,1) = diviiexact(gel(den,1), d);
+      }
+      /* We add this contribution to exp(f) */
+      ans = Fp_mul(ans, gel(num,1), pe);
+      denominator = Fp_mul(denominator, gel(den,1), pe);
+    }
+
+    if (trunc > e) break;
+
+    /* We update the variables for the next step */
+    trunc_mod = sqri(trunc_mod);
+    trunc <<= 1;
+    N >>= 1;
+  }
+
+  /* We coerce the result from Q to Zp */
+  ans = Zp_div(ans, denominator, p, e);
+  return gerepileuptoint(av, ans);
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**       QUADRATIC HENSEL LIFT (adapted from V. Shoup's NTL)         **/
