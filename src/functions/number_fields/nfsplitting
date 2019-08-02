@@ -1,17 +1,19 @@
 Function: nfsplitting
 Section: number_fields
-C-Name: nfsplitting
-Prototype: GDG
-Help: nfsplitting(P,{d}): defining polynomial over Q for the splitting field of
+C-Name: nfsplitting_gp
+Prototype: GDGD0,L,
+Help: nfsplitting(P,{d},{fl}): defining polynomial S over Q for the splitting field of
  P, that is the smallest field over which P is totally split. P can also be
  given by a nf structure. If d is given, it must be a multiple of the splitting
- field degree.
-Doc: defining polynomial over~$\Q$ for the splitting field of
+ field degree. If fl=1, return [S,C] where C=nfisincl(P,S).
+Doc: defining polynomial $S$ over~$\Q$ for the splitting field of
  $\var{P}\in\Q[x]$, that is the smallest field over which $P$ is totally split.
  If irreducible, the polynomial $P$ can also be given by a~\kbd{nf} structure,
  which is more efficient. If $d$ is given, it must be a multiple of the
  splitting field degree. Note that if $P$ is reducible the splitting field
  degree can be smaller than the degree of $P$.
+ If $\fl=1$, assume $P$ to be monic, integral and irreducible and
+ return a $2$-component vector $[S,inc]$ where \kbd{inc=nfisincl(P,S)}.
  \bprog
  ? K = nfinit(x^3-2);
  ? nfsplitting(K)
@@ -44,4 +46,12 @@ Doc: defining polynomial over~$\Q$ for the splitting field of
  ? nfsplitting(x^6-x-1)
  [... degree 720 polynomial deleted ...]
  time = 11,020 ms.
+ @eprog
+ When $P$ is irreducible, the flag $\fl=1$ allows to get the embedding
+ \bprog
+ ?  P = x^8-2;
+ ?  [S,emb]= nfsplitting(P,,1)
+ %2 = [x^16+272*x^8+64,-7/768*x^13-239/96*x^5+1/2*x]
+ ?  subst(P,x,Mod(emb,S))
+ %3 = Mod(0,x^16+272*x^8+64)
  @eprog

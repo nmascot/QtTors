@@ -1253,6 +1253,7 @@ nfisincl0(GEN fa, GEN fb, long flag)
     return gerepilecopy(av,x);
   }
   if (!tests_OK(a, nfa, b, nfb, 0)) { set_avma(av); return gen_0; }
+  if (flag==0 && !tests_OK(a, nfa, b, nfb, 0)) { set_avma(av); return gen_0; }
 
   if (nfb) lb = gen_1; else nfb = b = ZX_Q_normalize(b,&lb);
   if (nfa) la = gen_1; else nfa = a = ZX_Q_normalize(a,&la);
@@ -1284,12 +1285,12 @@ nfsplitting_composite(GEN P)
   return Q ? Q: pol_x(varn(P));
 }
 GEN
-nfsplitting(GEN T, GEN D)
+nfsplitting0(GEN T0, GEN D, long flag)
 {
   pari_sp av = avma;
   long d, v;
-  GEN F, K;
-  T = get_nfpol(T,&K);
+  GEN T, F, K, N = NULL;
+  T = T0 = get_nfpol(T0, &K);
   if (!K)
   {
     if (typ(T) != t_POL) pari_err_TYPE("nfsplitting",T);
@@ -1297,8 +1298,12 @@ nfsplitting(GEN T, GEN D)
     RgX_check_ZX(T,"nfsplitting");
   }
   T = nfsplitting_composite(T);
-  d = degpol(T);
-  if (d<=1) return pol_x(varn(T));
+  d = degpol(T); v = varn(T);
+  if (d <= 1)
+  {
+    if (flag) return gerepilecopy(av, mkvec2(pol_x(v),mkvec(pol_x(v))));
+    else { set_avma(av); return pol_x(v); }
+  }
   if (!K) {
     if (!isint1(leading_coeff(T))) K = T = polredbest(T,0);
     K = T;
@@ -1314,23 +1319,41 @@ nfsplitting(GEN T, GEN D)
     D = (d <= dmax)? gel(polgalois(T,DEFAULTPREC), 1): mpfact(d);
   }
   d = itos_or_0(D);
-  v = varn(T);
   T = leafcopy(T); setvarn(T, fetch_var_higher());
   for(F = T;;)
   {
     GEN P = gel(nffactor(K, F), 1), Q = gel(P,lg(P)-1);
-    if (degpol(gel(P,1)) == degpol(Q)) break;
+    if (degpol(gel(P,1)) == degpol(Q))
+    {
+      if (flag && ZX_equal(T, T0))
+        N = nfisincl_from_fact(K, F, gen_1, gen_1, v, liftall(P), 0);
+      break;
+    }
     F = rnfequation(K,Q);
-    if (degpol(F) == d) break;
+    if (degpol(F) == d)
+      break;
   }
   if (umodiu(D,degpol(F)))
   {
     char *sD = itostr(D);
     pari_warn(warner,stack_strcat("ignoring incorrect degree bound ",sD));
   }
+  setvarn(F, v);
+  if (flag && !N)
+    N = nfisincl0(ZX_equal(T, T0) ? K: T0, F, 1);
   (void)delete_var();
-  setvarn(F,v);
-  return gerepilecopy(av, F);
+  return gerepilecopy(av, flag ? mkvec2(F,N): F);
+}
+
+GEN
+nfsplitting(GEN T, GEN D) { return nfsplitting0(T, D, 0); }
+
+GEN
+nfsplitting_gp(GEN T, GEN D, long flag)
+{
+  if (flag < 0 || flag > 1)
+    pari_err_FLAG("nfsplitting");
+  return nfsplitting0(T, D, flag);
 }
 
 /*************************************************************************/

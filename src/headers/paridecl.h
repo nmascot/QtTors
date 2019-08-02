@@ -2185,6 +2185,8 @@ GEN     nfnewprec(GEN nf, long prec);
 GEN     nfnewprec_shallow(GEN nf, long prec);
 GEN     nfpoleval(GEN nf, GEN pol, GEN a);
 GEN     nfsplitting(GEN T, GEN D);
+GEN     nfsplitting_gp(GEN T, GEN D, long flag);
+GEN     nfsplitting0(GEN T, GEN D, long flag);
 long    nftyp(GEN x);
 GEN     polredord(GEN x);
 GEN     polred(GEN x);
