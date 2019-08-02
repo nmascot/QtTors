@@ -1211,18 +1211,35 @@ partmap_reverse(GEN a, GEN b, GEN t, GEN la, GEN lb, long v)
   return gerepilecopy(av, z);
 }
 
+static GEN
+nfisincl_from_fact(GEN a, GEN b, GEN la, GEN lb, long vb, GEN y, long flag)
+{
+  long i, k, lx = lg(y);
+  long da = degpol(a), db = degpol(b), d = db/da;
+  GEN x = cgetg(lx, t_VEC);
+  for (i=1, k=1; i<lx; i++)
+  {
+    GEN t = gel(y,i);
+    if (degpol(t)!=d) continue;
+    gel(x, k++) = partmap_reverse(a, b, t, la, lb, vb);
+    if (flag==1) return gel(x,1);
+  }
+  if (k==1) return gen_0;
+  setlg(x, k);
+  gen_sort_inplace(x, (void*)&cmp_RgX, &cmp_nodata, NULL);
+  return x;
+}
+
 GEN
 nfisincl0(GEN fa, GEN fb, long flag)
 {
   pari_sp av = avma;
-  long i, k, vb, lx;
-  long da, db, d;
+  long vb;
   GEN a, b, nfa, nfb, x, y, la, lb;
   int newvar;
   if (flag < 0 || flag > 1) pari_err_FLAG("nfisincl");
   a = get_nfpol(fa, &nfa);
   b = get_nfpol(fb, &nfb);
-  da = degpol(a); db = degpol(b);
   if (!nfa) { a = Q_primpart(a); RgX_check_ZX(a, "nsisincl"); }
   if (!nfb) { b = Q_primpart(b); RgX_check_ZX(b, "nsisincl"); }
   if (ZX_equal(a, b))
@@ -1242,21 +1259,8 @@ nfisincl0(GEN fa, GEN fb, long flag)
   vb = varn(b); newvar = (varncmp(varn(a),vb) <= 0);
   if (newvar) { b = leafcopy(b); setvarn(b, fetch_var_higher()); }
   y = lift_shallow(gel(nffactor(nfa,b),1));
-  lx = lg(y);
-  da = degpol(a); db = degpol(b); d = db/da;
-  x = cgetg(lx, t_VEC);
-  for (i=1, k=1; i<lx; i++)
-  {
-    GEN t = gel(y,i);
-    if (degpol(t)!=d) continue;
-    gel(x, k++) = partmap_reverse(a, b, t, la, lb, vb);
-    if (flag==1) break;
-  }
+  x = nfisincl_from_fact(a, b, la, lb, vb, y, flag);
   if (newvar) (void)delete_var();
-  if (k==1) { set_avma(av); return gen_0; }
-  if (flag==1) return gerepilecopy(av,gel(x,1));
-  setlg(x, k);
-  gen_sort_inplace(x, (void*)&cmp_RgX, &cmp_nodata, NULL);
   return gerepilecopy(av,x);
 }
 
