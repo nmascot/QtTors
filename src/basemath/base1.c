@@ -1212,6 +1212,27 @@ partmap_reverse(GEN a, GEN b, GEN t, GEN la, GEN lb, long v)
 }
 
 static GEN
+partmap_reverse_frac(GEN a, GEN b, GEN t, GEN la, GEN lb, long v)
+{
+  pari_sp av = avma;
+  long k = 0;
+  GEN N, D, G, L, de;
+  GEN C = ZX_ZXY_resultant_all(a, Q_remove_denom(t,&de), &k, &L);
+  if (k || degpol(b) != degpol(C))
+    { setvarn(b,v); pari_err_IRREDPOL("nfisincl", b); }
+  N = RgX_neg(gel(L,1)); D = gel(L,2);
+  setvarn(N, v); setvarn(D, v);
+  G = QX_gcd(N,D);
+  if (degpol(G))
+  {
+    N = RgX_div(N,G); D = RgX_div(D,G);
+  }
+  if (!isint1(lb)) { N = RgX_unscale(N, lb); D = RgX_unscale(D, lb); }
+  if (!isint1(la)) D = RgX_Rg_mul(D, la);
+  return gerepilecopy(av, mkrfrac(N,D));
+}
+
+static GEN
 nfisincl_from_fact(GEN a, GEN b, GEN la, GEN lb, long vb, GEN y, long flag)
 {
   long i, k, lx = lg(y);
@@ -1230,6 +1251,23 @@ nfisincl_from_fact(GEN a, GEN b, GEN la, GEN lb, long vb, GEN y, long flag)
   return x;
 }
 
+static GEN
+nfisincl_from_fact_frac(GEN a, GEN b, GEN la, GEN lb, long vb, GEN y)
+{
+  long i, k, lx = lg(y);
+  long da = degpol(a), db = degpol(b), d = db/da;
+  GEN x = cgetg(lx, t_VEC);
+  for (i=1, k=1; i<lx; i++)
+  {
+    GEN t = gel(y,i);
+    if (degpol(t)!=d) continue;
+    gel(x, k++) = partmap_reverse_frac(a, b, t, la, lb, vb);
+  }
+  if (k==1) return gen_0;
+  setlg(x, k);
+  return x;
+}
+
 GEN
 nfisincl0(GEN fa, GEN fb, long flag)
 {
@@ -1237,12 +1275,13 @@ nfisincl0(GEN fa, GEN fb, long flag)
   long vb;
   GEN a, b, nfa, nfb, x, y, la, lb;
   int newvar;
-  if (flag < 0 || flag > 1) pari_err_FLAG("nfisincl");
+  if (flag < 0 || flag > 3) pari_err_FLAG("nfisincl");
+
   a = get_nfpol(fa, &nfa);
   b = get_nfpol(fb, &nfb);
   if (!nfa) { a = Q_primpart(a); RgX_check_ZX(a, "nsisincl"); }
   if (!nfb) { b = Q_primpart(b); RgX_check_ZX(b, "nsisincl"); }
-  if (ZX_equal(a, b))
+  if (ZX_equal(a, b) && flag<=1)
   {
     if (flag==1)
     {
@@ -1252,7 +1291,6 @@ nfisincl0(GEN fa, GEN fb, long flag)
     x = galoisconj(fb, NULL); settyp(x, t_VEC);
     return gerepilecopy(av,x);
   }
-  if (!tests_OK(a, nfa, b, nfb, 0)) { set_avma(av); return gen_0; }
   if (flag==0 && !tests_OK(a, nfa, b, nfb, 0)) { set_avma(av); return gen_0; }
 
   if (nfb) lb = gen_1; else nfb = b = ZX_Q_normalize(b,&lb);
@@ -1260,7 +1298,10 @@ nfisincl0(GEN fa, GEN fb, long flag)
   vb = varn(b); newvar = (varncmp(varn(a),vb) <= 0);
   if (newvar) { b = leafcopy(b); setvarn(b, fetch_var_higher()); }
   y = lift_shallow(gel(nffactor(nfa,b),1));
-  x = nfisincl_from_fact(a, b, la, lb, vb, y, flag);
+  if (flag>=2)
+    x = nfisincl_from_fact_frac(a, b, la, lb, vb, y);
+  else
+    x = nfisincl_from_fact(a, b, la, lb, vb, y, flag);
   if (newvar) (void)delete_var();
   return gerepilecopy(av,x);
 }
@@ -1270,6 +1311,33 @@ nfisincl(GEN fa, GEN fb) { return nfisincl0(fa, fb, 0); }
 
 static GEN
 lastel(GEN x) { return gel(x, lg(x)-1); }
+
+static GEN
+nfsplitting_auto(GEN g, GEN R)
+{
+  forprime_t T;
+  long i, d = degpol(g);
+  ulong p;
+  GEN P, K, N, G, q, den = Q_denom(R);
+  u_forprime_init(&T,d, ULONG_MAX);
+  K = RgM_RgC_invimage(RgXV_to_RgM(R, d), col_ei(d, 2));
+  for(;;)
+  {
+    p = u_forprime_next(&T);
+    if (dvdiu(den,p)) continue;
+    P = Flx_roots(ZX_to_Flx(g, p), p);
+    if (lg(P)-1 == d) break;
+  }
+  N = Flm_transpose(FlxV_Flv_multieval(RgXV_to_FlxV(R, p), P, p));
+  q = perm_inv(vecsmall_indexsort(gel(N,1)));
+  G = cgetg(d+1, t_COL);
+  for (i=1; i<=d; i++)
+  {
+    GEN r = perm_mul(vecsmall_indexsort(gel(N,i)), q);
+    gel(G,i) = RgV_dotproduct(R, vecpermute(K, r));
+  }
+  return mkvec2(g, gen_sort(G, (void*)&gcmp, &gen_cmp_RgX));
+}
 
 static GEN
 nfsplitting_composite(GEN P)
@@ -1299,15 +1367,14 @@ nfsplitting0(GEN T0, GEN D, long flag)
   }
   T = nfsplitting_composite(T);
   d = degpol(T); v = varn(T);
-  if (d <= 1)
-  {
-    if (flag) return gerepilecopy(av, mkvec2(pol_x(v),mkvec(pol_x(v))));
-    else { set_avma(av); return pol_x(v); }
-  }
+  if (d <= 1  && flag==0)
+    { set_avma(av); return pol_x(v); }
   if (!K) {
     if (!isint1(leading_coeff(T))) K = T = polredbest(T,0);
     K = T;
   }
+  if (flag==1 && !ZX_equal(T, T0))
+    pari_err_FLAG("nfsplitting");
   if (D)
   {
     if (typ(D) != t_INT || signe(D) < 1) pari_err_TYPE("nfsplitting",D);
@@ -1325,12 +1392,14 @@ nfsplitting0(GEN T0, GEN D, long flag)
     GEN P = gel(nffactor(K, F), 1), Q = gel(P,lg(P)-1);
     if (degpol(gel(P,1)) == degpol(Q))
     {
-      if (flag && ZX_equal(T, T0))
-        N = nfisincl_from_fact(K, F, gen_1, gen_1, v, liftall(P), 0);
+      if (flag==1 && ZX_equal(T, T0))
+        N = nfisincl_from_fact(K, F, gen_1, gen_1, v, liftall(P), flag);
+      else if (flag>1 && ZX_equal(T, T0))
+        N = nfisincl_from_fact_frac(K, F, gen_1, gen_1, v, liftall(P));
       break;
     }
     F = rnfequation(K,Q);
-    if (degpol(F) == d)
+    if (degpol(F) == d && flag==0)
       break;
   }
   if (umodiu(D,degpol(F)))
@@ -1339,10 +1408,9 @@ nfsplitting0(GEN T0, GEN D, long flag)
     pari_warn(warner,stack_strcat("ignoring incorrect degree bound ",sD));
   }
   setvarn(F, v);
-  if (flag && !N)
-    N = nfisincl0(ZX_equal(T, T0) ? K: T0, F, 1);
   (void)delete_var();
-  return gerepilecopy(av, flag ? mkvec2(F,N): F);
+  if (flag==2) return gerepilecopy(av, nfsplitting_auto(F, N));
+  return gerepilecopy(av, odd(flag) ? mkvec2(F,N): F);
 }
 
 GEN
