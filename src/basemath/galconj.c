@@ -2895,7 +2895,7 @@ aut_to_groupelts(GEN aut, GEN L, ulong p)
   pari_sp av = avma;
   long i, d = lg(aut)-1;
   GEN P = ZV_to_Flv(L, p);
-  GEN N = FlxV_Flv_multieval(RgXV_to_FlxV(aut, p), P, p);
+  GEN N = FlxV_Flv_multieval(aut, P, p);
   GEN q = perm_inv(vecsmall_indexsort(P));
   GEN G = cgetg(d+1, t_VEC);
   for (i=1; i<=d; i++)
@@ -2903,8 +2903,26 @@ aut_to_groupelts(GEN aut, GEN L, ulong p)
   return gerepilecopy(av, vecvecsmall_sort_shallow(G));
 }
 
+static ulong
+galois_find_totally_split(GEN P, GEN Q)
+{
+  pari_sp av = avma;
+  forprime_t iter;
+  ulong p;
+  long n = degpol(P);
+  u_forprime_init(&iter, n*maxss(expu(n)-3, 2), ULONG_MAX);
+  while ((p = u_forprime_next(&iter)))
+  {
+    if (Flx_is_totally_split(ZX_to_Flx(P, p), p)
+       && (!Q || Flx_is_squarefree(ZX_to_Flx(Q, p), p)))
+      return gc_ulong(av, p);
+    set_avma(av);
+  }
+  return 0;
+}
+
 static GEN
-galoisinitfromaut(GEN T, GEN aut)
+galoisinitfromaut(GEN T, GEN aut, ulong l)
 {
   pari_sp ltop = avma;
   GEN nf, A, G, L, M, grp, den=NULL;
@@ -2925,7 +2943,7 @@ galoisinitfromaut(GEN T, GEN aut)
       pari_err_DOMAIN("galoisinit","issquarefree(pol)","=",gen_0,T);
     if (!gequal1(gel(T,n+2))) pari_err_IMPL("galoisinit(nonmonic)");
   }
-  if (!galoisanalysis(T, &ga, 1, NULL)) pari_err_IMPL("galoisinit");
+  ga.l = l? l: galois_find_totally_split(T, NULL);
   gb.l = utoipos(ga.l);
   if (DEBUGLEVEL >= 1) timer_start(&ti);
   den = galoisborne(T, den, &gb, degpol(T));
@@ -2936,8 +2954,8 @@ galoisinitfromaut(GEN T, GEN aut)
   if (DEBUGLEVEL >= 1) timer_printf(&ti, "FpV_invVandermonde()");
   A = aut_to_groupelts(aut, L, ga.l);
   G = groupelts_to_group(A);
-  if (!G) pari_err_IMPL("galoisinit(non WSS group)");
-  A = group_elts(G,n);
+  if (!G) G = trivialgroup();
+  else A = group_elts(G,n);
   grp = cgetg(9, t_VEC);
   gel(grp,1) = T;
   gel(grp,2) = mkvec3(utoipos(ga.l), utoipos(gb.valabs), gb.ladicabs);
@@ -2948,6 +2966,15 @@ galoisinitfromaut(GEN T, GEN aut)
   gel(grp,7) = gel(G,1);
   gel(grp,8) = gel(G,2);
   return gerepilecopy(ltop, grp);
+}
+
+GEN
+galoissplittinginit(GEN T, GEN D)
+{
+  pari_sp av = avma;
+  GEN R = nfsplitting0(T, D, 2), P = gel(R,1), aut = gel(R,2);
+  ulong p = itou(gel(R,3));
+  return gerepileupto(av, galoisinitfromaut(P, aut, p));
 }
 
 /* T: polynomial or nf, den multiple of common denominator of solutions or
@@ -3134,7 +3161,7 @@ galoisinit(GEN nf, GEN den)
 {
   GEN G;
   if (is_vec_t(typ(nf)) && lg(nf)==3 && is_vec_t(typ(gel(nf,2))))
-    return galoisinitfromaut(gel(nf,1), gel(nf,2));
+    return galoisinitfromaut(gel(nf,1), gel(nf,2), 0);
   G = galoisconj4_main(nf, den, 1);
   return G? G: gen_0;
 }

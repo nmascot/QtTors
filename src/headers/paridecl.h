@@ -3557,6 +3557,7 @@ GEN     galoisinit(GEN nf, GEN den);
 GEN     galoisisabelian(GEN gal, long flag);
 long    galoisisnormal(GEN gal, GEN sub);
 GEN     galoispermtopol(GEN gal, GEN perm);
+GEN     galoissplittinginit(GEN nf, GEN deg);
 GEN     galoissubgroups(GEN G);
 GEN     galoissubfields(GEN G, long flag, long v);
 long    numberofconjugates(GEN T, long pdepart);
