@@ -1578,3 +1578,235 @@ groupelts_to_group(GEN G)
   }
   return gc_NULL(av);
 }
+
+static GEN
+subg_get_gen(GEN subg) {  return gel(subg, 1); }
+
+static GEN
+subg_get_set(GEN subg) {  return gel(subg, 2); }
+
+static GEN
+groupelt_subg_normalize(GEN elt, GEN subg, GEN cyc)
+{
+  GEN gen = subg_get_gen(subg), set =  subg_get_set(subg);
+  long i, j, u, n = lg(elt)-1, lgen = lg(gen);
+  GEN b = F2v_copy(cyc), res = zero_F2v(n);
+  for(i = 1; i <= n; i++)
+  {
+    GEN g;
+    if (!F2v_coeff(b, i)) continue;
+    g = gel(elt,i);
+    for(u=1; u<=n; u++)
+      if (g[u]==1) break;
+    for(j=1; j<lgen; j++)
+    {
+      GEN h = gel(elt,gen[j]);
+      if (!F2v_coeff(set,g[h[u]])) break;
+    }
+    if (j < lgen) continue;
+    F2v_set(res,i);
+    for(j=1; j <= n; j++)
+      if (F2v_coeff(set, j))
+        F2v_clear(b,g[gel(elt,j)[1]]);
+  }
+  return res;
+}
+
+static GEN
+triv_subg(GEN elt)
+{
+  GEN v = cgetg(3, t_VEC);
+  gel(v,1) = cgetg(1,t_VECSMALL);
+  gel(v,2) = zero_F2v(lg(elt)-1);
+  F2v_set(gel(v,2),1);
+  return v;
+}
+
+int
+F2v_subset(GEN x, GEN y)
+{
+  long i, n = lg(y);
+  for (i = 2; i < n; i ++)
+    if ((x[i] & y[i]) != x[i]) return 0;
+  return 1;
+}
+
+
+static GEN
+subg_extend(GEN U, long e, long o, GEN elt)
+{
+  long i, j, n = lg(elt)-1;
+  GEN g = gel(elt, e);
+  GEN gen = vecsmall_append(subg_get_gen(U), e);
+  GEN set = subg_get_set(U);
+  GEN Vset = zv_copy(set);
+  for(i = 1; i <= n; i++)
+    if (F2v_coeff(set, i))
+    {
+      long h = gel(elt, i)[1];
+      for(j = 1; j < o; j++)
+      {
+        h = g[h];
+        F2v_set(Vset, h);
+      }
+    }
+  return mkvec2(gen, Vset);
+}
+
+static GEN
+cyclic_subg(long e, long o, GEN elt)
+{
+  long j, n = lg(elt)-1, h = 1;
+  GEN g = gel(elt, e);
+  GEN gen = mkvecsmall(e);
+  GEN set = zero_F2v(n);
+  F2v_set(set,1);
+  for(j = 1; j < o; j++)
+  {
+    h = g[h];
+    F2v_set(set, h);
+  }
+  return mkvec2(gen, set);
+}
+
+static GEN
+groupelts_to_regular(GEN elt)
+{
+  long i, j, n = lg(elt)-1;
+  GEN V = cgetg(n+1,t_VEC);
+  for (i=1; i<=n; i++)
+  {
+    pari_sp av = avma;
+    GEN g = gel(elt, i);
+    GEN W = cgetg(n+1,t_VEC);
+    for(j=1; j<=n; j++)
+      gel(W,j) = perm_mul(g, gel(elt,j));
+    gel(V, i) = gerepileuptoleaf(av,vecvecsmall_indexsort(W));
+  }
+  vecvecsmall_sort_inplace(V, NULL);
+  return V;
+}
+
+static long
+groupelts_pow(GEN elt, long j, long n)
+{
+  GEN g = gel(elt,j);
+  long i, h = 1;
+  for (i=1; i<=n; i++)
+    h = g[h];
+  return h;
+}
+
+static GEN
+groupelts_cyclic_primepow(GEN elt, GEN *pt_pr, GEN *pt_po)
+{
+  GEN R = groupelts_cyclic_subgroups(elt);
+  GEN gen = gel(R,1), ord = gel(R,2);
+  long i, n = lg(elt)-1, l = lg(gen);
+  GEN set = zero_F2v(n);
+  GEN pr  = zero_Flv(n);
+  GEN po  = zero_Flv(n);
+  for (i = 1; i < l; i++)
+  {
+    long h = gen[i];
+    ulong p;
+    if (uisprimepower(ord[i], &p))
+    {
+      F2v_set(set, h);
+      uel(pr,h) = p;
+      po[h] = groupelts_pow(elt, h, p);
+    }
+  }
+  *pt_pr = pr; *pt_po = po;
+  return set;
+}
+
+static GEN
+all_cyclic_subg(GEN pr, GEN po, GEN elt)
+{
+  long i, n = lg(pr)-1, m = 0, k = 1;
+  GEN W;
+  for (i=1; i <= n; i++)
+    m += po[i]==1;
+  W = cgetg(m+1, t_VEC);
+  for (i=1; i <= n; i++)
+    if (po[i]==1)
+      gel(W, k++) = cyclic_subg(i, pr[i], elt);
+  return W;
+}
+
+static GEN
+groupelts_subgroups_raw(GEN elts)
+{
+  pari_sp av = avma;
+  GEN elt = groupelts_to_regular(elts);
+  GEN pr, po, cyc = groupelts_cyclic_primepow(elt, &pr, &po);
+  long n = lg(elt)-1;
+  long i, j, nS = 1;
+  GEN S, L;
+  S = cgetg(1+bigomegau(n)+1, t_VEC);
+  gel(S, nS++) = mkvec(triv_subg(elt));
+  gel(S, nS++) = L = all_cyclic_subg(pr, po, elt);
+  if (DEBUGLEVEL) err_printf("subgroups: level %ld: %ld\n",nS,lg(L)-1);
+  while (lg(L) > 1)
+  {
+    pari_sp av2 = avma;
+    long nW = 1, lL = lg(L);
+    long ng = n;
+    GEN W = cgetg(1+ng, t_VEC);
+    for (i=1; i<lL; i++)
+    {
+      GEN U = gel(L, i), set = subg_get_set(U);
+      GEN G = groupelt_subg_normalize(elt, U, cyc);
+      for (j=1; j<nW; j++)
+      {
+        GEN Wj = subg_get_set(gel(W, j));
+        if (F2v_subset(set, Wj))
+          F2v_negimply_inplace(G, Wj);
+      }
+      for (j=1; j<=n; j++)
+        if(F2v_coeff(G,j))
+        {
+          long p = pr[j];
+          if (F2v_coeff(set, j)) continue;
+          if (F2v_coeff(set, po[j]))
+          {
+            GEN U2 = subg_extend(U, j, p, elt);
+            F2v_negimply_inplace(G, subg_get_set(U2));
+            if (nW > ng) { ng<<=1; W = vec_lengthen(W, ng); }
+            gel(W, nW++) = U2;
+          }
+        }
+    }
+    setlg(W, nW);
+    if (DEBUGLEVEL) err_printf("subgroups: level %ld: %ld\n",nS,nW-1);
+    L = W;
+    if (nW > 1) gel(S, nS++) = L = gerepilecopy(av2, W);
+  }
+  setlg(S, nS);
+  return gerepilecopy(av, shallowconcat1(S));
+}
+
+static GEN
+set_groupelts(GEN S, GEN x)
+{
+  long i, n = F2v_hamming(x), k=1, m = x[1];
+  GEN v = cgetg(n+1, t_VEC);
+  for (i=1; i<=m; i++)
+    if (F2v_coeff(x,i))
+      gel(v,k++) = gel(S,i);
+  return v;
+}
+
+static GEN
+subg_to_elts(GEN S, GEN x)
+{ pari_APPLY_type(t_VEC, set_groupelts(S, gmael(x,i,2))); }
+
+GEN
+groupelts_solvablesubgroups(GEN G)
+{
+  pari_sp av = avma;
+  GEN S = vecvecsmall_sort(checkgroupelts(G));
+  GEN L = groupelts_subgroups_raw(S);
+  return gerepilecopy(av, subg_to_elts(S, L));
+}

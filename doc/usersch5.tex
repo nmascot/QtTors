@@ -13745,6 +13745,10 @@ a subgroup of $G/H$, return the inverse image of $S$ by $C$.
 \fun{GEN}{group_subgroups}{GEN grp} returns the list of subgroups of the
 small group \var{grp} as a \typ{VEC}.
 
+\fun{GEN}{groupelts_solvablesubgroups}{GEN elts} where \var{elts} is the list of
+elements of a finite group, returns the list of its solvable subgroups,
+each as a list of its elements.
+
 \fun{GEN}{subgroups_tableset}{GEN S, long n} where $S$ is a vector of subgroups
 of domain $n$, returns a table which matchs the set of elements of the
 subgroups against the index of the subgroups.

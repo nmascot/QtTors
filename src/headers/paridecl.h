@@ -4680,6 +4680,7 @@ GEN     group_set(GEN G, long n);
 int     group_subgroup_is_faithful(GEN G, GEN H);
 long    group_subgroup_isnormal(GEN G, GEN H);
 GEN     group_subgroups(GEN G);
+GEN     groupelts_solvablesubgroups(GEN G);
 GEN     group_to_cc(GEN G);
 GEN     groupelts_abelian_group(GEN S);
 GEN     groupelts_center(GEN S);
