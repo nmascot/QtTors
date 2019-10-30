@@ -1,0 +1,18 @@
+Function: ellrankinit
+Section: elliptic_curves
+C-Name: ellrankinit
+Prototype: Gp
+Help: ellrankinit(E): if E is an elliptic curve over the rationals,
+ initialize data for further call to ellrank.
+Doc: if $E$ is an elliptic curve over the rationals,
+ initialize data for further call to \kbd{ellrank}.
+ \bprog
+ ? E = ellinit([-567^2,289]);
+ ? rk= ellrankinit(E);
+ ? [r,R,P]=ellrank(rk)
+ %5 = [3,3,[[-567,17],[0,17]]]
+ ? [r,R,P]=ellrank(rk,P,1)
+ %7 = [3,3,[[-567,17],[0,17]]]
+ ? [r,R,P]=ellrank(rk,P,2)
+ %8 = [3,3,[[-567,17],[0,17],[-131567/576,108424583/13824]]]
+ @eprog

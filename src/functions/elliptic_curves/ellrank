@@ -1,0 +1,64 @@
+Function: ellrank
+Section: elliptic_curves
+C-Name: ellrank
+Prototype: GD0,L,DGp
+Help: ellrank(E,{effort=0},{points}): if E is an elliptic curve over the rationals,
+ attempt to compute the Mordell-Weil group attached to the curve.
+ The output is [r,R,L] such that the rank is between r and R (both included)
+ and L is a list of independent, non-torsion rationals points on the curve.
+ E can also be given as the output of ellrankinit(E).
+Doc: if $E$ is an elliptic curve over the rationals,
+ attempt to compute the Mordell-Weil group attached to the curve.
+ The output is $[r,R,L]$ such that the rank is between $r$ and $R$
+ (both included) and $L$ is a list of independent, non-torsion rationals points
+ on the curve.
+ $E$ can also be given as the output of \kbd{ellrankinit(E)}.
+ If \kbd{points} is present, it must be a vector of rational points on the curve.
+ The parameter \kbd{effort} is a measure of the effort done to find rational
+ points before giving up. If \kbd{effort} is not $0$, the search is randomized,
+ so rerunning the function might find extra points.
+
+ \bprog
+ ? E = ellinit([-127^2,0]);
+ ? ellrank(E)
+ %2 = [1,1,[]] \\ rank is 1 but no point has been found.
+ ? ellrank(E,4) \\ make more effort to find a point.
+ %3 = [1,1,[[38902300445163190028032/305111826865145547009,
+      680061120400889506109527474197680/5329525731816164537079693913473]]]
+ @eprog
+
+ \misctitle{Technical explanation:}
+ The algorithm used is the $2$-descent method which has an intrinsic limitation:
+ the upper bound $R$ is equal to the rank when the Tate-Safarevich group of $E$
+ has odd order, otherwise, $R$ is equal to the sum of the rank of $E$ and of
+ the $2$-rank of the Tate-Safarevich group (which is always even).
+
+ When the conductor of $E$ is small, the BSD conjecture can be used
+ to find the true rank:
+ \bprog
+ ? E=ellinit([-289,0]);
+ ? ellrootno(E) \\ rank is even
+ %2 = 1
+ ? ellrank(E)
+ %3 = [0,2,[]] \\ rank is either 0 or 2
+ ? ellrank(E,3) \\ try harder
+ %4 = [0,2,[]] \\ no luck
+ ? [r,L]=ellanalyticrank(E) \\Assume BSD
+ %5 = [0,2.5437694712459114339644625704317852098]
+ ? L/ellbsd(E) \\ rank is 0, compute Sha
+ %6 = 4.0000000000000000000000000000000000000
+ @eprog
+ We find that the rank is $0$ and the cardinal of the Tate-Safarevich group
+ is $4$.
+ When the rank is $1$ and the conductor is small, \kbd{ellheegner} can be used
+ to find the point.
+ \bprog
+  ? E = ellinit([-157^2,0]);
+  ? ellrank(E)
+  %2 = [1,1,[]] \\ rank is 1, no point found
+  ? ellrank(E,5) \\ Try harder
+  %3 = [1,1,[]] \\ No luck
+  ? ellheegner(E) \\ use analytic method
+  %4 = [69648970982596494254458225/166136231668185267540804,
+         538962435089604615078004307258785218335/67716816556077455999228495435742408]
+ @eprog

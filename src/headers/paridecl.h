@@ -2737,6 +2737,7 @@ long nfislocalpower(GEN nf, GEN pr, GEN a, GEN n);
 long rnfislocalcyclo(GEN rnf);
 
 /* bnfunits.c */
+
 GEN     bnfisunit(GEN bnf, GEN x);
 GEN     bnfissunit(GEN bnf,GEN suni,GEN x);
 GEN     bnfsunit(GEN bnf,GEN s,long PREC);
@@ -3176,7 +3177,13 @@ GEN     ellpadiclog(GEN E, GEN p, long n, GEN P);
 GEN     ellpadicregulator(GEN E, GEN p, long n, GEN S);
 GEN     ellpadics2(GEN E, GEN p, long n);
 
+/* ellrank.c*/
+
+GEN     ellrank(GEN ell, long effort, GEN help, long prec);
+GEN     ellrankinit(GEN ell, long prec);
+
 /* elltors.c */
+
 long    ellisdivisible(GEN E, GEN P, GEN n, GEN *Q);
 
 /* ellisog.c */

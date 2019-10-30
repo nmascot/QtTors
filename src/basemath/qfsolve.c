@@ -480,7 +480,7 @@ qfminimize(GEN G, GEN P, GEN E)
     GEN p = gel(P,i);
     long vp = E[i], wp = vp;
     if (!vp) continue;
-    if (DEBUGLEVEL >= 2) err_printf("qfminimize: for %Ps^%ld:", p,vp);
+    if (DEBUGLEVEL >= 3) err_printf("qfminimize: for %Ps^%ld:", p,vp);
     while (vp)
     {
       long idx = 0, dimKer = 0; /* -Wall */
@@ -488,7 +488,7 @@ qfminimize(GEN G, GEN P, GEN E)
       pari_sp av = avma;
       while (vp) /* loop until vp <= n */
       {
-        if (DEBUGLEVEL>=2 && vp <= wp)
+        if (DEBUGLEVEL>=3 && vp <= wp)
         { err_printf(" %ld%%", (E[i]-vp)*100/E[i]); wp -= E[i]/100; }
         /* The case vp = 1 can be minimized only if n is odd. */
         if (vp == 1 && !odd(n)) break;
@@ -613,7 +613,7 @@ qfminimize(GEN G, GEN P, GEN E)
       vecsmalltrunc_append(faE, vp);
       break;
     }
-    if (DEBUGLEVEL >= 2) err_printf("\n");
+    if (DEBUGLEVEL >= 3) err_printf("\n");
   }
   if (!U) U = matid(n);
   else
