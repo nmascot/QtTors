@@ -220,6 +220,7 @@ GEN  direllnf_worker(GEN P, ulong X, GEN E);
 GEN  dirartin_worker(GEN P, ulong X, GEN nf, GEN G, GEN V, GEN aut);
 GEN  direllsympow_worker(GEN P, ulong X, GEN E, ulong m);
 GEN  dirgenus2_worker(GEN P, ulong X, GEN Q);
+GEN  dirhgm_worker(GEN P, ulong X, GEN hgm, GEN t);
 GEN  pardireuler(GEN worker, GEN a, GEN b, GEN c, GEN Sbad);
 GEN  FpM_ratlift_worker(GEN A, GEN mod, GEN B);
 GEN  ellQ_factorback_worker(GEN P, GEN E, GEN A, GEN L, ulong l);
@@ -239,7 +240,7 @@ enum { t_LFUN_GENERIC, t_LFUN_ZETA, t_LFUN_NF, t_LFUN_ELL, t_LFUN_KRONECKER,
        t_LFUN_CHIZ, t_LFUN_CHIGEN, t_LFUN_ETA,
        t_LFUN_DIV, t_LFUN_MUL, t_LFUN_CONJ,
        t_LFUN_SYMPOW_ELL, t_LFUN_QF, t_LFUN_ARTIN, t_LFUN_MFCLOS,
-       t_LFUN_GENUS2, t_LFUN_TWIST, t_LFUN_CLOSURE0, t_LFUN_SHIFT};
+       t_LFUN_GENUS2, t_LFUN_TWIST, t_LFUN_CLOSURE0, t_LFUN_SHIFT, t_LFUN_HGM};
 enum { t_LDESC_INIT, t_LDESC_THETA, t_LDESC_PRODUCT };
 
 /* Elliptic curves */
@@ -637,12 +638,15 @@ void pari_init_ellcondfile(void);
 void pari_init_evaluator(void);
 void pari_init_files(void);
 void pari_init_floats(void);
+void pari_close_hgm(void);
+void pari_init_hgm(void);
 void pari_init_homedir(void);
 void pari_init_graphics(void);
 void pari_init_parser(void);
 void pari_init_rand(void);
 void pari_init_paths(void);
 void pari_init_primetab(void);
+void pari_init_seadata(void);
 GEN pari_get_seadata(void);
 void pari_set_primetab(GEN global_primetab);
 void pari_set_seadata(GEN seadata);

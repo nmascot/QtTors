@@ -24,7 +24,7 @@ BEGINEXTERN
   ID(ellsea), \
   ID(factor), ID(factorff), ID(factorint), ID(factormod), ID(fflog), \
   ID(galois), ID(gammamellininv), ID(genus2red), \
-  ID(hensel), ID(hyperell), \
+  ID(hensel), ID(hgm), ID(hyperell), \
   ID(intnum), ID(io), ID(isprime), \
   ID(lfun), \
   ID(mat), ID(mathnf), ID(mf), ID(mod), ID(mpqs), ID(ms), ID(mt),\

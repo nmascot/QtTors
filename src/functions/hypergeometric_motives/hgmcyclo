@@ -1,0 +1,9 @@
+Function: hgmcyclo
+Section: hypergeometric_motives
+C-Name: hgmcyclo
+Prototype: G
+Help: hgmcyclo(H): returns the cyclotomic parameters (A,B) of the
+ hypergeometric motive template H.
+
+Doc: returns the cyclotomic parameters $(A,B)$ of the
+ hypergeometric motive template $H$.

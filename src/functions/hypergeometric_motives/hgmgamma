@@ -1,0 +1,9 @@
+Function: hgmgamma
+Section: hypergeometric_motives
+C-Name: hgmgamma
+Prototype: G
+Help: hgmgamma(H): returns the gamma vector of the hypergeometric motive
+ template H.
+
+Doc:  returns the gamma vector of the hypergeometric motive
+ template $H$.

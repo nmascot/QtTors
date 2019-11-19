@@ -1,0 +1,15 @@
+Function: lfunhgm
+Section: hypergeometric_motives
+C-Name: lfunhgm
+Prototype: GGD0,L,b
+Help: lfunhgm(H,t,{lim}): (H,t) being a hypergeometric motive, returns the
+ corresponding lfuncreate data for use with the L function package.
+Doc: $(H,t)$ being a hypergeometric motive, returns the corresponding
+ \kbd{lfuncreate} data for use with the $L$-function package. The optional
+ parameter \kbd{lim} is technical and should be omitted.
+
+Function: _dirhgm_worker
+Section: programming/internals
+C-Name: dirhgm_worker
+Prototype: GUGG
+Help: worker for hgmcoefs

@@ -44,10 +44,11 @@ Help topics: for a list of relevant subtopics, type ?n for n in
   11: Associative and central simple ALGEBRAS
   12: ELLIPTIC CURVES
   13: L-FUNCTIONS
-  14: MODULAR FORMS
-  15: MODULAR SYMBOLS
-  16: GRAPHIC functions
-  17: The PARI community
+  14: HYPERGEOMETRIC MOTIVES
+  15: MODULAR FORMS
+  16: MODULAR SYMBOLS
+  17: GRAPHIC functions
+  18: The PARI community
 Also:
   ? functionname (short on-line help)
   ?\             (keyboard shortcuts)
@@ -164,4 +165,4 @@ a&&b: boolean operator "and".
 
 x==y: return 1 if x and y are equal, 0 otherwise.
 
-Total time spent: 1
+Total time spent: 0

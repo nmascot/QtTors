@@ -1198,6 +1198,7 @@ pari_thread_init(void)
   pari_init_errcatch();
   pari_init_rand();
   pari_init_floats();
+  pari_init_hgm();
   pari_init_parser();
   pari_init_compiler();
   pari_init_evaluator();
@@ -1213,6 +1214,7 @@ pari_thread_close(void)
   pari_close_compiler();
   pari_close_parser();
   pari_close_floats();
+  pari_close_hgm();
   pari_close_blocks();
 }
 

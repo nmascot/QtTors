@@ -167,7 +167,7 @@ print_fun_list(char **list, long nbli)
   if (i) pari_putc('\n');
 }
 
-static const long MAX_SECTION = 16;
+static const long MAX_SECTION = 17;
 static void
 commands(long n)
 {
@@ -281,6 +281,7 @@ menu_commands(void)
   "Associative and central simple ALGEBRAS",
   "ELLIPTIC CURVES",
   "L-FUNCTIONS",
+  "HYPERGEOMETRIC MOTIVES",
   "MODULAR FORMS",
   "MODULAR SYMBOLS",
   "GRAPHIC functions",

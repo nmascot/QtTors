@@ -1,0 +1,9 @@
+Function: hgmtwist
+Section: hypergeometric_motives
+C-Name: hgmtwist
+Prototype: G
+Help: hgmtwist(H): twist by 1/2 of alpha and beta of the hypergeometric motive
+ template H.
+
+Doc: twist by $1/2$ of alpha and beta of the hypergeometric motive
+ template $H$.

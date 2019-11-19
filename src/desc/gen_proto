@@ -19,6 +19,7 @@ $i = 2;
   'algebras'              => $i++,
   'elliptic_curves'       => $i++,
   'l_functions'           => $i++,
+  'hypergeometric_motives'=> $i++,
   'modular_forms'         => $i++,
   'modular_symbols'       => $i++,
   'graphic'               => $i++,

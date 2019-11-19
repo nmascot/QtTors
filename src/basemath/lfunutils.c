@@ -314,11 +314,30 @@ lfundivpoles(GEN ldata1, GEN ldata2, long bitprec)
 }
 
 GEN
+lfunvgasub(GEN v01, GEN v2)
+{
+  GEN v1 = shallowcopy(v01), v;
+  long l1 = lg(v1), l2 = lg(v2), j1, j2, j;
+  for (j2 = 1; j2 < l2; j2++)
+  {
+    for (j1 = 1; j1 < l1; j1++)
+      if (gel(v1,j1) && gequal(gel(v1,j1), gel(v2,j2)))
+      {
+        gel(v1,j1) = NULL; break;
+      }
+    if (j1 == l1) pari_err_OP("lfunvgasub", v1, v2);
+  }
+  v = cgetg(l1-l2+1, t_VEC);
+  for (j1 = j = 1; j1 < l1; j1++)
+    if (gel(v1, j1)) gel(v,j++) = gel(v1,j1);
+  return v;
+}
+
+GEN
 lfundiv(GEN ldata1, GEN ldata2, long bitprec)
 {
   pari_sp ltop = avma;
-  GEN k, r, N, v, v1, v2, eno, a1a2, b1b2, LD, eno2;
-  long j, j1, j2, l1, l2;
+  GEN k, r, N, v, eno, a1a2, b1b2, LD, eno2;
   long prec = nbits2prec(bitprec);
   ldata1 = ldata_newprec(lfunmisc_to_ldata_shallow(ldata1), prec);
   ldata2 = ldata_newprec(lfunmisc_to_ldata_shallow(ldata2), prec);
@@ -332,22 +351,7 @@ lfundiv(GEN ldata1, GEN ldata2, long bitprec)
   b1b2 = lfuncombdual(lfunconvolinv, ldata1, ldata2);
   eno2 = ldata_get_rootno(ldata2);
   eno = isintzero(eno2)? gen_0: gdiv(ldata_get_rootno(ldata1), eno2);
-  v1 = shallowcopy(ldata_get_gammavec(ldata1));
-  v2 = ldata_get_gammavec(ldata2);
-  l1 = lg(v1); l2 = lg(v2);
-  for (j2 = 1; j2 < l2; j2++)
-  {
-    for (j1 = 1; j1 < l1; j1++)
-      if (gel(v1,j1) && gequal(gel(v1,j1), gel(v2,j2)))
-      {
-        gel(v1,j1) = NULL; break;
-      }
-    if (j1 == l1) pari_err_OP("lfundiv [Vga]",ldata1, ldata2);
-  }
-  v = cgetg(l1-l2+1, t_VEC);
-  for (j1 = j = 1; j1 < l1; j1++)
-    if (gel(v1, j1)) gel(v,j++) = gel(v1,j1);
-
+  v = lfunvgasub(ldata_get_gammavec(ldata1), ldata_get_gammavec(ldata2));
   LD = mkvecn(7, a1a2, b1b2, v, k, N, eno, r);
   if (!r) setlg(LD,7);
   return gerepilecopy(ltop, LD);
@@ -2814,6 +2818,8 @@ ldata_vecan(GEN van, long L, long prec)
     case t_LFUN_CONJ: an = vecan_conj(an, L, prec); break;
     case t_LFUN_SYMPOW_ELL: an = vecan_ellsympow(an, L); break;
     case t_LFUN_GENUS2: an = vecan_genus2(an, L); break;
+    case t_LFUN_HGM:
+      an = hgmcoefs(gel(an,1), gel(an,2), L); break;
     case t_LFUN_MFCLOS:
     {
       GEN F = gel(an,1), E = gel(an,2), c = gel(an,3);

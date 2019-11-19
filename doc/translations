@@ -180,15 +180,18 @@ Emacs           @Using GP under GNU Emacs@2
 11              @Associative and central simple algebras
 12              @Elliptic curves
 13              @$L$-functions
-14              @Modular forms
-15              @Modular symbols
-16              @Plotting functions
+14              @Hypergeometric Motives
+15              @Modular forms
+16              @Modular symbols
+17              @Plotting functions
 ell             @Elliptic curves
 mf              @Modular forms
 nf              @Number field structures
 bnf             @Number field structures
 bnr             @Number field structures
 rnf             @Relative extensions
+hgm             @Hypergeometric Motives
+HGM             @Hypergeometric Motives
 ideal           @Algebraic numbers and ideals
 idele           @Algebraic numbers and ideals
 modulus         @Class field theory

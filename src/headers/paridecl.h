@@ -3714,6 +3714,21 @@ long    z_pval(long n, GEN p);
 long    z_pvalrem(long n, GEN p, long *py);
 long    zx_lval(GEN f, long p);
 
+/* hgm.c */
+
+GEN hgmcyclo(GEN hgm);
+GEN hgmgamma(GEN hgm);
+GEN hgminit(GEN val, GEN vbe);
+GEN hgmparams(GEN hgm);
+GEN hgmeulerfactor(GEN hgm, GEN t, long p, GEN* ptcondexpo);
+GEN hgmcoef(GEN hgm, GEN t, GEN n);
+GEN hgmcoefs(GEN hgm, GEN t, long n);
+GEN hgmtwist(GEN hgm);
+long hgmissymmetrical(GEN hgm);
+GEN hgmbydegree(long n);
+GEN hgmeulerfactorlimit(GEN hgm, GEN t, long p, long d, GEN* ptcondexpo);
+GEN lfunhgm(GEN hgm, GEN t, long lim, long bit);
+
 /* Ser.c */
 
 GEN     RgX_to_ser(GEN x, long l);
@@ -4258,6 +4273,7 @@ long    lfunthetacost0(GEN L, GEN tdom, long m, long bitprec);
 long    lfunthetacost(GEN ldata, GEN tdom, long m, long bitprec);
 GEN     lfunthetainit(GEN ldata, GEN tdom, long m, long bitprec);
 GEN     lfunthetacheckinit(GEN data, GEN tinf, long m, long bitprec);
+GEN     lfunvgasub(GEN v01, GEN v2);
 GEN     lfunzeros(GEN ldata, GEN lim, long divz, long bitprec);
 int     sdomain_isincl(double k, GEN dom, GEN dom0);
 GEN     theta_get_an(GEN tdata);

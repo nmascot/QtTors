@@ -22,6 +22,7 @@ PARI::822::read(\%funcs, "pari.desc");
   number_fields
   algebras
   elliptic_curves
+  hypergeometric_motives
   l_functions
   modular_forms
   modular_symbols

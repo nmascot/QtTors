@@ -1,0 +1,9 @@
+Function: hgmissymmetrical
+Section: hypergeometric_motives
+C-Name: hgmissymmetrical
+Prototype: lG
+Help: hgmissymmetrical(H): is the hypergeometric motive template H symmetrical
+ at t=1 ?
+
+Doc:  is the hypergeometric motive template $H$ symmetrical
+ at $t=1$ ?

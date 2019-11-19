@@ -1,0 +1,30 @@
+Function: hgminit
+Section: hypergeometric_motives
+C-Name: hgminit
+Prototype: GDG
+Help: hgminit(a, {b}): Create the template for the hypergeometric
+ motive with parameters a and possibly b. The format of the parameters may
+ be alpha: Galois invariant lists of rational numbers a=alpha and b=beta;
+ or cyclo: lists A and B of positive integers corresponding to alpha and beta;
+ or gamma: list of cn such that the hypergeometric quotient is prod_n(x^n-1)^cn.
+ The hypergeometric motive itself must be given by the template together
+ with a nonzero rational number t.
+
+Doc: Create the template for the hypergeometric motive with parameters
+ $a$ and possibly $b$. The format of the parameters may be
+
+ \item alpha: lists of rational numbers $a=(\alpha_j)$ and
+ $b=(\beta_k)$ of the same length (and defined over $\Q$); if $b$ is
+ omitted, we take it to be $(0,\dots,0)$.
+
+ \item cyclo: lists $a=D$ and $b=E$ of positive integers corresponding
+ to the denominators of the $(\alpha_i)$ and $(\beta_i)$; if $b$ is omitted
+ we take it to be $(1,\dots,1)$.
+
+ \item gamma: list of $\gamma_n$ such that the
+ $\prod_j(x-\exp(2\pi i\alpha_j)) / \prod_k(x-\exp(2\pi i\beta_k))
+ = \prod_n(x^n-1)^{\gamma_n}$.
+
+ The hypergeometric motive itself must be given by the template together
+ with a rational number $t\ne0$. Note that $t=1$ is accepted but treated
+ specially.
