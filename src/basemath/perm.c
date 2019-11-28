@@ -1510,26 +1510,25 @@ groupelts_cyclic_subgroups(GEN G)
   pari_sp av = avma;
   long i, j, n = lg(G)-1;
   GEN elts = zero_F2v(n+1), f;
+  GEN gen = cgetg(n+1, t_VECSMALL);
   GEN ord = cgetg(n+1, t_VECSMALL);
-  GEN V = cgetg(n+1, t_VEC);
   for (i=1, j=1; i<=n; i++)
   {
     long k = 1, o, c = 0;
     GEN p = gel(G, i);
     if (F2v_coeff(elts, p[1])) continue;
     o = perm_orderu(p);
-    ord[j] = o;
-    gel(V,j++) = p;
+    gen[j] = i; ord[j] = o; j++;
     do
     {
       if (cgcd(o, ++c)==1) F2v_set(elts, p[k]);
       k = p[k];
     } while (k!=1);
   }
+  setlg(gen, j);
   setlg(ord, j);
-  setlg(V, j);
   f = vecsmall_indexsort(ord);
-  return gerepilecopy(av, mkvec2(vecpermute(V, f), vecpermute(ord, f)));
+  return gerepilecopy(av, mkvec2(vecpermute(gen, f), vecpermute(ord, f)));
 }
 
 GEN
@@ -1541,7 +1540,7 @@ groupelts_to_group(GEN G)
   long i, l = lg(cyc), n = lg(G)-1;
   for (i = l-1; i >= 2; i--)
   {
-    GEN p = gel(cyc,i);
+    GEN p = gel(G,cyc[i]);
     long o = ord[i];
     GEN H;
     if (o == n) { set_avma(av); return cyclicgroup(p, o); }
