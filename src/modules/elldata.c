@@ -102,10 +102,9 @@ ellconvertname(GEN n)
 }
 
 static GEN
-ellcondfile(long f)
+ellcondfile(long n)
 {
   pari_sp av = avma;
-  long n = f / 1000;
   char *s = stack_malloc(strlen(pari_datadir) + 12 + 20 + 1);
   pariFILE *F;
   GEN V;
@@ -124,7 +123,7 @@ static GEN
 ellcondlist(long f)
 {
   pari_sp av = avma;
-  GEN V = ellcondfile(f);
+  GEN V = ellcondfile(f/1000);
   long i = tablesearch(V, utoipos(f), &cmpi1);
   if (i)
   {
@@ -240,7 +239,7 @@ forell(void *E, long call(void*, GEN), long a, long b, long flag)
   for(i=ca; i<=cb; i++)
   {
     pari_sp ltop=avma;
-    GEN V = ellcondfile(i*1000);
+    GEN V = ellcondfile(i);
     for (j=1; j<lg(V); j++)
     {
       GEN ells = gel(V,j);
