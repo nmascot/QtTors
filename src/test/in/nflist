@@ -1,0 +1,47 @@
+default(parisize,"15M");
+
+do(G,lim)=
+{ my(B = [1,ceil(10^lim)], field, D, v, T);
+  print("group = ",G);
+  v = nflist(G,B,-2);
+  print(apply(length,v));
+  print(vector(#v, i, #nflist(G,B,i-1)));
+  v = concat(v); if (!#v, return);
+  T = v[1];
+  print([field,cond]=nfresolvent(T,1));
+  print(nfresolvent(T,2));
+  v = nflist(G,B,,field);
+  if (G == "D4", v = apply(polredabs,v)); \\ avoid 32 bit difference
+  print(if (#v > 10, #v, v));
+  print(D = abs(nfdisc(T)));
+  print(nflist(G,D));
+  print(nflist(G,D,,field));
+}
+
+vG=[["C2",4],["C3",10],["S3",4],["C4",8],["V4",8],["D4",3],["A4",5],["S4",3],["C5",10],["D5",4],["F5",5],["C6",10],["S36",8],["D612",5],["A46",7],["S3C3",5],["A462",6],["S46P",5],["S46M",6],["S32",5.5],["C32C4",6],["S462",5],["C32D4",4.5],["C7",15],["D7",6],["M21",9],["M42",6],["C9",12],["C3C3",12],["D9",9],["C11",17],["D11",10]];
+
+for(i=1,#vG,my([GP,lim]=vG[i]); do(GP,lim));
+nflist([10,1])
+nflist([9,9])
+nflist([11,1], 41426511213649)
+nflist([11,3])
+
+T=x^5-x^4+2*x^2-2*x+2; nfresolvent(T)
+T=polsubcyclo(53,13); nfresolvent(T,1)
+T=x^13-x^12-50*x^11+25*x^10+722*x^9-226*x^8-4207*x^7+1158*x^6+10465*x^5-2535*x^4-9399*x^3+1079*x^2+1316*x-49; nfresolvent(T,1)
+
+\\ regression tests
+nflist("D5",10^6)
+nflist("D5",[717000,717409],2)
+nflist("D5",6250000)
+#nflist("C6",[1,10^10],,x^2-2)
+nflist("C6",16807,-2)
+nflist("C2",125,-2)
+nflist("C4",8000,-2)
+nflist("S3",756,-2)
+nflist("S3",,-2)
+nflist("F5",2382032,-2)
+nflist("D612",91125,-2)
+nflist("C9",31381059609,-2)
+nflist("D9",775511104,-2)
+nflist("D9",6740083091889)

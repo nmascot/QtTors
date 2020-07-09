@@ -588,6 +588,33 @@ long cmbf_maxK(long nb);
 GEN ZX_DDF(GEN x);
 GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
 
+/* number fields */
+GEN _C3_worker(GEN gv, GEN T);
+GEN _C4vec_worker(GEN gm, GEN X, GEN Xinf, GEN gs);
+GEN _V4_worker(GEN D1, GEN X, GEN Xinf, GEN gs);
+GEN _D4_worker(GEN D, GEN X, GEN listarch);
+GEN _A4S4_worker(GEN P3, GEN X, GEN Xinf, GEN cards);
+GEN _C5_worker(GEN N, GEN bnfC5);
+GEN _CL_worker(GEN Fcond, GEN bnf, GEN ellprec);
+GEN _DL_worker(GEN P2, GEN X1pow, GEN X0pow, GEN X, GEN Xinf, GEN ells);
+GEN _Mgen_worker(GEN field, GEN X, GEN Xinf, GEN ella);
+GEN _C6_worker(GEN P3, GEN X, GEN Xinf, GEN M, GEN T);
+GEN _D612_worker(GEN P3, GEN X, GEN Xinf, GEN limd2s2);
+GEN _A46S46P_worker(GEN P3, GEN X, GEN Xinf, GEN SQX, GEN cards);
+GEN _S46M_worker(GEN P3, GEN X, GEN Xinf, GEN gs);
+GEN _A462_worker(GEN P3, GEN X, GEN listarch, GEN GAL);
+GEN _S3C3_worker(GEN D2, GEN X, GEN Xinf);
+GEN _S462_worker(GEN P3, GEN X, GEN listarch13, GEN GAL);
+GEN _S36_worker(GEN pol, GEN X, GEN Xinf);
+GEN _C32C4_worker(GEN P4, GEN X, GEN GAL);
+GEN _C32D4_worker(GEN P, GEN X, GEN Xinf, GEN gs);
+GEN _C9_worker(GEN P, GEN X, GEN Xinf);
+GEN _C3C3_worker(GEN gi, GEN V3, GEN V3D, GEN X);
+GEN _S3R_worker(GEN ga, GEN ALLCTS);
+GEN _S3I_worker(GEN ga, GEN ALLCTS);
+GEN _D9_worker(GEN P2, GEN X, GEN Xinf);
+GEN _S32_worker(GEN all1, GEN X, GEN Xinf, GEN V3, GEN gs);
+
 /* pari_init / pari_close */
 void pari_close_compiler(void);
 void pari_close_evaluator(void);

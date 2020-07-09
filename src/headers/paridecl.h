@@ -1926,6 +1926,7 @@ GEN     qfrsolvep(GEN Q, GEN p);
 GEN     quadgen(GEN x);
 GEN     quadgen0(GEN x, long v);
 GEN     quadpoly(GEN x);
+GEN     quadpoly_i(GEN D);
 GEN     quadpoly0(GEN x, long v);
 
 /* arith1.c */
@@ -5087,6 +5088,7 @@ GEN     factor_Aurifeuille(GEN p, long n);
 GEN     factor_Aurifeuille_prime(GEN p, long n);
 GEN     galoissubcyclo(GEN N, GEN sg, long flag, long v);
 GEN     polsubcyclo(long n, long d, long v);
+GEN     polsubcyclosmall(GEN n, long ell, long s, long fli);
 
 /* subfield.c */
 
@@ -5094,6 +5096,10 @@ GEN     nfsubfields(GEN nf, long d);
 GEN     nfsubfields0(GEN nf, long d, long flag);
 GEN     nfsubfieldscm(GEN nf, long flag);
 GEN     nfsubfieldsmax(GEN nf, long flag);
+
+/* nflist.c */
+GEN     nflist(GEN GP, GEN V, long s, GEN field);
+GEN     nfresolvent(GEN pol, long flag);
 
 /* subgroup.c */
 

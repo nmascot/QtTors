@@ -61,18 +61,25 @@ quadpoly_bc(GEN D, long Dodd, GEN *b, GEN *c)
   }
 }
 /* X^2 - X - (D-1)/4 or X^2 - D/4 */
-GEN
-quadpoly(GEN D)
+static GEN
+quadpoly_ii(GEN D, long Dmod4)
 {
-  long Dmod4, s;
   GEN b, c, y = cgetg(5,t_POL);
-  check_quaddisc(D, &s, &Dmod4, "quadpoly");
   y[1] = evalsigne(1) | evalvarn(0);
   quadpoly_bc(D, Dmod4, &b,&c);
   gel(y,2) = c;
   gel(y,3) = b;
   gel(y,4) = gen_1; return y;
 }
+GEN
+quadpoly(GEN D)
+{
+  long s, Dmod4;
+  check_quaddisc(D, &s, &Dmod4, "quadpoly");
+  return quadpoly_ii(D, Dmod4);
+}
+GEN /* no checks */
+quadpoly_i(GEN D) { return quadpoly_ii(D, Mod4(D)); }
 
 GEN
 quadpoly0(GEN x, long v)

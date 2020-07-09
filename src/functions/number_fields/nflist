@@ -1,0 +1,285 @@
+Function: nflist
+Section: number_fields
+C-Name: nflist
+Prototype: GDGD-1,L,DG
+Help: nflist(G, {N}, {s = -1}, {field}): find all number fields (up to
+ isomorphism) with Galois group of Galois closure isomorphic to G, and s
+ complex places.
+
+ If s = -1 (default) all signatures, s = -2 is identical to s = -1 except
+ signatures are separated by increasing number of complex places. If field is
+ specified, give only number fields having field as a subfield (or a resolvent
+ field in the case of S3, Dl, A4, S4, F5, M21 and M42).
+
+ The parameter N can be the following: a positive integer (absolute
+ value of discriminant is N); a vector [a,b] find fields with absolute
+ discriminant between a and b. Finally, N can be omitted (default), in which
+ case a few fields are given and 'field' is ignored.
+Doc: find all number fields (up to isomorphism) with Galois group of Galois
+ closure isomorphic to $G$ with $s$ complex places. This function supports
+ the following groups:
+
+ \item degree $2$: $C_2$;
+
+ \item degree $3$: $C_3$ and $S_3$;
+
+ \item degree $4$: $V_4$, $C_4$, $D_4$, $A_4$ and $S_4$;
+
+ \item degree $5$: $C_5$, $D_5$, $F_5 = M_{20}$, and $A_5$ (by table lookup);
+
+ \item degree $6$: $C_6$, $S_3(6) = D_6(6)$, $D_6(12)$, $A_4(6)$,
+ $S_3\times C_3$, $A_4(6)\times C_2$, $S_4(6)^+$, $S_4(6)^-$, $S_3^2$,
+ $C_3^2:C_4$, $S_4(6)\times C_2$, $A_5(6) = PSL_2(5)$ (by table lookup),
+ and $C_3^2:D_4$;
+
+ \item degree $7$: $C_7$, $D_7$, $M_{21}$, and $M_{42}$;
+
+ \item degree $9$: $C_9$, $C_3\times C_3$, and $D_9$;
+
+ \item degree $\ell$ with $\ell$ prime: $C_\ell$ and $D_\ell$.
+
+ The groups are coded as $[n,t]$ using the \kbd{nTt} format where $n$ is the
+ degree and $t$ is the $T$-number (the index in the classification of
+ transitive subgroups of $S_n$). Alternatively, they can be input as
+ character strings exactly as written, removing parentheses, multiplication,
+ and $:$ symbols, lifting subscripts and lowering exponents; for instance
+ \kbd{"S46+"} or \kbd{"A46C2"}. If the group is not recognized or is
+ unsupported the function returns $0$.
+
+ The fields are computed on the fly (and not from a preexisting table) using
+ a variety of algorithms, with the exception of $A_5$ and $A_5(6)$.
+ The algorithms are recursive and use the following ingredients: build
+ distinguished subfields (or resolvent fields in Galois closures) of smaller
+ degrees, use class field theory to build abelian extensions over a known
+ base, select subfields using Galois theory.
+
+ To avoid wasting time in some cases, the output polynomials defining the
+ number fields are usually not the simplest possible, use \kbd{polredbest}
+ or \kbd{polredabs} to reduce them.
+
+ The non-negative integer $s$ specifies the number of complex places.
+ Additional supported values are:
+
+ \item $s = -1$ (default) all signatures;
+
+ \item $s = -2$ all signatures, given by increasing number of complex
+ places; in degree $n$, this means a vector with $1 + \text{floor}(n/2)$
+ components: the $i$-th entry corresponds to $s = i - 1$.
+
+ If \kbd{field} is specified, give only number fields having
+ \kbd{field} as a subfield, or in the case of $S_3$, $D_\ell$, $A_4$, $S_4$,
+ $F_5$, $M_{21}$ and $M_{42}$, as a resolvent field (see also the function
+ \kbd{nfresolvent} for these cases).
+
+ The parameter $N$ can be the following:
+
+ \item a positive integer: find fields with absolute discriminant $N$ (recall
+ that the discriminant over $\Q$ is $(-1)^s N$).
+
+ \item a pair of non-negative integers $[a,b]$ specifying a real interval:
+ find fields with absolute value of discriminant between $a$ and $b$.
+ For most Galois groups, this is faster than iterating on individual $N$.
+
+ \item omitted (default): a few fields of small discriminant (not always
+ those with smallest absolute discriminant) are output with given $G$
+ and $s$; usually about 10, less if too difficult to find. The parameter
+ \kbd{field} is ignored.
+
+ \misctitle{Complexity} : For a positive integer $N$, the complexity is
+ subexponential in $\log N$ (and involves factoring $N$). For an interval
+ $[a,b]$, the complexity is roughly as follows, ignoring terms which are
+ subexponential in $\log b$. It is usually linear in the output size.
+
+ \item $C_n$: $O(b^{1/\phi(n)})$ for $n = 2, 4, 6, 9$ or any odd prime;
+
+ \item $D_n$: $O(b^{2/(n-1)})$ for $n$ any odd prime;
+
+ \item $C_3$: $O(b^{1/2})$, $S_3$ : $O(b)$;
+
+ \item $V_4$: $O(b^{1/2})$, $D_4$: $O(b)$, $A_4$: $O(b^{1/2})$, $S_4$: $O(b)$;
+ N.B. The subexponential terms are expensive for $A_4$ and $S_4$.
+
+ \item $M_{20}$: $O(b)$.
+
+ \item $S_4(6)^-$, $S_4(6)^+$ $A_4(6)\times C_2$, $S_3\times S_3$,
+ $S_4(6)\times C_2$ : $O(b)$,
+ $D_6(12)$, $A_4(6)$, $S_3(6)$, $S_3\times C_3$, $C_3^2:C_4$: $O(b^{1/2})$.
+
+ \item $M_{21}$, $M_{42}$: $O(b)$.
+
+ \item $C_3\times C_3$: $O(b^{1/3})$
+
+Function: _C3_worker
+Section: programming/internals
+C-Name: _C3_worker
+Prototype: GG
+Help: _C3_worker(gv, T): auxiliary.
+Doc: auxiliary
+
+Function: _C4vec_worker
+Section: programming/internals
+C-Name: _C4vec_worker
+Prototype: GGGG
+Help: _C4vec_worker(gm, X, Xinf, X2, gs): auxiliary.
+Doc: auxiliary
+
+Function: _V4_worker
+Section: programming/internals
+C-Name: _V4_worker
+Prototype: GGGG
+Help: _V4_worker(D1, X, Xinf, gs): auxiliary.
+Doc: auxiliary
+
+Function: _D4_worker
+Section: programming/internals
+C-Name: _D4_worker
+Prototype: GGG
+Help: _D4_worker(D, X, X21, listarch): auxiliary.
+Doc: auxiliary
+
+Function: _A4S4_worker
+Section: programming/internals
+C-Name: _A4S4_worker
+Prototype: GGGG
+Help: _A4S4_worker(P3, X, Xinf, cardsprec): auxiliary.
+Doc: auxiliary
+
+Function: _C5_worker
+Section: programming/internals
+C-Name: _C5_worker
+Prototype: GG
+Help: _C5_worker(N, bnfC5): auxiliary.
+Doc: auxiliary
+
+Function: _CL_worker
+Section: programming/internals
+C-Name: _CL_worker
+Prototype: GGG
+Help: _CL_worker(Fcond, bnf, ellprec): auxiliary.
+Doc: auxiliary
+
+Function: _DL_worker
+Section: programming/internals
+C-Name: _DL_worker
+Prototype: GGGGGG
+Help: _DL_worker(P2, X1p, X0p, X, Xinf, ells): auxiliary.
+Doc: auxiliary
+
+Function: _Mgen_worker
+Section: programming/internals
+C-Name: _Mgen_worker
+Prototype: GGGG
+Help: _Mgen_worker(field, X, Xinf, ella): auxiliary.
+Doc: auxiliary
+
+Function: _C6_worker
+Section: programming/internals
+C-Name: _C6_worker
+Prototype: GGGGG
+Help: _C6_worker(P3, X, Xinf, M, T): auxiliary.
+Doc: auxiliary
+
+Function: _D612_worker
+Section: programming/internals
+C-Name: _D612_worker
+Prototype: GGGG
+Help: _D612_worker(P3, X, Xinf, X2, limd2s2): auxiliary.
+Doc: auxiliary
+
+Function: _A46S46P_worker
+Section: programming/internals
+C-Name: _A46S46P_worker
+Prototype: GGGGG
+Help: _A46S46P_worker(P3, X, Xinf, SQX, cards): auxiliary.
+Doc: auxiliary
+
+Function: _S46M_worker
+Section: programming/internals
+C-Name: _S46M_worker
+Prototype: GGGG
+Help: _S46M_worker(P3, X, Xinf, sprec): auxiliary.
+Doc: auxiliary
+
+Function: _A462_worker
+Section: programming/internals
+C-Name: _A462_worker
+Prototype: GGGG
+Help: _A462_worker(P3, X, listarch, GAL): auxiliary.
+Doc: auxiliary
+
+Function: _S3C3_worker
+Section: programming/internals
+C-Name: _S3C3_worker
+Prototype: GGG
+Help: _S3C3_worker(D2, X, Xinf, X2): auxiliary.
+Doc: auxiliary
+
+Function: _S462_worker
+Section: programming/internals
+C-Name: _S462_worker
+Prototype: GGGG
+Help: _S462_worker(P3, X, listarch13, GAL): auxiliary.
+Doc: auxiliary
+
+Function: _S36_worker
+Section: programming/internals
+C-Name: _S36_worker
+Prototype: GGG
+Help: _S36_worker(pol, X, Xinf, X2): auxiliary.
+Doc: auxiliary
+
+Function: _C32C4_worker
+Section: programming/internals
+C-Name: _C32C4_worker
+Prototype: GGG
+Help: _C32C4_worker(P4, X, GAL): auxiliary.
+Doc: auxiliary
+
+Function: _C32D4_worker
+Section: programming/internals
+C-Name: _C32D4_worker
+Prototype: GGGG
+Help: _C32D4_worker(P, X, Xinf, gs): auxiliary.
+Doc: auxiliary
+
+Function: _C9_worker
+Section: programming/internals
+C-Name: _C9_worker
+Prototype: GGG
+Help: _C9_worker(P, X, Xinf): auxiliary.
+Doc: auxiliary
+
+Function: _C3C3_worker
+Section: programming/internals
+C-Name: _C3C3_worker
+Prototype: GGGG
+Help: _C3C3_worker(gi, V3, V3D, X): auxiliary.
+Doc: auxiliary
+
+Function: _S3R_worker
+Section: programming/internals
+C-Name: _S3R_worker
+Prototype: GG
+Help: _S3R_worker(ga, ALLCTS): auxiliary.
+Doc: auxiliary
+
+Function: _S3I_worker
+Section: programming/internals
+C-Name: _S3I_worker
+Prototype: GG
+Help: _S3I_worker(ga, ALLCTS): auxiliary.
+Doc: auxiliary
+
+Function: _D9_worker
+Section: programming/internals
+C-Name: _D9_worker
+Prototype: GGG
+Help: _D9_worker(P2, X, Xinf): auxiliary.
+Doc: auxiliary
+
+Function: _S32_worker
+Section: programming/internals
+C-Name: _S32_worker
+Prototype: GGGGG
+Help: _S32_worker(all1, X, Xinf, V3, sprec): auxiliary.
+Doc: auxiliary

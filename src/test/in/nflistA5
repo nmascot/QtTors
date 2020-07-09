@@ -1,0 +1,27 @@
+\\ package: A5data
+default(parisize,"80M");
+
+G = "A5";
+nftable(G)
+nftable(G,,-2)
+nftable(G,,1)
+nftable(G,[100,18000])
+nftable(G,18496)
+nftable(G,42849)
+nftable(G,[18497,10^5])
+
+G = "A5cond";
+nftable(G)
+nftable(G,,-2)
+nftable(G,,1)
+nftable(G,[100,500])
+nftable(G,633)
+nftable(G,[634, 1000])
+
+G = "A56";
+nftable(G)
+nftable(G,,-2)
+nftable(G,,2)
+nftable(G,[100,280000])
+nftable(G,287296)
+nftable(G,[287297,10^6])
