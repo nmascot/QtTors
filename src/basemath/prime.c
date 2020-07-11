@@ -786,17 +786,21 @@ long
 isprime(GEN x) { return BPSW_psp(x) && BPSW_isprime(x); }
 
 GEN
-primecert(GEN x, long flag)
+primecert0(GEN x, long flag, long stopat)
 {
   if (!BPSW_psp(x)) return gen_0;
   switch(flag)
   {
-    case 0: return ecpp(x);
+    case 0: return ecpp0(x, stopat);
     case 1: { pari_sp av = avma; return gerepilecopy(av, isprimePL(x)); }
   }
   pari_err_FLAG("primecert");
   return NULL;/*LCOV_EXCL_LINE*/
 }
+
+GEN
+primecert(GEN x, long flag)
+{ return primecert0(x, flag, 0); }
 
 enum { c_VOID = 0, c_ECPP, c_N1 };
 static long

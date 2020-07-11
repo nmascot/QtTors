@@ -1003,7 +1003,7 @@ mkNDmqg(GEN z, GEN N, GEN Dmq, GEN g, GEN sqrtlist)
  * pseudoprime, recursive call with N = q. May return gen_0 at toplevel
  * => N has a small prime divisor */
 static GEN
-N_downrun(GEN N, GEN param, GEN worker, GEN *X0, long *depth, long persevere)
+N_downrun(GEN N, GEN param, GEN worker, GEN *X0, long *depth, long persevere, long stopat)
 {
   pari_timer T, ti;
   long lgdisclist, lprimelist, nbsqrt = 0, t, i, j, expiN = expi(N);
@@ -1127,10 +1127,10 @@ N_downrun(GEN N, GEN param, GEN worker, GEN *X0, long *depth, long persevere)
         err_printf(ANSI_BRIGHT_BLUE "  h = %ld" ANSI_RESET, Dmq_get_h(Dmq));
       }
       /* q is pseudoprime */
-      if (expi(q) < 64) z = gen_1; /* q is prime; sentinel */
+      if (expi(q) < stopat) z = gen_1; /* q is prime; sentinel */
       else
       {
-        z = N_downrun(q, param, worker, X0, depth, persevere_next);
+        z = N_downrun(q, param, worker, X0, depth, persevere_next, stopat);
         if (!z) {
           dbg_mode() { char o = persevere? '<': '[', c = persevere? '>': ']';
                        err_printf(ANSI_CYAN "\n%c %3d | %4ld bits%c "
@@ -1171,12 +1171,12 @@ ecpp_flattencert(GEN x, long depth)
  * - gen_0 (if N is composite)
  * - NULL (if FAIL) */
 static GEN
-ecpp_step1(GEN N, GEN param, GEN* X0)
+ecpp_step1(GEN N, GEN param, GEN* X0, long stopat)
 {
   pari_sp av = avma;
   long depth = 0;
   GEN worker = strtofunction("_ecpp_ispsp_worker");
-  GEN downrun = N_downrun(N, param, worker, X0, &depth, 1);
+  GEN downrun = N_downrun(N, param, worker, X0, &depth, 1, stopat);
   if (downrun == NULL) return gc_NULL(av);
   return gerepilecopy(av, ecpp_flattencert(downrun, depth));
 }
@@ -1184,7 +1184,7 @@ ecpp_step1(GEN N, GEN param, GEN* X0)
 /* The input is an integer N.
    It uses the precomputation step0 done in ecpp_step0. */
 static GEN
-ecpp_param(GEN N, GEN param)
+ecpp_param(GEN N, GEN param, long stopat)
 {
 
   GEN step1, answer, Tv, Cv, X0;
@@ -1195,14 +1195,14 @@ ecpp_param(GEN N, GEN param)
   if (!BPSW_psp(N)) return gen_0;
 
   /* Check if we should even prove it. */
-  if (expi(N) < 64) return N;
+  if (expi(N) < stopat) return N;
 
   /* Timers and Counters */
   Tv = mkvec4(zero_zv(5), zero_zv(3), zero_zv(3), zero_zv(1));
   Cv = mkvec4(zero_zv(5), zero_zv(3), zero_zv(3), zero_zv(1));
   X0 = mkvec3(Tv, Cv, zero_zv(1));
 
-  step1 = ecpp_step1(N, param, &X0);
+  step1 = ecpp_step1(N, param, &X0, stopat);
   if (step1 == NULL) return gc_NULL(av);
   if (typ(step1) != t_VEC) { set_avma(av); return gen_0; }
 
@@ -1252,14 +1252,15 @@ static const long ecpp_tune[][4]=
 
 /* assume N BPSW-pseudoprime */
 GEN
-ecpp(GEN N)
+ecpp0(GEN N, long stopat)
 {
   long expiN, i, tunelen;
   GEN tune;
 
   /* Check if we should even prove it. */
   expiN = expi(N);
-  if (expiN < 64) return N;
+  if (stopat < 64) stopat = 64;
+  if (expiN < stopat) return N;
 
   tunelen = (expiN+499)/500;
   tune = cgetg(tunelen+1, t_VEC);
@@ -1277,12 +1278,17 @@ ecpp(GEN N)
       err_printf(ANSI_BRIGHT_WHITE "\n%Ps" ANSI_RESET, x);
       err_printf(ANSI_WHITE "  %8ld" ANSI_RESET, timer_delay(&T));
     }
-    if ((C = ecpp_param(N, param))) return C;
+    if ((C = ecpp_param(N, param, stopat))) return C;
     x[1] *= 2;
     x[2] *= 2;
     x[3] = minss(x[3]+1, 30);
   }
 }
+
+GEN
+ecpp(GEN N)
+{ return ecpp0(N, 0); }
+
 long
 isprimeECPP(GEN N)
 {

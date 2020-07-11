@@ -2963,12 +2963,15 @@ GEN setdefault(const char *s, const char *v, long flag);
 long setrealprecision(long n, long *prec);
 
 /* ecpp.c */
+
 GEN     ecpp(GEN N);
+GEN     ecpp0(GEN N, long stopat);
 GEN     ecppexport(GEN cert, long flag);
 long    ecppisvalid(GEN cert);
 long    isprimeECPP(GEN N);
 
 /* gplib.c */
+
 GEN sd_breakloop(const char *v, long flag);
 GEN sd_echo(const char *v, long flag);
 GEN sd_graphcolormap(const char *v, long flag);
@@ -4995,6 +4998,7 @@ long    ispseudoprime(GEN x, long flag);
 long    millerrabin(GEN n, long k);
 GEN     prime(long n);
 GEN     primecert(GEN x, long flag);
+GEN     primecert0(GEN x, long flag, long stopat);
 GEN     primecertexport(GEN cert, long flag);
 long    primecertisvalid(GEN x);
 GEN     primepi(GEN x);
