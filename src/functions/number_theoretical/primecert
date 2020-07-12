@@ -2,15 +2,18 @@ Function: primecert
 Section: number_theoretical
 C-Name: primecert0
 Prototype: GD0,L,D0,L,
-Help: primecert(N, {flag=0}, {stopat=64}): If N is a prime, return a Primality Certificate.
- Return 0 otherwise. If flag = 0 return an ECPP certificate (Atkin-Morain);
- if flag = 1 return an N-1 certificate (Pocklington-Lehmer)
+Help: primecert(N, {flag=0}, {partial=0}): If N is a prime, return a Primality
+ Certificate.  Return 0 otherwise. If flag = 0 return an ECPP certificate
+ (Atkin-Morain); if flag = 1 return an N-1 certificate (Pocklington-Lehmer)
 Doc:
  If N is a prime, return a PARI Primality Certificate for the prime $N$,
  as described below. Otherwise, return 0. A Primality Certificate
  $c$ can be checked using \tet{primecertisvalid}$(c)$.
 
  If $\fl = 0$ (default), return an ECPP certificate (Atkin-Morain)
+
+ If $\fl = 0$ and $\var{partial}>0$, return a (potentially) partial
+ ECPP certificate.
 
  A PARI ECPP Primality Certificate for the prime $N$ is either a prime
  integer $N < 2^{64}$ or a vector \kbd{C} of length $\ell$ whose $i$th
@@ -52,6 +55,11 @@ Doc:
  modulo $N$ such that $q > (N^{1/4} + 1)^2$, $q$ is a prime divisor of $m$,
  $mP = \infty$ and $\dfrac{m}{q}P \neq \infty$, then $N$ is prime.
 
+ A partial certificate is identical except that the condition $q_\ell \leq
+ 2^{64}$ is replaced by $q_\ell \leq 2^{partial}$.
+ Such partial certificate $C$ can be extended to a full certificate by calling
+ $C=primecert(C)$, or to a longer partial certificate by calling
+ $C=primecert(C,,b)$ with $b<partial$.
 
  \bprog
  ? primecert(10^35 + 69)
@@ -68,6 +76,12 @@ Doc:
  %3 = 0
  ? primecert(41)
  %4 = 41
+ ? N = 2^2000+841;
+ ? Cp1 = primecert(N,,1500); \\ partial certificate
+ ? Cp2 = primecert(Cp1,,1000); \\ partial certificate
+ ? C = primecert(Cp2); \\ full certificate for N
+ ? primecertisvalid(C)
+ %9 = 1
  @eprog\smallskip
 
  If $\fl = 1$ (very slow), return an $N-1$ certificate (Pocklington Lehmer)

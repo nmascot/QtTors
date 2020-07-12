@@ -469,6 +469,8 @@ cert_get_s(GEN x) { return gel(x,3); }
 INLINE GEN
 cert_get_q(GEN x) { return diviiexact(cert_get_m(x), cert_get_s(x)); }
 INLINE GEN
+cert_get_qlast(GEN x) { return cert_get_q( gel(x, lg(x)-1) ); }
+INLINE GEN
 cert_get_a4(GEN x) { return gel(x,4); }
 INLINE GEN
 cert_get_P(GEN x) { return gel(x,5); }
@@ -1252,15 +1254,22 @@ static const long ecpp_tune[][4]=
 
 /* assume N BPSW-pseudoprime */
 GEN
-ecpp0(GEN N, long stopat)
+ecpp0(GEN C, long stopat)
 {
+  pari_sp av = avma;
   long expiN, i, tunelen;
-  GEN tune;
+  GEN N = C, tune;
+
+  /* Is it a partial certificate? */
+  if (typ(C) == t_VEC && check_ecppcert(C))
+    N = cert_get_qlast(C);
+  if (typ(N) != t_INT)
+    pari_err_TYPE("ecpp",C);
 
   /* Check if we should even prove it. */
   expiN = expi(N);
   if (stopat < 64) stopat = 64;
-  if (expiN < stopat) return N;
+  if (expiN < stopat) return C;
 
   tunelen = (expiN+499)/500;
   tune = cgetg(tunelen+1, t_VEC);
@@ -1270,7 +1279,7 @@ ecpp0(GEN N, long stopat)
   for (; i <= tunelen; i++) gel(tune,i) = mkvecsmall4(200*(i-1),6*i-4,30,500*i);
   for(;;)
   {
-    GEN C, param, x = gel(tune, tunelen);
+    GEN C2, param, x = gel(tune, tunelen);
     pari_timer T;
     dbg_mode() timer_start(&T);
     param = ecpp_param_set(tune, x);
@@ -1278,7 +1287,9 @@ ecpp0(GEN N, long stopat)
       err_printf(ANSI_BRIGHT_WHITE "\n%Ps" ANSI_RESET, x);
       err_printf(ANSI_WHITE "  %8ld" ANSI_RESET, timer_delay(&T));
     }
-    if ((C = ecpp_param(N, param, stopat))) return C;
+    C2 = ecpp_param(N, param, stopat);
+    if (C2)
+      return typ(C)==t_INT? C2: gerepilecopy(av, shallowconcat(C,C2));
     x[1] *= 2;
     x[2] *= 2;
     x[3] = minss(x[3]+1, 30);
@@ -1501,7 +1512,7 @@ ecppisvalid_i(GEN cert)
     GEN certi = gel(cert, i);
     GEN qq = gel(check,i), N = cert_get_N(certi);
     if (isintzero(qq)) return 0;
-    if (i > 1 && !equalii(N, q)) return 0;
+    if (i > 1 && !equalii(N, q)) return 0; /* N of this entry doesn't match q of previous */
     q = qq;
   }
   return 1;

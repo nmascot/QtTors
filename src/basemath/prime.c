@@ -788,7 +788,7 @@ isprime(GEN x) { return BPSW_psp(x) && BPSW_isprime(x); }
 GEN
 primecert0(GEN x, long flag, long stopat)
 {
-  if (!BPSW_psp(x)) return gen_0;
+  if ((flag || typ(x) == t_INT) && !BPSW_psp(x)) return gen_0;
   switch(flag)
   {
     case 0: return ecpp0(x, stopat);

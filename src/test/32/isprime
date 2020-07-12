@@ -416,6 +416,9 @@ T=0x279D8007CF22A87E6AAA30
 450069040, 45736570588545364146636989, 1 *], [* [* 31373660453195251, 1 *] *
 ] *] *]
 1
+9
+19
+1
 1
   ***   at top-level: primecertexport([0],1)
   ***                 ^----------------------
@@ -423,4 +426,4 @@ T=0x279D8007CF22A87E6AAA30
   ***   at top-level: primecertexport([],1)
   ***                 ^---------------------
   *** primecertexport: incorrect type in primecertexport - invalid certificate (t_VEC).
-Total time spent: 22431
+Total time spent: 17322
