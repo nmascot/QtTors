@@ -546,6 +546,8 @@ double darg(double s, double t);
 void   dcxlog(double s, double t, double *a, double *b);
 double dnorm(double s, double t);
 double dbllog2(GEN z);
+double dbllambertW0(double a);
+double dbllambertW_1(double a);
 
 /* hnf */
 GEN hnfadd(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);

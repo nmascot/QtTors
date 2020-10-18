@@ -364,12 +364,10 @@ mpcatalan(long prec) { return rtor(constcatalan(prec), prec); }
 /********************************************************************/
 static GEN
 transvec(GEN (*f)(GEN,long), GEN x, long prec)
-{
-  long i, l;
-  GEN y = cgetg_copy(x, &l);
-  for (i=1; i<l; i++) gel(y,i) = f(gel(x,i),prec);
-  return y;
-}
+{ pari_APPLY_same(f(gel(x,i), prec)); }
+static GEN
+transvecgen(void *E, GEN (*f)(void *,GEN,long), GEN x, long prec)
+{ pari_APPLY_same(f(E, gel(x,i), prec)); }
 
 GEN
 trans_eval(const char *fun, GEN (*f)(GEN,long), GEN x, long prec)
@@ -385,6 +383,27 @@ trans_eval(const char *fun, GEN (*f)(GEN,long), GEN x, long prec)
     case t_VEC:
     case t_COL:
     case t_MAT: return transvec(f, x, prec);
+    default: pari_err_TYPE(fun,x);
+      return NULL;/*LCOV_EXCL_LINE*/
+  }
+  return gerepileupto(av, x);
+}
+
+GEN
+trans_evalgen(const char *fun, void *E, GEN (*f)(void*,GEN,long),
+              GEN x, long prec)
+{
+  pari_sp av = avma;
+  if (prec < 3) pari_err_BUG("trans_eval [prec < 3]");
+  switch(typ(x))
+  {
+    case t_INT:    x = f(E, itor(x,prec),prec); break;
+    case t_FRAC:   x = f(E, fractor(x, prec),prec); break;
+    case t_QUAD:   x = f(E, quadtofp(x,prec),prec); break;
+    case t_POLMOD: x = transvecgen(E, f, polmod_to_embed(x,prec), prec); break;
+    case t_VEC:
+    case t_COL:
+    case t_MAT: return transvecgen(E, f, x, prec);
     default: pari_err_TYPE(fun,x);
       return NULL;/*LCOV_EXCL_LINE*/
   }
@@ -2424,6 +2443,24 @@ sin_p(GEN x)
     GEN t = gdiv(gmul(y,x2), muluu(k, k+1));
     y = gsubsg(1, t);
   }
+  return gerepileupto(av, gmul(y, x));
+}
+
+GEN
+lambertp(GEN x)
+{
+  long k, n;
+  pari_sp av;
+  GEN y = gcopy(x), zer;
+
+  if (gequal0(x)) return y;
+  if(!valp(x)) { setvalp(y, 1); x = y; }
+  k = Qp_exp_prec(x);
+  if (k < 0) return NULL;
+  n = precp(x);
+  av = avma; zer = zeropadic(gel(x, 2), n);
+  for (y=gen_0; k; k--)
+    y = gsub(gpowgs(gaddsg(k, zer), k - 1), gdivgs(gmul(x, y), k + 1));
   return gerepileupto(av, gmul(y, x));
 }
 

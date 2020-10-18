@@ -93,6 +93,9 @@ BA  26- [libpari] Hermite_bound
 BA  28- New GP function ell2cover
 BA  29- nfsplitting: flag to get the embedding
 BA  30- New GP function galoissplittinginit
+HC  31- lambertw(y): support all values y > -1/e [#1472]
+HC  32- lambertw: add optional 'branch' argument; support and complex, p-adic
+        and power series inputs
 
   Changed
 HC   1- faster implementation of eulervec + cache result

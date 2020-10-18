@@ -13215,8 +13215,21 @@ that $C > 0$ is a \typ{REAL} and that \kbd{eC} is \kbd{NULL} or \kbd{mpexp(C)}.
 \fun{GEN}{mpeint1}{GEN x, GEN expx} returns \kbd{eint1}$(x)$, for a \typ{REAL}
 $x\neq 0$, assuming that \kbd{expx} is \kbd{mpexp}$(x)$.
 
-\fun{GEN}{mplambertW}{GEN y} solution $x$ of the implicit equation
-$x \exp(x) = y$, for $y > 0$ a \typ{REAL}.
+\noindent A few variants on the Lambert function: they actually work when
+\kbd{gtofp} can map all \kbd{GEN} arguments to a \typ{REAL}.
+
+\fun{GEN}{mplambertW}{GEN y} solution $x = W_0(y)$ of the implicit equation
+$x \exp(x) = y$, for $y > -1/e$ a \typ{REAL}.
+
+\fun{GEN}{mplambertx_logx}{GEN a, GEN b, long bit}
+solve $x - a  \log(x) = b$ with $a > 0$ and $b \geq a (1 - \log(a))$.
+
+\fun{GEN}{mplambertX}{GEN y, long bit} as \tet{mplambertx_logx}
+in the special case $a = 1$, $b = \log(y)$. In other words,
+solve $e^x / x = y$ with $y \geq e$.
+
+\fun{GEN}{mplambertxlogx_x}{GEN a, GEN b, long bit}
+solve $x  \log(x) - a  x = b$; if $b < 0$, assume $a \geq 1 + \log |b|$.
 
 \noindent Useful low-level functions which \emph{disregard} the sign of $x$:
 

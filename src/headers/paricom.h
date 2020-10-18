@@ -101,6 +101,9 @@ extern const double LOG10_2, LOG2_10;
 #ifndef  M_LN2
 #  define M_LN2 0.693147180559945309417232121458176568
 #endif
+#ifndef M_E
+#define M_E 2.7182818284590452354
+#endif
 
 /* Common global variables: */
 extern int new_galois_format, factor_add_primes, factor_proven;

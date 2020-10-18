@@ -21,54 +21,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*               Computation of inverse Mellin                     */
 /*               transforms of gamma products.                     */
 /*******************************************************************/
-#ifndef M_E
-#define M_E 2.7182818284590452354
-#endif
-
 /* Handle complex Vga whose sum is real */
 static GEN
 sumVga(GEN Vga) { return real_i(vecsum(Vga)); }
-
-/* rough approximation to W0(a > -1/e), < 1% relative error */
-double
-dbllambertW0(double a)
-{
-  if (a < -0.2583)
-  {
-    const double c2 = -1./3, c3 = 11./72, c4 = -43./540, c5 = 769./17280;
-    double p = sqrt(2*(M_E*a+1));
-    if (a < -0.3243) return -1+p*(1+p*(c2+p*c3));
-    return -1+p*(1+p*(c2+p*(c3+p*(c4+p*c5))));
-  }
-  else
-  {
-    double Wd = log(1.+a);
-    Wd *= (1.-log(Wd/a))/(1.+Wd);
-    if (a < 0.6482 && a > -0.1838) return Wd;
-    return Wd*(1.-log(Wd/a))/(1.+Wd);
-  }
-}
-
-/* rough approximation to W_{-1}(0 > a > -1/e), < 1% relative error */
-double
-dbllambertW_1(double a)
-{
-  if (a < -0.2464)
-  {
-    const double c2 = -1./3, c3 = 11./72, c4 = -43./540, c5 = 769./17280;
-    double p = -sqrt(2*(M_E*a+1));
-    if (a < -0.3243) return -1+p*(1+p*(c2+p*c3));
-    return -1+p*(1+p*(c2+p*(c3+p*(c4+p*c5))));
-  }
-  else
-  {
-    double Wd;
-    a = -a; Wd = -log(a);
-    Wd *= (1.-log(Wd/a))/(1.-Wd);
-    if (a < 0.0056) return -Wd;
-    return -Wd*(1.-log(Wd/a))/(1.-Wd);
-  }
-}
 
 /* ac != 0 */
 static double

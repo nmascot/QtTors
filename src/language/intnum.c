@@ -1861,7 +1861,7 @@ sumnuminit(GEN fast, long prec)
 
   gel(res, 1) = d = mkfrac(gen_1, utoipos(4)); /* 1/4 */
   av = avma;
-  w = gtodouble(glambertW(ginv(d), LOWDEFAULTPREC));
+  w = gtodouble(glambertW(ginv(d), 0, LOWDEFAULTPREC));
   N = (long)ceil(M_LN2*bitprec/(w*(1+w))+5);
   k = (long)ceil(N*w); if (k&1) k--;
 

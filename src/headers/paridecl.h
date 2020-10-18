@@ -4285,8 +4285,6 @@ GEN     ZM_permanent(GEN M);
 
 /* mellininv.c */
 
-double  dbllambertW0(double a);
-double  dbllambertW_1(double a);
 double  dbllemma526(double a, double b, double c, double B);
 double  dblcoro526(double a, double c, double B);
 GEN     gammamellininv(GEN Vga, GEN s, long m, long bitprec);
@@ -4621,6 +4619,13 @@ void forallsubset_init(forsubset_t *T, long n);
 void forksubset_init(forsubset_t *T, long n, long k);
 GEN forsubset_next(forsubset_t *T);
 void forsubset_init(forsubset_t *T, GEN nk);
+
+/* lambert.c */
+
+GEN     glambertW(GEN y, long branch, long prec);
+GEN     mplambertx_logx(GEN a, GEN b, long bit);
+GEN     mplambertX(GEN y, long bit);
+GEN     mplambertxlogx_x(GEN a, GEN b, long bit);
 
 /* perm.c */
 
@@ -5218,6 +5223,7 @@ GEN     gsqrpowers(GEN q, long n);
 GEN     gsqrt(GEN x, long prec);
 GEN     gsqrtn(GEN x, GEN n, GEN *zetan, long prec);
 GEN     gtan(GEN x, long prec);
+GEN     lambertp(GEN x);
 GEN     logr_abs(GEN x);
 GEN     mpcos(GEN x);
 GEN     mpeuler(long prec);
@@ -5258,6 +5264,7 @@ GEN     teich(GEN x);
 GEN     teichmullerinit(long p, long n);
 GEN     teichmuller(GEN x, GEN tab);
 GEN     trans_eval(const char *fun, GEN (*f) (GEN, long), GEN x, long prec);
+GEN     trans_evalgen(const char *fun, void *E, GEN (*f) (void*,GEN,long), GEN x, long prec);
 ulong   upowuu(ulong p, ulong k);
 GEN     upowers(ulong x, long n);
 ulong   usqrtn(ulong a, ulong n);
@@ -5304,7 +5311,6 @@ GEN     expIxy(GEN x, GEN y, long prec);
 GEN     eta(GEN x, long prec);
 GEN     eta0(GEN x, long flag,long prec);
 GEN     gerfc(GEN x, long prec);
-GEN     glambertW(GEN y, long prec);
 GEN     gpolylog(long m, GEN x, long prec);
 GEN     gzeta(GEN x, long prec);
 GEN     hbessel1(GEN n, GEN z, long prec);
@@ -5319,7 +5325,6 @@ GEN     jbesselh(GEN n, GEN z, long prec);
 GEN     jell(GEN x, long prec);
 GEN     kbessel(GEN nu, GEN gx, long prec);
 GEN     mpeint1(GEN x, GEN expx);
-GEN     mplambertW(GEN y);
 GEN     mpveceint1(GEN C, GEN eC, long n);
 GEN     polylog0(long m, GEN x, long flag, long prec);
 GEN     sumdedekind(GEN h, GEN k);
