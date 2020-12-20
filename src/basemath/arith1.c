@@ -6075,70 +6075,173 @@ Hspec(GEN N)
   return mulii(t, hclassno6(N));
 }
 
+GEN
+tauaux(GEN gt, GEN p2_7, GEN p_9, GEN p)
+{
+  long t = itou(gt), tin = mod4(p) == 3? 1: 0;
+  GEN h, a, t2 = sqru(t), D = shifti(subii(p, t2), 2); /* 4(p-t^2) */
+  /* t mod 2 != tin <=> D not fundamental at 2 */
+  h = ((t&1UL) == tin)? hclassno6(D): Hspec(D);
+  a = mulii(powiu(t2,3), addii(p2_7, mulii(t2, subii(shifti(t2,2), p_9))));
+  return mulii(a, h);
+}
+
 /* Ramanujan tau function for p prime */
 static GEN
 tauprime(GEN p)
 {
-  pari_sp av = avma, av2;
-  GEN s, p2, p2_7, p_9, T;
-  ulong lim, t, tin;
+  pari_sp av = avma;
+  GEN s, p2, p2_7, p_9, T, glim;
+  long par = expi(p) > 21;
 
   if (absequaliu(p, 2)) return utoineg(24);
   /* p > 2 */
-  p2 = sqri(p);
-  p2_7 = mului(7, p2);
-  p_9 = mului(9, p);
-  av2 = avma;
-  lim = itou(sqrtint(p));
-  tin = mod4(p) == 3? 1: 0;
-  s = gen_0;
-  for (t = 1; t <= lim; ++t)
+  p2 = sqri(p); p2_7 = mului(7, p2); p_9 = mului(9, p);
+  glim = sqrtint(p);
+  if (par)
+    s = parsum(gen_1, glim, strtoclosure("tauaux", 3, p2_7, p_9, p));
+  else
   {
-    GEN h, a, t2 = sqru(t), D = shifti(subii(p, t2), 2); /* 4(p-t^2) */
-    /* t mod 2 != tin <=> D not fundamental at 2 */
-    h = ((t&1UL) == tin)? hclassno6(D): Hspec(D);
-    a = mulii(powiu(t2,3), addii(p2_7, mulii(t2, subii(shifti(t2,2), p_9))));
-    s = addii(s, mulii(a,h));
-    if (!(t & 255)) s = gerepileuptoint(av2, s);
+    pari_sp av2 = avma;
+    long lim = itou(glim), tin = mod4(p) == 3? 1: 0, t;
+    s = gen_0;
+    for (t = 1; t <= lim; ++t)
+    {
+      GEN h, a, t2 = sqru(t), D = shifti(subii(p, t2), 2); /* 4(p-t^2) */
+      /* t mod 2 != tin <=> D not fundamental at 2 */
+      h = ((t&1UL) == tin)? hclassno6(D): Hspec(D);
+      a = mulii(powiu(t2,3), addii(p2_7, mulii(t2, subii(shifti(t2,2), p_9))));
+      s = addii(s, mulii(a,h));
+      if (!(t & 255)) s = gerepileuptoint(av2, s);
+    }
   }
   /* 28p^3 - 28p^2 - 90p - 35 */
   T = subii(shifti(mulii(p2_7, subiu(p,1)), 2), addiu(mului(90,p), 35));
   s = shifti(diviuexact(s, 3), 6);
-  return gerepileuptoint(av, subii(mulii(mulii(p2,p),T), addui(1, s)));
+  return gerepileuptoint(av, subii(mulii(mulii(p2, p), T), addui(1, s)));
 }
 
-/* Ramanujan tau function, return 0 for <= 0 */
 GEN
-ramanujantau(GEN n)
+polgegenbauer(long k)
+{
+  pari_sp ltop = avma;
+  long len = (k >> 1) + 2, j;
+  GEN V = cgetg(len, t_VEC);
+  for (j = 1; j < len; j++)
+  {
+    GEN tmp = binomialuu(k - j + 1, j - 1);
+    gel(V, j) = odd(j) ? tmp : negi(tmp);
+  }
+  return gerepileupto(ltop, gtopoly(V, 0));
+}
+
+GEN
+taugenaux(GEN t, GEN pol, GEN p4)
+{
+  GEN t2 = sqri(t);
+  return mulii(gsubst(pol, 0, t2), hclassno6(subii(p4, t2)));
+}
+
+static GEN
+taugenprime(GEN p, long ell, long flpol)
+{
+  pari_sp ltop = avma;
+  long k = ell - 2, par = expi(p) > 21;
+  GEN pol, S, p4, glim;
+  if (ell == 12) return tauprime(p);
+  pol = ZX_rescale(polgegenbauer(k), p);
+  p4 = shifti(p, 2); glim = sqrtint(p4);
+  if (issquare(p)) glim = subis(glim, 1);
+  if (par)
+    S = parsum(gen_1, glim, strtoclosure("taugenaux", 2, pol, p4));
+  else
+  {
+    pari_sp av2 = avma;
+    long lim = itou(glim), t;
+    S = gen_0;
+    for (t = 1; t <= lim; t++)
+    {
+      GEN t2 = sqru(t);
+      S = addii(S, mulii(gsubst(pol, 0, t2), hclassno6(subii(p4, t2))));
+      if (!(t & 255)) S = gerepileuptoint(av2, S);
+    }
+  }
+  S = gdivgs(gadd(S, gmul2n(mulii(gsubst(pol, 0, gen_0), hclassno6(p4)), -1)), 6);
+  return flpol ? gerepilecopy(ltop, mkvec2(S, pol)) : gerepileupto(ltop, negi(addsi(1, S)));
+}
+
+/* Ramanujan tau function for weights ell = 12, 16, 18, 20, 22, 26,
+   return 0 for <= 0 */
+
+static GEN
+ramanujantrace(GEN n, long ell)
+{
+  pari_sp ltop = avma;
+  GEN TP = taugenprime(n, ell, 1), LD = divisors(n);
+  GEN T = gel(TP, 1), pol = gel(TP, 2);
+  long i;
+  for (i = 1; i < lg(LD); i++)
+  {
+    GEN d = gel(LD, i);
+    long c = cmpii(sqri(d), n);
+    if (c < 0) T = gadd(T, powis(d, ell - 1));
+    else
+    {
+      if (c == 0)
+      {
+        T = gadd(T, gmul2n(powis(d, ell - 1), -1));
+        T = gsub(T, gdivgs(gsubst(pol, 0, shifti(n, 2)), 12));
+      }
+      break;
+    }
+  }
+  return gerepileupto(ltop, negi(T));
+}
+
+static void
+checkellcong(GEN T, GEN n, long ell)
+{
+  GEN V = mkvecsmalln(8, 691, 0, 3617, 43867, 283*617, 131*593, 0, 657931);
+  GEN R = sumdivk(n, ell - 1);
+  if (typ(T) != t_INT) pari_err(e_MISC, "bug in ramanujantau");
+  if (!gequal0(modis(subii(T, R), V[ell / 2 - 5])))
+    pari_err(e_MISC, "congruence check fails in ramanujantau, please report");
+  return;
+}
+
+GEN
+ramanujantau(GEN n, long ell)
 {
   pari_sp ltop = avma;
   GEN T, F, P, E;
   long j, lP;
 
-  if (!(F = check_arith_all(n,"ramanujantau")))
+  if (ell < 12 || ell == 14 || (ell & 1L)) return gen_0;
+  if (ell > 26 || ell == 24)
+    return signe(n) <= 0 ? gen_0 : ramanujantrace(n, ell);
+  if (!(F = check_arith_all(n, "ramanujantaugen")))
   {
     if (signe(n) <= 0) return gen_0;
     F = Z_factor(n);
   }
   else
   {
-    P = gel(F,1);
-    if (lg(P) == 1 || signe(gel(P,1)) <= 0) return gen_0;
+    P = gel(F, 1);
+    if (lg(P) == 1 || signe(gel(P, 1)) <= 0) return gen_0;
   }
-
-  P = gel(F,1);
-  E = gel(F,2); lP = lg(P);
+  P = gel(F, 1); E = gel(F, 2); lP = lg(P);
   T = gen_1;
   for (j = 1; j < lP; j++)
   {
-    GEN p = gel(P,j), tp = tauprime(p), t1 = tp, t0 = gen_1;
-    long k, e = itou(gel(E,j));
+    GEN p = gel(P, j), tp = taugenprime(p, ell, 0), t1 = tp, t0 = gen_1;
+    long k, e = itou(gel(E, j));
     for (k = 1; k < e; k++)
     {
-      GEN t2 = subii(mulii(tp, t1), mulii(powiu(p, 11), t0));
+      GEN t2 = subii(mulii(tp, t1), mulii(powiu(p, ell - 1), t0));
       t0 = t1; t1 = t2;
     }
     T = mulii(T, t1);
   }
+  checkellcong(T, n, ell);
   return gerepileuptoint(ltop, T);
 }

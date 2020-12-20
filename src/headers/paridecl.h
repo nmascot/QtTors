@@ -2054,7 +2054,7 @@ GEN     quaddisc(GEN x);
 GEN     quadregulator(GEN x, long prec);
 GEN     quadunit(GEN x);
 GEN     quadunit0(GEN x, long v);
-GEN     ramanujantau(GEN n);
+GEN     ramanujantau(GEN n, long ell);
 ulong   rootsof1_Fl(ulong n, ulong p);
 GEN     rootsof1_Fp(GEN n, GEN p);
 GEN     rootsof1u_Fp(ulong n, GEN p);

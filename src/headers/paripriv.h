@@ -658,6 +658,8 @@ void RgMs_structelim_col(GEN M, long nbcol, long nbrow, GEN A, GEN *p_col, GEN *
 
 int     is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L);
 int     is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L);
+GEN     tauaux(GEN gt, GEN p2_7, GEN p_9, GEN p);
+GEN     taugenaux(GEN t, GEN pol, GEN p4);
 
 /* arith2.c */
 
