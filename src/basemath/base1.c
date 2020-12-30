@@ -1368,7 +1368,7 @@ nf_get_allroots(GEN nf)
 }
 
 /* For internal use. compute trace(x mod pol), sym=polsym(pol,deg(pol)-1) */
-GEN
+static GEN
 quicktrace(GEN x, GEN sym)
 {
   GEN p1 = gen_0;
