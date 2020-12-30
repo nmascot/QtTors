@@ -5393,6 +5393,9 @@ mftreatdihedral(long N, GEN DIH, GEN POLCYC, long ordchi, GEN *pS)
   *pS = vecmflinear(DIH, C); return M;
 }
 
+static GEN
+_RgXQM_mul(GEN x, GEN y, GEN T)
+{ return T? RgXQM_mul(x, y, T): RgM_mul(x, y); }
 /* largest T-stable Q(CHI)-subspace of Q(CHI)-vector space spanned by columns
  * of A */
 static GEN
@@ -5407,12 +5410,12 @@ mfstabiter(GEN *pC, GEN T, GEN A, GEN dE1i, long lim, GEN P, long ordchi)
     if (lB == 1) return NULL;
     if (lB == lA) break;
     B = rowslice(B, 1, lA-1);
-    if (P) B = gmodulo(B, P);
-    A = Q_primitive_part(RgM_mul(A,B), &con);
-    C = C? RgM_mul(C, B): B;
+    A = _RgXQM_mul(A, B, P);
+    A = Q_primitive_part(A, &con);
+    C = C? _RgXQM_mul(C, B, P): B;
     cC = div_content(cC, con);
   }
-  if (*pC) C = C? RgM_mul(*pC, C): *pC;
+  if (*pC) C = C? _RgXQM_mul(*pC, C, P): *pC;
   if (cC) C = RgM_Rg_mul(C, cC);
   *pC = C; return A;
 }
@@ -5494,8 +5497,8 @@ mf1dimmodp(GEN E, GEN Tp, long ordchi, long dih, GEN TMP)
 static GEN
 mf1basis(long N, GEN CHI, GEN TMP, GEN *pS, long *pdih)
 {
-  GEN E, EB, E1i, dE1i, mf, A, M, Tp, C, POLCYC, DIH, Minv;
-  long plim, lim, i, p, dA, dimp, ordchi, dih;
+  GEN E, EB, E1i, dE1i, mf, A, Tp, C, POLCYC, DIH, Minv;
+  long nE, plim, lim, i, p, lA, dimp, ordchi, dih;
   pari_timer tt;
 
   if (pdih) *pdih = 0;
@@ -5573,11 +5576,11 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN *pS, long *pdih)
     return mftreatdihedral(N, DIH, POLCYC, ordchi, pS);
   }
   E1i = RgXn_inv(gel(E,1), plim-1); /* E[1] does not vanish at oo */
+  if (POLCYC) E1i = liftpol_shallow(E1i);
   E1i = Q_remove_denom(E1i, &dE1i); /* 1/E[1] = E1i / dE1i */
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: invert E");
-
-  C = NULL;
-  if (lg(E) > 2)
+  C = NULL; nE = lg(E) - 1;
+  if (nE > 1)
   { /* mf attached to S2(N), fi = mfbasis(mf)
      * M = coefs(f1,...,fd) up to LIM
      * F = coefs(F1,...,FD) = M * C, for some matrix C over Q(chi),
@@ -5590,24 +5593,40 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN *pS, long *pdih)
      * are not included */
     GEN Mindex = MF_get_Mindex(mf), F  = gel(TMP,4), Iden  = gel(TMP,5);
     GEN I = gel(Iden,1), den = gel(Iden,2);
-    long LIM = nbrows(F), nE = lg(E) - 1;
+    long LIM = nbrows(F);
+    pari_timer TT;
     pari_sp av = avma;
+    if (DEBUGLEVEL) timer_start(&TT);
     for (i = 2; i <= nE; i++)
     {
-      GEN z, e, B, Bden, B2;
-      e = Q_primpart(RgXn_mul(E1i, gel(E,i), LIM));
-      B = liftpol_shallow(mfmatsermul(F,e));
+      pari_sp av2 = avma;
+      GEN e = gel(E,i), z, B, Bden, B2;
+      e = Q_primpart(RgXn_mul(E1i, e, LIM));
+
       if (DEBUGLEVEL)
-        timer_printf(&tt, "mf1basis: matsermul %ld / %ld", i, nE);
+        timer_printf(&TT, "mf1basis: E[i] / E[1] %ld / %ld", i, nE);
+      /* the first time F is over Z and it is more efficient to lift than
+         * to let RgXn_mul use Kronecker's trick */
+      if (POLCYC && i == 2) e = liftpol_shallow(e);
+      B = mfmatsermul(F, e);
+      if (POLCYC)
+      {
+        if (i == 2) B = RgXQM_red(B, POLCYC); /* cf above */
+        else B = liftpol_shallow(B);
+      }
+      if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... matsermul");
       Bden = rowslice(B,lim+1,LIM);
       B2 = RgM_mul(I, rowpermute(B, Mindex));
       if (den) Bden = RgM_Rg_mul(Bden, den);
+      if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... RgM_mul");
       z = QabM_ker(RgM_sub(B2,Bden), POLCYC, ordchi);
+      if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... kernel");
       if (lg(z) == 1) return NULL;
-      if (POLCYC) z = gmodulo(z, POLCYC);
-      C = C? RgM_mul(C, z): z;
+      if (lg(z) == lg(F)) { set_avma(av2); continue; } /* no progress */
+      C = C? _RgXQM_mul(C, z, POLCYC): z;
       if (i == nE) break;
-      F = RgM_mul(F,z);
+      F = _RgXQM_mul(F, z, POLCYC);
+      if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... updates");
       if (gc_needed(av, 1))
       {
         if (DEBUGMEM > 1) pari_warn(warnmem,"mf1basis i = %ld", i);
@@ -5616,23 +5635,32 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN *pS, long *pdih)
     }
     A = RgM_mul(A, C);
   }
-  if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: intersection");
-  A = mfstabiter(&C, Tp, mfmatsermul(A, E1i), dE1i, lim, POLCYC, ordchi);
+  if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: intersection [total]");
+  /* enable Kronecker: if C = NULL, then A is over Z, else over Q(chi) */
+  if (POLCYC && C) A = QXQM_to_mod_shallow(A, POLCYC);
+  A = mfmatsermul(A, E1i); /* E1i is over Q(chi) */
+  if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: matsermul");
+  if (POLCYC) A = C? liftpol_shallow(A): RgXQM_red(A, POLCYC);
+  A = mfstabiter(&C, Tp, A, dE1i, lim, POLCYC, ordchi);
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: Hecke stability");
   if (!A) return NULL;
-  dA = lg(A); if (!pS) return utoi(dA-1);
-  M = cgetg(dA, t_MAT);
-  for (i = 1; i < dA; i++)
+  lA = lg(A); if (!pS) return utoi(lA-1);
+  if (POLCYC)
+  {
+    A = QXQM_to_mod_shallow(A, POLCYC);
+    C = QXQM_to_mod_shallow(C, POLCYC);
+  }
+  for (i = 1; i < lA; i++)
   {
     GEN c, v = gel(A,i);
-    gel(M,i) = RgV_normalize(v, &c);
+    gel(A,i) = RgV_normalize(v, &c);
     gel(C,i) = RgC_Rg_mul(gel(C,i), c);
   }
-  Minv = gel(mfclean(M, POLCYC, ordchi, 0), 2);
-  M = RgM_Minv_mul(M, Minv);
+  Minv = gel(mfclean(A, POLCYC, ordchi, 0), 2);
+  A = RgM_Minv_mul(A, Minv);
   C = RgM_Minv_mul(C, Minv);
   *pS = vecmflineardiv0(MF_get_S(mf), C, gel(EB,1));
-  return M;
+  return A;
 }
 
 static void
