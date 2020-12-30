@@ -2719,6 +2719,17 @@ RgXQ_norm(GEN x, GEN T)
 }
 
 GEN
+RgXQ_trace(GEN x, GEN T)
+{
+  pari_sp av = avma;
+  GEN dT = RgX_deriv(T);
+  long n = degpol(dT);
+  GEN z = RgXQ_mul(x, dT, T);
+  if (degpol(z)<n) return gc_const(av, gen_0);
+  return gerepileupto(av, gdiv(gel(z,2+n), gel(T,3+n)));
+}
+
+GEN
 RgX_blocks(GEN P, long n, long m)
 {
   GEN z = cgetg(m+1,t_VEC);

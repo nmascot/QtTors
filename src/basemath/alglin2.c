@@ -1473,7 +1473,7 @@ gtrace(GEN x)
       y = gel(x,1); z = gel(x,2);
       if (typ(z) != t_POL || varn(y) != varn(z)) return gmulsg(degpol(y), z);
       av = avma;
-      return gerepileupto(av, quicktrace(z, polsym(y, degpol(y)-1)));
+      return gerepileupto(av, RgXQ_trace(z, y));
 
     case t_FFELT:
       y=cgetg(3, t_INTMOD);

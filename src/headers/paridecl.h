@@ -1227,6 +1227,7 @@ GEN     RgXQ_norm(GEN x, GEN T);
 GEN     RgXQ_pow(GEN x, GEN n, GEN T);
 GEN     RgXQ_powers(GEN x, long l, GEN T);
 GEN     RgXQ_powu(GEN x, ulong n, GEN T);
+GEN     RgXQ_trace(GEN x, GEN T);
 GEN     RgXQC_red(GEN P, GEN T);
 GEN     RgXQM_mul(GEN P, GEN Q, GEN T);
 GEN     RgXQM_red(GEN P, GEN T);
