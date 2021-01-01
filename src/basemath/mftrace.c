@@ -5369,11 +5369,11 @@ RgV_normalize(GEN v, GEN *pc)
     GEN c = gel(v,i);
     if (!gequal0(c))
     {
-      if (gequal1(c)) { *pc = gen_1; return v; }
+      if (gequal1(c)) break;
       *pc = ginv(c); return RgV_Rg_mul(v, *pc);
     }
   }
-  return v;
+  *pc = gen_1; return v;
 }
 /* pS != NULL; dim > 0 */
 static GEN
