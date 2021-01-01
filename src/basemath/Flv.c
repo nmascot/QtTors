@@ -1180,10 +1180,10 @@ Flm_invimage_i(GEN A, GEN B, ulong p)
   long i, j, nY, nA = lg(A)-1, nB = lg(B)-1;
 
   if (!nB) return cgetg(1, t_MAT);
-  if (nA + nB >= Flm_CUP_LIMIT && nbrows(B) >= Flm_CUP_LIMIT)
+  if (maxss(nA, nB) >= Flm_CUP_LIMIT && nbrows(B) >= Flm_CUP_LIMIT)
     return Flm_invimage_CUP(A, B, p);
 
-  x = Flm_ker_sp(shallowconcat(Flm_neg(A,p), B), p, 0);
+  x = Flm_ker(shallowconcat(Flm_neg(A,p), B), p);
   /* AX = BY, Y in strict upper echelon form with pivots = 1.
    * We must find T such that Y T = Id_nB then X T = Z. This exists iff
    * Y has at least nB columns and full rank */
