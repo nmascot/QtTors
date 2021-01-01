@@ -3952,13 +3952,16 @@ heckenewtrace(long m0, long m, long l, long N, long NBIG, long k, long n, cachen
   return v;
 }
 
-/* Given v = an[i], return an[d*i] */
+/* Given v = an[i], return an[d*i], i=0..n */
 static GEN
 anextract(GEN v, long n, long d)
 {
-  GEN w = cgetg(n+2, t_VEC);
-  long i;
-  for (i = 0; i <= n; i++) gel(w, i+1) = gel(v, i*d+1);
+  long i, id, l = n + 2;
+  GEN w = cgetg(l, t_VEC);
+  if (d == 1)
+    for (i = 1; i < l; i++) gel(w, i) = gel(v, i);
+  else
+    for (i = id = 1; i < l; i++, id += d) gel(w, i) = gel(v, id);
   return w;
 }
 /* T_n(F)(0, l, ..., l*m) */
@@ -5356,13 +5359,11 @@ mfconreyminimize(GEN CHI)
   return zv_cyc_minimize(cyc, chi, coprimes_zv(mfcharorder(CHI)));
 }
 
-/* find scalar c such that first nonzero entry of c*v is 1; return c*v
- * (set c = NULL for 1) */
+/* find scalar c such that first nonzero entry of c*v is 1; return c*v */
 static GEN
 RgV_normalize(GEN v, GEN *pc)
 {
   long i, l = lg(v);
-  *pc = NULL;
   for (i = 1; i < l; i++)
   {
     GEN c = gel(v,i);
