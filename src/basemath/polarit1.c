@@ -328,7 +328,7 @@ ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
     return mkcol(a0);
   }
 
-  f = ZX_unscale_div(RgX_translate(f,a), p); /* f(pX + a) / p */
+  f = ZX_unscale_div(ZX_translate(f,a), p); /* f(pX + a) / p */
   (void)ZX_pvalrem(f,p,&f);
   z = cgetg(degpol(f)+1,t_COL);
 
