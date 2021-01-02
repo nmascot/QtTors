@@ -1894,7 +1894,7 @@ mul_intersect(GEN x, GEN y, GEN p)
 {
   if (!x) return y;
   if (!y) return x;
-  return FpM_intersect(x, y, p);
+  return FpM_intersect_i(x, y, p);
 }
 /* Fp-basis of (ZK/pr): applied to the primes found in primedec_aux()
  * true nf */

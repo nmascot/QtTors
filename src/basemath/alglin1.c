@@ -2148,16 +2148,34 @@ FqM_inv(GEN a, GEN T, GEN p)
 }
 
 GEN
-FpM_intersect(GEN x, GEN y, GEN p)
+FpM_intersect_i(GEN x, GEN y, GEN p)
 {
-  pari_sp av = avma;
   long j, lx = lg(x);
   GEN z;
 
-  if (lx==1 || lg(y)==1) return cgetg(1,t_MAT);
+  if (lx == 1 || lg(y) == 1) return cgetg(1,t_MAT);
+  if (lgefint(p) == 3)
+  {
+    ulong pp = p[2];
+    return Flm_to_ZM(Flm_intersect_i(ZM_to_Flm(x,pp), ZM_to_Flm(y,pp), pp));
+  }
   z = FpM_ker(shallowconcat(x,y), p);
   for (j=lg(z)-1; j; j--) setlg(gel(z,j),lx);
-  return gerepileupto(av, FpM_mul(x,z,p));
+  return FpM_mul(x,z,p);
+}
+GEN
+FpM_intersect(GEN x, GEN y, GEN p)
+{
+  pari_sp av = avma;
+  GEN z;
+  if (lgefint(p) == 3)
+  {
+    ulong pp = p[2];
+    z = Flm_image(Flm_intersect_i(ZM_to_Flm(x,pp), ZM_to_Flm(y,pp), pp), pp);
+  }
+  else
+    z = FpM_image(FpM_intersect_i(x,y,p), p);
+  return gerepileupto(av, z);
 }
 
 static void

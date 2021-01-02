@@ -25,6 +25,7 @@ BA   2- fplll: fast, dpe and heuristic variants
      5- new GP function lfunparams (initial implementation P. Molin)
      6- [libpari] row_Q_primpart
 BA   7- [libpari] RgXQ_trace
+     8- [libpari] FpM_intersect_i, Flm_intersect_i
 
   Changed
 HC   1- faster implementation of eulervec + cache result
@@ -32,6 +33,8 @@ HC   1- faster implementation of eulervec + cache result
      3- atanh(rational) now uses binary splitting
      4- prototype of FqV_to_FlxV, FqC_to_FlxC, FqM_to_FlxM: argument 'p' is
         an ulong, no longer a GEN
+     5- FpM_intersect and Flm_intersect now guaranteed to return an
+        Fp-basis; use FpM_intersect_i if you only need a generating set
 
 Done for version 2.13.0 (released 19/10/2020):
   Fixed
