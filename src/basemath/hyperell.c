@@ -358,7 +358,7 @@ ZpXQXXQ_sqr(GEN x, GEN S, GEN T, GEN q, GEN p, long e)
   pari_sp av = avma;
   GEN z, kx;
   long n = degpol(S);
-  kx = ZXX_to_Kronecker(x, n);
+  kx = RgXX_to_Kronecker(x, n);
   z = Kronecker_to_ZXX(FpXQX_sqr(kx, T, q), n, varn(S));
   return gerepileupto(av, ZpXQXXQ_red(z, S, T, q, p, e));
 }
@@ -369,8 +369,8 @@ ZpXQXXQ_mul(GEN x, GEN y, GEN S, GEN T, GEN q, GEN p, long e)
   pari_sp av = avma;
   GEN z, kx, ky;
   long n = degpol(S);
-  kx = ZXX_to_Kronecker(x, n);
-  ky = ZXX_to_Kronecker(y, n);
+  kx = RgXX_to_Kronecker(x, n);
+  ky = RgXX_to_Kronecker(y, n);
   z = Kronecker_to_ZXX(FpXQX_mul(ky, kx, T, q), n, varn(S));
   return gerepileupto(av, ZpXQXXQ_red(z, S, T, q, p, e));
 }

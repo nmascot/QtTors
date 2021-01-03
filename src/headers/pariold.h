@@ -13,6 +13,8 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* For compatibility with older PARI versions */
+#define ZXX_to_Kronecker RgXX_to_Kronecker
+#define ZXX_to_Kronecker_spec RgXX_to_Kronecker_spec
 #define perf qfperfection
 #define rootpadic polrootspadic
 #define rootsof1 nfrootsof1

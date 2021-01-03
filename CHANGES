@@ -35,6 +35,8 @@ HC   1- faster implementation of eulervec + cache result
         an ulong, no longer a GEN
      5- FpM_intersect and Flm_intersect now guaranteed to return an
         Fp-basis; use FpM_intersect_i if you only need a generating set
+     6- ZXX_to_Kronecker -> RgXX_to_Kronecker, ZXX_to_Kronecker_spec
+        -> RgXX_to_Kronecker_spec
 
 Done for version 2.13.0 (released 19/10/2020):
   Fixed

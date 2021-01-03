@@ -397,8 +397,8 @@ FpXQX_mulspec(GEN x, GEN y, GEN T, GEN p, long lx, long ly)
   } else if (ZXX_is_ZX_spec(x,lx))
       return FpXY_FpY_mulspec(y,x,T,p,ly,lx);
   n = get_FpX_degree(T);
-  kx = ZXX_to_Kronecker_spec(x, lx, n);
-  ky = ZXX_to_Kronecker_spec(y, ly, n);
+  kx = RgXX_to_Kronecker_spec(x, lx, n);
+  ky = RgXX_to_Kronecker_spec(y, ly, n);
   z = Kronecker_to_FpXQX(ZX_mul(ky,kx), T, p);
   return gerepileupto(av, z);
 }
@@ -416,7 +416,7 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
   pari_sp av = avma;
   GEN z, kx;
   if (ZXX_is_ZX(x)) return ZX_sqr(x);
-  kx= ZXX_to_Kronecker(x, get_FpX_degree(T));
+  kx= RgXX_to_Kronecker(x, get_FpX_degree(T));
   z = Kronecker_to_FpXQX(ZX_sqr(kx), T, p);
   return gerepileupto(av, z);
 }
@@ -1754,8 +1754,8 @@ FpXQXn_mul(GEN x, GEN y, long n, GEN T, GEN p)
   if (ZXX_is_ZX(y) && ZXX_is_ZX(x))
     return FpXn_mul(x,y,n,p);
   d = get_FpX_degree(T);
-  kx = ZXX_to_Kronecker(x, d);
-  ky = ZXX_to_Kronecker(y, d);
+  kx = RgXX_to_Kronecker(x, d);
+  ky = RgXX_to_Kronecker(y, d);
   z = Kronecker_to_FpXQX(ZXn_mul(ky,kx,(2*d-1)*n), T, p);
   return gerepileupto(av, z);
 }
@@ -1768,7 +1768,7 @@ FpXQXn_sqr(GEN x, long n, GEN T, GEN p)
   long d;
   if (ZXX_is_ZX(x)) return ZXn_sqr(x, n);
   d = get_FpX_degree(T);
-  kx= ZXX_to_Kronecker(x, d);
+  kx= RgXX_to_Kronecker(x, d);
   z = Kronecker_to_FpXQX(ZXn_sqr(kx, (2*d-1)*n), T, p);
   return gerepileupto(av, z);
 }

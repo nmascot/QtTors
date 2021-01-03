@@ -1137,7 +1137,7 @@ ZXX_Z_divexact(GEN y, GEN x)
  * P(X,Y) = sum_{0<=i<lP} P_i(X) * Y^i, where deg P_i < n.
  * Returns P(X,X^(2n-1)) */
 GEN
-ZXX_to_Kronecker_spec(GEN P, long lP, long n)
+RgXX_to_Kronecker_spec(GEN P, long lP, long n)
 {
   long i, k, N = (n<<1) + 1;
   GEN y;
@@ -1156,7 +1156,7 @@ ZXX_to_Kronecker_spec(GEN P, long lP, long n)
     {
       long l = lg(c);
       if (l-3 >= n)
-        pari_err_BUG("ZXX_to_Kronecker, P is not reduced mod Q");
+        pari_err_BUG("RgXX_to_Kronecker, P is not reduced mod Q");
       for (j=2; j < l; j++) gel(y,k++) = gel(c,j);
     }
     if (i == lP-1) break;
@@ -1189,18 +1189,18 @@ Kronecker_to_ZXX(GEN z, long n, long v)
 }
 
 GEN
-ZXX_to_Kronecker(GEN P, long n)
+RgXX_to_Kronecker(GEN P, long n)
 {
-  GEN z = ZXX_to_Kronecker_spec(P+2, lgpol(P), n);
+  GEN z = RgXX_to_Kronecker_spec(P+2, lgpol(P), n);
   setvarn(z,varn(P)); return z;
 }
 GEN
 ZXX_mul_Kronecker(GEN x, GEN y, long n)
-{ return ZX_mul(ZXX_to_Kronecker(x,n), ZXX_to_Kronecker(y,n)); }
+{ return ZX_mul(RgXX_to_Kronecker(x,n), RgXX_to_Kronecker(y,n)); }
 
 GEN
 ZXX_sqr_Kronecker(GEN x, long n)
-{ return ZX_sqr(ZXX_to_Kronecker(x,n)); }
+{ return ZX_sqr(RgXX_to_Kronecker(x,n)); }
 
 /* shallow, n = deg(T) */
 GEN
