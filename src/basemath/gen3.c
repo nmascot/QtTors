@@ -1450,7 +1450,7 @@ gsubst(GEN x, long v, GEN y)
   long tx = typ(x), ty = typ(y), lx = lg(x), ly = lg(y);
   long l, vx, vy, ex, ey, i, j, k, jb, matn;
   pari_sp av, av2;
-  GEN X, t, p1, p2, z;
+  GEN X, t, z;
 
   switch(ty)
   {
@@ -1562,32 +1562,29 @@ gsubst(GEN x, long v, GEN y)
             if (ex) z = gmul(z, gpowgs(y,ex));
             return gerepileupto(av,z);
           }
-          l = (lx-2)*ey+2;
+          l = (lx-2)*ey + 2;
           if (ex) { if (l>ly) l = ly; }
           else if (lx != 3)
           {
-            long l2;
             for (i = 3; i < lx; i++)
               if (!isexactzero(gel(x,i))) break;
-            l2 = (i-2)*ey + (gequal0(y)? 2 : ly);
-            if (l > l2) l = l2;
+            l = minss(l, (i-2)*ey + (gequal0(y)? 2 : ly));
           }
-          av = avma;
-          t = leafcopy(y);
+          av = avma; t = leafcopy(y);
           if (l < ly) setlg(t, l);
-          z = scalarser(gel(x,2),varn(y),l-2);
-          for (i=3,jb=ey; jb<=l-2; i++,jb+=ey)
+          z = scalarser(gen_1, varn(y), l-2);
+          gel(z,2) = gel(x,2); /* ensure lg(z) = l even if x[2] = 0 */
+          for (i = 3, jb = ey; jb <= l-2; i++,jb += ey)
           {
             if (i < lx) {
-              for (j=jb+2; j<minss(l, jb+ly); j++)
+              for (j = jb+2; j < minss(l, jb+ly); j++)
                 gel(z,j) = gadd(gel(z,j), gmul(gel(x,i),gel(t,j-jb)));
             }
-            for (j=minss(ly-1, l-1-jb-ey); j>1; j--)
+            for (j = minss(ly-1, l-1-jb-ey); j > 1; j--)
             {
-              p1 = gen_0;
-              for (k=2; k<j; k++)
-                p1 = gadd(p1, gmul(gel(t,j-k+2),gel(y,k)));
-              gel(t,j) = gadd(p1, gmul(gel(t,2),gel(y,j)));
+              GEN a = gmul(gel(t,2), gel(y,j));
+              for (k=2; k<j; k++) a = gadd(a, gmul(gel(t,j-k+2), gel(y,k)));
+              gel(t,j) = a;
             }
             if (gc_needed(av,1))
             {
@@ -1596,7 +1593,7 @@ gsubst(GEN x, long v, GEN y)
             }
           }
           if (!ex) return gerepilecopy(av,z);
-          return gerepileupto(av, gmul(z,gpowgs(y, ex)));
+          return gerepileupto(av, gmul(z, gpowgs(y, ex)));
 
         case t_POL: case t_RFRAC:
         {
@@ -1646,9 +1643,13 @@ gsubst(GEN x, long v, GEN y)
       }
       break;
 
-    case t_RFRAC: av=avma;
-      p1=gsubst(gel(x,1),v,y);
-      p2=gsubst(gel(x,2),v,y); return gerepileupto(av, gdiv(p1,p2));
+    case t_RFRAC:
+    {
+      GEN a = gel(x,1), b = gel(x,2);
+      av = avma;
+      a = gsubst(a, v, y);
+      b = gsubst(b, v, y); return gerepileupto(av, gdiv(a, b));
+    }
 
     case t_VEC: case t_COL: case t_MAT:
       z = cgetg_copy(x, &lx);
