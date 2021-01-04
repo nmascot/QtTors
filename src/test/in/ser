@@ -27,7 +27,8 @@ s = 1/x + x + 2*x^2 + O(x^3);
 serchop(s)
 serchop(s, 2)
 serchop(s, 100)
-serchop(Mod(0,3)+x+O(x^2))
+s = Mod(0,3) + x + O(x^2)
+serchop(s)
 serchop(Mod(0,3)+O(x^2))
 serchop(Mod(0,3)*x+O(x^2))
 

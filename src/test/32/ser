@@ -51,7 +51,8 @@ error("domain error in sqrtn: valuation != Mod(0, 2)")
 x + 2*x^2 + O(x^3)
 2*x^2 + O(x^3)
 O(x^100)
-x + O(x^2)
+Mod(1, 3)*x + O(x^2)
+Mod(1, 3)*x + O(x^2)
 Mod(0, 3)*x + O(x^2)
 Mod(0, 3)*x + O(x^2)
 1 + 2*x + 3*x^2 + O(x^3)
@@ -97,7 +98,7 @@ O(3^2) + O(x)
 O(3^3) + O(x)
 1 + O(x)
   *** _+_: Warning: normalizing a series with 0 leading term.
-x^-1 + O(x)
+1.0000000000000000000000000000000000000*x^-1 + O(x)
 [0, 1, 1]
 [0, 1, 1]
 [0, 1, 1]
@@ -181,4 +182,4 @@ O(x^18)
   ***   at top-level: O(y)/O(x)
   ***                     ^-----
   *** _/_: impossible inverse in RgXn_inv: 0.
-Total time spent: 8
+Total time spent: 7

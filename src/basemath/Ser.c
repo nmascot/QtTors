@@ -22,18 +22,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 static GEN
 RgX_to_ser_i(GEN x, long l, long v, int copy)
 {
-  long i, lx = lg(x);
+  long i = 2, lx = lg(x), vx = varn(x);
   GEN y;
-  if (lx == 2) return zeroser(varn(x), l-2);
-  if (l < 2) pari_err_BUG("RgX_to_ser (l < 2)");
-  y = cgetg(l,t_SER); y[1] = x[1];
-  /* e.g. Mod(0,3) * x^0 */
-  if (v == LONG_MAX) { v = 1; lx = 3; } else { x += v; lx = minss(lx-v, l); }
-  setvalp(y, v);
+  if (lx == 2) return zeroser(vx, minss(l - 2, v));
+  if (l <= 2)
+  {
+    if (l == 2 && v != LONG_MAX) return zeroser(vx, v);
+    pari_err_BUG("RgX_to_ser (l < 2)");
+  }
+  y = cgetg(l,t_SER);
+  if (v == LONG_MAX) { v = 1; lx = 3; } /* e.g. Mod(0,3) * x^0 */
+  else if (v)
+  {
+    long w = v;
+    while (isrationalzero(gel(x,2))) { x++; w--; }
+    lx -= v;
+    if (w)
+    { /* keep type information, e.g. Mod(0,3) + x */
+      GEN z = gel(x,2); /* = 0 */
+      x += w; gel(y,2) = gadd(gel(x,2), z); i++;
+    }
+  }
+  y[1] = evalvarn(vx) | evalvalp(v); /* must come here because of LONG_MAX */
+  if (lx > l) lx = l;
+  /* 3 <= lx <= l */
   if (copy)
-    for (i = 2; i <lx; i++) gel(y,i) = gcopy(gel(x,i));
+    for (; i <lx; i++) gel(y,i) = gcopy(gel(x,i));
   else
-    for (i = 2; i <lx; i++) gel(y,i) = gel(x,i);
+    for (; i <lx; i++) gel(y,i) = gel(x,i);
   for (     ; i < l; i++) gel(y,i) = gen_0;
   return normalize(y);
 }
