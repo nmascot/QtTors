@@ -158,12 +158,12 @@ GEN
 RgX_homogenous_evalpow(GEN P, GEN A, GEN B)
 {
   pari_sp av = avma;
-  long d, i, v;
+  long d, i;
   GEN s;
   if (typ(P)!=t_POL)
     return mkvec2(P, gen_1);
-  d = degpol(P); v = varn(A);
-  s = scalarpol_shallow(gel(P, d+2), v);
+  d = degpol(P);
+  s = gel(P, d+2);
   for (i = d-1; i >= 0; i--)
   {
     s = gadd(gmul(s, A), gmul(gel(B,d+1-i), gel(P,i+2)));
