@@ -62,7 +62,7 @@ static GEN mflineardivtomat(long N, GEN vF, long n);
 static GEN mfdihedralcusp(long N, GEN CHI);
 static long mfdihedralcuspdim(long N, GEN CHI);
 static GEN mfdihedralnew(long N, GEN CHI);
-static GEN mfdihedralall(GEN LIM);
+static GEN mfdihedralall(long a, long b);
 static long mf1cuspdim(long N, GEN CHI);
 static long mf2dim_Nkchi(long N, long k, GEN CHI, ulong space);
 static long mfdim_Nkchi(long N, long k, GEN CHI, long space);
@@ -6118,7 +6118,7 @@ mfgaloistype(GEN NK, GEN f)
 /* lim >= 2 */
 static void
 consttabdihedral(long lim)
-{ cache_set(cache_DIH, mfdihedralall(mkvecsmall2(1,lim))); }
+{ cache_set(cache_DIH, mfdihedralall(1, lim)); }
 
 /* a ideal coprime to bnr modulus */
 static long
@@ -6509,17 +6509,13 @@ append_dihedral(GEN v, long D, long l1, long l2)
 
 static long
 di_N(GEN a) { return gel(a,1)[1]; }
-/* All primitive dihedral wt1 forms: LIM a t_VECSMALL with a single component
- * (only level LIM) or 2 components [m,M], m < M (between m and M) */
+/* All primitive dihedral weight 1 forms of leven in [l1, l2] */
 static GEN
-mfdihedralall(GEN LIM)
+mfdihedralall(long l1, long l2)
 {
-  GEN res, z;
-  long limD, ct, i, l1, l2;
+  long limD = l2, ct, i;
+  GEN res = vectrunc_init(2*limD), z;
 
-  if (lg(LIM) == 2) l1 = l2 = LIM[1]; else { l1 = LIM[1]; l2 = LIM[2]; }
-  limD = l2;
-  res = vectrunc_init(2*limD);
   if (l1 == l2)
   {
     GEN D = mydivisorsu(l1);
@@ -6569,7 +6565,7 @@ mfdihedralnew_i(long N, GEN CHI)
   long Dold, d, ordw, i, SB, c, l, k0, k1, chino, chinoorig, lv;
 
   SP = cache_get(cache_DIH, N);
-  if (!SP) SP = mfdihedralall(mkvecsmall(N));
+  if (!SP) SP = mfdihedralall(N, N);
   lv = lg(SP); if (lv == 1) return NULL;
   CHI = mfcharinduce(CHI,N);
   ordw = mfcharorder(CHI);
