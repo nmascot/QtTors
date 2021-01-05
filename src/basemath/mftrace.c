@@ -12923,7 +12923,7 @@ search_abelian(GEN nf, long n, long k, GEN N, GEN CHI, GEN F,
   setlg(P,j);
   setlg(E,j);
   cond = mkvec2(cond, const_vec(r1, gen_1));
-  bnr = Buchraymod(Buchall(nf, 1, prec), cond, nf_INIT, utoipos(n));
+  bnr = Buchraymod(Buchall(nf, nf_FORCE, prec), cond, nf_INIT, utoipos(n));
   cyc = bnr_get_cyc(bnr);
   d = lg(cyc)-1;
   H = zv_diagonal(ZV_to_Flv(cyc, n));
