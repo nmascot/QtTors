@@ -6888,7 +6888,9 @@ mfinit_i(GEN NK, long space)
       {
         pari_sp av = avma;
         GEN c = gel(vCHI,i), z = mf1init(N, c, TMP, vSP, space, 0);
-        if (!z) {
+        if (z) z = gerepilecopy(av, z);
+        else
+        {
           set_avma(av);
           if (CHI) z = mfEMPTY(mkvec4(gN,gen_1,c,gs));
         }
