@@ -34,6 +34,7 @@ typedef struct {
 } cachenew_t;
 
 static void init_cachenew(cachenew_t *c, long n, long N, GEN f);
+static long mf1cuspdim_i(long N, GEN CHI, GEN TMP, GEN vSP, long *dih);
 static GEN mfinit_i(GEN NK, long space);
 static GEN mfinit_Nkchi(long N, long k, GEN CHI, long space, long flraw);
 static GEN mf2init_Nkchi(long N, long k, GEN CHI, long space, long flraw);
@@ -59,11 +60,11 @@ static GEN dihan(GEN bnr, GEN w, GEN k0j, long m, ulong n);
 static GEN sigchi(long k, GEN CHI, long n);
 static GEN sigchi2(long k, GEN CHI1, GEN CHI2, long n, long ord);
 static GEN mflineardivtomat(long N, GEN vF, long n);
-static GEN mfdihedralcusp(long N, GEN CHI);
-static long mfdihedralcuspdim(long N, GEN CHI);
-static GEN mfdihedralnew(long N, GEN CHI);
+static GEN mfdihedralcusp(long N, GEN CHI, GEN vSP);
+static long mfdihedralcuspdim(long N, GEN CHI, GEN vSP);
+static GEN mfdihedralnew(long N, GEN CHI, GEN SP);
 static GEN mfdihedralall(long a, long b);
-static long mf1cuspdim(long N, GEN CHI);
+static long mf1cuspdim(long N, GEN CHI, GEN vSP);
 static long mf2dim_Nkchi(long N, long k, GEN CHI, ulong space);
 static long mfdim_Nkchi(long N, long k, GEN CHI, long space);
 static GEN charLFwtk(long N, long k, GEN CHI, long ord, long t);
@@ -3442,22 +3443,25 @@ static long
 badchar(long N, long k, GEN CHI)
 { return mfcharparity(CHI) != m1pk(k) || (CHI && N % mfcharconductor(CHI)); }
 
-/* dimension of space of cusp forms S_k(\G_0(N),CHI)
- * Only depends on CHIP the primitive char attached to CHI */
-long
-mfcuspdim(long N, long k, GEN CHI)
+
+static long
+mfcuspdim_i(long N, long k, GEN CHI, GEN vSP)
 {
   pari_sp av = avma;
   long FC;
   GEN s;
   if (k <= 0) return 0;
-  if (k == 1) return mf1cuspdim(N, CHI);
+  if (k == 1) return CHI? mf1cuspdim(N, CHI, vSP): 0;
   FC = CHI? mfcharconductor(CHI): 1;
   if (FC == 1) CHI = NULL;
   s = gsub(A1(N, k), gadd(A21(N, k, CHI), A22(N, k, CHI)));
   s = gadd(s, gsubsg(A4(k, FC), A3(N, FC)));
   return gc_long(av, itos(s));
 }
+/* dimension of space of cusp forms S_k(\G_0(N),CHI)
+ * Only depends on CHIP the primitive char attached to CHI */
+long
+mfcuspdim(long N, long k, GEN CHI) { return mfcuspdim_i(N, k, CHI, NULL); }
 
 /* dimension of whole space M_k(\G_0(N),CHI)
  * Only depends on CHIP the primitive char attached to CHI; assumes !badchar */
@@ -3468,7 +3472,7 @@ mffulldim(long N, long k, GEN CHI)
   long FC = CHI? mfcharconductor(CHI): 1;
   GEN s;
   if (k <= 0) return (k == 0 && FC == 1)? 1: 0;
-  if (k == 1) return gc_long(av, itos(A3(N, FC)) + mf1cuspdim(N, CHI));
+  if (k == 1) return gc_long(av, itos(A3(N, FC)) + mf1cuspdim(N, CHI, NULL));
   if (FC == 1) CHI = NULL;
   s = gsub(A1(N, k), gadd(A21(N, k, CHI), A22(N, k, CHI)));
   s = gadd(s, A3(N, FC));
@@ -3579,18 +3583,44 @@ mfnewtrace_i(long N, long k, long n, cachenew_t *cache)
   return vchip_polmod(VCHIP, s);
 }
 
+static GEN
+get_DIH(long N)
+{
+  GEN x = cache_get(cache_DIH, N);
+  return x? x: mfdihedralall(N, N);
+}
+static GEN
+get_vDIH(long N, GEN D)
+{
+  GEN x = const_vec(N, NULL);
+  long i, l;
+  if (!D) D = mydivisorsu(N);
+  l = lg(D);
+  for (i = 1; i < l; i++) { long d = D[i]; gel(x, d) = get_DIH(d); }
+  return x;
+}
+
+/* divisors of N which are multiple of F */
+static GEN
+divisorsNF(long N, long F)
+{
+  GEN D = mydivisorsu(N / F);
+  long l = lg(D), i;
+  for (i = 1; i < l; i++) D[i] = N / D[i];
+  return D;
+}
 /* mfcuspdim(N,k,CHI) - mfnewdim(N,k,CHI); CHIP primitive (for efficiency) */
 static long
-mfolddim_i(long N, long k, GEN CHIP)
+mfolddim_i(long N, long k, GEN CHIP, GEN vSP)
 {
-  long S, i, l, FC = mfcharmodulus(CHIP), N1 = N/FC, N2;
+  long S, i, l, F = mfcharmodulus(CHIP), N1 = N / F, N2;
   GEN D;
   newd_params(N1, &N2); /* will ensure mubeta != 0 */
-  D = mydivisorsu(N1/N2); l = lg(D);
-  N2 *= FC; S = 0;
+  D = mydivisorsu(N1/N2); l = lg(D); S = 0;
+  if (k == 1 && !vSP) vSP = get_vDIH(N, divisorsNF(N, F));
   for (i = 2; i < l; i++)
   {
-    long M = D[l-i]*N2, d = mfcuspdim(M, k, CHIP);
+    long d = mfcuspdim_i(N / D[i], k, CHIP, vSP);
     if (d) S -= mubeta(D[i]) * d;
   }
   return S;
@@ -3600,17 +3630,18 @@ mfolddim(long N, long k, GEN CHI)
 {
   pari_sp av = avma;
   GEN CHIP = mfchartoprimitive(CHI, NULL);
-  return gc_long(av, mfolddim_i(N, k, CHIP));
+  return gc_long(av, mfolddim_i(N, k, CHIP, NULL));
 }
 /* Only depends on CHIP the primitive char attached to CHI; assumes !badchar */
 long
 mfnewdim(long N, long k, GEN CHI)
 {
   pari_sp av;
-  long S;
-  GEN CHIP = mfchartoprimitive(CHI, NULL);
-  S = mfcuspdim(N, k, CHIP); if (!S) return 0;
-  av = avma; return gc_long(av, S - mfolddim_i(N, k, CHIP));
+  long S, F;
+  GEN vSP, CHIP = mfchartoprimitive(CHI, &F);
+  vSP = (k == 1)? get_vDIH(N, divisorsNF(N, F)): NULL;
+  S = mfcuspdim_i(N, k, CHIP, vSP); if (!S) return 0;
+  av = avma; return gc_long(av, S - mfolddim_i(N, k, CHIP, vSP));
 }
 
 /* trace form, given as closure */
@@ -4163,13 +4194,14 @@ bhnmat_extend(GEN M, long m, long r, GEN S, cachenew_t *cache)
   return MAT;
 }
 
+/* k > 1 */
 static GEN
 mfinitcusp(long N, long k, GEN CHI, cachenew_t *cache, long space)
 {
   long L, l, lDN1, FC, N1, d1, i, init;
   GEN vS, vMjd, DN1, vmf, CHIP = mfchartoprimitive(CHI, &FC);
 
-  d1 = (space == mf_OLD)? mfolddim_i(N, k, CHIP): mfcuspdim(N, k, CHIP);
+  d1 = (space == mf_OLD)? mfolddim_i(N, k, CHIP, NULL): mfcuspdim(N, k, CHIP);
   if (!d1) return NULL;
   N1 = N/FC; DN1 = mydivisorsu(N1); lDN1 = lg(DN1);
   init = (space == mf_OLD)? -1: 1;
@@ -4976,7 +5008,7 @@ split_starting_space(GEN mf)
 /* If dimlim > 0, keep only the dimension <= dimlim eigenspaces.
  * See mfsplit for the meaning of flag. */
 static GEN
-split_ii(GEN mf, long dimlim, long flag, long *pnewd)
+split_ii(GEN mf, long dimlim, long flag, GEN vSP, long *pnewd)
 {
   forprime_t iter;
   GEN CHI = MF_get_CHI(mf), empty = cgetg(1, t_VEC), mf0 = mf;
@@ -4991,9 +5023,13 @@ split_ii(GEN mf, long dimlim, long flag, long *pnewd)
     case mf_NEW: break;
     case mf_CUSP:
     case mf_FULL:
+    {
+      GEN CHIP;
       if (k > 1) { mf0 = mfinittonew(mf); break; }
-      newd = lg(MF_get_S(mf))-1 - mfolddim(N, k, CHI);
+      CHIP = mfchartoprimitive(CHI, NULL);
+      newd = lg(MF_get_S(mf))-1 - mfolddim_i(N, k, CHIP, vSP);
       break;
+    }
     default: pari_err_TYPE("mfsplit [space does not contain newspace]", mf);
       return NULL; /*LCOV_EXCL_LINE*/
   }
@@ -5105,7 +5141,7 @@ dim_sum(GEN v)
 }
 static GEN
 split_i(GEN mf, long dimlim, long flag)
-{ long junk; return split_ii(mf, dimlim, flag, &junk); }
+{ long junk; return split_ii(mf, dimlim, flag, NULL, &junk); }
 /* mf is either already split or output by mfinit. Splitting is done only for
  * newspace except in weight 1. If flag = 0 (default) split completely.
  * If flag = d > 0, only give the Galois polynomials in degree > d
@@ -5123,7 +5159,7 @@ mfsplit(GEN mf0, long dimlim, long flag)
   if (!v)
   {
     long newd;
-    v = split_ii(mf, dimlim, flag, &newd);
+    v = split_ii(mf, dimlim, flag, NULL, &newd);
     if (lg(v) == 1) obj_insert(mf, MF_SPLITN, mkvec2(utoi(dimlim), v));
     else if (!flag)
     {
@@ -5496,7 +5532,7 @@ mf1dimmodp(GEN E, GEN Tp, long ordchi, long dih, GEN TMP)
  * Fourier expansions. pdih gives the dimension of the subspace generated by
  * dihedral forms; TMP is from mf1_pre or NULL. */
 static GEN
-mf1basis(long N, GEN CHI, GEN TMP, GEN *pS, long *pdih)
+mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
 {
   GEN E, EB, E1i, dE1i, mf, A, Tp, C, POLCYC, DIH, Minv;
   long nE, plim, lim, i, p, lA, dimp, ordchi, dih;
@@ -5509,13 +5545,13 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN *pS, long *pdih)
   if (uisprime(N) && ordchi > 4) return NULL;
   if (pS)
   {
-    DIH = mfdihedralcusp(N, CHI);
+    DIH = mfdihedralcusp(N, CHI, vSP);
     dih = lg(DIH) - 1;
   }
   else
   {
     DIH = NULL;
-    dih = mfdihedralcuspdim(N, CHI);
+    dih = mfdihedralcuspdim(N, CHI, vSP);
   }
   POLCYC = (ordchi <= 2)? NULL: mfcharpol(CHI);
   if (pdih) *pdih = dih;
@@ -5667,11 +5703,11 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN *pS, long *pdih)
 static void
 MF_set_space(GEN mf, long x) { gmael(mf,1,4) = utoi(x); }
 static GEN
-mf1_cusptonew(GEN mf)
+mf1_cusptonew(GEN mf, GEN vSP)
 {
   const long vy = 1;
-  GEN vP, F, S, Snew, vF, v = split(mf);
   long i, lP, dSnew, ct;
+  GEN vP, F, S, Snew, vF, v = split_ii(mf, 0, 0, vSP, &i);
 
   F = gel(v,1);
   vP= gel(v,2); lP = lg(vP);
@@ -5706,16 +5742,16 @@ mf1_cusptonew(GEN mf)
   gel(mf,3) = Snew; return mf;
 }
 static GEN
-mf1init(long N, GEN CHI, GEN TMP, long space, long flraw)
+mf1init(long N, GEN CHI, GEN TMP, GEN vSP, long space, long flraw)
 {
-  GEN mf, mf1, S, M = mf1basis(N, CHI, TMP, &S, NULL);
+  GEN mf, mf1, S, M = mf1basis(N, CHI, TMP, vSP, &S, NULL);
   if (!M) return NULL;
   mf1 = mkvec4(stoi(N), gen_1, CHI, utoi(mf_CUSP));
   mf = mkmf(mf1, cgetg(1,t_VEC), S, gen_0, NULL);
   if (space == mf_NEW)
   {
     gel(mf,5) = mfcleanCHI(M,CHI, 0);
-    mf = mf1_cusptonew(mf); if (!mf) return NULL;
+    mf = mf1_cusptonew(mf, vSP); if (!mf) return NULL;
     if (!flraw) M = mfcoefs_mf(mf, mfsturmNk(N,1)+1, 1);
   }
   gel(mf,5) = flraw? zerovec(3): mfcleanCHI(M, CHI, 0);
@@ -5772,28 +5808,33 @@ mfdim0all(GEN w)
   return cgetg(1,t_VEC);
 }
 static long
-mf1cuspdim_i(long N, GEN CHI, GEN TMP, long *dih)
+mf1cuspdim_i(long N, GEN CHI, GEN TMP, GEN vSP, long *dih)
 {
   pari_sp av = avma;
-  GEN b = mf1basis(N, CHI, TMP, NULL, dih);
+  GEN b = mf1basis(N, CHI, TMP, vSP, NULL, dih);
   return gc_long(av, b? itou(b): 0);
 }
+
 static long
-mf1cuspdim(long N, GEN CHI) { return mf1cuspdim_i(N, CHI, NULL, NULL); }
+mf1cuspdim(long N, GEN CHI, GEN vSP)
+{
+  if (!vSP) vSP = get_vDIH(N, divisorsNF(N, mfcharconductor(CHI)));
+  return mf1cuspdim_i(N, CHI, NULL, vSP, NULL);
+}
 static GEN
 mf1cuspdimall(long N, GEN vCHI)
 {
-  GEN z, TMP, w;
+  GEN z, TMP, w, vSP;
   long i, j, l;
   if (wt1empty(N)) return mfdim0all(vCHI);
   w = mf1chars(N,vCHI);
   l = lg(w); if (l == 1) return cgetg(1,t_VEC);
   z = cgetg(l, t_VEC);
-  TMP = mf1_pre(N);
+  TMP = mf1_pre(N); vSP = get_vDIH(N, NULL);
   for (i = j = 1; i < l; i++)
   {
     GEN CHI = gel(w,i);
-    long dih, d = mf1cuspdim_i(N, CHI, TMP, &dih);
+    long dih, d = mf1cuspdim_i(N, CHI, TMP, vSP, &dih);
     if (vCHI)
       gel(z,j++) = mkvec2s(d, dih);
     else if (d)
@@ -5820,12 +5861,13 @@ mf1cuspdimsum(long N)
 static GEN
 mf1newdimall(long N, GEN vCHI)
 {
-  GEN z, w, vTMP, fa, P, E;
+  GEN z, w, vTMP, vSP, fa, P, E;
   long i, c, l, lw, P1;
   if (wt1empty(N)) return mfdim0all(vCHI);
   w = mf1chars(N,vCHI);
   lw = lg(w); if (lw == 1) return cgetg(1,t_VEC);
   vTMP = const_vec(N, NULL);
+  vSP = get_vDIH(N, NULL);
   gel(vTMP,N) = mf1_pre(N);
   /* if p || N and p \nmid F(CHI), S_1^new(G0(N),chi) = 0 */
   fa = znstar_get_faN(gmael(w,1,1));
@@ -5840,7 +5882,7 @@ mf1newdimall(long N, GEN vCHI)
     long S, j, l, F, dihnew;
     GEN D, CHI = gel(w,i), CHIP = mfchartoprimitive(CHI,&F);
 
-    S = F % P1? 0: mf1cuspdim_i(N, CHI, gel(vTMP,N), &dihnew);
+    S = F % P1? 0: mf1cuspdim_i(N, CHI, gel(vTMP,N), vSP, &dihnew);
     if (!S)
     {
       if (vCHI) gel(z, c++) = zerovec(2);
@@ -5853,7 +5895,7 @@ mf1newdimall(long N, GEN vCHI)
       GEN TMP = gel(vTMP,M);
       if (wt1empty(M) || !(m = mubeta(D[l-j]))) continue; /*m = mubeta(N/M)*/
       if (!TMP) gel(vTMP,M) = TMP = mf1_pre(M);
-      s = mf1cuspdim_i(M, CHIP, TMP, &dih);
+      s = mf1cuspdim_i(M, CHIP, TMP, vSP, &dih);
       if (s) { S += m * s; dihnew += m * dih; }
     }
     if (vCHI)
@@ -6080,13 +6122,13 @@ mfgaloistype0(long N, GEN CHI, GEN F, GEN DIH, long lim)
 }
 
 /* If f is NULL, give all the galoistypes, otherwise just for f */
-/* May return 0 as a type if failed to determine; in this case the type is
- * either -12 or -60, most likely -12. FIXME using the Galois representation. */
+/* Return 0 to indicate failure; in this case the type is either -12 or -60,
+ * most likely -12. FIXME using the Galois representation. */
 GEN
 mfgaloistype(GEN NK, GEN f)
 {
   pari_sp av = avma;
-  GEN CHI, T, F, DIH, mf = checkMF_i(NK);
+  GEN CHI, T, F, DIH, SP, mf = checkMF_i(NK);
   long N, k, lL, i, lim, SB;
 
   if (f && !checkmf_i(f)) pari_err_TYPE("mfgaloistype", f);
@@ -6103,7 +6145,8 @@ mfgaloistype(GEN NK, GEN f)
   }
   if (k != 1) pari_err_DOMAIN("mfgaloistype", "k", "!=", gen_1, stoi(k));
   SB = mf? mfsturm_mf(mf): mfsturmNk(N,1);
-  DIH = mfdihedralnew(N,CHI);
+  SP = get_DIH(N);
+  DIH = mfdihedralnew(N, CHI, SP);
   lim = lg(DIH) == 1? 200: SB;
   DIH = mkvec2(DIH, mfvectomat(DIH,SB,1));
   if (f) return gerepileuptoint(av, mfgaloistype0(N,CHI, f, DIH, lim));
@@ -6576,13 +6619,11 @@ mfdihedralall(long l1, long l2)
 /* return [vF, index], where vecpermute(vF,index) generates dihedral forms
  * for character CHI */
 static GEN
-mfdihedralnew_i(long N, GEN CHI)
+mfdihedralnew_i(long N, GEN CHI, GEN SP)
 {
-  GEN bnf, Tinit, Pm, vf, M, V, NK, SP;
+  GEN bnf, Tinit, Pm, vf, M, V, NK;
   long Dold, d, ordw, i, SB, c, l, k0, k1, chino, chinoorig, lv;
 
-  SP = cache_get(cache_DIH, N);
-  if (!SP) SP = mfdihedralall(N, N);
   lv = lg(SP); if (lv == 1) return NULL;
   CHI = mfcharinduce(CHI,N);
   ordw = mfcharorder(CHI);
@@ -6633,23 +6674,23 @@ mfdihedralnew_i(long N, GEN CHI)
   return mkvec2(vf,gel(V,2));
 }
 static long
-mfdihedralnewdim(long N, GEN CHI)
+mfdihedralnewdim(long N, GEN CHI, GEN SP)
 {
   pari_sp av = avma;
-  GEN S = mfdihedralnew_i(N, CHI);
+  GEN S = mfdihedralnew_i(N, CHI, SP);
   return gc_long(av, S? lg(gel(S,2))-1: 0);
 }
 static GEN
-mfdihedralnew(long N, GEN CHI)
+mfdihedralnew(long N, GEN CHI, GEN SP)
 {
   pari_sp av = avma;
-  GEN S = mfdihedralnew_i(N, CHI);
+  GEN S = mfdihedralnew_i(N, CHI, SP);
   if (!S) { set_avma(av); return cgetg(1, t_VEC); }
   return vecpermute(gel(S,1), gel(S,2));
 }
 
 static long
-mfdihedralcuspdim(long N, GEN CHI)
+mfdihedralcuspdim(long N, GEN CHI, GEN vSP)
 {
   pari_sp av = avma;
   GEN D, CHIP;
@@ -6657,10 +6698,10 @@ mfdihedralcuspdim(long N, GEN CHI)
 
   CHIP = mfchartoprimitive(CHI, &F);
   D = mydivisorsu(N/F); lD = lg(D);
-  dim = mfdihedralnewdim(N, CHI); /* d = 1 */
+  dim = mfdihedralnewdim(N, CHI, gel(vSP,N)); /* d = 1 */
   for (i = 2; i < lD; i++)
   {
-    long d = D[i], a = mfdihedralnewdim(N / d, CHIP);
+    long d = D[i], a = mfdihedralnewdim(N/d, CHIP, gel(vSP, N/d));
     if (a) dim += a * mynumdivu(d);
   }
   return gc_long(av,dim);
@@ -6680,7 +6721,7 @@ mfbdall(GEN E, long N)
   return v;
 }
 static GEN
-mfdihedralcusp(long N, GEN CHI)
+mfdihedralcusp(long N, GEN CHI, GEN vSP)
 {
   pari_sp av = avma;
   GEN D, CHIP, z;
@@ -6689,10 +6730,10 @@ mfdihedralcusp(long N, GEN CHI)
   CHIP = mfchartoprimitive(CHI, &F);
   D = mydivisorsu(N/F); lD = lg(D);
   z = cgetg(lD, t_VEC);
-  gel(z,1) = mfdihedralnew(N, CHI);
+  gel(z,1) = mfdihedralnew(N, CHI, gel(vSP,N));
   for (i = 2; i < lD; i++) /* skip 1 */
   {
-    GEN LF = mfdihedralnew(N / D[i], CHIP);
+    GEN LF = mfdihedralnew(N / D[i], CHIP, gel(vSP, N / D[i]));
     gel(z,i) = mfbdall(LF, D[i]);
   }
   return gerepilecopy(av, shallowconcat1(z));
@@ -6738,7 +6779,8 @@ mfinit_Nkchi(long N, long k, GEN CHI, long space, long flraw)
     {
       case mf_NEW:
       case mf_FULL:
-      case mf_CUSP: mf = mf1init(N, CHI, NULL, space, flraw); break;
+      case mf_CUSP: mf = mf1init(N, CHI, NULL, get_vDIH(N,NULL), space, flraw);
+                    break;
       case mf_EISEN:break;
       case mf_OLD: pari_err_IMPL("mfinit in weight 1 for old space");
       default: pari_err_FLAG("mfinit");
@@ -6831,7 +6873,7 @@ mfinit_i(GEN NK, long space)
     if (k < 0) return mfEMPTYall(N, sstoQ(k,dk), CHI, space);
     if (k == 1 && dk == 1 && space != mf_EISEN)
     {
-      GEN TMP, gN, gs;
+      GEN TMP, vSP, gN, gs;
       pari_timer tt;
       if (space != mf_CUSP && space != mf_NEW)
         pari_err_IMPL("mfinit([N,1,wildcard], space != cusp or new space)");
@@ -6839,12 +6881,13 @@ mfinit_i(GEN NK, long space)
       vCHI = mf1chars(N,vCHI);
       l = lg(vCHI); mf = cgetg(l, t_VEC); if (l == 1) return mf;
       if (DEBUGLEVEL) timer_start(&tt);
-      TMP = mf1_pre(N); gN = utoipos(N); gs = utoi(space);
+      TMP = mf1_pre(N); vSP = get_vDIH(N, NULL);
+      gN = utoipos(N); gs = utoi(space);
       if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: S_2(%ld)", N);
       for (i = j = 1; i < l; i++)
       {
         pari_sp av = avma;
-        GEN c = gel(vCHI,i), z = mf1init(N, c, TMP, space, 0);
+        GEN c = gel(vCHI,i), z = mf1init(N, c, TMP, vSP, space, 0);
         if (!z) {
           set_avma(av);
           if (CHI) z = mfEMPTY(mkvec4(gN,gen_1,c,gs));
