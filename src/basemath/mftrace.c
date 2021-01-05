@@ -55,7 +55,7 @@ static GEN RgV_heckef2(long n, long d, GEN V, GEN F, GEN DATA);
 static GEN mfcusptrace_i(long N, long k, long n, GEN Dn, GEN TDATA);
 static GEN mfnewtracecache(long N, long k, long n, cachenew_t *cache);
 static GEN colnewtrace(long n0, long n, long d, long N, long k, cachenew_t *c);
-static GEN dihan(GEN bnr, GEN w, GEN k0j, ulong n);
+static GEN dihan(GEN bnr, GEN w, GEN k0j, long m, ulong n);
 static GEN sigchi(long k, GEN CHI, long n);
 static GEN sigchi2(long k, GEN CHI1, GEN CHI2, long n, long ord);
 static GEN mflineardivtomat(long N, GEN vF, long n);
@@ -1514,10 +1514,11 @@ c_Bd(long n, long d, GEN F, GEN A)
 }
 
 static GEN
-c_dihedral(long n, long d, GEN bnr, GEN w, GEN k0j)
+c_dihedral(long n, long d, GEN F)
 {
   pari_sp av = avma;
-  GEN V = dihan(bnr, w, k0j, n*d);
+  GEN CHI = mf_get_CHI(F);
+  GEN w = gel(F,3), V = dihan(gel(F,2), w, gel(F,4), mfcharorder(CHI), n*d);
   GEN Tinit = gel(w,3), Pm = gel(Tinit,1);
   GEN A = c_deflate(n, d, V);
   if (degpol(Pm) == 1 || RgV_is_ZV(A)) return gerepilecopy(av, A);
@@ -1638,7 +1639,7 @@ mfcoefs_i(GEN F, long n, long d)
     case t_MF_BD: return c_Bd(n, d, gel(F,2), gel(F,3));
     case t_MF_TRACE: return c_cusptrace(n, d, F);
     case t_MF_NEWTRACE: return c_newtrace(n, d, F);
-    case t_MF_DIHEDRAL: return c_dihedral(n, d, gel(F,2), gel(F,3), gel(F,4));
+    case t_MF_DIHEDRAL: return c_dihedral(n, d, F);
     default: pari_err_TYPE("mfcoefs",F); return NULL;/*LCOV_EXCL_LINE*/
   }
 }
@@ -6130,19 +6131,32 @@ mfdiheval(GEN bnr, GEN w, GEN a)
   return Flv_dotproduct(chin, L, ordmax);
 }
 
-/* A(x^k) mod T */
+/* A(x^k) mod T = polcyclo(m), 0 <= k < m */
 static GEN
-Galois(GEN A, long k, GEN T)
+Galois(GEN A, long k, GEN T, long m)
 {
+  GEN B;
+  long i, ik, d;
   if (typ(A) != t_POL) return A;
-  return gmod(RgX_inflate(A, k), T);
+  if (varn(A) != varn(T))
+  {
+    B = cgetg_copy(A, &d); B[1] = A[1];
+    for (i = 2; i < d; i++) gel(B, i) = Galois(gel(A, i), k, T, m);
+    return B;
+  }
+  if ((d = degpol(A)) <= 0) return A;
+  B = cgetg(m + 2, t_POL); B[1] = A[1]; gel(B,2) = gel(A,2);
+  for (i = 1; i < m; i++) gel(B, i+2) = gen_0;
+  for (i = 1, ik = k; i <= d; i++, ik = Fl_add(ik, k, m))
+    gel(B, ik + 2) = gel(A, i+2);
+  return QX_ZX_rem(normalizepol(B), T);
 }
 static GEN
-vecGalois(GEN v, long k, GEN T)
+vecGalois(GEN v, long k, GEN T, long m)
 {
   long i, l;
   GEN w = cgetg_copy(v,&l);
-  for (i = 1; i < l; i++) gel(w,i) = Galois(gel(v,i), k, T);
+  for (i = 1; i < l; i++) gel(w,i) = Galois(gel(v,i), k, T, m);
   return w;
 }
 
@@ -6164,7 +6178,7 @@ fix_pol(GEN S, GEN Pn, int *trace)
 }
 
 static GEN
-dihan(GEN bnr, GEN w, GEN k0j, ulong lim)
+dihan(GEN bnr, GEN w, GEN k0j, long m, ulong lim)
 {
   GEN nf = bnr_get_nf(bnr), f = bid_get_ideal(bnr_get_bid(bnr));
   GEN v = zerovec(lim+1), cycn = gel(w,1), Tinit = gel(w,3);
@@ -6238,8 +6252,11 @@ dihan(GEN bnr, GEN w, GEN k0j, ulong lim)
   if (trace)
   {
     v = QabV_tracerel(Tinit, jdeg, v);
-    /* Apply Galois Mod(k0, ordw) */
-    if (k0 > 1) { GEN Pm = gel(Tinit,1); v = vecGalois(v, k0, Pm); }
+    if (k0 > 1)
+    { /* Apply Galois Mod(k0, ordw) */
+      GEN Pm = gel(Tinit,1);
+      v = vecGalois(v, k0, Pm, m);
+    }
   }
   return v;
 }
@@ -6417,7 +6434,7 @@ mfdihedralcommon(GEN bnf, GEN id, GEN znN, GEN kroconreyN, long N, long D, GEN c
     k0 = zv_cyc_minimize(cycN, chi, coprimes_zv(o));
     vnum = Fl_powu(vnum, k0, N);
     /* encodes degrel forms: jdeg = 0..degrel-1 */
-    gel(res,j) = mkvec3(mkvecsmalln(5, N, k0, vnum, D, degrel),
+    gel(res,j) = mkvec3(mkvecsmalln(5, N, k0 % o, vnum, D, degrel),
                         id, mkvec3(cycn,chin,T));
   }
   return res;
@@ -6606,7 +6623,7 @@ mfdihedralnew_i(long N, GEN CHI)
     bnr = dihan_bnr(bnf, id);
     for (jdeg = 0; jdeg < degrel; jdeg++,c++)
     {
-      GEN k0j = mkvecsmall2(k0i, jdeg), an = dihan(bnr, w, k0j, SB);
+      GEN k0j = mkvecsmall2(k0i, jdeg), an = dihan(bnr, w, k0j, ordw, SB);
       settyp(an, t_COL); gel(M,c) = Q_primpart(an);
       gel(vf,c) = tag3(t_MF_DIHEDRAL, NK, bnr, w, k0j);
     }
@@ -11252,7 +11269,7 @@ bestapprnf2(GEN V, long m, GEN D, long prec)
   for (i = 2; i < m; i++)
   {
     if (H[i] != 1) continue;
-    if (!gequal(Vl, vecGalois(Vl, i, P))) H[i] = 0;
+    if (!gequal(Vl, vecGalois(Vl, i, P, m))) H[i] = 0;
     else for (j = i; j < m; j *= i) H[i] = 3;
   }
   f = znstar_conductor_bits(Flv_to_F2v(H));
