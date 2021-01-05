@@ -6609,7 +6609,7 @@ mfdihedralnew_i(long N, GEN CHI)
   setlg(V, l); /* dihedral forms of level N and character CHI */
   if (l == 1) return NULL;
 
-  SB = myeulerphiu(ordw) * mfsturmNk(N,1) + 1;
+  SB = mfsturmNk(N,1) + 1;
   M = cgetg(d+1, t_MAT);
   vf = cgetg(d+1, t_VEC);
   NK = mkNK(N, 1, CHI);
