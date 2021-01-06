@@ -3587,7 +3587,7 @@ static GEN
 get_DIH(long N)
 {
   GEN x = cache_get(cache_DIH, N);
-  return x? x: mfdihedralall(N, N);
+  return x? gcopy(x): mfdihedralall(N, N);
 }
 static GEN
 get_vDIH(long N, GEN D)
