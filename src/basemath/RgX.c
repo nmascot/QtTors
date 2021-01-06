@@ -2380,15 +2380,14 @@ RgXn_inv_i(GEN f, long e)
   {
     GEN b;
     if (degpol(f) <= 0 || gequal0(b = gel(f,3))) return scalarpol(a, v);
-    av = avma; b = gneg(b);
+    b = gneg(b);
     if (!gequal1(a)) b = gmul(b, gsqr(a));
-    W = deg1pol_shallow(b, a, v);
-    return gcopy(W);
+    return deg1pol(b, a, v);
   }
+  av = avma;
   W = scalarpol_shallow(a,v);
   mask = quadratic_prec_mask(e);
-  av = avma;
-  for (;mask>1;)
+  while (mask > 1)
   {
     GEN u, fr;
     long n2 = n;
@@ -2455,9 +2454,10 @@ RgXn_inv_fast(GEN x, long e)
 GEN
 RgXn_inv(GEN f, long e)
 {
+  pari_sp av = avma;
   GEN h = RgXn_inv_fast(f, e);
   if (h) return h;
-  return RgXn_inv_i(f, e);
+  return gerepileupto(av, RgXn_inv_i(f, e));
 }
 
 /* Compute intformal(x^n*S)/x^(n+1) */
