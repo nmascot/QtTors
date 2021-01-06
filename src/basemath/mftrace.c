@@ -5291,7 +5291,7 @@ static GEN
 mf1_pre(long N)
 {
   GEN mf = mfinit_Nkchi(N, 2, mfchartrivial(), mf_CUSP, 0);
-  GEN I, M, MLIM, Minv = MF_get_Minv(mf), den = gel(Minv,2);
+  GEN L, I, M, MLIM, Minv = MF_get_Minv(mf), den = gel(Minv,2);
   long B = mfsturm_mf(mf);
   /*not empty for N>25*/
   long p, lim, LIM;
@@ -5312,11 +5312,12 @@ mf1_pre(long N)
   }
   /* p = smalllest prime not dividing N */
   M = bhnmat_extend_nocache(MF_get_M(mf), N, p*lim-1, 1, MF_get_S(mf));
-  if (!LIM) return mkvec3(mkvecsmall2(lim, p), mf, M);
+  L = mkvecsmall3(p, LIM, lim);
+  if (!LIM) return mkvec3(L, mf, M);
   I = RgM_Rg_div(RgM_mul(rowslice(M, B+2, LIM), gel(Minv,1)), den);
   I = Q_remove_denom(I, &den);
   MLIM = p == 2? M: rowslice(M, 1, LIM);
-  return mkvec5(mkvecsmall2(lim, p), mf, M, MLIM, mkvec2(I, den));
+  return mkvec5(L, mf, M, MLIM, mkvec2(I, den));
 }
 
 /* lg(A) > 1, E a t_POL */
@@ -5521,31 +5522,31 @@ extract(GEN A, long p, long lim)
 
 /* upper bound dim S_1(Gamma_0(N),chi) performing the linear algebra mod p */
 static long
-mf1dimmod(GEN E, GEN chip, long p, long ordchi, long dih, GEN TMP)
+mf1dimmod(GEN E1, GEN E, GEN chip, long ordchi, long dih, GEN TMP)
 {
-  GEN E1, E1i, A, mf, C = NULL;
+  GEN E1i, A, mf, C = NULL;
   ulong q, r = QabM_init(ordchi, &q);
-  long lim, nE = lg(E) - 1;
+  long lim, LIM, p;
 
-  lim = gel(TMP,1)[1];
-  mf  = gel(TMP,2);
-  A   = gel(TMP,3);
+  p = gel(TMP,1)[1]; LIM = gel(TMP,1)[2]; lim = gel(TMP,1)[3];
+  mf= gel(TMP,2);
+  A = gel(TMP,3);
   A = QabM_to_Flm(A, r, q);
-  E1 = QabX_to_Flx(gel(E,1), r, q);
+  E1 = QabX_to_Flx(E1, r, q);
   E1i = Flxn_inv(E1, nbrows(A), q);
-  if (nE > 1)
+  if (LIM)
   {
     GEN Iden = gel(TMP,5), I = gel(Iden,1), den = gel(Iden,2);
-    long i, LIM = nbrows(gel(TMP,4));
     GEN Mindex = MF_get_Mindex(mf), F = rowslice(A, 1, LIM);
     GEN E1ip = Flxn_red(E1i, LIM);
     ulong d = den? umodiu(den, q): 1;
+    long i, nE = lg(E) - 1;
     pari_sp av;
 
     I = ZM_to_Flm(I, q);
     if (d != 1) I = Flm_Fl_mul(I, Fl_inv(d, q), q);
     av = avma;
-    for (i = 2; i <= nE; i++)
+    for (i = 1; i <= nE; i++)
     {
       GEN e = Flxn_mul(E1ip, QabX_to_Flx(gel(E,i), r, q), LIM, q);
       GEN B = mfmatsermul_Fl(F, e, q), z;
@@ -5574,8 +5575,8 @@ mf1dimmod(GEN E, GEN chip, long p, long ordchi, long dih, GEN TMP)
 static GEN
 mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
 {
-  GEN E, EB, E1i, dE1i, mf, A, C, POLCYC, DIH, Minv, chip;
-  long nE, plim, lim, i, p, lA, dimp, ordchi, dih;
+  GEN E = NULL, EB, E1, E1i, dE1i, mf, A, C, POLCYC, DIH, Minv, chip;
+  long nE = 0, plim, LIM, lim, i, p, lA, dimp, ordchi, dih;
   pari_timer tt;
 
   if (pdih) *pdih = 0;
@@ -5638,13 +5639,20 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
     TMP = mf1_pre(N);
     if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: S_2");
   }
-  lim = gel(TMP,1)[1]; p = gel(TMP,1)[2]; plim = p*lim;
+  p = gel(TMP,1)[1]; LIM = gel(TMP,1)[2]; lim = gel(TMP,1)[3];
   mf  = gel(TMP,2);
   A   = gel(TMP,3); /* p*lim x dim matrix */
+  plim = p * lim;
   EB = mfeisensteinbasis(N, 1, mfcharinv_i(CHI));
-  E = RgM_to_RgXV(mfvectomat(EB, plim+1, 1), 0);
+  E1 = RgV_to_RgX(mftocol(gel(EB,1), plim-1, 1), 0);
+  if (LIM)
+  {
+    nE = lg(EB) - 1;
+    E = RgM_to_RgXV(mfvectomat(vecslice(EB, 2, nE), LIM, 1), 0);
+    nE--;
+  }
   chip = mfchareval(CHI, p); /* != 0 */
-  dimp = mf1dimmod(E, chip, p, ordchi, dih, TMP);
+  dimp = mf1dimmod(E1, E, chip, ordchi, dih, TMP);
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: dim mod p is %ld", dimp);
   if (!dimp) return NULL;
   if (dimp == dih)
@@ -5652,12 +5660,12 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
     if (!pS) return utoipos(dih);
     return mftreatdihedral(N, DIH, POLCYC, ordchi, pS);
   }
-  E1i = RgXn_inv(gel(E,1), plim-1); /* E[1] does not vanish at oo */
+  E1i = RgXn_inv(E1, plim-1); /* E[1] does not vanish at oo */
   if (POLCYC) E1i = liftpol_shallow(E1i);
   E1i = Q_remove_denom(E1i, &dE1i); /* 1/E[1] = E1i / dE1i */
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: invert E");
-  C = NULL; nE = lg(E) - 1;
-  if (nE > 1)
+  C = NULL;
+  if (LIM)
   { /* mf attached to S2(N), fi = mfbasis(mf)
      * M = coefs(f1,...,fd) up to LIM
      * F = coefs(F1,...,FD) = M * C, for some matrix C over Q(chi),
@@ -5670,23 +5678,22 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
      * are not included */
     GEN Mindex = MF_get_Mindex(mf), F  = gel(TMP,4), Iden  = gel(TMP,5);
     GEN I = gel(Iden,1), den = gel(Iden,2);
-    long LIM = nbrows(F);
+    GEN e1i = RgXn_red_shallow(E1i, LIM);
     pari_timer TT;
     pari_sp av = avma;
     if (DEBUGLEVEL) timer_start(&TT);
-    for (i = 2; i <= nE; i++)
+    for (i = 1; i <= nE; i++)
     {
       pari_sp av2 = avma;
       GEN e = gel(E,i), z, B, Bden, B2;
-      e = Q_primpart(RgXn_mul(E1i, e, LIM));
+      e = Q_primpart(RgXn_mul(e1i, e, LIM));
 
-      if (DEBUGLEVEL)
-        timer_printf(&TT, "mf1basis: E[i] / E[1] %ld / %ld", i, nE);
+      if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: E[%ld] / E[1]", i+1);
       /* the first time F is over Z and it is more efficient to lift than
          * to let RgXn_mul use Kronecker's trick */
-      if (POLCYC && i == 2) e = liftpol_shallow(e);
+      if (POLCYC && i == 1) e = liftpol_shallow(e);
       B = mfmatsermul(F, e);
-      if (POLCYC && i != 2) B = liftpol_shallow(B);
+      if (POLCYC && i != 1) B = liftpol_shallow(B);
       if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... matsermul");
       Bden = rowslice(B,lim+1,LIM);
       B2 = RgM_mul(I, rowpermute(B, Mindex));
