@@ -5686,11 +5686,7 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
          * to let RgXn_mul use Kronecker's trick */
       if (POLCYC && i == 2) e = liftpol_shallow(e);
       B = mfmatsermul(F, e);
-      if (POLCYC)
-      {
-        if (i == 2) B = RgXQM_red(B, POLCYC); /* cf above */
-        else B = liftpol_shallow(B);
-      }
+      if (POLCYC && i != 2) B = liftpol_shallow(B);
       if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... matsermul");
       Bden = rowslice(B,lim+1,LIM);
       B2 = RgM_mul(I, rowpermute(B, Mindex));
