@@ -5285,18 +5285,6 @@ initwt1newtrace(GEN mf)
   return mflineardiv_linear(S, v, 1);
 }
 
-/* Matrix of T(p), p \nmid N */
-static GEN
-Tpmat(long p, long lim, GEN CHI)
-{
-  GEN M = zeromatcopy(lim, p*lim), chip = mfchareval(CHI, p); /* != 0 */
-  long i, j, pi, pj;
-  gcoeff(M, 1, 1) = gaddsg(1, chip);
-  for (i = 1, pi = p; i < lim; i++,  pi += p) gcoeff(M, i+1, pi+1) = gen_1;
-  for (j = 1, pj = p; pj < lim; j++, pj += p) gcoeff(M, pj+1, j+1) = chip;
-  return M;
-}
-
 /* assume !wt1empty(N), in particular N>25 */
 /* Returns [[lim,p], mf (weight 2), p*lim x dim matrix] */
 static GEN
@@ -5430,46 +5418,87 @@ mftreatdihedral(long N, GEN DIH, GEN POLCYC, long ordchi, GEN *pS)
   *pS = vecmflinear(DIH, C); return M;
 }
 
+/* same mode a maximal ideal above q */
+static GEN
+Tpmod(GEN Ap, GEN A, ulong chip, long p, ulong q)
+{
+  GEN B = leafcopy(Ap);
+  long i, ip, l = lg(B);
+  for (i = 1, ip = p; ip < l; i++, ip += p)
+    B[ip] = Fl_add(B[ip], Fl_mul(A[i], chip, q), q);
+  return B;
+}
+/* Tp(f_1), ..., Tp(f_d) mod q */
+static GEN
+matTpmod(GEN Ap, GEN A, ulong chip, long p, ulong q)
+{
+  long i, l;
+  GEN B = cgetg_copy(A, &l);
+  for (i = 1; i < l; i++) gel(B,i) = Tpmod(gel(Ap,i), gel(A,i), chip, p, q);
+  return B;
+}
+
+/* Ap[i] = a_{p*i}(F), A[i] = a_i(F), i = 1..lim
+ * Tp(f)[n] = a_{p*n}(f) + chi(p) a_{n/p}(f) * 1_{p | n} */
+static GEN
+Tp(GEN Ap, GEN A, GEN chip, long p)
+{
+  GEN B = leafcopy(Ap);
+  long i, ip, l = lg(B);
+  for (i = 1, ip = p; ip < l; i++, ip += p)
+    gel(B,ip) = gadd(gel(B,ip), gmul(gel(A,i), chip));
+  return B;
+}
+/* Tp(f_1), ..., Tp(f_d) mod q */
+static GEN
+matTp(GEN Ap, GEN A, GEN chip, long p)
+{
+  long i, l;
+  GEN B = cgetg_copy(A, &l);
+  for (i = 1; i < l; i++) gel(B,i) = Tp(gel(Ap,i), gel(A,i), chip, p);
+  return B;
+}
+
 static GEN
 _RgXQM_mul(GEN x, GEN y, GEN T)
 { return T? RgXQM_mul(x, y, T): RgM_mul(x, y); }
 /* largest T-stable Q(CHI)-subspace of Q(CHI)-vector space spanned by columns
  * of A */
 static GEN
-mfstabiter(GEN *pC, GEN T, GEN A, GEN dE1i, long lim, GEN P, long ordchi)
+mfstabiter(GEN *pC, GEN Ap, GEN A, GEN chip, long p, GEN P, long ordchi)
 {
-  GEN con, C = NULL, cC = dE1i;
+  GEN C = NULL;
   for(;;)
   {
-    GEN R = shallowconcat(RgM_mul(T,A), rowslice(A,1,lim));
+    GEN R = shallowconcat(matTp(Ap, A, chip, p), A);
     GEN B = QabM_ker(R, P, ordchi);
     long lA = lg(A), lB = lg(B);
     if (lB == 1) return NULL;
     if (lB == lA) break;
     B = rowslice(B, 1, lA-1);
+    Ap = _RgXQM_mul(Ap, B, P);
     A = _RgXQM_mul(A, B, P);
-    A = Q_primitive_part(A, &con);
     C = C? _RgXQM_mul(C, B, P): B;
-    cC = div_content(cC, con);
   }
   if (*pC) C = C? _RgXQM_mul(*pC, C, P): *pC;
-  if (cC) C = RgM_Rg_mul(C, cC);
   *pC = C; return A;
 }
+
 static long
-mfstabitermodp(GEN Mp, GEN Ap, long lim, long p)
+mfstabitermod(GEN Ap, GEN A, ulong chip, long p, ulong q)
 {
   GEN C = NULL;
   while (1)
   {
-    GEN Rp = shallowconcat(Flm_mul(Mp,Ap,p), rowslice(Ap,1,lim));
-    GEN Bp = Flm_ker(Rp, p);
-    long lA = lg(Ap), lB = lg(Bp);
+    GEN Rp = shallowconcat(matTpmod(Ap, A, chip, p, q), A);
+    GEN B = Flm_ker(Rp, q);
+    long lA = lg(A), lB = lg(B);
     if (lB == 1) return 0;
     if (lB == lA) return lA-1;
-    Bp = rowslice(Bp, 1, lA-1);
-    Ap = Flm_mul(Ap, Bp, p);
-    C = C? Flm_mul(C, Bp, p): Bp;
+    B = rowslice(B, 1, lA-1);
+    Ap = Flm_mul(Ap, B, q);
+    A = Flm_mul(A, B, q);
+    C = C? Flm_mul(C, B, q): B;
   }
 }
 
@@ -5480,50 +5509,61 @@ mfcharinv_i(GEN CHI)
   CHI = leafcopy(CHI); gel(CHI,2) =  zncharconj(G, gel(CHI,2)); return CHI;
 }
 
+/* A[i*p + 1, j], i = 1..lim-1 corresponding to a_p(f_j), a_{2p}(f_j)...  */
+static GEN
+extract(GEN A, long p, long lim)
+{
+  GEN v = cgetg(lim, t_VECSMALL);
+  long i, ip;
+  for (i = 1, ip = p + 1; i < lim; i++, ip += p) v[i] = ip;
+  return rowpermute(A, v);
+}
+
 /* upper bound dim S_1(Gamma_0(N),chi) performing the linear algebra mod p */
 static long
-mf1dimmodp(GEN E, GEN Tp, long ordchi, long dih, GEN TMP)
+mf1dimmod(GEN E, GEN chip, long p, long ordchi, long dih, GEN TMP)
 {
   GEN E1, E1i, A, mf, C = NULL;
-  ulong p, r = QabM_init(ordchi, &p);
+  ulong q, r = QabM_init(ordchi, &q);
   long lim, nE = lg(E) - 1;
 
   lim = gel(TMP,1)[1];
   mf  = gel(TMP,2);
   A   = gel(TMP,3);
-  A = QabM_to_Flm(A, r, p);
-  E1 = QabX_to_Flx(gel(E,1), r, p);
-  E1i = Flxn_inv(E1, nbrows(A), p);
+  A = QabM_to_Flm(A, r, q);
+  E1 = QabX_to_Flx(gel(E,1), r, q);
+  E1i = Flxn_inv(E1, nbrows(A), q);
   if (nE > 1)
   {
     GEN Iden = gel(TMP,5), I = gel(Iden,1), den = gel(Iden,2);
     long i, LIM = nbrows(gel(TMP,4));
     GEN Mindex = MF_get_Mindex(mf), F = rowslice(A, 1, LIM);
     GEN E1ip = Flxn_red(E1i, LIM);
-    ulong d = den? umodiu(den, p): 1;
+    ulong d = den? umodiu(den, q): 1;
     pari_sp av;
 
-    I = ZM_to_Flm(I, p);
-    if (d != 1) I = Flm_Fl_mul(I, Fl_inv(d, p), p);
+    I = ZM_to_Flm(I, q);
+    if (d != 1) I = Flm_Fl_mul(I, Fl_inv(d, q), q);
     av = avma;
     for (i = 2; i <= nE; i++)
     {
-      GEN e = Flxn_mul(E1ip, QabX_to_Flx(gel(E,i), r, p), LIM, p);
-      GEN B = mfmatsermul_Fl(F, e, p), z;
-      GEN B2 = Flm_mul(I, rowpermute(B, Mindex), p);
+      GEN e = Flxn_mul(E1ip, QabX_to_Flx(gel(E,i), r, q), LIM, q);
+      GEN B = mfmatsermul_Fl(F, e, q), z;
+      GEN B2 = Flm_mul(I, rowpermute(B, Mindex), q);
       B = rowslice(B, lim+1,LIM);
-      z = Flm_ker(Flm_sub(B2, B, p), p);
+      z = Flm_ker(Flm_sub(B2, B, q), q);
       if (lg(z)-1 == dih) return dih;
-      C = C? Flm_mul(C, z, p): z;
+      C = C? Flm_mul(C, z, q): z;
       if (i == nE) break;
-      F = Flm_mul(F, z, p);
+      F = Flm_mul(F, z, q);
       gerepileall(av, 2, &F,&C);
     }
-    A = Flm_mul(A, C, p);
+    A = Flm_mul(A, C, q);
   }
   /* intersection of Eisenstein series quotients non empty: use Schaeffer */
-  A = mfmatsermul_Fl(A, E1i, p);
-  return mfstabitermodp(QabM_to_Flm(Tp,r,p), A, lim, p);
+  A = mfmatsermul_Fl(A, E1i, q);
+  return mfstabitermod(extract(A, p, lim), rowslice(A, 2, lim),
+                       Qab_to_Fl(chip, r, q), p, q);
 }
 
 /* Compute the full S_1(\G_0(N),\chi); return NULL if space is empty; else
@@ -5534,7 +5574,7 @@ mf1dimmodp(GEN E, GEN Tp, long ordchi, long dih, GEN TMP)
 static GEN
 mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
 {
-  GEN E, EB, E1i, dE1i, mf, A, Tp, C, POLCYC, DIH, Minv;
+  GEN E, EB, E1i, dE1i, mf, A, C, POLCYC, DIH, Minv, chip;
   long nE, plim, lim, i, p, lA, dimp, ordchi, dih;
   pari_timer tt;
 
@@ -5603,8 +5643,8 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
   A   = gel(TMP,3); /* p*lim x dim matrix */
   EB = mfeisensteinbasis(N, 1, mfcharinv_i(CHI));
   E = RgM_to_RgXV(mfvectomat(EB, plim+1, 1), 0);
-  Tp = Tpmat(p, lim, CHI);
-  dimp = mf1dimmodp(E, Tp, ordchi, dih, TMP);
+  chip = mfchareval(CHI, p); /* != 0 */
+  dimp = mf1dimmod(E, chip, p, ordchi, dih, TMP);
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: dim mod p is %ld", dimp);
   if (!dimp) return NULL;
   if (dimp == dih)
@@ -5678,10 +5718,12 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
   A = mfmatsermul(A, E1i); /* E1i is over Q(chi) */
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: matsermul");
   if (POLCYC) A = C? liftpol_shallow(A): RgXQM_red(A, POLCYC);
-  A = mfstabiter(&C, Tp, A, dE1i, lim, POLCYC, ordchi);
+  A = mfstabiter(&C, extract(A, p, lim), rowslice(A, 2, lim),
+                 chip, p, POLCYC, ordchi);
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: Hecke stability");
   if (!A) return NULL;
   lA = lg(A); if (!pS) return utoi(lA-1);
+  if (dE1i) C = RgM_Rg_mul(C, dE1i);
   if (POLCYC)
   {
     A = QXQM_to_mod_shallow(A, POLCYC);
@@ -5689,7 +5731,7 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
   }
   for (i = 1; i < lA; i++)
   {
-    GEN c, v = gel(A,i);
+    GEN c, v = shallowconcat(gen_0, gel(A,i));
     gel(A,i) = RgV_normalize(v, &c);
     gel(C,i) = RgC_Rg_mul(gel(C,i), c);
   }
