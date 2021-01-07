@@ -552,7 +552,7 @@ qfminimize(GEN G, GEN P, GEN E)
     if (n == 3 || n == 4)
     {
       if (DEBUGLEVEL >= 1) err_printf(" no local solution at %Ps\n",p);
-      return(p);
+      return p;
     }
     vectrunc_append(faP, p);
     vecsmalltrunc_append(faE, vp);
@@ -824,14 +824,11 @@ check_symmetric(GEN G)
         pari_err_TYPE("qfsolve [not symmetric]",G);
 }
 
-/* Given a square matrix G of dimension n >= 1, */
-/* solves over Z the quadratic equation X^tGX = 0. */
-/* G is assumed to have integral coprime coefficients. */
-/* The solution might be a vectorv or a matrix. */
-/* If no solution exists, returns an integer, that can */
-/* be a prime p such that there is no local solution at p, */
-/* or -1 if there is no real solution, */
-/* or 0 in some rare cases. */
+/* Given a square rational matrix G of dimension n >= 1, solves over Z the
+ * quadratic equation X^tGX = 0. The solution is a t_VEC (a solution) or a
+ * t_MAT (totally isotropic subspace). If no solution exists, returns an
+ * integer: a prime p (no local solution at p), or a negative integer (no real
+ * solution). */
 static  GEN
 qfsolve_i(GEN G)
 {
@@ -1040,16 +1037,12 @@ qfsolve_i(GEN G)
 }
 GEN
 qfsolve(GEN G)
-{
-  pari_sp av = avma;
-  return gerepilecopy(av, qfsolve_i(G));
-}
+{ pari_sp av = avma; return gerepilecopy(av, qfsolve_i(G)); }
 
 /* G is a symmetric 3x3 matrix, and sol a solution of sol~*G*sol=0.
  * Returns a parametrization of the solutions with the good invariants,
- * as a matrix 3x3, where each line contains
- * the coefficients of each of the 3 quadratic forms.
- * If fl!=0, the fl-th form is reduced. */
+ * as a 3x3 matrix, where each line contains the coefficients of each of the 3
+ * quadratic forms. If fl!=0, the fl-th form is reduced. */
 GEN
 qfparam(GEN G, GEN sol, long fl)
 {
