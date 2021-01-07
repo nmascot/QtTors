@@ -5694,7 +5694,8 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
       B2 = RgM_mul(I, rowpermute(B, Mindex));
       if (den) Bden = RgM_Rg_mul(Bden, den);
       if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... RgM_mul");
-      z = QabM_ker(RgM_sub(B2,Bden), POLCYC, ordchi);
+      B = gerepileupto(av2, RgM_sub(B2,Bden));
+      z = QabM_ker(B, POLCYC, ordchi);
       if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... kernel");
       if (lg(z) == 1) return NULL;
       if (lg(z) == lg(F)) { set_avma(av2); continue; } /* no progress */
