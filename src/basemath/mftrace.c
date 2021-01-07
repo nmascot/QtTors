@@ -6373,7 +6373,7 @@ dihan_bnf(long D)
 {
   GEN c = getrand(), bnf;
   setrand(gen_1);
-  bnf = Buchall(quadpoly(stoi(D)), 0, LOWDEFAULTPREC);
+  bnf = Buchall(quadpoly(stoi(D)), 1, LOWDEFAULTPREC);
   setrand(c);
   return bnf;
 }
