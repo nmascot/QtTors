@@ -5662,7 +5662,6 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
   }
   E1i = RgXn_inv(E1, plim-1); /* E[1] does not vanish at oo */
   if (POLCYC) E1i = liftpol_shallow(E1i);
-  E1i = Q_remove_denom(E1i, &dE1i); /* 1/E[1] = E1i / dE1i */
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: invert E");
   C = NULL;
   if (LIM)
@@ -5678,7 +5677,7 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
      * are not included */
     GEN Mindex = MF_get_Mindex(mf), F  = gel(TMP,4), Iden  = gel(TMP,5);
     GEN I = gel(Iden,1), den = gel(Iden,2);
-    GEN e1i = RgXn_red_shallow(E1i, LIM);
+    GEN e1i = Q_remove_denom(RgXn_red_shallow(E1i, LIM), NULL);
     pari_timer TT;
     pari_sp av = avma;
     if (DEBUGLEVEL) timer_start(&TT);
@@ -5718,6 +5717,7 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: intersection [total]");
   /* enable Kronecker: if C = NULL, then A is over Z, else over Q(chi) */
   if (POLCYC && C) A = QXQM_to_mod_shallow(A, POLCYC);
+  E1i = Q_remove_denom(E1i, &dE1i);
   A = mfmatsermul(A, E1i); /* E1i is over Q(chi) */
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: matsermul");
   if (POLCYC) A = C? liftpol_shallow(A): RgXQM_red(A, POLCYC);
