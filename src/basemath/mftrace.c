@@ -5633,7 +5633,12 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
       if (N == 288 && (m != 31 && m !=223)) return NULL;
       if (N == 296 && (m !=105 && m !=265)) return NULL;
   }
-  if (DEBUGLEVEL) timer_start(&tt);
+  if (DEBUGLEVEL)
+  {
+    err_printf("mf1basis: start character %Ps, conductor = %ld, order = %ld\n",
+               gmfcharno(CHI), mfcharconductor(CHI), ordchi);
+    timer_start(&tt);
+  }
   if (!TMP)
   {
     TMP = mf1_pre(N);
@@ -5658,7 +5663,13 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
   }
   E1i = RgXn_inv(E1, plim-1); /* E[1] does not vanish at oo */
   if (POLCYC) E1i = liftpol_shallow(E1i);
-  if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: invert E");
+  if (DEBUGLEVEL)
+  {
+    GEN a0 = gel(E1,2);
+    if (typ(a0) == t_POLMOD) a0 = gnorm(a0);
+    a0 = Q_abs_shallow(a0);
+    timer_printf(&tt, "mf1basis: invert E; norm(a0(E)) = %Ps", a0);
+  }
   C = NULL;
   if (nE)
   { /* mf attached to S2(N), fi = mfbasis(mf)
