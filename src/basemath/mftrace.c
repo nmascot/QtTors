@@ -5534,7 +5534,7 @@ mf1dimmod(GEN E1, GEN E, GEN chip, long ordchi, long dih, GEN TMP)
   A = QabM_to_Flm(A, r, q);
   E1 = QabX_to_Flx(E1, r, q);
   E1i = Flxn_inv(E1, nbrows(A), q);
-  if (LIM)
+  if (E)
   {
     GEN Iden = gel(TMP,5), I = gel(Iden,1), den = gel(Iden,2);
     GEN Mindex = MF_get_Mindex(mf), F = rowslice(A, 1, LIM);
@@ -5642,15 +5642,11 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
   p = gel(TMP,1)[1]; LIM = gel(TMP,1)[2]; lim = gel(TMP,1)[3];
   mf  = gel(TMP,2);
   A   = gel(TMP,3); /* p*lim x dim matrix */
-  plim = p * lim;
   EB = mfeisensteinbasis(N, 1, mfcharinv_i(CHI));
+  nE = lg(EB) - 1; plim = p * lim;
   E1 = RgV_to_RgX(mftocol(gel(EB,1), plim-1, 1), 0);
-  if (LIM)
-  {
-    nE = lg(EB) - 1;
-    E = RgM_to_RgXV(mfvectomat(vecslice(EB, 2, nE), LIM, 1), 0);
-    nE--;
-  }
+  if (--nE)
+    E = RgM_to_RgXV(mfvectomat(vecslice(EB, 2, nE+1), LIM, 1), 0);
   chip = mfchareval(CHI, p); /* != 0 */
   dimp = mf1dimmod(E1, E, chip, ordchi, dih, TMP);
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: dim mod p is %ld", dimp);
@@ -5664,7 +5660,7 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
   if (POLCYC) E1i = liftpol_shallow(E1i);
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: invert E");
   C = NULL;
-  if (LIM)
+  if (nE)
   { /* mf attached to S2(N), fi = mfbasis(mf)
      * M = coefs(f1,...,fd) up to LIM
      * F = coefs(F1,...,FD) = M * C, for some matrix C over Q(chi),
