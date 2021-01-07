@@ -827,8 +827,8 @@ check_symmetric(GEN G)
 /* Given a square rational matrix G of dimension n >= 1, solves over Z the
  * quadratic equation X^tGX = 0. The solution is a t_VEC (a solution) or a
  * t_MAT (totally isotropic subspace). If no solution exists, returns an
- * integer: a prime p (no local solution at p), or a negative integer (no real
- * solution). */
+ * integer: a prime p (no local solution at p), or -1 (no real solution), or
+ * -2 (n = 2 and -deg(G) not a square). */
 static  GEN
 qfsolve_i(GEN G)
 {
