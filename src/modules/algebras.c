@@ -3327,7 +3327,7 @@ nfgrunwaldwang(GEN nf0, GEN Lpr, GEN Ld, GEN pl, long var)
   if (w%n==0 && lg(Ld)>1)
     return gerepileupto(av,nfgwkummer(nf,Lpr,Ld,pl,var));
   if (ell==n) {
-    if (!bnf) bnf = Buchall(nf,0,0);
+    if (!bnf) bnf = Buchall(nf, nf_FORCE, 0);
     return gerepileupto(av,bnfgwgeneric(bnf,Lpr,Ld,pl,var));
   }
   pari_err_IMPL("nfgrunwaldwang for nonprime degree");
