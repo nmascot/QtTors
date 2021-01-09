@@ -53,6 +53,8 @@
 3.0903009822753419949181566235987700160
 3.0903009822753419949181566235987700160
 [-1, 1, 2, 1]~
+0.70809200298127252820036742866403357571 - 0.5808881688552449029956683984899
+4493431*I
   ***   at top-level: airy(O(x))
   ***                 ^----------
   *** airy: incorrect type in airy (t_SER).
@@ -71,4 +73,4 @@
   ***   at top-level: hypergeom([1,2,3,4],[],1/2)
   ***                 ^---------------------------
   *** hypergeom: sorry, this hypergeometric function is not yet implemented.
-Total time spent: 3646
+Total time spent: 1777

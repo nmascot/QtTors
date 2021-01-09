@@ -137,6 +137,8 @@ F(k,a)=Pi^(k-1/2)*gamma(a)/(2^(3*k-1)*gamma(a+1/2))*hypergeom(concat(vector(k,j,
 L=lfuninit(lfunetaquo([4,2;8,2]),[1,6,1],2);
 lindep([lfun(L,3),F(3,5/4),F(3,3/4),F(3,1/4)])
 
+hypergeom([1/6,2/3],1/2,2)
+
 \\ Errors, keep at end
 airy(O(x))
 hypergeom([],[],O(x))

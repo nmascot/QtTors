@@ -1218,7 +1218,21 @@ gpow(GEN x, GEN n, long prec)
     switch (tx)
     {
     case t_INT:
+      if (signe(x) < 0)
+      {
+        if (equaliu(d, 2) && Z_issquareall(negi(x), &z))
+          return gerepilecopy(av, mkcomplex(gen_0, powgi(z, a)));
+        break;
+      }
+      if (ispower(x, d, &z)) return powgi(z, a);
+      break;
     case t_FRAC:
+      if (signe(gel(x,1)) < 0)
+      {
+        if (equaliu(d, 2) && ispower(absfrac(x), d, &z))
+          return gerepilecopy(av, mkcomplex(gen_0, powgi(z, a)));
+        break;
+      }
       if (ispower(x, d, &z)) return powgi(z, a);
       break;
 

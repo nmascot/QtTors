@@ -494,7 +494,11 @@ RgMrow_RgC_mul_i(GEN x, GEN y, long i, long l)
   pari_sp av = avma;
   GEN t = gmul(gcoeff(x,i,1), gel(y,1)); /* l > 1 ! */
   long j;
-  for (j=2; j<l; j++) t = gadd(t, gmul(gcoeff(x,i,j), gel(y,j)));
+  for (j=2; j<l; j++)
+  {
+    GEN c = gcoeff(x,i,j);
+    if (!isintzero(c)) t = gadd(t, gmul(c, gel(y,j)));
+  }
   return gerepileupto(av,t);
 }
 GEN
