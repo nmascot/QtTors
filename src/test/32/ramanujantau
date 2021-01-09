@@ -8,4 +8,9 @@
 0
 0
 -6048
-Total time spent: 2092
+-1809673056
+0
+  ***   at top-level: ramanujantau(x)
+  ***                 ^---------------
+  *** ramanujantau: incorrect type in ramanujantau (t_POL).
+Total time spent: 2268

@@ -8,3 +8,8 @@ ramanujantau(-1)
 ramanujantau(factor(-1))
 ramanujantau(factor(0))
 ramanujantau(factor(6))
+ramanujantau(factor(6),24)
+ramanujantau(factor(-6),24)
+
+\\ ERRORS
+ramanujantau(x)

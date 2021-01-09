@@ -132,13 +132,14 @@ taugen_n_worker(GEN T, GEN G, GEN n4)
   return s;
 }
 
-/* G(x) = n^deg(G_k) G_k(x/n), k = ell - 2 */
 static GEN
 taugen_n(GEN n, GEN G)
 {
   GEN S, r, n4 = shifti(n, 2);
   ulong t, lim = itou(sqrtremi(n4, &r));
+
   if (r == gen_0) lim--;
+  G = ZX_unscale(G, n);
   if (expi(n) > 15)
   {
     GEN worker = snm_closure(is_entry("_taugen_n_worker"), mkvec2(G, n4));
@@ -160,12 +161,12 @@ taugen_n(GEN n, GEN G)
 
 /* ell != 12 */
 static GEN
-newtrace(GEN n, long ell)
+newtrace(GEN fan, GEN n, long ell)
 {
   pari_sp av = avma;
-  GEN G = ZX_unscale(mfrhopol(ell-2), n), T = taugen_n(n, G);
-  GEN D = divisors(n);
+  GEN D = divisors(fan), G = mfrhopol(ell-2), T = taugen_n(n, G);
   long i, l = lg(D);
+
   for (i = 1; i < l; i++)
   {
     GEN d = gel(D, i), q;
@@ -176,7 +177,7 @@ newtrace(GEN n, long ell)
     else /* d^2 = n */
     {
       T = gadd(T, gmul2n(q, -1));
-      T = gsub(T, gdivgs(mfrhopol_eval(G, shifti(n, 2)), 12));
+      T = gsub(T, gdivgs(mulii(diviiexact(q,d), mfrhopol_eval(G, utoipos(4))), 12));
       break;
     }
   }
@@ -195,34 +196,35 @@ checkellcong(GEN T, GEN n, long ell)
 #endif
 
 /* Ramanujan tau function for weights ell = 12, 16, 18, 20, 22, 26,
-   return 0 for <= 0 */
+ * return 0 for <= 0 */
 GEN
 ramanujantau(GEN n, long ell)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   GEN T, P, E, G, F = check_arith_all(n, "ramanujantau");
   long j, lP;
 
   if (ell < 12 || ell == 14 || odd(ell)) return gen_0;
-  if (ell > 26 || ell == 24) return signe(n) <= 0? gen_0: newtrace(n, ell);
   if (!F)
   {
     if (signe(n) <= 0) return gen_0;
-    F = Z_factor(n);
-    P = gel(F,1);
+    F = Z_factor(n); P = gel(F,1);
   }
   else
   {
     P = gel(F,1);
     if (lg(P) == 1 || signe(gel(P,1)) <= 0) return gen_0;
+    n = typ(n) == t_VEC? gel(n,1): NULL;
   }
+  if (ell > 26 || ell == 24) return newtrace(F, n? n: factorback(F), ell);
+  /* dimension 1: tau is multiplicative */
   E = gel(F,2); lP = lg(P); T = gen_1;
   G = ell == 12? NULL: mfrhopol(ell - 2);
   for (j = 1; j < lP; j++)
   {
     GEN p = gel(P,j), q = powiu(p, ell-1), t, t1, t0 = gen_1;
     long k, e = itou(gel(E,j));
-    t1 = t = G? subsi(-1, taugen_n(p, ZX_unscale(G, p)))
+    t1 = t = G? subsi(-1, taugen_n(p, G))
               : tauprime(p);
     for (k = 1; k < e; k++)
     {
@@ -234,5 +236,5 @@ ramanujantau(GEN n, long ell)
 #ifdef DEBUG
   checkellcong(T, n, ell);
 #endif
-  return gerepileuptoint(ltop, T);
+  return gerepileuptoint(av, T);
 }
