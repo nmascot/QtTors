@@ -1497,7 +1497,7 @@ c_newtrace(long n, long d, GEN F)
   cachenew_t cache;
   long N = mf_get_N(F);
   GEN v;
-  init_cachenew(&cache, n*d, N, F);
+  init_cachenew(&cache, n == 1? 1: n*d, N, F);
   v = colnewtrace(0, n, d, N, mf_get_k(F), &cache);
   settyp(v, t_VEC); return gerepilecopy(av, v);
 }

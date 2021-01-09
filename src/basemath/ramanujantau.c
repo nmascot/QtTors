@@ -155,7 +155,7 @@ taugen_n(GEN n, GEN G)
     }
   }
   S = addii(shifti(S,1), mulii(leading_coeff(G), hclassno6(n4)));
-  return diviuexact(S, 12);
+  return gdivgs(S, 12);
 }
 
 /* ell != 12 */
