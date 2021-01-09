@@ -2920,6 +2920,18 @@ RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
   gerepilemanysp(av,tetpil,gptr,2); return 1;
 }
 
+GEN
+RgX_chinese_coprime(GEN x, GEN y, GEN Tx, GEN Ty, GEN Tz)
+{
+  pari_sp av = avma;
+  GEN ax = RgX_mul(RgXQ_inv(Tx,Ty), Tx);
+  GEN p1 = RgX_mul(ax, RgX_sub(y,x));
+  p1 = RgX_add(x,p1);
+  if (!Tz) Tz = RgX_mul(Tx,Ty);
+  p1 = RgX_rem(p1, Tz);
+  return gerepileupto(av,p1);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                RESULTANT USING DUCOS VARIANT                    */
