@@ -31,6 +31,7 @@ BA   2- fplll: fast, dpe and heuristic variants
      6- [libpari] row_Q_primpart
 BA   7- [libpari] RgXQ_trace
      8- [libpari] FpM_intersect_i, Flm_intersect_i
+HC   9- add optional argument to ramanujantau + parallelize code
 
   Changed
 HC   1- faster implementation of eulervec + cache result

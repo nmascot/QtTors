@@ -658,8 +658,6 @@ void RgMs_structelim_col(GEN M, long nbcol, long nbrow, GEN A, GEN *p_col, GEN *
 
 int     is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L);
 int     is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L);
-GEN     tauaux(GEN gt, GEN p2_7, GEN p_9, GEN p);
-GEN     taugenaux(GEN t, GEN pol, GEN p4);
 
 /* arith2.c */
 
@@ -835,6 +833,9 @@ GEN     contfraceval_inv(GEN CF, GEN tinv, long nlim);
 void pari_close_mf(void);
 long polishomogeneous(GEN P);
 GEN sertocol(GEN S);
+GEN mfrhopol(long n);
+GEN mfrhopol_u_eval(GEN Q, ulong t2);
+GEN mfrhopol_eval(GEN Q, GEN t2);
 
 /* prime.c */
 
@@ -892,6 +893,10 @@ GEN     nf_direct_compositum(GEN nf, GEN A, GEN B);
 ulong   ZX_ZXY_ResBound(GEN A, GEN B, GEN dB);
 GEN     ffinit_Artin_Schreier(ulong p, long l);
 GEN     ffinit_rand(GEN p, long n);
+
+/* ramanujantau.c */
+GEN     ramanujantau_worker(GEN gt, GEN p2_7, GEN p_9, GEN p);
+GEN     taugen_n_worker(GEN t, GEN pol, GEN p4);
 
 /* readline.c */
 

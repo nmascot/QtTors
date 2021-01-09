@@ -3052,7 +3052,7 @@ mutg1(long t, long N, GEN VCHI, GEN li, GEN GCD)
 }
 
 /* Gegenbauer pol; n > 2, P = \sum_{0<=j<=n/2} (-1)^j (n-j)!/j!(n-2*j)! X^j */
-static GEN
+GEN
 mfrhopol(long n)
 {
 #ifdef LONG_IS_64BIT
@@ -3075,12 +3075,22 @@ mfrhopol(long n)
 }
 
 /* polrecip(Q)(t2), assume Q(0) = 1 */
-static GEN
-ZXrecip_u_eval(GEN Q, ulong t2)
+GEN
+mfrhopol_u_eval(GEN Q, ulong t2)
 {
   GEN T = addiu(gel(Q,3), t2);
   long l = lg(Q), j;
   for (j = 4; j < l; j++) T = addii(gel(Q,j), mului(t2, T));
+  return T;
+}
+GEN
+mfrhopol_eval(GEN Q, GEN t2)
+{
+  long l, j;
+  GEN T;
+  if (lgefint(t2) == 3) return mfrhopol_u_eval(Q, t2[2]);
+  l = lg(Q); T = addii(gel(Q,3), t2);
+  for (j = 4; j < l; j++) T = addii(gel(Q,j), mulii(t2, T));
   return T;
 }
 /* return sh * sqrt(n)^nu * G_nu(t/(2*sqrt(n))) for t != 0
@@ -3098,7 +3108,7 @@ mfrhopowsimp(GEN Q, GEN sh, long nu, long t, long t2, long n)
     case 3: return gmul(mulss(t, t2 - 2*n), sh);
     default:
       if (!t) return gmul(gmul2n(gel(Q, lg(Q) - 1), -1), sh);
-      T = ZXrecip_u_eval(Q, t2); if (odd(nu)) T = mulsi(t, T);
+      T = mfrhopol_u_eval(Q, t2); if (odd(nu)) T = mulsi(t, T);
       return gmul(T, sh);
   }
 }

@@ -32,16 +32,14 @@ Doc: compute the value of Ramanujan's tau function at an individual $n$,
  %4 = 1
  @eprog
 
-Function: tauaux
-Section: number_theoretical
-C-Name: tauaux
+Function: _ramanujantau_worker
+C-Name: ramanujantau_worker
 Prototype: GGGG
-Help: tauaux(gt, p2_7, p_9, p): auxiliary.
-Doc: auxiliary
+Section: programming/internals
+Help: worker for ramanujantau
 
-Function: taugenaux
-Section: number_theoretical
-C-Name: taugenaux
+Function: _taugen_n_worker
+C-Name: taugen_n_worker
 Prototype: GGG
-Help: taugenaux(t, pol, p4): auxiliary.
-Doc: auxiliary
+Section: programming/internals
+Help: worker for ramanujantau
