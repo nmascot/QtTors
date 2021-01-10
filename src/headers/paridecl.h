@@ -5278,7 +5278,6 @@ GEN     kbessel(GEN nu, GEN gx, long prec);
 GEN     mpeint1(GEN x, GEN expx);
 GEN     mplambertW(GEN y);
 GEN     mpveceint1(GEN C, GEN eC, long n);
-GEN     nbessel(GEN n, GEN z, long prec);
 GEN     polylog0(long m, GEN x, long flag, long prec);
 GEN     sumdedekind(GEN h, GEN k);
 GEN     sumdedekind_coprime(GEN h, GEN k);
@@ -5296,6 +5295,7 @@ GEN     weber0(GEN x, long flag,long prec);
 GEN     weberf(GEN x, long prec);
 GEN     weberf1(GEN x, long prec);
 GEN     weberf2(GEN x, long prec);
+GEN     ybessel(GEN n, GEN z, long prec);
 GEN     zetahurwitz(GEN s, GEN x, long der, long bitprec);
 
 /* modsym.c */

@@ -43,6 +43,7 @@ HC   1- faster implementation of eulervec + cache result
         Fp-basis; use FpM_intersect_i if you only need a generating set
      6- ZXX_to_Kronecker -> RgXX_to_Kronecker, ZXX_to_Kronecker_spec
         -> RgXX_to_Kronecker_spec
+     7- [libpari] nbessel -> ybessel
 
 Done for version 2.13.0 (released 19/10/2020):
   Fixed

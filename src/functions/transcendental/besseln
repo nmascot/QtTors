@@ -1,6 +1,6 @@
 Function: besseln
 Section: transcendental
-C-Name: nbessel
+C-Name: ybessel
 Prototype: GGp
 Obsolete: 2018-12-10
 Help: besseln(nu,x): deprecated alias for bessely.

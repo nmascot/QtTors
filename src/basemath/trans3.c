@@ -632,15 +632,15 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 GEN
 kbessel(GEN n, GEN z, long prec) { return kbesselintern(n,z,0,prec); }
 GEN
-nbessel(GEN n, GEN z, long prec) { return kbesselintern(n,z,1,prec); }
+ybessel(GEN n, GEN z, long prec) { return kbesselintern(n,z,1,prec); }
 /* J + iN */
 GEN
 hbessel1(GEN n, GEN z, long prec)
 {
   pari_sp av = avma;
   GEN J = jbessel(n,z,prec);
-  GEN N = nbessel(n,z,prec);
-  return gerepileupto(av, gadd(J, mulcxI(N)));
+  GEN Y = ybessel(n,z,prec);
+  return gerepileupto(av, gadd(J, mulcxI(Y)));
 }
 /* J - iN */
 GEN
@@ -648,8 +648,8 @@ hbessel2(GEN n, GEN z, long prec)
 {
   pari_sp av = avma;
   GEN J = jbessel(n,z,prec);
-  GEN N = nbessel(n,z,prec);
-  return gerepileupto(av, gadd(J, mulcxmI(N)));
+  GEN Y = ybessel(n,z,prec);
+  return gerepileupto(av, gadd(J, mulcxmI(Y)));
 }
 
 /***********************************************************************/
