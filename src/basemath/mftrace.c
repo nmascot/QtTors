@@ -2592,6 +2592,22 @@ hclassno6u(ulong D)
   D0 = mycoredisc2neg(D, &F);
   return hclassno6u_2(D,D0,F);
 }
+/* same as hclassno6u without creating caches */
+ulong
+hclassno6u_from_cache(ulong D)
+{
+  cache *S = &caches[cache_H];
+  long D0, F;
+  if (S->cache)
+  {
+    const ulong d = D>>1; /* compressed */
+    if ((ulong)lg(S->cache) > d) return S->cache[d];
+  }
+  S = &caches[cache_D];
+  if (!S->cache || (ulong)lg(S->cache) <= D) return 0;
+  D0 = mycoredisc2neg(D, &F);
+  return hclassno6u_2(D,D0,F);
+}
 /* same, where the decomposition D = D0*F^2 is already known */
 static ulong
 hclassno6u_i(ulong D, long D0, long F)

@@ -4350,6 +4350,7 @@ GEN   checkMF_i(GEN mf);
 int   checkmf_i(GEN mf);
 GEN   getcache(void);
 ulong hclassno6u(ulong d);
+ulong hclassno6u_from_cache(ulong D);
 GEN   lfunmf(GEN mf, GEN F, long bitprec);
 GEN   mfDelta(void);
 GEN   mfEH(GEN gk);

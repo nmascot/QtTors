@@ -6006,32 +6006,39 @@ static GEN
 hclassno6_large(GEN x)
 {
   long i, l, s, xmod4;
-  GEN Q, H, D, P, E;
+  GEN H = NULL, D, P, E;
 
   x = negi(x);
   check_quaddisc(x, &s, &xmod4, "hclassno");
   corediscfact(x, xmod4, &D, &P, &E);
-
-  Q = quadclassunit0(D, 0, NULL, 0);
-  H = gel(Q,1); l = lg(P);
-
+  l = lg(P);
+  if (l > 1 && lgefint(x) == 3)
+  { /* F != 1, second chance */
+    ulong h = hclassno6u_from_cache(x[2]);
+    if (h) H = utoipos(h);
+  }
+  if (!H)
+  {
+    GEN Q = quadclassunit0(D, 0, NULL, 0);
+    H = gel(Q,1);
+    switch(itou_or_0(D))
+    {
+      case 3: H = shifti(H,1);break;
+      case 4: H = muliu(H,3); break;
+      default:H = muliu(H,6); break;
+    }
+  }
   /* H \prod_{p^e||f}  (1 + (p^e-1)/(p-1))[ p - (D/p) ] */
-  for (i=1; i<l; i++)
+  for (i = 1; i < l; i++)
   {
     long e = E[i], s;
     GEN p, t;
     if (!e) continue;
     p = gel(P,i); s = kronecker(D,p);
     if (e == 1) t = addiu(p, 1-s);
-    else if (s == 1) t = powiu(p,e);
-    else t = addui(1, mulii(subis(p, s), geomsum(p,e-1)));
+    else if (s == 1) t = powiu(p, e);
+    else t = addui(1, mulii(subis(p, s), geomsum(p, e-1)));
     H = mulii(H,t);
-  }
-  switch( itou_or_0(D) )
-  {
-    case 3: H = shifti(H,1);break;
-    case 4: H = muliu(H,3); break;
-    default:H = muliu(H,6); break;
   }
   return H;
 }
@@ -6041,8 +6048,12 @@ GEN
 hclassno6(GEN x)
 {
   ulong d = itou_or_0(x);
-  if (!d || d > 500000) return hclassno6_large(x);
-  return utoipos(hclassno6u(d));
+  if (d)
+  { /* create cache if d small */
+    ulong h = d < 500000 ? hclassno6u(d): hclassno6u_from_cache(d);
+    if (h) return utoipos(h);
+  }
+  return hclassno6_large(x);
 }
 
 GEN

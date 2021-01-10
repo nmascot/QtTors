@@ -82,6 +82,9 @@ parsum_u(ulong N, GEN worker)
   mt_queue_end(&pt); return s;
 }
 
+static int
+tau_parallel(GEN n) { return mt_nbthreads() > 1 && expi(n) > 15; }
+
 /* Ramanujan tau function for p prime */
 static GEN
 tauprime(GEN p)
@@ -94,7 +97,7 @@ tauprime(GEN p)
   /* p > 2 */
   p2 = sqri(p); p2_7 = mului(7, p2); p_9 = mului(9, p);
   lim = itou(sqrtint(p));
-  if (expi(p) > 15)
+  if (tau_parallel(p))
   {
     GEN worker = snm_closure(is_entry("_ramanujantau_worker"),
                              mkvec3(p2_7, p_9, p));
@@ -140,7 +143,7 @@ taugen_n(GEN n, GEN G)
 
   if (r == gen_0) lim--;
   G = ZX_unscale(G, n);
-  if (expi(n) > 15)
+  if (tau_parallel(n))
   {
     GEN worker = snm_closure(is_entry("_taugen_n_worker"), mkvec2(G, n4));
     S = parsum_u(lim, worker);
