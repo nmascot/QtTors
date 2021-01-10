@@ -83,7 +83,7 @@ parsum_u(ulong N, GEN worker)
 }
 
 static int
-tau_parallel(GEN n) { return mt_nbthreads() > 1 && expi(n) > 15; }
+tau_parallel(GEN n) { return mt_nbthreads() > 1 && expi(n) > 18; }
 
 /* Ramanujan tau function for p prime */
 static GEN
