@@ -1,0 +1,13 @@
+Function: besseljzero
+Section: transcendental
+C-Name: besseljzero
+Prototype: GLb
+Help: besseljzero(nu,k): k-th zero of the J-bessel function
+ of index nu.
+Doc: $k$-th zero of the $J$-Bessel function of index \var{nu}.
+ \bprog
+ ? besseljzero(0, 1)
+ %1 = 2.4048255576957727686216318793264546431
+ ? besselj(0, %)
+ %2 = 7.1951595399463653939930598011247182898 E-41
+ @eprog

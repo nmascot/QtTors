@@ -1,0 +1,13 @@
+Function: besselyzero
+Section: transcendental
+C-Name: besselyzero
+Prototype: GLb
+Help: besselyzero(nu,k): k-th positive zero of the Y-bessel function
+ of index nu.
+Doc: $k$-th positive zero of the $Y$-Bessel function of index \var{nu}.
+ \bprog
+ ? besselyzero(0, 1)
+ %1 = 0.89357696627916752158488710205833824123
+ ? bessely(0, %)
+ %2 = 1.8708573650996561952 E-39
+ @eprog

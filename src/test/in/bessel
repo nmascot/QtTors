@@ -57,8 +57,17 @@ for (i=1,#NU,
 for(i=1,#F,test(F[i]))
 
 besselk(1e-20,1e-5)
-\\ errors
+besseljzero(0, 1)
+besseljzero(0, 10)
+besselyzero(0, 1)
+besselyzero(0, 10)
+
+\\ ERRORS
 for(i=1,#F,print(iferr(F[i](O(2),1),E,E)));
 for(i=1,#F,print(iferr(F[i]("",1),E,E)));
 for(i=1,#F,print(iferr(F[i](1,O(2)),E,E)));
 for(i=1,#F,print(iferr(F[i](1,""),E,E)));
+besseljzero(0,-1)
+besseljzero(0,2^62)
+besselyzero(0,-1)
+besselyzero(0,2^62)

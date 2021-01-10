@@ -652,6 +652,44 @@ hbessel2(GEN n, GEN z, long prec)
   return gerepileupto(av, gadd(J, mulcxmI(Y)));
 }
 
+static GEN
+besselrefine(GEN z, GEN nu, GEN (*B)(GEN,GEN,long), long bit)
+{
+  GEN z0 = gprec_w(z, DEFAULTPREC), nu1 = gaddgs(nu, 1), t;
+  long e, n, c, j, prec = DEFAULTPREC;
+
+  t = gdiv(B(nu1, z0, prec), B(nu, z0, prec));
+  t = gadd(z0, gdiv(gsub(gsqr(z0), gsqr(nu)), gsub(gdiv(nu, z0), t)));
+  e = gexpo(t) - 2 * gexpo(z0) - 1; if (e < 0) e = 0;
+  n = expu(bit + 32 - e);
+  c = 1 + e + ((bit - e) >> n);
+  for (j = 1; j <= n; j++)
+  {
+    c = 2 * c - e;
+    prec = nbits2prec(c); z = gprec_w(z, prec);
+    t = gdiv(B(nu1, z, prec), B(nu, z, prec));
+    z = gsub(z, ginv(gsub(gdiv(nu, z), t)));
+  }
+  return gprec_w(z, nbits2prec(bit));
+}
+
+static GEN
+besselzero(GEN nu, long n, GEN (*B)(GEN,GEN,long), long bit)
+{
+  pari_sp av = avma;
+  long prec = nbits2prec(bit), a;
+  GEN z;
+  if (n <= 0) pari_err_DOMAIN("besselzero", "n", "<=", gen_0, stoi(n));
+  if (n > LONG_MAX / 4) pari_err_OVERFLOW("besselzero");
+  a = 4 * n - (B == jbessel? 1: 3);
+  z = gmul(mppi(prec), gmul2n(gaddgs(gmul2n(nu,1), a), -2));
+  return gerepilecopy(av, besselrefine(z, nu, B, bit));
+}
+GEN
+besseljzero(GEN nu, long k, long b) { return besselzero(nu, k, jbessel, b); }
+GEN
+besselyzero(GEN nu, long k, long b) { return besselzero(nu, k, ybessel, b); }
+
 /***********************************************************************/
 /**                    INCOMPLETE GAMMA FUNCTION                      **/
 /***********************************************************************/

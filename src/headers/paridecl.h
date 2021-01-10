@@ -5250,6 +5250,8 @@ GEN     sumformal(GEN T, long v);
 /* trans3.c */
 
 int     RgV_is_arithprog(GEN v, GEN *a, GEN *b);
+GEN     besseljzero(GEN nu, long n, long b);
+GEN     besselyzero(GEN nu, long n, long b);
 GEN     constzeta(long n, long prec);
 GEN     cxEk(GEN tau, long k, long prec);
 double  dblmodulus(GEN x);

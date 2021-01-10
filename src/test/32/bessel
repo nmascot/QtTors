@@ -837,6 +837,10 @@ bessely
 [8, 8]: 3.9757472194224873313063069161081647375 E304 + 1.2716329178698389636
 754301746165561798 E305*I
 11.628856980944362293418444710423341176
+2.4048255576957727686216318793264546431
+30.634606468431975117549578926854232737
+0.89357696627916752158488710205833824123
+29.064030252728398055304718405181344394
 error("domain error in Qp_log: argument = 0")
 error("domain error in Qp_log: argument = 0")
 error("incorrect type in isint (t_PADIC).")
@@ -853,4 +857,16 @@ error("incorrect type in jbessel (t_STR).")
 error("incorrect type in jbessel (t_STR).")
 error("incorrect type in besselk (t_STR).")
 error("incorrect type in besseln (t_STR).")
-Total time spent: 22
+  ***   at top-level: besseljzero(0,-1)
+  ***                 ^-----------------
+  *** besseljzero: domain error in besselzero: n <= 0
+  ***   at top-level: besseljzero(0,2^62)
+  ***                 ^-------------------
+  *** besseljzero: overflow in besselzero.
+  ***   at top-level: besselyzero(0,-1)
+  ***                 ^-----------------
+  *** besselyzero: domain error in besselzero: n <= 0
+  ***   at top-level: besselyzero(0,2^62)
+  ***                 ^-------------------
+  *** besselyzero: overflow in besselzero.
+Total time spent: 25
