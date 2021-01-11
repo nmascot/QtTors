@@ -1506,6 +1506,7 @@ od(0, t^16 + 1), Mod(3/8*t^11, t^16 + 1), Mod(0, t^16 + 1)]
 0
 [1, 24, 324, 3200, 25650, 176256, 1073720]
 0.0067751374633700320670755869090304807506
+[0, 1, 0, 28, 0, 126, 0, 344, 0, 757, 0, 1332, 0, 2198, 0, 3528]
 
 [  "Factors"  50000 13 1000000000]
 
@@ -1626,4 +1627,4 @@ od(0, t^16 + 1), Mod(3/8*t^11, t^16 + 1), Mod(0, t^16 + 1)]
   ***   at top-level: ...,0);[F]=mfeigenbasis(mf);mfpow(F,3)
   ***                                             ^----------
   *** mfpow: sorry, changing cyclotomic fields in mf is not yet implemented.
-Total time spent: 7214
+Total time spent: 6823

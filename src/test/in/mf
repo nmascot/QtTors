@@ -760,6 +760,8 @@ mf=mfinit([53,2]);
 F=mfeigenbasis(mf)[1];
 ms=mfsymbol(mf,F);mfpetersson(ms)
 
+f=mfeisenstein(4,Mod(1,2),Mod(1,2)); vec(f)
+
 getcache()[,1..4]
 
 \\ ERRORS, leave at end of bench

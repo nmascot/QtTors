@@ -9219,18 +9219,17 @@ charLFwtk_Fl(long k, GEN CHIvec, GEN vz, ulong p)
 static GEN
 mfeisenstein2_0(long k, GEN CHI1, GEN CHI2, long ord)
 {
-  if (k == 1 && mfcharistrivial(CHI1))
-    return charLFwtk(mfcharmodulus(CHI2), 1, CHI2, ord, 1);
-  else if (mfcharistrivial(CHI2))
-    return charLFwtk(mfcharmodulus(CHI1), k, CHI1, ord, 1);
-  else return gen_0;
+  long N1 = mfcharmodulus(CHI1), N2 = mfcharmodulus(CHI2);
+  if (k == 1 && N1 == 1) return charLFwtk(N2, 1, CHI2, ord, 1);
+  if (N2 == 1) return charLFwtk(N1, k, CHI1, ord, 1);
+  return gen_0;
 }
 static ulong
 mfeisenstein2_0_Fl(long k, GEN CHI1vec, GEN CHI2vec, GEN vz, ulong p)
 {
-  if (k == 1 && CHIvec_ord(CHI1vec) == 1)
+  if (k == 1 && CHIvec_N(CHI1vec) == 1)
     return charLFwtk_Fl(k, CHI2vec, vz, p);
-  else if (CHIvec_ord(CHI2vec) == 1)
+  else if (CHIvec_N(CHI2vec) == 1)
     return charLFwtk_Fl(k, CHI1vec, vz, p);
   else return 0;
 }
