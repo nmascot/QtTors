@@ -34,7 +34,7 @@ Hspec(GEN N)
 }
 
 static GEN
-tauprime_i(ulong t, GEN p2_7, GEN p_9, GEN p, long tin)
+tauprime_i(ulong t, GEN p2_7, GEN p_9, GEN p, ulong tin)
 {
   GEN h, a, t2 = sqru(t), D = shifti(subii(p, t2), 2); /* 4(p-t^2) */
   /* t mod 2 != tin <=> D not fundamental at 2 */
@@ -45,7 +45,8 @@ tauprime_i(ulong t, GEN p2_7, GEN p_9, GEN p, long tin)
 GEN
 ramanujantau_worker(GEN T, GEN p2_7, GEN p_9, GEN p)
 {
-  long i, l = lg(T), tin = mod4(p) == 3? 1: 0;
+  ulong tin = mod4(p) == 3? 1: 0;
+  long i, l = lg(T);
   GEN s = gen_0;
   for (i = 1; i < l; i++) s = addii(s, tauprime_i(T[i], p2_7, p_9, p, tin));
   return s;
@@ -106,7 +107,7 @@ tauprime(GEN p)
   else
   {
     pari_sp av2 = avma;
-    long tin = mod4(p) == 3? 1: 0, t;
+    ulong tin = mod4(p) == 3? 1: 0, t;
     s = gen_0;
     for (t = 1; t <= lim; t++)
     {
