@@ -5311,21 +5311,34 @@ initwt1newtrace(GEN mf)
   return mflineardiv_linear(S, v, 1);
 }
 
+/* i*p + 1, i*p < lim corresponding to a_p(f_j), a_{2p}(f_j)...  */
+static GEN
+pindices(long p, long lim)
+{
+  GEN v = cgetg(lim, t_VECSMALL);
+  long i, ip;
+  for (i = 1, ip = p + 1; ip < lim; i++, ip += p) v[i] = ip;
+  setlg(v, i); return v;
+}
+
 /* assume !wt1empty(N), in particular N>25 */
 /* Returns [[lim,p], mf (weight 2), p*lim x dim matrix] */
 static GEN
 mf1_pre(long N)
 {
-  GEN mf = mfinit_Nkchi(N, 2, mfchartrivial(), mf_CUSP, 0);
-  GEN L, I, M, MLIM, Minv = MF_get_Minv(mf), den = gel(Minv,2);
-  long B = mfsturm_mf(mf);
-  /*not empty for N>25*/
-  long p, lim, LIM;
+  pari_timer tt;
+  GEN mf, v, L, I, M, Minv, den;
+  long B, lim, LIM, p;
+
+  if (DEBUGLEVEL) timer_start(&tt);
+  mf = mfinit_Nkchi(N, 2, mfchartrivial(), mf_CUSP, 0);
+  if (DEBUGLEVEL) timer_printf(&tt, "mf1basis [pre]: S_2(%ld)", N);
+  M = MF_get_M(mf); Minv = MF_get_Minv(mf); den = gel(Minv,2);
+  B = mfsturm_mf(mf);
   if (uisprime(N))
   {
-    p = 2; /* N > 25 is not 2 */
-    lim = ceilA1(N, 3);
-    LIM = 0;
+    lim = 2 * MF_get_dim(mf); /* ensure mfstabiter's first kernel ~ square */
+    p = 2;
   }
   else
   {
@@ -5334,16 +5347,17 @@ mf1_pre(long N)
     while ((p = u_forprime_next(&S)))
       if (N % p) break;
     lim = B + 1;
-    LIM = 2 * lim;
   }
-  /* p = smalllest prime not dividing N */
-  M = bhnmat_extend_nocache(MF_get_M(mf), N, p*lim-1, 1, MF_get_S(mf));
-  L = mkvecsmall3(p, LIM, lim);
-  if (!LIM) return mkvec3(L, mf, M);
-  I = RgM_Rg_div(RgM_mul(rowslice(M, B+2, LIM), gel(Minv,1)), den);
+  LIM = (N & (N - 1))? 2 * lim: 3 * lim; /* N power of 2 ? */
+  L = mkvecsmall4(lim, LIM, mfsturmNk(N,1), p);
+  M = bhnmat_extend_nocache(M, N, LIM-1, 1, MF_get_S(mf));
+  if (DEBUGLEVEL) timer_printf(&tt, "mf1basis [pre]: bnfmat_extend");
+  v = pindices(p, LIM);
+  if (!LIM) return mkvec4(L, mf, M, v);
+  I = RgM_Rg_div(ZM_mul(rowslice(M, B+2, LIM), gel(Minv,1)), den);
   I = Q_remove_denom(I, &den);
-  MLIM = p == 2? M: rowslice(M, 1, LIM);
-  return mkvec5(L, mf, M, MLIM, mkvec2(I, den));
+  if (DEBUGLEVEL) timer_printf(&tt, "mf1basis [prec]: Iden");
+  return mkvec5(L, mf, M, v, mkvec2(I, den));
 }
 
 /* lg(A) > 1, E a t_POL */
@@ -5492,29 +5506,43 @@ _RgXQM_mul(GEN x, GEN y, GEN T)
 /* largest T-stable Q(CHI)-subspace of Q(CHI)-vector space spanned by columns
  * of A */
 static GEN
-mfstabiter(GEN *pC, GEN Ap, GEN A, GEN chip, long p, GEN P, long ordchi)
+mfstabiter(GEN *pC, GEN A0, GEN chip, GEN TMP, GEN P, long ordchi)
 {
-  GEN C = NULL;
+  GEN A, Ap, vp = gel(TMP,4), C = NULL;
+  long i, lA, lim1 = gel(TMP,1)[3], p = gel(TMP,1)[4];
+  Ap = rowpermute(A0, vp);
+  A = rowslice(A0, 2, nbrows(Ap)+1); /* remove a0 */
   for(;;)
   {
     GEN R = shallowconcat(matTp(Ap, A, chip, p), A);
     GEN B = QabM_ker(R, P, ordchi);
-    long lA = lg(A), lB = lg(B);
+    long lB = lg(B);
     if (lB == 1) return NULL;
-    if (lB == lA) break;
+    lA = lg(A); if (lB == lA) break;
     B = rowslice(B, 1, lA-1);
     Ap = _RgXQM_mul(Ap, B, P);
     A = _RgXQM_mul(A, B, P);
     C = C? _RgXQM_mul(C, B, P): B;
   }
+  if (nbrows(A) < lim1)
+  {
+    A0 = rowslice(A0, 2, lim1);
+    A = C? _RgXQM_mul(A0, C, P): A0;
+  }
+  else /* all needed coefs computed */
+    A = rowslice(A, 1, lim1-1);
   if (*pC) C = C? _RgXQM_mul(*pC, C, P): *pC;
+  /* put back a0 */
+  for (i = 1; i < lA; i++) gel(A,i) = shallowconcat(gen_0, gel(A,i));
   *pC = C; return A;
 }
 
 static long
-mfstabitermod(GEN Ap, GEN A, ulong chip, long p, ulong q)
+mfstabitermod(GEN A, GEN vp, ulong chip, long p, ulong q)
 {
-  GEN C = NULL;
+  GEN Ap, C = NULL;
+  Ap = rowpermute(A, vp);
+  A = rowslice(A, 2, nbrows(Ap)+1);
   while (1)
   {
     GEN Rp = shallowconcat(matTpmod(Ap, A, chip, p, q), A);
@@ -5536,25 +5564,15 @@ mfcharinv_i(GEN CHI)
   CHI = leafcopy(CHI); gel(CHI,2) =  zncharconj(G, gel(CHI,2)); return CHI;
 }
 
-/* A[i*p + 1, j], i = 1..lim-1 corresponding to a_p(f_j), a_{2p}(f_j)...  */
-static GEN
-extract(GEN A, long p, long lim)
-{
-  GEN v = cgetg(lim, t_VECSMALL);
-  long i, ip;
-  for (i = 1, ip = p + 1; i < lim; i++, ip += p) v[i] = ip;
-  return rowpermute(A, v);
-}
-
 /* upper bound dim S_1(Gamma_0(N),chi) performing the linear algebra mod p */
 static long
-mf1dimmod(GEN E1, GEN E, GEN chip, long ordchi, long dih, GEN TMP)
+mf1dimmod(long N, GEN E1, GEN E, GEN chip, long ordchi, long dih, GEN TMP)
 {
-  GEN E1i, A, mf, C = NULL;
+  GEN E1i, A, vp, mf, C = NULL;
   ulong q, r = QabM_init(ordchi, &q);
   long lim, LIM, p;
 
-  p = gel(TMP,1)[1]; LIM = gel(TMP,1)[2]; lim = gel(TMP,1)[3];
+  LIM = gel(TMP,1)[2]; lim = gel(TMP,1)[1];
   mf= gel(TMP,2);
   A = gel(TMP,3);
   A = QabM_to_Flm(A, r, q);
@@ -5581,18 +5599,36 @@ mf1dimmod(GEN E1, GEN E, GEN chip, long ordchi, long dih, GEN TMP)
       z = Flm_ker(Flm_sub(B2, B, q), q);
       if (lg(z)-1 == dih) return dih;
       C = C? Flm_mul(C, z, q): z;
-      if (i == nE) break;
       F = Flm_mul(F, z, q);
       gerepileall(av, 2, &F,&C);
     }
-    A = Flm_mul(A, C, q);
+    A = F;
   }
-  /* intersection of Eisenstein series quotients non empty: use Schaeffer */
+  /* use Schaeffer */
+  p = gel(TMP,1)[4]; vp = gel(TMP,4);
   A = mfmatsermul_Fl(A, E1i, q);
-  return mfstabitermod(extract(A, p, lim), rowslice(A, 2, lim),
-                       Qab_to_Fl(chip, r, q), p, q);
+  return mfstabitermod(A, vp, Qab_to_Fl(chip, r, q), p, q);
 }
 
+static GEN
+mf1intermat(GEN A, GEN Mindex, GEN e, GEN Iden, long lim, GEN POLCYC)
+{
+  long j, l = lg(A), LIM = nbrows(A);
+  GEN I = gel(Iden,1), den = gel(Iden,2), B = cgetg(l, t_MAT);
+
+  for (j = 1; j < l; j++)
+  {
+    pari_sp av = avma;
+    GEN c = RgV_to_RgX(gel(A,j), 0), c1, c2;
+    c = RgX_to_RgC(RgXn_mul(c, e, LIM), LIM);
+    if (POLCYC) c = liftpol_shallow(c);
+    c1 = vecslice(c, lim+1, LIM);
+    if (den) c1 = RgC_Rg_mul(c1, den);
+    c2 = RgM_RgC_mul(I, vecpermute(c, Mindex));
+    gel(B, j) = gerepileupto(av, RgC_sub(c2, c1));
+  }
+  return B;
+}
 /* Compute the full S_1(\G_0(N),\chi); return NULL if space is empty; else
  * if pS is NULL, return stoi(dim), where dim is the dimension; else *pS is
  * set to a vector of forms making up a basis, and return the matrix of their
@@ -5602,8 +5638,9 @@ static GEN
 mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
 {
   GEN E = NULL, EB, E1, E1i, dE1i, mf, A, C, POLCYC, DIH, Minv, chip;
-  long nE = 0, plim, LIM, lim, i, p, lA, dimp, ordchi, dih;
+  long nE = 0, p, LIM, lim, lim1, i, lA, dimp, ordchi, dih;
   pari_timer tt;
+  pari_sp av;
 
   if (pdih) *pdih = 0;
   if (pS) *pS = NULL;
@@ -5660,35 +5697,29 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
       if (N == 296 && (m !=105 && m !=265)) return NULL;
   }
   if (DEBUGLEVEL)
-  {
     err_printf("mf1basis: start character %Ps, conductor = %ld, order = %ld\n",
                gmfcharno(CHI), mfcharconductor(CHI), ordchi);
-    timer_start(&tt);
-  }
-  if (!TMP)
-  {
-    TMP = mf1_pre(N);
-    if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: S_2");
-  }
-  p = gel(TMP,1)[1]; LIM = gel(TMP,1)[2]; lim = gel(TMP,1)[3];
+  if (!TMP) TMP = mf1_pre(N);
+  lim = gel(TMP,1)[1]; LIM = gel(TMP,1)[2]; lim1 = gel(TMP,1)[3];
+  p = gel(TMP,1)[4];
   mf  = gel(TMP,2);
-  A   = gel(TMP,3); /* p*lim x dim matrix */
+  A   = gel(TMP,3);
   EB = mfeisensteinbasis(N, 1, mfcharinv_i(CHI));
-  nE = lg(EB) - 1; plim = p * lim;
-  E1 = RgV_to_RgX(mftocol(gel(EB,1), plim-1, 1), 0);
+  nE = lg(EB) - 1;
+  E1 = RgV_to_RgX(mftocol(gel(EB,1), LIM-1, 1), 0); /* + O(x^LIM) */
   if (--nE)
-    E = RgM_to_RgXV(mfvectomat(vecslice(EB, 2, nE+1), LIM, 1), 0);
+    E = RgM_to_RgXV(mfvectomat(vecslice(EB, 2, nE+1), LIM-1, 1), 0);
   chip = mfchareval(CHI, p); /* != 0 */
-  dimp = mf1dimmod(E1, E, chip, ordchi, dih, TMP);
+  if (DEBUGLEVEL) timer_start(&tt);
+  av = avma; dimp = mf1dimmod(N, E1, E, chip, ordchi, dih, TMP);
+  set_avma(av);
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: dim mod p is %ld", dimp);
   if (!dimp) return NULL;
-  if (dimp == dih)
-  {
-    if (!pS) return utoipos(dih);
-    return mftreatdihedral(N, DIH, POLCYC, ordchi, pS);
-  }
-  E1i = RgXn_inv(E1, plim-1); /* E[1] does not vanish at oo */
+  if (!pS) return utoi(dimp);
+  if (dimp == dih) return mftreatdihedral(N, DIH, POLCYC, ordchi, pS);
+  E1i = RgXn_inv(E1, LIM); /* E[1] does not vanish at oo */
   if (POLCYC) E1i = liftpol_shallow(E1i);
+  E1i = Q_remove_denom(E1i, &dE1i);
   if (DEBUGLEVEL)
   {
     GEN a0 = gel(E1,2);
@@ -5708,67 +5739,64 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
      *(B  - I * rowpermute(B, Mindex)) * X = 0.
      * where I = M * Minv. Rows of (B - I * ...) are 0 up to lim so
      * are not included */
-    GEN Mindex = MF_get_Mindex(mf), F  = gel(TMP,4), Iden  = gel(TMP,5);
-    GEN I = gel(Iden,1), den = gel(Iden,2);
-    GEN e1i = Q_remove_denom(RgXn_red_shallow(E1i, LIM), NULL);
+    GEN Mindex = MF_get_Mindex(mf), Iden  = gel(TMP,5);
     pari_timer TT;
     pari_sp av = avma;
     if (DEBUGLEVEL) timer_start(&TT);
     for (i = 1; i <= nE; i++)
     {
       pari_sp av2 = avma;
-      GEN e = gel(E,i), z, B, Bden, B2;
-      e = Q_primpart(RgXn_mul(e1i, e, LIM));
+      GEN e, z, B;
 
+      e = Q_primpart(RgXn_mul(E1i, gel(E,i), LIM));
       if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: E[%ld] / E[1]", i+1);
-      /* the first time F is over Z and it is more efficient to lift than
+      /* the first time A is over Z and it is more efficient to lift than
          * to let RgXn_mul use Kronecker's trick */
       if (POLCYC && i == 1) e = liftpol_shallow(e);
-      B = mfmatsermul(F, e);
-      if (POLCYC && i != 1) B = liftpol_shallow(B);
-      if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... matsermul");
-      Bden = rowslice(B,lim+1,LIM);
-      B2 = RgM_mul(I, rowpermute(B, Mindex));
-      if (den) Bden = RgM_Rg_mul(Bden, den);
-      if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... RgM_mul");
-      B = gerepileupto(av2, RgM_sub(B2,Bden));
-      z = QabM_ker(B, POLCYC, ordchi);
+      B = mf1intermat(A, Mindex, e, Iden, lim, i == 1? NULL: POLCYC);
+      if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... intermat");
+      z = gerepileupto(av2, QabM_ker(B, POLCYC, ordchi));
       if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... kernel");
       if (lg(z) == 1) return NULL;
-      if (lg(z) == lg(F)) { set_avma(av2); continue; } /* no progress */
+      if (lg(z) == lg(A)) { set_avma(av2); continue; } /* no progress */
       C = C? _RgXQM_mul(C, z, POLCYC): z;
-      if (i == nE) break;
-      F = _RgXQM_mul(F, z, POLCYC);
+      A = _RgXQM_mul(A, z, POLCYC);
       if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... updates");
+      if (lg(z)-1 == dimp) break;
       if (gc_needed(av, 1))
       {
         if (DEBUGMEM > 1) pari_warn(warnmem,"mf1basis i = %ld", i);
-        gerepileall(av, 2, &F, &C);
+        gerepileall(av, 2, &A, &C);
       }
     }
-    A = RgM_mul(A, C);
+    if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: intersection [total]");
   }
-  if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: intersection [total]");
-  /* enable Kronecker: if C = NULL, then A is over Z, else over Q(chi) */
-  if (POLCYC && C) A = QXQM_to_mod_shallow(A, POLCYC);
-  E1i = Q_remove_denom(E1i, &dE1i);
-  A = mfmatsermul(A, E1i); /* E1i is over Q(chi) */
-  if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: matsermul");
-  if (POLCYC) A = C? liftpol_shallow(A): RgXQM_red(A, POLCYC);
-  A = mfstabiter(&C, extract(A, p, lim), rowslice(A, 2, lim),
-                 chip, p, POLCYC, ordchi);
-  if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: Hecke stability");
-  if (!A) return NULL;
-  lA = lg(A); if (!pS) return utoi(lA-1);
+  lA = lg(A);
+  if (lA-1 == dimp)
+  {
+    A = mfmatsermul(rowslice(A, 1, lim1), E1i);
+    if (POLCYC) A = RgXQM_red(A, POLCYC);
+    if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: matsermul [1]");
+  }
+  else
+  {
+    A = mfmatsermul(A, E1i);
+    if (POLCYC) A = RgXQM_red(A, POLCYC);
+    if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: matsermul [2]");
+    A = mfstabiter(&C, A, chip, TMP, POLCYC, ordchi);
+    if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: Hecke stability");
+    if (!A) return NULL;
+  }
   if (dE1i) C = RgM_Rg_mul(C, dE1i);
   if (POLCYC)
   {
     A = QXQM_to_mod_shallow(A, POLCYC);
     C = QXQM_to_mod_shallow(C, POLCYC);
   }
+  lA = lg(A);
   for (i = 1; i < lA; i++)
   {
-    GEN c, v = shallowconcat(gen_0, gel(A,i));
+    GEN c, v = gel(A,i);
     gel(A,i) = RgV_normalize(v, &c);
     gel(C,i) = RgC_Rg_mul(gel(C,i), c);
   }
@@ -6959,10 +6987,8 @@ mfinit_i(GEN NK, long space)
       if (wt1empty(N)) return mfEMPTYall(N, gen_1, CHI, space);
       vCHI = mf1chars(N,vCHI);
       l = lg(vCHI); mf = cgetg(l, t_VEC); if (l == 1) return mf;
-      if (DEBUGLEVEL) timer_start(&tt);
       TMP = mf1_pre(N); vSP = get_vDIH(N, NULL);
       gN = utoipos(N); gs = utoi(space);
-      if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: S_2(%ld)", N);
       for (i = j = 1; i < l; i++)
       {
         pari_sp av = avma;

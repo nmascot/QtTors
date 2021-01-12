@@ -4709,16 +4709,33 @@ FlkM_ker(GEN M, GEN P, ulong p)
   return mkvec2(FlmV_recover_pre(V, W, p, pi, P[1]), D);
 }
 
+static int
+ZabM_ker_check(GEN M, GEN H, ulong p, GEN P, long n)
+{
+  GEN pow;
+  long j, l = lg(H);
+  ulong pi, r;
+  do p += n; while(!uisprime(p));
+  pi = get_Fl_red(p);
+  P = ZX_to_Flx(P, p);
+  r = Flx_oneroot(P, p);
+  pow = Fl_powers_pre(r, degpol(P),p,pi);
+  M = FqM_to_FlxM(M, P, p); M = FlxM_eval_powers_pre(M, pow, p, pi);
+  H = FqM_to_FlxM(H, P, p); H = FlxM_eval_powers_pre(H, pow, p, pi);
+  for (j = 1; j < l; j++)
+    if (!zv_equal0(Flm_Flc_mul_pre(M, gel(H,j), p, pi))) return 0;
+  return 1;
+}
+
 GEN
 ZabM_ker(GEN M, GEN P, long n)
 {
-  pari_sp av2, av = avma;
+  pari_sp av = avma;
   pari_timer ti;
-  GEN q, H, D;
+  GEN q, H = NULL, D = NULL;
   ulong m = LONG_MAX>>1;
-  ulong p= 1 + m - (m % n);
-  av2 = avma;
-  H = NULL; D = NULL;
+  ulong p = 1 + m - (m % n);
+
   if (DEBUGLEVEL>5) timer_start(&ti);
   for(;;)
   {
@@ -4741,15 +4758,13 @@ ZabM_ker(GEN M, GEN P, long n)
     if (DEBUGLEVEL>5) timer_printf(&ti,"ZabM_ker mod %ld (ratlift=%ld)", p,!!Hr);
     if (Hr) {/* DONE ? */
       GEN Hl = vec_Q_primpart(Hr);
-      GEN MH = ZXQM_mul(M, Hl,P);
-      if (DEBUGLEVEL>5) timer_printf(&ti,"ZabM_ker: check");
-      if (gequal0(MH)) { H = Hl;  break; }
+      if (ZabM_ker_check(M, Hl, p, P, n)) { H = Hl;  break; }
     }
 
     if (gc_needed(av,2))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"ZabM_ker");
-      gerepileall(av2, 3, &H, &D, &q);
+      gerepileall(av, 3, &H, &D, &q);
     }
   }
   return gerepilecopy(av, H);
