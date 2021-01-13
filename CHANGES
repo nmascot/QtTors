@@ -22,6 +22,7 @@ BA  13- Mod(2,3)^1000000000000000000001 -> Mod(-1,3) [#2266]
     17- missing GC at the end of RgXn_inv
     18- (-1)^(1/3) -> -1 instead of exp(log(-1)/3)
     19- mfeisenstein(k, trivial characters mod N > 1) not handled correctly
+BA  20- missing GC in qfsolve
 
   Added
 HC   1- new GP function eulerreal

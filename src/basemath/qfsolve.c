@@ -430,11 +430,12 @@ static GEN qfsolvemodp(GEN G, GEN p);
 static GEN
 qfminimize(GEN G, GEN P, GEN E)
 {
+  pari_sp av;
   GEN d, U, Ker, sol, aux, faE, faP;
   long n = lg(G)-1, lP = lg(P), i, dimKer, m;
-
   faP = vectrunc_init(lP);
   faE = vecsmalltrunc_init(lP);
+  av = avma;
   U = NULL;
   for (i = 1; i < lP; i++)
   {
@@ -447,7 +448,7 @@ qfminimize(GEN G, GEN P, GEN E)
     if (vp == 1 && n%2 == 0) {
       vectrunc_append(faP, p);
       vecsmalltrunc_append(faE, 1);
-      continue;
+      av = avma; continue;
     }
     Ker = kermodp(G,p, &dimKer); /* dimKer <= vp */
     if (DEBUGLEVEL >= 4) err_printf("    dimKer = %ld\n",dimKer);
@@ -491,6 +492,7 @@ qfminimize(GEN G, GEN P, GEN E)
                           vecslice(U,dimKer+1,n));
         E[i] -= 2*dimKer2;
       }
+      gerepileall(av, 2, &G, &U);
       i--; continue; /* same p */
     }
 
@@ -556,6 +558,7 @@ qfminimize(GEN G, GEN P, GEN E)
     }
     vectrunc_append(faP, p);
     vecsmalltrunc_append(faE, vp);
+    av = avma;
   }
   if (!U) U = matid(n);
   else
