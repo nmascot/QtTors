@@ -860,13 +860,7 @@ error("incorrect type in besseln (t_STR).")
   ***   at top-level: besseljzero(0,-1)
   ***                 ^-----------------
   *** besseljzero: domain error in besselzero: n <= 0
-  ***   at top-level: besseljzero(0,2^62)
-  ***                 ^-------------------
-  *** besseljzero: overflow in besselzero.
   ***   at top-level: besselyzero(0,-1)
   ***                 ^-----------------
   *** besselyzero: domain error in besselzero: n <= 0
-  ***   at top-level: besselyzero(0,2^62)
-  ***                 ^-------------------
-  *** besselyzero: overflow in besselzero.
-Total time spent: 25
+Total time spent: 29

@@ -68,6 +68,4 @@ for(i=1,#F,print(iferr(F[i]("",1),E,E)));
 for(i=1,#F,print(iferr(F[i](1,O(2)),E,E)));
 for(i=1,#F,print(iferr(F[i](1,""),E,E)));
 besseljzero(0,-1)
-besseljzero(0,2^62)
 besselyzero(0,-1)
-besselyzero(0,2^62)
