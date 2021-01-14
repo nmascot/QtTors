@@ -187,10 +187,8 @@ ZM_nm_mul(GEN x, GEN y)
 
 /* Strassen-Winograd algorithm */
 
-/*
-  Return A[ma+1..ma+da, na+1..na+ea] - B[mb+1..mb+db, nb+1..nb+eb]
-  as an (m x n)-matrix, padding the input with zeroes as necessary.
-*/
+/* Return A[ma+1..ma+da, na+1..na+ea] - B[mb+1..mb+db, nb+1..nb+eb]
+ * as an (m x n)-matrix, padding the input with zeroes as necessary. */
 static GEN
 add_slices(long m, long n,
            GEN A, long ma, long da, long na, long ea,
@@ -204,36 +202,26 @@ add_slices(long m, long n,
     for (i = 1; i <= min_d; i++)
       gel(C, i) = addii(gcoeff(A, ma + i, na + j),
                         gcoeff(B, mb + i, nb + j));
-    for (; i <= da; i++)
-      gel(C, i) = gcoeff(A, ma + i, na + j);
-    for (; i <= db; i++)
-      gel(C, i) = gcoeff(B, mb + i, nb + j);
-    for (; i <= m; i++)
-      gel(C, i) = gen_0;
+    for (; i <= da; i++) gel(C, i) = gcoeff(A, ma + i, na + j);
+    for (; i <= db; i++) gel(C, i) = gcoeff(B, mb + i, nb + j);
+    for (; i <= m; i++)  gel(C, i) = gen_0;
   }
   for (; j <= ea; j++) {
     gel(M, j) = C = cgetg(m + 1, t_COL);
-    for (i = 1; i <= da; i++)
-      gel(C, i) = gcoeff(A, ma + i, na + j);
-    for (; i <= m; i++)
-      gel(C, i) = gen_0;
+    for (i = 1; i <= da; i++) gel(C, i) = gcoeff(A, ma + i, na + j);
+    for (; i <= m; i++) gel(C, i) = gen_0;
   }
   for (; j <= eb; j++) {
     gel(M, j) = C = cgetg(m + 1, t_COL);
-    for (i = 1; i <= db; i++)
-      gel(C, i) = gcoeff(B, mb + i, nb + j);
-    for (; i <= m; i++)
-      gel(C, i) = gen_0;
+    for (i = 1; i <= db; i++) gel(C, i) = gcoeff(B, mb + i, nb + j);
+    for (; i <= m; i++) gel(C, i) = gen_0;
   }
-  for (; j <= n; j++)
-    gel(M, j) = zerocol(m);
+  for (; j <= n; j++) gel(M, j) = zerocol(m);
   return M;
 }
 
-/*
-  Return A[ma+1..ma+da, na+1..na+ea] - B[mb+1..mb+db, nb+1..nb+eb]
-  as an (m x n)-matrix, padding the input with zeroes as necessary.
-*/
+/* Return A[ma+1..ma+da, na+1..na+ea] - B[mb+1..mb+db, nb+1..nb+eb]
+ * as an (m x n)-matrix, padding the input with zeroes as necessary. */
 static GEN
 subtract_slices(long m, long n,
                 GEN A, long ma, long da, long na, long ea,
@@ -247,29 +235,21 @@ subtract_slices(long m, long n,
     for (i = 1; i <= min_d; i++)
       gel(C, i) = subii(gcoeff(A, ma + i, na + j),
                         gcoeff(B, mb + i, nb + j));
-    for (; i <= da; i++)
-      gel(C, i) = gcoeff(A, ma + i, na + j);
-    for (; i <= db; i++)
-      gel(C, i) = negi(gcoeff(B, mb + i, nb + j));
-    for (; i <= m; i++)
-      gel(C, i) = gen_0;
+    for (; i <= da; i++) gel(C, i) = gcoeff(A, ma + i, na + j);
+    for (; i <= db; i++) gel(C, i) = negi(gcoeff(B, mb + i, nb + j));
+    for (; i <= m; i++) gel(C, i) = gen_0;
   }
   for (; j <= ea; j++) {
     gel(M, j) = C = cgetg(m + 1, t_COL);
-    for (i = 1; i <= da; i++)
-      gel(C, i) = gcoeff(A, ma + i, na + j);
-    for (; i <= m; i++)
-      gel(C, i) = gen_0;
+    for (i = 1; i <= da; i++) gel(C, i) = gcoeff(A, ma + i, na + j);
+    for (; i <= m; i++) gel(C, i) = gen_0;
   }
   for (; j <= eb; j++) {
     gel(M, j) = C = cgetg(m + 1, t_COL);
-    for (i = 1; i <= db; i++)
-      gel(C, i) = negi(gcoeff(B, mb + i, nb + j));
-    for (; i <= m; i++)
-      gel(C, i) = gen_0;
+    for (i = 1; i <= db; i++) gel(C, i) = negi(gcoeff(B, mb + i, nb + j));
+    for (; i <= m; i++) gel(C, i) = gen_0;
   }
-  for (; j <= n; j++)
-    gel(M, j) = zerocol(m);
+  for (; j <= n; j++) gel(M, j) = zerocol(m);
   return M;
 }
 
@@ -646,7 +626,7 @@ ZM_sqr_i(GEN x, long l)
   else
   {
     long s = ZM_max_lg_i(x,l,l);
-    long ZM_sw_bound = s > 60 ? 2: s > 25 ? 4: s>15 ? 8 : s > 8 ? 16 : 32;
+    long ZM_sw_bound = s > 60 ? 2: s > 25 ? 4: s > 15 ? 8 : s > 8 ? 16 : 32;
     if (l <= ZM_sw_bound)
       return ZM_mul_classical(x, x, l, l, l);
     else
