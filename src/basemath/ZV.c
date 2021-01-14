@@ -45,35 +45,24 @@ static long
 ZV_max_lg_i(GEN x, long m)
 {
   long i, prec = 2;
-  for (i=1; i<m; i++) { long l = lgefint(gel(x,i)); if (l > prec) prec = l; }
+  for (i = 1; i < m; i++) prec = maxss(prec, lgefint(gel(x,i)));
   return prec;
 }
-
 long
-ZV_max_lg(GEN x)
-{ return ZV_max_lg_i(x, lg(x)); }
+ZV_max_lg(GEN x) { return ZV_max_lg_i(x, lg(x)); }
 
 static long
 ZM_max_lg_i(GEN x, long n, long m)
 {
-  long prec = 2;
-  if (n != 1)
-  {
-    long j;
-    for (j=1; j<n; j++)
-    {
-      long l = ZV_max_lg_i(gel(x,j), m);
-      if (l > prec) prec = l;
-    }
-  }
+  long j, prec = 2;
+  for (j = 1; j < n; j++) prec = maxss(prec, ZV_max_lg_i(gel(x,j), m));
   return prec;
 }
-
 long
 ZM_max_lg(GEN x)
 {
   long n = lg(x);
-  if (n==1) return 2;
+  if (n == 1) return 2;
   return ZM_max_lg_i(x, n, lgcols(x));
 }
 
@@ -480,14 +469,13 @@ ZM_mul_fast(GEN A, GEN B, long lA, long lB)
 static GEN
 ZM_mul_i(GEN x, GEN y, long l, long lx, long ly)
 {
-  if (lx==3 && l==3 && ly==3)
-    return ZM2_mul(x,y);
-  else if (lx > 70 && ly > 70 && l > 70)
+  if (lx==3 && l==3 && ly==3) return ZM2_mul(x,y);
+  if (lx > 70 && ly > 70 && l > 70)
     return ZM_mul_fast(x, y, lx, ly);
   else
   {
     long s = maxss(ZM_max_lg_i(x,lx,l), ZM_max_lg_i(y,ly,lx));
-    long ZM_sw_bound = s > 60 ? 2: s > 25 ? 4: s>15 ? 8 : s > 8 ? 16 : 32;
+    long ZM_sw_bound = s > 60 ? 2: s > 25 ? 4: s > 15 ? 8 : s > 8 ? 16 : 32;
     if (l <= ZM_sw_bound || lx <= ZM_sw_bound || ly <= ZM_sw_bound)
       return ZM_mul_classical(x, y, l, lx, ly);
     else
@@ -498,9 +486,9 @@ ZM_mul_i(GEN x, GEN y, long l, long lx, long ly)
 GEN
 ZM_mul(GEN x, GEN y)
 {
-  long lx=lg(x), ly=lg(y);
-  if (ly==1) return cgetg(1,t_MAT);
-  if (lx==1) return zeromat(0, ly-1);
+  long lx = lg(x), ly = lg(y);
+  if (ly == 1) return cgetg(1,t_MAT);
+  if (lx == 1) return zeromat(0, ly-1);
   return ZM_mul_i(x, y, lgcols(x), lx, ly);
 }
 
