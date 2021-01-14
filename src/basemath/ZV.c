@@ -433,7 +433,7 @@ ZM_mul_i(GEN x, GEN y, long l, long lx, long ly)
   if (lx==3 && l==3 && ly==3) return ZM2_mul(x,y);
   sx = ZM_max_lg_i(x, lx, l);
   sy = ZM_max_lg_i(y, ly, lx);
-  if ((lx > 70 && ly > 70 && l > 70) && (sx <= 10 * sy || sy <= 10 * sx))
+  if ((lx > 70 && ly > 70 && l > 70) && (sx <= 10 * sy && sy <= 10 * sx))
     return ZM_mul_fast(x, y, lx, ly, sx, sy);
 
   B = sw_bound(minss(sx, sy));

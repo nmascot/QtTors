@@ -6989,6 +6989,7 @@ mfinit_i(GEN NK, long space)
       l = lg(vCHI); mf = cgetg(l, t_VEC); if (l == 1) return mf;
       TMP = mf1_pre(N); vSP = get_vDIH(N, NULL);
       gN = utoipos(N); gs = utoi(space);
+      if (DEBUGLEVEL) timer_start(&tt);
       for (i = j = 1; i < l; i++)
       {
         pari_sp av = avma;
