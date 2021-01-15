@@ -4814,7 +4814,7 @@ pol_red(GEN NF, GEN *pP, GEN *pa, long flag)
   long d = degpol(P);
 
   *pa = a = pol_x(varn(P));
-  if (d > 30) return;
+  if (d * (NF ? nf_get_degree(NF): 1) > 30) return;
 
   dP = RgX_disc(P);
   if (typ(dP) != t_INT)
