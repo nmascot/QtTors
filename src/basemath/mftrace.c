@@ -5107,7 +5107,7 @@ split_ii(GEN mf, long dimlim, long flag, GEN vSP, long *pnewd)
           else
           { /* simple module */
             simplesp = vec_append(simplesp, mkvec3(A,Tp,P1));
-            dimsimple += d1;
+            if ((dimsimple += d1) == newd) goto END;
           }
           continue;
         }
@@ -5130,7 +5130,7 @@ split_ii(GEN mf, long dimlim, long flag, GEN vSP, long *pnewd)
         {
           GEN Tpi = RgM_mul(Xi, RgM_mul(rowpermute(Tp,y), Ai));
           simplesp = vec_append(simplesp, mkvec3(AAi, Tpi, Pi));
-          dimsimple += degpol(Pi);
+          if ((dimsimple += degpol(Pi)) == newd) goto END;
         }
         else
         {
@@ -5141,6 +5141,7 @@ split_ii(GEN mf, long dimlim, long flag, GEN vSP, long *pnewd)
     }
     todosp = nextsp; if (lg(todosp) == 1) break;
   }
+END:
   if (DEBUGLEVEL) err_printf("end split, need to clean\n");
   return mfspclean(mf, mf0, NF, ord, sort_by_dim(simplesp), flag);
 }
