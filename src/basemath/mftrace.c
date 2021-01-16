@@ -5333,7 +5333,9 @@ mf1_pre(long N)
 
   if (DEBUGLEVEL) timer_start(&tt);
   mf = mfinit_Nkchi(N, 2, mfchartrivial(), mf_CUSP, 0);
-  if (DEBUGLEVEL) timer_printf(&tt, "mf1basis [pre]: S_2(%ld)", N);
+  if (DEBUGLEVEL)
+    timer_printf(&tt, "mf1basis [pre]: S_2(%ld), dim = %ld",
+                 N, MF_get_dim(mf));
   M = MF_get_M(mf); Minv = MF_get_Minv(mf); den = gel(Minv,2);
   B = mfsturm_mf(mf);
   if (uisprime(N))
@@ -5511,6 +5513,8 @@ mfstabiter(GEN *pC, GEN A0, GEN chip, GEN TMP, GEN P, long ordchi)
 {
   GEN A, Ap, vp = gel(TMP,4), C = NULL;
   long i, lA, lim1 = gel(TMP,1)[3], p = gel(TMP,1)[4];
+  pari_timer tt;
+
   Ap = rowpermute(A0, vp);
   A = rowslice(A0, 2, nbrows(Ap)+1); /* remove a0 */
   for(;;)
@@ -5518,6 +5522,8 @@ mfstabiter(GEN *pC, GEN A0, GEN chip, GEN TMP, GEN P, long ordchi)
     GEN R = shallowconcat(matTp(Ap, A, chip, p), A);
     GEN B = QabM_ker(R, P, ordchi);
     long lB = lg(B);
+    if (DEBUGLEVEL)
+      timer_printf(&tt, "mf1basis: Hecke intersection (dim %ld)", lB-1);
     if (lB == 1) return NULL;
     lA = lg(A); if (lB == lA) break;
     B = rowslice(B, 1, lA-1);
@@ -5757,7 +5763,8 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
       B = mf1intermat(A, Mindex, e, Iden, lim, i == 1? NULL: POLCYC);
       if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... intermat");
       z = gerepileupto(av2, QabM_ker(B, POLCYC, ordchi));
-      if (DEBUGLEVEL) timer_printf(&TT, "mf1basis: ... kernel");
+      if (DEBUGLEVEL)
+        timer_printf(&TT, "mf1basis: ... kernel (dim %ld)",lg(z)-1);
       if (lg(z) == 1) return NULL;
       if (lg(z) == lg(A)) { set_avma(av2); continue; } /* no progress */
       C = C? _RgXQM_mul(C, z, POLCYC): z;
