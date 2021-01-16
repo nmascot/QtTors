@@ -685,11 +685,11 @@ ZX_mulspec(GEN x, GEN y, long nx, long ny)
   v = vx + vy;
   if (nx==1) return Z_ZX_mulshiftspec(gel(x,0), y, ny, v);
   if (ny==1) return Z_ZX_mulshiftspec(gel(y,0), x, nx, v);
+  if (nx > 2 * ny || (ny > 2 * nx))
+    return RgX_mulspec(x - vx, y - vy, nx + vx, ny + vy);
   av = avma;
   ex = ZX_expispec(x, nx);
   ey = ZX_expispec(y, ny);
-  if (ex > 10 * ey || ey > 10 * ex)
-    return RgX_mulspec(x - vx, y - vy, nx + vx, ny + vy);
   z  = ZX_mulspec_mulii(x,y,nx,ny,ex,ey,v);
   return gerepileupto(av, z);
 }
@@ -951,7 +951,7 @@ ZXQM_mul(GEN x, GEN y, GEN T)
   {
     long e, n, N, ex = ZXM_expi(x), ey = ZXM_expi(y);
 
-    if ((ey && ex > 10 * ey) || (ex && ey > 10 * ex)) return RgM_mul_i(x, y);
+    if ((ey && ex > 64 * ey) || (ex && ey > 64 * ex)) return RgM_mul_i(x, y);
     n = lg(x)-1;
     e = ex + ey + expu(d) + expu(n) + 4;
     N = divsBIL(e)+1;
