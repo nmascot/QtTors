@@ -63,7 +63,8 @@ static GEN mflineardivtomat(long N, GEN vF, long n);
 static GEN mfdihedralcusp(long N, GEN CHI, GEN vSP);
 static long mfdihedralcuspdim(long N, GEN CHI, GEN vSP);
 static GEN mfdihedralnew(long N, GEN CHI, GEN SP);
-static GEN mfdihedralall(long a, long b);
+static GEN mfdihedral(long N);
+static GEN mfdihedralall(long N);
 static long mf1cuspdim(long N, GEN CHI, GEN vSP);
 static long mf2dim_Nkchi(long N, long k, GEN CHI, ulong space);
 static long mfdim_Nkchi(long N, long k, GEN CHI, long space);
@@ -3613,7 +3614,7 @@ static GEN
 get_DIH(long N)
 {
   GEN x = cache_get(cache_DIH, N);
-  return x? gcopy(x): mfdihedralall(N, N);
+  return x? gcopy(x): mfdihedral(N);
 }
 static GEN
 get_vDIH(long N, GEN D)
@@ -6276,8 +6277,7 @@ mfgaloistype(GEN NK, GEN f)
 /******************************************************************/
 /* lim >= 2 */
 static void
-consttabdihedral(long lim)
-{ cache_set(cache_DIH, mfdihedralall(1, lim)); }
+consttabdihedral(long lim) { cache_set(cache_DIH, mfdihedralall(lim)); }
 
 /* a ideal coprime to bnr modulus */
 static long
@@ -6684,47 +6684,44 @@ append_dihedral(GEN v, long D, long l1, long l2)
 
 static long
 di_N(GEN a) { return gel(a,1)[1]; }
-/* All primitive dihedral weight 1 forms of leven in [l1, l2] */
 static GEN
-mfdihedralall(long l1, long l2)
+mfdihedral(long N)
 {
-  long limD = l2, ct, i;
-  GEN res = vectrunc_init(2*limD), z;
+  GEN D = mydivisorsu(N), res = vectrunc_init(2*N);
+  long j, l = lg(D);
+  for (j = 2; j < l; j++)
+  { /* skip d = 1 */
+    long d = D[j];
+    if (d == 2) continue;
+    append_dihedral(res, -d, N,N);
+    if (d >= 5 && D[l-j] >= 3) append_dihedral(res, d, N,N); /* Nf >= 3 */
+  }
+  if (lg(res) > 1) res = shallowconcat1(res);
+  return res;
+}
+/* All primitive dihedral weight 1 forms of leven in [1, N], N > 1 */
+static GEN
+mfdihedralall(long N)
+{
+  GEN res = vectrunc_init(2*N), z;
+  long D, ct, i;
 
-  if (l1 == l2)
-  {
-    GEN D = mydivisorsu(l1);
-    long l = lg(D), j;
-    for (j = 2; j < l; j++)
-    { /* skip d = 1 */
-      long d = D[j];
-      if (d == 2) continue;
-      append_dihedral(res, -d, l1,l2);
-      if (d >= 5 && D[l-j] >= 3) append_dihedral(res, d, l1,l2); /* Nf >= 3 */
-    }
-  }
-  else
-  {
-    long D;
-    for (D = -3; D >= -limD; D--) append_dihedral(res, D, l1,l2);
-    limD /= 3; /* Nf >= 3 (GTM 193, prop 3.3.18) */
-    for (D = 5; D <= limD;   D++) append_dihedral(res, D, l1,l2);
-  }
+  for (D = -3; D >= -N; D--) append_dihedral(res, D, 1,N);
+  /* Nf >= 3 (GTM 193, prop 3.3.18) */
+  for (D = N / 3; D >= 5; D--) append_dihedral(res, D, 1,N);
   ct = lg(res);
-  if (ct > 1) res = shallowconcat1(res);
-  if (l1 == l2) return res; /* single level */
   if (ct > 1)
   { /* sort wrt N */
+    res = shallowconcat1(res);
     res = vecpermute(res, indexvecsort(res, mkvecsmall(1)));
     ct = lg(res);
   }
-  z = const_vec(l2-l1+1, cgetg(1,t_VEC));
+  z = const_vec(N, cgetg(1,t_VEC));
   for (i = 1; i < ct;)
   { /* regroup result sharing the same N */
     long n = di_N(gel(res,i)), j = i+1, k;
     GEN v;
     while (j < ct && di_N(gel(res,j)) == n) j++;
-    n -= l1-1;
     gel(z, n) = v = cgetg(j-i+1, t_VEC);
     for (k = 1; i < j; k++,i++) gel(v,k) = gel(res,i);
   }
