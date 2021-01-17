@@ -35,6 +35,7 @@ BA   7- [libpari] RgXQ_trace, RgX_chinese_coprime
      8- [libpari] FpM_intersect_i, Flm_intersect_i
 HC   9- add optional argument to ramanujantau + parallelize code
 HC  10- new GP functions bessljzero, besselyzero
+BA  11- [libpari] Fle_ellweilpairing, Fle_elltatepairing
 
   Changed
 HC   1- faster implementation of eulervec + cache result

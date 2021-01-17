@@ -689,3 +689,170 @@ FleV_mulu_pre_inplace(GEN P, ulong n, GEN a4, ulong p, ulong pi)
   naf_t x; naf_repr(&x, n);
   FleV_mulu_pre_naf_inplace(P, n, a4, p, pi, &x);
 }
+
+/***********************************************************************/
+/**                                                                   **/
+/**                            Pairings                               **/
+/**                                                                   **/
+/***********************************************************************/
+
+/* Derived from APIP from and by Jerome Milan, 2012 */
+
+static ulong
+Fle_vert(GEN P, GEN Q, ulong a4, ulong p)
+{
+  if (ell_is_inf(P))
+    return 1;
+  if (uel(Q, 1) != uel(P, 1))
+    return Fl_sub(uel(Q, 1), uel(P, 1), p);
+  if (uel(P,2) != 0 ) return 1;
+  return Fl_inv(Fl_add(Fl_triple(Fl_sqr(uel(P,1),p), p), a4, p), p);
+}
+
+static ulong
+Fle_Miller_line(GEN R, GEN Q, ulong slope, ulong a4, ulong p)
+{
+  ulong x = uel(Q, 1), y = uel(Q, 2);
+  ulong tmp1 = Fl_sub(x, uel(R, 1), p);
+  ulong tmp2 = Fl_add(Fl_mul(tmp1, slope, p), uel(R,2), p);
+  if (y != tmp2)
+    return Fl_sub(y, tmp2, p);
+  if (y == 0)
+    return 1;
+  else
+  {
+    ulong s1, s2;
+    ulong y2i = Fl_inv(Fl_double(y, p), p);
+    s1 = Fl_mul(Fl_add(Fl_triple(Fl_sqr(x, p), p), a4, p), y2i, p);
+    if (s1 != slope)
+      return Fl_sub(s1, slope, p);
+    s2 = Fl_mul(Fl_sub(Fl_triple(x, p), Fl_sqr(s1, p), p), y2i, p);
+    return s2 ? s2: y2i;
+  }
+}
+
+/* Computes the equation of the line tangent to R and returns its
+   evaluation at the point Q. Also doubles the point R.
+ */
+
+static ulong
+Fle_tangent_update(GEN R, GEN Q, ulong a4, ulong p, GEN *pt_R)
+{
+  if (ell_is_inf(R))
+  {
+    *pt_R = ellinf();
+    return 1;
+  }
+  else if (uel(R,2) == 0)
+  {
+    *pt_R = ellinf();
+    return Fle_vert(R, Q, a4, p);
+  } else {
+    ulong slope;
+    *pt_R = Fle_dbl_slope(R, a4, p, &slope);
+    return Fle_Miller_line(R, Q, slope, a4, p);
+  }
+}
+
+/* Computes the equation of the line through R and P, and returns its
+   evaluation at the point Q. Also adds P to the point R.
+ */
+
+static ulong
+Fle_chord_update(GEN R, GEN P, GEN Q, ulong a4, ulong p, GEN *pt_R)
+{
+  if (ell_is_inf(R))
+  {
+    *pt_R = gcopy(P);
+    return Fle_vert(P, Q, a4, p);
+  }
+  else if (ell_is_inf(P))
+  {
+    *pt_R = gcopy(R);
+    return Fle_vert(R, Q, a4, p);
+  }
+  else if (uel(P, 1) == uel(R, 1))
+  {
+    if (uel(P, 2) == uel(R, 2))
+      return Fle_tangent_update(R, Q, a4, p, pt_R);
+    else {
+      *pt_R = ellinf();
+      return Fle_vert(R, Q, a4, p);
+    }
+  } else {
+    ulong slope;
+    *pt_R = Fle_add_slope(P, R, a4, p, &slope);
+    return Fle_Miller_line(R, Q, slope, a4, p);
+  }
+}
+
+struct _Fle_miller { ulong p, a4; GEN P; };
+static GEN
+Fle_Miller_dbl(void* E, GEN d)
+{
+  struct _Fle_miller *m = (struct _Fle_miller *)E;
+  ulong p = m->p, a4 = m->a4;
+  GEN P = m->P;
+  ulong v, line;
+  ulong N = Fl_sqr(umael(d,1,1), p);
+  ulong D = Fl_sqr(umael(d,1,2), p);
+  GEN point = gel(d,2);
+  line = Fle_tangent_update(point, P, a4, p, &point);
+  N  = Fl_mul(N, line, p);
+  v = Fle_vert(point, P, a4, p);
+  D = Fl_mul(D, v, p); return mkvec2(mkvecsmall2(N, D), point);
+}
+static GEN
+Fle_Miller_add(void* E, GEN va, GEN vb)
+{
+  struct _Fle_miller *m = (struct _Fle_miller *)E;
+  ulong p = m->p, a4= m->a4;
+  GEN P = m->P, point;
+  ulong v, line;
+  ulong na = umael(va,1,1), da = umael(va,1,2);
+  ulong nb = umael(vb,1,1), db = umael(vb,1,2);
+  GEN pa = gel(va,2), pb = gel(vb,2);
+  ulong N = Fl_mul(na, nb, p);
+  ulong D = Fl_mul(da, db, p);
+  line = Fle_chord_update(pa, pb, P, a4, p, &point);
+  N = Fl_mul(N, line, p);
+  v = Fle_vert(point, P, a4, p);
+  D = Fl_mul(D, v, p); return mkvec2(mkvecsmall2(N, D), point);
+}
+
+/* Returns the Miller function f_{m, Q} evaluated at the point P using
+ * the standard Miller algorithm. */
+static ulong
+Fle_Miller(GEN Q, GEN P, ulong m, ulong a4, ulong p)
+{
+  pari_sp av = avma;
+  struct _Fle_miller d;
+  GEN v;
+  ulong N, D;
+
+  d.a4 = a4; d.p = p; d.P = P;
+  v = gen_powu_i(mkvec2(mkvecsmall2(1,1), Q), m, (void*)&d,
+                Fle_Miller_dbl, Fle_Miller_add);
+  N = umael(v,1,1); D = umael(v,1,2);
+  return gc_ulong(av, Fl_div(N, D, p));
+}
+
+ulong
+Fle_weilpairing(GEN P, GEN Q, ulong m, ulong a4, ulong p)
+{
+  pari_sp ltop = avma;
+  ulong N, D, w;
+  if (ell_is_inf(P) || ell_is_inf(Q) || zv_equal(P,Q)) return 1;
+  N = Fle_Miller(P, Q, m, a4, p);
+  D = Fle_Miller(Q, P, m, a4, p);
+  w = Fl_div(N, D, p);
+  if (odd(m)) w  = Fl_neg(w, p);
+  return gc_ulong(ltop, w);
+}
+
+ulong
+Fle_tatepairing(GEN P, GEN Q, ulong m, ulong a4, ulong p)
+{
+  if (ell_is_inf(P) || ell_is_inf(Q)) return 1;
+  return Fle_Miller(P, Q, m, a4, p);
+}
