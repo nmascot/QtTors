@@ -5574,7 +5574,7 @@ mfcharinv_i(GEN CHI)
 
 /* upper bound dim S_1(Gamma_0(N),chi) performing the linear algebra mod p */
 static long
-mf1dimmod(long N, GEN E1, GEN E, GEN chip, long ordchi, long dih, GEN TMP)
+mf1dimmod(GEN E1, GEN E, GEN chip, long ordchi, long dih, GEN TMP)
 {
   GEN E1i, A, vp, mf, C = NULL;
   ulong q, r = QabM_init(ordchi, &q);
@@ -5719,7 +5719,7 @@ mf1basis(long N, GEN CHI, GEN TMP, GEN vSP, GEN *pS, long *pdih)
     E = RgM_to_RgXV(mfvectomat(vecslice(EB, 2, nE+1), LIM-1, 1), 0);
   chip = mfchareval(CHI, p); /* != 0 */
   if (DEBUGLEVEL) timer_start(&tt);
-  av = avma; dimp = mf1dimmod(N, E1, E, chip, ordchi, dih, TMP);
+  av = avma; dimp = mf1dimmod(E1, E, chip, ordchi, dih, TMP);
   set_avma(av);
   if (DEBUGLEVEL) timer_printf(&tt, "mf1basis: dim mod p is %ld", dimp);
   if (!dimp) return NULL;
