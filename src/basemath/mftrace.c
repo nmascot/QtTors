@@ -6559,7 +6559,7 @@ mfdihedralcommon(GEN bnf, GEN id, GEN znN, GEN kroconreyN, long N, long D, GEN c
 {
   GEN bnr = dihan_bnr(bnf, id), cyc = ZV_to_zv( bnr_get_cyc(bnr) );
   GEN bnrconreyN, cycn, cycN, Lvchi, res, P, vT;
-  long j, ordmax, l, lc, deghecke, degrel, vt;
+  long j, ordmax, l, lc, deghecke, vt;
 
   lc = lg(cyc); if (lc == 1) return NULL;
   cycn = cyc_normalize_zv(cyc);
@@ -6580,7 +6580,7 @@ mfdihedralcommon(GEN bnf, GEN id, GEN znN, GEN kroconreyN, long N, long D, GEN c
   {
     GEN T, v, vchi = ZV_to_zv(gel(Lvchi,j));
     GEN chi, chin = char_normalize_zv(vchi, cycn);
-    long o, vnum, k0;
+    long o, vnum, k0, degrel;
     v = bnrchartwist2conrey(chin, cycn, bnrconreyN, kroconreyN);
     o = itou(Q_denom(v));
     T = gel(vT, o);
@@ -6599,10 +6599,10 @@ mfdihedralcommon(GEN bnf, GEN id, GEN znN, GEN kroconreyN, long N, long D, GEN c
 }
 
 static long
-not_cond(long D, long n)
+is_cond(long D, long n)
 {
-  if (D > 0) return n == 4 && (D&7L) != 1;
-  return n == 2 || n == 3 || (n == 4 && (D&7L)==1);
+  if (D > 0) return n != 4 || (D&7L) == 1;
+  return n != 2 && n != 3 && (n != 4 || (D&7L)!=1);
 }
 /* Append to v all dihedral weight 1 forms coming from D, if fundamental.
  * level in [l1, l2] */
@@ -6610,7 +6610,7 @@ static void
 append_dihedral(GEN v, long D, long l1, long l2)
 {
   long Da = labs(D), no, i, numi, ct, min, max;
-  GEN bnf, con, LI, resall, arch1, arch2;
+  GEN bnf, con, vI, resall, arch1, arch2;
   pari_sp av;
 
   /* min <= Nf <= max */
@@ -6627,8 +6627,8 @@ append_dihedral(GEN v, long D, long l1, long l2)
   av = avma;
   bnf = dihan_bnf(D);
   con = nf2_get_conj(bnf_get_nf(bnf));
-  LI = ideallist(bnf, max);
-  numi = 0; for (i = min; i <= max; i++) numi += lg(gel(LI, i)) - 1;
+  vI = ideallist(bnf, max);
+  numi = 0; for (i = min; i <= max; i++) numi += lg(gel(vI, i)) - 1;
   if (D > 0)
   {
     numi <<= 1;
@@ -6638,23 +6638,23 @@ append_dihedral(GEN v, long D, long l1, long l2)
   else
     arch1 = arch2 = NULL;
   resall = cgetg(numi+1, t_VEC); ct = 1;
-  for (no = min; no <= max; no++) if (!not_cond(D, no))
+  for (no = min; no <= max; no++) if (is_cond(D, no))
   {
-    long N = Da*no, lgc, lglis;
-    GEN LIs = gel(LI, no), znN = znstar0(utoipos(N), 1), conreyN, kroconreyN;
+    long N = Da*no, lc, lI;
+    GEN I = gel(vI, no), znN = znstar0(utoipos(N), 1), conreyN, kroconreyN;
 
-    conreyN = znstar_get_conreygen(znN); lgc = lg(conreyN);
-    kroconreyN = cgetg(lgc, t_VECSMALL);
-    for (i = 1; i < lgc; i++) kroconreyN[i] = krosi(D, gel(conreyN, i));
-    lglis = lg(LIs);
-    for (i = 1; i < lglis; i++)
+    conreyN = znstar_get_conreygen(znN); lc = lg(conreyN);
+    kroconreyN = cgetg(lc, t_VECSMALL);
+    for (i = 1; i < lc; i++) kroconreyN[i] = krosi(D, gel(conreyN, i));
+    lI = lg(I);
+    for (i = 1; i < lI; i++)
     {
-      GEN id = gel(LIs, i), idcon, z;
+      GEN id = gel(I, i), idcon, z;
       long j;
       if (typ(id) == t_INT) continue;
       idcon = galoisapply(bnf, con, id);
-      for (j = i; j < lglis; j++)
-        if (gequal(idcon, gel(LIs, j))) { gel(LIs, j) = gen_0; break; }
+      for (j = i; j < lI; j++)
+        if (gequal(idcon, gel(I, j))) { gel(I, j) = gen_0; break; }
       if (D < 0)
       {
         GEN conk = i == j ? con : NULL;
