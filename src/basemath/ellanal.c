@@ -670,7 +670,7 @@ logplusQ(GEN t, long prec)
 
 /* See GTM239, p532, Th 8.1.18
  * Return M such that h_naive <= M */
-static GEN
+GEN
 hnaive_max(GEN ell, GEN ht)
 {
   const long prec = LOWDEFAULTPREC; /* minimal accuracy */

@@ -29,11 +29,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 static ulong
 Fl_c4_to_a4(ulong c4, ulong p)
 { return Fl_neg(Fl_mul(c4, 27, p), p); }
+static ulong
+Fl_c6_to_a6(ulong c6, ulong p)
+{ return Fl_neg(Fl_mul(c6, 54, p), p); }
 static void
 Fl_c4c6_to_a4a6(ulong c4, ulong c6, ulong p, ulong *a4, ulong *a6)
 {
   *a4 = Fl_c4_to_a4(c4, p);
-  *a6 = Fl_neg(Fl_mul(c6, 54, p), p);
+  *a6 = Fl_c6_to_a6(c6, p);
 }
 static GEN
 c4_to_a4(GEN c4, GEN p)
@@ -5199,31 +5202,46 @@ ellQ_factorback_chinese(GEN A, GEN P, GEN *mod)
   GEN Q, B = ellQ_factorback_filter(A, P, &Q);
   return ncV_chinese_center(B, Q, mod);
 }
+
 static GEN
-ellQ_factorback1(GEN A, GEN L, GEN E, ulong p)
+ellQ_factorback1(GEN A, GEN L, ulong l, GEN E, long CM, ulong p)
 {
   pari_sp av = avma;
   ulong pi = get_Fl_red(p);
   GEN c4 = ell_get_c4(E);
   ulong a4 = Fl_c4_to_a4(Rg_to_Fl(c4, p), p);
-  GEN a4a6 = a4a6_ch_Fl(E,p);
-  GEN a = FljV_changepointinv_pre(A, a4a6, p, pi);
-  GEN Hp = FljV_factorback_pre(a, L, a4, p, pi);
+  GEN a4a6, a, Hp;
+  ulong d = 1;
+  if (l != 1)
+  {
+    GEN c6 = ell_get_c6(E);
+    ulong a6 = Fl_c6_to_a6(Rg_to_Fl(c6, p), p);
+    ulong c = p + 1 - Fl_elltrace_CM(CM, a4, a6, p);
+    d = Fl_invsafe(l % c, c);
+    if (!d) return NULL;
+  }
+  a4a6 = a4a6_ch_Fl(E,p);
+  a = FljV_changepointinv_pre(A, a4a6, p, pi);
+  Hp = FljV_factorback_pre(a, L, a4, p, pi);
+  if (d != 1)
+    Hp = Flj_mulu_pre(Hp, d, a4, p, pi);
   Hp = Flj_to_Fle_pre(Hp, p, pi);
   Hp = Fle_changepoint(Hp, a4a6, p);
   return gerepileuptoleaf(av, Hp);
 }
 
 static GEN
-ellQ_factorback_slice(GEN A, GEN L, GEN E, GEN P, GEN *mod)
+ellQ_factorback_slice(GEN A, GEN L, ulong l, GEN E, GEN P, GEN *mod)
 {
   pari_sp av = avma;
   long i, n = lg(P)-1;
+  long CM = ellQ_get_CM(E);
   GEN H, T, B, Q;
   if (n == 1)
   {
     ulong p = uel(P,1);
-    GEN Hp = ellQ_factorback1(ZM_to_Flm(A, p), L, E, p);
+    GEN Hp = ellQ_factorback1(ZM_to_Flm(A, p), L, l, E, CM, p);
+    if (!Hp) { *mod = gen_1; return ellinf(); }
     *mod = utoi(p);
     return Flv_to_ZV(Hp);
   }
@@ -5231,7 +5249,10 @@ ellQ_factorback_slice(GEN A, GEN L, GEN E, GEN P, GEN *mod)
   A = ZM_nv_mod_tree(A, P, T);
   H = cgetg(n+1, t_VEC);
   for(i=1; i <= n; i++)
-    gel(H,i) = ellQ_factorback1(gel(A,i),L,E,uel(P,i));
+  {
+    gel(H,i) = ellQ_factorback1(gel(A,i), L, l, E, CM, uel(P,i));
+    if (gel(H,i)==NULL) { gel(H,i) = ellinf(); uel(P,i) = 1; }
+  }
   B = ellQ_factorback_filter(H, P, &Q);
   if (lg(Q) != lg(P)) T = ZV_producttree(Q);
   H = ncV_chinese_center_tree(B, Q, T, ZV_chinesetree(Q,T));
@@ -5241,36 +5262,43 @@ ellQ_factorback_slice(GEN A, GEN L, GEN E, GEN P, GEN *mod)
 }
 
 GEN
-ellQ_factorback_worker(GEN P, GEN E, GEN A, GEN L)
+ellQ_factorback_worker(GEN P, GEN E, GEN A, GEN L, ulong l)
 {
   GEN V = cgetg(3, t_VEC);
-  gel(V,1) = ellQ_factorback_slice(A, L, E, P, &gel(V,2));
+  gel(V,1) = ellQ_factorback_slice(A, L, l, E, P, &gel(V,2));
   return V;
 }
 
 static GEN
-ellQ_factorback(GEN E, GEN A, GEN L, GEN h, long prec)
+ellQ_factorback(GEN E, GEN A, GEN L, ulong l, GEN h, long prec)
 {
   pari_sp av = avma;
   GEN mod = gen_1, H = NULL;
   forprime_t S;
-  GEN worker = snm_closure(is_entry("_ellQ_factorback_worker"), mkvec3(E, QEV_to_ZJV(A), L));
+  GEN hn = l==1 ? NULL: hnaive_max(E, h);
+  GEN D = ell_get_disc(E);
+  GEN worker = snm_closure(is_entry("_ellQ_factorback_worker"),
+               mkvec4(E, QEV_to_ZJV(A), L, utoi(l)));
   ulong bound = 1;
-  init_modular_big(&S);
+  if (l==1)
+    init_modular_big(&S);
+  else
+    init_modular_small(&S);
   while (1)
   {
     GEN amax, r;
-    gen_inccrt("ellQ_factorback", worker, NULL, bound, 0,
+    gen_inccrt("ellQ_factorback", worker, D, bound, 0,
             &S, &H, &mod, ellQ_factorback_chinese, NULL);
     amax = sqrti(shifti(mod,-2));
-    r = ell_is_inf(H)? H: FpC_ratlift(H, mod, amax, amax, NULL);
+    r = ell_is_inf(H)? ellinf(): FpC_ratlift(H, mod, amax, amax, NULL);
     if (r) settyp(r,t_VEC);
     if (r && oncurve(E,r))
     {
       GEN g = ellheight(E,r,prec);
-      if (expo(subrs(divrr(g,h),1))<-prec2nbits(prec)/2)
+      if (signe(g) && expo(subrs(divrr(g,h),1))<-prec2nbits(prec)/2)
         return gerepileupto(av, r);
     }
+    if (hn && gcmpsg(expi(mod)>>2,hn) > 0) return NULL;
     bound <<=1;
   }
 }
@@ -5287,7 +5315,7 @@ ellQ_genreduce(GEN E, GEN G, long prec)
   {
     GEN Li = gel(L, i), h = qfeval(M,Li);
     if (expo(h)>-prec2nbits(prec)/2)
-      gel(V,j++) = ellQ_factorback(E, G, Li, h, prec);
+      gel(V,j++) = ellQ_factorback(E, G, Li, 1, h, prec);
   }
   setlg(V, j);
   return gerepilecopy(av, V);
@@ -7209,3 +7237,152 @@ ellxn(GEN e, long n, long v)
   }
   return gerepilecopy(av, mkvec2(B,A));
 }
+
+static ulong
+ltors_Fl(ulong l, ulong p)
+{
+  ulong x, y;
+  ulong r = (p-1)/l;
+  for (x = 2; ; x++)
+  {
+    y = Fl_powu(x, r, p);
+    if (y!=1) break;
+  }
+  return y;
+}
+
+static void
+FljV_vecsat(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p, GEN S, long *m)
+{
+  long i, lA = lg(P)-1;
+  GEN v = zero_zv(lA);
+  GEN w = zero_zv(lA);
+  pari_sp av = avma;
+  GEN a4a6 = a4a6_ch_Fl(E, p);
+  GEN G = Fl_ellptors(l, o, a4, a6, p);
+  GEN G1 = gel(G,1), G2 = lg(G)==3 ? gel(G, 2): NULL;
+  ulong g = ltors_Fl(l, p), q = (p-1)/l;
+  for (i=1; i<=lA; i++)
+  {
+    GEN Q = Fle_changepointinv(Flj_to_Fle(gel(P,i), p), a4a6, p);
+    if (!ell_is_inf(Q))
+    {
+      ulong u = Fl_powu(Fle_tatepairing(G1, Q, l, a4, p), q, p);
+      v[i] = Fl_log(u, g, l, p);
+      if (G2)
+      {
+        ulong u = Fl_powu(Fle_tatepairing(G2, Q, l, a4, p), q, p);
+        w[i] = Fl_log(u, g, l, p);
+      }
+    }
+  }
+  gel(S,(*m)++) = v;
+  if (G2 && *m < lg(S)) gel(S,(*m)++) = w;
+  set_avma(av);
+}
+
+static GEN
+ellsatp_ker(hashtable *h, GEN e, long CM, GEN help, ulong l, long nb)
+{
+  GEN D = ell_get_disc(e);
+  forprime_t S;
+  long m = 1;
+  GEN P = QEV_to_ZJV(help);
+  GEN sat  = cgetg(nb+1, t_MAT);
+  (void)u_forprime_arith_init(&S, 5, ULONG_MAX,1,l);
+  while (m <= nb)
+  {
+    long o;
+    ulong a4, a6, p = u_forprime_next(&S);
+    if (dvdiu(D, p)) continue;
+    if (!hash_haskey_long(h, (void*)p, &o))
+    {
+      Fl_ell_to_a4a6(e, p, &a4, &a6);
+      o = p+1 - Fl_elltrace_CM(CM, a4, a6, p);
+      hash_insert_long(h,(void*)p, o);
+    }
+    if (o % l == 0)
+    {
+      Fl_ell_to_a4a6(e, p, &a4, &a6);
+      FljV_vecsat(e, ZM_to_Flm(P, p), o, l, a4, a6, p, sat, &m);
+    }
+  }
+  return sat;
+}
+
+static GEN
+ellsatp(hashtable *h, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, long nb, long prec)
+{
+  GEN P = T ? shallowconcat(H, T): H;
+  GEN S = ellsatp_ker(h, E, CM, P, l, nb);
+  pari_sp av = avma;
+  GEN K = Flm_ker(Flm_transpose(S), l);
+  long i, lK = lg(K), j, r = lg(H)-1;
+  GEN V = cgetg(lK, t_VEC);
+  if (lK==1) return gc_NULL(av);
+  av = avma;
+  for (i=1, j=1; i<lK; i++)
+  {
+    GEN R;
+    GEN Ki = FpC_center(Flc_to_ZC(gel(K,i)), utoi(l), utoi(l>>1));
+    GEN h = qfeval(M, T? vecslice(Ki,1,r): Ki);
+    if (isintzero(h)) continue;
+    if (T || l <= 7)
+    {
+      GEN Q = ellQ_factorback(E, P, Ki, 1, h, prec);
+      if (!ellisdivisible(E, Q, utoi(l), &R)) R = NULL;
+    }
+    else
+      R = ellQ_factorback(E, P, Ki, l, gdiv(h,sqru(l)), prec);
+    if (R)
+    {
+      gel(V, j++) = R;
+      av = avma;
+    }
+    set_avma(av);
+  }
+  if (j==1) return NULL;
+  setlg(V,j);
+  return ellQ_genreduce(E, shallowconcat(P,V), prec);
+}
+
+static GEN
+ellQ_saturation(GEN E, GEN P, long B, long prec)
+{
+  forprime_t S;
+  long l = lg(P)-1;
+  ulong p;
+  hashtable h;
+  GEN M = ellheightmatrix(E, P, prec);
+  long CM = ellQ_get_CM(E);
+  if (lg(P)==1) return cgetg(1, t_VEC);
+  hash_init_ulong(&h, 16, 1);
+  (void)u_forprime_init(&S, 2, B);
+  while((p = u_forprime_next(&S)))
+  {
+    GEN T = gel(elltors_psylow(E, l), 3);
+    long nb = l+lg(T)+5;
+    if (lg(T)==1) T = NULL;
+    while(1)
+    {
+      GEN Q = ellsatp(&h, E, CM, T, P, M, p, nb, prec);
+      if (!Q) break;
+      P = Q; nb += l;
+      M = ellheightmatrix(E, P, prec);
+    }
+  }
+  return P;
+}
+
+GEN
+ellsaturation(GEN E, GEN P, long B, long prec)
+{
+  pari_sp av = avma;
+  GEN urst;
+  E = ellintegralmodel(E, &urst);
+  if (urst) P = ellchangepoint(P, urst);
+  P = ellQ_saturation(E, P, B, prec);
+  if (urst) P = ellchangepoint(P, ellchangeinvert(urst));
+  return gerepilecopy(av, P);
+}
+

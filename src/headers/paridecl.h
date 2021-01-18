@@ -3132,6 +3132,7 @@ GEN     ellordinate(GEN e, GEN x, long prec);
 GEN     ellpadicheight0(GEN e, GEN p, long n, GEN P, GEN Q);
 GEN     ellpadicheightmatrix(GEN e, GEN p, long n, GEN P);
 GEN     ellperiods(GEN w, long flag, long prec);
+GEN     ellsaturation(GEN E, GEN P, long B, long prec);
 GEN     elltwist(GEN E, GEN D);
 GEN     ellrandom(GEN e);
 long    ellrootno(GEN e, GEN p);

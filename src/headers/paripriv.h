@@ -220,7 +220,7 @@ GEN  direllsympow_worker(GEN P, ulong X, GEN E, ulong m);
 GEN  dirgenus2_worker(GEN P, ulong X, GEN Q);
 GEN  pardireuler(GEN worker, GEN a, GEN b, GEN c, GEN Sbad);
 GEN  FpM_ratlift_worker(GEN A, GEN mod, GEN B);
-GEN  ellQ_factorback_worker(GEN A, GEN P, GEN L, GEN c4);
+GEN  ellQ_factorback_worker(GEN P, GEN E, GEN A, GEN L, ulong l);
 GEN  chinese_unit_worker(GEN P, GEN A, GEN U, GEN B, GEN D, GEN C);
 
 /* Relative number fields */
@@ -726,6 +726,11 @@ void random_curves_with_m_torsion(ulong *a4, ulong *a6, ulong *tx, ulong *ty, lo
 
 /* dirichlet.c */
 GEN direuler_factor(GEN s, long n);
+
+
+/* ellanal.c */
+
+GEN hnaive_max(GEN ell, GEN ht);
 
 /* elliptic.c */
 
