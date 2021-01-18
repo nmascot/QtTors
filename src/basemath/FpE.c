@@ -590,20 +590,35 @@ FpE_Miller(GEN Q, GEN P, GEN m, GEN a4, GEN p)
 GEN
 FpE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN p)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   GEN N, D, w;
   if (ell_is_inf(P) || ell_is_inf(Q) || ZV_equal(P,Q)) return gen_1;
+  if (lgefint(p)==3 && lgefint(m)==3)
+  {
+    ulong pp = p[2];
+    GEN Pp = ZV_to_Flv(P, pp), Qp = ZV_to_Flv(Q, pp);
+    ulong w = Fle_weilpairing(Pp, Qp, itou(m), umodiu(a4, pp), pp);
+    set_avma(av); return utoi(w);
+  }
   N = FpE_Miller(P, Q, m, a4, p);
   D = FpE_Miller(Q, P, m, a4, p);
   w = Fp_div(N, D, p);
   if (mpodd(m)) w  = Fp_neg(w, p);
-  return gerepileuptoint(ltop, w);
+  return gerepileuptoint(av, w);
 }
 
 GEN
 FpE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN p)
 {
   if (ell_is_inf(P) || ell_is_inf(Q)) return gen_1;
+  if (lgefint(p)==3 && lgefint(m)==3)
+  {
+    pari_sp av = avma;
+    ulong pp = p[2];
+    GEN Pp = ZV_to_Flv(P, pp), Qp = ZV_to_Flv(Q, pp);
+    ulong w = Fle_tatepairing(Pp, Qp, itou(m), umodiu(a4, pp), pp);
+    set_avma(av); return utoi(w);
+  }
   return FpE_Miller(P, Q, m, a4, p);
 }
 
