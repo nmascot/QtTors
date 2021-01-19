@@ -5154,6 +5154,34 @@ FljV_changepointinv_pre(GEN x, GEN a4a6, ulong p, ulong pi)
 }
 
 static GEN
+ellQ_factorback_filter(GEN A, GEN P, GEN *pQ)
+{
+  long i, j, l = lg(A), k = 0;
+  GEN B, Q;
+  for (i = 1; i < l; i++)
+    if (!ell_is_inf(gel(A,i))) k++;
+  if (k==0 || k==l-1) { *pQ = P; return A; }
+  B = cgetg(k+1, t_VEC);
+  Q = cgetg(k+1, typ(P));
+  for (i=1, j=1; i<l; i++)
+  {
+    if (!ell_is_inf(gel(A,i)))
+    {
+      gel(B,j) = gel(A,i);
+      Q[j] = P[i];
+      j++;
+    }
+  }
+  *pQ = Q; return B;
+}
+
+static GEN
+ellQ_factorback_chinese(GEN A, GEN P, GEN *mod)
+{
+  GEN Q, B = ellQ_factorback_filter(A, P, &Q);
+  return ncV_chinese_center(B, Q, mod);
+}
+static GEN
 ellQ_factorback1(GEN A, GEN L, GEN E, ulong p)
 {
   pari_sp av = avma;
@@ -5173,7 +5201,7 @@ ellQ_factorback_slice(GEN A, GEN L, GEN E, GEN P, GEN *mod)
 {
   pari_sp av = avma;
   long i, n = lg(P)-1;
-  GEN H, T;
+  GEN H, T, B, Q;
   if (n == 1)
   {
     ulong p = uel(P,1);
@@ -5186,7 +5214,9 @@ ellQ_factorback_slice(GEN A, GEN L, GEN E, GEN P, GEN *mod)
   H = cgetg(n+1, t_VEC);
   for(i=1; i <= n; i++)
     gel(H,i) = ellQ_factorback1(gel(A,i),L,E,uel(P,i));
-  H = ncV_chinese_center_tree(H, P, T, ZV_chinesetree(P,T));
+  B = ellQ_factorback_filter(H, P, &Q);
+  if (lg(Q) != lg(P)) T = ZV_producttree(Q);
+  H = ncV_chinese_center_tree(B, Q, T, ZV_chinesetree(Q,T));
   *mod = gmael(T, lg(T)-1, 1);
   gerepileall(av, 2, &H, mod);
   return H;
@@ -5201,7 +5231,7 @@ ellQ_factorback_worker(GEN P, GEN E, GEN A, GEN L)
 }
 
 static GEN
-ellQ_factorback(GEN E, GEN A, GEN L)
+ellQ_factorback(GEN E, GEN A, GEN L, GEN h, long prec)
 {
   pari_sp av = avma;
   GEN mod = gen_1, H = NULL;
@@ -5213,25 +5243,36 @@ ellQ_factorback(GEN E, GEN A, GEN L)
   {
     GEN amax, r;
     gen_inccrt("ellQ_factorback", worker, NULL, bound, 0,
-            &S, &H, &mod, ncV_chinese_center, FpC_center);
+            &S, &H, &mod, ellQ_factorback_chinese, NULL);
     amax = sqrti(shifti(mod,-2));
-    r = FpC_ratlift(H, mod, amax, amax, NULL);
+    r = ell_is_inf(H)? H: FpC_ratlift(H, mod, amax, amax, NULL);
     if (r) settyp(r,t_VEC);
-    if (r && oncurve(E,r)) return gerepileupto(av, r);
+    if (r && oncurve(E,r))
+    {
+      GEN g = ellheight(E,r,prec);
+      if (expo(subrs(divrr(g,h),1))<-prec2nbits(prec)/2)
+        return gerepileupto(av, r);
+    }
     bound <<=1;
   }
 }
 
-static GEN
-ellQ_vecfactorback(GEN E, GEN G, GEN x)
-{ pari_APPLY_type(t_VEC,ellQ_factorback(E, G, gel(x,i))) }
-
 GEN
 ellQ_genreduce(GEN E, GEN G, long prec)
 {
+  pari_sp av = avma;
   GEN M = ellheightmatrix(E, G, prec);
   GEN L = lllgram(M);
-  return ellQ_vecfactorback(E, G, L);
+  long i, j, l = lg(L);
+  GEN V = cgetg(l, t_VEC);
+  for (i = 1, j = 1; i < l; i++)
+  {
+    GEN Li = gel(L, i), h = qfeval(M,Li);
+    if (expo(h)>-prec2nbits(prec)/2)
+      gel(V,j++) = ellQ_factorback(E, G, Li, h, prec);
+  }
+  setlg(V, j);
+  return gerepilecopy(av, V);
 }
 
 /********************************************************************/
