@@ -109,7 +109,7 @@ tutorial.dvi: tutorial.tex \$(MACROS)
 	sed -e 's/!\([1-9]\)!/!00\1!/'\\
 	    -e 's/!\([1-9][0-9]\)!/!0\1!/'\\
 	    -e 's/\\\\EFF {}/f/g'\\
-	  \$< | env LANG=C sort -f |\\
+	  \$< | env LANG=C LC_ALL=C sort -f |\\
 	sed -e 's/!00*\([0-9]*\)!/!\1!/' > \$@;
 
 users.dvi: \$(USERS_TEX)
