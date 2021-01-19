@@ -1078,19 +1078,54 @@ hypergeom_arg(GEN x)
   if (!x) return cgetg(1,t_VEC);
   return (typ(x) == t_VEC)? x: mkvec(x);
 }
+
+static GEN hypergeomderiv(GEN N, GEN D, GEN z, long k, long prec);
+
+static GEN
+serhypergeom(GEN N, GEN D, GEN y, long prec)
+{
+  GEN S, pn, pd;
+  long v, vy, n, val, l, ln, ld, i, j;
+  if (!signe(y)) return gadd(gen_1, y);
+  v = valp(y);
+  vy = varn(y);
+  n = lg(y) - 3;
+  for (val = 1; val < n; val++)
+    if (!gequal0(polcoef(y, val, vy))) break;
+  if (v < 0) pari_err_DOMAIN("hypergeom","valuation", "<", gen_0, y);
+  l = 3 + n / val;
+  if (v == 0)
+  {
+    GEN y0 = gel(y, 2);
+    y = serchop0(y);
+    S = gen_0; pn = gen_1;
+    for (i = 0; i < l; i++)
+    {
+      S = gadd(S, gmul(pn, hypergeomderiv(N, D, y0, i, prec)));
+      if (i < l) pn = gdivgs(gmul(pn, y), i + 1);
+    }
+    return S;
+  }
+  S = gen_1; ln = lg(N); ld = lg(D);
+  pn = gen_1; pd = gen_1;
+  for (i = 1; i <= l; i++)
+  {
+    for (j = 1; j < ln; j++) pn = gmul(pn, gaddgs(gel(N, j), i - 1));
+    for (j = 1; j < ld; j++) pd = gmul(pd, gaddgs(gel(D, j), i - 1));
+    pn = gmul(pn, y); pd = gmulsg(i, pd);
+    S = gadd(S, gdiv(pn, pd));
+  }
+  return S;
+}
+
 static GEN
 hypergeom_i(GEN N, GEN D, GEN z, long prec)
 {
-  long nN, nD, j;
+  long nN, nD;
   if (!is_scalar_t(typ(z))) pari_err_TYPE("hypergeom",z);
   if (gequal0(z)) return gen_1;
-  N = hypergeom_arg(N);
-  D = hypergeom_arg(D);
-  hypersimplify(&N, &D);
   nN = lg(N) - 1;
   nD = lg(D) - 1;
-  for (j = 1; j <= nD; ++j)
-    if (isnegint(gel(D,j))) pari_err_TYPE("hypergeom", D);
   if (nD >= (nN? nN: 2)) return Ftaylor(N, D, z, prec);
   if (nD == nN - 1 && nN >= 3)
   {
@@ -1120,6 +1155,39 @@ hypergeom_i(GEN N, GEN D, GEN z, long prec)
   pari_err_IMPL("this hypergeometric function");
   return NULL; /*LCOV_EXCL_LINE*/
 }
+
+static GEN
+hypergeomderiv(GEN N, GEN D, GEN z, long k, long prec)
+{
+  long ln = lg(N), ld = lg(D), j;
+  GEN Nk = cgetg(ln, t_VEC), Dk = cgetg(ld, t_VEC);
+  GEN Np = gen_1, Dp = gen_1;
+  for (j = 1; j < ln; j++)
+  {
+    gel(Nk, j) = gaddsg(k, gel(N, j));
+    Np = gmul(Np, poch(gel(N, j), k, prec));
+  }
+  for (j = 1; j < ld; j++)
+  {
+    gel(Dk, j) = gaddsg(k, gel(D, j));
+    Dp = gmul(Dp, poch(gel(D, j), k, prec));
+  }
+  return gmul(hypergeom_i(Nk, Dk, z, prec), gdiv(Np, Dp));
+}
+
 GEN
-hypergeom(GEN N, GEN D, GEN z, long prec)
-{ pari_sp av = avma; return gerepilecopy(av, hypergeom_i(N,D,z,prec)); }
+hypergeom(GEN N, GEN D, GEN y, long prec)
+{
+  pari_sp av = avma;
+  GEN z;
+  long j;
+  N = hypergeom_arg(N);
+  D = hypergeom_arg(D);
+  hypersimplify(&N, &D);
+  for (j = 1; j < lg(D); ++j)
+    if (isnegint(gel(D,j))) pari_err_TYPE("hypergeom", D);
+  if (is_scalar_t(typ(y)))
+    return gerepilecopy(av, hypergeom_i(N, D, y, prec));
+  if (!(z = toser_i(y))) pari_err_TYPE("hypergeom", y);
+  return gerepileupto(av, serhypergeom(N, D, z, prec));
+}
