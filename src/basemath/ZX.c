@@ -678,20 +678,38 @@ ZX_mulspec(GEN x, GEN y, long nx, long ny)
 {
   pari_sp av;
   long ex, ey, vx, vy, v;
-  GEN z;
   if (!nx || !ny) return pol_0(0);
   vx = ZX_valspec(x,nx); nx-=vx; x += vx;
   vy = ZX_valspec(y,ny); ny-=vy; y += vy;
   v = vx + vy;
   if (nx==1) return Z_ZX_mulshiftspec(gel(x,0), y, ny, v);
   if (ny==1) return Z_ZX_mulshiftspec(gel(y,0), x, nx, v);
-  if (nx > 2 * ny || (ny > 2 * nx))
+  if (nx == 2 && ny == 2)
+  {
+    GEN a0 = gel(x,0), a1 = gel(x,1), A0, A1, A2;
+    GEN b0 = gel(y,0), b1 = gel(y,1), z = cgetg(5 + v, t_POL);
+    long i;
+    z[1] = evalvarn(0) | evalsigne(1);
+    A0 = mulii(a0, b0);
+    A2 = mulii(a1, b1); av = avma;
+    A1 = gerepileuptoint(av, subii(addii(A0,A2),
+                                   mulii(subii(a1,a0), subii(b1,b0))));
+    i = 4 + v;
+    gel(z,i--) = A2;
+    gel(z,i--) = A1;
+    gel(z,i--) = A0; while (i > 1) gel(z, i--) = gen_0;
+    return z;
+  }
+#if 0
+  /* generically slower even when degrees differ a lot; sometimes about twice
+   * faster when bitsize is moderate */
+  if (DEBUGVAR)
     return RgX_mulspec(x - vx, y - vy, nx + vx, ny + vy);
+#endif
   av = avma;
   ex = ZX_expispec(x, nx);
   ey = ZX_expispec(y, ny);
-  z  = ZX_mulspec_mulii(x,y,nx,ny,ex,ey,v);
-  return gerepileupto(av, z);
+  return gerepileupto(av,  ZX_mulspec_mulii(x,y,nx,ny,ex,ey,v));
 }
 GEN
 ZX_mul(GEN x, GEN y)
