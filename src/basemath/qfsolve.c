@@ -419,13 +419,6 @@ blocks4(GEN G, long d, long n, GEN *A, GEN *B, GEN *C)
   *B = rowslice(G2, 1, d);
   *C = rowslice(G2, d+1, n);
 }
-/* Minimization of the quadratic form G, deg G != 0, dim n >= 2
- * G symmetric integral
- * Returns [G',U,factd] with U in GLn(Q) such that G'=U~*G*U*constant
- * is integral and has minimal determinant.
- * In dimension 3 or 4, may return a prime p if the reduction at p is
- * impossible because of local nonsolvability.
- * P,E = factor(+/- det(G)), "prime" -1 is ignored. Destroy E. */
 static GEN qfsolvemodp(GEN G, GEN p);
 static void
 update_fm(GEN f, GEN a, long i)
@@ -435,10 +428,9 @@ update_fm(GEN f, GEN a, long i)
   else
   {
     long v = vals(i+1), k;
-    GEN b = gel(f,1);
-    GEN u = QM_mul(b, a);
+    GEN b = gel(f,1), u = QM_mul(b, a);
     gel(f,1) = gen_0;
-    if (v+2>=lg(f)) pari_err_BUG("update_fm");
+    if (v+2 >= lg(f)) pari_err_BUG("update_fm");
     for (k = 1; k < v; k++)
     {
       u = QM_mul(gel(f, k+1), u);
@@ -447,46 +439,47 @@ update_fm(GEN f, GEN a, long i)
     gel(f,v+1) = u;
   }
 }
-
 static GEN
 prod_fm(GEN f, long i)
 {
-  long v = vals(i);
-  long k;
-  GEN u = gel(f,v+1);
-  v++;
-  for (i>>=v, k = v+1; i; i>>=1, k++)
-    if (odd(i))
-      u = QM_mul(gel(f,k), u);
+  long v = vals(i), k;
+  GEN u = gel(f, ++v);
+  for (i >>= v, k = v+1; i; i >>= 1, k++)
+    if (odd(i)) u = QM_mul(gel(f,k), u);
   return u;
 }
 
+/* Minimization of the quadratic form G, deg G != 0, dim n >= 2
+ * G symmetric integral
+ * Returns [G',U,factd] with U in GLn(Q) such that G'=U~*G*U*constant
+ * is integral and has minimal determinant.
+ * In dimension 3 or 4, may return a prime p if the reduction at p is
+ * impossible because of local nonsolvability.
+ * P,E = factor(+/- det(G)), "prime" -1 is ignored. Destroy E. */
 static GEN
 qfminimize(GEN G, GEN P, GEN E)
 {
-  pari_sp av;
-  GEN d, U, Ker = NULL, sol, aux, faE, faP;
-  long n = lg(G)-1, lP = lg(P), i, dimKer, m;
+  GEN U = NULL, Ker = NULL, faE, faP;
+  long n = lg(G)-1, lP = lg(P), i;
   faP = vectrunc_init(lP);
   faE = vecsmalltrunc_init(lP);
-  U = NULL;
   for (i = 1; i < lP; i++)
   {
     GEN p = gel(P,i);
-    long vp = E[i], wp = E[i];
-    if (!vp || !p) continue;
+    long vp = E[i], wp = vp;
+    if (!vp) continue;
     if (DEBUGLEVEL >= 2) err_printf("qfminimize: for %Ps^%ld:", p,vp);
     while (vp)
     {
-      long idx = 0;
-      GEN FU = zerovec(2*expu(vp)+100);
-      av = avma;
-      while(vp)
+      long idx = 0, dimKer;
+      GEN d, sol = NULL, FU = zerovec(2*expu(vp)+100);
+      pari_sp av = avma;
+      while (vp)
       {
         if (DEBUGLEVEL>=2 && vp <= wp)
         { err_printf(" %ld%%", (E[i]-vp)*100/E[i]); wp -= E[i]/100; }
         /* The case vp = 1 can be minimized only if n is odd. */
-        if (vp == 1 && n%2 == 0) break;
+        if (vp == 1 && !odd(n)) break;
         Ker = kermodp(G,p, &dimKer); /* dimKer <= vp */
         if (DEBUGLEVEL >= 4) err_printf("    dimKer = %ld\n",dimKer);
         if (dimKer == n) break;
@@ -499,8 +492,9 @@ qfminimize(GEN G, GEN P, GEN E)
         if (dimKer == 1)
         {
           long j;
-          gel(G,1) = ZC_Z_divexact(gel(G,1), p);
-          for (j = 1; j<=n; j++) gcoeff(G,1,j) = diviiexact(gcoeff(G,1,j), p);
+          gcoeff(G,1,1) = diviiexact(gcoeff(G,1,1), sqri(p));
+          for (j = 2; j <= n; j++)
+            gcoeff(G,1,j) = gcoeff(G,j,1) = diviiexact(gcoeff(G,j,1), p);
           gel(Ker,1) = RgC_Rg_div(gel(Ker,1), p);
           update_fm(FU, Ker, idx++);
           vp -= 2;
@@ -510,13 +504,13 @@ qfminimize(GEN G, GEN P, GEN E)
           GEN A,B,C, K2 = ZsymM_Z_divexact(principal_minor(G,dimKer),p);
           long j, dimKer2;
           K2 = kermodp(K2, p, &dimKer2);
-          for (j = dimKer2+1; j <= dimKer; j++) gel(K2,j) = ZC_Z_mul(gel(K2,j),p);
+          for (j = dimKer2+1; j <= dimKer; j++)
+            gel(K2,j) = ZC_Z_mul(gel(K2,j),p);
           /* Write G = [A,B;B~,C] and apply [K2,0;0,p*Id]/p by blocks */
           blocks4(G, dimKer,n, &A,&B,&C);
           A = ZsymM_Z_divexact(qf_apply_ZM(A,K2), sqri(p));
           B = ZM_Z_divexact(ZM_transmul(B,K2), p);
-          G = shallowmatconcat(mkmat2(mkcol2(A,B),
-                mkcol2(shallowtrans(B), C)));
+          G = shallowmatconcat(mkmat2(mkcol2(A,B), mkcol2(shallowtrans(B), C)));
           /* Ker *= [K2,0;0,Id] */
           Ker = shallowconcat(RgM_Rg_div(QM_mul(vecslice(Ker,1,dimKer),K2), p),
               vecslice(Ker,dimKer+1,n));
@@ -535,7 +529,7 @@ qfminimize(GEN G, GEN P, GEN E)
         U = U ? QM_mul(U, PU): PU;
       }
       if (vp == 0) break;
-      if (vp == 1 && n%2 == 0)
+      if (vp == 1 && !odd(n))
       {
         vectrunc_append(faP, p);
         vecsmalltrunc_append(faE, 1);
@@ -545,14 +539,12 @@ qfminimize(GEN G, GEN P, GEN E)
       { /* trivial case: dimKer = n */
         if (DEBUGLEVEL >= 4) err_printf("     case 0: dimKer = n\n");
         G = ZsymM_Z_divexact(G, p);
-        vp -= n;
-        continue;
+        vp -= n; continue;
       }
       U = U ? QM_mul(U, Ker): Ker;
       /* vp = dimKer
-       * 2nd case: kernel has dim >= 2 and contains an element of norm 0 mod p^2
-       * search for an element of norm p^2... in the kernel */
-      sol = NULL;
+       * 2nd case: kernel has dim >= 2 and contains an elt of norm 0 mod p^2,
+       * find it */
       if (dimKer > 2) {
         if (DEBUGLEVEL >= 4) err_printf("    case 2.1\n");
         dimKer = 3;
@@ -563,12 +555,12 @@ qfminimize(GEN G, GEN P, GEN E)
       {
         GEN a = modii(diviiexact(gcoeff(G,1,1),p), p);
         GEN b = modii(diviiexact(gcoeff(G,1,2),p), p);
-        GEN c = diviiexact(gcoeff(G,2,2),p);
-        GEN di= modii(subii(sqri(b), mulii(a,c)), p);
-        if (kronecker(di,p) >= 0)
+        GEN c = modii(diviiexact(gcoeff(G,2,2),p), p);
+        GEN D = modii(subii(sqri(b), mulii(a,c)), p);
+        if (kronecker(D,p) >= 0)
         {
           if (DEBUGLEVEL >= 4) err_printf("    case 2.2\n");
-          sol = signe(a)? mkcol2(Fp_sub(Fp_sqrt(di,p), b, p), a): vec_ei(2,1);
+          sol = signe(a)? mkcol2(Fp_sub(Fp_sqrt(D,p), b, p), a): vec_ei(2,1);
         }
       }
       if (sol)
@@ -578,16 +570,14 @@ qfminimize(GEN G, GEN P, GEN E)
         sol = Q_primpart(sol);
         if (DEBUGLEVEL >= 4) err_printf("    sol = %Ps\n", sol);
         Ker = completebasis(vecextend(sol,n), 1);
-        for(j=1; j<n; j++) gel(Ker,j) = ZC_Z_mul(gel(Ker,j), p);
+        for (j = 1; j<n; j++) gel(Ker,j) = ZC_Z_mul(gel(Ker,j), p);
         G = ZsymM_Z_divexact(qf_apply_ZM(G, Ker), sqri(p));
         U = RgM_Rg_div(QM_mul(U,Ker), p);
-        vp -= 2;
-        continue;
+        vp -= 2; continue;
       }
-      /* Now 1 <= vp = dimKer <= 2 and kernel contains no vector with norm p^2 */
+      /* Now 0 < vp = dimKer < 3 and kernel contains no vector with norm p^2 */
       /* exchanging kernel and image makes minimization easier ? */
-      m = (n-3)/2;
-      d = ZM_det(G); if (odd(m)) d = negi(d);
+      d = ZM_det(G); if (odd((n-3) / 2)) d = negi(d);
       if ((vp==1 && kronecker(gmod(gdiv(negi(d), gcoeff(G,1,1)),p), p) >= 0)
           || (vp==2 && odd(n) && n >= 5)
           || (vp==2 && !odd(n) && kronecker(modii(diviiexact(d,sqri(p)), p),p) < 0))
@@ -598,8 +588,7 @@ qfminimize(GEN G, GEN P, GEN E)
         for (j = dimKer+1; j <= n; j++) gcoeff(Ker,j,j) = p;
         G = ZsymM_Z_divexact(qf_apply_ZM(G, Ker), p);
         U = QM_mul(U, Ker);
-        vp -= 2*dimKer-n;
-        continue;
+        vp -= 2*dimKer-n; continue;
       }
 
       /* Minimization was not possible so far. */
@@ -618,9 +607,9 @@ qfminimize(GEN G, GEN P, GEN E)
   if (!U) U = matid(n);
   else
   { /* apply LLL to avoid coefficient explosion */
-    aux = lllint(Q_primpart(U));
-    G = qf_apply_ZM(G,aux);
-    U = RgM_mul(U,aux);
+    GEN u = lllint(Q_primpart(U));
+    G = qf_apply_ZM(G, u);
+    U = RgM_mul(U, u);
   }
   return mkvec4(G, U, faP, faE);
 }
