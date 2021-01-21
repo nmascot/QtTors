@@ -54,10 +54,7 @@ completebasis(GEN Mv, long redflag)
                        vecslice(U, m-n+1,m));
 }
 
-/* Compute the kernel of M mod p.
- * returns [d,U], where
- * d = dim (ker M mod p)
- * U in GLn(Z), and its first d columns span the kernel. */
+/* Return U in GLn(Z) whose first d columns span Ker (M mod p). */
 static GEN
 kermodp(GEN M, GEN p, long *d)
 {
@@ -400,14 +397,32 @@ ZsymM_Z_divexact(GEN G, GEN d)
 {
   long i,j,l = lg(G);
   GEN H = cgetg(l, t_MAT);
-  for(j=1; j<l; j++)
+  for (j = 1; j < l; j++)
   {
     GEN c = cgetg(l, t_COL), b = gel(G,j);
-    for(i=1; i<j; i++) gcoeff(H,j,i) = gel(c,i) = diviiexact(gel(b,i),d);
+    for (i=1; i < j; i++) gcoeff(H,j,i) = gel(c,i) = diviiexact(gel(b,i),d);
     gel(c,j) = diviiexact(gel(b,j),d);
     gel(H,j) = c;
   }
   return H;
+}
+/* by blocks, in place: G[1,1] /= d, G[2,2] *= d */
+static void
+ZsymM_Z_divexact_partial(GEN G, long n,  GEN d)
+{
+  long i, j, l = lg(G);
+  for(j = 1; j <= n; j++)
+  {
+    for (i = 1; i < j; i++)
+      gcoeff(G,i,j) = gcoeff(G,j,i) = diviiexact(gcoeff(G,i,j), d);
+    gcoeff(G,j,j) = diviiexact(gcoeff(G,j,j), d);
+  }
+  for (; j < l; j++)
+  {
+    for (i = n+1; i < j; i++)
+      gcoeff(G,i,j) = gcoeff(G,j,i) = mulii(gcoeff(G,i,j), d);
+    gcoeff(G,j,j) = mulii(gcoeff(G,j,j), d);
+  }
 }
 
 /* write symmetric G as [A,B;B~,C], A dxd, C (n-d)x(n-d) */
@@ -474,7 +489,7 @@ qfminimize(GEN G, GEN P, GEN E)
       long idx = 0, dimKer;
       GEN d, sol = NULL, FU = zerovec(2*expu(vp)+100);
       pari_sp av = avma;
-      while (vp)
+      while (vp) /* loop until vp <= n */
       {
         if (DEBUGLEVEL>=2 && vp <= wp)
         { err_printf(" %ld%%", (E[i]-vp)*100/E[i]); wp -= E[i]/100; }
@@ -496,27 +511,26 @@ qfminimize(GEN G, GEN P, GEN E)
           for (j = 2; j <= n; j++)
             gcoeff(G,1,j) = gcoeff(G,j,1) = diviiexact(gcoeff(G,j,1), p);
           gel(Ker,1) = RgC_Rg_div(gel(Ker,1), p);
-          update_fm(FU, Ker, idx++);
           vp -= 2;
         }
         else
         {
-          GEN A,B,C, K2 = ZsymM_Z_divexact(principal_minor(G,dimKer),p);
+          GEN A, B, C, K2;
           long j, dimKer2;
-          K2 = kermodp(K2, p, &dimKer2);
-          for (j = dimKer2+1; j <= dimKer; j++)
-            gel(K2,j) = ZC_Z_mul(gel(K2,j),p);
-          /* Write G = [A,B;B~,C] and apply [K2,0;0,p*Id]/p by blocks */
-          blocks4(G, dimKer,n, &A,&B,&C);
-          A = ZsymM_Z_divexact(qf_apply_ZM(A,K2), sqri(p));
-          B = ZM_Z_divexact(ZM_transmul(B,K2), p);
+          blocks4(G, dimKer,n, &A,&B,&C); A = ZsymM_Z_divexact(A, p);
+          K2 = kermodp(A, p, &dimKer2);
+          /* Write G = [pA,B;B~,C] and apply [K2/p,0;0,Id] by blocks */
+          A = qf_apply_ZM(A,K2); ZsymM_Z_divexact_partial(A, dimKer2, p);
+          B = ZM_transmul(B,K2);
+          for (j = 1; j <= dimKer2; j++) gel(B,j) = ZC_Z_divexact(gel(B,j), p);
           G = shallowmatconcat(mkmat2(mkcol2(A,B), mkcol2(shallowtrans(B), C)));
           /* Ker *= [K2,0;0,Id] */
-          Ker = shallowconcat(RgM_Rg_div(QM_mul(vecslice(Ker,1,dimKer),K2), p),
-              vecslice(Ker,dimKer+1,n));
-          update_fm(FU, Ker, idx++);
+          B = ZM_mul(vecslice(Ker,1,dimKer),K2);
+          for (j = 1; j <= dimKer2; j++) gel(B,j) = gdiv(gel(B,j), p);
+          Ker = shallowconcat(B, vecslice(Ker,dimKer+1,n));
           vp -= 2*dimKer2;
         }
+        update_fm(FU, Ker, idx++);
         if (gc_needed(av, 1))
         {
           if (DEBUGMEM >= 2) pari_warn(warnmem,"qfminimize");
