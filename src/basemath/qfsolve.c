@@ -526,7 +526,7 @@ qfminimize(GEN G, GEN P, GEN E)
           G = shallowmatconcat(mkmat2(mkcol2(A,B), mkcol2(shallowtrans(B), C)));
           /* Ker *= [K2,0;0,Id] */
           B = ZM_mul(vecslice(Ker,1,dimKer),K2);
-          for (j = 1; j <= dimKer2; j++) gel(B,j) = gdiv(gel(B,j), p);
+          for (j = 1; j <= dimKer2; j++) gel(B,j) = RgC_Rg_div(gel(B,j), p);
           Ker = shallowconcat(B, vecslice(Ker,dimKer+1,n));
           vp -= 2*dimKer2;
         }
@@ -584,9 +584,11 @@ qfminimize(GEN G, GEN P, GEN E)
         sol = Q_primpart(sol);
         if (DEBUGLEVEL >= 4) err_printf("    sol = %Ps\n", sol);
         Ker = completebasis(vecextend(sol,n), 1);
-        for (j = 1; j<n; j++) gel(Ker,j) = ZC_Z_mul(gel(Ker,j), p);
-        G = ZsymM_Z_divexact(qf_apply_ZM(G, Ker), sqri(p));
-        U = RgM_Rg_div(QM_mul(U,Ker), p);
+        G = qf_apply_ZM(G, Ker);
+        for (j = 1; j < n; j++)
+          gcoeff(G,n,j) = gcoeff(G,j,n) = diviiexact(gcoeff(G,j,n), p);
+        gcoeff(G,n,n) = diviiexact(gcoeff(G,n,n), sqri(p));
+        U = QM_mul(U,Ker); gel(U,n) = RgC_Rg_div(gel(U,n), p);
         vp -= 2; continue;
       }
       /* Now 0 < vp = dimKer < 3 and kernel contains no vector with norm p^2 */
@@ -598,10 +600,8 @@ qfminimize(GEN G, GEN P, GEN E)
       {
         long j;
         if (DEBUGLEVEL >= 4) err_printf("    case 3\n");
-        Ker = matid(n);
-        for (j = dimKer+1; j <= n; j++) gcoeff(Ker,j,j) = p;
-        G = ZsymM_Z_divexact(qf_apply_ZM(G, Ker), p);
-        U = QM_mul(U, Ker);
+        ZsymM_Z_divexact_partial(G, dimKer, p);
+        for (j = dimKer+1; j <= n; j++) gel(U,j) = RgC_Rg_mul(gel(U,j), p);
         vp -= 2*dimKer-n; continue;
       }
 
