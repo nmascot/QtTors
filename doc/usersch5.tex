@@ -10434,6 +10434,10 @@ coefficients are \kbd{RgX}s (arbitrary \kbd{GEN}s in fact), reduce them to
 \fun{GEN}{RgXQV_RgXQ_mul}{GEN z, GEN x, GEN T} \kbd{z} multiplies the
  \kbd{RgXQV} \kbd{z} by the scalar (\kbd{RgXQ}) \kbd{x}.
 
+\fun{GEN}{RgXQV_factorback}{GEN L, GEN e, GEN T} returns
+$\prod_i L_i^{e_i}$ mod $T$ where $L$ is a vector of \kbd{RgXQ}s and
+$e$ a vector of \typ{INT}s.
+
 \subsec{\kbd{RgXQM}}
 
 \fun{GEN}{RgXQM_red}{GEN z, GEN T} \kbd{z} a matrix whose

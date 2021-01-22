@@ -31,7 +31,7 @@ BA   2- fplll: fast, dpe and heuristic variants
      4- [libpari] atanhuu, atanhui, powcx, powcx_prec
      5- new GP function lfunparams (initial implementation P. Molin)
      6- [libpari] row_Q_primpart
-BA   7- [libpari] RgXQ_trace, RgX_chinese_coprime
+BA   7- [libpari] RgXQ_trace, RgX_chinese_coprime, RgXQV_factorback
      8- [libpari] FpM_intersect_i, Flm_intersect_i
 HC   9- add optional argument to ramanujantau + parallelize code
 HC  10- new GP functions bessljzero, besselyzero

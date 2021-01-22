@@ -1236,6 +1236,7 @@ GEN     RgXQC_red(GEN P, GEN T);
 GEN     RgXQM_mul(GEN P, GEN Q, GEN T);
 GEN     RgXQM_red(GEN P, GEN T);
 GEN     RgXQV_RgXQ_mul(GEN v, GEN x, GEN T);
+GEN     RgXQV_factorback(GEN x, GEN n, GEN T);
 GEN     RgXQV_red(GEN P, GEN T);
 GEN     RgXQX_RgXQ_mul(GEN x, GEN y, GEN T);
 GEN     RgXQX_divrem(GEN x,GEN y,GEN T,GEN *r);

@@ -2229,6 +2229,8 @@ _sub(void *data, GEN x, GEN y) { (void)data; return RgX_sub(x, y); }
 static GEN
 _sqr(void *data, GEN x) { return RgXQ_sqr(x, (GEN)data); }
 static GEN
+_pow(void *data, GEN x, GEN n) { return RgXQ_pow(x, n, (GEN)data); }
+static GEN
 _mul(void *data, GEN x, GEN y) { return RgXQ_mul(x,y, (GEN)data); }
 static GEN
 _cmul(void *data, GEN P, long a, GEN x) { (void)data; return RgX_Rg_mul(x,gel(P,a+2)); }
@@ -2650,6 +2652,10 @@ RgXQ_powers(GEN x, long l, GEN T)
   int use_sqr = 2*degpol(x) >= degpol(T);
   return gen_powers(x, l, use_sqr, (void *)T,_sqr,_mul,_one);
 }
+
+GEN
+RgXQV_factorback(GEN L, GEN e, GEN T)
+{ return gen_factorback(L, e, (void*)T, &_mul, &_pow); }
 
 /* a in K = Q[X]/(T), returns [a^0, ..., a^n] */
 GEN
