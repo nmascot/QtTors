@@ -1726,6 +1726,14 @@ ZV_mul(GEN x, GEN y)
   for (i = 1; i < l; i++) gel(z,i) = mulii(gel(x,i), gel(y,i));
   return z;
 }
+static int
+dump_gen(GEN x, long flag)
+{
+  GEN d;
+  if (!(flag & nf_GENMAT)) return 0;
+  x = Q_remove_denom(x, &d);
+  return (d && expi(d) > 32) || gexpo(x) > 32;
+}
 
 /* assume x in HNF; cf class_group_gen for notations. Return NULL iff
  * flag & nf_FORCE and computation of principal ideal generator fails */
@@ -1781,9 +1789,7 @@ isprincipalall(GEN bnf, GEN x, long *pprec, long flag)
     if (nW) col = add(col, RgC_sub(act_arch(Q, bnf_get_GD(bnf)),
                                    act_arch(A, bnf_get_ga(bnf))));
     col = isprincipalarch(bnf, col, q, gen_1, d, &e);
-    if (col)
-      if (((flag & nf_GENMAT) && gexpo(col) > 32) ||
-          !fact_ok(nf,x, col,gen,R)) col = NULL;
+    if (col && (dump_gen(col, flag) || !fact_ok(nf,x, col,gen,R))) col = NULL;
   }
   if (!col && (flag & nf_GENMAT))
   {
