@@ -8502,7 +8502,7 @@ not be corrupted. (We use \tet{togglesign_safe}.)
 \fun{GEN}{ZC_Z_divexact}{GEN x, GEN y} returns $x/y$ assuming all divisions
 are exact.
 
-\fun{GEN}{ZC_u_divexact}{GEN x, ulong y} returns $x/y$ assuming all divisions
+\fun{GEN}{ZC_divexactu}{GEN x, ulong y} returns $x/y$ assuming all divisions
 are exact.
 
 \fun{GEN}{ZC_Z_div}{GEN x, GEN y} returns $x/y$, where the resulting vector
@@ -8645,6 +8645,9 @@ the \kbd{ZM}~\kbd{V} is zero, and $0$ otherwise.
 by the \kbd{ZM}~\kbd{y}. Returns a \typ{VEC}.
 
 \fun{GEN}{ZM_Z_divexact}{GEN x, GEN y} returns $x/y$ assuming all divisions
+are exact.
+
+\fun{GEN}{ZM_divexactu}{GEN x, ulong y} returns $x/y$ assuming all divisions
 are exact.
 
 \fun{GEN}{ZM_Z_div}{GEN x, GEN y} returns $x/y$, where the resulting matrix

@@ -835,12 +835,16 @@ GEN
 ZC_Z_divexact(GEN x, GEN c)
 { pari_APPLY_type(t_COL, diviiexact(gel(x,i), c)) }
 GEN
-ZC_u_divexact(GEN x, ulong c)
+ZC_divexactu(GEN x, ulong c)
 { pari_APPLY_type(t_COL, diviuexact(gel(x,i), c)) }
 
 GEN
 ZM_Z_divexact(GEN x, GEN c)
 { pari_APPLY_same(ZC_Z_divexact(gel(x,i), c)) }
+
+GEN
+ZM_divexactu(GEN x, ulong c)
+{ pari_APPLY_same(ZC_divexactu(gel(x,i), c)) }
 
 GEN
 ZC_Z_mul(GEN x, GEN c)
