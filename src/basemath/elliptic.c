@@ -872,11 +872,24 @@ gcomposev(GEN *vtotal, GEN w)
   if (!v || typ(v) == t_INT) { *vtotal = w; return; }
   U = gel(v,1); R = gel(v,2); S = gel(v,3); T = gel(v,4);
   u = gel(w,1); r = gel(w,2); s = gel(w,3); t = gel(w,4);
-  U2 = gsqr(U);
+  U2 = NULL;
+  if (!gequal0(r))
+  {
+    GEN rU2;
+    U2 = gsqr(U); rU2 = gmul(U2, r);
+    R = gadd(R, rU2);
+    T = gadd(T, gmul(S, rU2));
+  }
+  if (!gequal0(s)) S = gadd(S, gmul(U, s));
+  if (!gequal0(t))
+  {
+    if (!U2) U2 = gsqr(U);
+    T = gadd(T, gmul(gmul(U,U2), t));
+  }
   gel(v,1) = gmul(U, u);
-  gel(v,2) = gadd(R, gmul(U2, r));
-  gel(v,3) = gadd(S, gmul(U, s));
-  gel(v,4) = gadd(T, gmul(U2, gadd(gmul(U, t), gmul(S, r))));
+  gel(v,2) = R;
+  gel(v,3) = S;
+  gel(v,4) = T;
 }
 
 /* [u,r,s,t]^-1 = [ 1/u,-r/u^2,-s/u, (rs-t)/u^3 ] */
