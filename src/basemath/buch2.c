@@ -1781,7 +1781,9 @@ isprincipalall(GEN bnf, GEN x, long *pprec, long flag)
     if (nW) col = add(col, RgC_sub(act_arch(Q, bnf_get_GD(bnf)),
                                    act_arch(A, bnf_get_ga(bnf))));
     col = isprincipalarch(bnf, col, q, gen_1, d, &e);
-    if (col && !fact_ok(nf,x, col,gen,R)) col = NULL;
+    if (col)
+      if (((flag & nf_GENMAT) && gexpo(col) > 32) ||
+          !fact_ok(nf,x, col,gen,R)) col = NULL;
   }
   if (!col && (flag & nf_GENMAT))
   {
