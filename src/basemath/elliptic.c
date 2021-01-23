@@ -4201,11 +4201,11 @@ ellintegralbmodel(GEN e, GEN *pv)
   else
   {
     GEN urst = mkvec4(mpodd(a1) || mpodd(a3) ? ghalf: gen_1,
-        gen_0, gdivgs(a1,-2), gdivgs(a3,-2));
+                      gen_0, gdivgs(a1,-2), gdivgs(a3,-2));
     gcomposev(pv, urst);
     f = coordch(f, urst);
   }
-  gerepileall(av, pv ? 2:1, &f, pv);
+  gerepileall(av, 2, &f, pv);
   return f;
 }
 
