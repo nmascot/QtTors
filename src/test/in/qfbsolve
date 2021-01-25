@@ -18,7 +18,9 @@ bqfb();
 test(v,N,flag=1)=
 {
   my([a,b,c]=v, q=Qfb(a,b,c));
-  for(i=-N,N,my(Q=qfbsolve(q,i,flag));if(Q,print(v,":",i,":",Q)));
+  for(i=-N,N,my(Q=qfbsolve(q,i,flag));
+    if(Q,if(!chk(q,if(flag%2,Q,[Q]),i),error([v,N]));
+      print(v,":",i,":",Q)));
 }
 test([1,1,1],30);
 test([1,29,271],300);

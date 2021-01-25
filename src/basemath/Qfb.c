@@ -1456,20 +1456,24 @@ qfbredsl2(GEN q, GEN S)
 }
 
 static GEN
-qfrsolve_normform(GEN N, GEN P, GEN P2, GEN d, GEN rd)
+qfrsolve_normform(GEN N, GEN Ps, GEN d, GEN rd)
 {
-  pari_sp ltop = avma, btop;
-  GEN M = N, P1 = redrealsl2(P, d,rd);
+  pari_sp av = avma, btop;
+  GEN M = N, P = redrealsl2(Ps, d,rd), Q = P;
   btop = avma;
   for(;;)
   {
-    if (ZV_equal(gel(M,1), gel(P1,1))) { N = gel(P1,2); break; }
-    if (P2 && ZV_equal(gel(M,1), gel(P2,1))) { N = gel(P2,2); break; }
+    if (ZV_equal(gel(M,1), gel(P,1)))
+       return gerepilecopy(av, SL2_div_mul_e1(gel(M,2),gel(P,2)));
+    if (ZV_equal(gel(N,1), gel(Q,1)))
+       return gerepilecopy(av, SL2_div_mul_e1(gel(N,2),gel(Q,2)));
     M = redrealsl2step(M, d,rd);
-    if (ZV_equal(gel(M,1), gel(N,1))) { set_avma(ltop); return NULL; }
-    if (gc_needed(btop, 1)) M = gerepileupto(btop, M);
+    Q = redrealsl2step(Q, d,rd);
+    if (ZV_equal(gel(M,1), gel(N,1))) return gc_NULL(av);
+    if (ZV_equal(gel(P,1), gel(Q,1))) return gc_NULL(av);
+    if (gc_needed(btop, 1))
+      gerepileall(btop, 2, &M, &Q);
   }
-  return gerepilecopy(ltop, SL2_div_mul_e1(gel(M,2),N));
 }
 
 GEN
@@ -1481,7 +1485,7 @@ qfrsolvep(GEN Q, GEN p)
   P = primeform(d, p, DEFAULTPREC);
   rd = sqrti(d);
   N = redrealsl2(Q, d,rd);
-  x = qfrsolve_normform(N, P, invraw(P), d,rd);
+  x = qfrsolve_normform(N, P, d,rd);
   if (!x) { set_avma(ltop); return gen_0; }
   return gerepileupto(ltop, x);
 }
@@ -1496,7 +1500,7 @@ redsl2(GEN Q, GEN d)
 
 static GEN
 qfsolve_normform(GEN Q, GEN f, GEN d, GEN rd)
-{ return rd? qfrsolve_normform(Q, f, NULL, d, rd): qfisolve_normform(Q, f); }
+{ return rd? qfrsolve_normform(Q, f, d, rd): qfisolve_normform(Q, f); }
 static GEN
 qfbsolve_primitive_i(GEN Q, GEN d, GEN rd, GEN *Qr, GEN fa, long all)
 {
