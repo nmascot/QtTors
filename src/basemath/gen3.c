@@ -4287,6 +4287,7 @@ qfnorm0(GEN q, GEN x)
         case t_VEC:
         case t_COL: return qfbeval(q,x);
         case t_MAT: if (RgM_is_ZM(x)) return qfb_apply_ZM(q,x);
+        default: pari_err_TYPE("qfeval",x);
       }
     default: pari_err_TYPE("qfeval",q);
   }
