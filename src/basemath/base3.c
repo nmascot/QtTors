@@ -743,6 +743,7 @@ nfM_nfC_mul(GEN nf, GEN A, GEN B)
 long
 ZC_nfvalrem(GEN x, GEN pr, GEN *newx)
 {
+  pari_sp av = avma;
   long i, v, l;
   GEN r, y, p = pr_get_p(pr), mul = pr_get_tau(pr);
 
@@ -758,6 +759,12 @@ ZC_nfvalrem(GEN x, GEN pr, GEN *newx)
       if (r != gen_0) { if (newx) *newx = x; return v; }
     }
     swap(x, y);
+    if ((v & 0xf) == 0xf) v += pr_get_e(pr) * ZV_pvalrem(x, p, &x);
+    if (gc_needed(av,1))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"ZC_nfvalrem, v >= %ld", v);
+      gerepileall(av, 2, &x, &y);
+    }
   }
 }
 long
