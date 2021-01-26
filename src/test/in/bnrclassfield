@@ -4,9 +4,10 @@ count = 0;
 check(K,f,sol,flag, expo = 32)=
 {
   if (!sol, return(0));
-  if (exponent(f) > exponent(sol) + expo, return(0));
+  if (exponent(f) > exponent(sol) + expo, error(exponent(f)," > ",exponent(sol)," + ",expo));
   if (flag != 2, sol = rnfequation(K,sol); f = rnfequation(K,f));
-  !(nfisisom(sol,f)===0);
+  if (nfisisom(sol,f)===0,error("Non isomorphic: ",[f,sol]));
+  1;
 }
 checkvec(K,f,~sol,flag)=
 {
@@ -41,8 +42,9 @@ do(y^2-y+58) \\10
 s=x^12-2*x^11+(-4*y-5)*x^10+(8*y-28)*x^9+(9*y-308)*x^8+(100*y+482)*x^7+(-132*y+429)*x^6+(1082*y-294)*x^5+(-1617*y+15083)*x^4+(-1770*y+18798)*x^3+(-2764*y-60684)*x^2+(15996*y-16436)*x+(-2045*y-11529);
 do(y^2-y+58,,,1,s)
 
-s=[x^4+(2*y+25)*x^2+(10*y-310)*x+(-48*y-376),x^4-4*y*x^3+(6*y-43805)*x^2+(77130*y+5238)*x+(-38566*y+21012859)]
+s=[x^4-4*y*x^3+(6*y-43805)*x^2+(77130*y+5238)*x+(-38566*y+21012859),x^4+(2*y+25)*x^2+(10*y-310)*x+(-48*y-376)];
 do(y^2-y+595,,,,s)
+
 do(y^2-y+174)
 
 s=[x^3-15*x+(-1204*y+602),x^3+(2838*y+39081)*x+(-3130358*y-68297802)]
