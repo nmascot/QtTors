@@ -140,8 +140,12 @@ lindep([lfun(L,3),F(3,5/4),F(3,3/4),F(3,1/4)])
 hypergeom([1/6,2/3],1/2,2)
 
 hypergeom([],[],x)
-hypergeom([2,1],[1],x)
-hypergeom([2,1],[1],1/2+x)
+hypergeom([2],[],x)
+hypergeom([2],[],1/2+x)
+hypergeom([2],[],1/2+x^2)
+hypergeom([2,1],[3],x)
+hypergeom([2,1],[3],1/2+x)
+hypergeom([2,1],[3],1/2+x^2)
 
 \\ Errors, keep at end
 airy(O(x))
