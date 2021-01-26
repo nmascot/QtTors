@@ -486,7 +486,7 @@ qfminimize(GEN G, GEN P, GEN E)
     if (DEBUGLEVEL >= 2) err_printf("qfminimize: for %Ps^%ld:", p,vp);
     while (vp)
     {
-      long idx = 0, dimKer;
+      long idx = 0, dimKer = 0; /* -Wall */
       GEN d, sol = NULL, FU = zerovec(2*expu(vp)+100);
       pari_sp av = avma;
       while (vp) /* loop until vp <= n */
