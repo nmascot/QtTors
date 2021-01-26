@@ -823,10 +823,7 @@ hyperell_redsl2(GEN Q)
   else if (issquare(D))
     M = mkmat22(gen_1,divii(negi(q2),shifti(q1,1)),gen_0,gen_1);
   else
-  {
-    GEN Q = signe(D) < 0 ? qfi(q1,q2,q3): qfr(q1,q2,q3,real_0(DEFAULTPREC));
-    M = gel(qfbredsl2(Q, NULL),2);
-  }
+    M = gel(qfbredsl2(mkqfb(q1, q2, q3, D), NULL), 2);
   A = deg1pol(gcoeff(M,1,1),gcoeff(M,1,2),v);
   B = gpowers(deg1pol(gcoeff(M,2,1),gcoeff(M,2,2),v), d);
   R = gel(RgX_homogenous_evalpow(P, A, B),1);

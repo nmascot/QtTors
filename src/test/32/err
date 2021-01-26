@@ -259,7 +259,7 @@
   *** ellj: incorrect type in modular function (t_INTMOD).
   ***   at top-level: ellj(Qfb(1,1,1))
   ***                 ^----------------
-  *** ellj: incorrect type in ellj (t_QFI).
+  *** ellj: incorrect type in ellj (t_QFB).
   ***   at top-level: eta(1+O(2))
   ***                 ^-----------
   *** eta: domain error in eta: v_p(q) <= 0
@@ -427,7 +427,7 @@
   *** qfbprimeform: domain error in primeform: disc % 4 > 1
   ***   at top-level: qfbcomp(Qfb(1,1,1),Qfb(1,0,2))
   ***                 ^------------------------------
-  ***   not a function in function call
+  *** qfbcomp: inconsistent multiplication t_QFB * t_QFB.
   ***   at top-level: galoisinit(x^2)
   ***                 ^---------------
   *** galoisinit: domain error in galoisinit: issquarefree(pol) = 0
@@ -650,4 +650,4 @@ INFINITY
   ***                                   ^-
   ***   incorrect value for plothsizes: [2,
   ***                                      ^
-Total time spent: 11
+Total time spent: 10

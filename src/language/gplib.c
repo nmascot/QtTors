@@ -249,8 +249,7 @@ gentypes(void)
   t_POL    : polynomials       [ cod1 ] [ cod2 ] [ man_1 ] ... [ man_k ]\n\
   t_SER    : power series      [ cod1 ] [ cod2 ] [ man_1 ] ... [ man_k ]\n\
   t_RFRAC  : irred. rat. func. [ code ] [ num. ] [ den. ]\n\
-  t_QFR    : real qfb          [ code ] [ a ] [ b ] [ c ] [ del ]\n\
-  t_QFI    : imaginary qfb     [ code ] [ a ] [ b ] [ c ]\n\
+  t_QFB    : qfb               [ code ] [ a ] [ b ] [ c ] [ disc ]\n\
   t_VEC    : row vector        [ code ] [  x_1  ] ... [  x_k  ]\n\
   t_COL    : column vector     [ code ] [  x_1  ] ... [  x_k  ]\n\
   t_MAT    : matrix            [ code ] [ col_1 ] ... [ col_k ]\n\

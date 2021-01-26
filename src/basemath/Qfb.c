@@ -96,35 +96,73 @@ quadgen0(GEN x, long v)
 /**                      BINARY QUADRATIC FORMS                       **/
 /**                                                                   **/
 /***********************************************************************/
-GEN
-qfi(GEN x, GEN y, GEN z)
+static int
+is_qfi(GEN q) { return typ(q)==t_QFB && qfb_is_qfi(q); }
+
+static GEN
+check_qfbext(const char *fun, GEN x)
 {
-  if (signe(x) < 0) pari_err_IMPL("negative definite t_QFI");
-  retmkqfi(icopy(x),icopy(y),icopy(z));
-}
-GEN
-qfr(GEN x, GEN y, GEN z, GEN d)
-{
-  if (typ(d) != t_REAL) pari_err_TYPE("qfr",d);
-  retmkqfr(icopy(x),icopy(y),icopy(z),rcopy(d));
+  long t = typ(x);
+  if (t == t_QFB) return x;
+  if (t == t_VEC && lg(x)==3)
+  {
+    GEN q = gel(x,1);
+    if (!is_qfi(q) && typ(gel(x,2))==t_REAL) return q;
+  }
+  pari_err_TYPE(fun, x);
+  return NULL;/* LCOV_EXCL_LINE */
 }
 
-GEN
-Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
-{
-  pari_sp av = avma;
-  GEN D;
-  long s, r;
-  if (typ(x)!=t_INT) pari_err_TYPE("Qfb",x);
-  if (typ(y)!=t_INT) pari_err_TYPE("Qfb",y);
-  if (typ(z)!=t_INT) pari_err_TYPE("Qfb",z);
-  D = qfb_disc3(x,y,z);
-  check_quaddisc(D, &s, &r, "Qfb");
-  set_avma(av);
-  if (s < 0) return qfi(x, y, z);
+static GEN
+qfb3(GEN x, GEN y, GEN z)
+{ retmkqfb(icopy(x), icopy(y), icopy(z), qfb_disc3(x,y,z)); }
 
-  d = d? gtofp(d,prec): real_0(prec);
-  return qfr(x,y,z,d);
+GEN
+mkqfbcopy(GEN x, GEN y, GEN z, GEN d)
+{ retmkqfb(icopy(x), icopy(y), icopy(z), icopy(d)); }
+
+static int
+qfb_equal(GEN x, GEN y)
+{
+  return equalii(gel(x,1),gel(y,1))
+      && equalii(gel(x,2),gel(y,2))
+      && equalii(gel(x,3),gel(y,3));
+}
+
+/* valid for t_QFB, qfr3, qfr5; shallow */
+static GEN
+qfb_inv(GEN x) {
+  GEN z = shallowcopy(x);
+  gel(z,2) = negi(gel(z,2));
+  return z;
+}
+/* valid for t_QFB, gerepile-safe */
+static GEN
+qfbinv(GEN x)
+{ retmkqfb(icopy(gel(x,1)),negi(gel(x,2)),icopy(gel(x,3)), icopy(gel(x,4))); }
+
+GEN
+Qfb0(GEN a, GEN b, GEN c)
+{
+  GEN q, D;
+  if (!b)
+  {
+    if (c) pari_err_TYPE("Qfb",c);
+    if (typ(a) != t_VEC || lg(a) != 4) pari_err_TYPE("Qfb",a);
+    b = gel(a,2);
+    c = gel(a,3);
+    a = gel(a,1);
+  }
+  else if (!c)
+    pari_err_TYPE("Qfb",b);
+  if (typ(a)!=t_INT) pari_err_TYPE("Qfb",a);
+  if (typ(b)!=t_INT) pari_err_TYPE("Qfb",b);
+  if (typ(c)!=t_INT) pari_err_TYPE("Qfb",c);
+  q = qfb3(a, b, c); D = qfb_disc(q);
+  if (signe(D) < 0)
+  { if (signe(a) < 0) pari_err_IMPL("negative definite t_QFB"); }
+  else if (Z_issquare(D)) pari_err_DOMAIN("Qfb","issquare(disc)","=", gen_1,q);
+  return q;
 }
 
 /* composition */
@@ -188,53 +226,124 @@ qfb_comp(GEN z, GEN x, GEN y)
   gel(z,3) = diviiexact(c3,v1);
 }
 
+/* not meant to be efficient */
+static GEN
+qfb_comp_gen(GEN x, GEN y)
+{
+  GEN d1 = qfb_disc(x), d2 = qfb_disc(y);
+  GEN a1 = gel(x,1), b1 = gel(x,2), c1 = gel(x,3), n1;
+  GEN a2 = gel(y,1), b2 = gel(y,2), c2 = gel(y,3), n2;
+  GEN cx = content(x), cy = content(y), A, B, C, D, U, m, m2;
+
+  if (!is_pm1(cx))
+  {
+    a1 = diviiexact(a1, cx); b1 = diviiexact(b1, cx);
+    c1 = diviiexact(c1, cx); d1 = diviiexact(d1, sqri(cx));
+  }
+  if (!is_pm1(cy))
+  {
+    a2 = diviiexact(a2, cy); c2 = diviiexact(c2, cy);
+    b2 = diviiexact(b2, cy); d2 = diviiexact(d2, sqri(cy));
+  }
+  D = gcdii(d1, d2); if (signe(d1) < 0) setsigne(D, -1);
+  if (!Z_issquareall(diviiexact(d1, D), &n1) ||
+      !Z_issquareall(diviiexact(d2, D), &n2)) return NULL;
+  A = mulii(a1, n2);
+  B = mulii(a2, n1);
+  C = shifti(addii(mulii(b1, n2), mulii(b2, n1)), -1);
+  U = ZV_extgcd(mkvec3(A, B, C));
+  m = gel(U,1); U = gmael(U,2,3);
+  A = mulii(diviiexact(mulii(a1,b2),m), gel(U,1));
+  B = mulii(diviiexact(mulii(a2,b1),m), gel(U,2));
+  C = addii(mulii(b1,b2), mulii(D, mulii(n1,n2)));
+  C = mulii(diviiexact(shifti(C,-1), m), gel(U,3));
+  B = addii(A, addii(B, C));
+  m2 = sqri(m);
+  A = diviiexact(mulii(a1, a2), m2);
+  C = diviiexact(shifti(subii(sqri(B),D), -2), A);
+  cx = mulii(cx, cy);
+  if (!is_pm1(cx))
+  {
+    A = mulii(A, cx); B = mulii(B, cx);
+    C = mulii(C, cx); D = mulii(D, sqri(cx));
+  }
+  return mkqfb(A, B, C, D);
+}
+
 static GEN redimag_av(pari_sp av, GEN q);
 static GEN
 qficomp0(GEN x, GEN y, int raw)
 {
   pari_sp av = avma;
-  GEN z = cgetg(4,t_QFI);
+  GEN z = cgetg(5,t_QFB);
+  gel(z,4) = gel(x,4);
   qfb_comp(z, x,y);
   if (raw) return gerepilecopy(av,z);
   return redimag_av(av, z);
 }
+static GEN redreal(GEN x);
 static GEN
 qfrcomp0(GEN x, GEN y, int raw)
 {
   pari_sp av = avma;
-  GEN z = cgetg(5,t_QFR);
-  qfb_comp(z, x,y); gel(z,4) = addrr(gel(x,4),gel(y,4));
-  if (raw) return gerepilecopy(av,z);
-  return gerepileupto(av, redreal(z));
+  GEN dx = NULL, dy = NULL;
+  GEN z = cgetg(5,t_QFB);
+  if (typ(x)==t_VEC) { dx = gel(x,2); x = gel(x,1); }
+  if (typ(y)==t_VEC) { dy = gel(y,2); y = gel(y,1); }
+  gel(z,4) = gel(x,4);
+  qfb_comp(z, x,y);
+  if (dx) z = mkvec2(z, dy? addrr(dx, dy): dx); else if (dy) z = mkvec2(z, dy);
+  if (!raw) z = redreal(z);
+  return gerepilecopy(av, z);
 }
+/* same discriminant, no distance, no checks */
 GEN
-qfrcomp(GEN x, GEN y) { return qfrcomp0(x,y,0); }
+qfbcomp_i(GEN x, GEN y)
+{ return qfb_is_qfi(x)? qficomp0(x,y,0): qfrcomp0(x,y,0); }
 GEN
-qfrcompraw(GEN x, GEN y) { return qfrcomp0(x,y,1); }
+qfbcomp(GEN x, GEN y)
+{
+  GEN qx = check_qfbext("qfbcomp", x);
+  GEN qy = check_qfbext("qfbcomp", y);
+  if (!equalii(gel(qx,4),gel(qy,4)))
+  {
+    pari_sp av = avma;
+    GEN z = qfb_comp_gen(qx, qy);
+    if (typ(x) == t_VEC || typ(y) == t_VEC)
+      pari_err_IMPL("Shanks's distance in general composition");
+    if (!z) pari_err_OP("*",x,y);
+    return gerepileupto(av, qfbred(z));
+  }
+  return qfb_is_qfi(qx)? qficomp0(x,y,0): qfrcomp0(x,y,0);
+}
+/* same discriminant, no distance, no checks */
 GEN
-qficomp(GEN x, GEN y) { return qficomp0(x,y,0); }
-GEN
-qficompraw(GEN x, GEN y) { return qficomp0(x,y,1); }
+qfbcompraw_i(GEN x, GEN y)
+{ return qfb_is_qfi(x)? qficomp0(x,y,1): qfrcomp0(x,y,1); }
 GEN
 qfbcompraw(GEN x, GEN y)
 {
-  long tx = typ(x);
-  if (typ(y) != tx) pari_err_TYPE2("*",x,y);
-  switch(tx) {
-    case t_QFI: return qficompraw(x,y);
-    case t_QFR: return qfrcompraw(x,y);
+  GEN qx = check_qfbext("qfbcompraw", x);
+  GEN qy = check_qfbext("qfbcompraw", y);
+  if (!equalii(gel(qx,4),gel(qy,4)))
+  {
+    pari_sp av = avma;
+    GEN z = qfb_comp_gen(qx, qy);
+    if (typ(x) == t_VEC || typ(y) == t_VEC)
+      pari_err_IMPL("Shanks's distance in general composition");
+    if (!z) pari_err_OP("qfbcompraw",x,y);
+    return gerepilecopy(av, z);
   }
-  pari_err_TYPE("composition",x);
-  return NULL; /* LCOV_EXCL_LINE */
+  if (!equalii(gel(qx,4),gel(qy,4))) pari_err_OP("qfbcompraw",x,y);
+  return qfb_is_qfi(qx)? qficomp0(x,y,1): qfrcomp0(x,y,1);
 }
 
 static GEN
 qfisqr0(GEN x, long raw)
 {
   pari_sp av = avma;
-  GEN z = cgetg(4,t_QFI);
-
-  if (typ(x)!=t_QFI) pari_err_TYPE("composition",x);
+  GEN z = cgetg(5,t_QFB);
+  gel(z,4) = gel(x,4);
   qfb_sqr(z,x);
   if (raw) return gerepilecopy(av,z);
   return redimag_av(av, z);
@@ -243,26 +352,27 @@ static GEN
 qfrsqr0(GEN x, long raw)
 {
   pari_sp av = avma;
-  GEN z = cgetg(5,t_QFR);
-
-  if (typ(x)!=t_QFR) pari_err_TYPE("composition",x);
-  qfb_sqr(z,x); gel(z,4) = shiftr(gel(x,4),1);
-  if (raw) return gerepilecopy(av,z);
-  return gerepileupto(av, redreal(z));
+  GEN z = cgetg(5,t_QFB);
+  gel(z,4) = gel(x,4);
+  qfb_sqr(z,x);
+  if (!raw) z = redreal(z);
+  return gerepilecopy(av, z);
 }
+/* same discriminant, no distance, no checks */
 GEN
-qfrsqr(GEN x) { return qfrsqr0(x,0); }
+qfbsqr_i(GEN x)
+{ return qfb_is_qfi(x)? qfisqr0(x,0): qfrsqr0(x,0); }
 GEN
-qfrsqrraw(GEN x) { return qfrsqr0(x,1); }
-GEN
-qfisqr(GEN x) { return qfisqr0(x,0); }
-GEN
-qfisqrraw(GEN x) { return qfisqr0(x,1); }
+qfbsqr(GEN x)
+{
+  GEN qx = check_qfbext("qfbsqr", x);
+  return qfb_is_qfi(qx)? qfisqr0(x,0): qfrsqr0(x,0);
+}
 
 static GEN
-qfr_1_by_disc(GEN D, long prec)
+qfr_1_by_disc(GEN D)
 {
-  GEN y = cgetg(5,t_QFR), isqrtD;
+  GEN y = cgetg(5,t_QFB), isqrtD;
   pari_sp av = avma;
   long r;
 
@@ -272,14 +382,16 @@ qfr_1_by_disc(GEN D, long prec)
     isqrtD = gerepileuptoint(av, subiu(isqrtD,1));
   gel(y,2) = isqrtD; av = avma;
   gel(y,3) = gerepileuptoint(av, shifti(subii(sqri(isqrtD), D),-2));
-  gel(y,4) = real_0(prec); return y;
+  gel(y,4) = icopy(D); return y;
 }
-GEN
+
+static GEN
+qfr_disc(GEN x)
+{ return qfb_disc(typ(x)==t_VEC ? gel(x,1): x); }
+
+static GEN
 qfr_1(GEN x)
-{
-  if (typ(x) != t_QFR) pari_err_TYPE("qfr_1",x);
-  return qfr_1_by_disc(qfb_disc(x), precision(gel(x,4)));
-}
+{ return qfr_1_by_disc(qfr_disc(x)); }
 
 static void
 qfr_1_fill(GEN y, struct qfr_data *S)
@@ -306,79 +418,61 @@ qfr3_1(struct qfr_data *S)
   qfr_1_fill(y, S); return y;
 }
 
-/* Assume D < 0 is the discriminant of a t_QFI */
+/* Assume D < 0 is the discriminant of a t_QFB */
 static GEN
 qfi_1_by_disc(GEN D)
 {
-  GEN b,c, y = cgetg(4,t_QFI);
+  GEN b,c, y = cgetg(5,t_QFB);
   quadpoly_bc(D, mod2(D), &b,&c);
   if (b == gen_m1) b = gen_1;
   gel(y,1) = gen_1;
   gel(y,2) = b;
-  gel(y,3) = c; return y;
+  gel(y,3) = c;
+  gel(y,4) = icopy(D); return y;
 }
-GEN
+static GEN
 qfi_1(GEN x)
 {
-  if (typ(x) != t_QFI) pari_err_TYPE("qfi_1",x);
+  if (typ(x) != t_QFB) pari_err_TYPE("qfi_1",x);
   return qfi_1_by_disc(qfb_disc(x));
 }
 
+GEN
+qfb_1(GEN x) { return qfb_is_qfi(x) ? qfi_1(x): qfr_1(x); }
+
 static GEN
-invraw(GEN x)
-{
-  GEN y = gcopy(x);
-  if (typ(y) == t_QFR) togglesign(gel(y,4));
-  togglesign(gel(y,2)); return y;
-}
-GEN
-qfrpowraw(GEN x, long n)
-{
-  pari_sp av = avma;
-  long m;
-  GEN y;
+_qfimul(void *E, GEN x, GEN y) { (void) E; return qficomp0(x,y,0); }
+static GEN
+_qfisqr(void *E, GEN x) { (void) E; return qficomp0(x,x,0); }
+static GEN
+_qfimulraw(void *E, GEN x, GEN y) { (void) E; return qficomp0(x,y,1); }
+static GEN
+_qfisqrraw(void *E, GEN x) { (void) E; return qficomp0(x,x,1); }
 
-  if (typ(x) != t_QFR) pari_err_TYPE("qfrpowraw",x);
-  if (!n) return qfr_1(x);
-  if (n== 1) return gcopy(x);
-  if (n==-1) return invraw(x);
-
-  y = NULL; m = labs(n);
-  for (; m>1; m>>=1)
-  {
-    if (m&1) y = y? qfrcompraw(y,x): x;
-    x = qfrsqrraw(x);
-  }
-  y = y? qfrcompraw(y,x): x;
-  if (n < 0) y = invraw(y);
-  return gerepileupto(av,y);
-}
-GEN
+static GEN
 qfipowraw(GEN x, long n)
 {
   pari_sp av = avma;
-  long m;
   GEN y;
-
-  if (typ(x) != t_QFI) pari_err_TYPE("qfipow",x);
   if (!n) return qfi_1(x);
   if (n== 1) return gcopy(x);
-  if (n==-1) return invraw(x);
-
-  y = NULL; m = labs(n);
-  for (; m>1; m>>=1)
-  {
-    if (m&1) y = y? qficompraw(y,x): x;
-    x = qfisqrraw(x);
-  }
-  y = y? qficompraw(y,x): x;
-  if (n < 0) y = invraw(y);
-  return gerepileupto(av,y);
+  if (n==-1) { x = gcopy(x); togglesign(gel(x,2)); return x; }
+  if (n < 0) x = qfb_inv(x);
+  y = gen_powu(x, labs(n), NULL, &_qfisqrraw, &_qfimulraw);
+  return gerepilecopy(av,y);
 }
 
-GEN
-qfbpowraw(GEN x, long n)
-{ return (typ(x)==t_QFI)? qfipowraw(x,n): qfrpowraw(x,n); }
+static GEN
+qfipow(GEN x, GEN n)
+{
+  pari_sp av = avma;
+  GEN y;
+  long s = signe(n);
+  if (!s) return qfi_1(x);
+  if (s < 0) x = qfb_inv(x);
+  y = gen_pow(qfbred_i(x), n, NULL, &_qfisqr, &_qfimul);
+  return gerepilecopy(av,y);
+}
 
 static long
 parteucl(GEN L, GEN *d, GEN *v3, GEN *v, GEN *v2)
@@ -403,8 +497,8 @@ nucomp(GEN x, GEN y, GEN L)
   GEN a, a1, a2, b2, b, d, d1, g, n, p1, q1, q2, s, u, u1, v, v2, v3, Q;
 
   if (x==y) return nudupl(x,L);
-  if (typ(x) != t_QFI) pari_err_TYPE("nucomp",x);
-  if (typ(y) != t_QFI) pari_err_TYPE("nucomp",y);
+  if (!is_qfi(x)) pari_err_TYPE("nucomp",x);
+  if (!is_qfi(y)) pari_err_TYPE("nucomp",y);
 
   if (abscmpii(gel(x,1),gel(y,1)) < 0) swap(x, y);
   s = shifti(addii(gel(x,2),gel(y,2)), -1);
@@ -437,7 +531,7 @@ nucomp(GEN x, GEN y, GEN L)
   }
   a = modii(a,a1); p1 = subii(a,a1); if (abscmpii(a,p1) > 0) a = p1;
   d = a1; v3 = a; z = parteucl(L, &d,&v3, &v,&v2);
-  Q = cgetg(4,t_QFI);
+  Q = cgetg(5,t_QFB);
   if (!z) {
     g = diviiexact(addii(mulii(v3,s),gel(y,3)), d);
     b = a2;
@@ -460,6 +554,7 @@ nucomp(GEN x, GEN y, GEN L)
   q2 = addii(q1,n);
   gel(Q,2) = addii(b2, z? addii(q1,q2): shifti(q1, 1));
   gel(Q,3) = addii(mulii(v3,diviiexact(q2,d)), mulii(g,v2));
+  gel(Q,4) = gel(x,4);
   return redimag_av(av, Q);
 }
 
@@ -470,7 +565,7 @@ nudupl(GEN x, GEN L)
   long z;
   GEN u, v, d, d1, p1, a, b, c, a2, b2, c2, Q, v2, v3, g;
 
-  if (typ(x) != t_QFI) pari_err_TYPE("nudupl",x);
+  if (!is_qfi(x)) pari_err_TYPE("nudupl",x);
   a = gel(x,1);
   b = gel(x,2);
   d1 = bezout(b,a, &u,NULL);
@@ -484,7 +579,7 @@ nudupl(GEN x, GEN L)
   d = a; v3 = c; z = parteucl(L, &d,&v3, &v,&v2);
   a2 = sqri(d);
   c2 = sqri(v3);
-  Q = cgetg(4,t_QFI);
+  Q = cgetg(5,t_QFB);
   if (!z) {
     g = diviiexact(addii(mulii(v3,b),gel(x,3)), d);
     b2 = gel(x,2);
@@ -501,6 +596,7 @@ nudupl(GEN x, GEN L)
   }
   gel(Q,2) = addii(b2, subii(sqri(addii(d,v3)), addii(a2,c2)));
   gel(Q,3) = addii(c2, mulii(g,v2));
+  gel(Q,4) = gel(x,4);
   return redimag_av(av, Q);
 }
 
@@ -515,7 +611,7 @@ nupow(GEN x, GEN n, GEN L)
   GEN y, D;
 
   if (typ(n) != t_INT) pari_err_TYPE("nupow",n);
-  if (typ(x) != t_QFI) pari_err_TYPE("nupow",x);
+  if (!is_qfi(x)) pari_err_TYPE("nupow",x);
   if (gequal1(n)) return gcopy(x);
   av = avma;
   D = qfb_disc(x);
@@ -617,17 +713,14 @@ REDBU(GEN a, GEN *b, GEN *c, GEN u1, GEN *u2)
   *u2 = subii(*u2, mulii(q, u1));
 }
 
-/* q t_QFI, return reduced representative and set base change U in Sl2(Z) */
+/* q t_QFB, return reduced representative and set base change U in Sl2(Z) */
 GEN
 redimagsl2(GEN q, GEN *U)
 {
-  GEN Q = cgetg(4, t_QFI);
-  pari_sp av = avma, av2;
-  GEN z, u1,u2,v1,v2, a = gel(q,1), b = gel(q,2), c = gel(q,3);
+  pari_sp av = avma;
+  GEN z, u1,u2,v1,v2,Q;
+  GEN a = gel(q,1), b = gel(q,2), c = gel(q,3);
   long cmp;
-  /* upper bound for size of final (a,b,c) */
-  (void)new_chunk(2*(lgefint(a) + lgefint(b) + lgefint(c) + 3));
-  av2 = avma;
   u1 = gen_1; u2 = gen_0;
   cmp = abscmpii(a, b);
   if (cmp < 0)
@@ -645,7 +738,7 @@ redimagsl2(GEN q, GEN *U)
     REDBU(a,&b,&c, u1,&u2);
     if (gc_needed(av, 1)) {
       if (DEBUGMEM>1) pari_warn(warnmem, "redimagsl2");
-      gerepileall(av2, 5, &a,&b,&c, &u1,&u2);
+      gerepileall(av, 5, &a,&b,&c, &u1,&u2);
     }
   }
   if (cmp == 0 && signe(b) < 0)
@@ -653,56 +746,49 @@ redimagsl2(GEN q, GEN *U)
     b = negi(b);
     z = u1; u1 = u2; u2 = negi(z);
   }
-  set_avma(av);
-  a = icopy(a); gel(Q,1) = a;
-  b = icopy(b); gel(Q,2) = b;
-  c = icopy(c); gel(Q,3) = c;
-  u1 = icopy(u1);
-  u2 = icopy(u2); av = avma;
-
   /* Let q = (A,B,C). q o [u1,u2; v1,v2] = Q implies
    * [v1,v2] = (1/C) [(b-B)/2 u1 - a u2, c u1 - (b+B)/2 u2] */
   z = shifti(subii(b, gel(q,2)), -1);
   v1 = subii(mulii(z, u1), mulii(a, u2)); v1 = diviiexact(v1, gel(q,3));
   z = subii(z, b);
   v2 = addii(mulii(z, u2), mulii(c, u1)); v2 = diviiexact(v2, gel(q,3));
-  set_avma(av);
-  v1 = icopy(v1);
-  v2 = icopy(v2);
-  *U = mkmat2(mkcol2(u1,v1), mkcol2(u2,v2)); return Q;
+  *U = mkmat2(mkcol2(u1,v1), mkcol2(u2,v2));
+  Q = lg(q)==5 ? mkqfb(a,b,c,gel(q,4)): mkvec3(a,b,c);
+  gerepileall(av, 2, &Q, U);
+  return Q;
 }
 
 static GEN
-setq_b0(ulong a, ulong c)
-{ retmkqfi( utoipos(a), gen_0, utoipos(c) ); }
+setq_b0(ulong a, ulong c, GEN D)
+{ retmkqfb(utoipos(a), gen_0, utoipos(c), icopy(D)); }
 /* assume |sb| = 1 */
 static GEN
-setq(ulong a, ulong b, ulong c, long sb)
-{ retmkqfi( utoipos(a), sb == 1? utoipos(b): utoineg(b), utoipos(c) ); }
+setq(ulong a, ulong b, ulong c, long sb, GEN D)
+{ retmkqfb(utoipos(a), sb==1? utoipos(b): utoineg(b), utoipos(c), icopy(D)); }
 /* 0 < a, c < 2^BIL, b = 0 */
 static GEN
-redimag_1_b0(ulong a, ulong c)
-{ return (a <= c)? setq_b0(a, c): setq_b0(c, a); }
+redimag_1_b0(ulong a, ulong c, GEN D)
+{ return (a <= c)? setq_b0(a, c, D): setq_b0(c, a, D); }
 
 /* 0 < a, c < 2^BIL: single word affair */
 static GEN
-redimag_1(pari_sp av, GEN a, GEN b, GEN c)
+redimag_1(pari_sp av, GEN a, GEN b, GEN c, GEN D)
 {
   ulong ua, ub, uc;
   long sb;
   for(;;)
   { /* at most twice */
     long lb = lgefint(b); /* <= 3 after first loop */
-    if (lb == 2) return redimag_1_b0(a[2],c[2]);
+    if (lb == 2) return redimag_1_b0(a[2],c[2], D);
     if (lb == 3 && uel(b,2) <= (ulong)LONG_MAX) break;
     REDB(a,&b,&c);
     if (uel(a,2) <= uel(c,2))
     { /* lg(b) <= 3 but may be too large for itos */
       long s = signe(b);
       set_avma(av);
-      if (!s) return redimag_1_b0(a[2], c[2]);
+      if (!s) return redimag_1_b0(a[2], c[2], D);
       if (a[2] == c[2]) s = 1;
-      return setq(a[2], b[2], c[2], s);
+      return setq(a[2], b[2], c[2], s, D);
     }
     swap(a,c); b = negi(b);
   }
@@ -719,7 +805,7 @@ redimag_1(pari_sp av, GEN a, GEN b, GEN c)
     lswap(ua,uc); sb = -sb;
     sREDB(ua, &sb, &uc);
   }
-  if (!sb) return setq_b0(ua, uc);
+  if (!sb) return setq_b0(ua, uc, D);
   else
   {
     long s = 1;
@@ -728,17 +814,17 @@ redimag_1(pari_sp av, GEN a, GEN b, GEN c)
       sb = -sb;
       if (ua != uc) s = -1;
     }
-    return setq(ua, sb, uc, s);
+    return setq(ua, sb, uc, s, D);
   }
 }
 
 static GEN
 redimag_av(pari_sp av, GEN q)
 {
-  GEN a = gel(q,1), b = gel(q,2), c = gel(q,3);
+  GEN a = gel(q,1), b = gel(q,2), c = gel(q,3), D = gel(q,4);
   long cmp, lc = lgefint(c);
 
-  if (lgefint(a) == 3 && lc == 3) return redimag_1(av, a, b, c);
+  if (lgefint(a) == 3 && lc == 3) return redimag_1(av, a, b, c, D);
   cmp = abscmpii(a, b);
   if (cmp < 0)
     REDB(a,&b,&c);
@@ -748,16 +834,12 @@ redimag_av(pari_sp av, GEN q)
   {
     cmp = abscmpii(a, c); if (cmp <= 0) break;
     lc = lgefint(a); /* lg(future c): we swap a & c next */
-    if (lc == 3) return redimag_1(av, a, b, c);
+    if (lc == 3) return redimag_1(av, a, b, c, D);
     swap(a,c); b = negi(b); /* apply rho */
     REDB(a,&b,&c);
   }
   if (cmp == 0 && signe(b) < 0) b = negi(b);
-  /* size of reduced Qfb(a,b,c) <= 3 lg(c) + 4 <= 4 lg(c) */
-  (void)new_chunk(lc<<2);
-  a = icopy(a); b = icopy(b); c = icopy(c);
-  set_avma(av);
-  retmkqfi(icopy(a), icopy(b), icopy(c));
+  return gerepilecopy(av, mkqfb(a, b, c, D));
 }
 GEN
 redimag(GEN q) { return redimag_av(avma, q); }
@@ -765,28 +847,25 @@ redimag(GEN q) { return redimag_av(avma, q); }
 static GEN
 rhoimag(GEN x)
 {
-  GEN a = gel(x,1), b = gel(x,2), c = gel(x,3);
+  pari_sp av = avma;
+  GEN a = gel(x,1), b = gel(x,2), c = gel(x,3), D = gel(x,4);
   int fl = abscmpii(a, c);
   if (fl <= 0) {
     int fg = abscmpii(a, b);
     if (fg >= 0) {
-      x = qfi(a,b,c);
+      x = mkqfbcopy(a, b, c, D);
       if ((!fl || !fg) && signe(gel(x,2)) < 0) setsigne(gel(x,2), 1);
       return x;
     }
   }
-  x = cgetg(4, t_QFI);
-  (void)new_chunk(lgefint(a) + lgefint(b) + lgefint(c) + 3);
   swap(a,c); b = negi(b);
-  REDB(a, &b, &c); set_avma((pari_sp)x);
-  gel(x,1) = icopy(a);
-  gel(x,2) = icopy(b);
-  gel(x,3) = icopy(c); return x;
+  REDB(a, &b, &c);
+  return gerepilecopy(av, mkqfb(a,b,c,D));
 }
 
 /* qfr3 / qfr5 */
 
-/* t_QFR are unusable: D, sqrtD, isqrtD are recomputed all the time and the
+/* t_QFB are unusable: D, sqrtD, isqrtD are recomputed all the time and the
  * logarithmic Shanks's distance is costly and hard to control.
  * qfr3 / qfr5 routines take a container of t_INTs (e.g a t_VEC) as argument,
  * at least 3 (resp. 5) components [it is a feature that they do not check the
@@ -871,10 +950,10 @@ qfr_to_qfr5(GEN x, long prec)
 
 /* d0 = initial distance, x = [a,b,c, expo(d), d], d = exp(2*distance) */
 GEN
-qfr5_to_qfr(GEN x, GEN d0)
+qfr5_to_qfr(GEN x, GEN D, GEN d0)
 {
   GEN y;
-  if (lg(x) ==  6)
+  if (d0)
   {
     GEN n = gel(x,4), d = absr(gel(x,5));
     if (signe(n))
@@ -892,18 +971,15 @@ qfr5_to_qfr(GEN x, GEN d0)
       d0 = addrr(d0, d);
     }
   }
-  y = cgetg(5, t_QFR);
-  gel(y,1) = gel(x,1);
-  gel(y,2) = gel(x,2);
-  gel(y,3) = gel(x,3);
-  gel(y,4) = d0; return y;
+  y = mkqfb(gel(x,1), gel(x,2), gel(x,3), D);
+  return d0 ? mkvec2(y,d0): y;
 }
 
 /* Not stack-clean */
 GEN
 qfr3_to_qfr(GEN x, GEN d)
 {
-  GEN z = cgetg(5, t_QFR);
+  GEN z = cgetg(5, t_QFB);
   gel(z,1) = gel(x,1);
   gel(z,2) = gel(x,2);
   gel(z,3) = gel(x,3);
@@ -961,14 +1037,6 @@ qfr3_red(GEN x, struct qfr_data *S)
   return x;
 }
 
-static void
-get_disc(GEN x, struct qfr_data *S)
-{
-  if (!S->D) S->D = qfb_disc(x);
-  else if (typ(S->D) != t_INT) pari_err_TYPE("qfr_init",S->D);
-  if (!signe(S->D)) pari_err_DOMAIN("qfr_init", "disc", "=", gen_0,x);
-}
-
 void
 qfr_data_init(GEN D, long prec, struct qfr_data *S)
 {
@@ -978,15 +1046,13 @@ qfr_data_init(GEN D, long prec, struct qfr_data *S)
 }
 
 static GEN
-qfr5_init(GEN x, struct qfr_data *S)
+qfr5_init(GEN x, GEN d, struct qfr_data *S)
 {
-  GEN d = gel(x,4);
   long prec = realprec(d), l = -expo(d);
   if (l < BITS_IN_LONG) l = BITS_IN_LONG;
   prec = maxss(prec, nbits2prec(l));
+  S->D = qfb_disc(x);
   x = qfr_to_qfr5(x,prec);
-
-  get_disc(x, S);
   if (!S->sqrtD) S->sqrtD = sqrtr(itor(S->D,prec));
   else if (typ(S->sqrtD) != t_REAL) pari_err_TYPE("qfr_init",S->sqrtD);
 
@@ -1003,7 +1069,7 @@ qfr5_init(GEN x, struct qfr_data *S)
 static GEN
 qfr3_init(GEN x, struct qfr_data *S)
 {
-  get_disc(x, S);
+  S->D = qfb_disc(x);
   if (!S->isqrtD) S->isqrtD = sqrti(S->D);
   else if (typ(S->isqrtD) != t_INT) pari_err_TYPE("qfr_init",S->isqrtD);
   return x;
@@ -1013,50 +1079,50 @@ qfr3_init(GEN x, struct qfr_data *S)
 #define qf_STEP 1
 
 static GEN
-redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
+redreal_i(GEN x, long flag, GEN isqrtD, GEN sqrtD)
 {
-  pari_sp av = avma;
   struct qfr_data S;
-  GEN d;
-  if (typ(x) != t_QFR) pari_err_TYPE("redreal",x);
-  d = gel(x,4);
-  S.D = D;
+  GEN d = NULL, y;
+  if (typ(x)==t_VEC) { d = gel(x,2); x = gel(x,1); } else flag |= qf_NOD;
   S.sqrtD = sqrtD;
   S.isqrtD = isqrtD;
-  x = (flag & qf_NOD)? qfr3_init(x, &S): qfr5_init(x, &S);
+  y = (flag & qf_NOD)? qfr3_init(x, &S): qfr5_init(x, d, &S);
   switch(flag) {
-    case 0:              x = qfr5_red(x,&S); break;
-    case qf_NOD:         x = qfr3_red(x,&S); break;
-    case qf_STEP:        x = qfr5_rho(x,&S); break;
-    case qf_STEP|qf_NOD: x = qfr3_rho(x,&S); break;
+    case 0:              y = qfr5_red(y,&S); break;
+    case qf_NOD:         y = qfr3_red(y,&S); break;
+    case qf_STEP:        y = qfr5_rho(y,&S); break;
+    case qf_STEP|qf_NOD: y = qfr3_rho(y,&S); break;
     default: pari_err_FLAG("qfbred");
   }
-  return gerepilecopy(av, qfr5_to_qfr(x,d));
+  return qfr5_to_qfr(y, qfb_disc(x), d);
 }
-GEN
+static GEN
 redreal(GEN x)
-{ return redreal0(x,0,NULL,NULL,NULL); }
-GEN
-rhoreal(GEN x)
-{ return redreal0(x,qf_STEP,NULL,NULL,NULL); }
-GEN
-redrealnod(GEN x, GEN isqrtD)
-{ return redreal0(x,qf_NOD,NULL,isqrtD,NULL); }
-GEN
-rhorealnod(GEN x, GEN isqrtD)
-{ return redreal0(x,qf_STEP|qf_NOD,NULL,isqrtD,NULL); }
-GEN
-qfbred0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
-{
-  if (typ(x) == t_QFI)
-    return (flag & qf_STEP)? rhoimag(x): redimag(x);
-  return redreal0(x,flag,D,isqrtD,sqrtD);
-}
+{ return redreal_i(x,0,NULL,NULL); }
 
 GEN
-qfr5_comp(GEN x, GEN y, struct qfr_data *S)
+qfbred0(GEN x, long flag, GEN isqrtD, GEN sqrtD)
 {
-  pari_sp av = avma;
+  pari_sp av;
+  GEN q = check_qfbext("qfbred",x);
+  if (qfb_is_qfi(q)) return (flag & qf_STEP)? rhoimag(x): redimag(x);
+  if (typ(x)==t_QFB) flag |= qf_NOD;
+  else               flag &= ~qf_NOD;
+  av = avma;
+  return gerepilecopy(av, redreal_i(x,flag,isqrtD,sqrtD));
+}
+/* t_QFB */
+GEN
+qfbred_i(GEN x)
+{ return qfb_is_qfi(x)? redimag(x): redreal(x); }
+GEN
+qfbred(GEN x)
+{ return qfbred0(x, 0, NULL, NULL); }
+
+/* Not stack-clean */
+GEN
+qfr5_compraw(GEN x, GEN y)
+{
   GEN z = cgetg(6,t_VEC); qfb_comp(z,x,y);
   if (x == y)
   {
@@ -1068,23 +1134,40 @@ qfr5_comp(GEN x, GEN y, struct qfr_data *S)
     gel(z,4) = addii(gel(x,4),gel(y,4));
     gel(z,5) = mulrr(gel(x,5),gel(y,5));
   }
-  fix_expo(z); z = qfr5_red(z,S);
-  return gerepilecopy(av,z);
+  fix_expo(z); return z;
 }
+GEN
+qfr5_comp(GEN x, GEN y, struct qfr_data *S)
+{ return qfr5_red(qfr5_compraw(x, y), S); }
 /* Not stack-clean */
 GEN
-qfr3_comp(GEN x, GEN y, struct qfr_data *S)
+qfr3_compraw(GEN x, GEN y)
 {
   GEN z = cgetg(4,t_VEC); qfb_comp(z,x,y);
-  return qfr3_red(z, S);
-}
-
-/* valid for t_QFR, qfr3, qfr5 */
-static GEN
-qfr_inv(GEN x) {
-  GEN z = shallowcopy(x);
-  gel(z,2) = negi(gel(z,2));
   return z;
+}
+GEN
+qfr3_comp(GEN x, GEN y, struct qfr_data *S)
+{ return qfr3_red(qfr3_compraw(x,y), S); }
+
+/* return x^n. Not stack-clean */
+GEN
+qfr5_powraw(GEN x, GEN n, struct qfr_data *S)
+{
+  GEN y = NULL;
+  long i, m, s = signe(n);
+  if (!s) return qfr5_1(S, lg(gel(x,5)));
+  for (i=lgefint(n)-1; i>1; i--)
+  {
+    m = n[i];
+    for (; m; m>>=1)
+    {
+      if (m&1) y = y? qfr5_compraw(y,x): x;
+      if (m == 1 && i == 2) break;
+      x = qfr5_compraw(x,x);
+    }
+  }
+  return y;
 }
 
 /* return x^n. Not stack-clean */
@@ -1108,12 +1191,32 @@ qfr5_pow(GEN x, GEN n, struct qfr_data *S)
 }
 /* return x^n. Not stack-clean */
 GEN
+qfr3_powraw(GEN x, GEN n, struct qfr_data *S)
+{
+  GEN y = NULL;
+  long i, m, s = signe(n);
+  if (!s) return qfr3_1(S);
+  if (s < 0) x = qfb_inv(x);
+  for (i=lgefint(n)-1; i>1; i--)
+  {
+    m = n[i];
+    for (; m; m>>=1)
+    {
+      if (m&1) y = y? qfr3_compraw(y,x): x;
+      if (m == 1 && i == 2) break;
+      x = qfr3_compraw(x,x);
+    }
+  }
+  return y;
+}
+/* return x^n. Not stack-clean */
+GEN
 qfr3_pow(GEN x, GEN n, struct qfr_data *S)
 {
   GEN y = NULL;
   long i, m, s = signe(n);
   if (!s) return qfr3_1(S);
-  if (s < 0) x = qfr_inv(x);
+  if (s < 0) x = qfb_inv(x);
   for (i=lgefint(n)-1; i>1; i--)
   {
     m = n[i];
@@ -1126,39 +1229,90 @@ qfr3_pow(GEN x, GEN n, struct qfr_data *S)
   }
   return y;
 }
-GEN
+
+static GEN
+qfrinvraw(GEN x)
+{
+  if (typ(x) == t_VEC) retmkvec2(qfbinv(gel(x,1)), negr(gel(x,2)));
+ return qfbinv(x);
+}
+static GEN
+qfrpowraw(GEN x, long n)
+{
+  struct qfr_data S = { NULL, NULL, NULL };
+  pari_sp av = avma;
+  if (!n) return qfr_1(x);
+  if (n==1) return gcopy(x);
+  if (n==-1) return qfrinvraw(x);
+  if (typ(x)==t_QFB)
+  {
+    if (n < 0) x = qfb_inv(x);
+    x = qfr3_init(x, &S);
+    x = qfr3_powraw(x, stoi(n), &S);
+    x = qfr3_to_qfr(x, S.D);
+  }
+  else
+  {
+    GEN d0 = gel(x,2);
+    x = gel(x,1);
+    if (n < 0) x = qfb_inv(x);
+    x = qfr5_init(x, d0, &S);
+    if (labs(n) != 1) x = qfr5_powraw(x, stoi(n), &S);
+    x = qfr5_to_qfr(x, S.D, mulrs(d0,n));
+  }
+  return gerepilecopy(av, x);
+}
+static GEN
 qfrpow(GEN x, GEN n)
 {
   struct qfr_data S = { NULL, NULL, NULL };
   long s = signe(n);
   pari_sp av = avma;
-  GEN d0;
-
   if (!s) return qfr_1(x);
-  if (is_pm1(n)) return s > 0? redreal(x): ginv(x);
-  if (s < 0) x = qfr_inv(x);
-  d0 = gel(x,4);
-  if (!signe(d0)) {
+  if (typ(x)==t_QFB)
+  {
+    if (s < 0) x = qfb_inv(x);
     x = qfr3_init(x, &S);
-    x = qfr3_pow(x, n, &S);
-    x = qfr3_to_qfr(x, d0);
-  } else {
-    x = qfr5_init(x, &S);
-    x = qfr5_pow(qfr_to_qfr5(x, lg(S.sqrtD)), n, &S);
-    x = qfr5_to_qfr(x, mulri(d0,n));
+    x = is_pm1(n)? qfr3_red(x, &S): qfr3_pow(x, n, &S);
+    x = qfr3_to_qfr(x, S.D);
+  }
+  else
+  {
+    GEN d0 = gel(x,2);
+    x = gel(x,1);
+    if (s < 0) x = qfb_inv(x);
+    x = qfr5_init(x, d0, &S);
+    x = is_pm1(n)? qfr5_red(x, &S): qfr5_pow(x, n, &S);
+    x = qfr5_to_qfr(x, S.D, mulri(d0,n));
   }
   return gerepilecopy(av, x);
+}
+GEN
+qfbpowraw(GEN x, long n)
+{
+  GEN q = check_qfbext("qfbpowraw",x);
+  return qfb_is_qfi(q)? qfipowraw(x,n): qfrpowraw(x,n);
+}
+/* same discriminant, no distance, no checks */
+GEN
+qfbpow_i(GEN x, GEN n)
+{ return qfb_is_qfi(x)? qfipow(x,n): qfrpow(x,n); }
+GEN
+qfbpow(GEN x, GEN n)
+{
+  GEN q = check_qfbext("qfbpow",x);
+  return qfb_is_qfi(q)? qfipow(x,n): qfrpow(x,n);
 }
 
 /* Prime forms attached to prime ideals of degree 1 */
 
 /* assume x != 0 a t_INT, p > 0
- * Return a t_QFI, but discriminant sign is not checked: can be used for
+ * Return a t_QFB, but discriminant sign is not checked: can be used for
  * real forms as well */
 GEN
 primeform_u(GEN x, ulong p)
 {
-  GEN c, y = cgetg(4, t_QFI);
+  GEN c, y = cgetg(5, t_QFB);
   pari_sp av = avma;
   ulong b;
   long s;
@@ -1183,13 +1337,14 @@ primeform_u(GEN x, ulong p)
     c = diviuexact(shifti(subii(sqru(b), x), -2), p);
   }
   gel(y,3) = gerepileuptoint(av, c);
+  gel(y,4) = icopy(x);
   gel(y,2) = utoi(b);
   gel(y,1) = utoipos(p); return y;
 }
 
 /* special case: p = 1 return unit form */
 GEN
-primeform(GEN x, GEN p, long prec)
+primeform(GEN x, GEN p)
 {
   const char *f = "primeform";
   pari_sp av;
@@ -1206,35 +1361,30 @@ primeform(GEN x, GEN p, long prec)
     if (pp == 1) {
       if (sx < 0) {
         long r;
-        if (sp < 0) pari_err_IMPL("negative definite t_QFI");
+        if (sp < 0) pari_err_IMPL("negative definite t_QFB");
         r = mod4(x);
         if (r && r != 3) pari_err_DOMAIN(f,"disc % 4",">", gen_1,x);
         return qfi_1_by_disc(x);
       }
-      y = qfr_1_by_disc(x,prec);
+      y = qfr_1_by_disc(x);
       if (sp < 0) { gel(y,1) = gen_m1; togglesign(gel(y,3)); }
       return y;
     }
     y = primeform_u(x, pp);
     if (sx < 0) {
-      if (sp < 0) pari_err_IMPL("negative definite t_QFI");
+      if (sp < 0) pari_err_IMPL("negative definite t_QFB");
       return y;
     }
     if (sp < 0) { togglesign(gel(y,1)); togglesign(gel(y,3)); }
-    return gcopy( qfr3_to_qfr(y, real_0(prec)) );
+    return gcopy( qfr3_to_qfr(y, x) );
   }
   s = mod8(x);
   if (sx < 0)
   {
-    if (sp < 0) pari_err_IMPL("negative definite t_QFI");
+    if (sp < 0) pari_err_IMPL("negative definite t_QFB");
     if (s) s = 8-s;
-    y = cgetg(4, t_QFI);
   }
-  else
-  {
-    y = cgetg(5, t_QFR);
-    gel(y,4) = real_0(prec);
-  }
+  y = cgetg(5, t_QFB);
   /* 2 or 3 mod 4 */
   if (s & 2) pari_err_DOMAIN(f, "disc % 4", ">",gen_1, x);
   absp = absi_shallow(p); av = avma;
@@ -1245,6 +1395,7 @@ primeform(GEN x, GEN p, long prec)
 
   av = avma;
   gel(y,3) = gerepileuptoint(av, diviiexact(shifti(subii(sqri(b), x), -2), p));
+  gel(y,4) = icopy(x);
   gel(y,2) = b;
   gel(y,1) = icopy(p);
   return y;
@@ -1363,7 +1514,7 @@ qfisolvep(GEN Q, GEN p)
     a[0] = evaltyp(t_VEC) | _evallg(3); /* transpose */
     return gerepileupto(av, a);
   }
-  b = redimagsl2(primeform(d, p, 0), &M);
+  b = redimagsl2(primeform(d, p), &M);
   if (!GL2_qfb_equal(a,b)) { set_avma(av); return gen_0; }
   if (signe(gel(a,2))==signe(gel(b,2)))
     x = SL2_div_mul_e1(N,M);
@@ -1388,7 +1539,8 @@ redrealsl2step(GEN A, GEN d, GEN rd)
   N = mkmat2(gel(M,2),
              mkcol2(subii(mulii(q, gcoeff(M, 1, 2)), gcoeff(M, 1, 1)),
                     subii(mulii(q, gcoeff(M, 2, 2)), gcoeff(M, 2, 1))));
-  return gerepilecopy(ltop, mkvec2(mkvec3(a,b,c),N));
+  return gerepilecopy(ltop, mkvec2(lg(V)==5? mkqfb(a,b,c,gel(V,4))
+                                           : mkvec3(a,b,c),N));
 }
 
 GEN
@@ -1416,7 +1568,8 @@ redrealsl2(GEN V, GEN d, GEN rd)
     }
   }
   M = mkmat2(mkcol2(u1,u2), mkcol2(v1,v2));
-  return gerepilecopy(ltop, mkvec2(mkvec3(a,b,c), M));
+  return gerepilecopy(ltop, mkvec2(lg(V)==5?mkqfb(a,b,c,gel(V,4))
+                                           :mkvec3(a,b,c), M));
 }
 
 GEN
@@ -1424,34 +1577,31 @@ qfbredsl2(GEN q, GEN S)
 {
   GEN v, D, isD;
   pari_sp av;
-  switch(typ(q))
+  if (typ(q) != t_QFB) pari_err_TYPE("qfbredsl2",q);
+  if (qfb_is_qfi(q))
   {
-    case t_QFI:
-      if (S) pari_err_TYPE("qfbredsl2",S);
-      v = cgetg(3,t_VEC);
-      gel(v,1) = redimagsl2(q, &gel(v,2));
-      return v;
-    case t_QFR:
-      av = avma;
-      if (S) {
-        if (typ(S) != t_VEC || lg(S) != 3) pari_err_TYPE("qfbredsl2",S);
-        D = gel(S,1);
-        isD = gel(S,2);
-        if (typ(D) != t_INT || signe(D) <= 0 || typ(isD) != t_INT)
-          pari_err_TYPE("qfbredsl2",S);
-      }
-      else
-      {
-        D = qfb_disc(q);
-        isD = sqrti(D);
-      }
-      v = redrealsl2(q,D,isD);
-      gel(v,1) = qfr3_to_qfr(gel(v,1), real_0(precision(gel(q,4))));
-      return gerepilecopy(av, v);
-
-    default:
-        pari_err_TYPE("qfbredsl2",q);
-        return NULL;/*LCOV_EXCL_LINE*/
+    if (S) pari_err_TYPE("qfbredsl2",S);
+    v = cgetg(3,t_VEC);
+    gel(v,1) = redimagsl2(q, &gel(v,2));
+    return v;
+  } else
+  {
+    av = avma;
+    if (S) {
+      if (typ(S) != t_VEC || lg(S) != 3) pari_err_TYPE("qfbredsl2",S);
+      D = gel(S,1);
+      isD = gel(S,2);
+      if (typ(D) != t_INT || signe(D) <= 0 || typ(isD) != t_INT)
+        pari_err_TYPE("qfbredsl2",S);
+    }
+    else
+    {
+      D = qfb_disc(q);
+      isD = sqrti(D);
+    }
+    v = redrealsl2(q,D,isD);
+    gel(v,1) = qfr3_to_qfr(gel(v,1), D);
+    return gerepilecopy(av, v);
   }
 }
 
@@ -1463,14 +1613,14 @@ qfrsolve_normform(GEN N, GEN Ps, GEN d, GEN rd)
   btop = avma;
   for(;;)
   {
-    if (ZV_equal(gel(M,1), gel(P,1)))
+    if (qfb_equal(gel(M,1), gel(P,1)))
        return gerepilecopy(av, SL2_div_mul_e1(gel(M,2),gel(P,2)));
-    if (ZV_equal(gel(N,1), gel(Q,1)))
+    if (qfb_equal(gel(N,1), gel(Q,1)))
        return gerepilecopy(av, SL2_div_mul_e1(gel(N,2),gel(Q,2)));
     M = redrealsl2step(M, d,rd);
     Q = redrealsl2step(Q, d,rd);
-    if (ZV_equal(gel(M,1), gel(N,1))) return gc_NULL(av);
-    if (ZV_equal(gel(P,1), gel(Q,1))) return gc_NULL(av);
+    if (qfb_equal(gel(M,1), gel(N,1))) return gc_NULL(av);
+    if (qfb_equal(gel(P,1), gel(Q,1))) return gc_NULL(av);
     if (gc_needed(btop, 1))
       gerepileall(btop, 2, &M, &Q);
   }
@@ -1482,7 +1632,7 @@ qfrsolvep(GEN Q, GEN p)
   pari_sp ltop = avma;
   GEN P, N, x, rd, d = qfb_disc(Q);
   if (kronecker(d, p) < 0) { set_avma(ltop); return gen_0; }
-  P = primeform(d, p, DEFAULTPREC);
+  P = primeform(d, p);
   rd = sqrti(d);
   N = redrealsl2(Q, d,rd);
   x = qfrsolve_normform(N, P, d,rd);

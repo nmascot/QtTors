@@ -926,9 +926,7 @@ gidentical(GEN x, GEN y)
     case t_FFELT:
       return FF_equal(x,y);
 
-    case t_QFR:
-          if (!identicalrr(gel(x,4),gel(y,4))) return 0; /* fall through */
-    case t_QFI:
+    case t_QFB:
       return equalii(gel(x,1),gel(y,1))
           && equalii(gel(x,2),gel(y,2))
           && equalii(gel(x,3),gel(y,3));
@@ -1054,8 +1052,7 @@ gequal(GEN x, GEN y)
       case t_FFELT:
         return FF_equal(x,y);
 
-      case t_QFR:
-      case t_QFI:
+      case t_QFB:
         return equalii(gel(x,1),gel(y,1))
             && equalii(gel(x,2),gel(y,2))
             && equalii(gel(x,3),gel(y,3));

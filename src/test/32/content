@@ -11,8 +11,8 @@ denominator
 1
 1
 x
-error("incorrect type in denom (t_QFI).")
-error("incorrect type in denom (t_QFR).")
+error("incorrect type in denom (t_QFB).")
+error("incorrect type in denom (t_QFB).")
 4
 2
 1
@@ -74,8 +74,8 @@ w
 Mod(1/2*x, x^2)
 2*x
 2
-error("incorrect type in numer (t_QFI).")
-error("incorrect type in numer (t_QFR).")
+error("incorrect type in numer (t_QFB).")
+error("incorrect type in numer (t_QFB).")
 [8, 3]
 [2, 4; 3, 8]
 1/y*x + 1/2
@@ -96,7 +96,7 @@ Mod(x, x^2)
 2*x
 2/x
 Qfb(1, 2, 4)
-Qfb(-1, 2, 4, 0.E-38)
+Qfb(-1, 2, 4)
 [8, 3]
 [2, 4; 3, 8]
 2/y*x + 1
@@ -117,7 +117,7 @@ Mod(1/2*x, x^2)
 2*x
 2/x
 Qfb(1, 2, 4)
-Qfb(-1, 2, 4, 0.E-38)
+Qfb(-1, 2, 4)
 [2, 3/4]
 [1, 2; 3/2, 4]
 2*x + y

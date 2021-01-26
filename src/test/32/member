@@ -172,9 +172,9 @@ RNF
 .polabs: x^4 - 1105
 .zk: [[1, x - 1], [1, [1, 1/2; 0, 1/2]]]
 QUADCLASSUNIT
-.clgp: [4, [2, 2], [Qfb(2, 33, -2, 0.E-38), Qfb(3, 31, -12, 0.E-38)]]
+.clgp: [4, [2, 2], [Qfb(2, 33, -2), Qfb(3, 31, -12)]]
 .cyc: [2, 2]
-.gen: [Qfb(2, 33, -2, 0.E-38), Qfb(3, 31, -12, 0.E-38)]
+.gen: [Qfb(2, 33, -2), Qfb(3, 31, -12)]
 .no: 4
 .reg: 10.950385405825605330267750825017937393
 GAL
@@ -293,6 +293,7 @@ POLMOD
 .mod: x^2 + 1
 .pol: x
 QFB
+.disc: -8
 QUAD
 .disc: -4
 .fu: []
@@ -346,4 +347,4 @@ BID (nogen)
 MF
 .mod: t^2 + t + 1
 .mod: Mod(1, t^2 + t + 1)*y^2 + Mod(-2*t, t^2 + t + 1)
-Total time spent: 59
+Total time spent: 57

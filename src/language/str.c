@@ -100,8 +100,7 @@ type_name(long t)
     case t_POL    : s="t_POL";     break;
     case t_SER    : s="t_SER";     break;
     case t_RFRAC  : s="t_RFRAC";   break;
-    case t_QFR    : s="t_QFR";     break;
-    case t_QFI    : s="t_QFI";     break;
+    case t_QFB    : s="t_QFB";     break;
     case t_VEC    : s="t_VEC";     break;
     case t_COL    : s="t_COL";     break;
     case t_MAT    : s="t_MAT";     break;

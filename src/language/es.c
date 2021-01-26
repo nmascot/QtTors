@@ -2084,7 +2084,7 @@ dbg(GEN x, long nb, long bl)
       }
       break;
 
-    case t_QFR: case t_QFI: case t_VEC: case t_COL:
+    case t_QFB: case t_VEC: case t_COL:
       for (i=1; i<lx; i++)
       {
         blancs(bl); pari_printf("%s component = ",uordinal(i));
@@ -2826,12 +2826,11 @@ bruti_intern(GEN g, pariout_t *T, pari_str *S, int addsign)
       set_avma(av0); break;
     }
 
-    case t_QFR: case t_QFI: r = (tg == t_QFR);
+    case t_QFB:
       str_puts(S, "Qfb(");
       bruti(gel(g,1),T,S); comma_sp(T,S);
       bruti(gel(g,2),T,S); comma_sp(T,S);
       bruti(gel(g,3),T,S);
-      if (r) { comma_sp(T,S); bruti(gel(g,4),T,S); }
       str_putc(S, ')'); break;
 
     case t_VEC: case t_COL:
@@ -3017,7 +3016,7 @@ texi_sign(GEN g, pariout_t *T, pari_str *S, int addsign)
   tg = typ(g);
   switch(tg)
   {
-    case t_INT: case t_REAL: case t_QFR: case t_QFI:
+    case t_INT: case t_REAL: case t_QFB:
       bruti_intern(g, T, S, addsign); break;
 
     case t_INTMOD: case t_POLMOD:

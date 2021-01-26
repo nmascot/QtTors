@@ -222,8 +222,7 @@ gtoser(GEN x, long v, long prec)
   {
     case t_POL: return poltoser(x, v, prec);
     case t_RFRAC: return rfractoser(x, v, prec);
-    case t_QFR:
-    case t_QFI: return RgV_to_ser_i(x, v, 4+1, 1);
+    case t_QFB: return RgV_to_ser_i(x, v, 4+1, 1);
     case t_VECSMALL: x = zv_to_ZV(x);/*fall through*/
     case t_VEC: case t_COL:
       if (varncmp(gvar(x), v) <= 0) pari_err_PRIORITY("Ser", x, "<=", v);
@@ -243,8 +242,7 @@ gtoser_prec(GEN x, long v, long prec)
   {
     case t_SER: if (varn(x) != v) break;
                 return gerepilecopy(av, sertoser(x, prec));
-    case t_QFR:
-    case t_QFI:
+    case t_QFB:
       x = RgV_to_ser_i(mkvec3(gel(x,1),gel(x,2),gel(x,3)), v, prec+2, 1);
       return gerepileupto(av, x);
     case t_VECSMALL: x = zv_to_ZV(x);/*fall through*/

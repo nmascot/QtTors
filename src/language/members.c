@@ -155,6 +155,7 @@ member_disc(GEN x) /* discriminant */
     switch(t)
     {
       case typ_Q  : return quad_disc(x);
+      case typ_QFB: return qfb_disc(x);
       case typ_ELL: return ell_get_disc(x);
       case typ_RNF: return rnf_get_disc(x);
     }

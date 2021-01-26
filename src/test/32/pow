@@ -7,8 +7,8 @@ Mod(1, 3)
 
 Mod(0, 1)
 Mod(1, 3)
-Qfb(1, 2, -1, 0.E-38)
-Qfb(-1, 2, 1, 0.E-38)
+Qfb(1, 2, -1)
+Qfb(-1, 2, 1)
 Vecsmall([1, 2, 3])
 O(2)
   ***   at top-level: O(2)^-2
@@ -31,7 +31,7 @@ O(2)
   ***   at top-level: (1/2)^n
   ***                      ^--
   *** _^_: overflow in lg().
-Qfb(2, 0, -1, 0.E-38)
+Qfb(2, 0, -1)
 Mod(x^2, x^6 + x^5 + x^4 + x^3 + x^2 + x + 1)
 O(x^0)
 x + O(x^4)
@@ -83,4 +83,4 @@ d(9, 11), Mod(7, 11), Mod(3, 11), Mod(6, 11), Mod(1, 11)]
 [2, 6, 18, 54, 162, 486]
 []
 [1]
-Total time spent: 0
+Total time spent: 1

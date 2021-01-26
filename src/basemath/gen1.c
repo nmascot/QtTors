@@ -1387,7 +1387,7 @@ mul_scal(GEN y, GEN x, long ty)
       return RgX_Rg_mul(y, x);
     case t_SER: return mul_ser_scal(y, x);
     case t_RFRAC: return mul_rfrac_scal(gel(y,1),gel(y,2), x);
-    case t_QFI: case t_QFR:
+    case t_QFB:
       if (typ(x) == t_INT && gequal1(x)) return gcopy(y); /* fall through */
   }
   pari_err_TYPE2("*",x,y);
@@ -1870,8 +1870,7 @@ gmul(GEN x, GEN y)
       y = RgXn_mul(x, y, lx-2);
       return gerepilecopy(av, fill_ser(z,y));
     }
-    case t_QFI: return qficomp(x,y);
-    case t_QFR: return qfrcomp(x,y);
+    case t_QFB: return qfbcomp(x,y);
     case t_RFRAC: return mul_rfrac(gel(x,1),gel(x,2), gel(y,1),gel(y,2));
     case t_MAT: return RgM_mul(x, y);
 
@@ -2213,8 +2212,7 @@ gsqr(GEN x)
       gel(z,2) = gsqr(gel(x,2)); return z;
 
     case t_MAT: return RgM_sqr(x);
-    case t_QFR: return qfrsqr(x);
-    case t_QFI: return qfisqr(x);
+    case t_QFB: return qfbsqr(x);
     case t_VECSMALL:
       z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++)
@@ -2515,8 +2513,7 @@ gdiv(GEN x, GEN y)
       }
       return div_rfrac(x,y);
 
-    case t_QFI: av = avma; return gerepileupto(av, qficomp(x, ginv(y)));
-    case t_QFR: av = avma; return gerepileupto(av, qfrcomp(x, ginv(y)));
+    case t_QFB: av = avma; return gerepileupto(av, qfbcomp(x, ginv(y)));
 
     case t_MAT:
       av = avma; p1 = RgM_inv(y);
@@ -3176,19 +3173,8 @@ ginv(GEN x)
       return z;
     }
 
-    case t_QFR:
-      av = avma; z = cgetg(5, t_QFR);
-      gel(z,1) = gel(x,1);
-      gel(z,2) = negi( gel(x,2) );
-      gel(z,3) = gel(x,3);
-      gel(z,4) = negr( gel(x,4) );
-      return gerepileupto(av, redreal(z));
-
-    case t_QFI:
-      y = gcopy(x);
-      if (!equalii(gel(x,1),gel(x,2)) && !equalii(gel(x,1),gel(x,3)))
-        togglesign(gel(y,2));
-      return y;
+    case t_QFB:
+      return qfbpow(x, gen_m1);
     case t_MAT:
       y = RgM_inv(x);
       if (!y) pari_err_INV("ginv",x);

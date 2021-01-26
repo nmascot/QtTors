@@ -5540,9 +5540,9 @@ int
 qfb_equal1(GEN f) { return equali1(gel(f,1)); }
 
 static GEN qfi_pow(void *E, GEN f, GEN n)
-{ return E? nupow(f,n,(GEN)E): powgi(f,n); }
+{ return E? nupow(f,n,(GEN)E): qfbpow_i(f,n); }
 static GEN qfi_comp(void *E, GEN f, GEN g)
-{ return E? nucomp(f,g,(GEN)E): qficomp(f,g); }
+{ return E? nucomp(f,g,(GEN)E): qfbcomp_i(f,g); }
 static const struct bb_group qfi_group={ qfi_comp,qfi_pow,NULL,hash_GEN,
                                          gidentical,qfb_equal1,NULL};
 
@@ -5561,8 +5561,8 @@ qfi_Shanks(GEN a, GEN g, long n)
   GEN T, X;
   long rt_n, c;
 
-  a = redimag(a);
-  g = redimag(g);
+  a = qfbred_i(a);
+  g = qfbred_i(g);
 
   rt_n = sqrt((double)n);
   c = n / rt_n;
@@ -5570,9 +5570,7 @@ qfi_Shanks(GEN a, GEN g, long n)
 
   T = gen_Shanks_init(g, rt_n, NULL, &qfi_group);
   X = gen_Shanks(T, a, c, NULL, &qfi_group);
-
-  if (!X) { set_avma(av); return X; }
-  return gerepileuptoint(av, X);
+  return X? gerepileuptoint(av, X): gc_NULL(av);
 }
 
 GEN
@@ -5725,7 +5723,7 @@ two_rank(GEN x)
 }
 
 static GEN
-sqr_primeform(GEN x, ulong p) { return redimag(qfisqr(primeform_u(x, p))); }
+sqr_primeform(GEN x, ulong p) { return qfbsqr_i(primeform_u(x, p)); }
 /* return a set of forms hopefully generating Cl(K)^2; set L ~ L(chi_D,1) */
 static GEN
 get_forms(GEN D, GEN *pL)

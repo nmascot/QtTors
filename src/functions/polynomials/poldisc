@@ -20,7 +20,7 @@ Doc: discriminant of the polynomial
  @eprog
 
  For convenience, the function also applies to types \typ{QUAD} and
- \typ{QFI}/\typ{QFR}:
+ \typ{QFB}:
  \bprog
  ? z = 3*quadgen(8) + 4;
  ? poldisc(z)

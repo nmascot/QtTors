@@ -840,8 +840,7 @@ or \typ{FRAC}.
 \fun{int}{is_real_t}{long t} \kbd{true} iff \kbd{t} is \typ{INT}
 or \typ{REAL} or \typ{FRAC}.
 
-\fun{int}{is_qfb_t}{long t} \kbd{true} iff \kbd{t} is \typ{QFI}
-or \typ{QFR}.
+\fun{int}{is_qfb_t}{long t} \kbd{true} iff \kbd{t} is \typ{QFB}.
 
 \fun{int}{is_vec_t}{long t} \kbd{true} iff \kbd{t} is \typ{VEC}
 or \typ{COL}.
@@ -11507,8 +11506,8 @@ equal to \kbd{[x,y,z,t]}.
 \fun{GEN}{mkvec5}{GEN a1, GEN a2, GEN a3, GEN a4, GEN a5} creates the
 5-dimensional \typ{VEC} equal to $[a_1,a_2,a_3,a_4,a_5]$.
 
-\fun{GEN}{mkqfi}{GEN x, GEN y, GEN z} creates \typ{QFI} equal
-to \kbd{Qfb(x,y,z)}, assuming that $y^2 - 4xz < 0$.
+\fun{GEN}{mkqfb}{GEN a, GEN b, GEN c, GEN D} creates \typ{QFB} equal
+to \kbd{Qfb(a,b,c)}, assuming that $D = b^2 - 4ac$.
 
 \fun{GEN}{mkerr}{long n} returns a \typ{ERROR} with error code $n$
 (\kbd{enum err\_list}).
@@ -11600,10 +11599,6 @@ generally that the rational function cannot be simplified.
 
 \fun{GEN}{retmkintmod}{GEN x, GEN y}
 returns the \typ{INTMOD} \kbd{Mod(x, y)}.
-
-\fun{GEN}{retmkqfi}{GEN a, GEN b, GEN c}.
-
-\fun{GEN}{retmkqfr}{GEN a, GEN b, GEN c, GEN d}.
 
 \fun{GEN}{retmkquad}{GEN n, GEN a, GEN b}.
 
@@ -12350,7 +12345,7 @@ $N$ (the gcd of the moduli that appear).
 
 \item \kbd{FF\_1}$(x)$ for a \typ{FFELT}.
 
-\item \kbd{qfi\_1}$(x)$ and \kbd{qfr\_1}$(x)$ for \typ{QFI} and \typ{QFR}.
+\item \kbd{qfb\_1}$(x)$ for \typ{QFB}.
 
 \item the identity permutation for \typ{VECSMALL}.
 
@@ -12628,8 +12623,8 @@ Not stack-clean but suitable for \kbd{gerepileupto}.
 
 \fun{GEN}{quadnorm}{GEN x} norm of the \typ{QUAD} $x$.
 
-\fun{GEN}{qfb_disc}{GEN x} returns the discriminant of the \typ{QFI}
-or \typ{QFR} \kbd{x}.
+\fun{GEN}{qfb_disc}{GEN x} returns the discriminant of the \typ{QFB}
+\kbd{x}.
 
 \fun{GEN}{qfb_disc3}{GEN x, GEN y, GEN z} returns $y^2 - 4xz$ assuming all
 inputs are \typ{INT}s. Not stack-clean.

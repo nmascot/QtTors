@@ -456,8 +456,7 @@ gpowg0(GEN x)
       y = matid(lx-1);
       for (i=1; i<lx; i++) gcoeff(y,i,i) = gpowg0(gcoeff(x,i,i));
       return y;
-    case t_QFR: return qfr_1(x);
-    case t_QFI: return qfi_1(x);
+    case t_QFB: return qfb_1(x);
     case t_VECSMALL: return identity_perm(lg(x) - 1);
   }
   pari_err_TYPE("gpow",x);
@@ -913,8 +912,7 @@ gpowgs(GEN x, long n)
   if (n == 0) return gpowg0(x);
   if (n == 1)
     switch (typ(x)) {
-      case t_QFI: return redimag(x);
-      case t_QFR: return redreal(x);
+      case t_QFB: return qfbred(x);
       default: return gcopy(x);
     }
   if (n ==-1) return ginv(x);
@@ -989,7 +987,7 @@ powgi(GEN x, GEN n)
     case t_FRAC:
       pari_err_OVERFLOW("lg()");
 
-    case t_QFR: return qfrpow(x, n);
+    case t_QFB: return qfbpow(x, n);
     case t_POLMOD: return pow_polmod(x, n);
     default: {
       pari_sp av = avma;

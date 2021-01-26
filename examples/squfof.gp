@@ -17,7 +17,7 @@ squfof(n) =
   q = []; lq = 0; i = 0;
   while (1,
     i++;
-    f = qfbred(f, 3, D, d);
+    f = qfbred(f, 1, d);
     a = component(f, 1);
     if (!(i%2) && issquare(a, &as),
       my(j = 1);
@@ -40,10 +40,10 @@ squfof(n) =
   if (gs > 1, return (gs));
 
   f = Qfb(as, -bb, as*component(f,3));
-  g = qfbred(f, 3, D, d);
+  g = qfbred(f, 1, d);
   b = component(g, 2);
   until (b1 == b,
-    b1 = b; g = qfbred(g, 3, D, d);
+    b1 = b; g = qfbred(g, 1, d);
     b = component(g, 2);
   );
   a = abs(component(g, 1));

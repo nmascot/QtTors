@@ -2090,7 +2090,8 @@ CM_factor(GEN E, GEN Q)
 
   /* tau is a root of fk (X^2 - b X + c) \in Z[X],  */
   F = Q_primpart(mkvec3(fk, fkb, fkc));
-  dF = qfb_disc(F); /* = disc tau, E has CM by orders of disc dF q^2, all q */
+  dF = qfb_disc3(gel(F,1), gel(F,2), gel(F,3));
+  /* = disc tau, E has CM by orders of disc dF q^2, all q */
   q = dvmdii(dF, D, &r);
   if (r != gen_0 || !Z_issquareall(q, &q)) return NULL;
   /* disc(Q) = disc(tau) (v / q)^2 */

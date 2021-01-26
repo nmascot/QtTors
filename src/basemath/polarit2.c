@@ -1952,7 +1952,7 @@ content(GEN x)
       lx = lg(x); if (lx == 2) return gen_0;
       break;
     case t_VECSMALL: return utoi(zv_content(x));
-    case t_QFR: case t_QFI:
+    case t_QFB:
       lx = 4; break;
 
     default: pari_err_TYPE("content",x);
@@ -3659,8 +3659,8 @@ poldisc0(GEN x, long v)
     case t_POLMOD:
       if (v >= 0 && varn(gel(x,1)) != v) break;
       return RgX_disc(gel(x,1));
-    case t_QFR: case t_QFI:
-      av = avma; return gerepileuptoint(av, qfb_disc(x));
+    case t_QFB:
+      return icopy(qfb_disc(x));
     case t_VEC: case t_COL: case t_MAT:
     {
       long i;

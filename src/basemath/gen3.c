@@ -235,7 +235,7 @@ gprecision(GEN x)
       l=gprecision(gel(x,2)); if (l && (!k || l<k)) k=l;
       return k;
     }
-    case t_QFR:
+    case t_QFB:
       return gprecision(gel(x,4));
   }
   return 0;
@@ -333,7 +333,7 @@ serprec(GEN x, long v)
   switch(typ(x))
   {
     case t_INT: case t_REAL: case t_INTMOD: case t_FRAC: case t_FFELT:
-    case t_COMPLEX: case t_PADIC: case t_QUAD: case t_QFR:
+    case t_COMPLEX: case t_PADIC: case t_QUAD: case t_QFB:
       return LONG_MAX;
 
     case t_POL:
@@ -490,7 +490,7 @@ isinexactreal(GEN x)
 
     case t_INT: case t_INTMOD: case t_FRAC:
     case t_FFELT: case t_PADIC: case t_QUAD:
-    case t_QFR: case t_QFI: return 0;
+    case t_QFB: return 0;
 
     case t_RFRAC: case t_POLMOD:
       return isinexactreal(gel(x,1)) || isinexactreal(gel(x,2));
@@ -547,7 +547,7 @@ isinexact(GEN x)
     case t_REAL: case t_PADIC: case t_SER:
       return 1;
     case t_INT: case t_INTMOD: case t_FFELT: case t_FRAC:
-    case t_QFR: case t_QFI:
+    case t_QFB:
       return 0;
     case t_COMPLEX: case t_QUAD: case t_RFRAC: case t_POLMOD:
       return isinexact(gel(x,1)) || isinexact(gel(x,2));
@@ -1460,7 +1460,7 @@ gsubst(GEN x, long v, GEN y)
       if (ly==1) return cgetg(1,t_MAT);
       if (ly == lgcols(y)) { matn = ly - 1; break; }
       /* fall through */
-    case t_QFR: case t_QFI:
+    case t_QFB:
       pari_err_TYPE2("substitution",x,y);
     default: matn = -1;
   }
@@ -3035,11 +3035,11 @@ _gtopoly(GEN x, long v, int reverse)
       y = RgX_div(a,b); break;
     }
     case t_VECSMALL: x = zv_to_ZV(x); /* fall through */
-    case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
+    case t_QFB: case t_VEC: case t_COL: case t_MAT:
     {
       long j, k, lx = lg(x);
       GEN z;
-      if (tx == t_QFR) lx--;
+      if (tx == t_QFB) lx--;
       if (varncmp(gvar(x), v) <= 0) pari_err_PRIORITY("gtopoly", x, "<=", v);
       y = cgetg(lx+1, t_POL);
       y[1] = evalvarn(v);
@@ -3084,7 +3084,7 @@ gtovecpost(GEN x, long n)
       lx=lg(x); imax = minss(lx-2, n); x++;
       for (i=1; i<=imax; i++) gel(y,i) = gcopy(gel(x,i));
       return y;
-    case t_QFR: case t_QFI: case t_VEC: case t_COL:
+    case t_QFB: case t_VEC: case t_COL:
       lx=lg(x); imax = minss(lx-1, n);
       for (i=1; i<=imax; i++) gel(y,i) = gcopy(gel(x,i));
       return y;
@@ -3129,7 +3129,7 @@ gtovecpre(GEN x, long n)
       y0 = init_vectopre(lx-2, n, y, &imax);
       for (i=1; i<=imax; i++) gel(y0,i) = gcopy(gel(x,i));
       return y;
-    case t_QFR: case t_QFI: case t_VEC: case t_COL:
+    case t_QFB: case t_VEC: case t_COL:
       lx=lg(x);
       y0 = init_vectopre(lx-1, n, y, &imax);
       for (i=1; i<=imax; i++) gel(y0,i) = gcopy(gel(x,i));
@@ -3175,7 +3175,9 @@ gtovec(GEN x)
       for (i=1; i<=lx-2; i++) gel(y,i) = gcopy(gel(x,i));
       return y;
     case t_RFRAC: return mkveccopy(x);
-    case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
+    case t_QFB:
+      retmkvec3(icopy(gel(x,1)), icopy(gel(x,2)), icopy(gel(x,3)));
+    case t_VEC: case t_COL: case t_MAT:
       lx=lg(x); y=cgetg(lx,t_VEC);
       for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
       return y;
@@ -4125,7 +4127,7 @@ geval_gp(GEN x, GEN t)
       av = avma;
       return gerepileupto(av, gdiv(geval_gp(gel(x,1),t), geval_gp(gel(x,2),t)));
 
-    case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
+    case t_QFB: case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = geval_gp(gel(x,i),t);
       return y;
@@ -4151,7 +4153,7 @@ simplify_shallow(GEN x)
   switch(typ(x))
   {
     case t_INT: case t_REAL: case t_INTMOD: case t_FRAC: case t_FFELT:
-    case t_PADIC: case t_QFR: case t_QFI: case t_LIST: case t_STR: case t_VECSMALL:
+    case t_PADIC: case t_QFB: case t_LIST: case t_STR: case t_VECSMALL:
     case t_CLOSURE: case t_ERROR: case t_INFINITY:
       return x;
     case t_COMPLEX: return isintzero(gel(x,2))? gel(x,1): x;
@@ -4281,7 +4283,7 @@ qfnorm0(GEN q, GEN x)
   switch(typ(q))
   {
     case t_MAT: break;
-    case t_QFI: case t_QFR:
+    case t_QFB:
       if (lg(x) == 3) switch(typ(x))
       {
         case t_VEC:
@@ -4339,7 +4341,7 @@ qfeval0(GEN q, GEN x, GEN y)
   switch(typ(q))
   {
     case t_MAT: break;
-    case t_QFI: case t_QFR:
+    case t_QFB:
       if (lg(x) == 3 && lg(y) == 3) return qfbevalb(q,x,y);
     default: pari_err_TYPE("qfeval",q);
   }

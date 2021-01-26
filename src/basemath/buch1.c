@@ -43,7 +43,7 @@ struct buch_quad
   long *primfact, *exprimfact, **hashtab;
   GEN FB, numFB;
   GEN powsubFB, vperm, subFB, badprim;
-  struct qfr_data *QFR;
+  struct qfr_data *q;
 };
 
 /*******************************************************************/
@@ -137,7 +137,7 @@ init_form(struct buch_quad *B, GEN ex,
     if (ex[i])
     {
       GEN t = gmael(B->powsubFB,i,ex[i]);
-      F = F? comp(F, t, B->QFR): t;
+      F = F? comp(F, t, B->q): t;
     }
   return F;
 }
@@ -145,7 +145,7 @@ static GEN
 qfr5_factorback(struct buch_quad *B, GEN ex) { return init_form(B, ex, &QFR5_comp); }
 
 static GEN
-QFI_comp(GEN x, GEN y, struct qfr_data *S) { (void)S; return qficomp(x,y); }
+QFI_comp(GEN x, GEN y, struct qfr_data *S) { (void)S; return qfbcomp_i(x,y); }
 
 static GEN
 qfi_factorback(struct buch_quad *B, GEN ex) { return init_form(B, ex, &QFI_comp); }
@@ -413,7 +413,7 @@ quadGRHchk(GEN D, GRHcheck_t *S, ulong LIMC)
 static void
 FBquad(struct buch_quad *B, ulong C2, ulong C1, GRHcheck_t *S)
 {
-  GEN D = B->QFR->D;
+  GEN D = B->q->D;
   long i;
   pari_sp av;
   GRHprime_t *pr;
@@ -492,16 +492,16 @@ powsubFBquad(struct buch_quad *B, long n)
 {
   pari_sp av = avma;
   long i,j, l = lg(B->subFB);
-  GEN F, y, x = cgetg(l, t_VEC), D = B->QFR->D;
+  GEN F, y, x = cgetg(l, t_VEC), D = B->q->D;
 
   if (B->PRECREG) /* real */
   {
     for (i=1; i<l; i++)
     {
-      F = qfr5_pf(B->QFR, B->FB[B->subFB[i]], B->PRECREG);
+      F = qfr5_pf(B->q, B->FB[B->subFB[i]], B->PRECREG);
       y = cgetg(n+1, t_VEC); gel(x,i) = y;
       gel(y,1) = F;
-      for (j=2; j<=n; j++) gel(y,j) = QFR5_comp(gel(y,j-1), F, B->QFR);
+      for (j=2; j<=n; j++) gel(y,j) = QFR5_comp(gel(y,j-1), F, B->q);
     }
   }
   else /* imaginary */
@@ -511,7 +511,7 @@ powsubFBquad(struct buch_quad *B, long n)
       F = qfi_pf(D, B->FB[B->subFB[i]]);
       y = cgetg(n+1, t_VEC); gel(x,i) = y;
       gel(y,1) = F;
-      for (j=2; j<=n; j++) gel(y,j) = qficomp(gel(y,j-1), F);
+      for (j=2; j<=n; j++) gel(y,j) = qfbcomp_i(gel(y,j-1), F);
     }
   }
   x = gclone(x); set_avma(av); return x;
@@ -545,26 +545,26 @@ add_fact(struct buch_quad *B, GEN col, GEN F)
 }
 
 static GEN
-get_clgp(struct buch_quad *B, GEN W, GEN *ptD, long prec)
+get_clgp(struct buch_quad *B, GEN W, GEN *ptD)
 {
-  GEN res, init, u1, D = ZM_snf_group(W,NULL,&u1), Z = prec? real_0(prec): NULL;
+  GEN res, init, u1, D = ZM_snf_group(W,NULL,&u1);
   long i, j, l = lg(W), c = lg(D);
 
   res=cgetg(c,t_VEC); init = cgetg(l,t_VEC);
-  for (i=1; i<l; i++) gel(init,i) = primeform_u(B->QFR->D, B->FB[B->vperm[i]]);
+  for (i=1; i<l; i++) gel(init,i) = primeform_u(B->q->D, B->FB[B->vperm[i]]);
   for (j=1; j<c; j++)
   {
     GEN g = NULL;
-    if (prec)
+    if (signe(B->q->D) > 0)
     {
       for (i=1; i<l; i++)
       {
         GEN t, u = gcoeff(u1,i,j);
         if (!signe(u)) continue;
-        t = qfr3_pow(gel(init,i), u, B->QFR);
-        g = g? qfr3_comp(g, t, B->QFR): t;
+        t = qfr3_pow(gel(init,i), u, B->q);
+        g = g? qfr3_comp(g, t, B->q): t;
       }
-      g = qfr3_to_qfr(qfr3_canon_safe(qfr3_red(g, B->QFR), B->QFR), Z);
+      g = qfr3_to_qfr(qfr3_canon_safe(qfr3_red(g, B->q), B->q), B->q->D);
     }
     else
     {
@@ -573,7 +573,7 @@ get_clgp(struct buch_quad *B, GEN W, GEN *ptD, long prec)
         GEN t, u = gcoeff(u1,i,j);
         if (!signe(u)) continue;
         t = powgi(gel(init,i), u);
-        g = g? qficomp(g, t): t;
+        g = g? qfbcomp_i(g, t): t;
       }
     }
     gel(res,j) = g;
@@ -585,7 +585,7 @@ static long
 trivial_relations(struct buch_quad *B, GEN mat, GEN C)
 {
   long i, j = 0;
-  GEN col, D = B->QFR->D;
+  GEN col, D = B->q->D;
   for (i = 1; i <= B->KC; i++)
   { /* ramified prime ==> trivial relation */
     if (umodiu(D, B->FB[i])) continue;
@@ -623,7 +623,7 @@ imag_relations(struct buch_quad *B, long need, long *pc, ulong LIMC, GEN mat)
     if (s >= need) break;
     set_avma(av);
     form = qfi_random(B,ex);
-    form = qficomp(form, qfi_pf(B->QFR->D, B->FB[current]));
+    form = qfbcomp_i(form, qfi_pf(B->q->D, B->FB[current]));
     nbtest++; fpc = factorquad(B,form,B->KC,LIMC);
     if (!fpc)
     {
@@ -641,7 +641,7 @@ imag_relations(struct buch_quad *B, long need, long *pc, ulong LIMC, GEN mat)
         if (DEBUGLEVEL>3) err_printf(".");
         continue;
       }
-      form2 = qficomp(qfi_factorback(B,fpd), qfi_pf(B->QFR->D, B->FB[fpd[-2]]));
+      form2 = qfbcomp_i(qfi_factorback(B,fpd), qfi_pf(B->q->D, B->FB[fpd[-2]]));
       p = fpc << 1;
       b1 = umodiu(gel(form2,2), p);
       b2 = umodiu(gel(form,2),  p);
@@ -686,7 +686,7 @@ imag_be_honest(struct buch_quad *B)
   while (s<B->KC2)
   {
     p = B->FB[s+1]; if (DEBUGLEVEL>2) err_printf(" %ld",p);
-    F = qficomp(qfi_pf(B->QFR->D, p), qfi_random(B, ex));
+    F = qfbcomp_i(qfi_pf(B->q->D, p), qfi_random(B, ex));
     fpc = factorquad(B,F,s,p-1);
     if (fpc == 1) { nbtest=0; s++; }
     else
@@ -723,7 +723,7 @@ real_relations(struct buch_quad *B, long need, long *pc, long lim, ulong LIMC, G
     }
     set_avma(av); form = qfr3_random(B, ex);
     if (!first)
-      form = QFR3_comp(form, qfr3_pf(B->QFR, B->FB[current]), B->QFR);
+      form = QFR3_comp(form, qfr3_pf(B->q, B->FB[current]), B->q);
     av1 = avma;
     form0 = form; form1 = NULL;
     endcycle = rhoacc = 0;
@@ -743,7 +743,7 @@ CYCLE:
     if (rho < 0) rho = 0; /* first time in */
     else
     {
-      form = qfr3_rho(form, B->QFR); rho++;
+      form = qfr3_rho(form, B->q); rho++;
       rhoacc++;
       if (first)
         endcycle = (absequalii(gel(form,1),gel(form0,1))
@@ -754,7 +754,7 @@ CYCLE:
         {
           if (absequalii(gel(form,1),gel(form0,1)) &&
                   equalii(gel(form,2),gel(form0,2))) continue;
-          form = qfr3_rho(form, B->QFR); rho++;
+          form = qfr3_rho(form, B->q); rho++;
           rhoacc++;
         }
         else
@@ -783,15 +783,15 @@ CYCLE:
       {
         form1 = qfr5_factorback(B,ex);
         if (!first)
-          form1 = QFR5_comp(form1, qfr5_pf(B->QFR, B->FB[current], prec), B->QFR);
+          form1 = QFR5_comp(form1, qfr5_pf(B->q, B->FB[current], prec), B->q);
       }
-      form1 = qfr5_rho_pow(form1, rho, B->QFR);
+      form1 = qfr5_rho_pow(form1, rho, B->q);
       rho = 0;
 
       form2 = qfr5_factorback(B,fpd);
       if (fpd[-2])
-        form2 = QFR5_comp(form2, qfr5_pf(B->QFR, B->FB[fpd[-2]], prec), B->QFR);
-      form2 = qfr5_rho_pow(form2, fpd[-3], B->QFR);
+        form2 = QFR5_comp(form2, qfr5_pf(B->q, B->FB[fpd[-2]], prec), B->q);
+      form2 = qfr5_rho_pow(form2, fpd[-3], B->q);
       if (!absequalii(gel(form2,1),gel(form2,3)))
       {
         setsigne(form2[1], 1);
@@ -829,9 +829,9 @@ CYCLE:
       {
         form1 = qfr5_factorback(B, ex);
         if (!first)
-          form1 = QFR5_comp(form1, qfr5_pf(B->QFR, B->FB[current], prec), B->QFR);
+          form1 = QFR5_comp(form1, qfr5_pf(B->q, B->FB[current], prec), B->q);
       }
-      form1 = qfr5_rho_pow(form1, rho, B->QFR);
+      form1 = qfr5_rho_pow(form1, rho, B->q);
       rho = 0;
 
       col = gel(mat,++s);
@@ -866,13 +866,13 @@ real_be_honest(struct buch_quad *B)
   while (s<B->KC2)
   {
     p = B->FB[s+1]; if (DEBUGLEVEL>2) err_printf(" %ld",p);
-    F = QFR3_comp(qfr3_random(B, ex), qfr3_pf(B->QFR, p), B->QFR);
+    F = QFR3_comp(qfr3_random(B, ex), qfr3_pf(B->q, p), B->q);
     for (F0 = F;;)
     {
       fpc = factorquad(B,F,s,p-1);
       if (fpc == 1) { nbtest=0; s++; break; }
       if (++nbtest > 40) return 0;
-      F = qfr3_canon(qfr3_rho(F, B->QFR), B->QFR);
+      F = qfr3_canon(qfr3_rho(F, B->q), B->q);
       if (equalii(gel(F,1),gel(F0,1))
        && equalii(gel(F,2),gel(F0,2))) break;
     }
@@ -957,17 +957,17 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   GEN W, cyc, res, gen, dep, mat, C, extraC, B, R, invhr, h = NULL; /*-Wall*/
   double drc, sdrc, lim, LOGD, LOGD2;
   GRHcheck_t GRHcheck;
-  struct qfr_data QFR;
+  struct qfr_data q;
   struct buch_quad BQ;
   int FIRST = 1;
 
   check_quaddisc(D, &s, /*junk*/&i, "Buchquad");
   R = NULL; /* -Wall */
-  BQ.QFR = &QFR;
-  QFR.D = D;
+  BQ.q = &q;
+  q.D = D;
   if (s < 0)
   {
-    if (abscmpiu(QFR.D,4) <= 0)
+    if (abscmpiu(q.D,4) <= 0)
     {
       GEN z = cgetg(5,t_VEC);
       gel(z,1) = gel(z,4) = gen_1; gel(z,2) = gel(z,3) = cgetg(1,t_VEC);
@@ -975,7 +975,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
     }
     prec = BQ.PRECREG = 0;
   } else {
-    BQ.PRECREG = maxss(prec+EXTRAPRECWORD, nbits2prec(2*expi(QFR.D) + 128));
+    BQ.PRECREG = maxss(prec+EXTRAPRECWORD, nbits2prec(2*expi(q.D) + 128));
   }
   if (DEBUGLEVEL>2) timer_start(&T);
   BQ.primfact   = new_chunk(100);
@@ -983,7 +983,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   BQ.hashtab = (long**) new_chunk(HASHT);
   for (i=0; i<HASHT; i++) BQ.hashtab[i] = NULL;
 
-  drc = fabs(gtodouble(QFR.D));
+  drc = fabs(gtodouble(q.D));
   LOGD = log(drc);
   LOGD2 = LOGD * LOGD;
 
@@ -1040,11 +1040,11 @@ START:
     clearhash(BQ.hashtab);
     if (LIMC < cp) LIMC = cp;
     if (LIMC2 < LIMC) LIMC2 = LIMC;
-    if (BQ.PRECREG) qfr_data_init(QFR.D, BQ.PRECREG, &QFR);
+    if (BQ.PRECREG) qfr_data_init(q.D, BQ.PRECREG, &q);
 
     FBquad(&BQ, LIMC2, LIMC, &GRHcheck);
     if (DEBUGLEVEL>2) timer_printf(&T, "factor base");
-    BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5, minSFB);
+    BQ.subFB = subFBquad(&BQ, q.D, lim + 0.5, minSFB);
     if (DEBUGLEVEL>2) timer_printf(&T, "subFBquad = %Ps",
                                  vecpermute(BQ.FB, BQ.subFB));
     nsubFB = lg(BQ.subFB) - 1;
@@ -1137,7 +1137,7 @@ START:
   clearhash(BQ.hashtab);
   free_GRHcheck(&GRHcheck);
 
-  gen = get_clgp(&BQ,W,&cyc,prec);
+  gen = get_clgp(&BQ,W,&cyc);
   gunclone(BQ.subFB);
   gunclone(BQ.powsubFB);
   res = cgetg(5,t_VEC);

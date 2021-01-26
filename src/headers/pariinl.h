@@ -75,13 +75,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
        gel(_v,1) = (x);\
        gel(_v,2) = (y);\
        gel(_v,3) = (z); return _v; } while(0)
-#define retmkqfi(x,y,z)\
-  do { GEN _v = cgetg(4, t_QFI);\
-       gel(_v,1) = (x);\
-       gel(_v,2) = (y);\
-       gel(_v,3) = (z); return _v; } while(0)
-#define retmkqfr(x,y,z,d)\
-  do { GEN _v = cgetg(5, t_QFR);\
+#define retmkqfb(x,y,z,d)\
+  do { GEN _v = cgetg(5, t_QFB);\
        gel(_v,1) = (x);\
        gel(_v,2) = (y);\
        gel(_v,3) = (z);\
@@ -237,7 +232,7 @@ mkvecsmall5(long x,long y,long z,long t,long u) { GEN v = cgetg(6, t_VECSMALL);
   v[1]=x; v[2]=y; v[3]=z; v[4]=t; v[5]=u; return v; }
 
 INLINE GEN
-mkqfi(GEN x, GEN y, GEN z) { retmkqfi(x,y,z); }
+mkqfb(GEN x, GEN y, GEN z, GEN d) { retmkqfb(x,y,z,d); }
 /* vec */
 INLINE GEN
 mkvec(GEN x) { retmkvec(x); }
@@ -1998,9 +1993,9 @@ is_matvec_t(long t) { return (t >= t_VEC && t <= t_MAT); }
 INLINE int
 is_noncalc_t(long tx) { return (tx) >= t_LIST; }
 INLINE int
-is_rational_t(long t) { return (t == t_INT || t == t_FRAC); }
+is_qfb_t(long t) { return (t == t_QFB); }
 INLINE int
-is_qfb_t(long t) { return (t == t_QFI || t == t_QFR); }
+is_rational_t(long t) { return (t == t_INT || t == t_FRAC); }
 INLINE int
 is_real_t(long t) { return (t == t_INT || t == t_REAL || t == t_FRAC); }
 INLINE int
@@ -2009,6 +2004,9 @@ INLINE int
 is_scalar_t(long t) { return (t < t_POL); }
 INLINE int
 is_vec_t(long t) { return (t == t_VEC || t == t_COL); }
+
+INLINE int
+qfb_is_qfi(GEN q) { return signe(gel(q,4)) < 0; }
 
 /*******************************************************************/
 /*                                                                 */
@@ -2611,7 +2609,7 @@ quad_disc(GEN x)
 INLINE GEN
 qfb_disc3(GEN x, GEN y, GEN z) { return subii(sqri(y), shifti(mulii(x,z),2)); }
 INLINE GEN
-qfb_disc(GEN x) { return qfb_disc3(gel(x,1), gel(x,2), gel(x,3)); }
+qfb_disc(GEN x) { return gel(x,4); }
 
 INLINE GEN
 sqrfrac(GEN x)

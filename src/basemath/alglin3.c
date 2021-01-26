@@ -923,7 +923,7 @@ gtomat(GEN x)
       y = mkmatcopy(x); break;
     case t_MAT:
       y = gcopy(x); break;
-    case t_QFI: case t_QFR: {
+    case t_QFB: {
       GEN b;
       y = cgetg(3,t_MAT); b = gmul2n(gel(x,2),-1);
       gel(y,1) = mkcol2(icopy(gel(x,1)), b);

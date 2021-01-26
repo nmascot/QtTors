@@ -771,10 +771,9 @@ statement (using \kbd{gaffect}).
 
 Note that the length argument $l$ is predetermined for a number of types:
 3 for types \typ{INTMOD}, \typ{FRAC}, \typ{COMPLEX}, \typ{POLMOD},
-\typ{RFRAC}, 4 for type \typ{QUAD} and \typ{QFI}, and 5 for type \typ{PADIC}
-and \typ{QFR}. However for the sake of efficiency,
-\kbd{cgetg} does not check this: disasters will occur if you give an incorrect
-length for those types.
+\typ{RFRAC}, 4 for type \typ{QUAD}, and 5 for type \typ{PADIC} and \typ{QFB}.
+However for the sake of efficiency, \kbd{cgetg} does not check this: disasters
+will occur if you give an incorrect length for those types.
 
 \misctitle{Notes} 1)  The main use of this function is create efficiently
 a constant object, or to prepare for later assignments (see
@@ -1429,16 +1428,10 @@ numerator $n$, and \kbd{z[2]} on the denominator $d$. The denominator must be
 of type \typ{POL}, with variable of higher priority than the numerator. The
 numerator $n$ is not an exact $0$ and $(n,d) = 1$ (see \tet{gred_rfac2}).
 
-\subsec{Type \typ{QFR} (indefinite binary quadratic form)}%
-\kbdsidx{t_QFR}\sidx{indefinite binary quadratic form} \kbd{z[1]},
-\kbd{z[2]}, \kbd{z[3]} point to the three coefficients of the form and are of
-type \typ{INT}. \kbd{z[4]} is Shanks's distance function, and must be of type
-\typ{REAL}.
-
-\subsec{Type \typ{QFI} (definite binary quadratic form)}%
-\kbdsidx{t_QFI}\sidx{definite binary quadratic form} \kbd{z[1]}, \kbd{z[2]},
-\kbd{z[3]} point to the three coefficients of the form. All three are of type
-\typ{INT}.
+\subsec{Type \typ{QFB} (binary quadratic form)}%
+\kbdsidx{t_QFB}\sidx{binary quadratic form} \kbd{z[1]}, \kbd{z[2]},
+\kbd{z[3]} point to the three coefficients of the form, and \kbd{z[4]} point to
+the form discriminant. All four are of type \typ{INT}.
 
 \subsec{Type \typ{VEC} and \typ{COL} (vector)}%
 \kbdsidx{t_VEC}\kbdsidx{t_COL}\sidx{row vector}\sidx{column vector}

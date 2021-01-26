@@ -255,6 +255,7 @@ get_nf(GEN x, long *t)
         case 17: *t = typ_ELL; return NULL;
       }
       break;
+    case t_QFB: *t = typ_QFB; return NULL;
     case t_COL:
       if (get_prid(x)) { *t = typ_MODPR; return NULL; }
       break;

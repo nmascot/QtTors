@@ -705,23 +705,22 @@ qimag2(GEN Q)
 /***************************************************/
 
 static GEN
-qfb_mult(GEN Q, GEN M)
+qfb_mult(GEN Q, GEN a, GEN b, GEN c, GEN d)
 {
-  GEN A = gel(Q, 1) , B = gel(Q, 2) , C = gel(Q, 3);
-  GEN a = gcoeff(M, 1, 1), b = gcoeff(M, 1, 2);
-  GEN c = gcoeff(M, 2, 1), d = gcoeff(M, 2, 2);
-  GEN W1 = addii(addii(mulii(sqri(a), A), mulii(mulii(c, a), B)), mulii(sqri(c), C));
+  GEN A = gel(Q, 1) , B = gel(Q, 2), C = gel(Q, 3), D = qfb_disc(Q);
+  GEN a2 = sqri(a), b2 = sqri(b), c2 = sqri(c), d2 = sqri(d);
+  GEN ad = mulii(d, a), bc = mulii(b, c), e = subii(ad, bc);
+  GEN W1 = addii(addii(mulii(a2, A), mulii(mulii(c, a), B)), mulii(c2, C));
+  GEN W3 = addii(addii(mulii(b2, A), mulii(mulii(d, b), B)), mulii(d2, C));
   GEN W2 = addii(addii(mulii(mulii(shifti(b,1), a), A),
-                       mulii(addii(mulii(d, a), mulii(c, b)), B)),
+                       mulii(addii(ad, bc), B)),
                  mulii(mulii(shifti(d,1), c), C));
-  GEN W3 = addii(addii(mulii(sqri(b), A), mulii(mulii(d, b), B)), mulii(sqri(d), C));
-  GEN D = gcdii(W1, gcdii(W2, W3));
-  if (!equali1(D)) {
-    W1 = diviiexact(W1,D);
-    W2 = diviiexact(W2,D);
-    W3 = diviiexact(W3,D);
+  if (!equali1(e)) {
+    W1 = diviiexact(W1,e);
+    W2 = diviiexact(W2,e);
+    W3 = diviiexact(W3,e);
   }
-  return qfi(W1, W2, W3);
+  return mkqfb(W1, W2, W3, D);
 }
 
 #ifdef DEBUG
@@ -729,32 +728,24 @@ static void
 best_point_old(GEN Q, GEN NQ, GEN f, GEN *u, GEN *v)
 {
   long n, k;
-  GEN U, c, d;
-  GEN A = gel(f, 1);
-  GEN B = gel(f, 2);
-  GEN C = gel(f, 3);
-  GEN q = qfi(mulii(NQ, C), negi(B), diviiexact(A, NQ));
+  GEN U, c, d, A = gel(f,1), B = gel(f,2), C = gel(f,3), D = qfb_disc(f);
+  GEN q = mkqfb(mulii(NQ, C), negi(B), diviiexact(A, NQ), D);
   redimagsl2(q, &U);
   *u = c = gcoeff(U, 1, 1);
   *v = d = gcoeff(U, 2, 1);
-  if (equali1(gcdii(mulii(*u, NQ), mulii(*v, Q))))
-    return;
-  for (n = 1; ; n++)
+  if (equali1(gcdii(mulii(*u, NQ), mulii(*v, Q)))) return;
+  for (n = 1;; n++)
   {
-    for (k = -n; k<=n; k++)
+    for (k = -n; k <= n; k++)
     {
       *u = addis(c, k); *v = addiu(d, n);
-      if (equali1(ggcd(mulii(*u, NQ), mulii(*v, Q))))
-        return;
-      *v= subiu(d, n);
-      if (equali1(ggcd(mulii(*u, NQ), mulii(*v, Q))))
-        return;
+      if (equali1(gcdii(mulii(*u, NQ), mulii(*v, Q)))) return;
+      *v = subiu(d, n);
+      if (equali1(gcdii(mulii(*u, NQ), mulii(*v, Q)))) return;
       *u = addiu(c, n); *v = addis(d, k);
-      if (equali1(ggcd(mulii(*u, NQ), mulii(*v, Q))))
-        return;
+      if (equali1(gcdii(mulii(*u, NQ), mulii(*v, Q)))) return;
       *u = subiu(c, n);
-      if (equali1(ggcd(mulii(*u, NQ), mulii(*v, Q))))
-        return;
+      if (equali1(gcdii(mulii(*u, NQ), mulii(*v, Q)))) return;
     }
   }
 }
@@ -788,12 +779,13 @@ static void
 best_point(GEN Q, GEN NQ, GEN f, GEN *pu, GEN *pv)
 {
   GEN a = mulii(NQ, gel(f,3)), b = negi(gel(f,2)), c = diviiexact(gel(f,1), NQ);
-  GEN D = absi_shallow( qfb_disc(f) );
-  GEN U, qr = redimagsl2(qfi(a,b,c), &U);
+  GEN D = qfb_disc(f);
+  GEN U, qr = redimagsl2(mkqfb(a, b, c, D), &U);
   GEN A = gel(qr,1), B = gel(qr,2), A2 = shifti(A,1), AA4 = sqri(A2);
   GEN V, best;
   long y;
 
+  D = absi_shallow(D);
   /* 4A qr(x,y) = (2A x + By)^2 + D y^2
    * Write x = x0(y) + i, where x0 is an integer minimum
    * (the smallest in case of tie) of x-> qr(x,y), for given y.
@@ -867,7 +859,7 @@ best_point(GEN Q, GEN NQ, GEN f, GEN *pu, GEN *pv)
   }
 #ifdef DEBUG
   {
-    GEN oldu, oldv, F = qfi(a,b,c);
+    GEN oldu, oldv, F = mkqfb(a, b, c, qfb_disc(f));
     best_point_old(Q, NQ, f, &oldu, &oldv);
     if (!equalii(oldu, *pu) || !equalii(oldv, *pv))
     {
@@ -885,18 +877,17 @@ best_point(GEN Q, GEN NQ, GEN f, GEN *pu, GEN *pv)
 }
 
 static GEN
-best_lift(GEN N, GEN Q, GEN NQ, GEN f)
+best_lift(GEN Q, GEN NQ, GEN f)
 {
-  GEN a,b,c,d,M;
+  GEN a, b, c, d, dQ, cNQ;
   best_point(Q, NQ, f, &c, &d);
-  (void)bezout(mulii(d, Q), mulii(NQ, c), &a, &b);
-  M = mkmat2( mkcol2(mulii(d, Q), mulii(negi(N), c)),
-              mkcol2(b, mulii(a, Q)));
-  return qfb_mult(f, M);
+  dQ = mulii(d, Q); cNQ = mulii(NQ, c);
+  (void)bezout(dQ, cNQ, &a, &b);
+  return qfb_mult(f, dQ, b, mulii(negi(Q),cNQ), mulii(a,Q));
 }
 
 static GEN
-lift_points(GEN N, GEN listQ, GEN f, GEN *pt, GEN *pQ)
+lift_points(GEN listQ, GEN f, GEN *pt, GEN *pQ)
 {
   pari_sp av = avma;
   GEN yf = gen_0, tf = NULL, Qf = NULL;
@@ -904,7 +895,7 @@ lift_points(GEN N, GEN listQ, GEN f, GEN *pt, GEN *pQ)
   for (k = 1; k < l; ++k)
   {
     GEN c = gel(listQ, k), Q = gel(c,1), NQ = gel(c,2);
-    GEN t = best_lift(N, Q, NQ, f), y = qimag2(t);
+    GEN t = best_lift(Q, NQ, f), y = qimag2(t);
     if (gcmp(y, yf) > 0) { yf = y; Qf = Q; tf = t; }
   }
   gerepileall(av, 3, &tf, &Qf, &yf);
@@ -1101,10 +1092,10 @@ listDisc(GEN fa4N, GEN bad, long d)
 /* L = vector of [q1,q2] or [q1,q2,q2']
  * cd = (b^2 - D)/(4N) */
 static void
-listfill(GEN N, GEN b, GEN c, GEN d, GEN L, long *s)
+listfill(GEN N, GEN b, GEN c, GEN d, GEN D, GEN L, long *s)
 {
   long k, l = lg(L);
-  GEN add, frm2, a = mulii(d, N), V = mkqfi(a,b,c), frm = redimag(V);
+  GEN add, frm2, a = mulii(d, N), V = mkqfb(a,b,c,D), frm = qfbred_i(V);
   for (k = 1; k < l; ++k)
   { /* Lk = [v,frm] or [v,frm,frm2] */
     GEN Lk = gel(L,k);
@@ -1117,7 +1108,7 @@ listfill(GEN N, GEN b, GEN c, GEN d, GEN L, long *s)
         return;
       }
   }
-  frm2 = redimag( mkqfi(d, negi(b), mulii(c,N)) );
+  frm2 = qfbred_i(mkqfb(d, negi(b), mulii(c,N), D));
   add = gequal(frm, frm2)? mkvec2(V,frm): mkvec3(V,frm,frm2);
   vectrunc_append(L, add);
   *s += lg(add) - 2;
@@ -1140,14 +1131,14 @@ listheegner(GEN N, GEN faN4, GEN listQ, GEN D)
     for (i = 1; i < l; i++)
     {
       GEN d = gel(div, i), c = gel(div, l-i); /* cd = C */
-      listfill(N, bk, c, d, L, &s);
+      listfill(N, bk, c, d, D, L, &s);
     }
   }
   l = lg(L); ymin = NULL;
   for (k = 1; k < l; k++)
   {
     GEN t, Q, Lk = gel(L,k), f = gel(Lk,1);
-    GEN y = lift_points(N, listQ, f, &t, &Q);
+    GEN y = lift_points(listQ, f, &t, &Q);
     gel(L, k) = mkvec3(t, stoi(lg(Lk) - 2), Q);
     if (!ymin || gcmp(y, ymin) < 0) ymin = y;
   }

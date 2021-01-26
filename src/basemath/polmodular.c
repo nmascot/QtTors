@@ -250,7 +250,7 @@ red_primeform(long D, long p)
   GEN P;
   if (!prime_to_conductor(D, p)) return NULL;
   P = primeform_u(stoi(D), p); /* primitive since p \nmid conductor */
-  return gerepileupto(av, redimag(P));
+  return gerepileupto(av, qfbred_i(P));
 }
 
 /* Computes product of primeforms over primes appearing in the prime
@@ -269,7 +269,7 @@ qfb_nform(long D, long n)
     if (!Q) return gc_NULL(av);
     e = E[i];
     if (i == 1) { N = Q; j = 1; } else j = 0;
-    for (; j < e; ++j) N = qficomp(Q, N);
+    for (; j < e; ++j) N = qfbcomp_i(Q, N);
   }
   return gerepileupto(av, N);
 }
@@ -290,11 +290,11 @@ qfb_distinct_prods(long D, long p1, long p2)
 
   P1 = red_primeform(D, p1);
   if (!P1) return 0;
-  P1 = qfisqr(P1);
+  P1 = qfbsqr_i(P1);
 
   P2 = red_primeform(D, p2);
   if (!P2) return 0;
-  P2 = qfisqr(P2);
+  P2 = qfbsqr_i(P2);
 
   return !(equalii(gel(P1,1), gel(P2,1)) && absequalii(gel(P1,2), gel(P2,2)));
 }
@@ -325,7 +325,7 @@ modinv_double_eta_good_disc(long D, long inv)
       /* if p1 is unramified, require it to have order > 2 */
       || (i1 && qfb_is_two_torsion(P))) return gc_bool(av,0);
   if (p1 == p2) /* if p1=p2 we need p1*p1 to be distinct from its inverse */
-    return gc_bool(av, !qfb_is_two_torsion(qfisqr(P)));
+    return gc_bool(av, !qfb_is_two_torsion(qfbsqr_i(P)));
 
   /* this also verifies that p2 is prime to the conductor */
   P = red_primeform(D, p2);
@@ -795,10 +795,7 @@ modfn_preimage(ulong x, norm_eqn_t ne, long inv)
  */
 
 INLINE GEN
-mkqfis(long a, long b, long c)
-{
-  retmkqfi(stoi(a), stoi(b), stoi(c));
-}
+mkqfis(GEN a, ulong b, ulong c, GEN D) { retmkqfb(a, utoi(b), utoi(c), D); }
 
 /**
  * SECTION: Fixed-length dot-product-like functions on Fl's with
@@ -3182,21 +3179,17 @@ typedef struct D_entry_struct {
 INLINE GEN
 qform_primeform2(long p, long D)
 {
-  pari_sp ltop = avma, av;
-  GEN M;
-  register long k;
+  GEN a = sqru(p), Dp2 = mulis(a, D), M = Z_factor(utoipos(p - 1));
+  pari_sp av = avma;
+  long k;
 
-  M = factor_pn_1(stoi(p), 1);
-  av = avma;
   for (k = D & 1; k <= p; k += 2)
   {
-    GEN Q;
-    long ord, a, b, c = (k * k - D) / 4;
+    long ord, c = (k * k - D) / 4;
+    GEN Q, q;
 
     if (!(c % p)) continue;
-    a = p * p;
-    b = k * p;
-    Q = redimag(mkqfis(a, b, c));
+    q = mkqfis(a, k * p, c, Dp2); Q = qfbred_i(q);
     /* TODO: How do we know that Q has order dividing p - 1? If we don't, then
      * the call to gen_order should be replaced with a call to something with
      * fastorder semantics (i.e. return 0 if ord(Q) \ndiv M). */
@@ -3204,13 +3197,12 @@ qform_primeform2(long p, long D)
     if (ord == p - 1) {
       /* TODO: This check that gen_order returned the correct result should be
        * removed when gen_order is replaced with fastorder semantics. */
-      GEN tst = gpowgs(Q, p - 1);
-      if (qfb_equal1(tst)) { set_avma(ltop); return mkqfis(a, b, c); }
-        break;
+      if (qfb_equal1(gpowgs(Q, p - 1))) return q;
+      break;
     }
     set_avma(av);
   }
-  return gc_NULL(ltop);
+  return NULL;
 }
 
 /* Let n = #cl(D); return x such that [L0]^x = [L] in cl(D), or -1 if x was
@@ -3353,7 +3345,7 @@ check_generators(
     pari_sp av = avma;
     GEN D1 = stoi(D);
     GEN Q = gpowgs(primeform_u(D1, L0), n1 / 2);
-    res = gequal(Q, redimag(primeform_u(D1, L1)));
+    res = gequal(Q, qfbred_i(primeform_u(D1, L1)));
     set_avma(av);
     if (res) {
       dbg_printf(3)("Bad D1=%ld, with n1=%ld, h1=%ld, L1=%ld: "
@@ -3740,7 +3732,7 @@ modpoly_pickD(disc_info Ds[MODPOLY_MAX_DCNT], long L, long inv,
         GEN Q1 = qform_primeform2(L, D1), Q2, X;
         if (!Q1) pari_err_BUG("modpoly_pickD");
         Q2 = primeform_u(stoi(D2), L1);
-        Q2 = gmul(Q1, Q2); /* we know this element has order L-1 */
+        Q2 = qfbcomp(Q1, Q2); /* we know this element has order L-1 */
         Q1 = primeform_u(stoi(D2), L0);
         k = ((n2 & 1) ? 2*n2 : n2)/(L-1);
         Q1 = gpowgs(Q1, k);
@@ -3932,7 +3924,7 @@ scanD0(long *tablelen, long *minD, long maxD, long maxh, long L0)
     /* Check if ord(q) is not big enough to generate at least half the
      * class group (where q is the L0-primeform). */
     frm = primeform_u(DD, L0);
-    ordL = qfi_order(redimag(frm), H);
+    ordL = qfi_order(qfbred_i(frm), H);
     n = itos(ordL);
     if (n < h/2 || (!L1 && n < h)) continue;
 

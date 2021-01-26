@@ -788,7 +788,7 @@ next_generator(GEN DD, long D, ulong u, long filter, GEN *genred, long *P)
     {
       GEN gen = primeform_u(DD, p);
       /* If gen is in the principal class, skip it */
-      *genred = redimag(gen);
+      *genred = qfbred_i(gen);
       if (!equali1(gel(*genred,1))) { *P = (long)p; return gen; }
       set_avma(av);
     }
@@ -1070,7 +1070,7 @@ next_prime_evec(long *qq, long f[], const long m[], long k,
   *qq = q;
 
   /* Get evec f corresponding to q */
-  P = redimag(primeform_u(DD, q));
+  P = qfbred_i(primeform_u(DD, q));
   he = hash_search(tbl, P);
   if (!he) pari_err_BUG("next_prime_evec");
   idx = itos((GEN) he->val);
@@ -1256,11 +1256,11 @@ classgp_make_pcp(
   bv = avma;
   while (1) {
     k = 0;
-    /* Hash table has a QFI as a key and the (boxed) index of that QFI
-     * in T as its value */
+    /* Hash table has an imaginary QFB as a key and the (boxed) index of that
+     * form in T as its value */
     tbl = hash_create(h, (ulong(*)(void*)) hash_GEN,
                          (int(*)(void*,void*))&gequal, 1);
-    ident = redimag(primeform_u(DD, 1));
+    ident = qfbred_i(primeform_u(DD, 1));
     hash_insert(tbl, ident, gen_0);
 
     T = vectrunc_init(h + 1);
@@ -1278,7 +1278,7 @@ classgp_make_pcp(
       if (nelts == 1 && G->L0) {
         curr_p = G->L0;
         gamma_i = qfb_nform(D, curr_p);
-        beta = redimag(gamma_i);
+        beta = qfbred_i(gamma_i);
         if (equali1(gel(beta, 1)))
         {
           curr_p = 1;
@@ -1289,11 +1289,11 @@ classgp_make_pcp(
       while ((e = hash_search(tbl, beta)) == NULL) {
         long j;
         for (j = 1; j <= N; ++j) {
-          GEN t = qficomp(beta, gel(T, j));
+          GEN t = qfbcomp_i(beta, gel(T, j));
           vectrunc_append(T, t);
           hash_insert(tbl, t, stoi(Tlen++));
         }
-        beta = qficomp(beta, gamma_i);
+        beta = qfbcomp_i(beta, gamma_i);
         ++ri;
       }
       if (ri > 1) {

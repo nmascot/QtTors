@@ -1786,16 +1786,19 @@ use different variable names:
 %
 In addition to elements of a quadratic order, we also want to be able to
 handle ideals of such orders. In the quadratic case, it is equivalent to
-handling binary quadratic forms. For negative discriminants, quadratic forms
-are triples $(a,b,c)$ representing the form $ax^2+bxy+cy^2$. Such a form will
-be printed as, and can be created by, \kbd{Qfb($a$,$b$,$c$)}.
+handling binary quadratic forms. Quadratic forms are triples $(a,b,c)$
+representing the form $ax^2+bxy+cy^2$. Such a form will be printed as, and
+can be created by, \kbd{Qfb($a$,$b$,$c$)}.
 
 Such forms can be multiplied, divided, powered as many PARI objects using
 the usual operations, and they can also be reduced using the function
-\kbd{qfbred} (it is not the purpose of this tutorial to explain what all
-these things mean). In addition, Shanks's NUCOMP algorithm has been
-implemented (functions \kbd{qfbnucomp} and \kbd{qfbnupow}), and this is
-usually a little faster.
+\kbd{qfbred} or \kbd{qfbredsl2} (which also returns the unimodular
+transformation matrix). One can also use explicitly \kbd{qfbcomp} /
+\kbd{qfbpow} (same as multiplication) and \kbd{qfbcompraw} / \kbd{qfbpowraw}
+(composition without reduction) (It is not the purpose of this tutorial to
+explain what all these things mean.) In addition, Shanks's NUCOMP algorithm
+has been implemented (functions \kbd{qfbnucomp} and \kbd{qfbnupow}), and this
+is usually a little faster.
 
 Finally, you have at your disposal the functions \kbd{qfbclassno} which
 (\emph{usually}) gives the class number, the function \kbd{qfbhclassno}
@@ -1904,32 +1907,23 @@ not very different.
 The same \kbd{quadgen} function is used to create elements. Ideals are again
 represented by binary quadratic forms $(a,b,c)$, this time indefinite. However,
 the Archimedean valuations of the number field start to come into play, hence
-in fact quadratic forms with positive discriminant will be represented as a
-quadruplet $(a,b,c,d)$ where the quadratic form itself is $ax^2+bxy+cy^2$
-with $a$, $b$ and $c$ integral, and $d\in \R$ is a ``distance''
+in fact quadratic forms with positive discriminant can also
+be represented as a pair $[q, d]$ where $q = \kbd{Qfb(a, b, c)}$ is the
+indefinite quadratic form $ax^2+bxy+cy^2$, and $d\in \R$ is a ``distance''
 component, as defined by Shanks and Lenstra.
 
-To create such forms, one uses the same function as for definite ones, but
-you can add a fourth (optional) argument to initialize the distance:
-\kbd{q = Qfb($a$, $b$, $c$, $d$)}.
-If the discriminant of \kbd{poldisc(q)} is negative, $d$ is silently
-discarded. If you omit it, this component is set to \kbd{0.} (i.e.~a real
-zero to the current precision).
+The form $q$ can be multiplied, divided, powered, and they can be
+reduced using \kbd{qfbred}. But this time, to compose extended forms
+$[q,d]$ and $[q,d']$, one must use \kbd{qfbcomp} and \kbd{qfbpow} (since
+ordinary multiplication and powerings will not accept pairs)
 
-Again these forms can be multiplied, divided, powered, and they can be
-reduced using \kbd{qfbred}. This function is in fact a succession of
+The \kbd{qfbred} function applies a succession of
 elementary reduction steps corresponding essentially to a continued fraction
 expansion, and a single one of these steps can be achieved by adding an
-(optional) flag to the arguments of \kbd{qfbred}. Since handling the
-fourth component $d$ usually involves computing expensive logarithms, the
-same flag may be used to ignore the fourth component. Finally, it is
-sometimes useful to operate on forms of positive discriminant without
-performing any reduction (this is useless in the negative case), the
-functions \kbd{qfbcompraw} and \kbd{qfbpowraw} do exactly that.
-
-Again, the function \kbd{qfbprimeform} gives a prime form, but the form which
-is given corresponds to an ideal of prime norm which is usually not reduced.
-If desired, it can be reduced using \kbd{qfbred}.
+(optional) flag to the arguments of \kbd{qfbred}. Again, the function
+\kbd{qfbprimeform} gives a prime form, but the form which is given
+corresponds to an ideal of prime norm which is usually not reduced. If
+desired, it can be reduced using \kbd{qfbred}.
 
 Finally, you still have at your disposal the function \kbd{qfbclassno} which
 gives the class number (this time \emph{guaranteed} correct),
@@ -1943,24 +1937,24 @@ much larger range.
 Let us see examples of all this at work and learn some little known number
 theory at the same time. First of all, type
 \bprog
-  d = 3 * 3299; qfbclassno(d)
+  D = 3 * 3299; qfbclassno(D)
 @eprog\noindent We see that the class number is 3. (We know
-in advance that it must be divisible by 3 from the \kbd{d = -3299} case above
+in advance that it must be divisible by 3 from the \kbd{D = -3299} case above
 and Scholz's mirror theorem.) Let us create a form by typing
 \bprog
-  f = qfbred(qfbprimeform(d,2), 2)
+  f = qfbred(qfbprimeform(D,2))
 @eprog\noindent
-(the last 2 tells \kbd{qfbred} to ignore the Archimedean component). This
-gives us a prime ideal of norm equal to 2. Is this ideal principal? Well, one
-way to check this, which is not the most efficient but will suffice for now,
-is to look at the complete cycle of reduced forms equivalent to \kbd{f}. Type
+This gives us a prime ideal of norm equal to 2. Is this ideal principal?
+Well, one way to check this, which is not the most efficient but will suffice
+for now, is to look at the complete cycle of reduced forms equivalent to
+\kbd{f}. Type
 \bprog
- g = f; for(i=1,20, g = qfbred(g, 3); print(g))
+ g = f; for(i=1,20, g = qfbred(g, 1); print(g))
 @eprog\noindent
-(this time the 3 means to do a single reduction step, still not using
-Shanks's distance). We see that we come back to the form \kbd{f} without
-having the principal form (starting with $\pm1$) in the cycle, so the ideal
-corresponding to \kbd{f} is not principal.
+(the flag $1$ in \kbd{qfbred} means to perform a single reduction step). We
+see that we come back to the form \kbd{f} without meeting the principal form
+(starting with $\pm1$) in the cycle, so the ideal corresponding to \kbd{f} is
+not principal.
 
 Since the class number is equal to 3, we know however that \kbd{f\pow 3} will
 be a principal ideal $\alpha\Z_K$. How do we find $\alpha$? For this, type
@@ -1970,22 +1964,24 @@ be a principal ideal $\alpha\Z_K$. How do we find $\alpha$? For this, type
 This computes the cube of \kbd{f}, without
 reducing it. Hence it corresponds to an ideal of norm equal to $8=2^3$, so we
 already know that the norm of $\alpha$ is equal to $\pm8$. We need more
-information, and this will be given by the fourth component of the form.
-Reduce your form until you reach the unit form (you will have to type
-\kbd{qfbred(\%,~1)} exactly 6 times), then extract the Archimedean component,
-say $c$. By definition of this distance, we know that
-$${\alpha\over{\sigma(\alpha)}}=\pm e^{2c},$$
-where $\sigma$ denotes real conjugation in our quadratic field. This can be
-automated:
+information, and this is given by supplementing the form by a \emph{distance}
+component $d$, a real number that tracks archimedean information that will
+eventually allows to recover $\alpha$: we call such a pair $[f,d]$ an
+\emph{extended form}.
 \bprog
-  q = f3;
-  while(abs(component(q,1)) != 1, print(q); q = qfbred(q, 1))
-  c = component(q,4);
-@eprog\noindent
-Thus, if we type
+  F3 = [f3, 0.0]; /* initialize */
+  while(abs(component(F3[1], 1)) != 1, F3 = qfbred(F3, 1); print(F3))
+  d = F3[2];
+@eprog
+We reduce the form until we reach the unit form (exactly 6 times),
+then extract the Archimedean component, say $d = 8.59\dots$
+By definition of this distance, we know that
+$${\alpha\over{\sigma(\alpha)}}=\pm e^{2d},$$
+where $\sigma$ denotes real conjugation in our quadratic field. Thus, if we type
 \bprog
-  a = sqrt(8 * exp(2*c))
-  sa = 8 / a
+  Na = 8; /* |Norm(alpha)| */
+  a = sqrt(Na * exp(2*d))
+  sa = Na / a
 @eprog\noindent
 we know that up to sign, \kbd{a} and \kbd{sa} are
 numerical approximations of $\alpha$ and $\sigma(\alpha)$. Of course,
@@ -1996,16 +1992,17 @@ numerical approximation to $\sigma(\alpha)$ is \kbd{$-$sa}. Thus we type
 \bprog
   p = x^2 - round(a-sa)*x - 8
 @eprog\noindent
-and this is the characteristic polynomial of $\alpha$. We can check that the
-discriminant of this polynomial is a square multiple of \kbd{d}, so $\alpha$
-is indeed in our field. More precisely, solving for $\alpha$ and using the
-numerical approximation that we have to resolve the sign ambiguity in the
-square root, we get explicitly $\alpha=(15221+153\sqrt d)/2$. Note that this
-can also be done automatically using the functions \kbd{polred} and
-\kbd{modreverse}, as we will see later in the general number field case, or
-by solving a system of 2 linear equations in 2 variables. (Exercise: now that
-we have $\alpha$, check that it is indeed a generator of the ideal
-corresponding to the form \kbd{f3}.)
+and this ($x^2 - 15221x - 8$) is the characteristic polynomial of $\alpha$.
+We can check that the discriminant of this polynomial is a square multiple of
+\kbd{D} using \kbd{issquare(poldisc(p) / D)}, so $\alpha$ is indeed in our
+field. More precisely, solving for $\alpha$ and using the numerical
+approximation that we have to resolve the sign ambiguity in the square root,
+we get explicitly $\alpha=(15221+153\sqrt D)/2$. Note that this can also be
+done automatically using the functions \kbd{polred} and \kbd{modreverse}, as
+we will see later in the general number field case. Or by solving a system
+of~2 linear equations in 2 variables. (Exercise: now that we have $\alpha$,
+check that it is indeed a generator of the ideal corresponding to the form
+\kbd{f3}.)
 
 \medskip Let us now play a little with cycles. Type
 \bprog
@@ -2013,58 +2010,57 @@ corresponding to the form \kbd{f3}.)
   quadclassunit(D)
 @eprog\noindent
 We get as a result a 5-component vector, which tells us that (under GRH) the
-class number is equal to 1, and the regulator is approximately
+class number is equal to 1, and the regulator $R$ is approximately
 equal to $2641.5$. You may certify this with
 \bprog
   bnf = bnfinit(x^2 - D, 1);  \\ @com insist on finding fundamental unit
   bnfcertify(bnf);
 @eprog\noindent
 although it's a little inefficient. Indeed \kbd{bnfcertify} needs the
-fundamental unit which is so large that \kbd{bnfinit} will have a hard time
-computing it: it needs about $R/\log(10)\approx 1147$ digits of precision!
-(So that it would have given up had we not inserted the flag $1$.)
-See \kbd{bnf.fu}. On the other hand, you can try \kbd{quadunit(D,'w)}.
-Impressive, isn't it? (You can check that its logarithm is indeed equal to
-the regulator.)
+fundamental unit, which is large: it needs about $R/\log(10)\approx 1147$
+digits of precision, see \kbd{bnf.fu}!
+(\kbd{bnfinit} would have given up had we not inserted the flag $1$.)
+On the other hand, you can try \kbd{quadunit(D,'w)}. Impressive, isn't it?
+(You can check that its logarithm is indeed equal to the regulator.)
 
-Now just as an example, let's assume that we want the regulator to 500
-decimals, say. (Without cheating and computing the fundamental unit exactly
-first!) I claim that simply from the crude approximation above, this can be
-computed with no effort.
-
-This time, we want to start with the unit form. Type:
+Let's now assume that we want the regulator $R$ to 500 decimals, say.
+(Without cheating and computing the fundamental unit exactly first!)
+This can be computed with no effort, simply from the crude approximation
+$2641.5$ above. This time, we start with the unit form. Type:
 \bprog
-  u = qfbred(qfbprimeform(D, 1), 2)
+  u = [qfbprimeform(D, 1), 0.0];
+  R = 2641.5; /* rough approximation */
 @eprog\noindent
-We use the function \kbd{qfbred} with no distance since we want the initial
-distance to be equal to~0. Now type  \kbd{f = qfbred(u, 1)}. This is the
+This initializes the distance to $0$.
+Now type  \kbd{f = qfbred(u, 1)}. This is the
 first form encountered along the principal cycle. For the moment, keep the
 precision low, for example the initial default precision. The distance from
-the identity of \kbd{f} is around 4.253. Very crudely, since we want a
-distance of $2641.5$, this should be encountered approximately at
-$2641.5/4.253=621$ times the distance of \kbd{f}. Hence, as a first try, we
-type \kbd{f\pow 621}. Oops, we overshot, since the distance is now $3173.02$.
+the identity of \kbd{f} is around 4.253. Since we want a
+distance of $R$, this should be encountered approximately at
+$R/f[2]=621$ times the distance of \kbd{f}. Hence, as a first try, we
+type \kbd{qfbpow(f,621)} (\kbd{f \pow 621} will not accept extended forms).
+Oops, we overshot, since the distance is now $3173.02$.
 Now we can refine our initial estimate and believe that we should be close to
-the correct distance if we raise \kbd{f} to the power $621*2641.5/3173$ which
-is close to $517$. Now if we compute \kbd{f\pow 517} we hit the principal
-form right on the dot. Note that this is not a lucky accident: we will always
-land extremely close to the correct target using this method, and usually at
-most one reduction correction step is necessary. Of course, only the distance
-component can tell us where we are along the cycle.
+the correct distance if we raise \kbd{f} to the power $621*R/3173$ which
+is close to $517$. Now if we compute \kbd{qfbpow(f, 517)} we hit the principal
+form right on the dot. Note that this is not a lucky accident: we must land
+extremely close to the correct target using this method, and usually at most
+one reduction correction step is necessary. And the distance component can
+tell us where we are along the cycle.
 
 Up to now, we have only worked to low precision. The goal was to obtain this
 unknown integer $517$. Note that this number has absolutely no mathematical
 significance: indeed the notion of reduction of a form with positive
 discriminant is not well defined since there are usually many reduced forms
-equivalent to a given form. However, when PARI makes its computations, the
-specific order and reductions that it performs are dictated entirely by the
-coefficients of the quadratic form itself, and not by the distance component,
-hence the precision used has no effect.
+equivalent to a given form. However, when PARI computes with extended forms,
+the specific order and reductions that it performs are dictated entirely by
+the coefficients of the quadratic form itself, and not by the distance
+component, hence the precision used has no effect.
 
 Hence we now start again by setting the precision to (for example) 500,
 we retype the definition of \kbd{u} (why is this necessary?), and then
-\kbd{qfbred(u, 1)\pow 517}. Of course we know in advance that we land on the
-unit form, and the fourth component gives us the regulator to 500 decimal
+\kbd{qfbpow(qfbred(u, 1), 517)}. We already know that we land on the
+unit form, and the distance component gives us the regulator to 500 decimal
 places with no effort at all.
 
 In a similar way, we could obtain the so-called \emph{compact representation}

@@ -109,8 +109,9 @@ POL             @Polynomials@2
 polynomial      @Polynomials@2
 SER             @Power series@2
 RFRAC           @Rational functions@2
-QFR             @Binary quadratic forms of positive or negative discriminant@2
-QFI             @Binary quadratic forms of positive or negative discriminant@2
+QFR             @Binary quadratic forms@2
+QFI             @Binary quadratic forms@2
+QFB             @Binary quadratic forms@2
 VEC             @Row and column vectors@2
 COL             @Row and column vectors@2
 MAT             @Matrices@2

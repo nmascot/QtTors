@@ -2324,79 +2324,77 @@ This is a low-level function behind \kbd{hclassno}.
 \fun{ulong}{hclassno6u}{ulong d} assuming $d > 0$, returns the integer
 $6 H(d)$.
 
-\subsec{\typ{QFI}, \typ{QFR}}
+\subsec{\typ{QFB}}
 
-\fun{GEN}{qfi}{GEN x, GEN y, GEN z} creates the \typ{QFI} $(x,y,z)$.
+The functions in this section operate on binary quadratic forms of type
+\typ{QFB}. When specified, a \typ{QFB} argument $q$ attached to an
+indefinite form can be replaced by the pair $[q, d]$ where the \typ{REAL}
+$d$ is Shanks's distance.
 
-\fun{GEN}{qfr}{GEN x, GEN y, GEN z, GEN d} creates the \typ{QFR} $(x,y,z)$
-with distance component $d$.
+\fun{GEN}{qfb_1}{GEN q} given a \typ{QFB} $q$, return the unit form $q^0$.
 
-\fun{GEN}{qfr_1}{GEN q} given a \typ{QFR} $q$, return the unit form $q^0$.
-
-\fun{GEN}{qfi_1}{GEN q} given a \typ{QFI} $q$, return the unit form $q^0$.
-
-\fun{int}{qfb_equal1}{GEN q} returns 1 if the \typ{QFI} or \typ{QFR}
+\fun{int}{qfb_equal1}{GEN q} returns 1 if the \typ{QFB}
 $q$ is the unit form.
+
+\subsubsec{Reduction}
+
+\fun{GEN}{qfbred}{GEN x} reduction of a \typ{QFB} $x$. Also allow extended
+indefinite forms.
+
+\fun{GEN}{qfbred_i}{GEN x} internal version of \kbd{qfbred}: assume $x$
+is a \typ{QFB}.
 
 \subsubsec{Composition}
 
-\fun{GEN}{qficomp}{GEN x, GEN y} compose the two \typ{QFI} $x$ and $y$,
-then reduce the result. This is the same as \kbd{gmul(x,y)}.
+\fun{GEN}{qfbcomp}{GEN x, GEN y} compose the two \typ{QFB} $x$ and $y$ (with
+same discriminant), then reduce the result. This is the same as
+\kbd{gmul(x,y)}. Also allow extended indefinite forms.
 
-\fun{GEN}{qfrcomp}{GEN x, GEN y} compose the two \typ{QFR} $x$ and $y$,
-then reduce the result. This is the same as \kbd{gmul(x,y)}.
+\fun{GEN}{qfbcomp_i}{GEN x, GEN y} internal version of \kbd{qfbcomp}: assume
+$x$ and $y$ are \typ{QFB} of the same discriminant.
 
-\fun{GEN}{qfisqr}{GEN x} as \kbd{qficomp(x,y)}.
+\fun{GEN}{qfbsqr}{GEN x} as \kbd{qfbcomp(x,x)}.
 
-\fun{GEN}{qfrsqr}{GEN x} as \kbd{qfrcomp(x,y)}.
+\fun{GEN}{qfbsqr_i}{GEN x} as \kbd{qfbcomp\_i(x,y)}.
 
 \noindent Same as above, \emph{without} reducing the result:
 
-\fun{GEN}{qficompraw}{GEN x, GEN y}
+\fun{GEN}{qfbcompraw}{GEN x, GEN y} compose two \typ{QFB}s,
+without reducing the result. Also allow extended indefinite forms.
 
-\fun{GEN}{qfrcompraw}{GEN x, GEN y}
-
-\fun{GEN}{qfisqrraw}{GEN x}
-
-\fun{GEN}{qfrsqrraw}{GEN x}
-
-\fun{GEN}{qfbcompraw}{GEN x, GEN y} compose two \typ{QFI}s or two \typ{QFR}s,
-without reduce the result.
+\fun{GEN}{qfbcompraw_i}{GEN x, GEN y} internal version of \kbd{qfbcompraw}:
+assume $x$ and $y$ are \typ{QFB} of the same discriminant.
 
 \subsubsec{Powering}
 
-\fun{GEN}{powgi}{GEN x, GEN n} computes $x^n$ (will work for many more types
-than \typ{QFI} and \typ{QFR}, of course). Reduce the result.
+\fun{GEN}{qfbpow}{GEN x, GEN n} computes $x^n$ and reduce the result. Also
+allow extended indefinite forms.
 
-\fun{GEN}{qfrpow}{GEN x, GEN n} computes $x^n$ for a \typ{QFR} $x$, reducing
-along the way. If the distance component is initially $0$, leave it alone;
-otherwise update it.
+\fun{GEN}{qfbpow_i}{GEN x, GEN n} internal version of \kbd{qfbcomp}. Assume
+$x$ is a \kbd{QFB}.
 
 \fun{GEN}{qfbpowraw}{GEN x, long n} compute $x^n$ (pure composition, no
-reduction), for a \typ{QFI} or \typ{QFR} $x$.
-
-\fun{GEN}{qfipowraw}{GEN x, long n} as \tet{qfbpowraw}, for a \typ{QFI} $x$.
-
-\fun{GEN}{qfrpowraw}{GEN x, long n} as \tet{qfbpowraw}, for a \typ{QFR} $x$.
+reduction), for a \typ{QFB} $x$. Also allow indefinite forms.
 
 \subsubsec{Order, discrete log}
 
 \fun{GEN}{qfi_order}{GEN q, GEN o}
-assuming that the \typ{QFI} $q$ has order dividing $o$, compute its
+assuming that the imaginary \typ{QFB} $q$ has order dividing $o$, compute its
 order in the class group. The order can be given in all formats allowed by
 generic discrete log functions, the preferred format being \kbd{[ord, fa]}
 (\typ{INT} and its factorization).
 
-\fun{GEN}{qfi_log}{GEN a, GEN g, GEN o} given a \typ{QFI} $a$ and assuming
-that the \typ{QFI} $g$ has order $o$, compute an integer $k$ such that $a^k =
+\fun{GEN}{qfi_log}{GEN a, GEN g, GEN o} given an imaginary \typ{QFB} $a$ and
+assuming
+that the \typ{QFB} $g$ has order $o$, compute an integer $k$ such that $a^k =
 g$. Return \kbd{cgetg(1, t\_VEC)} if there are no solutions. Uses a generic
 Pollig-Hellman algorithm, then either Shanks (small $o$) or Pollard rho
 (large $o$) method. The order can be given in all formats allowed by generic
 discrete log functions, the preferred format being \kbd{[ord, fa]}
 (\typ{INT} and its factorization).
 
-\fun{GEN}{qfi_Shanks}{GEN a, GEN g, long n} given a \typ{QFI} $a$ and
-assuming that the \typ{QFI} $g$ has (small) order $n$, compute an integer $k$
+\fun{GEN}{qfi_Shanks}{GEN a, GEN g, long n} given an imaginary \typ{QFB} $a$ and
+assuming that the \typ{QFB} $g$ has (small) order $n$, compute an integer $k$
 such that $a^k = g$. Return \kbd{cgetg(1, t\_VEC)} if there are no solutions.
 Directly uses Shanks algorithm, which is inefficient when $n$ is composite.
 
@@ -2405,10 +2403,10 @@ Directly uses Shanks algorithm, which is inefficient when $n$ is composite.
 The following functions underly \tet{qfbsolve}; $p$ denotes a prime number.
 
 \fun{GEN}{qfisolvep}{GEN Q, GEN p} solves $Q(x,y) = p$ over the integers, for
-a \typ{QFI} $Q$. Return \kbd{gen\_0} if there are no solutions.
+an imaginary \typ{QFB} $Q$. Return \kbd{gen\_0} if there are no solutions.
 
 \fun{GEN}{qfrsolvep}{GEN Q, GEN p} solves $Q(x,y) = p$ over the integers, for
-a \typ{QFR} $Q$. Return \kbd{gen\_0} if there are no solutions.
+a real \typ{QFB} $Q$. Return \kbd{gen\_0} if there are no solutions.
 
 \fun{long}{cornacchia}{GEN d, GEN p, GEN *px, GEN *py} solves
 $x^2+ dy^2 = p$ over the integers, where $d > 0$. Return $1$ if there is a
@@ -2422,16 +2420,16 @@ where  $p > 2$ and $b$ is the smallest squareroot of $d$ modulo $p$.
 
 \subsubsec{Prime forms}
 
-\fun{GEN}{primeform_u}{GEN x, ulong p} \typ{QFI} whose first coefficient
-is the prime $p$.
+\fun{GEN}{primeform_u}{GEN D, ulong p} \typ{QFB} of discriminant $D$
+whose first coefficient is the prime $p$, assuming $(D/p) \geq 0$.
 
-\fun{GEN}{primeform}{GEN x, GEN p, long prec}
+\fun{GEN}{primeform}{GEN D, GEN p}
 
-\subsec{Efficient real quadratic forms} Unfortunately, \typ{QFR}s
+\subsec{Efficient real quadratic forms} Unfortunately, real \typ{QFB}s
 are very inefficient, and are only provided for backward compatibility.
 
 \item they do not contain needed quantities, which are thus constantly
-recomputed (the discriminant $D$, $\sqrt{D}$ and its integer part),
+recomputed (the discriminant square root $\sqrt{D}$ and its integer part),
 
 \item the distance component is stored in logarithmic form, which involves
 computing one extra logarithm per operation. It is much more efficient
@@ -2449,7 +2447,7 @@ three coefficients a \typ{REAL} $d$ and a \typ{INT} $e$ coding the distance
 component $2^{Ne} d$, in exponential form, for some large fixed $N$.
 
 It is a feature that \kbd{qfr3} and \kbd{qfr5} have no specified length or
-type. It implies that a \kbd{qfr5} or \typ{QFR} will do whenever a \kbd{qfr3}
+type. It implies that a \kbd{qfr5} or \typ{QFB} will do whenever a \kbd{qfr3}
 is expected. Routines using these objects all require a global context,
 provided by a \kbd{struct qfr\_data *}:
 \bprog
@@ -2476,8 +2474,8 @@ along the way.
 \fun{GEN}{qfr3_rho}{GEN x, struct qfr_data *S} perform one reduction step;
 \kbd{qfr3\_red} just performs reduction steps until we hit a reduced form.
 
-\fun{GEN}{qfr3_to_qfr}{GEN x, GEN d} recover an ordinary \typ{QFR} from the
-\kbd{qfr3} $x$, adding distance component $d$.
+\fun{GEN}{qfr3_to_qfr}{GEN x, GEN d} recover an ordinary \typ{QFB} from the
+\kbd{qfr3} $x$, adding disriminant component $d$.
 
 Before we explain \kbd{qfr5}, recall that it corresponds to an ideal, that
 reduction corresponds to multiplying by a principal ideal, and that the
@@ -2498,16 +2496,16 @@ along the way.
 \fun{GEN}{qfr5_rho}{GEN x, struct qfr_data *S} perform one reduction step.
 
 \fun{GEN}{qfr5_dist}{GEN e, GEN d, long prec} decode the distance component
-from exponential (\kbd{qfr5}-specific) to logarithmic form (as in a
-\typ{QFR}).
+from exponential (\kbd{qfr5}-specific) to logarithmic form (true Shanks's
+distance).
 
-\fun{GEN}{qfr_to_qfr5}{GEN x, long prec} convert a \typ{QFR} to a
+\fun{GEN}{qfr_to_qfr5}{GEN x, long prec} convert a real \typ{QFB} to a
 \kbd{qfr5} with initial trivial distance component ($= 1$).
 
 \fun{GEN}{qfr5_to_qfr}{GEN x, GEN d}, assume $x$ is a \kbd{qfr5} and
-$d$ was the original distance component of some \typ{QFR} that we converted
-using \tet{qfr_to_qfr5} to perform efficiently a number of operations.
-Convert $x$ to a \typ{QFR} with the correct (logarithmic) distance component.
+$d$ is \kbd{NULL} or the original distance component of some real \typ{QFB}.
+Convert $x$ to a \typ{QFB}, with the correct (logarithmic) distance component
+if $d$ is not \kbd{NULL}.
 
 \section{Linear algebra over $\Z$}
 \subsec{Hermite and Smith Normal Forms}

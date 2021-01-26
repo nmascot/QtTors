@@ -159,18 +159,15 @@ qflocalinvariants(GEN G, GEN P)
 /* QUADRATIC FORM REDUCTION */
 static GEN
 qfb(GEN D, GEN a, GEN b, GEN c)
-{
-  if (signe(D) < 0) return mkqfi(a,b,c);
-  retmkqfr(a,b,c,real_0(DEFAULTPREC));
-}
+{ return mkqfb(a,b,c,D); }
 
 /* Gauss reduction of the binary quadratic form
  * Q = a*X^2+2*b*X*Y+c*Y^2 of discriminant D (divisible by 4)
  * returns the reduced form */
 static GEN
-qfbreduce(GEN D, GEN Q)
+qfbreduce(GEN Q)
 {
-  GEN a = gel(Q,1), b = shifti(gel(Q,2),-1), c = gel(Q,3);
+  GEN a = gel(Q,1), b = shifti(gel(Q,2),-1), c = gel(Q,3), D = gel(Q,4);
   while (signe(a))
   {
     GEN r, q, nexta, nextc;
@@ -686,13 +683,13 @@ qfbsqrt(GEN D, GEN q, GEN P, GEN E)
 
 /* \prod gen[i]^e[i] as a Qfb, e in {0,1}^n nonzero */
 static GEN
-qfb_factorback(GEN D, GEN gen, GEN e)
+qfb_factorback(GEN gen, GEN e)
 {
   GEN q = NULL;
   long j, l = lg(gen), n = 0;
   for (j = 1; j < l; j++)
     if (e[j]) { n++; q = q? qfbcompraw(q, gel(gen,j)): gel(gen,j); }
-  return (n <= 1)? q: qfbreduce(D, q);
+  return (n <= 1)? q: qfbreduce(q);
 }
 
 /* unit form, assuming 4 | D */
@@ -758,7 +755,7 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
       if (U2) W2 = shallowconcat(W2,U2);
       V = Flm_Flc_invimage(W2, W,2);
       if (V) {
-        GEN Q = qfb_factorback(D, vecpermute(gen,indexim), V);
+        GEN Q = qfb_factorback(vecpermute(gen,indexim), V);
         Q = gtomat(Q);
         if (U2 && V[lg(V)-1]) Q = gmul2n(Q,1);
         return Q;
@@ -769,7 +766,7 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
     Wgen2 = cgetg(m+1, t_MAT);
     for (i = 1; i <= dKer; i++)
     {
-      GEN q = qfb_factorback(D, gen, gel(Ker,i));
+      GEN q = qfb_factorback(gen, gel(Ker,i));
       q = qfbsqrt(D,q,P2D,E2D);
       gel(gen2,i) = q;
       gel(Wgen2,i) = gel(qflocalinvariants(q,Pm2D), 1);

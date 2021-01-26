@@ -2702,7 +2702,7 @@ init_pq(GEN D, struct gpq_data *T)
       break;
     }
     if (kroiu(D, q) < 0) continue; /* inert */
-    Q = redimag(primeform_u(D, q));
+    Q = qfbred_i(primeform_u(D, q));
     if (is_pm1(gel(Q,1))) continue; /* Q | q is principal */
 
     store = 1;
@@ -2756,12 +2756,11 @@ static GEN
 gpq(GEN form, struct gpq_data *T)
 {
   pari_sp av = avma;
-  long a = form[1], b = form[2], c = form[3];
-  long p = T->p, q = T->q;
+  long a = form[1], b = form[2], c = form[3], p = T->p, q = T->q;
   GEN form2, w, z;
   int fl, real = 0;
 
-  form2 = qficomp(T->qfpq, mkvec3s(a, -b, c));
+  form2 = qfbcomp_i(T->qfpq, mkqfb(stoi(a), stoi(-b), stoi(c), T->D));
   /* form2 and form yield complex conjugate roots : only compute for the
    * lexicographically smallest of the 2 */
   fl = cmpis(gel(form2,1), a);
@@ -2841,17 +2840,17 @@ quadhilbertimag(GEN D)
   T.pq2 = shifti(T.pq,1);
   if (T.p == T.q)
   {
-    GEN qfbp2 = qficompraw(qfp, qfp);
+    GEN qfbp2 = qfbcompraw(qfp, qfp);
     u = gel(qfbp2,2);
     T.u = modii(u, T.pq2);
-    T.qfpq = redimag(qfbp2);
+    T.qfpq = qfbred_i(qfbp2);
   }
   else
   {
     GEN qfq = primeform_u(D, T.q), bp = gel(qfp,2), bq = gel(qfq,2);
     T.u = Z_chinese(bp, bq, utoipos(T.p << 1), utoipos(T.q << 1));
     /* T.u = bp (mod 2p), T.u = bq (mod 2q) */
-    T.qfpq = qficomp(qfp, qfq);
+    T.qfpq = qfbcomp_i(qfp, qfq);
   }
   /* u modulo 2pq */
   prec = LOWDEFAULTPREC;

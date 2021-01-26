@@ -10,6 +10,11 @@ This file lists the incompatible changes between Version 2.x and older versions
     -> RgXX_to_Kronecker_spec
   - nbessel -> ybessel (according to the new GP name bessely)
   - ZC_u_divexact -> ZC_divexactu
+  - removed obsolete functions qfi, qfr, qfi_1, qfr_1, redreal, redrealnod,
+    rhoreal, rhorealnod, qfrsqr, qfrsqrraw, qfrcomp, qfrcompraw, qfisqrraw,
+    qficompraw, qfipowraw, qfipow, redimag
+  - unify real and imaginary binary quadratic forms, include discriminant
+    types t_QFI and t_QFR are replaced by t_QFB
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.12 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   - the member function bnf.futu and .tufu (deprecated since 2.2) have been

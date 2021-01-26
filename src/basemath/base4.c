@@ -154,8 +154,7 @@ idealhnf_shallow(GEN nf, GEN x)
       x = ZM_hnfmod(x, ZM_detmult(x));
       return cx? ZM_Q_mul(x,cx): x;
     }
-    case t_QFI:
-    case t_QFR:
+    case t_QFB:
     {
       pari_sp av = avma;
       GEN u, D = nf_get_disc(nf), T = nf_get_pol(nf), f = nf_get_index(nf);

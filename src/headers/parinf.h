@@ -17,6 +17,7 @@ enum {
   typ_NULL = 0,
   typ_POL,
   typ_Q,
+  typ_QFB,
   typ_NF,
   typ_BNF,
   typ_BNR,

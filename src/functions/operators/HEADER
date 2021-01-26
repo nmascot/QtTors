@@ -216,10 +216,10 @@ Doc:
  %5 = Mod(1, x^2)
  @eprog\noindent
  If $x$ is a $p$-adic number, its precision will increase if $v_p(n) > 0$ and
- $n \neq 0$. Powering a binary quadratic form (types \typ{QFI} and
- \typ{QFR}) returns a representative of the class, which is reduced if the
- input was. (In particular, \kbd{x \pow 1} returns $x$ itself, whether it is
- reduced or not.)
+ $n \neq 0$. Powering a binary quadratic form (type \typ{QFB}) returns a
+ representative of the class, which is reduced if the input was.
+ (In particular, \kbd{x \pow 1} returns $x$ itself, whether it is reduced or
+ not.)
 
  PARI rewrites the multiplication $x * x$ of two \emph{identical}
  objects as $x^2$. Here, identical means the operands are reference the same
