@@ -1148,6 +1148,7 @@ vpoch_mul(GEN v, long k)
 static GEN
 serhypergeom(GEN N, GEN D, GEN y, long prec)
 {
+  pari_sp av;
   GEN S, pn, vN, vD, y0 = NULL;
   long v, l, i;
   if (!signe(y)) return gadd(gen_1, y);
@@ -1163,13 +1164,18 @@ serhypergeom(GEN N, GEN D, GEN y, long prec)
     S = hypergeom(N, D, y0, prec);
   }
   vN = RgV_vpoch(N, l-1);
-  vD = RgV_vpoch(D, l-1);
+  vD = RgV_vpoch(D, l-1); av = avma;
   pn = y;
   for (i = 1; i < l; i++)
   {
     GEN H = gdiv(vpoch_mul(vN, i), vpoch_mul(vD, i));
     if (y0) H = gmul(H, hypergeom_i(RgV_z_add(N,i), RgV_z_add(D,i), y0,prec));
     S = gadd(S, gmul(pn, H)); if (i + 1 < l) pn = gdivgs(gmul(pn, y), i + 1);
+    if (gc_needed(av,1))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"hypergeom, i = %ld / %ld", i,l-1);
+      gerepileall(av, 2, &S, &pn);
+    }
   }
   return S;
 }
