@@ -2606,13 +2606,10 @@ permtoaut(GEN p, struct galois_perm *gp)
 }
 
 static GEN
-pc_evalcache(GEN W, GEN u, GEN ss, GEN genG, GEN T, GEN p, struct galois_perm *gp)
+pc_evalcache(GEN W, GEN u, GEN sp, GEN T, GEN p, struct galois_perm *gp)
 {
-  GEN sp, v;
-  long ns;
-  if (lg(ss) == 1) return gel(u,2);
-  sp = pc_to_perm(ss, genG, degpol(T));
-  ns = sp[1];
+  GEN v;
+  long ns = sp[1];
   if (!isintzero(gel(W,ns))) return gel(W,ns);
   v = RgX_to_FpX(permtoaut(sp, gp), p);
   gel(W,ns) = FpX_FpXQV_eval(v, u, T, p);
@@ -2688,14 +2685,17 @@ nilp_froblift(GEN genG, GEN autH, long j, GEN pcgrp,
     long nborb = lg(orb)-1;
     GEN A = cgetg(l+1, t_VECSMALL);
     GEN W = zerovec(lg(gl->L)-1);
+    GEN U = zeromatcopy(nborb,degpol(T));
     GEN br = pcgrp_get_br(pcgrp), brj = gcopy(gel(br, j+1));
-    GEN U = cgetg(nborb+1, t_VEC);
+    GEN Ui = cgetg(nborb+1, t_VEC);
     long a, b, i;
     for(a = 0; a < m; a++)
     {
+      pari_timer ti;
       pari_sp av2;
       GEN B = pol_0(v);
       long aa = a;
+      if (DEBUGLEVEL>=4) timer_start(&ti);
       for(i = 1; i <= l; i++)
       {
         uel(A,i) = aa % o;
@@ -2705,14 +2705,20 @@ nilp_froblift(GEN genG, GEN autH, long j, GEN pcgrp,
       for(b = 1; b <= nborb; b++)
       {
         GEN br = pc_bracket(pc_exp(gel(gen,b)), mkvecsmall(j+1), pcgrp);
-        gel(U, b) = pc_evalcache(W, frobG, br, genG, T, pe, gp);
+        GEN sp = pc_to_perm(br, genG, degpol(T));
+        long u = sp[1];
+        long s = permprodeval(permfact_Hp, gel(gen,b), fr);
+        if (isintzero(gmael(U,u,s)))
+        {
+          GEN Ub = pc_evalcache(W, frobG, sp, T, pe, gp);
+          gmael(U,u,s) = FpXQ_mul(Ub, gel(bezout_Gpe,s), T, pe);
+        }
+        gel(Ui, b) = gmael(U,u,s);
       }
       av2 = avma;
       for(b = 1; b <= nborb; b++)
-      {
-        long s = permprodeval(permfact_Hp, gel(gen,b), fr);
-        B = FpX_add(B, FpXQ_mul(gel(U, b), gel(bezout_Gpe,s), T, pe), pe);
-      }
+        B = FpX_add(B, gel(Ui,b), pe);
+      if (DEBUGLEVEL >= 4) timer_printf(&ti,"Testing candidate %ld",a);
       if (galoisfrobeniustest(B, gl, pf))
       {
         GEN pfi = perm_inv(pf);
