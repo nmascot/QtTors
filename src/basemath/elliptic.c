@@ -5148,6 +5148,7 @@ QE_to_ZJ(GEN P)
     return mkvec3(gen_1, gen_1, gen_0);
   else
   {
+    pari_sp av = avma;
     GEN D1 = denom(gel(P,1)), D2 = denom(gel(P,2));
     GEN R  = diviiexact(D2, gcdii(D1,D2));
     GEN R2 = sqri(R), R3 = mulii(R2, R);
@@ -5155,7 +5156,7 @@ QE_to_ZJ(GEN P)
     GEN Q2 = gmul(gel(P,2),R3);
     GEN Z  = denom(mkvec2(Q1, Q2));
     GEN Z2 = sqri(Z), Z3 = mulii(Z, Z2);
-    retmkvec3(gmul(Q1, Z2), gmul(Q2, Z3), mulii(Z, R));
+    return gerepilecopy(av, mkvec3(gmul(Q1, Z2), gmul(Q2, Z3), mulii(Z, R)));
   }
 }
 
@@ -5205,7 +5206,7 @@ ellQ_factorback1(GEN A, GEN L, GEN E, ulong p)
   GEN c4 = ell_get_c4(E);
   ulong a4 = Fl_c4_to_a4(Rg_to_Fl(c4, p), p);
   GEN a4a6 = a4a6_ch_Fl(E,p);
-  GEN a = FljV_changepointinv_pre(A, a4a6, p , pi);
+  GEN a = FljV_changepointinv_pre(A, a4a6, p, pi);
   GEN Hp = FljV_factorback_pre(a, L, a4, p, pi);
   Hp = Flj_to_Fle_pre(Hp, p, pi);
   Hp = Fle_changepoint(Hp, a4a6, p);
@@ -5252,7 +5253,7 @@ ellQ_factorback(GEN E, GEN A, GEN L, GEN h, long prec)
   pari_sp av = avma;
   GEN mod = gen_1, H = NULL;
   forprime_t S;
-  GEN worker = strtoclosure("_ellQ_factorback_worker", 3, E, QEV_to_ZJV(A), L);
+  GEN worker = snm_closure(is_entry("_ellQ_factorback_worker"), mkvec3(E, QEV_to_ZJV(A), L));
   ulong bound = 1;
   init_modular_big(&S);
   while (1)
