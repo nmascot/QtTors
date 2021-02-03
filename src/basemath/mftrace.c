@@ -6773,7 +6773,7 @@ mfdihedralnew_i(long N, GEN CHI, GEN SP)
     for (jdeg = 0; jdeg < degrel; jdeg++,c++)
     {
       GEN k0j = mkvecsmall2(k0i, jdeg), an = dihan(bnr, w, k0j, ordw, SB);
-      settyp(an, t_COL); gel(M,c) = Q_primpart(an);
+      settyp(an, t_COL); gel(M,c) = an;
       gel(vf,c) = tag3(t_MF_DIHEDRAL, NK, bnr, w, k0j);
     }
   }
