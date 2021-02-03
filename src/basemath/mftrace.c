@@ -6409,12 +6409,8 @@ dihan(GEN bnr, GEN w, GEN k0j, long m, ulong lim)
   }
   if (trace)
   {
-    v = QabV_tracerel(Tinit, jdeg, v);
-    if (k0 > 1)
-    { /* Apply Galois Mod(k0, ordw) */
-      GEN Pm = gel(Tinit,1);
-      v = vecGalois(v, k0, Pm, m);
-    }
+    v = QabV_tracerel(Tinit, jdeg, v); /* Apply Galois Mod(k0, ordw) */
+    if (k0 > 1) v = vecGalois(v, k0, gel(Tinit,1), m);
   }
   return v;
 }
