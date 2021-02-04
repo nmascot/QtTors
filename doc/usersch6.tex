@@ -2448,7 +2448,7 @@ component $2^{Ne} d$, in exponential form, for some large fixed $N$.
 
 It is a feature that \kbd{qfr3} and \kbd{qfr5} have no specified length or
 type. It implies that a \kbd{qfr5} or \typ{QFB} will do whenever a \kbd{qfr3}
-is expected. Routines using these objects all require a global context,
+is expected. Routines using these objects require a global context,
 provided by a \kbd{struct qfr\_data *}:
 \bprog
   struct qfr_data {
@@ -2465,6 +2465,9 @@ given a discriminant $D > 0$, initialize $S$ for computations at precision
 
 \fun{GEN}{qfr3_comp}{GEN x, GEN y, struct qfr_data *S} compose two
 \kbd{qfr3}, reducing the result.
+
+\fun{GEN}{qfr3_compraw}{GEN x, GEN y}
+as \kbd{qfr3\_comp}, without reducing the result.
 
 \fun{GEN}{qfr3_pow}{GEN x, GEN n, struct qfr_data *S} compute $x^n$, reducing
 along the way.
@@ -2487,6 +2490,9 @@ $(b + \sqrt{D}) / (b - \sqrt{D})$.
 
 \fun{GEN}{qfr5_comp}{GEN x, GEN y, struct qfr_data *S} compose two
 \kbd{qfr5}, reducing the result, and updating the distance component.
+
+\fun{GEN}{qfr5_compraw}{GEN x, GEN y}
+as \kbd{qfr5\_comp}, without reducing the result.
 
 \fun{GEN}{qfr5_pow}{GEN x, GEN n, struct qfr_data *S} compute $x^n$, reducing
 along the way.

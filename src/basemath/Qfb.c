@@ -950,7 +950,6 @@ qfr_to_qfr5(GEN x, long prec)
 GEN
 qfr5_to_qfr(GEN x, GEN D, GEN d0)
 {
-  GEN y;
   if (d0)
   {
     GEN n = gel(x,4), d = absr(gel(x,5));
@@ -969,20 +968,13 @@ qfr5_to_qfr(GEN x, GEN D, GEN d0)
       d0 = addrr(d0, d);
     }
   }
-  y = mkqfb(gel(x,1), gel(x,2), gel(x,3), D);
-  return d0 ? mkvec2(y,d0): y;
+  x = qfr3_to_qfr(x, D);
+  return d0 ? mkvec2(x,d0): x;
 }
 
 /* Not stack-clean */
 GEN
-qfr3_to_qfr(GEN x, GEN d)
-{
-  GEN z = cgetg(5, t_QFB);
-  gel(z,1) = gel(x,1);
-  gel(z,2) = gel(x,2);
-  gel(z,3) = gel(x,3);
-  gel(z,4) = d; return z;
-}
+qfr3_to_qfr(GEN x, GEN d) { retmkqfb(gel(x,1), gel(x,2), gel(x,3), d); }
 
 static int
 ab_isreduced(GEN a, GEN b, GEN isqrtD)
@@ -1145,22 +1137,16 @@ GEN
 qfr3_comp(GEN x, GEN y, struct qfr_data *S)
 { return qfr3_red(qfr3_compraw(x,y), S); }
 
-/* return x^n. Not stack-clean */
-GEN
-qfr5_powraw(GEN x, GEN n, struct qfr_data *S)
+/* m > 0. Not stack-clean */
+static GEN
+qfr5_powraw(GEN x, long m, struct qfr_data *S)
 {
   GEN y = NULL;
-  long i, m, s = signe(n);
-  if (!s) return qfr5_1(S, lg(gel(x,5)));
-  for (i=lgefint(n)-1; i>1; i--)
+  for (; m; m >>= 1)
   {
-    m = n[i];
-    for (; m; m>>=1)
-    {
-      if (m&1) y = y? qfr5_compraw(y,x): x;
-      if (m == 1 && i == 2) break;
-      x = qfr5_compraw(x,x);
-    }
+    if (m&1) y = y? qfr5_compraw(y,x): x;
+    if (m == 1) break;
+    x = qfr5_compraw(x,x);
   }
   return y;
 }
@@ -1172,6 +1158,7 @@ qfr5_pow(GEN x, GEN n, struct qfr_data *S)
   GEN y = NULL;
   long i, m, s = signe(n);
   if (!s) return qfr5_1(S, lg(gel(x,5)));
+  if (s < 0) x = qfb_inv(x);
   for (i=lgefint(n)-1; i>1; i--)
   {
     m = n[i];
@@ -1184,23 +1171,16 @@ qfr5_pow(GEN x, GEN n, struct qfr_data *S)
   }
   return y;
 }
-/* return x^n. Not stack-clean */
-GEN
-qfr3_powraw(GEN x, GEN n, struct qfr_data *S)
+/* m > 0; return x^m. Not stack-clean */
+static GEN
+qfr3_powraw(GEN x, long m)
 {
   GEN y = NULL;
-  long i, m, s = signe(n);
-  if (!s) return qfr3_1(S);
-  if (s < 0) x = qfb_inv(x);
-  for (i=lgefint(n)-1; i>1; i--)
+  for (; m; m>>=1)
   {
-    m = n[i];
-    for (; m; m>>=1)
-    {
-      if (m&1) y = y? qfr3_compraw(y,x): x;
-      if (m == 1 && i == 2) break;
-      x = qfr3_compraw(x,x);
-    }
+    if (m&1) y = y? qfr3_compraw(y,x): x;
+    if (m == 1) break;
+    x = qfr3_compraw(x,x);
   }
   return y;
 }
@@ -1241,18 +1221,18 @@ qfrpowraw(GEN x, long n)
   if (n==-1) return qfrinvraw(x);
   if (typ(x)==t_QFB)
   {
-    if (n < 0) x = qfb_inv(x);
-    x = qfr3_init(x, &S);
-    x = qfr3_powraw(x, stoi(n), &S);
-    x = qfr3_to_qfr(x, S.D);
+    GEN D = qfb_disc(x);
+    if (n < 0) { x = qfb_inv(x); n = -n; }
+    x = qfr3_powraw(x, n);
+    x = qfr3_to_qfr(x, D);
   }
   else
   {
     GEN d0 = gel(x,2);
     x = gel(x,1);
-    if (n < 0) x = qfb_inv(x);
+    if (n < 0) { x = qfb_inv(x); n = -n; }
     x = qfr5_init(x, d0, &S);
-    if (labs(n) != 1) x = qfr5_powraw(x, stoi(n), &S);
+    if (labs(n) != 1) x = qfr5_powraw(x, n, &S);
     x = qfr5_to_qfr(x, S.D, mulrs(d0,n));
   }
   return gerepilecopy(av, x);

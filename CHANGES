@@ -40,8 +40,8 @@ BA  11- [libpari] Fle_ellweilpairing, Fle_elltatepairing, Flj_to_Fle
                   Fl_ellptors
 BA  12- [libpari] ZC_divexactu, ZM_divexactu
 HC  13- allow hypergeom(N, D, t_SER)
-    14- [libpari] qfbsqr, qfbcomp, qfbpow, qfbpowraw,
-        qfbsqr_i, qfbcomp_i, qfbpow_i, qfbpow, qfbpowraw
+    14- [libpari] qfbsqr, qfbcomp, qfbpow, qfbpowraw, qfbsqr_i, qfbcomp_i,
+        qfbpow_i, qfbpow, qfbpowraw, qfr3_compraw, qfr5_compraw
     15- general composition of binary quadratic forms (in different orders)
 
   Changed
