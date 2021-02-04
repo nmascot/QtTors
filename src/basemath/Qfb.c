@@ -1547,43 +1547,30 @@ redrealsl2(GEN V, GEN d, GEN rd)
 }
 
 GEN
-qfbredsl2(GEN q, GEN S)
+qfbredsl2(GEN q, GEN isD)
 {
-  GEN v, D, isD;
+  GEN v, D;
   pari_sp av;
   if (typ(q) != t_QFB) pari_err_TYPE("qfbredsl2",q);
   if (qfb_is_qfi(q))
   {
-    if (S) pari_err_TYPE("qfbredsl2",S);
-    v = cgetg(3,t_VEC);
-    gel(v,1) = redimagsl2(q, &gel(v,2));
+    if (isD) pari_err_TYPE("qfbredsl2", isD);
+    v = cgetg(3,t_VEC); gel(v,1) = redimagsl2(q, &gel(v,2));
     return v;
-  } else
-  {
-    av = avma;
-    if (S) {
-      if (typ(S) != t_VEC || lg(S) != 3) pari_err_TYPE("qfbredsl2",S);
-      D = gel(S,1);
-      isD = gel(S,2);
-      if (typ(D) != t_INT || signe(D) <= 0 || typ(isD) != t_INT)
-        pari_err_TYPE("qfbredsl2",S);
-    }
-    else
-    {
-      D = qfb_disc(q);
-      isD = sqrti(D);
-    }
-    v = redrealsl2(q,D,isD);
-    gel(v,1) = qfr3_to_qfr(gel(v,1), D);
-    return gerepilecopy(av, v);
   }
+  av = avma; D = qfb_disc(q);
+  if (isD)
+  { if (signe(D) <= 0 || typ(isD) != t_INT) pari_err_TYPE("qfbredsl2",isD); }
+  else
+    isD = sqrti(D);
+  return gerepileupto(av, redrealsl2(q, D, isD));
 }
 
 static GEN
 qfrsolve_normform(GEN N, GEN Ps, GEN d, GEN rd)
 {
   pari_sp av = avma, btop;
-  GEN M = N, P = redrealsl2(Ps, d,rd), Q = P;
+  GEN M = N, P = redrealsl2(Ps, d, rd), Q = P;
   btop = avma;
   for(;;)
   {
@@ -1595,30 +1582,27 @@ qfrsolve_normform(GEN N, GEN Ps, GEN d, GEN rd)
     Q = redrealsl2step(Q, d,rd);
     if (qfb_equal(gel(M,1), gel(N,1))) return gc_NULL(av);
     if (qfb_equal(gel(P,1), gel(Q,1))) return gc_NULL(av);
-    if (gc_needed(btop, 1))
-      gerepileall(btop, 2, &M, &Q);
+    if (gc_needed(btop, 1)) gerepileall(btop, 2, &M, &Q);
   }
 }
 
 GEN
 qfrsolvep(GEN Q, GEN p)
 {
-  pari_sp ltop = avma;
-  GEN P, N, x, rd, d = qfb_disc(Q);
-  if (kronecker(d, p) < 0) { set_avma(ltop); return gen_0; }
-  P = primeform(d, p);
+  pari_sp av = avma;
+  GEN N, x, rd, d = qfb_disc(Q);
+  if (kronecker(d, p) < 0) return gc_const(av, gen_0);
   rd = sqrti(d);
-  N = redrealsl2(Q, d,rd);
-  x = qfrsolve_normform(N, P, d,rd);
-  if (!x) { set_avma(ltop); return gen_0; }
-  return gerepileupto(ltop, x);
+  N = redrealsl2(Q, d, rd);
+  x = qfrsolve_normform(N, primeform(d, p), d,rd);
+  return x? gerepileupto(av, x): gc_const(av, gen_0);
 }
 
 static GEN
 redsl2(GEN Q, GEN d)
 {
   GEN P, U;
-  if( signe(d)>0) return redrealsl2(Q, d, sqrti(d));
+  if (signe(d) > 0) return redrealsl2(Q, d, sqrti(d));
   P = redimagsl2(Q, &U); return mkvec2(P,U);
 }
 
