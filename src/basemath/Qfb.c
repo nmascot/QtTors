@@ -837,7 +837,7 @@ redimag_av(pari_sp av, GEN q)
   if (cmp == 0 && signe(b) < 0) b = negi(b);
   return gerepilecopy(av, mkqfb(a, b, c, D));
 }
-GEN
+static GEN
 redimag(GEN q) { return redimag_av(avma, q); }
 
 static GEN
@@ -1095,8 +1095,7 @@ redreal_i(GEN x, long flag, GEN isqrtD, GEN sqrtD)
   return qfr5_to_qfr(y, qfb_disc(x), d);
 }
 static GEN
-redreal(GEN x)
-{ return redreal_i(x,0,NULL,NULL); }
+redreal(GEN x) { return redreal_i(x,0,NULL,NULL); }
 
 GEN
 qfbred0(GEN x, long flag, GEN isqrtD, GEN sqrtD)
@@ -1111,11 +1110,9 @@ qfbred0(GEN x, long flag, GEN isqrtD, GEN sqrtD)
 }
 /* t_QFB */
 GEN
-qfbred_i(GEN x)
-{ return qfb_is_qfi(x)? redimag(x): redreal(x); }
+qfbred_i(GEN x) { return qfb_is_qfi(x)? redimag(x): redreal(x); }
 GEN
-qfbred(GEN x)
-{ return qfbred0(x, 0, NULL, NULL); }
+qfbred(GEN x) { return qfbred0(x, 0, NULL, NULL); }
 
 /* Not stack-clean */
 GEN
@@ -1293,8 +1290,7 @@ qfbpowraw(GEN x, long n)
 }
 /* same discriminant, no distance, no checks */
 GEN
-qfbpow_i(GEN x, GEN n)
-{ return qfb_is_qfi(x)? qfipow(x,n): qfrpow(x,n); }
+qfbpow_i(GEN x, GEN n) { return qfb_is_qfi(x)? qfipow(x,n): qfrpow(x,n); }
 GEN
 qfbpow(GEN x, GEN n)
 {
