@@ -117,10 +117,6 @@ static GEN
 qfb3(GEN x, GEN y, GEN z)
 { retmkqfb(icopy(x), icopy(y), icopy(z), qfb_disc3(x,y,z)); }
 
-GEN
-mkqfbcopy(GEN x, GEN y, GEN z, GEN d)
-{ retmkqfb(icopy(x), icopy(y), icopy(z), icopy(d)); }
-
 static int
 qfb_equal(GEN x, GEN y)
 {
@@ -848,19 +844,21 @@ static GEN
 rhoimag(GEN x)
 {
   pari_sp av = avma;
-  GEN a = gel(x,1), b = gel(x,2), c = gel(x,3), D = gel(x,4);
+  GEN a = gel(x,1), b = gel(x,2), c = gel(x,3);
   int fl = abscmpii(a, c);
-  if (fl <= 0) {
+  if (fl <= 0)
+  {
     int fg = abscmpii(a, b);
-    if (fg >= 0) {
-      x = mkqfbcopy(a, b, c, D);
+    if (fg >= 0)
+    {
+      x = gcopy(x);
       if ((!fl || !fg) && signe(gel(x,2)) < 0) setsigne(gel(x,2), 1);
       return x;
     }
   }
   swap(a,c); b = negi(b);
   REDB(a, &b, &c);
-  return gerepilecopy(av, mkqfb(a,b,c,D));
+  return gerepilecopy(av, mkqfb(a,b,c, qfb_disc(x)));
 }
 
 /* qfr3 / qfr5 */
