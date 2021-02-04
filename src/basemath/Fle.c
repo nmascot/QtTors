@@ -871,3 +871,32 @@ Fle_tatepairing(GEN P, GEN Q, ulong m, ulong a4, ulong p)
   if (ell_is_inf(P) || ell_is_inf(Q)) return 1;
   return Fle_Miller(P, Q, m, a4, p);
 }
+
+GEN
+Fl_ellptors(ulong l, ulong N, ulong a4, ulong a6, ulong p)
+{
+  long v;
+  ulong N0, N1;
+  GEN F;
+  if (N==1) return cgetg(1,t_VEC);
+  v = z_lval(N, l);
+  N0 = upowuu(l, v); N1 = N/N0;
+  F = mkmat2(mkcols(l), mkcols(v));
+  while(1)
+  {
+    pari_sp av2 = avma;
+    GEN P, Q;
+    ulong d, s, t;
+
+    P = Fle_mulu(random_Fle(a4, a6, p), N1, a4, p);
+    Q = Fle_mulu(random_Fle(a4, a6, p), N1, a4, p);
+    s = itou(Fle_order(P, F, a4, p));
+    t = itou(Fle_order(Q, F, a4, p));
+    if (s < t) { swap(P,Q); lswap(s,t); }
+    if (s == N0) retmkvec(Fle_mulu(P, s/l, a4, p));
+    d = Fl_order(Fle_weilpairing(P, Q, s, a4, p), s, p);
+    if (s*d == N0)
+      retmkvec2(Fle_mulu(P, s/l, a4, p), Fle_mulu(Q, t/l, a4, p));
+    set_avma(av2);
+  }
+}
