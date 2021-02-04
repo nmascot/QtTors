@@ -42,8 +42,8 @@ static GEN
 redqfbsplit(GEN a, GEN b, GEN c, GEN d)
 {
   GEN p = subii(d,b), q = shifti(a,1);
-  GEN u,v,w = bezout(p, q, &u, &v);
-  GEN U, Q, k;
+  GEN U, Q, u, v, w = bezout(p, q, &u, &v);
+
   if (!equali1(w)) { p = diviiexact(p, w); q = diviiexact(q, w); }
   U = mkmat22(p, negi(v), q, u);
   Q = qfb_apply_ZM(mkvec3(a,b,c), U);
@@ -54,15 +54,16 @@ redqfbsplit(GEN a, GEN b, GEN c, GEN d)
     gcoeff(U,1,2) = negi(gcoeff(U,1,2));
     gcoeff(U,2,2) = negi(gcoeff(U,2,2));
   }
-  k = truedivii(negi(c),d);
-  return ZM2_mul(U,mkmat22(gen_1,k,gen_0,gen_1));
+  gel(U,2) = ZC_lincomb(gen_1, truedivii(negi(c), d),
+                        gel(U,2), gel(U,1));
+  return U;
 }
 
 static GEN
 polreduce(GEN P, GEN M)
 {
   long d = degpol(P), v = varn(P);
-  GEN A = deg1pol(gcoeff(M,1,1),gcoeff(M,1,2),v);
+  GEN A = deg1pol_shallow(gcoeff(M,1,1),gcoeff(M,1,2),v);
   GEN B = gpowers(deg1pol(gcoeff(M,2,1),gcoeff(M,2,2),v), d);
   return gel(RgX_homogenous_evalpow(P, A, B),1);
 }
@@ -87,7 +88,7 @@ hyperellreduce(GEN Q)
   }
   D = qfb_disc3(q1, q2, q3);
   if (!signe(D))
-    M = mkmat22(gen_1,truedivii(negi(q2),shifti(q1,1)),gen_0,gen_1);
+    M = mkmat22(gen_1, truedivii(negi(q2),shifti(q1,1)), gen_0, gen_1);
   else if (issquareall(D,&vD))
     M = redqfbsplit(q1, q2, q3, vD);
   else
