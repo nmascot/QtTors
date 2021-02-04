@@ -1607,11 +1607,7 @@ qfbsolve_primitive_i(GEN Q, GEN rd, GEN *Qr, GEN fa, long all)
   GEN x, W, F = normforms(qfb_disc(Q), fa);
   long i, j, l;
   if (!F) return NULL;
-  if (!*Qr)
-  {
-    if (qfb_is_qfi(Q)) { GEN U, P = redimagsl2(Q, &U); *Qr = mkvec2(P, U); }
-    else *Qr = redrealsl2(Q, rd);
-  }
+  if (!*Qr) *Qr = qfbredsl2(Q, rd);
   l = lg(F); W = all? cgetg(l, t_VEC): NULL;
   for (j = i = 1; i < l; i++)
     if ((x = qfsolve_normform(*Qr, gel(F,i), rd)))
@@ -1628,11 +1624,10 @@ qfb_initrd(GEN Q) { GEN d = qfb_disc(Q); return signe(d) > 0? sqrti(d): NULL; }
 static GEN
 qfbsolve_primitive(GEN Q, GEN fa, long all)
 {
-  pari_sp av = avma;
   GEN x, Qr = NULL, rdQ = qfb_initrd(Q);
   x = qfbsolve_primitive_i(Q, rdQ, &Qr, fa, all);
-  if (!x) { set_avma(av); return cgetg(1, t_VEC); }
-  return gerepilecopy(av, x);
+  if (!x) return cgetg(1, t_VEC);
+  return x;
 }
 
 /* f / g^2 */
@@ -1642,7 +1637,6 @@ famat_divsqr(GEN f, GEN g)
 static GEN
 qfbsolve_all(GEN Q, GEN n, long all)
 {
-  pari_sp av = avma;
   GEN W, Qr = NULL, fa = factorint(n, 0), rdQ = qfb_initrd(Q);
   GEN D = divisors_factored(mkmat2(gel(fa,1), gshift(gel(fa,2),-1)));
   long i, j, l = lg(D);
@@ -1653,21 +1647,22 @@ qfbsolve_all(GEN Q, GEN n, long all)
     if ((w = qfbsolve_primitive_i(Q, rdQ, &Qr, FA, all)))
     {
       if (i != 1) w = RgV_Rg_mul(w, gel(d,1));
-      if (!all) return gerepilecopy(av, w);
+      if (!all) return w;
       gel(W,j++) = w;
     }
   }
-  if (j == 1) { set_avma(av); return cgetg(1, t_VEC); }
-  setlg(W,j); return gerepilecopy(av, shallowconcat1(W));
+  if (j == 1) return cgetg(1, t_VEC);
+  setlg(W,j); return shallowconcat1(W);
 }
 
 GEN
 qfbsolve(GEN Q, GEN n, long fl)
 {
+  pari_sp av = avma;
   if (!is_qfb_t(typ(Q))) pari_err_TYPE("qfbsolve",Q);
   if (fl < 0 || fl > 3) pari_err_FLAG("qfbsolve");
-  return (fl & 2)? qfbsolve_all(Q, n, fl & 1)
-                 : qfbsolve_primitive(Q, n, fl & 1);
+  return gerepilecopy(av, (fl & 2)? qfbsolve_all(Q, n, fl & 1)
+                                  : qfbsolve_primitive(Q, n, fl & 1));
 }
 
 /* 1 if there exists x,y such that x^2 + dy^2 = p [prime], 0 otherwise */
