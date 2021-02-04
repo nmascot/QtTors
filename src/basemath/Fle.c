@@ -875,11 +875,10 @@ Fle_tatepairing(GEN P, GEN Q, ulong m, ulong a4, ulong p)
 GEN
 Fl_ellptors(ulong l, ulong N, ulong a4, ulong a6, ulong p)
 {
-  long v;
+  long v = z_lval(N, l);
   ulong N0, N1;
   GEN F;
-  if (N==1) return cgetg(1,t_VEC);
-  v = z_lval(N, l);
+  if (v==0) return cgetg(1,t_VEC);
   N0 = upowuu(l, v); N1 = N/N0;
   F = mkmat2(mkcols(l), mkcols(v));
   while(1)
