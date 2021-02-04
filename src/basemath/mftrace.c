@@ -6341,7 +6341,7 @@ dihan(GEN bnr, GEN w, GEN k0j, long m, ulong lim)
   GEN nf = bnr_get_nf(bnr), f = bid_get_ideal(bnr_get_bid(bnr));
   GEN v = zerovec(lim+1), cycn = gel(w,1), Tinit = gel(w,3);
   GEN Pn = gel(Tinit,lg(Tinit)==4? 2: 1);
-  long j, ordmax = cycn[1], k0 = k0j[1], jdeg = k0j[2];
+  long j, ordmax = cycn[1];
   long D = itos(nf_get_disc(nf)), vt = varn(Pn);
   int trace = 0;
   ulong p, n;
@@ -6409,6 +6409,7 @@ dihan(GEN bnr, GEN w, GEN k0j, long m, ulong lim)
   }
   if (trace)
   {
+    long k0 = k0j[1], jdeg = k0j[2];
     v = QabV_tracerel(Tinit, jdeg, v); /* Apply Galois Mod(k0, ordw) */
     if (k0 > 1) v = vecGalois(v, k0, gel(Tinit,1), m);
   }
