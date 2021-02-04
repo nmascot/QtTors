@@ -5643,7 +5643,7 @@ update_g1(GEN *pg1, GEN *pd1, GEN *pfad1, GEN f, GEN o, GEN fao)
 {
   GEN A,B, g1 = *pg1, d1 = *pd1;
   *pfad1 = split_lcm(d1,*pfad1, o,fao, &A,&B);
-  *pg1 = gmul(powgi(g1, diviiexact(d1,A)),  powgi(f, diviiexact(o,B)));
+  *pg1 = gmul(qfbpow_i(g1, diviiexact(d1,A)),  qfbpow_i(f, diviiexact(o,B)));
   *pd1 = mulii(A,B); /* g1 has order d1 <- lcm(d1,o) */
 }
 
@@ -5847,8 +5847,8 @@ classno(GEN x)
   for (i=2; i < l; i++)
   {
     GEN o, fao, a, F, fd, f = gel(forms,i);
-    fd = powgi(f, d1); if (is_pm1(gel(fd,1))) continue;
-    F = powgi(fd, q);
+    fd = qfbpow_i(f, d1); if (is_pm1(gel(fd,1))) continue;
+    F = qfbpow_i(fd, q);
     a = gel(F,1);
     o = is_pm1(a)? find_order(E, fd, q, &fao): Shanks_order(E, fd, q, &fao);
     /* f^(d1 q) = 1 */
@@ -5871,7 +5871,7 @@ classno(GEN x)
     {
       GEN d, f = gel(forms,i), B = gel(order_bound,i);
       if (!B) B = find_order(E, f, fad1, /*junk*/&d);
-      f = powgi(f,d2);
+      f = qfbpow_i(f,d2);
       if (equal1(E, T,N,f)) continue;
       B = gdiv(B,d2); if (typ(B) == t_FRAC) B = gel(B,1);
       /* f^B = 1 */
