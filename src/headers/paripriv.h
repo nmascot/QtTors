@@ -644,8 +644,6 @@ GEN    subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
 /* Qfb.c */
 
 GEN     redimagsl2(GEN q, GEN *U);
-GEN     redrealsl2(GEN V, GEN d, GEN rd);
-GEN     redrealsl2step(GEN A, GEN d, GEN rd);
 
 /* alglin1.c */
 
