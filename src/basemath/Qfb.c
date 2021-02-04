@@ -1599,14 +1599,6 @@ qfrsolvep(GEN Q, GEN p)
 }
 
 static GEN
-redsl2(GEN Q, GEN d)
-{
-  GEN P, U;
-  if (signe(d) > 0) return redrealsl2(Q, sqrti(d));
-  P = redimagsl2(Q, &U); return mkvec2(P,U);
-}
-
-static GEN
 qfsolve_normform(GEN Q, GEN f, GEN rd)
 { return rd? qfrsolve_normform(Q, f, rd): qfisolve_normform(Q, f); }
 static GEN
@@ -1615,7 +1607,11 @@ qfbsolve_primitive_i(GEN Q, GEN d, GEN rd, GEN *Qr, GEN fa, long all)
   GEN x, W, F = normforms(d, fa);
   long i, j, l;
   if (!F) return NULL;
-  if (!*Qr) *Qr = redsl2(Q, d);
+  if (!*Qr)
+  {
+    if (qfb_is_qfi(Q)) { GEN U, P = redimagsl2(Q, &U); *Qr = mkvec2(P, U); }
+    else *Qr = redrealsl2(Q, rd);
+  }
   l = lg(F); W = all? cgetg(l, t_VEC): NULL;
   for (j = i = 1; i < l; i++)
     if ((x = qfsolve_normform(*Qr, gel(F,i), rd)))
