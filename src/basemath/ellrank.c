@@ -125,7 +125,7 @@ listratpoint(GEN pol)
     GEN ff, co, p, M, C, roots;
     long lroots;
     GEN li = gel(list, i), pol = gel(li, 1);
-    GEN K = absi(ZX_content(pol));
+    GEN K = ZX_content(pol);
     if (!equali1(K))
     {
       pol = gel(li, 1) = ZX_Z_divexact(gel(li, 1), K);
@@ -133,22 +133,21 @@ listratpoint(GEN pol)
     }
     K = gel(li, 3);
     if (equali1(K)) continue;
-    ff = factor(K); co = core2(mkvec2(K,ff));
+    ff = Z_factor(K); co = core2(mkvec2(K,ff));
     if (!equali1(gel(co,2)))
     {
       gel(li, 4) = mulii(gel(li, 4), gel(co,2));
-      gel(li, 3) = gel(co, 1);
-      K = gel(li, 3);
+      K = gel(li, 3) = gel(co, 1);
       if (equali1(K)) continue;
-      ff = factor(K);
+      ff = Z_factor(K);
     }
     p = gcoeff(ff, 1, 1);
     M = gel(li, 2); C = gel(li, 4);
     /* root at infinity */
     if (dvdii(leading_coeff(pol), p))
     {
-      GEN U = ZM2_mul(M, mkmat22(gen_1,gen_0,gen_0,p));
-      if (gequal1(content(U)))
+      GEN U = mkmat2(gel(M,1), ZC_Z_mul(gel(M,2), p));
+      if (equali1(content(U)))
       {
         GEN newpol = ZX_Z_divexact(ZX_rescale(pol, p), p);
         GEN vec = mkvec4(newpol, U, diviiexact(K, p), mulii(C, p));
@@ -157,7 +156,7 @@ listratpoint(GEN pol)
     }
     roots = FpC_center(FpX_roots(pol, p), p, shifti(p,-1));
     lroots = lg(roots);
-    for (j = 1; j < lroots; ++j)
+    for (j = 1; j < lroots; j++)
     {
       GEN U = ZM2_mul(M, mkmat22(p, gel(roots, j), gen_0, gen_1));
       if (equali1(content(U)))
@@ -167,18 +166,18 @@ listratpoint(GEN pol)
         list = vec_append(list, vec); l++;
       }
     }
-    if (gc_needed(btop, 1))
-      gerepileall(btop, 2, &pol, &list);
+    if (gc_needed(btop, 1)) gerepileall(btop, 2, &pol, &list);
   }
 
   list2 = cgetg(l, t_VEC);
-  for (i = 1, j = 1; i < l; ++i)
+  for (i = 1, j = 1; i < l; i++)
   {
     GEN li = gel(list, i);
-    if (gequal1(gel(li,1)))
+    if (equali1(gel(li,1)))
     {
       GEN rr = hyperellreduce(gel(li, 1));
-      gel(list2, j++) = mkvec4(gel(rr, 1), gmul(gel(li, 2), gel(rr, 2)),gel(li,3),gel(li,4));
+      gel(list2, j++) = mkvec4(gel(rr, 1), gmul(gel(li, 2), gel(rr, 2)),
+                               gel(li,3), gel(li,4));
     }
   }
   setlg(list2,j);
