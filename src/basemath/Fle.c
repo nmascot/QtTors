@@ -259,6 +259,20 @@ Fle_to_Flj(GEN P)
 }
 
 GEN
+Flj_to_Fle(GEN P, ulong p)
+{
+  if (P[3] == 0) return ellinf();
+  else
+  {
+    ulong Z = Fl_inv(P[3], p);
+    ulong Z2 = Fl_sqr(Z, p);
+    ulong X3 = Fl_mul(P[1], Z2, p);
+    ulong Y3 = Fl_mul(P[2], Fl_mul(Z, Z2, p), p);
+    return mkvecsmall2(X3, Y3);
+  }
+}
+
+GEN
 Flj_to_Fle_pre(GEN P, ulong p, ulong pi)
 {
   if (P[3] == 0) return ellinf();

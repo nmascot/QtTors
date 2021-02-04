@@ -36,7 +36,7 @@ BA   7- [libpari] RgXQ_trace, RgX_chinese_coprime, RgXQV_factorback
      8- [libpari] FpM_intersect_i, Flm_intersect_i
 HC   9- add optional argument to ramanujantau + parallelize code
 HC  10- new GP functions bessljzero, besselyzero
-BA  11- [libpari] Fle_ellweilpairing, Fle_elltatepairing
+BA  11- [libpari] Fle_ellweilpairing, Fle_elltatepairing, Flj_to_Fle
 BA  12- [libpari] ZC_divexactu, ZM_divexactu
 HC  13- allow hypergeom(N, D, t_SER)
     14- [libpari] qfbsqr, qfbcomp, qfbpow, qfbpowraw,

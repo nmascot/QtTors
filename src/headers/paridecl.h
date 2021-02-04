@@ -286,6 +286,7 @@ GEN     Flj_changepointinv_pre(GEN P, GEN ch, ulong p, ulong pi);
 GEN     Flj_dbl_pre(GEN P, ulong a4, ulong p, ulong pi);
 GEN     Flj_mulu_pre(GEN P, ulong n, ulong a4, ulong p, ulong pi);
 GEN     Flj_neg(GEN Q, ulong p);
+GEN     Flj_to_Fle(GEN P, ulong p);
 GEN     Flj_to_Fle_pre(GEN P, ulong p, ulong pi);
 GEN     FljV_factorback_pre(GEN P, GEN L, ulong a4, ulong p, ulong pi);
 GEN     random_Fle(ulong a4, ulong a6, ulong p);

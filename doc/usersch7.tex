@@ -650,8 +650,11 @@ Below, \kbd{pi} is assumed to be the precomputed inverse of $p$.
 
 \fun{GEN}{Fle_to_Flj}{GEN P} convert a \kbd{Fle} to an equivalent \kbd{Flj}.
 
-\fun{GEN}{Flj_to_Fle_pre}{GEN P} convert a \kbd{Flj} to the equivalent
+\fun{GEN}{Flj_to_Fle}{GEN P, ulong p} convert a \kbd{Flj} to the equivalent
 \kbd{Fle}.
+
+\fun{GEN}{Flj_to_Fle_pre}{GEN P, ulong p, ulong pi} convert a \kbd{Flj} to the
+equivalent \kbd{Fle}.
 
 \fun{GEN}{Flj_add_pre}{GEN P, GEN Q, ulong a4, ulong p, ulong pi}
 
