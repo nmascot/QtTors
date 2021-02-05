@@ -1547,20 +1547,17 @@ redrealsl2(GEN V, GEN rd)
 GEN
 qfbredsl2(GEN q, GEN isD)
 {
-  GEN v, D;
   pari_sp av;
   if (typ(q) != t_QFB) pari_err_TYPE("qfbredsl2",q);
   if (qfb_is_qfi(q))
   {
+    GEN v = cgetg(3,t_VEC);
     if (isD) pari_err_TYPE("qfbredsl2", isD);
-    v = cgetg(3,t_VEC); gel(v,1) = redimagsl2(q, &gel(v,2));
-    return v;
+    gel(v,1) = redimagsl2(q, &gel(v,2)); return v;
   }
-  av = avma; D = qfb_disc(q);
-  if (isD)
-  { if (signe(D) <= 0 || typ(isD) != t_INT) pari_err_TYPE("qfbredsl2",isD); }
-  else
-    isD = sqrti(D);
+  av = avma;
+  if (!isD) isD = sqrti(qfb_disc(q));
+  else if (typ(isD) != t_INT) pari_err_TYPE("qfbredsl2",isD);
   return gerepileupto(av, redrealsl2(q, isD));
 }
 
