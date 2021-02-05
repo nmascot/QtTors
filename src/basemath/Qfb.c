@@ -1656,7 +1656,7 @@ GEN
 qfbsolve(GEN Q, GEN n, long fl)
 {
   pari_sp av = avma;
-  if (!is_qfb_t(typ(Q))) pari_err_TYPE("qfbsolve",Q);
+  if (typ(Q) != t_QFB) pari_err_TYPE("qfbsolve",Q);
   if (fl < 0 || fl > 3) pari_err_FLAG("qfbsolve");
   return gerepilecopy(av, (fl & 2)? qfbsolve_all(Q, n, fl & 1)
                                   : qfbsolve_primitive(Q, n, fl & 1));
