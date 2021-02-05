@@ -1139,7 +1139,7 @@ qfr3_comp(GEN x, GEN y, struct qfr_data *S)
 
 /* m > 0. Not stack-clean */
 static GEN
-qfr5_powraw(GEN x, long m, struct qfr_data *S)
+qfr5_powraw(GEN x, long m)
 {
   GEN y = NULL;
   for (; m; m >>= 1)
@@ -1232,7 +1232,7 @@ qfrpowraw(GEN x, long n)
     x = gel(x,1);
     if (n < 0) { x = qfb_inv(x); n = -n; }
     x = qfr5_init(x, d0, &S);
-    if (labs(n) != 1) x = qfr5_powraw(x, n, &S);
+    if (labs(n) != 1) x = qfr5_powraw(x, n);
     x = qfr5_to_qfr(x, S.D, mulrs(d0,n));
   }
   return gerepilecopy(av, x);
