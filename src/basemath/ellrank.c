@@ -728,7 +728,7 @@ ellrankinit(GEN ell, long prec)
 {
   pari_sp av = avma;
   GEN urst;
-  checkell(ell);
+  checkell_Q(ell);
   ell = ellintegralbmodel(ell, &urst);
   return gerepilecopy(av, mkvec3(ell, urst, makevbnf(ell, prec)));
 }
@@ -1205,7 +1205,7 @@ ell2descent(GEN ell, GEN help, GEN K, long effort, long prec)
   }
   else
   {
-    checkell(ell);
+    checkell_Q(ell);
     ell = ellintegralbmodel(ell, &urst);
     vbnf = makevbnf(ell, prec);
     check_ell2descent(ell, help, K);
