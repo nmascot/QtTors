@@ -69,22 +69,22 @@ polreduce(GEN P, GEN M)
 }
 
 static GEN
-hyperellreduce(GEN Q)
+hyperellreduce(GEN Q, GEN *pM)
 {
   pari_sp av = avma;
   long d = degpol(Q);
-  GEN den, P = Q_primitive_part(Q, &den);
+  GEN q1, q2, q3, D, M, R, vD, den, P = Q_primitive_part(Q, &den);
   GEN a = gel(P,d+2), b = gel(P,d+1), c = gel(P, d);
-  GEN q1, q2, q3, D, M, R, vD;
-  q1 = mulis(sqri(a), d);
+
+  q1 = muliu(sqri(a), d);
   q2 = shifti(mulii(a,b), 1);
-  q3 = subii(sqri(b),shifti(mulii(a,c), 1));
+  q3 = subii(sqri(b), shifti(mulii(a,c), 1));
   D = gcdii(gcdii(q1, q2), q3);
   if (!equali1(D))
   {
-    q1 = diviiexact(q1,D);
-    q2 = diviiexact(q2,D);
-    q3 = diviiexact(q3,D);
+    q1 = diviiexact(q1, D);
+    q2 = diviiexact(q2, D);
+    q3 = diviiexact(q3, D);
   }
   D = qfb_disc3(q1, q2, q3);
   if (!signe(D))
@@ -92,10 +92,11 @@ hyperellreduce(GEN Q)
   else if (issquareall(D,&vD))
     M = redqfbsplit(q1, q2, q3, vD);
   else
-    M = gel(qfbredsl2(mkqfb(q1,q2,q3,D), NULL),2);
+    M = gel(qfbredsl2(mkqfb(q1,q2,q3,D), NULL), 2);
   R = polreduce(P, M);
   if (den) R = gmul(R, den);
-  return gerepilecopy(av, mkvec2(R, M));
+  gerepileall(av, 2, &R, &M);
+  *pM = M; return R;
 }
 
 static GEN
@@ -170,16 +171,14 @@ listratpoint(GEN pol)
   l = lg(list);
   for (i = 1, j = 1; i < l; i++)
   {
-    GEN li = gel(list, i);
-    if (equali1(gel(li,1)))
+    GEN L = gel(list, i);
+    if (equali1(gel(L,1)))
     {
-      GEN rr = hyperellreduce(gel(li,1));
-      gel(list, j++) = mkvec4(gel(rr,1), gmul(gel(li,2), gel(rr,2)),
-                              gel(li,3), gel(li,4));
+      GEN M, pol = hyperellreduce(gel(L,1), &M);
+      gel(list, j++) = mkvec4(pol, gmul(gel(L,2), M), gel(L,3), gel(L,4));
     }
   }
-  setlg(list,j);
-  return gerepilecopy(av, list);
+  setlg(list,j); return gerepilecopy(av, list);
 }
 
 static GEN
@@ -884,7 +883,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
   av2 = avma;
   for (t = 1; t <= ntry; t++)
   {
-    GEN ttheta, q1, pol4, redq, den, point;
+    GEN ttheta, q1, pol4, den, point;
     GEN tttheta, q0, pointxx, point2;
     GEN xx, yy, zz, R, x2, y2, z2;
     GEN rd, zc, q2, change;
@@ -906,8 +905,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
     param = gdiv(param, content(param));
     ttheta = RgX_shift_shallow(pol,-2);
     q1 = RgM_neg(tracematrix(RgXQ_mul(zc, ttheta, pol), newbase, pol, polprime));
-    redq = hyperellreduce(qfeval(q1, param));
-    pol4 = gel(redq, 1); R = gel(redq, 2);
+    pol4 = hyperellreduce(qfeval(q1, param), &R);
     den = denom(content(gmul(K, pol4)));
     pol4 = gmul(pol4, sqri(den));
     if (DEBUGLEVEL >= 2)
