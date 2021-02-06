@@ -202,7 +202,7 @@ projratpoint2(GEN pol, long lim)
       rat = mkvec3(gel(aux, 1), y2, gen_0);
     else
       rat = mkvec3(gdiv(gel(aux, 1), gel(aux, 2)),
-            gdiv(y2, gpowgs(gel(aux, 2), degpol(pol)>>1)), gen_1);
+                   gdiv(y2, gpowgs(gel(aux, 2), degpol(pol)>>1)), gen_1);
     return gerepilecopy(ltop, rat);
   }
   return gc_NULL(ltop);
@@ -380,7 +380,7 @@ bestS(GEN bnf,GEN S, ulong p)
     GEN w, Sl = idealprimedec(bnf, utoi(l));
     long lSl = lg(Sl);
     ulong vDl;
-    for (i = 1; i<lSl; i++)
+    for (i = 1; i < lSl; i++)
     {
       w = ZM_hnf(shallowconcat(v, bnfisprincipal0(bnf,gel(Sl,i),0)));
       vDl = Z_lval(ZM_det(w), p);
@@ -400,7 +400,7 @@ nfC_prV_val(GEN nf, GEN G, GEN P)
 {
   long i, j, lG = lg(G), lP = lg(P);
   GEN M = cgetg(lG, t_MAT);
-  for (i=1; i<lG; i++)
+  for (i = 1; i < lG; i++)
   {
     GEN V = cgetg(lP, t_COL);
     for (j = 1; j < lP; j++)
@@ -715,7 +715,7 @@ ellrankinit(GEN ell, long prec)
 
 INLINE GEN
 ZV_isneg(GEN x)
-{ pari_APPLY_long(signe(gel(x,i))<0) }
+{ pari_APPLY_long(signe(gel(x,i)) < 0) }
 
 static void
 check_ell2descent(GEN ell, GEN help, GEN K)
@@ -1044,8 +1044,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     {
       long kmin = 1;
       for (k = 2; k <= n; ++k)
-        if (cmprr(gmael(vroots,k,1), gmael(vroots,kmin,1))<0)
-          kmin = k;
+        if (cmprr(gmael(vroots,k,1), gmael(vroots,kmin,1)) < 0) kmin = k;
       row = 1;
       for (k = 1; k < kmin; k++) row += vr1[k];
     }
@@ -1121,7 +1120,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   lhelp = lg(help);
   dimselmer = lg(selmer)-1;
   newselmer = cgetg(dimselmer+1, t_MAT);
-  if (lhelp>1)
+  if (lhelp > 1)
   {
     GEN M = Flm_mul(LS2chars, selmer, 2);
     for (i = 1; i < lhelp; ++i)
@@ -1157,7 +1156,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     {
       gel(listpoints, ++nbpoints) = P;
       gel(newselmer, nbpoints) = vec;
-      if (nbpoints>dimselmer) pari_err_BUG("nbpoints");
+      if (nbpoints > dimselmer) pari_err_BUG("nbpoints");
       setlg(newselmer, nbpoints+1);
     } else set_avma(btop);
     if (t==dimselmer) { t=0; u++; effort--; }
