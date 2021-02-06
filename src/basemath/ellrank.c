@@ -175,7 +175,7 @@ listratpoint(GEN pol)
     if (equali1(gel(L,1)))
     {
       GEN M, pol = hyperellreduce(gel(L,1), &M);
-      gel(list, j++) = mkvec4(pol, gmul(gel(L,2), M), gel(L,3), gel(L,4));
+      gel(list, j++) = mkvec4(pol, ZM2_mul(gel(L,2), M), gel(L,3), gel(L,4));
     }
   }
   setlg(list,j); return gerepilecopy(av, list);
@@ -911,8 +911,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
     if (DEBUGLEVEL >= 2)
       err_printf("  reduced quartic: %Ps*Y^2 = %Ps\n", K, pol4);
     point = projratpoint(gmul(K, pol4), lim);
-    if (!point)
-      point = projratpoint2(gmul(K, pol4), lim);
+    if (!point) point = projratpoint2(gmul(K, pol4), lim);
     if (!point) { set_avma(av2); continue; }
     x2 = gel(point, 1); y2 = gel(point, 2); z2 = gel(point, 3);
     point = RgM_RgC_mul(R, mkcol2(x2, z2));
