@@ -32,13 +32,6 @@ ell2pol(GEN ell)
 }
 
 static GEN
-sqrtrat(GEN a)
-{
-  if (typ(a) == t_INT) return sqrti(a);
-  retmkfrac(sqrti(gel(a,1)),sqrti(gel(a,2)));
-}
-
-static GEN
 redqfbsplit(GEN a, GEN b, GEN c, GEN d)
 {
   GEN p = subii(d,b), q = shifti(a,1);
@@ -96,17 +89,18 @@ hyperellreduce(GEN Q, GEN *pM)
   *pM = M; return R;
 }
 
+/* find point (x:y:z) on y^2 = pol, return [x,z]~ and set *py = y */
 static GEN
-projratpoint(GEN pol, long lim)
+projratpointxz(GEN pol, long lim, GEN *py)
 {
   pari_timer ti;
   GEN P;
-  if (issquare(leading_coeff(pol)))
-    return mkvec3(gen_1, sqrtrat(leading_coeff(pol)), gen_0);
+  if (issquareall(leading_coeff(pol), py)) return mkcol2(gen_1, gen_0);
   if (DEBUGLEVEL) timer_start(&ti);
   P = hyperellratpoints(pol, stoi(lim), 1);
   if (DEBUGLEVEL) timer_printf(&ti,"hyperellratpoints(%ld)",lim);
-  return lg(P)==1 ? NULL: mkvec3(gmael(P,1,1),gmael(P,1,2), gen_1);
+  if (lg(P) == 1) return NULL;
+  P = gel(P,1); *py = gel(P,2); return mkcol2(gel(P,1), gen_1);
 }
 
 /* P a list of integers (actually primes) one of which divides x; return
@@ -120,8 +114,9 @@ first_divisor(GEN x, GEN P)
   return gel(P,i);
 }
 
+/* find point (x:y:z) on y^2 = pol, return [x,z]~ and set *py = y */
 static GEN
-projratpoint2(GEN pol, long lim)
+projratpointxz2(GEN pol, long lim, GEN *py)
 {
   pari_sp av = avma;
   GEN list = mkvec(mkvec4(pol, matid(2), gen_1, gen_1));
@@ -139,17 +134,14 @@ projratpoint2(GEN pol, long lim)
     C = gel(L,4);
     if (Z_issquareall(K, &k))
     {
-      GEN P, y2, aux, U;
+      GEN xz, y, aux, U;
       pol = hyperellreduce(pol, &U);
-      P = projratpoint(pol, lim); if (!P) continue;
-      y2 = gmul(gel(P,2), mulii(C, k));
-      aux = RgM_RgC_mul(ZM2_mul(M, U), mkcol2(gel(P,1), gel(P,3)));
-      if (gequal0(gel(aux, 2)))
-        P = mkvec3(gel(aux, 1), y2, gen_0);
-      else
-        P = mkvec3(gdiv(gel(aux, 1), gel(aux, 2)),
-                   gdiv(y2, gpowgs(gel(aux, 2), degpol(pol)>>1)), gen_1);
-      return P;
+      xz = projratpointxz(pol, lim, &y); if (!xz) continue;
+      *py = gmul(y, mulii(C, k));
+      aux = RgM_RgC_mul(ZM2_mul(M, U), xz);
+      if (gequal0(gel(aux, 2))) return mkcol2(gel(aux,1), gen_0);
+      *py = gdiv(*py, gpowgs(gel(aux, 2), degpol(pol)>>1));
+      return mkcol2(gdiv(gel(aux, 1), gel(aux, 2)), gen_1);
     }
     ff = Z_factor(K); co = core2(mkvec2(K, ff)); K = gel(co,1); /* > 1 */
     p = first_divisor(K, gel(ff,1));
@@ -858,11 +850,8 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
   av2 = avma;
   for (t = 1; t <= ntry; t++)
   {
-    GEN ttheta, q1, pol4, den, point;
-    GEN tttheta, q0, pointxx, point2;
-    GEN xx, yy, zz, R, x2, y2, z2;
-    GEN rd, zc, q2, change;
-    GEN sol, param, newbase;
+    GEN ttheta, q1, pol4, den, point, tttheta, q0;
+    GEN xz, xx, yy, zz, R, y2, rd, zc, q2, change, sol, param, newbase;
     if (t==1) zc = z;
     else
     {
@@ -885,22 +874,19 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
     pol4 = gmul(pol4, sqri(den));
     if (DEBUGLEVEL >= 2)
       err_printf("  reduced quartic: %Ps*Y^2 = %Ps\n", K, pol4);
-    point = projratpoint(gmul(K, pol4), lim);
-    if (!point) point = projratpoint2(gmul(K, pol4), lim);
-    if (!point) { set_avma(av2); continue; }
-    x2 = gel(point, 1); y2 = gel(point, 2); z2 = gel(point, 3);
-    point = RgM_RgC_mul(R, mkcol2(x2, z2));
-    xx = gel(point,1); yy = gel(point,2); zz = gdiv(y2, den);
-    if (gequal0(zz))
-      pari_err_BUG("ell2selmer: wrong point");
+    xz = projratpointxz(gmul(K, pol4), lim, &y2);
+    if (!xz) xz = projratpointxz2(gmul(K, pol4), lim, &y2);
+    if (!xz) { set_avma(av2); continue; }
+    point = RgM_RgC_mul(R, xz);
+    xx = gel(point,1); yy = gel(point,2); zz = gdiv(y2, den); /* != 0 */
     param = RgXV_homogenous_evaldeg(param, xx, gpowers(yy, 2));
     param = gmul(param, gdiv(K, zz));
     tttheta = RgX_shift_shallow(pol, -1);
     q0 = tracematrix(RgXQ_mul(zc, tttheta, pol), newbase, pol, polprime);
-    pointxx = gdiv(qfeval(q0, param), K);
-    point2 = mkvec2(pointxx,sqrtrat(gdiv(poleval(pol, pointxx), K)));
-    if (DEBUGLEVEL) err_printf("Found point: %Ps\n",point2);
-    return gerepilecopy(av, point2);
+    xx = gdiv(qfeval(q0, param), K);
+    (void)issquareall(gdiv(poleval(pol, xx), K), &yy);
+    if (DEBUGLEVEL) err_printf("Found point: %Ps\n", mkvec2(xx,yy));
+    return gerepilecopy(av, mkvec2(xx, yy));
   }
   return gc_NULL(av);
 }
