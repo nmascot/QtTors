@@ -861,24 +861,17 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
     if (DEBUGLEVEL) err_printf("Found point: %Ps\n", mkvec2(xx,yy));
     return gerepilecopy(av, mkvec2(xx, yy));
   }
-  return gc_NULL(av);
+  return NULL;
 }
 
 static GEN
 ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
 {
-  pari_sp ltop = avma, btop;
-  GEN pol;
-  GEN ell_K = gen_0, torseven;
-  long i, j, k;
-  GEN vnf, vpol, vpolinv, vroots, vr1, sbase;
-  GEN factdisc, badprimes;
-  GEN LS2, factLS2, sqrtLS2, LS2k;
-  GEN selmer, helpLS2, LS2chars, helpchars, newselmer;
-  GEN  triv, helplist, listpoints;
-  long tr1, n, tors2, mwrank;
-  long dimselmer, nbpoints, lfactdisc, lhelp;
-  long t, u;
+  pari_sp av;
+  GEN ell_K = gen_0, torseven, pol, vnf, vpol, vpolinv, vroots, vr1, sbase;
+  GEN LS2, factLS2, sqrtLS2, LS2k, selmer, helpLS2, LS2chars, helpchars;
+  GEN newselmer, factdisc, badprimes, triv, helplist, listpoints;
+  long i, j, k, tr1, n, tors2, mwrank, dim, nbpoints, lfactdisc, lhelp, t, u;
 
   if (!K) K = gen_1;
   /* Equations of the curve */
@@ -897,8 +890,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   ell = ellinit(ell, NULL, prec);
   tors2 = lg(torseven) - 1;
   n = tors2+1;
-  if (lg(vbnf)-1 != n)
-    pari_err_TYPE("ell2selmer",vbnf);
+  if (lg(vbnf)-1 != n) pari_err_TYPE("ell2selmer",vbnf);
   vnf = cgetg(n+1, t_VEC);
   vpol = cgetg(n+1, t_VEC);
   vpolinv = cgetg(n+1, t_VEC);
@@ -990,7 +982,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     /* the signs of LS2 for this embedding */
     selmer = Flm_intersect(selmer, Flm_ker(signs, 2), 2);
   }
-  btop = avma;
+  av = avma;
   lfactdisc = lg(factdisc);
   for (i = 1; i < lfactdisc; i++)
   {
@@ -1024,10 +1016,10 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     locimage = Flm_intersect(LS2image, locimage, 2);
     selmer = Flm_intersect(selmer, shallowconcat(Flm_ker(LS2image,2),
                                                  Flm_invimage(LS2image, locimage,2)), 2);
-    dimselmer = lg(selmer)-1;
-    if (dimselmer == Flm_rank(helpimage,2))
+    dim = lg(selmer)-1;
+    if (dim == Flm_rank(helpimage,2))
       break;
-    if (i==lfactdisc-1 && Flm_rank(Flm_mul(LS2chars, selmer, 2), 2) < dimselmer)
+    if (i==lfactdisc-1 && Flm_rank(Flm_mul(LS2chars, selmer, 2), 2) < dim)
     {
       long B = 10;
       GEN sp;
@@ -1039,16 +1031,16 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
       factdisc = shallowconcat(factdisc, gel(sp, 1));
       lfactdisc++;
     }
-    if (gc_needed(btop, 1))
-      gerepileall(btop, 4, &factdisc, &selmer, &LS2chars, &helpchars);
+    if (gc_needed(av, 1))
+      gerepileall(av, 4, &factdisc, &selmer, &LS2chars, &helpchars);
   }
   helplist = gel(Flm_indexrank(helpchars,2),2);
   help = shallowextract(help, helplist);
   helpchars = shallowextract(helpchars, helplist);
   helpLS2 = shallowextract(helpLS2, helplist);
   lhelp = lg(help);
-  dimselmer = lg(selmer)-1;
-  newselmer = cgetg(dimselmer+1, t_MAT);
+  dim = lg(selmer)-1;
+  newselmer = cgetg(dim+1, t_MAT);
   if (lhelp > 1)
   {
     GEN M = Flm_mul(LS2chars, selmer, 2);
@@ -1056,13 +1048,13 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
       gel(newselmer, i) = Flm_Flc_invimage(M, gel(helpchars, i), 2);
   }
   setlg(newselmer, lhelp);
-  if (DEBUGLEVEL) err_printf("Selmer rank: %ld\n", dimselmer);
-  listpoints = vec_lengthen(help, dimselmer);
+  if (DEBUGLEVEL) err_printf("Selmer rank: %ld\n", dim);
+  listpoints = vec_lengthen(help, dim);
   nbpoints = lg(help)-1;
-  for (i=1; i <= dimselmer; ++i)
+  for (i=1; i <= dim; ++i)
   {
     pari_sp btop = avma;
-    GEN P, vec = vecsmall_ei(dimselmer, i);
+    GEN P, vec = vecsmall_ei(dim, i);
     if (Flm_Flc_invimage(newselmer, vec, 2)) continue;
     P = liftselmer(vec, vnf, sbase, LS2k, LS2, sqrtLS2, factLS2, badprimes,
         vpolinv, pol, selmer, K, LIM1, 1);
@@ -1073,11 +1065,11 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
       setlg(newselmer, nbpoints+1);
     } else set_avma(btop);
   }
-  for (t=1, u=1; nbpoints < dimselmer && effort > 0; t++)
+  for (t=1, u=1; nbpoints < dim && effort > 0; t++)
   {
     pari_sp btop = avma;
     GEN P, vec;
-    do vec = random_Flv(dimselmer, 2);
+    do vec = random_Flv(dim, 2);
     while (zv_equal0(vec) || Flm_Flc_invimage(newselmer, vec, 2));
     P = liftselmer(vec, vnf, sbase, LS2k, LS2, sqrtLS2, factLS2, badprimes,
         vpolinv, pol, selmer, K, u*LIM1, u);
@@ -1085,18 +1077,16 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     {
       gel(listpoints, ++nbpoints) = P;
       gel(newselmer, nbpoints) = vec;
-      if (nbpoints > dimselmer) pari_err_BUG("nbpoints");
       setlg(newselmer, nbpoints+1);
     } else set_avma(btop);
-    if (t==dimselmer) { t=0; u++; effort--; }
+    if (t == dim) { t = 0; u++; effort--; }
   }
   setlg(listpoints, nbpoints+1);
   mwrank = nbpoints - tors2;
-  if (odd(dimselmer - mwrank - tors2))
-    mwrank++;
+  if (odd(dim - nbpoints)) mwrank++;
   listpoints = vecslice(listpoints, 1+tors2, nbpoints);
   listpoints = ellredgen(ell, listpoints, K, prec);
-  return gerepilecopy(ltop, mkvec3(stoi(mwrank),stoi(dimselmer-tors2), listpoints));
+  return mkvec3(stoi(mwrank),stoi(dim-tors2), listpoints);
 }
 
 static GEN
