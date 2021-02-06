@@ -289,7 +289,7 @@ static GEN
 elltwistpoints(GEN x, GEN K)
 {
   GEN K2;
-  if (!K || equali1(K)) return x;
+  if (!K || gequal1(K)) return x;
   K2 = gsqr(K);
   pari_APPLY_same(elltwistpoint(gel(x,i), K, K2))
 }
