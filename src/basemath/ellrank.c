@@ -418,103 +418,91 @@ bnfselmer(GEN bnf, GEN S, ulong p)
   }
   return gerepilecopy(av, mkvec3(LS2gen,e,f));
 }
+
+static GEN
+get_kerval(GEN nf, GEN S2, GEN LS2gen)
+{
+  long i, j, lS2 = lg(S2), l = lg(LS2gen);
+  GEN e = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++)
+  {
+    GEN v = cgetg(lS2, t_VECSMALL);
+    for (j=1; j < lS2; j++) v[j] = odd(idealval(nf, gel(LS2gen, i), gel(S2,j)));
+    gel(e, i) = Flv_to_F2v(v);
+  }
+  return F2m_ker(e);
+}
 static GEN
 nf2selmer_quad(GEN nf, GEN S)
 {
   pari_sp ltop = avma;
-  GEN SlistQ, QS2gen, LS2gen2;
   GEN D = nf_get_disc(nf), factD = nf_get_ramified_primes(nf);
-  GEN Hlist, H, KerH, norms;
-  GEN LS2gen, chpol, Q;
-  GEN kerval, S2, e2, G;
-  long lQS2gen, lHlist, lLS2gen;
-  GEN e, f, b, c;
-  long i, j, k;
-  long lS = lg(S), lkerH, lS2, lkerval;
+  GEN SlistQ, QS2gen, gen, Hlist, H, KerH, norms, LS2gen, chpol, Q;
+  GEN kerval, S2, G, e, f, b, c, bad;
+  long lS = lg(S), l, lHlist, i, j, k;
+
   SlistQ = cgetg(lS, t_VEC);
-  for (i = 1; i < lS; ++i)
-    gel(SlistQ, i) = pr_get_p(gel(S, i));
+  for (i = 1; i < lS; i++) gel(SlistQ, i) = pr_get_p(gel(S, i));
   SlistQ = ZV_sort_uniq(SlistQ);
-  QS2gen = shallowconcat(gen_m1, SlistQ);
-  Hlist = ZV_sort_uniq(shallowconcat1(mkvec3(mkvec(gen_2), factD, SlistQ)));
-  lQS2gen = lg(QS2gen);
+  QS2gen = vec_prepend(SlistQ, gen_m1);
+  bad = ZV_sort_uniq(shallowconcat(factD, SlistQ));
+  Hlist = ZV_search(bad, gen_2)? bad: vec_prepend(bad, gen_2);
+  l = lg(QS2gen);
   lHlist = lg(Hlist);
-  H = cgetg(lQS2gen, t_MAT);
-  for (j = 1; j < lQS2gen; ++j)
+  H = cgetg(l, t_MAT);
+  for (j = 1; j < l; j++)
   {
     GEN v = cgetg(lHlist, t_VECSMALL);
-    for (i = 1; i < lHlist; ++i)
+    for (i = 1; i < lHlist; i++)
       v[i] = hilbert(D, gel(QS2gen, j), gel(Hlist, i)) < 0;
     gel(H, j) = Flv_to_F2v(v);
   }
-  KerH = F2m_ker(H); lkerH = lg(KerH);
-  norms = cgetg(lkerH, t_VEC);
-  for (i = 1; i < lkerH; ++i)
+  KerH = F2m_ker(H); l = lg(KerH);
+  norms = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
     gel(norms, i) = factorback2(QS2gen, F2c_to_ZC(gel(KerH, i)));
-  LS2gen = cgetg(lkerH, t_VEC);
+  LS2gen = cgetg(l, t_VEC);
   chpol = QXQ_charpoly(gel(nf_get_zk(nf), 2), nf_get_pol(nf), 0);
-  b = gdivgs(gneg(gel(chpol, 3)), 2);
+  b = gdivgs(negi(gel(chpol, 3)), 2);
   c = gel(chpol, 2);
-  Q = mkmat3(mkcol3(gen_1,b,gen_0),
-             mkcol3(b,c,gen_0),
-             mkcol3(gen_0,gen_0,gen_0));
-  for (k = 1; k < lkerH; ++k)
+  Q = mkmat3(mkcol3(gen_1, b, gen_0),
+             mkcol3(b, c, gen_0),
+             mkcol3(gen_0, gen_0, gen_0));
+  for (k = 1; k < l; k++)
   {
     GEN sol;
-    gcoeff(Q, 3, 3) = gneg(gel(norms, k));
-    sol = qfsolve(Q);
-    if (typ(sol) == t_INT)
-      pari_err_BUG(" nf2selmer_quad: unsolvable quadratic form");
-    sol = mkcol2(gel(sol, 1), gel(sol, 2));
-    sol = gdiv(sol, ZV_content(sol));
+    gcoeff(Q, 3, 3) = negi(gel(norms, k));
+    sol = qfsolve(Q); /* must be solvable */
+    sol = Q_primpart(mkcol2(gel(sol,1), gel(sol,2)));
     gel(LS2gen, k) = basistoalg(nf, sol);
   }
-  G = ZV_sort_uniq(shallowconcat1(mkvec3(mkvec(gen_m1), factD, SlistQ)));
-  if (gequalgs(D, -4))
-    G = setminus(G, mkvec(gen_m1));
+  if (equalis(D, -4)) G = bad;
   else
-    G = setminus(G, mkvec(gel(factD, lg(factD)-1)));
-  LS2gen = shallowconcat(G, LS2gen);
-  if (lg(SlistQ) > 1)
   {
-    long lSlistQ = lg(SlistQ);
-    S2 = cgetg(lSlistQ, t_VEC);
-    for (i = 1; i < lSlistQ; ++i)
-      gel(S2, i) = idealprimedec(nf, gel(SlistQ, i));
+    G = vecsplice(bad, ZV_search(bad, gel(factD, lg(factD)-1)));
+    G = vec_prepend(G, gen_m1);
+  }
+  LS2gen = shallowconcat(G, LS2gen);
+  l = lg(SlistQ); S2 = cgetg(l, t_VEC);
+  if (l > 1)
+  {
+    for (i = 1; i < l; i++) gel(S2, i) = idealprimedec(nf, gel(SlistQ, i));
     S2 = setminus(shallowconcat1(S2), S);
   }
-  else
-    S2 = cgetg(1, t_VEC);
-  lLS2gen = lg(LS2gen);
-  lS2 = lg(S2);
-  e2 = cgetg(lLS2gen, t_MAT);
-  for (i = 1; i < lLS2gen; ++i)
+  kerval = get_kerval(nf, S2, LS2gen); l = lg(kerval);
+  gen = cgetg(l, t_VEC);
+  e = cgetg(l, t_MAT);
+  f = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
   {
-    GEN v = cgetg(lS2, t_VECSMALL);
-    for (j = 1; j < lS2; ++j)
-      v[j] = odd(idealval(nf, gel(LS2gen, i), gel(S2, j)));
-    gel(e2, i) = Flv_to_F2v(v);
+    GEN id, ei, x = nffactorback(nf, LS2gen, F2v_to_Flv(gel(kerval, i)));
+    gel(e,i) = ei = cgetg(lS, t_COL);
+    for (j = 1; j < lS; j++) gel(ei,j) = stoi(idealval(nf, x, gel(S,j)));
+    id = idealdiv(nf, x, idealfactorback(nf, S, gel(e,i), 0));
+    if (!idealispower(nf, id, 2, &gel(f,i))) pari_err_BUG("nf2selmer_quad");
+    gel(gen, i) = x;
   }
-  kerval = F2m_ker(e2); lkerval = lg(kerval);
-  LS2gen2 = cgetg(lkerval, t_VEC);
-  for (i = 1; i < lkerval; ++i)
-    gel(LS2gen2, i) = nffactorback(nf,LS2gen, F2c_to_ZC(gel(kerval, i)));
-  LS2gen = LS2gen2;
-  e = cgetg(lkerval, t_MAT);
-  for (i = 1; i < lkerval; ++i)
-  {
-    gel(e, i) = cgetg(lS, t_COL);
-    for (j = 1; j < lS; ++j)
-      gcoeff(e, j, i) = stoi(idealval(nf, gel(LS2gen, i), gel(S, j)));
-  }
-  f = cgetg(lkerval, t_VEC);
-  for (i = 1; i < lkerval; ++i)
-  {
-    GEN id = idealdiv(nf, gel(LS2gen, i), idealfactorback(nf, S, gel(e, i), 0));
-    if (!idealispower(nf, id, 2, &gel(f, i)))
-      pari_err_BUG("nf2selmer_quad");
-  }
-  return gerepilecopy(ltop, mkvec3(LS2gen, e, f));
+  return gerepilecopy(ltop, mkvec3(gen, e, f));
 }
 
 static GEN
