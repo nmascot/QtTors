@@ -211,35 +211,32 @@ projratpoint2(GEN pol, long lim)
 static GEN
 polrootsmodpn(GEN pol, GEN p)
 {
-  pari_sp ltop = avma;
-  long i = 1, j;
-  long vd = Z_pval(ZX_disc(pol), p);
-  GEN listroots = mkvec(mkvec2(gen_0,gen_0));
-  pari_sp btop = avma;
-  while (i < lg(listroots))
+  pari_sp av = avma, av2;
+  long j, l, i = 1, vd = Z_pval(ZX_disc(pol), p);
+  GEN v, r, P = gpowers0(p, vd-1, p);
+
+  av2 = avma;
+  v = FpX_roots(pol, p); l = lg(v);
+  for (j = 1; j < l; j++) gel(v,j) = mkvec2(gel(v,j), gen_1);
+  while (i < lg(v))
   {
-    GEN pol2, r, newroots;
-    long lr;
-    GEN root = gel(listroots, i);
-    /* worked root */
-    if (gcmpgs(gel(root, 2), vd) >= 0) { i++; continue; }
-    pol2 = ZX_translate(pol, gel(root, 1));
-    pol2 = ZX_unscale(pol2, powii(p, gel(root, 2)));
-    pol2 = ZX_Z_divexact(pol2, content(pol2));
-    r = FpX_roots(pol2, p);
-    if (lg(r) == 1) { i++; continue; }
-    lr = lg(r);
-    newroots = cgetg(lr, t_VEC);
-    for (j = 1; j < lr; ++j)
-      gel(newroots, j) = mkvec2(gadd(gel(root, 1), gmul(powii(p, gel(root, 2)), gel(r, j)))
-          ,gaddgs(gel(root, 2), 1));
-    /* roots with higher precision = root + r*p^... */
-    listroots = shallowconcat(listroots, vecslice(newroots, 2, lg(r)-1));
-    gel(listroots, i) = gel(newroots, 1);
-    if (gc_needed(btop, 1))
-      gerepileall(btop, 1, &listroots);
+    GEN pol2, pe, roe = gel(v, i), ro = gel(roe,1);
+    long e = itou(gel(roe,2));
+
+    if (e >= vd) { i++; continue; }
+    pe = gel(P, e);
+    pol2 = ZX_unscale(ZX_translate(pol, ro), pe);
+    (void)ZX_pvalrem(pol2, p, &pol2);
+    r = FpX_roots(pol2, p); l = lg(r);
+    if (l == 1) { i++; continue; }
+    for (j = 1; j < l; j++)
+      gel(r, j) = mkvec2(addii(ro, mulii(pe, gel(r, j))), utoi(e + 1));
+    /* roots with higher precision = ro + r*p^(e+1) */
+    if (l > 2) v = shallowconcat(v, vecslice(r, 2, l-1));
+    gel(v, i) = gel(r, 1);
+    if (gc_needed(av2, 1)) gerepileall(av2, 1, &v);
   }
-  return gerepilecopy(ltop, listroots);
+  return gerepilecopy(av, v);
 }
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
@@ -628,7 +625,7 @@ elllocalimage(GEN pol, GEN K, GEN vnf, GEN pp, GEN ppstar, GEN pts)
     p2 += lg(gel(pp, i))-1;
   prank = p2 - !gequalgs(p, 2);
   root = polrootsmodpn(gmul(K, pol), p);
-  bound = gaddgs(p, 6);
+  bound = addiu(p, 6);
   while (Flm_rank(pts, 2) < prank)
   {
     pari_sp btop;
@@ -637,17 +634,17 @@ elllocalimage(GEN pol, GEN K, GEN vnf, GEN pp, GEN ppstar, GEN pts)
     if (attempt%16==0)
     {
       pts = Flm_image(pts, 2);
-      bound = gmul(bound, p);
+      bound = mulii(bound, p);
     }
     btop = avma;
     do
     {
-      long r = random_Fl(lg(root)-1)+1;
-      long mylocalprec = random_Fl(itou(gmael(root, r, 2)) + 3) - 2;
+      GEN r = gel(root, random_Fl(lg(root)-1)+1);
+      long pprec = random_Fl(itou(gel(r, 2)) + 3) - 2;
       set_avma(btop);
-      xx = gadd(gmael(root, r, 1), gmul(gpowgs(p, mylocalprec), genrand(bound)));
+      xx = gadd(gel(r, 1), gmul(powis(p, pprec), randomi(bound)));
       y2 = gmul(K, poleval(pol, xx));
-    } while(gequal0(y2) || !Qp_issquare(y2, p));
+    } while (gequal0(y2) || !Qp_issquare(y2, p));
     delta = gmul(K, gsub(xx, pol_x(0)));
     deltamodsquares = kpmodsquares(vnf, delta, pp, ppstar);
     pts = vec_append(pts, deltamodsquares);
