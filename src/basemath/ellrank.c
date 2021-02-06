@@ -396,7 +396,7 @@ bestS(GEN bnf,GEN S, ulong p)
 }
 
 static GEN
-nfC_pridV_val(GEN nf, GEN G, GEN P)
+nfC_prV_val(GEN nf, GEN G, GEN P)
 {
   long i, j, lG = lg(G), lP = lg(P);
   GEN M = cgetg(lG, t_MAT);
@@ -448,10 +448,10 @@ bnfselmer(GEN bnf, GEN S, ulong p)
   lS3 = lg(S3)-1; lS2all = lg(LS2all)-1; r = lS2all - lS3 - 1;
   LS2gen = vecslice(LS2all,1,lS3);
   LS2fu  = vecslice(LS2all,lS3+1, lS2all-1);
-  e2 = nfC_pridV_val(nf, LS2gen, S2);
+  e2 = nfC_prV_val(nf, LS2gen, S2);
   kerval = Flm_ker(ZM_to_Flm(e2, p), p);
   LS2gen = nfV_Flm_factorbackmod(nf, LS2gen, kerval, p);
-  e =  S ? nfC_pridV_val(nf, LS2gen, S): zeromat(0,lS3);
+  e =  S ? nfC_prV_val(nf, LS2gen, S): zeromat(0,lS3);
   e2 = ZM_divexactu(ZM_zm_mul(e2, kerval), p);
   f = pridV_ZM_factorback(nf, S2, e2);
   LS2gen = shallowconcat(LS2fu, LS2gen);
