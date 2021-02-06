@@ -172,7 +172,7 @@ listratpoint(GEN pol)
   for (i = 1, j = 1; i < l; i++)
   {
     GEN L = gel(list, i);
-    if (equali1(gel(L,1)))
+    if (equali1(gel(L,3)))
     {
       GEN M, pol = hyperellreduce(gel(L,1), &M);
       gel(list, j++) = mkvec4(pol, ZM2_mul(gel(L,2), M), gel(L,3), gel(L,4));
@@ -195,7 +195,7 @@ projratpoint2(GEN pol, long lim)
     y2 = gmul(gel(rat, 2), gel(li, 4));
     aux = mkcol2(gel(rat, 1), gel(rat, 3));
     aux = gmul(gel(li, 2), aux);
-    if (signe(gel(aux, 2))==0)
+    if (gequal0(gel(aux, 2)))
       rat = mkvec3(gel(aux, 1), y2, gen_0);
     else
       rat = mkvec3(gdiv(gel(aux, 1), gel(aux, 2)),
