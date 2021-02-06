@@ -114,13 +114,12 @@ projratpoint(GEN pol, long lim)
 static GEN
 listratpoint(GEN pol)
 {
-  pari_sp ltop = avma, btop;
-  GEN list, list2;
+  pari_sp av = avma, av2;
+  GEN list = mkvec(mkvec4(pol, matid(2), gen_1, gen_1));
   long i, j, l;
-  list = mkvec(mkvec4(pol, matid(2), gen_1, gen_1));
-  l = lg(list);
-  btop = avma;
-  for (i = 1; i < l; i++)
+
+  av2 = avma;
+  for (i = 1; i < lg(list); i++)
   {
     GEN ff, co, p, M, C, roots;
     long lroots;
@@ -151,7 +150,7 @@ listratpoint(GEN pol)
       {
         GEN newpol = ZX_Z_divexact(ZX_rescale(pol, p), p);
         GEN vec = mkvec4(newpol, U, diviiexact(K, p), mulii(C, p));
-        list = vec_append(list, vec); l++;
+        list = vec_append(list, vec);
       }
     }
     roots = FpC_center(FpX_roots(pol, p), p, shifti(p,-1));
@@ -163,25 +162,24 @@ listratpoint(GEN pol)
       {
         GEN newpol = ZX_Z_divexact(ZX_unscale(ZX_translate(pol, gel(roots, j)), p), p);
         GEN vec = mkvec4(newpol, U, diviiexact(K, p), mulii(C, p));
-        list = vec_append(list, vec); l++;
+        list = vec_append(list, vec);
       }
     }
-    if (gc_needed(btop, 1)) gerepileall(btop, 2, &pol, &list);
+    if (gc_needed(av2, 1)) gerepileall(av2, 2, &pol, &list);
   }
-
-  list2 = cgetg(l, t_VEC);
+  l = lg(list);
   for (i = 1, j = 1; i < l; i++)
   {
     GEN li = gel(list, i);
     if (equali1(gel(li,1)))
     {
-      GEN rr = hyperellreduce(gel(li, 1));
-      gel(list2, j++) = mkvec4(gel(rr, 1), gmul(gel(li, 2), gel(rr, 2)),
-                               gel(li,3), gel(li,4));
+      GEN rr = hyperellreduce(gel(li,1));
+      gel(list, j++) = mkvec4(gel(rr,1), gmul(gel(li,2), gel(rr,2)),
+                              gel(li,3), gel(li,4));
     }
   }
-  setlg(list2,j);
-  return gerepilecopy(ltop, list2);
+  setlg(list,j);
+  return gerepilecopy(av, list);
 }
 
 static GEN
