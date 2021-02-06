@@ -681,33 +681,6 @@ INLINE GEN
 ZV_isneg(GEN x)
 { pari_APPLY_long(signe(gel(x,i)) < 0) }
 
-static void
-check_ell2descent(GEN ell, GEN help, GEN K)
-{
-  checkell(ell);
-  if (gequal0(K))
-    pari_err(e_MISC, "ell2descent: twist by 0");
-  if (typ(K) != t_INT)
-    pari_err(e_MISC, "ell2descent: nonintegral quadratic twist");
-  if (!gequalgs(ell_get_a1(ell), 0) || !gequalgs(ell_get_a3(ell), 0))
-  {
-    if (!gequalgs(K, 1))
-      pari_err(e_MISC, "ell2descent: quadratic twist only allowed for a1=a3=0");
-  }
-}
-
-static void
-ell2descent1_checks(GEN ell, GEN help, GEN K)
-{
-  check_ell2descent(ell, help, K);
-  if (!gequalgs(ell_get_a1(ell), 0))
-    pari_err(e_MISC, "ell2descent1: nonzero coefficient a1");
-  if (!gequalgs(ell_get_a3(ell), 0))
-    pari_err(e_MISC, "ell2descent1: nonzero coefficient a3");
-  if (((typ(ell_get_a2(ell)) != t_INT) || (typ(ell_get_a4(ell)) != t_INT)) || (typ(ell_get_a2(ell)) != t_INT))
-    pari_err(e_MISC, "ell2descent1: nonintegral model");
-}
-
 static GEN
 selmersign(GEN x, GEN vpol, GEN L)
 { pari_APPLY_same(ZV_isneg(nfeltsign(gel(x, i), RgX_rem(L, gel(vpol, i)), NULL))) }
@@ -906,8 +879,8 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   long tr1, n, tors2, mwrank;
   long dimselmer, nbpoints, lfactdisc, lhelp;
   long t, u;
+
   if (!K) K = gen_1;
-  ell2descent1_checks(ell, help, K);
   /* Equations of the curve */
   pol = ell2pol(ell);
   ell_K = elltwistequation(ell, K);
@@ -1130,27 +1103,35 @@ static GEN
 ell2descent(GEN ell, GEN help, GEN K, long effort, long prec)
 {
   pari_sp ltop = avma;
-  GEN urst, mwrank, vbnf;
-  if (!K)
-    K = gen_1;
+  GEN urst, v, vbnf;
+  if (!K) K = gen_1;
   if (lg(ell)==4 && typ(ell)==t_VEC)
   {
-    vbnf = gel(ell,3); urst = gel(ell,2); ell = gel(ell,1);
-    check_ell2descent(ell, help, K);
+    vbnf = gel(ell,3); urst = gel(ell,2);
+    ell = gel(ell,1); checkell_Q(ell);
+  if (!gequal0(ell_get_a1(ell)))
+    pari_err(e_MISC, "ell2descent: nonzero coefficient a1");
+  if (!gequal0(ell_get_a3(ell)))
+    pari_err(e_MISC, "ell2descent: nonzero coefficient a3");
+  if ((typ(ell_get_a2(ell)) != t_INT ||
+       typ(ell_get_a4(ell)) != t_INT) || typ(ell_get_a2(ell)) != t_INT)
+    pari_err(e_MISC, "ell2descent: nonintegral model");
   }
   else
   {
     checkell_Q(ell);
     ell = ellintegralbmodel(ell, &urst);
     vbnf = makevbnf(ell, prec);
-    check_ell2descent(ell, help, K);
   }
-  if (help && urst)
-     help = ellchangepoint(help, urst);
-  mwrank = ell2selmer(ell, help, K, vbnf, effort, prec);
-  if (urst)
-    gel(mwrank, 3) = ellchangepoint(gel(mwrank, 3), ellchangeinvert(urst));
-  return gerepilecopy(ltop, mwrank);
+  if (typ(K) != t_INT)
+    pari_err(e_MISC, "ell2descent: nonintegral quadratic twist");
+  if (!signe(K)) pari_err(e_MISC, "ell2descent: twist by 0");
+  if (!equali1(K) && (!gequal0(ell_get_a1(ell)) || !gequal0(ell_get_a3(ell))))
+    pari_err(e_MISC, "ell2descent: quadratic twist only allowed for a1=a3=0");
+  if (help && urst) help = ellchangepoint(help, urst);
+  v = ell2selmer(ell, help, K, vbnf, effort, prec);
+  if (urst) gel(v,3) = ellchangepoint(gel(v,3), ellchangeinvert(urst));
+  return gerepilecopy(ltop, v);
 }
 
 GEN
