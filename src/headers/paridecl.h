@@ -1254,6 +1254,7 @@ GEN     RgXV_to_RgM(GEN v, long n);
 GEN     RgXV_unscale(GEN v, GEN h);
 GEN     RgXX_to_RgM(GEN v, long n);
 long    RgXY_degreex(GEN bpol);
+GEN     RgXY_derivx(GEN x);
 GEN     RgXY_swap(GEN x, long n, long w);
 GEN     RgXY_swapspec(GEN x, long n, long w, long nx);
 GEN     RgXn_eval(GEN Q, GEN x, long n);

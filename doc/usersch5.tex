@@ -11161,6 +11161,9 @@ priorities: the above is an invalid object if $\kbd{varncmp(v, w)} \geq 0$.
 \fun{long}{RgXY_degreex}{GEN P} return the degree of $P$ with respect to
 the secondary variable.
 
+\fun{GEN}{RgXY_deriv}{GEN P} return the derivative of $P$ with respect to
+the secondary variable.
+
 \fun{GEN}{RgXY_swap}{GEN P, long n, long w} converts the bivariate polynomial
 $\kbd{P}(u,v)$ (a \typ{POL} with \typ{POL} or scalar coefficients) to
 $P(\kbd{pol\_x[w]},u)$, assuming \kbd{n} is an upper bound for

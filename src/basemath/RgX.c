@@ -821,6 +821,16 @@ RgXY_degreex(GEN b)
   return deg;
 }
 
+GEN
+RgXY_derivx(GEN x)
+{
+  long i,lx;
+  GEN y = cgetg_copy(x,&lx);
+  for (i=2; i<lx ; i++)
+    gel(y,i) = RgX_deriv(gel(x,i));
+  y[1] = x[1]; return normalizepol_lg(y,i);
+}
+
 /* return (x % X^n). Shallow */
 GEN
 RgXn_red_shallow(GEN a, long n)
