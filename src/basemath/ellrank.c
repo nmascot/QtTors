@@ -321,12 +321,12 @@ bestS(GEN bnf,GEN S, ulong p)
   ulong l, vD;
   forprime_t P;
   GEN v, w, S2;
+
+  if (!dvdiu(bnf_get_no(bnf), p)) return cgetg(1,t_VEC);
   w = cgetg(lS+1,t_VEC);
   gel(w,1) = diagonal(bnf_get_cyc(bnf));
-  for (i = 1; i < lS; i++)
-    gel(w,i+1) = bnfisprincipal0(bnf,gel(S,i),0);
-  v = shallowconcat1(w);
-  v = ZM_hnf(v);
+  for (i = 1; i < lS; i++) gel(w,i+1) = bnfisprincipal0(bnf,gel(S,i),0);
+  v = ZM_hnf(shallowconcat1(w));
   vD = Z_lval(ZM_det(v), p);
   if (!vD) { set_avma(av); return cgetg(1, t_VEC); }
   S2 = cgetg(vD+2, t_VEC);
@@ -360,19 +360,25 @@ nfC_prV_val(GEN nf, GEN G, GEN P)
   {
     GEN V = cgetg(lP, t_COL);
     for (j = 1; j < lP; j++)
-      gel(V,j) = gpnfvalrem(nf,gel(G,i),gel(P,j),NULL);
+      gel(V,j) = gpnfvalrem(nf, gel(G,i), gel(P,j), NULL);
     gel(M,i) = V;
   }
   return M;
 }
 
 static GEN
-nffactorbackmod(GEN nf, GEN x, ulong p)
-{ return nffactorback(nf, gel(x,1), ZV_to_Flv(gel(x,2), p)); }
-
-static GEN
 nfV_factorbackmod(GEN nf, GEN x, ulong p)
-{ pari_APPLY_type(t_VEC,nffactorbackmod(nf, gel(x,i), p)) }
+{
+  long i, l = lg(x);
+  GEN v = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
+  {
+    GEN y = gel(x,i), g = gel(y,1), e = gel(y,2);
+    y = nffactorback(nf, g, ZV_to_Flv(e, p));
+    gel(v,i) = nfmul(nf, y, nfsqr(nf, idealredmodpower(nf, y, p, 0)));
+  }
+  return v;
+}
 
 static GEN
 nfV_Flm_factorbackmod(GEN nf, GEN G, GEN x, ulong p)
@@ -383,40 +389,31 @@ pridV_ZM_factorback(GEN nf, GEN S, GEN x)
 { pari_APPLY_type(t_VEC,idealfactorback(nf, S, gel(x,i),0)) }
 
 static GEN
-nfV_redmodpower(GEN nf, GEN x, long n)
-{ pari_APPLY_same(nfmul(nf, gel(x,i), nfsqr(nf, idealredmodpower(nf, gel(x,i), n, 0)))) }
-
-static GEN
 bnfselmer(GEN bnf, GEN S, ulong p)
 {
   pari_sp av = avma;
-  GEN nf, S2, S3;
-  GEN e, f, e2;
-  GEN kerval, LS2gen, LS2fu, LS2all;
-  long lS = S? lg(S)-1: 0, lS3, lS2all, r;
-  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  if (S && !is_vec_t(typ(S))) pari_err_TYPE("bnfselmer",S);
-  S2 = dvdiu(bnf_get_no(bnf), p)? bestS(bnf, S, p): cgetg(1,t_VEC);
-  S3 = S ? shallowconcat(S, S2): S2;
-  LS2all = gel(bnfunits(bnf, S3), 1);
-  LS2all = nfV_factorbackmod(nf, LS2all, p);
-  LS2all = nfV_redmodpower(nf, LS2all, p);
-  lS3 = lg(S3)-1; lS2all = lg(LS2all)-1; r = lS2all - lS3 - 1;
-  LS2gen = vecslice(LS2all,1,lS3);
-  LS2fu  = vecslice(LS2all,lS3+1, lS2all-1);
+  GEN nf = bnf_get_nf(bnf), S2, S3, e, f, e2, kerval, LS2gen, LS2fu, LS2all;
+  long n = S? lg(S)-1: 0, n3, n2all, r;
+
+  S2 = bestS(bnf, S, p);
+  S3 = S? shallowconcat(S, S2): S2;
+  LS2all = nfV_factorbackmod(nf, gel(bnfunits(bnf, S3), 1), p);
+  n3 = lg(S3)-1; n2all = lg(LS2all)-1; r = n2all - n3 - 1;
+  LS2gen = vecslice(LS2all,1,n3);
+  LS2fu  = vecslice(LS2all,n3+1, n2all-1);
   e2 = nfC_prV_val(nf, LS2gen, S2);
   kerval = Flm_ker(ZM_to_Flm(e2, p), p);
   LS2gen = nfV_Flm_factorbackmod(nf, LS2gen, kerval, p);
-  e =  S ? nfC_prV_val(nf, LS2gen, S): zeromat(0,lS3);
+  e = S? nfC_prV_val(nf, LS2gen, S): zeromat(0,n3);
   e2 = ZM_divexactu(ZM_zm_mul(e2, kerval), p);
   f = pridV_ZM_factorback(nf, S2, e2);
   LS2gen = shallowconcat(LS2fu, LS2gen);
-  e = shallowconcat(zeromat(lS, r), e);
+  e = shallowconcat(zeromat(n, r), e);
   f = shallowconcat(const_vec(r, gen_1), f);
   if (bnf_get_tuN(bnf) % p == 0)
   {
     LS2gen = shallowconcat( mkvec(bnf_get_tuU(bnf)), LS2gen);
-    e = shallowconcat(zeromat(lS, 1),e);
+    e = shallowconcat(zeromat(n, 1),e);
     f = shallowconcat(mkvecs(1),f);
   }
   return gerepilecopy(av, mkvec3(LS2gen,e,f));
