@@ -38,6 +38,7 @@ chk(ellinit([0,1,phi,-47*phi+31,560*phi-803],nf))
 chk(ellinit([phi+1,1,phi+1,6*phi-1,13*phi+2],nf))
 nf=nfinit(a^2-2);
 chk(ellinit([a,-1,0,18,46],nf))
+ellisomat(ellinit([-824740032823875,9115932407325507114750],nfinit(y-16581375)),1)[2]
 
 E=ellinit([1,0,1,4,-6]);
 ellisotree(E)
@@ -48,5 +49,5 @@ ellisotree(ellisomat(E,,1))
 
 \\ ERRORS
 ellisomat(ellinit([1,0],nfinit(a^2+1)))
-ellisomat(ellinit([-824740032823875,9115932407325507114750],nfinit(x-16581375)))[2]
-ellisomat(ellinit([-824740032823875,9115932407325507114750],nfinit(y-16581375)))[2]
+ellisomat(ellinit([-824740032823875,9115932407325507114750],nfinit(x-16581375)))
+ellisomat(ellinit([-824740032823875,9115932407325507114750],nfinit(y-16581375)))

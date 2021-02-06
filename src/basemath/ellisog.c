@@ -904,13 +904,13 @@ isograph_p(GEN nf, GEN e, ulong p, GEN P, long flag)
 }
 
 static GEN
-get_polmodular(ulong p)
-{ return p > 3 ? polmodular_ZXX(p,0,0,1): NULL; }
+get_polmodular(ulong p, long vx, long vy)
+{ return p > 3 ? polmodular_ZXX(p,0,vx,vy): NULL; }
 static GEN
 ellisograph_p(GEN nf, GEN E, ulong p, long flag)
 {
   GEN e = ellisograph_a4a6(E, flag);
-  GEN P = get_polmodular(p);
+  GEN P = get_polmodular(p, 0, 1);
   return isograph_p(nf, e, p, P, flag);
 }
 
@@ -1012,7 +1012,8 @@ static GEN
 isomatdbl(GEN nf, GEN L, GEN M, ulong p, GEN T2, long flag)
 {
   long i, j, n = lg(L) -1;
-  GEN P = get_polmodular(p), V = cgetg(2*n+1, t_VEC), N = cgetg(2*n+1, t_MAT);
+  GEN P = get_polmodular(p, 0, 1);
+  GEN V = cgetg(2*n+1, t_VEC), N = cgetg(2*n+1, t_MAT);
   for (i=1; i <= n; i++)
   {
     GEN F, E, e = gel(L,i);
@@ -1453,11 +1454,11 @@ isomat_perm(GEN nf, GEN E, GEN L)
 }
 
 static GEN
-ellnf_modpoly(GEN v)
+ellnf_modpoly(GEN v, long vx, long vy)
 {
   long i, l = lg(v);
   GEN P = cgetg(l, t_VEC);
-  for(i = 1; i < l; i++) gel(P, i) = get_polmodular(v[i]);
+  for(i = 1; i < l; i++) gel(P, i) = get_polmodular(v[i],vx,vy);
   return P;
 }
 
@@ -1466,7 +1467,9 @@ ellnf_isomat(GEN E, long flag)
 {
   GEN nf = ellnf_get_nf(E);
   GEN v = ellnf_prime_degree(E);
-  GEN P = ellnf_modpoly(v);
+  long vy = fetch_var_higher();
+  long vx = fetch_var_higher();
+  GEN P = ellnf_modpoly(v,vx,vy);
   GEN LM = ellnf_isocrv(nf, E, v, P, flag), L = gel(LM,1), M = gel(LM,2);
   long i, l = lg(L);
   GEN R = cgetg(l, t_MAT);
@@ -1480,6 +1483,7 @@ ellnf_isomat(GEN E, long flag)
     GEN r = isomat_perm(nf, L, LLi);
     gel(R,i) = vecpermute(Mi, r);
   }
+  delete_var(); delete_var();
   return mkvec2(L, R);
 }
 
@@ -1515,7 +1519,9 @@ ellisomat(GEN E, long p, long flag)
     case t_ELL_NF:
       if (p) good = ellnf_goodl_l(E, mkvecsmall(p));
       nf = ellnf_get_nf(E);
-      if (nf_get_varn(nf) <= 1)
+      if (nf_get_varn(nf) <= 0)
+        pari_err_PRIORITY("ellisomat", nf_get_pol(nf), "<=", 0);
+      if (flag==0 && nf_get_varn(nf) <= 1)
         pari_err_PRIORITY("ellisomat", nf_get_pol(nf), "<=", 1);
       break;
     default: pari_err_TYPE("ellisomat",E);
