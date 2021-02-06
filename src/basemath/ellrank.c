@@ -570,16 +570,14 @@ nf2selmer_quad(GEN nf, GEN S)
 static GEN
 makevbnf(GEN ell, long prec)
 {
-  GEN vpol, vbnf;
-  long l, k;
-  vpol = gel(factor(ell2pol(ell)), 1);
-  l = lg(vpol);
+  GEN vbnf, P = gel(factor(ell2pol(ell)), 1);
+  long k, l = lg(P);
   vbnf = cgetg(l, t_VEC);
-  for (k = 1; k < l; ++k)
-    if (degpol(gel(vpol, k)) == 2)
-      gel(vbnf, k) = nfinit0(gel(vpol, k), 0, prec);
-    else
-      gel(vbnf, k) = Buchall(gel(vpol, k), nf_FORCE, prec);
+  for (k = 1; k < l; k++)
+  {
+    GEN t = gel(P,k);
+    gel(vbnf,k) = degpol(t) == 2 ? nfinit(t, prec): Buchall(t, nf_FORCE, prec);
+  }
   return vbnf;
 }
 
