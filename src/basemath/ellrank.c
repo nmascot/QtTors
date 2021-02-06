@@ -64,7 +64,7 @@ polreduce(GEN P, GEN M)
 {
   long d = degpol(P), v = varn(P);
   GEN A = deg1pol_shallow(gcoeff(M,1,1),gcoeff(M,1,2),v);
-  GEN B = gpowers(deg1pol(gcoeff(M,2,1),gcoeff(M,2,2),v), d);
+  GEN B = gpowers(deg1pol_shallow(gcoeff(M,2,1),gcoeff(M,2,2),v), d);
   return gel(RgX_homogenous_evalpow(P, A, B),1);
 }
 
@@ -104,7 +104,7 @@ projratpoint(GEN pol, long lim)
   pari_timer ti;
   GEN P;
   if (issquare(leading_coeff(pol)))
-    return mkvec3( gen_1, sqrtrat(leading_coeff(pol)), gen_0);
+    return mkvec3(gen_1, sqrtrat(leading_coeff(pol)), gen_0);
   if (DEBUGLEVEL) timer_start(&ti);
   P = hyperellratpoints(pol, stoi(lim), 1);
   if (DEBUGLEVEL) timer_printf(&ti,"hyperellratpoints(%ld)",lim);
@@ -403,7 +403,7 @@ nfC_pridV_val(GEN nf, GEN G, GEN P)
   for (i=1; i<lG; i++)
   {
     GEN V = cgetg(lP, t_COL);
-    for(j=1; j<lP; j++)
+    for (j = 1; j < lP; j++)
       gel(V,j) = gpnfvalrem(nf,gel(G,i),gel(P,j),NULL);
     gel(M,i) = V;
   }
@@ -815,7 +815,7 @@ static void
 check_oncurve(GEN ell, GEN V)
 {
   long i, l = lg(V);
-  for(i = 1; i < l; i++)
+  for (i = 1; i < l; i++)
   {
     GEN vi = gel(V, i);
     if (lg(vi)!=3 || !oncurve(ell,vi))
