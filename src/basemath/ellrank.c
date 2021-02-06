@@ -27,9 +27,7 @@ static long LIMTRIV = 10000;
 
 static GEN
 ell2pol(GEN ell)
-{
-  return mkpoln(4, gen_1, ell_get_a2(ell), ell_get_a4(ell), ell_get_a6(ell));
-}
+{ return mkpoln(4, gen_1, ell_get_a2(ell), ell_get_a4(ell), ell_get_a6(ell)); }
 
 static GEN
 redqfbsplit(GEN a, GEN b, GEN c, GEN d)
@@ -47,18 +45,17 @@ redqfbsplit(GEN a, GEN b, GEN c, GEN d)
     gcoeff(U,1,2) = negi(gcoeff(U,1,2));
     gcoeff(U,2,2) = negi(gcoeff(U,2,2));
   }
-  gel(U,2) = ZC_lincomb(gen_1, truedivii(negi(c), d),
-                        gel(U,2), gel(U,1));
+  gel(U,2) = ZC_lincomb(gen_1, truedivii(negi(c), d), gel(U,2), gel(U,1));
   return U;
 }
 
 static GEN
 polreduce(GEN P, GEN M)
 {
-  long d = degpol(P), v = varn(P);
-  GEN A = deg1pol_shallow(gcoeff(M,1,1),gcoeff(M,1,2),v);
-  GEN B = gpowers(deg1pol_shallow(gcoeff(M,2,1),gcoeff(M,2,2),v), d);
-  return gel(RgX_homogenous_evalpow(P, A, B),1);
+  long v = varn(P);
+  GEN A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
+  GEN B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
+  return gel(RgX_homogenous_evalpow(P, A, gpowers(B, degpol(P))),1);
 }
 
 static GEN
@@ -264,32 +261,28 @@ Qp_issquare(GEN a, GEN p)
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
 
 static GEN
-ellabs(GEN P)
-{
-  return ell_is_inf(P) ? P: mkvec2(gel(P,1), Q_abs(gel(P,2)));
-}
+ellabs(GEN P) { return ell_is_inf(P) ? P: mkvec2(gel(P,1), Q_abs(gel(P,2))); }
 
 static GEN
-vecellabs(GEN x)
-{ pari_APPLY_same(ellabs(gel(x,i))) }
+vecellabs(GEN x) { pari_APPLY_same(ellabs(gel(x,i))) }
 
 static GEN
 elltwistequation(GEN ell, GEN K)
 {
-  GEN K2, K3;
-  if (!K || equali1(K))
-    return ell;
-  K2 = sqri(K); K3 = mulii(K, K2);
-  return ellinit(mkvec5(gen_0, mulii(ell_get_a2(ell), K),
-                gen_0, mulii(ell_get_a4(ell), K2),
-                mulii(ell_get_a6(ell), K3)), NULL, DEFAULTPREC);
+  GEN K2, a2, a4, a6;
+  if (!K || equali1(K)) return ell;
+  K2 = sqri(K);
+  a2 = mulii(ell_get_a2(ell), K);
+  a4 = mulii(ell_get_a4(ell), K2);
+  a6 = mulii(ell_get_a6(ell), mulii(K, K2));
+  return ellinit(mkvec5(gen_0, a2, gen_0, a4, a6), NULL, DEFAULTPREC);
 }
 
 static GEN
 elltwistpoint(GEN P, GEN K, GEN K2)
 {
   if (ell_is_inf(P)) return ellinf();
-  return mkvec2(gmul(gel(P, 1), K), gmul(gel(P, 2), K2));
+  return mkvec2(gmul(gel(P,1), K), gmul(gel(P,2), K2));
 }
 
 static GEN
@@ -749,14 +742,13 @@ ZC_shifti(GEN x, long n)
 { pari_APPLY_type(t_COL, shifti(gel(x,i),n)) }
 
 static void
-check_oncurve(GEN ell, GEN V)
+check_oncurve(GEN ell, GEN v)
 {
-  long i, l = lg(V);
+  long i, l = lg(v);
   for (i = 1; i < l; i++)
   {
-    GEN vi = gel(V, i);
-    if (lg(vi)!=3 || !oncurve(ell,vi))
-      pari_err_TYPE("ellrank",vi);
+    GEN P = gel(v, i);
+    if (lg(P) != 3 || !oncurve(ell,P)) pari_err_TYPE("ellrank",P);
   }
 }
 
@@ -1126,6 +1118,4 @@ ell2descent(GEN ell, GEN help, GEN K, long effort, long prec)
 
 GEN
 ellrank(GEN ell, long effort, GEN help, long prec)
-{
-  return ell2descent(ell, help, NULL, effort, prec);
-}
+{ return ell2descent(ell, help, NULL, effort, prec); }
