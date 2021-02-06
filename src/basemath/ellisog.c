@@ -1515,6 +1515,8 @@ ellisomat(GEN E, long p, long flag)
     case t_ELL_NF:
       if (p) good = ellnf_goodl_l(E, mkvecsmall(p));
       nf = ellnf_get_nf(E);
+      if (nf_get_varn(nf) <= 1)
+        pari_err_PRIORITY("ellisomat", nf_get_pol(nf), "<=", 1);
       break;
     default: pari_err_TYPE("ellisomat",E);
   }

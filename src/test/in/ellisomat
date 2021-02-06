@@ -47,4 +47,6 @@ ellisotree(ellisomat(E,3,1))
 ellisotree(ellisomat(E,,1))
 
 \\ ERRORS
-ellisomat(ellinit([1,0],nfinit(y^2+1)))
+ellisomat(ellinit([1,0],nfinit(a^2+1)))
+ellisomat(ellinit([-824740032823875,9115932407325507114750],nfinit(x-16581375)))[2]
+ellisomat(ellinit([-824740032823875,9115932407325507114750],nfinit(y-16581375)))[2]
