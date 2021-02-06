@@ -129,20 +129,21 @@ projratpoint2(GEN pol, long lim)
 
   for (i = 1; i < lg(list); i++)
   {
-    GEN K, k, ff, co, p, M, C, roots, pol, L = gel(list, i);
-    long lroots;
+    GEN K, k, ff, co, p, M, C, r, pol, L = gel(list, i);
+    long lr;
 
     list = vecsplice(list, i); i--;
-    pol = gel(L,1) = Q_primitive_part(gel(L,1), &K);
+    pol = Q_primitive_part(gel(L,1), &K);
+    M = gel(L,2);
     K = K? mulii(gel(L,3), K): gel(L,3);
+    C = gel(L,4);
     if (Z_issquareall(K, &k))
     {
-      GEN P, y2, aux;
-      k = mulii(gel(L,4), k);
-      pol = hyperellreduce(gel(L,1), &M);
+      GEN P, y2, aux, U;
+      pol = hyperellreduce(pol, &U);
       P = projratpoint(pol, lim); if (!P) continue;
-      y2 = gmul(gel(P,2), k);
-      aux = RgM_RgC_mul(ZM2_mul(gel(L,2), M), mkcol2(gel(P,1), gel(P,3)));
+      y2 = gmul(gel(P,2), mulii(C, k));
+      aux = RgM_RgC_mul(ZM2_mul(M, U), mkcol2(gel(P,1), gel(P,3)));
       if (gequal0(gel(aux, 2)))
         P = mkvec3(gel(aux, 1), y2, gen_0);
       else
@@ -150,32 +151,28 @@ projratpoint2(GEN pol, long lim)
                    gdiv(y2, gpowgs(gel(aux, 2), degpol(pol)>>1)), gen_1);
       return P;
     }
-    ff = Z_factor(K); co = core2(mkvec2(K, ff));
-    gel(L, 4) = mulii(gel(L, 4), gel(co,2));
-    K = gel(L, 3) = gel(co, 1); /* > 1 */
+    ff = Z_factor(K); co = core2(mkvec2(K, ff)); K = gel(co,1); /* > 1 */
     p = first_divisor(K, gel(ff,1));
     K = diviiexact(K, p);
-    C = mulii(gel(L,4), p);
-    M = gel(L, 2);
+    C = mulii(mulii(C, gel(co,2)), p);
     /* root at infinity */
     if (dvdii(leading_coeff(pol), p))
     {
       GEN U = mkmat2(gel(M,1), ZC_Z_mul(gel(M,2), p));
       if (equali1(content(U)))
       {
-        GEN newpol = ZX_Z_divexact(ZX_rescale(pol, p), p);
-        list = vec_append(list, mkvec4(newpol, U, K, C));
+        GEN t = ZX_rescale(pol, p);
+        list = vec_append(list, mkvec4(ZX_Z_divexact(t,p), U, K, C));
       }
     }
-    roots = FpC_center(FpX_roots(pol, p), p, shifti(p,-1));
-    lroots = lg(roots);
-    for (j = 1; j < lroots; j++)
+    r = FpC_center(FpX_roots(pol, p), p, shifti(p,-1)); lr = lg(r);
+    for (j = 1; j < lr; j++)
     {
-      GEN U = ZM2_mul(M, mkmat22(p, gel(roots, j), gen_0, gen_1));
+      GEN U = ZM2_mul(M, mkmat22(p, gel(r, j), gen_0, gen_1));
       if (equali1(content(U)))
       {
-        GEN newpol = ZX_Z_divexact(ZX_unscale(ZX_translate(pol, gel(roots, j)), p), p);
-        list = vec_append(list, mkvec4(newpol, U, K, C));
+        GEN t = ZX_unscale(ZX_translate(pol, gel(r,j)), p);
+        list = vec_append(list, mkvec4(ZX_Z_divexact(t,p), U, K, C));
       }
     }
     if (gc_needed(av, 1)) gerepileall(av, 2, &pol, &list);
