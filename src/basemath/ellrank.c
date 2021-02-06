@@ -14,24 +14,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/* This file is based on a port by Bill Allombert of the GP script ellQ.gp
- * by Denis Simon.
- */
-
-/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
-/*       Copyright (C) 2019 Denis Simon */
-/* */
-/* Distributed under the terms of the GNU General Public License (GPL) */
-/* */
-/*    This code is distributed in the hope that it will be useful, */
-/*    but WITHOUT ANY WARRANTY; without even the implied warranty of */
-/*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU */
-/*    General Public License for more details. */
-/* */
-/* The full text of the GPL is available at: */
-/* */
-/*                 http://www.gnu.org/licenses/ */
-/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
+/* This file is a port by Bill Allombert of the script ellQ.gp by Denis Simon
+ * Copyright (C) 2019 Denis Simon
+ * Distributed under the terms of the GNU General Public License (GPL) */
 
 static long LIM1 = 10000;
 static long LIMTRIV = 10000;
