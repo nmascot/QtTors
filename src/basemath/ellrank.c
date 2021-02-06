@@ -295,19 +295,18 @@ elltwistpoints(GEN x, GEN K)
 }
 
 static GEN
-ellredgen(GEN ell, GEN listgen, GEN K, long prec)
+ellredgen(GEN E, GEN vP, GEN K, long prec)
 {
-  pari_sp ltop = avma;
-  GEN ell_K, listgenK;
-  if (!K)
-    K = gen_1;
-  ell_K = elltwistequation(ell, K);
-  listgenK = elltwistpoints(listgen, K);
-  ell_K = ellinit(ell_K, NULL, prec);
-  listgen = ellQ_genreduce(ell_K, listgenK, prec);
-  listgen = vecellabs(listgen);
-  listgen = elltwistpoints(listgen, ginv(K));
-  return gerepilecopy(ltop, listgen);
+  if (equali1(K)) K = NULL;
+  if (K)
+  {
+    E = elltwistequation(E, K);
+    E = ellinit(E, NULL, prec);
+    vP = elltwistpoints(vP, K);
+  }
+  vP = vecellabs(ellQ_genreduce(E, vP, prec));
+  if (K) vP = elltwistpoints(vP, ginv(K));
+  return vP;
 }
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
