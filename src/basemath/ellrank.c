@@ -71,7 +71,6 @@ polreduce(GEN P, GEN M)
 static GEN
 hyperellreduce(GEN Q, GEN *pM)
 {
-  pari_sp av = avma;
   long d = degpol(Q);
   GEN q1, q2, q3, D, M, R, vD, den, P = Q_primitive_part(Q, &den);
   GEN a = gel(P,d+2), b = gel(P,d+1), c = gel(P, d);
@@ -93,9 +92,7 @@ hyperellreduce(GEN Q, GEN *pM)
     M = redqfbsplit(q1, q2, q3, vD);
   else
     M = gel(qfbredsl2(mkqfb(q1,q2,q3,D), NULL), 2);
-  R = polreduce(P, M);
-  if (den) R = gmul(R, den);
-  gerepileall(av, 2, &R, &M);
+  R = polreduce(P, M); if (den) R = gmul(R, den);
   *pM = M; return R;
 }
 
@@ -113,7 +110,7 @@ projratpoint(GEN pol, long lim)
 }
 
 static GEN
-listratpoint(GEN pol)
+projratpoint2(GEN pol, long lim)
 {
   pari_sp av = avma, av2;
   GEN list = mkvec(mkvec4(pol, matid(2), gen_1, gen_1));
@@ -122,27 +119,26 @@ listratpoint(GEN pol)
   av2 = avma;
   for (i = 1; i < lg(list); i++)
   {
-    GEN ff, co, p, M, C, roots;
-    long lroots;
-    GEN li = gel(list, i), pol = gel(li, 1);
+    GEN ff, co, p, M, C, roots, L = gel(list, i), pol = gel(L, 1);
     GEN K = ZX_content(pol);
+    long lroots;
     if (!equali1(K))
     {
-      pol = gel(li, 1) = ZX_Z_divexact(gel(li, 1), K);
-      gel(li, 3) = mulii(gel(li, 3), K);
+      pol = gel(L, 1) = ZX_Z_divexact(gel(L, 1), K);
+      gel(L, 3) = mulii(gel(L, 3), K);
     }
-    K = gel(li, 3);
+    K = gel(L, 3);
     if (equali1(K)) continue;
     ff = Z_factor(K); co = core2(mkvec2(K,ff));
     if (!equali1(gel(co,2)))
     {
-      gel(li, 4) = mulii(gel(li, 4), gel(co,2));
-      K = gel(li, 3) = gel(co, 1);
+      gel(L, 4) = mulii(gel(L, 4), gel(co,2));
+      K = gel(L, 3) = gel(co, 1);
       if (equali1(K)) continue;
       ff = Z_factor(K);
     }
     p = gcoeff(ff, 1, 1);
-    M = gel(li, 2); C = gel(li, 4);
+    M = gel(L, 2); C = gel(L, 4);
     /* root at infinity */
     if (dvdii(leading_coeff(pol), p))
     {
@@ -168,41 +164,24 @@ listratpoint(GEN pol)
     }
     if (gc_needed(av2, 1)) gerepileall(av2, 2, &pol, &list);
   }
-  l = lg(list);
-  for (i = 1, j = 1; i < l; i++)
+  l = lg(list); av2 = avma;
+  for (i = 1, j = 1; i < l; i++, set_avma(av2))
   {
-    GEN L = gel(list, i);
-    if (equali1(gel(L,3)))
-    {
-      GEN M, pol = hyperellreduce(gel(L,1), &M);
-      gel(list, j++) = mkvec4(pol, ZM2_mul(gel(L,2), M), gel(L,3), gel(L,4));
-    }
-  }
-  setlg(list,j); return gerepilecopy(av, list);
-}
-
-static GEN
-projratpoint2(GEN pol, long lim)
-{
-  pari_sp ltop = avma;
-  GEN list = listratpoint(pol);
-  long i, l = lg(list);
-  for (i = 1; i < l; ++i)
-  {
-    GEN li = gel(list, i);
-    GEN rat = projratpoint(gel(li, 1), lim), y2, aux;
+    GEN rat, y2, aux, M, pol, L = gel(list, i);
+    if (!equali1(gel(L,3))) continue;
+    pol = hyperellreduce(gel(L,1), &M);
+    rat = projratpoint(pol, lim);
     if (!rat) continue;
-    y2 = gmul(gel(rat, 2), gel(li, 4));
-    aux = mkcol2(gel(rat, 1), gel(rat, 3));
-    aux = gmul(gel(li, 2), aux);
+    y2 = gmul(gel(rat,2), gel(L,4));
+    aux = RgM_RgC_mul(ZM2_mul(gel(L,2), M), mkcol2(gel(rat,1), gel(rat,3)));
     if (gequal0(gel(aux, 2)))
       rat = mkvec3(gel(aux, 1), y2, gen_0);
     else
       rat = mkvec3(gdiv(gel(aux, 1), gel(aux, 2)),
                    gdiv(y2, gpowgs(gel(aux, 2), degpol(pol)>>1)), gen_1);
-    return gerepilecopy(ltop, rat);
+    return gerepilecopy(av, rat);
   }
-  return gc_NULL(ltop);
+  return gc_NULL(av);
 }
 
 static GEN
