@@ -832,9 +832,9 @@ ellisog_by_j(GEN e, GEN jt, long n, GEN P, long flag)
 {
   pari_sp av = avma;
   GEN c4  = gel(e,1), c6 = gel(e, 2), j = gel(e, 3);
-  GEN Px = deriv(P, 0), Py = deriv(P, 1);
+  GEN Px = RgX_deriv(P), Py = RgXY_derivx(P);
   GEN Pxj = RgXY_eval(Px, j, jt), Pyj = RgXY_eval(Py, j, jt);
-  GEN Pxx  = deriv(Px, 0), Pxy = deriv(Py, 0), Pyy = deriv(Py, 1);
+  GEN Pxx  = RgX_deriv(Px), Pxy = RgX_deriv(Py), Pyy = RgXY_derivx(Py);
   GEN Pxxj = RgXY_eval(Pxx,j,jt);
   GEN Pxyj = RgXY_eval(Pxy,j,jt);
   GEN Pyyj = RgXY_eval(Pyy,j,jt);
