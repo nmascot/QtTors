@@ -86,13 +86,13 @@ womack=
 checkwomack()=
 {
   for(i=1,#womack,
-    print(i,":",ellrank(ellinit(womack[i]))[1..2]));
+    print("W:",i,":",ellrank(ellinit(womack[i]))[1..2]));
 }
 checkwomack()
 checkdujella()=
 {
   for(i=1,#dujella,
-    print(i,":",ellrank(ellinit(dujella[i]),1)[1..2]));
+    print("D:",i,":",ellrank(ellinit(dujella[i]),1)[1..2]));
 }
 checkdujella()
 crv3(D)=[0,0,1,0,(-27*D-1)/4];
@@ -100,6 +100,6 @@ quer=[-23,-3299,-3321607,-653329427];
 checkquer()=
 {
   for(i=1,#quer,
-    print(i,":",ellrank(ellinit(crv3(quer[i])))[1..2]));
+    print("Q:",i,":",ellrank(ellinit(crv3(quer[i])))[1..2]));
 }
 checkquer()
