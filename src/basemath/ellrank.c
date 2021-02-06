@@ -530,20 +530,20 @@ bnfpselmer(GEN bnf, GEN S, ulong p)
 static GEN
 kernorm(GEN gen, GEN S, ulong p, GEN pol)
 {
-  long i, j, lG = lg(gen), lS;
-  GEN normmap = cgetg(lG, t_MAT);
+  long i, j, lS, lG = lg(gen);
+  GEN M = cgetg(lG, t_MAT);
   if (p == 2) S = vec_prepend(S, gen_m1);
   lS = lg(S);
-  for (j = 1; j < lG; ++j)
+  for (j = 1; j < lG; j++)
   {
-    GEN nj = QXQ_norm(gel(gen,j), pol);
+    GEN N = QXQ_norm(gel(gen,j), pol);
     GEN v = cgetg(lS, t_VECSMALL);
-    for (i = 1; i < lS; ++i)
-      v[i] =  (i == 1 && p==2) ? gsigne(nj) < 0
-                               : smodss(Q_pval(nj, gel(S, i)), p);
-    gel(normmap, j) = v;
+    for (i = 1; i < lS; i++)
+      v[i] = (i == 1 && p==2)? gsigne(N) < 0
+                             : smodss(Q_pvalrem(N, gel(S, i), &N), p);
+    gel(M, j) = v;
   }
-  return Flm_ker(normmap, p);
+  return Flm_ker(M, p);
 }
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
