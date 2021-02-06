@@ -408,14 +408,13 @@ bnfselmer(GEN bnf, GEN S, ulong p)
   e2 = ZM_divexactu(ZM_zm_mul(e2, kerval), p);
   f = pridV_ZM_factorback(nf, S2, e2);
   LS2gen = shallowconcat(LS2fu, LS2gen);
-  e = shallowconcat(zeromat(n, r), e);
-  f = shallowconcat(const_vec(r, gen_1), f);
   if (bnf_get_tuN(bnf) % p == 0)
   {
-    LS2gen = shallowconcat( mkvec(bnf_get_tuU(bnf)), LS2gen);
-    e = shallowconcat(zeromat(n, 1),e);
-    f = shallowconcat(mkvecs(1),f);
+    LS2gen = vec_prepend(LS2gen, bnf_get_tuU(bnf));
+    r++;
   }
+  e = shallowconcat(zeromat(n, r), e);
+  f = shallowconcat(const_vec(r, gen_1), f);
   return gerepilecopy(av, mkvec3(LS2gen,e,f));
 }
 
