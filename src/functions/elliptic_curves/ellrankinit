@@ -2,17 +2,15 @@ Function: ellrankinit
 Section: elliptic_curves
 C-Name: ellrankinit
 Prototype: Gp
-Help: ellrankinit(E): if E is an elliptic curve over the rationals,
- initialize data for further call to ellrank.
-Doc: if $E$ is an elliptic curve over the rationals,
- initialize data for further call to \kbd{ellrank}.
+Help: ellrankinit(E): if E is an elliptic curve over Q,
+ initialize data for further calls to ellrank.
+Doc: if $E$ is an elliptic curve over $\Q$, initialize data to speed up further
+ calls to \kbd{ellrank}.
  \bprog
- ? E = ellinit([-567^2,289]);
- ? rk= ellrankinit(E);
- ? [r,R,P]=ellrank(rk)
- %5 = [3,3,[[-567,17],[0,17]]]
- ? [r,R,P]=ellrank(rk,P,1)
- %7 = [3,3,[[-567,17],[0,17]]]
- ? [r,R,P]=ellrank(rk,P,2)
- %8 = [3,3,[[-567,17],[0,17],[-131567/576,108424583/13824]]]
+ ? E = ellinit([0,2429469980725060,0,275130703388172136833647756388,0]);
+ ? rk = ellrankinit(E);
+ ? [r,R,P] = ellrank(rk)
+ %3 = [12, 14, [...]]
+ ? [r, R, P] = ellrank(rk, 1, P) \\ more effort, using known points
+ %4 = [14, 14, [...]] \\ this time all points are found
  @eprog
