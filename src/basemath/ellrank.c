@@ -385,7 +385,7 @@ nfV_Flm_factorbackmod(GEN nf, GEN G, GEN x, ulong p)
 { pari_APPLY_type(t_VEC,nffactorback(nf, G, gel(x,i))) }
 
 static GEN
-pridV_ZM_factorback(GEN nf, GEN S, GEN x)
+prV_ZM_factorback(GEN nf, GEN S, GEN x)
 { pari_APPLY_type(t_VEC,idealfactorback(nf, S, gel(x,i),0)) }
 
 static GEN
@@ -406,7 +406,7 @@ bnfselmer(GEN bnf, GEN S, ulong p)
   LS2gen = nfV_Flm_factorbackmod(nf, LS2gen, kerval, p);
   e = S? nfC_prV_val(nf, LS2gen, S): zeromat(0,n3);
   e2 = ZM_divexactu(ZM_zm_mul(e2, kerval), p);
-  f = pridV_ZM_factorback(nf, S2, e2);
+  f = prV_ZM_factorback(nf, S2, e2);
   LS2gen = shallowconcat(LS2fu, LS2gen);
   if (bnf_get_tuN(bnf) % p == 0)
   {
