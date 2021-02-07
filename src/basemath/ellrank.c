@@ -174,9 +174,10 @@ polrootsmodpn(GEN pol, GEN p)
 {
   pari_sp av = avma, av2;
   long j, l, i = 1, vd = Z_pval(ZX_disc(pol), p);
-  GEN v, r, P = gpowers0(p, vd-1, p);
+  GEN v, r, P;
 
-  av2 = avma;
+  if (!vd) { set_avma(av); retmkvec(mkvec2(gen_0, gen_0)); }
+  P = gpowers0(p, vd-1, p); av2 = avma;
   v = FpX_roots(pol, p); l = lg(v);
   for (j = 1; j < l; j++) gel(v,j) = mkvec2(gel(v,j), gen_1);
   while (i < lg(v))

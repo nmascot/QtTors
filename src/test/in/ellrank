@@ -103,3 +103,6 @@ checkquer()=
     print("Q:",i,":",ellrank(ellinit(crv3(quer[i])))[1..2]));
 }
 checkquer()
+
+\\ check for old regressions
+ellrank(ellinit([-181^2,-1]))
