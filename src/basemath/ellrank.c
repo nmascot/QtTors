@@ -367,6 +367,12 @@ nfC_prV_val(GEN nf, GEN G, GEN P)
 }
 
 static GEN
+_factorbackmod(GEN nf, GEN g, GEN e, ulong p)
+{
+  GEN y = nffactorback(nf, g, e);
+  return nfmul(nf, y, nfsqr(nf, idealredmodpower(nf, y, p, 0)));
+}
+static GEN
 nfV_factorbackmod(GEN nf, GEN x, ulong p)
 {
   long i, l = lg(x);
@@ -374,19 +380,17 @@ nfV_factorbackmod(GEN nf, GEN x, ulong p)
   for (i = 1; i < l; i++)
   {
     GEN y = gel(x,i), g = gel(y,1), e = gel(y,2);
-    y = nffactorback(nf, g, ZV_to_Flv(e, p));
-    gel(v,i) = nfmul(nf, y, nfsqr(nf, idealredmodpower(nf, y, p, 0)));
+    gel(v,i) = _factorbackmod(nf, g, ZV_to_Flv(e,p), p);
   }
   return v;
 }
-
 static GEN
-nfV_Flm_factorbackmod(GEN nf, GEN G, GEN x, ulong p)
-{ pari_APPLY_type(t_VEC,nffactorback(nf, G, gel(x,i))) }
+nfV_zm_factorback(GEN nf, GEN G, GEN x, long p)
+{ pari_APPLY_type(t_VEC, _factorbackmod(nf, G, gel(x,i), p)) }
 
 static GEN
 prV_ZM_factorback(GEN nf, GEN S, GEN x)
-{ pari_APPLY_type(t_VEC,idealfactorback(nf, S, gel(x,i),0)) }
+{ pari_APPLY_type(t_VEC,idealfactorback(nf, S, gel(x,i), 0)) }
 
 static GEN
 bnfselmer(GEN bnf, GEN S, ulong p)
@@ -403,7 +407,7 @@ bnfselmer(GEN bnf, GEN S, ulong p)
   LS2fu  = vecslice(LS2all,n3+1, n2all-1);
   e2 = nfC_prV_val(nf, LS2gen, S2);
   kerval = Flm_ker(ZM_to_Flm(e2, p), p);
-  LS2gen = nfV_Flm_factorbackmod(nf, LS2gen, kerval, p);
+  LS2gen = nfV_zm_factorback(nf, LS2gen, kerval, p);
   e = S? nfC_prV_val(nf, LS2gen, S): zeromat(0,n3);
   e2 = ZM_divexactu(ZM_zm_mul(e2, kerval), p);
   f = prV_ZM_factorback(nf, S2, e2);
