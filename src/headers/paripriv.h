@@ -720,10 +720,6 @@ GEN     minkowski_bound(GEN D, long N, long r2, long prec);
 int     subgroup_conductor_ok(GEN H, GEN L);
 GEN     subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound);
 
-/* buch4.c */
-
-GEN     nf_quadchar_modpr(GEN nf, GEN z, GEN modpr, GEN pstar);
-
 /* crvwtors.c */
 
 void random_curves_with_m_torsion(ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, long m, ulong p);

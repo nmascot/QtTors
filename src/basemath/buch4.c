@@ -119,20 +119,8 @@ hyperell_locally_soluble(GEN T,GEN p)
 static long
 quad_char(GEN nf, GEN t, GEN pr)
 {
-  GEN ord, ordp, T, p, modpr = zk_to_Fq_init(nf, &pr,&T,&p);
-  t = nf_to_Fq(nf,t,modpr);
-  if (T)
-  {
-    ord = subiu( pr_norm(pr), 1 ); /* |(O_K / pr)^*| */
-    ordp= subiu( p, 1);            /* |F_p^*|        */
-    t = Fq_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
-    if (typ(t) == t_POL)
-    {
-      if (degpol(t)) pari_err_BUG("nfhilbertp");
-      t = gel(t,2);
-    }
-  }
-  return kronecker(t, p);
+  GEN T, p, modpr = zk_to_Fq_init(nf, &pr,&T,&p);
+  return Fq_issquare(nf_to_Fq(nf,t,modpr), T, p)? 1: -1;
 }
 /* quad_char(x), x in Z, nonzero mod p */
 static long
@@ -196,35 +184,6 @@ psquare2nf(GEN nf, GEN x, GEN pr, GEN sprk)
   if (odd(v)) return 0;
   x = to_principal_unit(nf, x, pr, sprk); /* = 1 mod pr */
   return ZV_iseven(sprk_log_prk1(nf, x, sprk));
-}
-
-/*
-For z in nf, z != 0.
-quadratic characters modulo the prime ideal pr in nf.
-pr output by nfmodprinit
-pstar output by idealstar (only for p | 2).
-For p odd, the output is a vector [v,c]*Mod(1,2), where
-v = valuation(z,pr)
-c = !issquare( z/pr^v mod pr)
-For p | 2, the output is similar, with a longer sequence of 0,1 for c.
-*/
-
-GEN
-nf_quadchar_modpr(GEN nf, GEN z, GEN modpr, GEN pstar)
-{
-  pari_sp av = avma;
-  GEN pr = modpr_get_pr(modpr);
-  GEN v = stoi(nfvalrem(nf, z, pr, &z));
-  if( equaliu(pr_get_p(pr),2))
-  {
-    GEN c = ideallog(nf, z, pstar);
-    return gerepilecopy(av, shallowconcat(v, shallowtrans(c)));
-  }
-  else
-  {
-    GEN c = quad_char(nf, z, modpr)==1? gen_0: gen_1;
-    return gerepilecopy(av, mkvec2(v,c));
-  }
 }
 
 /* pr above an odd prime */
