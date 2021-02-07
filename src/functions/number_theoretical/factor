@@ -112,16 +112,13 @@ Doc: factor $x$ over domain $D$; if $D$ is omitted, it is determined from $x$.
  [59649589127497217 1]
 
  [5704689200685129054721 1]
- @eprog\noindent
-
- Setting $D = I$ will factor in the Gaussian integers
- $\Z[i]$:
+ @eprog
 
  \misctitle{$x \in \Q(i)$} The factorization is performed with Gaussian
  primes in $\Z[i]$ and includes Gaussian units in $\{\pm1, \pm i\}$;
  factors are sorted by increasing norm. Except for a possible leading unit,
  the Gaussian factors are normalized: rational factors are positive and
- irrational factors have positive imaginary part (a canonical represneta.
+ irrational factors have positive imaginary part.
 
  Unless \tet{factor_proven} is set, large factors are actually pseudoprimes,
  not proven primes; a rational factor is prime if less than $2^{64}$ and an
