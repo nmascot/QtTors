@@ -1100,18 +1100,25 @@ vecselmersign(GEN vnf, GEN vpol, GEN x)
 { pari_APPLY_type(t_VEC, shallowconcat1(selmersign(vnf, vpol, gel(x, i)))) }
 
 static GEN
-tracematrix(GEN zc, GEN base, GEN T, GEN dT)
+_trace(GEN z, GEN T)
+{
+  long n = degpol(T)-1;
+  if (degpol(z) < n) return gen_0;
+  return gdiv(gel(z, 2+n), gel(T, 3+n));
+}
+static GEN
+tracematrix(GEN zc, GEN b, GEN T)
 {
   long i, j;
-  GEN q2 = cgetg(4, t_MAT);
-  for (j = 1; j <= 3; ++j)
+  GEN q = cgetg(4, t_MAT);
+  for (j = 1; j <= 3; j++) gel(q,j) = cgetg(4, t_COL);
+  for (j = 1; j <= 3; j++)
   {
-    gel(q2, j) = cgetg(4, t_COL);
-    for (i = 1; i <= 3; ++i)
-      gcoeff(q2, i, j) = RgXQ_trace(
-        QXQ_div(gmul(zc, QXQ_mul(gel(base, i), gel(base, j), T)), dT, T),T);
+    for (i = 1; i < j; i++) gcoeff(q,i,j) = gcoeff(q,j,i) =
+      _trace(QXQ_mul(zc, QXQ_mul(gel(b,i), gel(b,j), T), T), T);
+    gcoeff(q,i,i) = _trace(QXQ_mul(zc, QXQ_sqr(gel(b,i), T), T), T);
   }
-  return q2;
+  return q;
 }
 
 static GEN
@@ -1237,7 +1244,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
       while (degpol(ZX_gcd(rd,pol))!=0);
       zc = RgXQ_mul(z, RgXQ_sqr(rd,pol), pol);
     }
-    q2 = tracematrix(zc, base, pol, polprime);
+    q2 = tracematrix(zc, base, pol);
     change = redquadric(base, q2, pol, QXQ_div(zc, polprime, pol));
     if (lg(change) < 4) { set_avma(av2); continue; }
     q2 = qf_apply_RgM(q2, change);
@@ -1246,7 +1253,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
     param = gmul(qfparam(q2, sol, 0), mkcol3(pol_xn(2,0), pol_x(0), pol_1(0)));
     param = gdiv(param, content(param));
     ttheta = RgX_shift_shallow(pol,-2);
-    q1 = RgM_neg(tracematrix(RgXQ_mul(zc, ttheta, pol), newbase, pol, polprime));
+    q1 = RgM_neg(tracematrix(RgXQ_mul(zc, ttheta, pol), newbase, pol));
     pol4 = hyperellreduce(qfeval(q1, param), &R);
     den = denom(content(gmul(K, pol4)));
     pol4 = gmul(pol4, sqri(den));
@@ -1260,7 +1267,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
     param = RgXV_homogenous_evaldeg(param, xx, gpowers(yy, 2));
     param = gmul(param, gdiv(K, zz));
     tttheta = RgX_shift_shallow(pol, -1);
-    q0 = tracematrix(RgXQ_mul(zc, tttheta, pol), newbase, pol, polprime);
+    q0 = tracematrix(RgXQ_mul(zc, tttheta, pol), newbase, pol);
     xx = gdiv(qfeval(q0, param), K);
     (void)issquareall(gdiv(poleval(pol, xx), K), &yy);
     if (DEBUGLEVEL) err_printf("Found point: %Ps\n", mkvec2(xx,yy));
