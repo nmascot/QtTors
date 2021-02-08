@@ -996,29 +996,30 @@ kernorm(GEN gen, GEN S, ulong p, GEN pol)
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
 /*    FUNCTIONS FOR 2-DESCENT                  \\ */
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
+/* vector of t_VEC; return total number of entries */
+static long
+RgVV_nb(GEN v)
+{
+  long i, l = lg(v), n = 0;
+  for (i = 1; i < l; i++) n += lg(gel(v,i)) - 1;
+  return n;
+}
 
 static GEN
 elllocalimage(GEN pol, GEN K, GEN vnf, GEN p, GEN pp, GEN pts)
 {
-  pari_sp ltop = avma;
-  GEN R, bound = addiu(p, 6);
-  long i, prank, p2, lpp = lg(pp), attempt = 0;
+  pari_sp av = avma;
+  long attempt = 0, p2 = RgVV_nb(pp), prank = equaliu(p, 2)? p2: p2 - 1;
+  GEN R = polrootsmodpn(gmul(K, pol), p), bound = addiu(p, 6);
 
   if (!pts) pts = cgetg(1, t_MAT);
-  p2 = 0;
-  for (i = 1; i < lpp; ++i) p2 += lg(gel(pp, i))-1;
-  prank = equaliu(p, 2)? p2: p2 - 1;
-  R = polrootsmodpn(gmul(K, pol), p);
-  while (Flm_rank(pts, 2) < prank)
+  for(;;)
   {
     pari_sp btop;
-    GEN xx, y2, delta, deltamodsquares;
+    GEN xx, y2, delta;
+    pts = Flm_image(pts, 2); if (lg(pts)-1 == prank) break;
     attempt++;
-    if (attempt%16 == 0)
-    {
-      pts = Flm_image(pts, 2);
-      bound = mulii(bound, p);
-    }
+    if (attempt%16 == 0) bound = mulii(bound, p);
     btop = avma;
     do
     {
@@ -1029,11 +1030,9 @@ elllocalimage(GEN pol, GEN K, GEN vnf, GEN p, GEN pp, GEN pts)
       y2 = gmul(K, poleval(pol, xx));
     } while (gequal0(y2) || !Qp_issquare(y2, p));
     delta = deg1pol_shallow(negi(K), gmul(K, xx), 0);
-    deltamodsquares = kpmodsquares(vnf, delta, pp);
-    pts = vec_append(pts, deltamodsquares);
+    pts = vec_append(pts, kpmodsquares(vnf, delta, pp));
   }
-  pts = Flm_image(pts,2);
-  return gerepilecopy(ltop, pts);
+  return gerepilecopy(av, pts);
 }
 
 static GEN
