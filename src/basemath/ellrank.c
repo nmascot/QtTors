@@ -1122,14 +1122,12 @@ tracematrix(GEN zc, GEN b, GEN T)
 }
 
 static GEN
-RgXV_cxeval(GEN x, GEN z)
-{ pari_APPLY_same(RgX_cxeval(gel(x,i), z, NULL)) }
+RgXV_cxeval(GEN x, GEN z) { pari_APPLY_same(RgX_cxeval(gel(x,i), z, NULL)) }
 
 static GEN
 redquadric(GEN base, GEN q2, GEN pol, GEN zc)
 {
-  GEN m = vecmax(gabs(RgM_Rg_div(q2, content(q2)),DEFAULTPREC));
-  long prec = nbits2prec(2*expi(m))+1;
+  long prec = nbits2prec(2*expi(ZM_supnorm(q2))) + 1;
   GEN r = roots(pol, prec);
   long i, l = lg(r);
   GEN s = NULL;
@@ -1244,14 +1242,14 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
       while (degpol(ZX_gcd(rd,pol))!=0);
       zc = RgXQ_mul(z, RgXQ_sqr(rd,pol), pol);
     }
-    q2 = tracematrix(zc, base, pol);
+    q2 = Q_primpart(tracematrix(zc, base, pol));
     change = redquadric(base, q2, pol, QXQ_div(zc, polprime, pol));
     if (lg(change) < 4) { set_avma(av2); continue; }
     q2 = qf_apply_RgM(q2, change);
     newbase = RgV_RgM_mul(base, change);
-    sol = qfsolve(gdiv(q2, content(q2)));
+    sol = qfsolve(q2);
     param = gmul(qfparam(q2, sol, 0), mkcol3(pol_xn(2,0), pol_x(0), pol_1(0)));
-    param = gdiv(param, content(param));
+    param = Q_primpart(param);
     ttheta = RgX_shift_shallow(pol,-2);
     q1 = RgM_neg(tracematrix(RgXQ_mul(zc, ttheta, pol), newbase, pol));
     pol4 = hyperellreduce(qfeval(q1, param), &R);
