@@ -8989,6 +8989,10 @@ to have compatible dimensions). Assumes that $x$ is nonempty and $0 < i <
 \fun{GEN}{RgC_RgV_mul}{GEN x, GEN y} returns $x\times y$ (the matrix
 $(x_iy_j)$).
 
+\fun{GEN}{RgC_RgV_mulrealsym}{GEN x, GEN y} returns the real part of $x\times
+y$ (whose entries are \typ{INT}, \typ{FRAC}, \typ{REAL} or \typ{COMPLEX}),
+assuming the result is symetric.
+
 The following two functions are not well defined in general and only provided
 for convenience in specific cases:
 

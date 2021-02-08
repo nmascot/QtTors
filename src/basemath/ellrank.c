@@ -1122,20 +1122,20 @@ tracematrix(GEN zc, GEN b, GEN T)
 }
 
 static GEN
-RgXV_cxeval(GEN x, GEN z) { pari_APPLY_same(RgX_cxeval(gel(x,i), z, NULL)) }
+RgXV_cxeval(GEN x, GEN r, GEN ri)
+{ pari_APPLY_same(RgX_cxeval(gel(x,i), r, ri)) }
 
 static GEN
 redquadric(GEN base, GEN q2, GEN pol, GEN zc)
 {
-  long prec = nbits2prec(2*expi(ZM_supnorm(q2))) + 1;
-  GEN r = roots(pol, prec);
-  long i, l = lg(r);
-  GEN s = NULL;
+  long i, l, prec = nbits2prec(2*gexpo(q2)) + 1;
+  GEN s = NULL, R = roots(pol, prec);
+  l = lg(R);
   for (i = 1; i < l; ++i)
   {
-    GEN v = RgXV_cxeval(base, gel(r, i));
-    GEN N = gabs(RgX_cxeval(zc, gel(r, i), NULL), prec);
-    GEN M = real_i(RgC_RgV_mul(RgV_Rg_mul(v,N), gconj(v)));
+    GEN r = gel(R,i), ri = gexpo(r) > 1? ginv(r): NULL;
+    GEN b = RgXV_cxeval(base, r, ri), z = RgX_cxeval(zc, r, ri);
+    GEN M = RgC_RgV_mulrealsym(RgV_Rg_mul(b, gabs(z, prec)), gconj(b));
     s = s ? RgM_add(s, M): M;
   }
   return lllgram(s);

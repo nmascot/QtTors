@@ -4040,6 +4040,22 @@ RgM_mulreal(GEN x, GEN y)
   return z;
 }
 
+/* Compute Re(x * y), symetric result, x and y vectors of compatible
+ * dimensions; assume scalar entries */
+GEN
+RgC_RgV_mulrealsym(GEN x, GEN y)
+{
+  long i, j, l = lg(x);
+  GEN q = cgetg(l, t_MAT);
+  for (j = 1; j < l; j++)
+  {
+    gel(q,j) = cgetg(l,t_COL);
+    for (i = 1; i <= j; i++)
+      gcoeff(q,i,j) = gcoeff(q,j,i) = mulreal(gel(x,i), gel(y,j));
+  }
+  return q;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                     LOGICAL OPERATIONS                          */
