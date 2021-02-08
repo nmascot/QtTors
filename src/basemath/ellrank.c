@@ -1493,13 +1493,12 @@ ell2descent(GEN ell, GEN help, GEN K, long effort, long prec)
   {
     vbnf = gel(ell,3); urst = gel(ell,2);
     ell = gel(ell,1); checkell_Q(ell);
-  if (!gequal0(ell_get_a1(ell)))
-    pari_err(e_MISC, "ell2descent: nonzero coefficient a1");
-  if (!gequal0(ell_get_a3(ell)))
-    pari_err(e_MISC, "ell2descent: nonzero coefficient a3");
-  if ((typ(ell_get_a2(ell)) != t_INT ||
-       typ(ell_get_a4(ell)) != t_INT) || typ(ell_get_a2(ell)) != t_INT)
-    pari_err(e_MISC, "ell2descent: nonintegral model");
+    if (!ell_is_integral(ell))
+      pari_err(e_MISC, "ell2descent: nonintegral model");
+    if (!signe(ell_get_a1(ell)))
+      pari_err(e_MISC, "ell2descent: nonzero coefficient a1");
+    if (!signe(ell_get_a3(ell)))
+      pari_err(e_MISC, "ell2descent: nonzero coefficient a3");
   }
   else
   {
