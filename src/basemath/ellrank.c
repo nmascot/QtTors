@@ -1167,36 +1167,34 @@ check_oncurve(GEN ell, GEN v)
 }
 
 static GEN
-smallbasis1(GEN nf, GEN polinv, GEN pol)
+smallbasis1(GEN nf, GEN crt, GEN pol)
 {
-  GEN b, T = nf_get_pol(nf), zk = nf_get_zk(nf), _0 = pol_0(0);
+  GEN b, zk = nf_get_zk(nf);
   long i, l = lg(zk);
 
   b = cgetg(l, t_COL);
   for (i = 1; i < l; ++i)
   {
     GEN z = nf_to_scalar_or_alg(nf, gel(zk, i));
-    if (typ(z) != t_POL) z = scalarpol_shallow(z, 0);
-    gel(b, i) = RgX_chinese_coprime(z, _0, T, polinv, pol);
+    gel(b, i) = grem(gsub(z, gmul(crt, z)), pol); /* z mod T, 0 mod (pol/T) */
   }
   return b;
 }
 
 static GEN
-vecsmallbasis(GEN x, GEN vpolinv, GEN pol)
-{ pari_APPLY_same(smallbasis1(gel(x,i), gel(vpolinv,i), pol)) }
+vecsmallbasis(GEN x, GEN vcrt, GEN pol)
+{ pari_APPLY_same(smallbasis1(gel(x,i), gel(vcrt,i), pol)) }
 
 static GEN
 ZC_shifti(GEN x, long n) { pari_APPLY_type(t_COL, shifti(gel(x,i), n)) }
 
 static GEN
 selmerbasis(GEN nf, GEN LS2k, GEN expo, GEN sqrtLS2, GEN factLS2,
-            GEN badprimes, GEN polinv, GEN pol)
+            GEN badprimes, GEN crt, GEN pol)
 {
   pari_sp av = avma;
-  GEN b, T = nf_get_pol(nf);
   long i, l;
-  GEN expok = vecslice(expo, LS2k[1], LS2k[2]);
+  GEN b, expok = vecslice(expo, LS2k[1], LS2k[2]);
   GEN sqrtzc = idealfactorback(nf, sqrtLS2, zv_neg(expok), 0);
   GEN exposqrtzc = ZC_shifti(ZM_zc_mul(factLS2, expok), -1);
 
@@ -1208,15 +1206,14 @@ selmerbasis(GEN nf, GEN LS2k, GEN expo, GEN sqrtLS2, GEN factLS2,
   for (i = 1; i < l; i++)
   {
     GEN z = nf_to_scalar_or_alg(nf, gel(sqrtzc, i));
-    if (typ(z) != t_POL) z = scalarpol_shallow(z, 0);
-    gel(b, i) = RgX_chinese_coprime(z, pol_0(0), T, polinv, pol);
+    gel(b, i) = grem(gsub(z, gmul(crt, z)), pol); /* z mod T, 0 mod (pol/T) */
   }
   return gerepilecopy(av, b);
 }
 
 static GEN
 liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN factLS2,
-           GEN badprimes, GEN vpolinv, GEN pol, GEN selmer, GEN K, long lim, long ntry)
+           GEN badprimes, GEN vcrt, GEN pol, GEN selmer, GEN K, long lim, long ntry)
 {
   pari_sp av = avma, av2;
   long n = lg(vnf)-1, k, t;
@@ -1225,7 +1222,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
   base = cgetg(n+1, t_VEC);
   for (k = 1; k <= n; k++)
     gel(base,k) = selmerbasis(gel(vnf, k), gel(LS2k,k), expo, gel(sqrtLS2, k),
-        gel(factLS2, k), gel(badprimes, k), gel(vpolinv, k), pol);
+        gel(factLS2, k), gel(badprimes, k), gel(vcrt, k), pol);
   base = shallowconcat1(base);
   polprime = ZX_deriv(pol);
   z = RgXQV_factorback(LS2, expo, pol);
@@ -1277,7 +1274,7 @@ static GEN
 ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
 {
   pari_sp av;
-  GEN ell_K, KP, torseven, pol, vnf, vpol, vpolinv, vroots, vr1, sbase;
+  GEN ell_K, KP, torseven, pol, vnf, vpol, vroots, vr1, vcrt, sbase;
   GEN LS2, factLS2, sqrtLS2, LS2k, selmer, helpLS2, LS2chars, helpchars;
   GEN newselmer, factdisc, badprimes, triv, helplist, listpoints;
   long i, j, k, tr1, n, tors2, mwrank, dim, nbpoints, lfactdisc, lhelp, t, u;
@@ -1294,35 +1291,32 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   ell = ellinit(ell, NULL, prec);
   n = lg(torseven); tors2 = n - 1;
   if (lg(vbnf)-1 != n) pari_err_TYPE("ell2selmer",vbnf);
+  KP = gel(absZ_factor(K), 1);
+  factdisc = mkvec3(KP, mkcol(gen_2), gel(absZ_factor(ZX_disc(pol)), 1));
+  factdisc = ZV_sort_uniq(shallowconcat1(factdisc));
+  badprimes = cgetg(n+1, t_VEC);
   vnf = cgetg(n+1, t_VEC);
   vpol = cgetg(n+1, t_VEC);
-  vpolinv = cgetg(n+1, t_VEC);
   vroots = cgetg(n+1, t_VEC);
+  vcrt = cgetg(n+1, t_VEC);
   vr1 = cgetg(n+1, t_VECSMALL);
   for (k = 1; k <= n; ++k)
   {
-    gel(vnf, k) = checknf(gel(vbnf, k));
-    gel(vpol, k) = nf_get_pol(gel(vnf, k));
-    gel(vpolinv, k) = RgX_div(pol, gel(vpol, k));
+    GEN T, Tinv, id, f, nf = checknf(gel(vbnf, k));
+    gel(vnf, k) = nf;
+    gel(vpol, k) = T = nf_get_pol(nf);
+    Tinv = RgX_div(pol, gel(vpol, k));
+    gel(vcrt, k) = QX_mul(QXQ_inv(T, Tinv), T);
     gel(vroots, k) = nf_get_roots(gel(vnf, k));
     uel(vr1, k) = nf_get_r1(gel(vnf, k));
-  }
-  sbase = shallowconcat1(vecsmallbasis(vnf, vpolinv, pol));
-  KP = gel(absZ_factor(K), 1);
-  factdisc = mkvec3(mkcol(gen_2),
-    gel(absZ_factor(ZX_disc(pol)), 1), KP);
-  factdisc = ZV_sort_uniq(shallowconcat1(factdisc));
-  badprimes = cgetg(n+1, t_VEC);
-  for (k = 1; k <= n; k++)
-  {
-    GEN nf = gel(vnf, k);
-    GEN id = idealadd(nf, nf_get_index(nf), ZX_deriv(gel(vpol, k)));
-    GEN f = mkvec3(K, gel(vpolinv, k), id);
-    for (i = 1; i <= 3; i++) gel(f,i) = gel(idealfactor(nf, gel(f,i)), 1);
+
+    id = idealadd(nf, nf_get_index(nf), ZX_deriv(T));
+    f = mkvec3(gel(idealfactor(nf, Tinv), 1),
+               gel(idealfactor(nf, id), 1), nf_pV_to_prV(nf, KP));
     gel(badprimes, k) = gtoset(shallowconcat1(f));
   }
-  if (DEBUGLEVEL >= 3)
-    err_printf("   local badprimes = %Ps\n", badprimes);
+  sbase = shallowconcat1(vecsmallbasis(vnf, vcrt, pol));
+  if (DEBUGLEVEL >= 3) err_printf("   local badprimes = %Ps\n", badprimes);
   LS2 = cgetg(n+1, t_VEC);
   factLS2 = cgetg(n+1, t_VEC);
   sqrtLS2 = cgetg(n+1, t_VEC);
@@ -1334,7 +1328,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     gel(sqrtLS2, k) = gel(sel, 3);
   }
   LS2k = cgetg(n+1, t_VEC);
-  for (k = 1; k <= n; ++k)
+  for (k = 1; k <= n; k++)
   {
     long s = 0, t;
     for (i = 1; i < k; i++)
@@ -1344,12 +1338,13 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   }
   for (k = 1; k <= n; k++)
   {
-    long i, lk = lg(gel(LS2, k));
-    for (i = 1; i < lk; ++i)
+    GEN L = gel(LS2, k);
+    long i, lk = lg(L);
+    for (i = 1; i < lk; i++)
     {
-      GEN z = nf_to_scalar_or_alg(gel(vnf, k), gmael(LS2, k, i));
-      if (typ(z) != t_POL) z = scalarpol_shallow(z, 0);
-      gmael(LS2, k, i) = RgX_chinese_coprime(z, pol_1(0), gel(vpol,k), gel(vpolinv,k), pol);
+      GEN z = nf_to_scalar_or_alg(gel(vnf,k), gel(L,i));
+      /* z mod T, 1 mod (pol/T) */
+      gel(L,i) = grem(gadd(z, gmul(gsubsg(1,z), gel(vcrt,k))), pol);
     }
   }
   LS2 = shallowconcat1(LS2);
@@ -1451,7 +1446,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     GEN P, vec = vecsmall_ei(dim, i);
     if (Flm_Flc_invimage(newselmer, vec, 2)) continue;
     P = liftselmer(vec, vnf, sbase, LS2k, LS2, sqrtLS2, factLS2, badprimes,
-        vpolinv, pol, selmer, K, LIM1, 1);
+        vcrt, pol, selmer, K, LIM1, 1);
     if (P)
     {
       gel(listpoints, ++nbpoints) = P;
@@ -1466,7 +1461,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     do vec = random_Flv(dim, 2);
     while (zv_equal0(vec) || Flm_Flc_invimage(newselmer, vec, 2));
     P = liftselmer(vec, vnf, sbase, LS2k, LS2, sqrtLS2, factLS2, badprimes,
-        vpolinv, pol, selmer, K, u*LIM1, u);
+        vcrt, pol, selmer, K, u*LIM1, u);
     if (P)
     {
       gel(listpoints, ++nbpoints) = P;
