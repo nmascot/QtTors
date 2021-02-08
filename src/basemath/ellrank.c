@@ -1431,7 +1431,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     pari_sp btop = avma;
     GEN P, vec;
     do vec = random_Flv(dim, 2);
-    while (hammingweight(vec) < 2 || Flm_Flc_invimage(newselmer, vec, 2));
+    while (zv_equal0(vec) || Flm_Flc_invimage(newselmer, vec, 2));
     P = liftselmer(vec, vnf, sbase, LS2k, LS2, sqrtLS2, factLS2, badprimes,
         vcrt, pol, selmer, K, u*LIM1, u);
     if (P)
