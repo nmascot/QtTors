@@ -1136,7 +1136,7 @@ redquadric(GEN base, GEN q2, GEN pol, GEN zc)
     GEN r = gel(R,i), ri = gexpo(r) > 1? ginv(r): NULL;
     GEN b = RgXV_cxeval(base, r, ri), z = RgX_cxeval(zc, r, ri);
     GEN M = RgC_RgV_mulrealsym(RgV_Rg_mul(b, gabs(z, prec)), gconj(b));
-    s = s ? RgM_add(s, M): M;
+    s = s? RgM_add(s, M): M;
   }
   return lllgram(s);
 }
@@ -1155,10 +1155,6 @@ static GEN
 RgXV_homogenous_evaldeg(GEN x, GEN a, GEN b)
 { pari_APPLY_same(RgX_homogenous_evaldeg(gel(x,i), a, b)) }
 
-static GEN
-ZC_shifti(GEN x, long n)
-{ pari_APPLY_type(t_COL, shifti(gel(x,i),n)) }
-
 static void
 check_oncurve(GEN ell, GEN v)
 {
@@ -1173,44 +1169,47 @@ check_oncurve(GEN ell, GEN v)
 static GEN
 smallbasis1(GEN nf, GEN polinv, GEN pol)
 {
-  pari_sp av = avma;
-  GEN vpol = nf_get_pol(nf), zk = nf_get_zk(nf);
+  GEN b, T = nf_get_pol(nf), zk = nf_get_zk(nf), _0 = pol_0(0);
   long i, l = lg(zk);
-  GEN b = cgetg(l, t_COL);
+
+  b = cgetg(l, t_COL);
   for (i = 1; i < l; ++i)
   {
     GEN z = nf_to_scalar_or_alg(nf, gel(zk, i));
-    if (typ(z) != t_POL) z = scalarpol(z, 0);
-    gel(b, i) = RgX_chinese_coprime(z, pol_0(0), vpol, polinv, pol);
+    if (typ(z) != t_POL) z = scalarpol_shallow(z, 0);
+    gel(b, i) = RgX_chinese_coprime(z, _0, T, polinv, pol);
   }
-  return gerepilecopy(av, b);
+  return b;
 }
 
 static GEN
 vecsmallbasis(GEN x, GEN vpolinv, GEN pol)
-{ pari_APPLY_same(smallbasis1(gel(x, i), gel(vpolinv, i), pol)) }
+{ pari_APPLY_same(smallbasis1(gel(x,i), gel(vpolinv,i), pol)) }
+
+static GEN
+ZC_shifti(GEN x, long n) { pari_APPLY_type(t_COL, shifti(gel(x,i), n)) }
 
 static GEN
 selmerbasis(GEN nf, GEN LS2k, GEN expo, GEN sqrtLS2, GEN factLS2,
             GEN badprimes, GEN polinv, GEN pol)
 {
   pari_sp av = avma;
-  GEN b, vpol = nf_get_pol(nf);
+  GEN b, T = nf_get_pol(nf);
   long i, l;
   GEN expok = vecslice(expo, LS2k[1], LS2k[2]);
   GEN sqrtzc = idealfactorback(nf, sqrtLS2, zv_neg(expok), 0);
   GEN exposqrtzc = ZC_shifti(ZM_zc_mul(factLS2, expok), -1);
+
   if (!gequal0(exposqrtzc))
     sqrtzc = idealmul(nf, sqrtzc,
         idealfactorback(nf, badprimes, gneg(exposqrtzc), 0));
   sqrtzc = idealhnf(nf, sqrtzc);
-  l = lg(sqrtzc);
-  b = cgetg(l, t_COL);
-  for (i = 1; i < l; ++i)
+  l = lg(sqrtzc); b = cgetg(l, t_COL);
+  for (i = 1; i < l; i++)
   {
     GEN z = nf_to_scalar_or_alg(nf, gel(sqrtzc, i));
-    if (typ(z) != t_POL) z = scalarpol(z, 0);
-    gel(b, i) = RgX_chinese_coprime(z, pol_0(0), vpol, polinv, pol);
+    if (typ(z) != t_POL) z = scalarpol_shallow(z, 0);
+    gel(b, i) = RgX_chinese_coprime(z, pol_0(0), T, polinv, pol);
   }
   return gerepilecopy(av, b);
 }
@@ -1278,28 +1277,22 @@ static GEN
 ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
 {
   pari_sp av;
-  GEN ell_K = gen_0, torseven, pol, vnf, vpol, vpolinv, vroots, vr1, sbase;
+  GEN ell_K, KP, torseven, pol, vnf, vpol, vpolinv, vroots, vr1, sbase;
   GEN LS2, factLS2, sqrtLS2, LS2k, selmer, helpLS2, LS2chars, helpchars;
   GEN newselmer, factdisc, badprimes, triv, helplist, listpoints;
   long i, j, k, tr1, n, tors2, mwrank, dim, nbpoints, lfactdisc, lhelp, t, u;
 
   if (!K) K = gen_1;
-  /* Equations of the curve */
   pol = ell2pol(ell);
   ell_K = elltwistequation(ell, K);
-  if (help)
-  {
-    check_oncurve(ell, help);
-    help = elltwistpoints(help, K);
-  }
+  if (help) help = elltwistpoints(help, K);
   triv = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,(effort+1)), help);
-  torseven = gel(triv, 1); help = gel(triv, 2);
-  torseven = elltwistpoints(torseven, ginv(K));
+
   help = elltwistpoints(help, ginv(K));
-  help = shallowconcat(torseven, help);
+  torseven = elltwistpoints(gel(triv, 1), ginv(K));
+  help = shallowconcat(torseven, gel(triv, 2));
   ell = ellinit(ell, NULL, prec);
-  tors2 = lg(torseven) - 1;
-  n = tors2+1;
+  n = lg(torseven); tors2 = n - 1;
   if (lg(vbnf)-1 != n) pari_err_TYPE("ell2selmer",vbnf);
   vnf = cgetg(n+1, t_VEC);
   vpol = cgetg(n+1, t_VEC);
@@ -1315,9 +1308,9 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     uel(vr1, k) = nf_get_r1(gel(vnf, k));
   }
   sbase = shallowconcat1(vecsmallbasis(vnf, vpolinv, pol));
-  factdisc = mkvec3(mkcols(2),
-    gel(absZ_factor(ZX_disc(pol)), 1),
-    gel(absZ_factor(K), 1));
+  KP = gel(absZ_factor(K), 1);
+  factdisc = mkvec3(mkcol(gen_2),
+    gel(absZ_factor(ZX_disc(pol)), 1), KP);
   factdisc = ZV_sort_uniq(shallowconcat1(factdisc));
   badprimes = cgetg(n+1, t_VEC);
   for (k = 1; k <= n; k++)
@@ -1325,8 +1318,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     GEN nf = gel(vnf, k);
     GEN id = idealadd(nf, nf_get_index(nf), ZX_deriv(gel(vpol, k)));
     GEN f = mkvec3(K, gel(vpolinv, k), id);
-    for (i = 1; i <= 3; i++)
-      gel(f,i) = gel(idealfactor(nf, gel(f,i)), 1);
+    for (i = 1; i <= 3; i++) gel(f,i) = gel(idealfactor(nf, gel(f,i)), 1);
     gel(badprimes, k) = gtoset(shallowconcat1(f));
   }
   if (DEBUGLEVEL >= 3)
@@ -1356,7 +1348,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     for (i = 1; i < lk; ++i)
     {
       GEN z = nf_to_scalar_or_alg(gel(vnf, k), gmael(LS2, k, i));
-      if (typ(z)!=t_POL) z = scalarpol(z, 0);
+      if (typ(z) != t_POL) z = scalarpol_shallow(z, 0);
       gmael(LS2, k, i) = RgX_chinese_coprime(z, pol_1(0), gel(vpol,k), gel(vpolinv,k), pol);
     }
   }
@@ -1392,8 +1384,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     /* the signs of LS2 for this embedding */
     selmer = Flm_intersect(selmer, Flm_ker(signs, 2), 2);
   }
-  av = avma;
-  lfactdisc = lg(factdisc);
+  av = avma; lfactdisc = lg(factdisc);
   for (i = 1; i < lfactdisc; i++)
   {
     GEN LS2image, helpimage, locimage;
@@ -1521,7 +1512,11 @@ ell2descent(GEN ell, GEN help, GEN K, long effort, long prec)
   if (!signe(K)) pari_err(e_MISC, "ell2descent: twist by 0");
   if (!equali1(K) && (!gequal0(ell_get_a1(ell)) || !gequal0(ell_get_a3(ell))))
     pari_err(e_MISC, "ell2descent: quadratic twist only allowed for a1=a3=0");
-  if (help && urst) help = ellchangepoint(help, urst);
+  if (help)
+  {
+    if (urst) help = ellchangepoint(help, urst);
+    check_oncurve(ell, help);
+  }
   v = ell2selmer(ell, help, K, vbnf, effort, prec);
   if (urst) gel(v,3) = ellchangepoint(gel(v,3), ellchangeinvert(urst));
   return gerepilecopy(ltop, v);
