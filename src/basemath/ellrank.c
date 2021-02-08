@@ -618,6 +618,7 @@ polrootsmodpn(GEN pol, GEN p)
   GEN v, r, P;
 
   if (!vd) { set_avma(av); retmkvec(mkvec2(gen_0, gen_0)); }
+  pol = Q_primpart(pol);
   P = gpowers0(p, vd-1, p); av2 = avma;
   v = FpX_roots(pol, p); l = lg(v);
   for (j = 1; j < l; j++) gel(v,j) = mkvec2(gel(v,j), gen_1);
@@ -1285,7 +1286,6 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   if (help) help = elltwistpoints(help, K);
   triv = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,(effort+1)), help);
 
-  help = elltwistpoints(help, ginv(K));
   torseven = elltwistpoints(gel(triv, 1), ginv(K));
   help = shallowconcat(torseven, gel(triv, 2));
   ell = ellinit(ell, NULL, prec);
@@ -1316,8 +1316,9 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     uel(vr1, k) = nf_get_r1(gel(vnf, k));
 
     id = idealadd(nf, nf_get_index(nf), ZX_deriv(T));
+    f = nf_pV_to_prV(nf, KP); settyp(f, t_COL);
     f = mkvec3(gel(idealfactor(nf, Tinv), 1),
-               gel(idealfactor(nf, id), 1), nf_pV_to_prV(nf, KP));
+               gel(idealfactor(nf, id), 1), f);
     gel(badprimes, k) = S = gtoset(shallowconcat1(f));
     sel = (NF == nf)? nf2selmer_quad(NF, S): bnfselmer(NF, S, 2);
     gel(LS2, k) = L = gel(sel, 1); lk = lg(L);
@@ -1450,11 +1451,18 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
 }
 
 static GEN
-ell2descent(GEN ell, GEN help, GEN K, long effort, long prec)
+ell2descent(GEN ell, GEN help, long effort, long prec)
 {
   pari_sp ltop = avma;
-  GEN urst, v, vbnf;
-  if (!K) K = gen_1;
+  GEN urst, v, vbnf, K = gen_1;
+
+  if (lg(ell)==3 && typ(ell)==t_VEC)
+  {
+    K = gel(ell, 2); ell = gel(ell, 1);
+    if (typ(K) != t_INT)
+      pari_err(e_MISC, "ell2descent: nonintegral quadratic twist");
+    if (!signe(K)) pari_err(e_MISC, "ell2descent: twist by 0");
+  }
   if (lg(ell)==4 && typ(ell)==t_VEC)
   {
     vbnf = gel(ell,3); urst = gel(ell,2);
@@ -1472,9 +1480,6 @@ ell2descent(GEN ell, GEN help, GEN K, long effort, long prec)
     ell = ellintegralbmodel(ell, &urst);
     vbnf = makevbnf(ell, prec);
   }
-  if (typ(K) != t_INT)
-    pari_err(e_MISC, "ell2descent: nonintegral quadratic twist");
-  if (!signe(K)) pari_err(e_MISC, "ell2descent: twist by 0");
   if (!equali1(K) && (!gequal0(ell_get_a1(ell)) || !gequal0(ell_get_a3(ell))))
     pari_err(e_MISC, "ell2descent: quadratic twist only allowed for a1=a3=0");
   if (help)
@@ -1489,4 +1494,4 @@ ell2descent(GEN ell, GEN help, GEN K, long effort, long prec)
 
 GEN
 ellrank(GEN ell, long effort, GEN help, long prec)
-{ return ell2descent(ell, help, NULL, effort, prec); }
+{ return ell2descent(ell, help, effort, prec); }

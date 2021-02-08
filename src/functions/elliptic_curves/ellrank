@@ -28,6 +28,12 @@ Doc: if $E$ is an elliptic curve over $\Q$,
       680061120400889506109527474197680/5329525731816164537079693913473]]]
  @eprog
 
+ Finally, $E$ can be a pair $[e, D]$, where $D$ is a non-zero integer and $e$
+ is an elliptic curve with $a_1$ and $a_3$ coefficients equal to $0$, as
+ given by \kbd{ellinit} or \kbd{ellrankinit}. We then look for points on
+ the twist of $e$ by $D$. Note that the \kbd{ellrankinit} initialization
+ is independant of $D$!
+
  \misctitle{Technical explanation:}
  The algorithm uses $2$-descent which has an intrinsic limitation:
  $R$ is equal to the sum of the rank of $E$ and of the $2$-rank of the

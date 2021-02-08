@@ -2295,7 +2295,7 @@ nf_pV_to_prV(GEN nf, GEN P)
   GEN Q = cgetg_copy(P,&l);
   if (l == 1) return Q;
   for (i = 1; i < l; i++) gel(Q,i) = idealprimedec(nf, gel(P,i));
-  return shallowconcat1(Q);
+  settyp(Q, t_VEC); return shallowconcat1(Q);
 }
 
 /* return [Fp[x]: Fp] */
