@@ -1267,7 +1267,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   GEN ell_K, KP, torseven, pol, vnf, vpol, vroots, vr1, vcrt, sbase;
   GEN LS2, factLS2, sqrtLS2, LS2k, selmer, helpLS2, LS2chars, helpchars;
   GEN newselmer, factdisc, badprimes, triv, helplist, listpoints;
-  long i, j, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, lhelp, t, u;
+  long i, j, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u;
 
   if (!K) K = gen_1;
   pol = ell2pol(ell);
@@ -1331,23 +1331,18 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   if (zv_sum(vr1) == 3)
   {
     GEN signs;
-    long row;
+    long row, m = 1;
     if (signe(K) > 0)
     {
-      long kmin = 1;
       for (k = 2; k <= n; ++k)
-        if (cmprr(gmael(vroots,k,1), gmael(vroots,kmin,1)) < 0) kmin = k;
-      row = 1;
-      for (k = 1; k < kmin; k++) row += vr1[k];
+        if (cmprr(gmael(vroots,k,1), gmael(vroots,m,1)) < 0) m = k;
+      row = 1; for (k = 1; k < m; k++) row += vr1[k];
     }
     else
     {
-      long kmax = 1;
       for (k = 2; k <= n; ++k)
-        if (cmprr(gmael(vroots,k,vr1[k]), gmael(vroots,kmax,vr1[k])) > 0)
-          kmax = k;
-      row = 0;
-      for (k = 1; k <= kmax; k++) row += vr1[k];
+        if (cmprr(gmael(vroots,k,vr1[k]), gmael(vroots,m,vr1[k])) > 0) m = k;
+      row = 0; for (k = 1; k <= m; k++) row += vr1[k];
     }
     signs = Flm_transpose(mkmat(Flm_row(LS2chars, row)));
     /* the signs of LS2 for this embedding */
@@ -1401,19 +1396,11 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   help = shallowextract(help, helplist);
   helpchars = shallowextract(helpchars, helplist);
   helpLS2 = shallowextract(helpLS2, helplist);
-  lhelp = lg(help);
   dim = lg(selmer)-1;
-  newselmer = cgetg(dim+1, t_MAT);
-  if (lhelp > 1)
-  {
-    GEN M = Flm_mul(LS2chars, selmer, 2);
-    for (i = 1; i < lhelp; i++)
-      gel(newselmer, i) = Flm_Flc_invimage(M, gel(helpchars, i), 2);
-  }
-  setlg(newselmer, lhelp);
+  newselmer = Flm_invimage(Flm_mul(LS2chars, selmer, 2), helpchars, 2);
   if (DEBUGLEVEL) err_printf("Selmer rank: %ld\n", dim);
   listpoints = vec_lengthen(help, dim);
-  nbpoints = lhelp - 1;
+  nbpoints = lg(help) - 1;
   for (i=1; i <= dim; i++)
   {
     pari_sp btop = avma;
