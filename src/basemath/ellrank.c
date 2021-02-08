@@ -1232,8 +1232,8 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
     else
     {
       GEN r;
-      do r = randS(sbase); while (degpol(ZX_gcd(r, pol)));
-      zc = RgXQ_mul(z, ZXQ_sqr(r, pol), pol);
+      do r = randS(sbase); while (degpol(QX_gcd(r, pol)));
+      zc = RgXQ_mul(z, QXQ_sqr(r, pol), pol);
     }
     q2 = Q_primpart(tracematrix(zc, b, pol));
     U = redquadric(b, q2, pol, QXQ_div(zc, polprime, pol));
@@ -1430,7 +1430,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     pari_sp btop = avma;
     GEN P, vec;
     do vec = random_Flv(dim, 2);
-    while (zv_equal0(vec) || Flm_Flc_invimage(newselmer, vec, 2));
+    while (hammingweight(vec) < 2 || Flm_Flc_invimage(newselmer, vec, 2));
     P = liftselmer(vec, vnf, sbase, LS2k, LS2, sqrtLS2, factLS2, badprimes,
         vcrt, pol, selmer, K, u*LIM1, u);
     if (P)
