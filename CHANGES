@@ -46,7 +46,7 @@ HC  13- allow hypergeom(N, D, t_SER)
 BA  16- New GP functions ellrank, ellrankinit : implement 2-descent on
         elliptic curve following a GP script by Denis Simon.
 BA  17- [libpari] RgXY_derivx
-    18- [libpari] RgC_RgV_mulrealsym
+    18- [libpari] RgC_RgV_mulrealsym, RgM_to_RgXV_reverse
 
   Changed
 HC   1- faster implementation of eulervec + cache result

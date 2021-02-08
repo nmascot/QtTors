@@ -1169,6 +1169,7 @@ GEN     Rg_get_0(GEN x);
 GEN     Rg_get_1(GEN x);
 GEN     Rg_to_RgC(GEN x, long N);
 GEN     RgM_to_RgXV(GEN x, long v);
+GEN     RgM_to_RgXV_reverse(GEN x, long v);
 GEN     RgM_to_RgXX(GEN x, long v,long w);
 GEN     RgV_to_RgX(GEN x, long v);
 GEN     RgV_to_RgM(GEN v, long n);

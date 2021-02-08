@@ -1200,58 +1200,64 @@ selmerbasis(GEN nf, GEN LS2k, GEN expo, GEN sqrtLS2, GEN factLS2,
   return b;
 }
 
+static long randu() { return random_Fl(127) - 63; }
+static GEN
+randS(GEN b)
+{
+  return gadd(gmulgs(gel(b,1), randu()),
+              gadd(gmulgs(gel(b,2), randu()), gmulgs(gel(b,3), randu())));
+}
+
 static GEN
 liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN factLS2,
            GEN badprimes, GEN vcrt, GEN pol, GEN selmer, GEN K, long lim, long ntry)
 {
   pari_sp av = avma, av2;
   long n = lg(vnf)-1, k, t;
-  GEN expo, z, b, polprime;
+  GEN ttheta, tttheta, z, b, polprime, expo = Flm_Flc_mul(selmer, vec, 2);
 
-  expo = Flm_Flc_mul(selmer, vec, 2);
   b = cgetg(n+1, t_VEC);
   for (k = 1; k <= n; k++)
     gel(b,k) = selmerbasis(gel(vnf,k), gel(LS2k,k), expo, gel(sqrtLS2,k),
                            gel(factLS2,k), gel(badprimes,k), gel(vcrt,k), pol);
   b = shallowconcat1(b);
-  polprime = ZX_deriv(pol);
   z = RgXQV_factorback(LS2, expo, pol);
-  av2 = avma;
+  ttheta = RgX_shift_shallow(pol,-2);
+  tttheta = RgX_shift_shallow(pol, -1);
+  polprime = ZX_deriv(pol); av2 = avma;
   for (t = 1; t <= ntry; t++)
   {
-    GEN ttheta, q1, pol4, den, point, tttheta, q0;
-    GEN xz, xx, yy, zz, R, y2, rd, zc, q2, change, sol, param, newbase;
-    if (t==1) zc = z;
+    GEN q1, pol4, den, point, q0, xz, xx, yy, zz, R, zc, q2, U, param, newb;
+    if (t == 1) zc = z;
     else
     {
-      do rd = RgV_dotproduct(sbase,mkcol3s(random_Fl(127)-63, random_Fl(127)-63, random_Fl(127)-63));
-      while (degpol(ZX_gcd(rd,pol))!=0);
-      zc = RgXQ_mul(z, RgXQ_sqr(rd,pol), pol);
+      GEN r;
+      do r = randS(sbase); while (degpol(ZX_gcd(r, pol)));
+      zc = RgXQ_mul(z, ZXQ_sqr(r, pol), pol);
     }
     q2 = Q_primpart(tracematrix(zc, b, pol));
-    change = redquadric(b, q2, pol, QXQ_div(zc, polprime, pol));
-    if (lg(change) < 4) { set_avma(av2); continue; }
-    q2 = qf_apply_RgM(q2, change);
-    newbase = RgV_RgM_mul(b, change);
-    sol = qfsolve(q2);
-    param = gmul(qfparam(q2, sol, 0), mkcol3(pol_xn(2,0), pol_x(0), pol_1(0)));
-    param = Q_primpart(param);
-    ttheta = RgX_shift_shallow(pol,-2);
-    q1 = RgM_neg(tracematrix(RgXQ_mul(zc, ttheta, pol), newbase, pol));
+    U = redquadric(b, q2, pol, QXQ_div(zc, polprime, pol));
+    if (lg(U) < 4) { set_avma(av2); continue; }
+    q2 = qf_apply_RgM(q2, U);
+    newb = RgV_RgM_mul(b, U);
+
+    param = Q_primpart(qfparam(q2, qfsolve(q2), 0));
+    param = RgM_to_RgXV_reverse(shallowtrans(param), 0);
+    q1 = RgM_neg(tracematrix(RgXQ_mul(zc, ttheta, pol), newb, pol));
     pol4 = hyperellreduce(qfeval(q1, param), &R);
-    den = denom(content(gmul(K, pol4)));
-    pol4 = gmul(pol4, sqri(den));
-    if (DEBUGLEVEL >= 2)
-      err_printf("  reduced quartic: %Ps*Y^2 = %Ps\n", K, pol4);
-    xz = projratpointxz(gmul(K, pol4), lim, &y2);
-    if (!xz) xz = projratpointxz2(gmul(K, pol4), lim, &y2);
+    if (!equali1(K)) pol4 = RgX_Rg_mul(pol4, K);
+    pol4 = Q_remove_denom(pol4, &den);
+    if (den) pol4 = ZX_Z_mul(pol4, den);
+    if (DEBUGLEVEL >= 2) err_printf("  reduced quartic: Y^2 = %Ps\n", pol4);
+
+    xz = projratpointxz(pol4, lim, &zz);
+    if (!xz) xz = projratpointxz2(pol4, lim, &zz);
     if (!xz) { set_avma(av2); continue; }
-    point = RgM_RgC_mul(R, xz);
-    xx = gel(point,1); yy = gel(point,2); zz = gdiv(y2, den); /* != 0 */
+    point = RgM_RgC_mul(R, xz); xx = gel(point,1); yy = gel(point,2);
+
     param = RgXV_homogenous_evaldeg(param, xx, gpowers(yy, 2));
-    param = gmul(param, gdiv(K, zz));
-    tttheta = RgX_shift_shallow(pol, -1);
-    q0 = tracematrix(RgXQ_mul(zc, tttheta, pol), newbase, pol);
+    param = gmul(param, gdiv(den? mulii(K, den): K, zz));
+    q0 = tracematrix(RgXQ_mul(zc, tttheta, pol), newb, pol);
     xx = gdiv(qfeval(q0, param), K);
     (void)issquareall(gdiv(poleval(pol, xx), K), &yy);
     if (DEBUGLEVEL) err_printf("Found point: %Ps\n", mkvec2(xx,yy));

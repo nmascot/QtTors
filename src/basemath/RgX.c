@@ -736,10 +736,13 @@ Rg_to_RgC(GEN x, long N)
   return (typ(x) == t_POL)? RgX_to_RgC(x,N): scalarcol_shallow(x, N);
 }
 
-/* vector of polynomials (in v) whose coeffs are given by the columns of x */
+/* vector of polynomials (in v) whose coefs are given by the columns of x */
 GEN
 RgM_to_RgXV(GEN x, long v)
 { pari_APPLY_type(t_VEC, RgV_to_RgX(gel(x,i), v)) }
+GEN
+RgM_to_RgXV_reverse(GEN x, long v)
+{ pari_APPLY_type(t_VEC, RgV_to_RgX_reverse(gel(x,i), v)) }
 
 /* matrix whose entries are given by the coeffs of the polynomials in
  * vector v (considered as degree n-1 polynomials) */
