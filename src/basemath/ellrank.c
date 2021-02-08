@@ -1227,7 +1227,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
   polprime = ZX_deriv(pol); av2 = avma;
   for (t = 1; t <= ntry; t++)
   {
-    GEN q1, pol4, den, point, q0, xz, xx, yy, zz, R, zc, q2, U, param, newb;
+    GEN q1, pol4, den, P, q0, xz, x, y, zz, R, zc, q2, U, param, newb;
     if (t == 1) zc = z;
     else
     {
@@ -1248,20 +1248,21 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
     if (!equali1(K)) pol4 = RgX_Rg_mul(pol4, K);
     pol4 = Q_remove_denom(pol4, &den);
     if (den) pol4 = ZX_Z_mul(pol4, den);
-    if (DEBUGLEVEL >= 2) err_printf("  reduced quartic: Y^2 = %Ps\n", pol4);
+    if (DEBUGLEVEL>1) err_printf("  reduced quartic: Y^2 = %Ps\n", pol4);
 
     xz = projratpointxz(pol4, lim, &zz);
     if (!xz) xz = projratpointxz2(pol4, lim, &zz);
     if (!xz) { set_avma(av2); continue; }
-    point = RgM_RgC_mul(R, xz); xx = gel(point,1); yy = gel(point,2);
+    P = RgM_RgC_mul(R, xz); x = gel(P,1); y = gel(P,2);
 
-    param = RgXV_homogenous_evaldeg(param, xx, gpowers(yy, 2));
+    param = RgXV_homogenous_evaldeg(param, x, gpowers(y, 2));
     param = gmul(param, gdiv(den? mulii(K, den): K, zz));
     q0 = tracematrix(RgXQ_mul(zc, tttheta, pol), newb, pol);
-    xx = gdiv(qfeval(q0, param), K);
-    (void)issquareall(gdiv(poleval(pol, xx), K), &yy);
-    if (DEBUGLEVEL) err_printf("Found point: %Ps\n", mkvec2(xx,yy));
-    return gerepilecopy(av, mkvec2(xx, yy));
+    x = gdiv(qfeval(q0, param), K);
+    (void)issquareall(gdiv(poleval(pol, x), K), &y);
+    P = mkvec2(x, y);
+    if (DEBUGLEVEL) err_printf("Found point: %Ps\n", P);
+    return gerepilecopy(av, P);
   }
   return NULL;
 }
@@ -1328,7 +1329,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     }
   }
   sbase = shallowconcat1(vecsmallbasis(vnf, vcrt, pol));
-  if (DEBUGLEVEL >= 3) err_printf("   local badprimes = %Ps\n", badprimes);
+  if (DEBUGLEVEL>2) err_printf("   local badprimes = %Ps\n", badprimes);
   LS2 = shallowconcat1(LS2);
   helpLS2 = ellLS2image(pol, help, K, vpol);
   selmer = kernorm(LS2, factdisc, 2, pol);
