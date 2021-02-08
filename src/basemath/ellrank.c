@@ -1036,53 +1036,47 @@ elllocalimage(GEN pol, GEN K, GEN vnf, GEN p, GEN pp, GEN pts)
 }
 
 static GEN
-ellLS2image(GEN pol, GEN listpoints, GEN K, GEN vpol)
+ellLS2image(GEN pol, GEN vP, GEN K, GEN vpol)
 {
-  pari_sp ltop = avma;
-  GEN LS2image, var;
-  long i, l = lg(listpoints);
-  if (l == 1)
-    return cgetg(1, t_VEC);
-  var = pol_x(varn(pol));
+  pari_sp av = avma;
+  GEN LS2image;
+  long i, l = lg(vP);
+
+  if (l == 1) return cgetg(1, t_VEC);
   LS2image = cgetg(l, t_VEC);
-  for (i = 1; i < l; ++i)
+  for (i = 1; i < l; i++)
   {
-    GEN point = gel(listpoints, i);
-    GEN px = gel(point,1), py = gel(point,2);
-    if (ell_is_inf(point))
-    {
-      gel(LS2image, i) = gen_1;
-      continue;
-    }
-    if (!gequal0(py))
-      gel(LS2image, i) = gmul(K, gsub(px, var));
+    GEN P = gel(vP, i), x, t;
+    if (ell_is_inf(P)) { gel(LS2image, i) = gen_1; continue; }
+    x = gel(P,1); t = deg1pol_shallow(gen_m1, x, 0);
+    if (!gequal0(gel(P,2)))
+      gel(LS2image, i) = gmul(K, t);
     else
     {
       long k, lp = lg(vpol);
       GEN aux = cgetg(lp, t_VEC);
-      for (k = 1; k < lp; ++k)
+      for (k = 1; k < lp; k++)
       {
-        gel(aux, k) = signe(poleval(gel(vpol, k), px))==0 ?
-          ZX_deriv(pol): gmul(K, gsub(px, var));
-        gel(aux, k) = gmodulo(gel(aux, k), gel(vpol, k));
+        GEN a = signe(poleval(gel(vpol, k), x))?  gmul(K, t): ZX_deriv(pol);
+        gel(aux, k) = gmodulo(a, gel(vpol, k));
       }
-      gel(LS2image, i) = lift(chinese1(aux));
+      gel(LS2image, i) = liftpol_shallow(chinese1(aux));
     }
   }
-  return gerepilecopy(ltop, LS2image);
+  return gerepilecopy(av, LS2image);
 }
 
 static GEN
 ellsearchtrivialpoints(GEN ell, GEN lim, GEN help)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   GEN torseven = gtoset(gel(elltors_psylow(ell,2), 3));
   GEN triv = ellratpoints(ell, lim, 0);
-  if (help)
-    triv = shallowconcat(triv, help);
+
+  if (help) triv = shallowconcat(triv, help);
   triv = gtoset(vecellabs(triv));
   triv = setminus(triv, torseven);
-  return gerepilecopy(ltop, mkvec2(torseven, triv));
+  return gerepilecopy(av, mkvec2(torseven, triv));
 }
 
 GEN
@@ -1090,14 +1084,12 @@ ellrankinit(GEN ell, long prec)
 {
   pari_sp av = avma;
   GEN urst;
-  checkell_Q(ell);
-  ell = ellintegralbmodel(ell, &urst);
+  checkell_Q(ell); ell = ellintegralbmodel(ell, &urst);
   return gerepilecopy(av, mkvec3(ell, urst, makevbnf(ell, prec)));
 }
 
 INLINE GEN
-ZV_isneg(GEN x)
-{ pari_APPLY_long(signe(gel(x,i)) < 0) }
+ZV_isneg(GEN x) { pari_APPLY_long(signe(gel(x,i)) < 0) }
 
 static GEN
 selmersign(GEN x, GEN vpol, GEN L)
