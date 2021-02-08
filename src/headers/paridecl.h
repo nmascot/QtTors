@@ -2839,10 +2839,6 @@ GEN     subgrouplist0(GEN bnr, GEN indexbound, long all);
 GEN     bnfisnorm(GEN bnf,GEN x,long flag);
 GEN     rnfisnorm(GEN S, GEN x, long flag);
 GEN     rnfisnorminit(GEN bnf, GEN R, int galois);
-long    nfhilbert(GEN bnf,GEN a,GEN b);
-long    nfhilbert0(GEN bnf,GEN a,GEN b,GEN p);
-long    hyperell_locally_soluble(GEN pol,GEN p);
-long    nf_hyperell_locally_soluble(GEN nf,GEN pol,GEN p);
 
 /* char.c */
 
@@ -3182,6 +3178,10 @@ GEN     ellpadics2(GEN E, GEN p, long n);
 
 GEN     ellrank(GEN ell, long effort, GEN help, long prec);
 GEN     ellrankinit(GEN ell, long prec);
+long    hyperell_locally_soluble(GEN pol,GEN p);
+long    nf_hyperell_locally_soluble(GEN nf,GEN pol,GEN p);
+long    nfhilbert(GEN bnf,GEN a,GEN b);
+long    nfhilbert0(GEN bnf,GEN a,GEN b,GEN p);
 
 /* elltors.c */
 

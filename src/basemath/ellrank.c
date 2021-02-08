@@ -205,14 +205,454 @@ polrootsmodpn(GEN pol, GEN p)
 /*    FUNCTIONS FOR LOCAL COMPUTATIONS         \\ */
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
 
-static GEN
-kpmodsquares1(GEN nf, GEN z, GEN modpr, GEN pstar)
+/* p > 2, T ZX, p prime, x t_INT */
+static long
+lemma6(GEN T, GEN p, long nu, GEN x)
 {
-  GEN pr = modpr_get_pr(modpr), p = pr_get_p(pr);
-  long v = nfvalrem(nf, z, pr, &z);
+  long la, mu;
+  pari_sp av = avma;
+  GEN gpx, gx = poleval(T, x);
+
+  if (Zp_issquare(gx, p)) return gc_long(av,1);
+
+  la = Z_pval(gx, p);
+  gpx = poleval(ZX_deriv(T), x);
+  mu = signe(gpx)? Z_pval(gpx,p)
+                 : la+nu+1; /* mu = +oo */
+  set_avma(av);
+  if (la > mu<<1) return 1;
+  if (la >= nu<<1 && mu >= nu) return 0;
+  return -1;
+}
+/* p = 2, T ZX, x t_INT: return 1 = yes, -1 = no, 0 = inconclusive */
+static long
+lemma7(GEN T, long nu, GEN x)
+{
+  long odd4, la, mu;
+  pari_sp av = avma;
+  GEN gpx, oddgx, gx = poleval(T, x);
+
+  if (Zp_issquare(gx,gen_2)) return 1;
+
+  gpx = poleval(ZX_deriv(T), x);
+  la = Z_lvalrem(gx, 2, &oddgx);
+  odd4 = umodiu(oddgx,4); set_avma(av);
+
+  mu = vali(gpx);
+  if (mu < 0) mu = la+nu+1; /* mu = +oo */
+
+  if (la > mu<<1) return 1;
+  if (nu > mu)
+  {
+    long mnl = mu+nu-la;
+    if (odd(la)) return -1;
+    if (mnl==1) return 1;
+    if (mnl==2 && odd4==1) return 1;
+  }
+  else
+  {
+    long nu2 = nu << 1;
+    if (la >= nu2) return 0;
+    if (la == nu2 - 2 && odd4==1) return 0;
+  }
+  return -1;
+}
+
+/* T a ZX, p a prime, pnu = p^nu, x0 t_INT */
+static long
+zpsol(GEN T, GEN p, long nu, GEN pnu, GEN x0)
+{
+  long i, res;
+  pari_sp av = avma, btop;
+  GEN x, pnup;
+
+  res = absequaliu(p,2)? lemma7(T,nu,x0): lemma6(T,p,nu,x0);
+  if (res== 1) return 1;
+  if (res==-1) return 0;
+  x = x0; pnup = mulii(pnu,p);
+  btop = avma;
+  for (i=0; i < itos(p); i++)
+  {
+    x = addii(x,pnu);
+    if (zpsol(T,p,nu+1,pnup,x)) return gc_long(av,1);
+    if (gc_needed(btop, 2))
+    {
+      x = gerepileupto(btop, x);
+      if (DEBUGMEM > 1)
+        pari_warn(warnmem, "hyperell_locally_soluble: %ld/%Ps",i,p);
+    }
+  }
+  return gc_long(av,0);
+}
+
+/* return 1 if equation y^2=T(x) has a rational p-adic solution (possibly
+ * infinite), 0 otherwise. */
+long
+hyperell_locally_soluble(GEN T,GEN p)
+{
+  pari_sp av = avma;
+  long res;
+  if (typ(T)!=t_POL) pari_err_TYPE("hyperell_locally_soluble",T);
+  if (typ(p)!=t_INT) pari_err_TYPE("hyperell_locally_soluble",p);
+  RgX_check_ZX(T, "hyperell_locally_soluble");
+  res = zpsol(T,p,0,gen_1,gen_0) || zpsol(RgX_recip_shallow(T), p, 1, p, gen_0);
+  return gc_long(av, res);
+}
+
+/* is t a square in (O_K/pr) ? Assume v_pr(t) = 0 */
+static long
+quad_char(GEN nf, GEN t, GEN pr)
+{
+  GEN T, p, modpr = zk_to_Fq_init(nf, &pr,&T,&p);
+  return Fq_issquare(nf_to_Fq(nf,t,modpr), T, p)? 1: -1;
+}
+/* quad_char(x), x in Z, nonzero mod p */
+static long
+Z_quad_char(GEN x, GEN pr)
+{
+  long f = pr_get_f(pr);
+  if (!odd(f)) return 1;
+  return kronecker(x, pr_get_p(pr));
+}
+
+/* (pr,2) = 1. return 1 if x in Z_K is a square in Z_{K_pr}, 0 otherwise.
+ * modpr = zkmodprinit(nf,pr) */
+static long
+psquarenf(GEN nf,GEN x,GEN pr,GEN modpr)
+{
+  pari_sp av = avma;
+  GEN p = pr_get_p(pr);
+  long v;
+
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) == t_INT) {
+    if (!signe(x)) return 1;
+    v = Z_pvalrem(x, p, &x) * pr_get_e(pr);
+    if (v&1) return 0;
+    v = (Z_quad_char(x, pr) == 1);
+  } else {
+    v = ZC_nfvalrem(x, pr, &x);
+    if (v&1) return 0;
+    v = (quad_char(nf, x, modpr) == 1);
+  }
+  return gc_long(av,v);
+}
+
+static long
+ZV_iseven(GEN zlog)
+{
+  long i, l = lg(zlog);
+  for (i = 1; i < l; i++)
+    if (mpodd(gel(zlog,i))) return 0;
+  return 1;
+}
+
+/* pr | 2, project to principal units (trivializes later discrete log) */
+static GEN
+to_principal_unit(GEN nf, GEN x, GEN pr, GEN sprk)
+{
+  if (pr_get_f(pr) != 1)
+  {
+    GEN prk = gel(sprk,3);
+    x = nfpowmodideal(nf, x, gmael(sprk,5,1), prk);
+  }
+  return x;
+}
+/* pr | 2. Return 1 if x in Z_K is square in Z_{K_pr}, 0 otherwise */
+static int
+psquare2nf(GEN nf, GEN x, GEN pr, GEN sprk)
+{
+  long v = nfvalrem(nf, x, pr, &x);
+  if (v == LONG_MAX) return 1; /* x = 0 */
+  /* (x,pr) = 1 */
+  if (odd(v)) return 0;
+  x = to_principal_unit(nf, x, pr, sprk); /* = 1 mod pr */
+  return ZV_iseven(sprk_log_prk1(nf, x, sprk));
+}
+
+/* pr above an odd prime */
+static long
+lemma6nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN modpr)
+{
+  pari_sp av = avma;
+  long la, mu;
+  GEN gpx, gx = nfpoleval(nf, T, x);
+
+  if (psquarenf(nf,gx,pr,modpr)) return 1;
+
+  la = nfval(nf,gx,pr);
+  gpx = nfpoleval(nf, RgX_deriv(T), x);
+  mu = gequal0(gpx)? la+nu+1 /* +oo */: nfval(nf,gpx,pr);
+  set_avma(av);
+  if (la > (mu<<1)) return 1;
+  if (la >= (nu<<1) && mu >= nu) return 0;
+  return -1;
+}
+/* pr above 2 */
+static long
+lemma7nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN sprk)
+{
+  long i, res, la, mu, q, e, v;
+  GEN M, y, gpx, loggx = NULL, gx = nfpoleval(nf, T, x);
+
+  la = nfvalrem(nf, gx, pr, &gx); /* gx /= pi^la, pi a pr-uniformizer */
+  if (la == LONG_MAX) return 1;
+  if (!odd(la))
+  {
+    gx = to_principal_unit(nf, gx, pr, sprk); /* now 1 mod pr */
+    loggx = sprk_log_prk1(nf, gx, sprk); /* cheap */
+    if (ZV_iseven(loggx)) return 1;
+  }
+  gpx = nfpoleval(nf, RgX_deriv(T), x);
+  mu = gequal0(gpx)? la+nu+1 /* oo */: nfval(nf,gpx,pr);
+
+  if (la > (mu << 1)) return 1;
+  if (nu > mu)
+  {
+    if (odd(la)) return -1;
+    q = mu+nu-la; res = 1;
+  }
+  else
+  {
+    q = (nu << 1) - la;
+    if (q <= 0) return 0;
+    if (odd(la)) return -1;
+    res = 0;
+  }
+  /* la even */
+  e = pr_get_e(pr);
+  if (q > e << 1)  return -1;
+  if (q == 1) return res;
+
+  /* gx = 1 mod pr; square mod pi^q ? */
+  v = nfvalrem(nf, nfadd(nf, gx, gen_m1), pr, &y);
+  if (v >= q) return res;
+  /* 1 + pi^v y = (1 + pi^vz z)^2 mod pr^q ? v < q <= 2e => vz < e => vz = vy/2
+   * => y = x^2 mod pr^(min(q-v, e+v/2)), (y,pr) = 1 */
+  if (odd(v)) return -1;
+  /* e > 1 */
+  M = cgetg(2*e+1 - q + 1, t_VEC);
+  for (i = q+1; i <= 2*e+1; i++) gel(M, i-q) = sprk_log_gen_pr(nf, sprk, i);
+  M = ZM_hnfmodid(shallowconcat1(M), gen_2);
+  return hnf_solve(M,loggx)? res: -1;
+}
+/* zinit either a sprk (pr | 2) or a modpr structure (pr | p odd).
+   pnu = pi^nu, pi a uniformizer */
+static long
+zpsolnf(GEN nf,GEN T,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
+{
+  long i, res;
+  pari_sp av = avma;
+  GEN pnup;
+
+  res = typ(zinit) == t_VEC? lemma7nf(nf,T,pr,nu,x0,zinit)
+                           : lemma6nf(nf,T,pr,nu,x0,zinit);
+  set_avma(av);
+  if (res== 1) return 1;
+  if (res==-1) return 0;
+  pnup = nfmul(nf, pnu, pr_get_gen(pr));
+  nu++;
+  for (i=1; i<lg(repr); i++)
+  {
+    GEN x = nfadd(nf, x0, nfmul(nf,pnu,gel(repr,i)));
+    if (zpsolnf(nf,T,pr,nu,pnup,x,repr,zinit)) return gc_long(av,1);
+  }
+  return gc_long(av,0);
+}
+
+/* Let y = copy(x); y[k] := j; return y */
+static GEN
+ZC_add_coeff(GEN x, long k, long j)
+{ GEN y = shallowcopy(x); gel(y, k) = utoipos(j); return y; }
+
+/* system of representatives for Zk/pr */
+static GEN
+repres(GEN nf, GEN pr)
+{
+  long f = pr_get_f(pr), N = nf_get_degree(nf), p = itos(pr_get_p(pr));
+  long i, j, k, pi, pf = upowuu(p, f);
+  GEN perm = pr_basis_perm(nf, pr), rep = cgetg(pf+1,t_VEC);
+
+  gel(rep,1) = zerocol(N);
+  for (pi=i=1; i<=f; i++,pi*=p)
+  {
+    long t = perm[i];
+    for (j=1; j<p; j++)
+      for (k=1; k<=pi; k++) gel(rep, j*pi+k) = ZC_add_coeff(gel(rep,k), t, j);
+  }
+  return rep;
+}
+
+/* = 1 if equation y^2 = z^deg(T) * T(x/z) has a pr-adic rational solution
+ * (possibly (1,y,0) = oo), 0 otherwise.
+ * coeffs of T are algebraic integers in nf */
+static long
+locally_soluble(GEN nf,GEN T,GEN pr)
+{
+  GEN repr, zinit;
+
+  if (typ(T)!=t_POL) pari_err_TYPE("nf_hyperell_locally_soluble",T);
+  if (gequal0(T)) return 1;
+  checkprid(pr); nf = checknf(nf);
+  if (absequaliu(pr_get_p(pr), 2))
+  { /* tough case */
+    zinit = log_prk_init(nf, pr, 1+2*pr_get_e(pr), NULL);
+    if (psquare2nf(nf,constant_coeff(T),pr,zinit)) return 1;
+    if (psquare2nf(nf, leading_coeff(T),pr,zinit)) return 1;
+  }
+  else
+  {
+    zinit = zkmodprinit(nf, pr);
+    if (psquarenf(nf,constant_coeff(T),pr,zinit)) return 1;
+    if (psquarenf(nf, leading_coeff(T),pr,zinit)) return 1;
+  }
+  repr = repres(nf,pr); /* FIXME: inefficient if Npr is large */
+  return zpsolnf(nf, T, pr, 0, gen_1, gen_0, repr, zinit) ||
+         zpsolnf(nf, RgX_recip_shallow(T), pr, 1, pr_get_gen(pr),
+                 gen_0, repr, zinit);
+}
+long
+nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
+{
+  pari_sp av = avma;
+  return gc_long(av, locally_soluble(nf, T, pr));
+}
+
+/* return a * denom(a)^2, as an 'liftalg' */
+static GEN
+den_remove(GEN nf, GEN a)
+{
+  GEN da;
+  a = nf_to_scalar_or_basis(nf, a);
+  switch(typ(a))
+  {
+    case t_INT: return a;
+    case t_FRAC: return mulii(gel(a,1), gel(a,2));
+    case t_COL:
+      a = Q_remove_denom(a, &da);
+      if (da) a = ZC_Z_mul(a, da);
+      return nf_to_scalar_or_alg(nf, a);
+    default: pari_err_TYPE("nfhilbert",a);
+      return NULL;/*LCOV_EXCL_LINE*/
+  }
+}
+
+static long
+hilb2nf(GEN nf,GEN a,GEN b,GEN p)
+{
+  pari_sp av = avma;
+  GEN pol;
+  a = den_remove(nf, a);
+  b = den_remove(nf, b);
+  pol = mkpoln(3, a, gen_0, b);
+  /* varn(nf.pol) = 0, pol is not a valid GEN  [as in Pol([x,x], x)].
+   * But it is only used as a placeholder, hence it is not a problem */
+  return gc_long(av, nf_hyperell_locally_soluble(nf,pol,p)? 1: -1);
+}
+
+/* local quadratic Hilbert symbol (a,b)_pr, for a,b (nonzero) in nf */
+static long
+nfhilbertp(GEN nf, GEN a, GEN b, GEN pr)
+{
+  GEN t;
+  long va, vb;
+  pari_sp av = avma;
+
+  if (absequaliu(pr_get_p(pr), 2)) return hilb2nf(nf,a,b,pr);
+
+  /* pr not above 2, compute t = tame symbol */
+  va = nfval(nf,a,pr);
+  vb = nfval(nf,b,pr);
+  if (!odd(va) && !odd(vb)) return gc_long(av,1);
+  /* Trick: pretend the exponent is 2, result is OK up to squares ! */
+  t = famat_makecoprime(nf, mkvec2(a,b), mkvec2s(vb, -va),
+                        pr, pr_hnf(nf, pr), gen_2);
+  /* quad. symbol is image of t = (-1)^(v(a)v(b)) a^v(b) b^(-v(a))
+   * by the quadratic character  */
+  switch(typ(t))
+  {
+    default: /* t_COL */
+      if (!ZV_isscalar(t)) break;
+      t = gel(t,1); /* fall through */
+    case t_INT:
+      if (odd(va) && odd(vb)) t = negi(t);
+      return gc_long(av,  Z_quad_char(t, pr));
+  }
+  if (odd(va) && odd(vb)) t = ZC_neg(t);
+  return gc_long(av, quad_char(nf, t, pr));
+}
+
+/* Global quadratic Hilbert symbol (a,b):
+ *  =  1 if X^2 - aY^2 - bZ^2 has a point in projective plane
+ *  = -1 otherwise
+ * a, b should be nonzero */
+long
+nfhilbert(GEN nf, GEN a, GEN b)
+{
+  pari_sp av = avma;
+  long i, l;
+  GEN S, S2, Sa, Sb, sa, sb;
+
+  nf = checknf(nf);
+  a = nf_to_scalar_or_basis(nf, a);
+  b = nf_to_scalar_or_basis(nf, b);
+  /* local solutions in real completions ? [ error in nfsign if arg is 0 ]*/
+  sa = nfsign(nf, a);
+  sb = nfsign(nf, b); l = lg(sa);
+  for (i=1; i<l; i++)
+    if (sa[i] && sb[i])
+    {
+      if (DEBUGLEVEL>3)
+        err_printf("nfhilbert not soluble at real place %ld\n",i);
+      return gc_long(av,-1);
+    }
+
+  /* local solutions in finite completions ? (pr | 2ab)
+   * primes above 2 are toughest. Try the others first */
+  Sa = idealfactor(nf, a);
+  Sb = idealfactor(nf, b);
+  S2 = idealfactor(nf, gen_2);
+  S = merge_factor(Sa, Sb, (void*)&cmp_prime_ideal, &cmp_nodata);
+  S = merge_factor(S,  S2, (void*)&cmp_prime_ideal, &cmp_nodata);
+  S = gel(S,1);
+  /* product of all hilbertp is 1 ==> remove one prime (above 2!) */
+  for (i=lg(S)-1; i>1; i--)
+    if (nfhilbertp(nf,a,b,gel(S,i)) < 0)
+    {
+      if (DEBUGLEVEL>3)
+        err_printf("nfhilbert not soluble at finite place %Ps\n",S[i]);
+      return gc_long(av,-1);
+    }
+  return gc_long(av,1);
+}
+
+long
+nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
+{
+  nf = checknf(nf);
+  if (p) {
+    checkprid(p);
+    if (gequal0(a)) pari_err_DOMAIN("nfhilbert", "a", "=", gen_0, a);
+    if (gequal0(b)) pari_err_DOMAIN("nfhilbert", "b", "=", gen_0, b);
+    return nfhilbertp(nf,a,b,p);
+  }
+  return nfhilbert(nf,a,b);
+}
+
+/* sprk true (pr | 2) [t_VEC] or modpr structure (pr | p odd) [t_COL] */
+static GEN
+kpmodsquares1(GEN nf, GEN z, GEN sprk)
+{
+  GEN modpr = (typ(sprk) == t_VEC)? gmael(sprk, 4, 1): sprk;
+  GEN dz, pr = modpr_get_pr(modpr), p = pr_get_p(pr);
+  long v;
+  z = Q_remove_denom(z, &dz); if (dz) z = gmul(z, dz);
+  v = nfvalrem(nf, z, pr, &z);
   if (equaliu(p, 2))
   {
-    GEN c = ZV_to_Flv(ideallog(nf, z, pstar), 2);
+    GEN c;
+    z = to_principal_unit(nf, z, pr, sprk); /* = 1 mod pr */
+    c = ZV_to_Flv(sprk_log_prk1(nf, z, sprk), 2);
     return vecsmall_prepend(c, odd(v));
   }
   else
@@ -224,31 +664,26 @@ kpmodsquares1(GEN nf, GEN z, GEN modpr, GEN pstar)
 }
 
 static GEN
-kpmodsquares(GEN vnf, GEN z, GEN pr, GEN pstar)
+kpmodsquares(GEN vnf, GEN z, GEN PP)
 {
   pari_sp ltop = avma;
   long i, j, l = lg(vnf);
   GEN vchar = cgetg(l, t_VEC);
-  for (i = 1; i < l; ++i)
+  for (i = 1; i < l; i++)
   {
-    GEN pri = gel(pr, i), nf = gel(vnf, i);
-    long lp = lg(pri);
-    GEN delta = RgX_rem(z, nf_get_pol(nf));
-    GEN kp = cgetg(lp, t_VEC);
-    for (j = 1; j < lp; ++j)
-    {
-      GEN prij = gel(pri, j);
-      GEN psj = equaliu(modpr_get_p(prij), 2) ? gmael(pstar, i, j): NULL;
-      gel(kp, j) = kpmodsquares1(nf, delta, prij, psj);
-    }
+    GEN nf = gel(vnf, i), pp = gel(PP, i);
+    GEN kp, delta = RgX_rem(z, nf_get_pol(nf));
+    long lp = lg(pp);
+    kp = cgetg(lp, t_VEC);
+    for (j = 1; j < lp; j++) gel(kp, j) = kpmodsquares1(nf, delta, gel(pp,j));
     gel(vchar, i) = shallowconcat1(kp);
   }
   return gerepilecopy(ltop, shallowconcat1(vchar));
 }
 
 static GEN
-veckpmodsquares(GEN x, GEN vnf, GEN pr, GEN pstar)
-{ pari_APPLY_type(t_MAT,kpmodsquares(vnf, gel(x, i), pr, pstar)) }
+veckpmodsquares(GEN x, GEN vnf, GEN PP)
+{ pari_APPLY_type(t_MAT, kpmodsquares(vnf, gel(x, i), PP)) }
 
 static int
 Qp_issquare(GEN a, GEN p)
@@ -556,27 +991,23 @@ kernorm(GEN gen, GEN S, ulong p, GEN pol)
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
 
 static GEN
-elllocalimage(GEN pol, GEN K, GEN vnf, GEN pp, GEN ppstar, GEN pts)
+elllocalimage(GEN pol, GEN K, GEN vnf, GEN p, GEN pp, GEN pts)
 {
   pari_sp ltop = avma;
-  GEN p = modpr_get_p(gmael(pp, 1, 1));
-  long p2, lpp = lg(pp);
-  long i, prank, attempt = 0;
-  GEN root, bound;
-  if (!pts)
-    pts = cgetg(1, t_MAT);
+  GEN R, bound = addiu(p, 6);
+  long i, prank, p2, lpp = lg(pp), attempt = 0;
+
+  if (!pts) pts = cgetg(1, t_MAT);
   p2 = 0;
-  for (i = 1; i < lpp; ++i)
-    p2 += lg(gel(pp, i))-1;
-  prank = p2 - !gequalgs(p, 2);
-  root = polrootsmodpn(gmul(K, pol), p);
-  bound = addiu(p, 6);
+  for (i = 1; i < lpp; ++i) p2 += lg(gel(pp, i))-1;
+  prank = equaliu(p, 2)? p2: p2 - 1;
+  R = polrootsmodpn(gmul(K, pol), p);
   while (Flm_rank(pts, 2) < prank)
   {
     pari_sp btop;
     GEN xx, y2, delta, deltamodsquares;
     attempt++;
-    if (attempt%16==0)
+    if (attempt%16 == 0)
     {
       pts = Flm_image(pts, 2);
       bound = mulii(bound, p);
@@ -584,14 +1015,14 @@ elllocalimage(GEN pol, GEN K, GEN vnf, GEN pp, GEN ppstar, GEN pts)
     btop = avma;
     do
     {
-      GEN r = gel(root, random_Fl(lg(root)-1)+1);
-      long pprec = random_Fl(itou(gel(r, 2)) + 3) - 2;
+      GEN r = gel(R, random_Fl(lg(R)-1)+1);
+      long pprec = random_Fl(itou(gel(r, 2)) + 3) - 2; /* >= -2 */
       set_avma(btop);
       xx = gadd(gel(r, 1), gmul(powis(p, pprec), randomi(bound)));
       y2 = gmul(K, poleval(pol, xx));
     } while (gequal0(y2) || !Qp_issquare(y2, p));
-    delta = gmul(K, gsub(xx, pol_x(0)));
-    deltamodsquares = kpmodsquares(vnf, delta, pp, ppstar);
+    delta = deg1pol_shallow(negi(K), gmul(K, xx), 0);
+    deltamodsquares = kpmodsquares(vnf, delta, pp);
     pts = vec_append(pts, deltamodsquares);
   }
   pts = Flm_image(pts,2);
@@ -706,10 +1137,6 @@ redquadric(GEN base, GEN q2, GEN pol, GEN zc)
   }
   return lllgram(s);
 }
-
-static GEN
-vecnfmodprinit(GEN nf, GEN x)
-{ pari_APPLY_same(nfmodprinit(nf, gel(x, i))) }
 
 static GEN
 RgX_homogenous_evaldeg(GEN P, GEN A, GEN B)
@@ -966,39 +1393,32 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   lfactdisc = lg(factdisc);
   for (i = 1; i < lfactdisc; i++)
   {
-    GEN ppstar, LS2image, helpimage, locimage;
-    GEN p = gel(factdisc, i);
-    GEN pp = cgetg(n+1, t_VEC);
-    for (k = 1; k <= n; ++k)
-      gel(pp, k) = vecnfmodprinit(gel(vnf, k), idealprimedec(gel(vnf, k), p));
-    if (equaliu(p, 2))
+    GEN LS2image, helpimage, locimage;
+    GEN p = gel(factdisc, i), pp = cgetg(n+1, t_VEC);
+    int pis2 = equaliu(p, 2);
+
+    for (k = 1; k <= n; k++)
     {
-      ppstar = cgetg(n+1, t_VEC);
-      for (k = 1; k <= n; ++k)
+      GEN v, nf = gel(vnf,k), PR = idealprimedec(nf, p);
+      long l = lg(PR);
+      gel(pp, k) = v = cgetg(l, t_VEC);
+      for (j = 1; j < l; j++)
       {
-        GEN ppk = gel(pp, k);
-        long lppk = lg(ppk);
-        GEN pk = cgetg(lppk, t_VEC);
-        for (j = 1; j < lppk; ++j)
-        {
-          GEN pkj3 = gmael(ppk,j,3);
-          gel(pk, j) = idealstar0(gel(vnf, k),
-              idealpows(gel(vnf, k), pkj3, 1 + 2*pr_get_e(pkj3)), 1);
-        }
-        gel(ppstar, k) = pk;
+        GEN pr = gel(PR,j);
+        gel(v,j) = pis2? log_prk_init(nf, pr, 1 + 2 * pr_get_e(pr), NULL)
+                       : zkmodprinit(nf, pr);
       }
-    } else ppstar = gen_0;
-    LS2image = veckpmodsquares(LS2, vnf, pp, ppstar);
+    }
+    LS2image = veckpmodsquares(LS2, vnf, pp);
     LS2chars = vconcat(LS2chars, LS2image);
-    helpimage = veckpmodsquares(helpLS2, vnf, pp, ppstar);
+    helpimage = veckpmodsquares(helpLS2, vnf, pp);
     helpchars = vconcat(helpchars, helpimage);
-    locimage = elllocalimage(pol, K, vnf, pp, ppstar, helpimage);
+    locimage = elllocalimage(pol, K, vnf, p, pp, helpimage);
     locimage = Flm_intersect(LS2image, locimage, 2);
     selmer = Flm_intersect(selmer, shallowconcat(Flm_ker(LS2image,2),
                                                  Flm_invimage(LS2image, locimage,2)), 2);
     dim = lg(selmer)-1;
-    if (dim == Flm_rank(helpimage,2))
-      break;
+    if (dim == Flm_rank(helpimage,2)) break;
     if (i==lfactdisc-1 && Flm_rank(Flm_mul(LS2chars, selmer, 2), 2) < dim)
     {
       long B = 10;
@@ -1014,7 +1434,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     if (gc_needed(av, 1))
       gerepileall(av, 4, &factdisc, &selmer, &LS2chars, &helpchars);
   }
-  helplist = gel(Flm_indexrank(helpchars,2),2);
+  helplist = gel(Flm_indexrank(helpchars,2), 2);
   help = shallowextract(help, helplist);
   helpchars = shallowextract(helpchars, helplist);
   helpLS2 = shallowextract(helpLS2, helplist);
@@ -1024,14 +1444,14 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   if (lhelp > 1)
   {
     GEN M = Flm_mul(LS2chars, selmer, 2);
-    for (i = 1; i < lhelp; ++i)
+    for (i = 1; i < lhelp; i++)
       gel(newselmer, i) = Flm_Flc_invimage(M, gel(helpchars, i), 2);
   }
   setlg(newselmer, lhelp);
   if (DEBUGLEVEL) err_printf("Selmer rank: %ld\n", dim);
   listpoints = vec_lengthen(help, dim);
-  nbpoints = lg(help)-1;
-  for (i=1; i <= dim; ++i)
+  nbpoints = lhelp - 1;
+  for (i=1; i <= dim; i++)
   {
     pari_sp btop = avma;
     GEN P, vec = vecsmall_ei(dim, i);
@@ -1066,7 +1486,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   if (odd(dim - nbpoints)) mwrank++;
   listpoints = vecslice(listpoints, 1+tors2, nbpoints);
   listpoints = ellredgen(ell, listpoints, K, prec);
-  return mkvec3(stoi(mwrank),stoi(dim-tors2), listpoints);
+  return mkvec3(utoi(mwrank), utoi(dim-tors2), listpoints);
 }
 
 static GEN
