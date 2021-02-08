@@ -1200,7 +1200,7 @@ selmerbasis(GEN nf, GEN LS2k, GEN expo, GEN sqrtLS2, GEN factLS2,
   return b;
 }
 
-static long randu() { return random_Fl(127) - 63; }
+static long randu(void) { return random_Fl(127) - 63; }
 static GEN
 randS(GEN b)
 {
@@ -1225,9 +1225,9 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
   ttheta = RgX_shift_shallow(pol,-2);
   tttheta = RgX_shift_shallow(pol, -1);
   polprime = ZX_deriv(pol); av2 = avma;
-  for (t = 1; t <= ntry; t++)
+  for (t = 1; t <= ntry; t++, set_avma(av2))
   {
-    GEN q1, pol4, den, P, q0, xz, x, y, zz, R, zc, q2, U, param, newb;
+    GEN P, Q, R, den, q0, q1, q2, xz, x, y, zz, zc, U, param, newb;
     if (t == 1) zc = z;
     else
     {
@@ -1237,22 +1237,25 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
     }
     q2 = Q_primpart(tracematrix(zc, b, pol));
     U = redquadric(b, q2, pol, QXQ_div(zc, polprime, pol));
-    if (lg(U) < 4) { set_avma(av2); continue; }
+    if (lg(U) < 4) continue;
     q2 = qf_apply_RgM(q2, U);
     newb = RgV_RgM_mul(b, U);
 
     param = Q_primpart(qfparam(q2, qfsolve(q2), 0));
     param = RgM_to_RgXV_reverse(shallowtrans(param), 0);
     q1 = RgM_neg(tracematrix(RgXQ_mul(zc, ttheta, pol), newb, pol));
-    pol4 = hyperellreduce(qfeval(q1, param), &R);
-    if (!equali1(K)) pol4 = RgX_Rg_mul(pol4, K);
-    pol4 = Q_remove_denom(pol4, &den);
-    if (den) pol4 = ZX_Z_mul(pol4, den);
-    if (DEBUGLEVEL>1) err_printf("  reduced quartic: Y^2 = %Ps\n", pol4);
+    Q = hyperellreduce(qfeval(q1, param), &R);
+    if (!equali1(K)) Q = RgX_Rg_mul(Q, K);
+    Q = Q_remove_denom(Q, &den);
+    if (den) Q = ZX_Z_mul(Q, den);
+    if (DEBUGLEVEL>1) err_printf("  reduced quartic: Y^2 = %Ps\n", Q);
 
-    xz = projratpointxz(pol4, lim, &zz);
-    if (!xz) xz = projratpointxz2(pol4, lim, &zz);
-    if (!xz) { set_avma(av2); continue; }
+    xz = projratpointxz(Q, lim, &zz);
+    if (!xz)
+    {
+      xz = projratpointxz2(Q, lim, &zz);
+      if (!xz) continue;
+    }
     P = RgM_RgC_mul(R, xz); x = gel(P,1); y = gel(P,2);
 
     param = RgXV_homogenous_evaldeg(param, x, gpowers(y, 2));
