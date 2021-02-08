@@ -1182,23 +1182,22 @@ static GEN
 selmerbasis(GEN nf, GEN LS2k, GEN expo, GEN sqrtLS2, GEN factLS2,
             GEN badprimes, GEN crt, GEN pol)
 {
-  pari_sp av = avma;
-  long i, l;
-  GEN b, expok = vecslice(expo, LS2k[1], LS2k[2]);
-  GEN sqrtzc = idealfactorback(nf, sqrtLS2, zv_neg(expok), 0);
-  GEN exposqrtzc = ZC_shifti(ZM_zc_mul(factLS2, expok), -1);
+  GEN b, ek = vecslice(expo, LS2k[1], LS2k[2]);
+  GEN sqrtzc = idealfactorback(nf, sqrtLS2, zv_neg(ek), 0);
+  GEN E = ZC_shifti(ZM_zc_mul(factLS2, ek), -1);
+  long i, n = nf_get_degree(nf);
 
-  if (!gequal0(exposqrtzc))
-    sqrtzc = idealmul(nf, sqrtzc,
-        idealfactorback(nf, badprimes, gneg(exposqrtzc), 0));
-  sqrtzc = idealhnf(nf, sqrtzc);
-  l = lg(sqrtzc); b = cgetg(l, t_COL);
-  for (i = 1; i < l; i++)
+  if (ZV_equal0(E))
+    sqrtzc = idealhnf(nf, sqrtzc);
+  else
+    sqrtzc = idealmul(nf, sqrtzc, idealfactorback(nf, badprimes, ZC_neg(E), 0));
+  b = cgetg(n+1, t_COL);
+  for (i = 1; i <= n; i++)
   {
     GEN z = nf_to_scalar_or_alg(nf, gel(sqrtzc, i));
     gel(b, i) = grem(gsub(z, gmul(crt, z)), pol); /* z mod T, 0 mod (pol/T) */
   }
-  return gerepilecopy(av, b);
+  return b;
 }
 
 static GEN
@@ -1207,13 +1206,14 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
 {
   pari_sp av = avma, av2;
   long n = lg(vnf)-1, k, t;
-  GEN expo, z, base, polprime;
+  GEN expo, z, b, polprime;
+
   expo = Flm_Flc_mul(selmer, vec, 2);
-  base = cgetg(n+1, t_VEC);
+  b = cgetg(n+1, t_VEC);
   for (k = 1; k <= n; k++)
-    gel(base,k) = selmerbasis(gel(vnf, k), gel(LS2k,k), expo, gel(sqrtLS2, k),
-        gel(factLS2, k), gel(badprimes, k), gel(vcrt, k), pol);
-  base = shallowconcat1(base);
+    gel(b,k) = selmerbasis(gel(vnf,k), gel(LS2k,k), expo, gel(sqrtLS2,k),
+                           gel(factLS2,k), gel(badprimes,k), gel(vcrt,k), pol);
+  b = shallowconcat1(b);
   polprime = ZX_deriv(pol);
   z = RgXQV_factorback(LS2, expo, pol);
   av2 = avma;
@@ -1228,11 +1228,11 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
       while (degpol(ZX_gcd(rd,pol))!=0);
       zc = RgXQ_mul(z, RgXQ_sqr(rd,pol), pol);
     }
-    q2 = Q_primpart(tracematrix(zc, base, pol));
-    change = redquadric(base, q2, pol, QXQ_div(zc, polprime, pol));
+    q2 = Q_primpart(tracematrix(zc, b, pol));
+    change = redquadric(b, q2, pol, QXQ_div(zc, polprime, pol));
     if (lg(change) < 4) { set_avma(av2); continue; }
     q2 = qf_apply_RgM(q2, change);
-    newbase = RgV_RgM_mul(base, change);
+    newbase = RgV_RgM_mul(b, change);
     sol = qfsolve(q2);
     param = gmul(qfparam(q2, sol, 0), mkcol3(pol_xn(2,0), pol_x(0), pol_1(0)));
     param = Q_primpart(param);
