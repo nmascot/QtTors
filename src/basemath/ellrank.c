@@ -14,197 +14,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/* This file is a port by Bill Allombert of the script ellQ.gp by Denis Simon
- * Copyright (C) 2019 Denis Simon
- * Distributed under the terms of the GNU General Public License (GPL) */
-
 static long LIM1 = 10000;
 static long LIMTRIV = 10000;
 
-/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
-/*    FUNCTIONS FOR POLYNOMIALS                \\ */
-/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
-
-static GEN
-ell2pol(GEN ell)
-{ return mkpoln(4, gen_1, ell_get_a2(ell), ell_get_a4(ell), ell_get_a6(ell)); }
-
-static GEN
-redqfbsplit(GEN a, GEN b, GEN c, GEN d)
-{
-  GEN p = subii(d,b), q = shifti(a,1);
-  GEN U, Q, u, v, w = bezout(p, q, &u, &v);
-
-  if (!equali1(w)) { p = diviiexact(p, w); q = diviiexact(q, w); }
-  U = mkmat22(p, negi(v), q, u);
-  Q = qfb_apply_ZM(mkvec3(a,b,c), U);
-  a = gel(Q, 1); b = gel(Q, 2); c = gel(Q,3);
-  if (signe(b) < 0)
-  {
-    b = negi(b);
-    gcoeff(U,1,2) = negi(gcoeff(U,1,2));
-    gcoeff(U,2,2) = negi(gcoeff(U,2,2));
-  }
-  gel(U,2) = ZC_lincomb(gen_1, truedivii(negi(c), d), gel(U,2), gel(U,1));
-  return U;
-}
-
-static GEN
-polreduce(GEN P, GEN M)
-{
-  long v = varn(P);
-  GEN A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
-  GEN B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
-  return gel(RgX_homogenous_evalpow(P, A, gpowers(B, degpol(P))),1);
-}
-
-static GEN
-hyperellreduce(GEN Q, GEN *pM)
-{
-  long d = degpol(Q);
-  GEN q1, q2, q3, D, M, R, vD, den, P = Q_primitive_part(Q, &den);
-  GEN a = gel(P,d+2), b = gel(P,d+1), c = gel(P, d);
-
-  q1 = muliu(sqri(a), d);
-  q2 = shifti(mulii(a,b), 1);
-  q3 = subii(sqri(b), shifti(mulii(a,c), 1));
-  D = gcdii(gcdii(q1, q2), q3);
-  if (!equali1(D))
-  {
-    q1 = diviiexact(q1, D);
-    q2 = diviiexact(q2, D);
-    q3 = diviiexact(q3, D);
-  }
-  D = qfb_disc3(q1, q2, q3);
-  if (!signe(D))
-    M = mkmat22(gen_1, truedivii(negi(q2),shifti(q1,1)), gen_0, gen_1);
-  else if (issquareall(D,&vD))
-    M = redqfbsplit(q1, q2, q3, vD);
-  else
-    M = gel(qfbredsl2(mkqfb(q1,q2,q3,D), NULL), 2);
-  R = polreduce(P, M); if (den) R = gmul(R, den);
-  *pM = M; return R;
-}
-
-/* find point (x:y:z) on y^2 = pol, return [x,z]~ and set *py = y */
-static GEN
-projratpointxz(GEN pol, long lim, GEN *py)
-{
-  pari_timer ti;
-  GEN P;
-  if (issquareall(leading_coeff(pol), py)) return mkcol2(gen_1, gen_0);
-  if (DEBUGLEVEL) timer_start(&ti);
-  P = hyperellratpoints(pol, stoi(lim), 1);
-  if (DEBUGLEVEL) timer_printf(&ti,"hyperellratpoints(%ld)",lim);
-  if (lg(P) == 1) return NULL;
-  P = gel(P,1); *py = gel(P,2); return mkcol2(gel(P,1), gen_1);
-}
-
-/* P a list of integers (actually primes) one of which divides x; return
- * the first one */
-static GEN
-first_divisor(GEN x, GEN P)
-{
-  long i, n = lg(P);
-  for (i = 1; i < n; i++)
-    if (dvdii(x, gel(P,i))) return gel(P,i);
-  return gel(P,i);
-}
-
-/* find point (x:y:z) on y^2 = pol, return [x,z]~ and set *py = y */
-static GEN
-projratpointxz2(GEN pol, long lim, GEN *py)
-{
-  pari_sp av = avma;
-  GEN list = mkvec(mkvec4(pol, matid(2), gen_1, gen_1));
-  long i, j;
-
-  for (i = 1; i < lg(list); i++)
-  {
-    GEN K, k, ff, co, p, M, C, r, pol, L = gel(list, i);
-    long lr;
-
-    list = vecsplice(list, i); i--;
-    pol = Q_primitive_part(gel(L,1), &K);
-    M = gel(L,2);
-    K = K? mulii(gel(L,3), K): gel(L,3);
-    C = gel(L,4);
-    if (Z_issquareall(K, &k))
-    {
-      GEN xz, y, aux, U;
-      pol = hyperellreduce(pol, &U);
-      xz = projratpointxz(pol, lim, &y); if (!xz) continue;
-      *py = gmul(y, mulii(C, k));
-      aux = RgM_RgC_mul(ZM2_mul(M, U), xz);
-      if (gequal0(gel(aux, 2))) return mkcol2(gel(aux,1), gen_0);
-      *py = gdiv(*py, gpowgs(gel(aux, 2), degpol(pol)>>1));
-      return mkcol2(gdiv(gel(aux, 1), gel(aux, 2)), gen_1);
-    }
-    ff = Z_factor(K); co = core2(mkvec2(K, ff)); K = gel(co,1); /* > 1 */
-    p = first_divisor(K, gel(ff,1));
-    K = diviiexact(K, p);
-    C = mulii(mulii(C, gel(co,2)), p);
-    /* root at infinity */
-    if (dvdii(leading_coeff(pol), p))
-    {
-      GEN U = mkmat2(gel(M,1), ZC_Z_mul(gel(M,2), p));
-      if (equali1(content(U)))
-      {
-        GEN t = ZX_rescale(pol, p);
-        list = vec_append(list, mkvec4(ZX_Z_divexact(t,p), U, K, C));
-      }
-    }
-    r = FpC_center(FpX_roots(pol, p), p, shifti(p,-1)); lr = lg(r);
-    for (j = 1; j < lr; j++)
-    {
-      GEN U = ZM2_mul(M, mkmat22(p, gel(r, j), gen_0, gen_1));
-      if (equali1(content(U)))
-      {
-        GEN t = ZX_unscale(ZX_translate(pol, gel(r,j)), p);
-        list = vec_append(list, mkvec4(ZX_Z_divexact(t,p), U, K, C));
-      }
-    }
-    if (gc_needed(av, 1)) gerepileall(av, 2, &pol, &list);
-  }
-  return NULL;
-}
-
-static GEN
-polrootsmodpn(GEN pol, GEN p)
-{
-  pari_sp av = avma, av2;
-  long j, l, i = 1, vd = Z_pval(ZX_disc(pol), p);
-  GEN v, r, P;
-
-  if (!vd) { set_avma(av); retmkvec(mkvec2(gen_0, gen_0)); }
-  P = gpowers0(p, vd-1, p); av2 = avma;
-  v = FpX_roots(pol, p); l = lg(v);
-  for (j = 1; j < l; j++) gel(v,j) = mkvec2(gel(v,j), gen_1);
-  while (i < lg(v))
-  {
-    GEN pol2, pe, roe = gel(v, i), ro = gel(roe,1);
-    long e = itou(gel(roe,2));
-
-    if (e >= vd) { i++; continue; }
-    pe = gel(P, e);
-    pol2 = ZX_unscale(ZX_translate(pol, ro), pe);
-    (void)ZX_pvalrem(pol2, p, &pol2);
-    r = FpX_roots(pol2, p); l = lg(r);
-    if (l == 1) { i++; continue; }
-    for (j = 1; j < l; j++)
-      gel(r, j) = mkvec2(addii(ro, mulii(pe, gel(r, j))), utoi(e + 1));
-    /* roots with higher precision = ro + r*p^(e+1) */
-    if (l > 2) v = shallowconcat(v, vecslice(r, 2, l-1));
-    gel(v, i) = gel(r, 1);
-    if (gc_needed(av2, 1)) gerepileall(av2, 1, &v);
-  }
-  return gerepilecopy(av, v);
-}
-
-/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
-/*    FUNCTIONS FOR LOCAL COMPUTATIONS         \\ */
-/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
-
+/*******************************************************************/
+/*               NFHILBERT and LOCAL SOLUBILITY                    */
+/*     adapted from Denis Simon's original C limplementation       */
+/*******************************************************************/
 /* p > 2, T ZX, p prime, x t_INT */
 static long
 lemma6(GEN T, GEN p, long nu, GEN x)
@@ -639,15 +455,205 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
   return nfhilbert(nf,a,b);
 }
 
-/* sprk true (pr | 2) [t_VEC] or modpr structure (pr | p odd) [t_COL] */
+/*******************************************************************/
+/*                         ELLRANK                                 */
+/*******************************************************************/
+/* This section is a port by Bill Allombert of ellQ.gp by Denis Simon
+ * Copyright (C) 2019 Denis Simon
+ * Distributed under the terms of the GNU General Public License (GPL) */
+
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
+/*    FUNCTIONS FOR POLYNOMIALS                \\ */
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
+
+static GEN
+ell2pol(GEN ell)
+{ return mkpoln(4, gen_1, ell_get_a2(ell), ell_get_a4(ell), ell_get_a6(ell)); }
+
+static GEN
+redqfbsplit(GEN a, GEN b, GEN c, GEN d)
+{
+  GEN p = subii(d,b), q = shifti(a,1);
+  GEN U, Q, u, v, w = bezout(p, q, &u, &v);
+
+  if (!equali1(w)) { p = diviiexact(p, w); q = diviiexact(q, w); }
+  U = mkmat22(p, negi(v), q, u);
+  Q = qfb_apply_ZM(mkvec3(a,b,c), U);
+  a = gel(Q, 1); b = gel(Q, 2); c = gel(Q,3);
+  if (signe(b) < 0)
+  {
+    b = negi(b);
+    gcoeff(U,1,2) = negi(gcoeff(U,1,2));
+    gcoeff(U,2,2) = negi(gcoeff(U,2,2));
+  }
+  gel(U,2) = ZC_lincomb(gen_1, truedivii(negi(c), d), gel(U,2), gel(U,1));
+  return U;
+}
+
+static GEN
+polreduce(GEN P, GEN M)
+{
+  long v = varn(P);
+  GEN A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
+  GEN B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
+  return gel(RgX_homogenous_evalpow(P, A, gpowers(B, degpol(P))),1);
+}
+
+static GEN
+hyperellreduce(GEN Q, GEN *pM)
+{
+  long d = degpol(Q);
+  GEN q1, q2, q3, D, M, R, vD, den, P = Q_primitive_part(Q, &den);
+  GEN a = gel(P,d+2), b = gel(P,d+1), c = gel(P, d);
+
+  q1 = muliu(sqri(a), d);
+  q2 = shifti(mulii(a,b), 1);
+  q3 = subii(sqri(b), shifti(mulii(a,c), 1));
+  D = gcdii(gcdii(q1, q2), q3);
+  if (!equali1(D))
+  {
+    q1 = diviiexact(q1, D);
+    q2 = diviiexact(q2, D);
+    q3 = diviiexact(q3, D);
+  }
+  D = qfb_disc3(q1, q2, q3);
+  if (!signe(D))
+    M = mkmat22(gen_1, truedivii(negi(q2),shifti(q1,1)), gen_0, gen_1);
+  else if (issquareall(D,&vD))
+    M = redqfbsplit(q1, q2, q3, vD);
+  else
+    M = gel(qfbredsl2(mkqfb(q1,q2,q3,D), NULL), 2);
+  R = polreduce(P, M); if (den) R = gmul(R, den);
+  *pM = M; return R;
+}
+
+/* find point (x:y:z) on y^2 = pol, return [x,z]~ and set *py = y */
+static GEN
+projratpointxz(GEN pol, long lim, GEN *py)
+{
+  pari_timer ti;
+  GEN P;
+  if (issquareall(leading_coeff(pol), py)) return mkcol2(gen_1, gen_0);
+  if (DEBUGLEVEL) timer_start(&ti);
+  P = hyperellratpoints(pol, stoi(lim), 1);
+  if (DEBUGLEVEL) timer_printf(&ti,"hyperellratpoints(%ld)",lim);
+  if (lg(P) == 1) return NULL;
+  P = gel(P,1); *py = gel(P,2); return mkcol2(gel(P,1), gen_1);
+}
+
+/* P a list of integers (actually primes) one of which divides x; return
+ * the first one */
+static GEN
+first_divisor(GEN x, GEN P)
+{
+  long i, n = lg(P);
+  for (i = 1; i < n; i++)
+    if (dvdii(x, gel(P,i))) return gel(P,i);
+  return gel(P,i);
+}
+
+/* find point (x:y:z) on y^2 = pol, return [x,z]~ and set *py = y */
+static GEN
+projratpointxz2(GEN pol, long lim, GEN *py)
+{
+  pari_sp av = avma;
+  GEN list = mkvec(mkvec4(pol, matid(2), gen_1, gen_1));
+  long i, j;
+
+  for (i = 1; i < lg(list); i++)
+  {
+    GEN K, k, ff, co, p, M, C, r, pol, L = gel(list, i);
+    long lr;
+
+    list = vecsplice(list, i); i--;
+    pol = Q_primitive_part(gel(L,1), &K);
+    M = gel(L,2);
+    K = K? mulii(gel(L,3), K): gel(L,3);
+    C = gel(L,4);
+    if (Z_issquareall(K, &k))
+    {
+      GEN xz, y, aux, U;
+      pol = hyperellreduce(pol, &U);
+      xz = projratpointxz(pol, lim, &y); if (!xz) continue;
+      *py = gmul(y, mulii(C, k));
+      aux = RgM_RgC_mul(ZM2_mul(M, U), xz);
+      if (gequal0(gel(aux, 2))) return mkcol2(gel(aux,1), gen_0);
+      *py = gdiv(*py, gpowgs(gel(aux, 2), degpol(pol)>>1));
+      return mkcol2(gdiv(gel(aux, 1), gel(aux, 2)), gen_1);
+    }
+    ff = Z_factor(K); co = core2(mkvec2(K, ff)); K = gel(co,1); /* > 1 */
+    p = first_divisor(K, gel(ff,1));
+    K = diviiexact(K, p);
+    C = mulii(mulii(C, gel(co,2)), p);
+    /* root at infinity */
+    if (dvdii(leading_coeff(pol), p))
+    {
+      GEN U = mkmat2(gel(M,1), ZC_Z_mul(gel(M,2), p));
+      if (equali1(content(U)))
+      {
+        GEN t = ZX_rescale(pol, p);
+        list = vec_append(list, mkvec4(ZX_Z_divexact(t,p), U, K, C));
+      }
+    }
+    r = FpC_center(FpX_roots(pol, p), p, shifti(p,-1)); lr = lg(r);
+    for (j = 1; j < lr; j++)
+    {
+      GEN U = ZM2_mul(M, mkmat22(p, gel(r, j), gen_0, gen_1));
+      if (equali1(content(U)))
+      {
+        GEN t = ZX_unscale(ZX_translate(pol, gel(r,j)), p);
+        list = vec_append(list, mkvec4(ZX_Z_divexact(t,p), U, K, C));
+      }
+    }
+    if (gc_needed(av, 1)) gerepileall(av, 2, &pol, &list);
+  }
+  return NULL;
+}
+
+static GEN
+polrootsmodpn(GEN pol, GEN p)
+{
+  pari_sp av = avma, av2;
+  long j, l, i = 1, vd = Z_pval(ZX_disc(pol), p);
+  GEN v, r, P;
+
+  if (!vd) { set_avma(av); retmkvec(mkvec2(gen_0, gen_0)); }
+  P = gpowers0(p, vd-1, p); av2 = avma;
+  v = FpX_roots(pol, p); l = lg(v);
+  for (j = 1; j < l; j++) gel(v,j) = mkvec2(gel(v,j), gen_1);
+  while (i < lg(v))
+  {
+    GEN pol2, pe, roe = gel(v, i), ro = gel(roe,1);
+    long e = itou(gel(roe,2));
+
+    if (e >= vd) { i++; continue; }
+    pe = gel(P, e);
+    pol2 = ZX_unscale(ZX_translate(pol, ro), pe);
+    (void)ZX_pvalrem(pol2, p, &pol2);
+    r = FpX_roots(pol2, p); l = lg(r);
+    if (l == 1) { i++; continue; }
+    for (j = 1; j < l; j++)
+      gel(r, j) = mkvec2(addii(ro, mulii(pe, gel(r, j))), utoi(e + 1));
+    /* roots with higher precision = ro + r*p^(e+1) */
+    if (l > 2) v = shallowconcat(v, vecslice(r, 2, l-1));
+    gel(v, i) = gel(r, 1);
+    if (gc_needed(av2, 1)) gerepileall(av2, 1, &v);
+  }
+  return gerepilecopy(av, v);
+}
+
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
+/*    FUNCTIONS FOR LOCAL COMPUTATIONS         \\ */
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
+
+/* z is integral; sprk true (pr | 2) [t_VEC] or modpr structure (pr | p odd)
+ * [t_COL] */
 static GEN
 kpmodsquares1(GEN nf, GEN z, GEN sprk)
 {
   GEN modpr = (typ(sprk) == t_VEC)? gmael(sprk, 4, 1): sprk;
-  GEN dz, pr = modpr_get_pr(modpr), p = pr_get_p(pr);
-  long v;
-  z = Q_remove_denom(z, &dz); if (dz) z = gmul(z, dz);
-  v = nfvalrem(nf, z, pr, &z);
+  GEN pr = modpr_get_pr(modpr), p = pr_get_p(pr);
+  long v = nfvalrem(nf, z, pr, &z);
   if (equaliu(p, 2))
   {
     GEN c;
@@ -666,9 +672,10 @@ kpmodsquares1(GEN nf, GEN z, GEN sprk)
 static GEN
 kpmodsquares(GEN vnf, GEN z, GEN PP)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   long i, j, l = lg(vnf);
-  GEN vchar = cgetg(l, t_VEC);
+  GEN dz, vchar = cgetg(l, t_VEC);
+  z = Q_remove_denom(z, &dz); if (dz) z = gmul(z, dz);
   for (i = 1; i < l; i++)
   {
     GEN nf = gel(vnf, i), pp = gel(PP, i);
@@ -678,7 +685,7 @@ kpmodsquares(GEN vnf, GEN z, GEN PP)
     for (j = 1; j < lp; j++) gel(kp, j) = kpmodsquares1(nf, delta, gel(pp,j));
     gel(vchar, i) = shallowconcat1(kp);
   }
-  return gerepilecopy(ltop, shallowconcat1(vchar));
+  return gerepileuptoleaf(av, shallowconcat1(vchar));
 }
 
 static GEN

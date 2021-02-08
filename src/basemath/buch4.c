@@ -13,10 +13,8 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /*******************************************************************/
-/*                                                                 */
-/*               S-CLASS GROUP AND NORM SYMBOLS                    */
-/*          (Denis Simon, desimon@math.u-bordeaux.fr)              */
-/*                                                                 */
+/*                        RNFISNORM                                */
+/*     (Adapted from Denis Simon's original implementation)        */
 /*******************************************************************/
 #include "pari.h"
 #include "paripriv.h"
