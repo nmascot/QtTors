@@ -991,10 +991,10 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
     if (DEBUGLEVEL) timer_printf(&ti,"Xm");
   } else
     Xm = cgetg(1,t_VEC);
-  if (DEBUGLEVEL) timer_printf(&ti,"Xm");
   j = Flxq_ellj(a4,a6,T,p);
   sqx = Flxq_powers(Flxq_lroot(polx_Flx(T[1]), T, p), p-1, T, p);
   phi = polmodular_ZM(p, 0);
+  if (DEBUGLEVEL) timer_printf(&ti,"phi");
   J1 = lift_isogeny(phi, Flx_to_ZX(j), N, Xm, T2,sqx,T,p);
   if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");
   c2 = get_trace_Robert(J1, phi, Xm, T2, q, p, N);
