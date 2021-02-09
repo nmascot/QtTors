@@ -947,84 +947,21 @@ Flxq_ellcard_Kohel(GEN a4, GEN a6, GEN T, ulong p)
   return gerepileupto(av, subii(addiu(powuu(p,n),1),t));
 }
 
-static void
-liftcurve(GEN J, GEN T, GEN q, ulong p, long N, GEN *A4, GEN *A6)
-{
-  pari_sp av = avma;
-  GEN r = ZpXQ_inv(Z_ZX_sub(utoi(1728),J),T,utoipos(p),N);
-  GEN g = FpXQ_mul(J,r,T,q);
-  *A4 = FpX_mulu(g,3,q);
-  *A6 = FpX_mulu(g,2,q);
-  gerepileall(av,2,A4,A6);
-}
+/* Use Damien Robert method */
 
 static GEN
-getc5(GEN H, GEN A40, GEN A60, GEN A41, GEN A61, GEN T, GEN q, ulong p, long N)
+get_trace_Robert(GEN J, GEN phi, GEN Xm, GEN T, GEN q, ulong p, long e)
 {
-  long d = lg(H)-1;
-  GEN s1 = gel(H,d-1), s2 = gel(H,d-2), s3 = d<5 ? pol_0(varn(T)): gel(H,d-3);
-  GEN s12 = FpXQ_sqr(s1,T,q);
-  GEN h2 = ZX_sub(ZX_shifti(s2,1),s12); /*2*s2-s1^2*/
-  GEN h3 = ZX_sub(FpXQ_mul(ZX_add(h2,s2),s1,T,q),ZX_mulu(s3,3));
-                                        /*3*s2*s1-s1^3-3s3*/
-  GEN alpha= ZX_sub(ZX_mulu(h2,30), ZX_mulu(A40,5*p-6)); /* 30*h2+A40*(6-5*p)*/
-  GEN beta = ZX_sub(ZX_sub(ZX_mulu(FpXQ_mul(A40,s1,T,q),42),ZX_mulu(A60,14*p-15)),
-                    ZX_mulu(h3,70)); /* 42*A40*s1-A60*(14*p-15)-70*h3 */
-  GEN u2 = FpXQ_mul(FpXQ_mul(A41,beta,T,q),
-                    ZpXQ_inv(FpXQ_mul(A61,alpha,T,q),T,utoipos(p),N),T,q);
-  return u2;
-}
-
-static GEN
-ZpXQX_liftrootmod_vald(GEN f, GEN H, long v, GEN T, GEN p, long e)
-{
-  pari_sp av = avma, av2;
-  GEN pv = p, q, qv, W, df, Tq, fr, dfr;
-  ulong mask;
-  pari_timer ti;
-  if (e <= v+1) return H;
-  df = RgX_deriv(f);
-  if (v) { pv = powiu(p,v); qv = mulii(pv,p); df = ZXX_Z_divexact(df, pv); }
-  else qv = p;
-  mask = quadratic_prec_mask(e-v);
-  Tq = FpXT_red(T, qv); dfr = FpXQX_red(df, Tq, p);
-  if (DEBUGLEVEL) timer_start(&ti);
-  W = FpXQXQ_inv(FpXQX_rem(dfr, H, Tq, p), H, Tq, p); /* 1/f'(a) mod (T,p) */
-  if (DEBUGLEVEL) timer_printf(&ti,"FpXQXQ_inv");
-  q = p; av2 = avma;
-  for (;;)
-  {
-    GEN u, fa, qv, q2v, Tq2, fadH;
-    GEN H2 = H, q2 = q;
-    q = sqri(q);
-    if (mask & 1) q = diviiexact(q,p);
-    mask >>= 1;
-    if (v) { qv = mulii(q, pv); q2v = mulii(q2, pv); }
-    else { qv = q; q2v = q2; }
-    Tq2 = FpXT_red(T, q2v); Tq = FpXT_red(T, qv);
-    fr = FpXQX_red(f, Tq, qv);
-    fa = FpXQX_rem(fr, H, Tq, qv);
-    fa = ZXX_Z_divexact(fa, q2v);
-    fadH = FpXQXQ_mul(RgX_deriv(H),fa,H,Tq2,q2);
-    H = FpXX_add(H, gmul(FpXQXQ_mul(W, fadH, H, Tq2, q2v), q2), qv);
-    if (mask == 1) return gerepileupto(av, H);
-    dfr = FpXQX_rem(FpXQX_red(df, Tq, q),H,Tq,q);
-    u = ZXX_Z_divexact(ZXX_Z_add_shallow(FpXQXQ_mul(W,dfr,H,Tq,q),gen_m1),q2);
-    W = gsub(W,gmul(FpXQXQ_mul(u,W,H2,Tq2,q2),q2));
-    if (gc_needed(av2,2))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"ZpXQX_liftroot, e = %ld", e);
-      gerepileall(av2, 3, &H, &W, &q);
-    }
-  }
-}
-
-static GEN
-get_H1(GEN A41, GEN A61, GEN T2, ulong p)
-{
-  GEN q = utoipos(p), T = FpXT_red(T2,q);
-  GEN pol = FpXQ_elldivpol(FpX_red(A41,q),FpX_red(A61,q),p,T,q);
-  return FpXQX_normalize(RgX_deflate(pol,p),T,q);
+  long n = lg(phi)-2;
+  GEN K = ZpXQ_frob(J, Xm, T, q, p);
+  GEN Jp = FpXQ_powers(J, n, T, q);
+  GEN Kp = FpXQ_powers(K, n, T, q);
+  GEN Jd = FpXC_powderiv(Jp, q);
+  GEN Kd = FpXC_powderiv(Kp, q);
+  GEN Dx = FpM_FpXQV_bilinear(phi, Kd, Jp, T, q);
+  GEN Dy = FpM_FpXQV_bilinear(phi, Kp, Jd, T, q);
+  GEN C = ZpXQ_inv(ZX_divuexact(Dy, p), T, utoi(p), e);
+  return FpX_neg(FpXQ_mul(Dx, C, T, q), q);
 }
 
 static GEN
@@ -1034,9 +971,8 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
   pari_timer ti;
   long n = get_Flx_degree(T), N = (n+5)/2;
   GEN pp = utoipos(p), q = powuu(p, N);
-  GEN T2, j, t;
-  GEN J1,A40,A41,A60,A61, sqx,Xm;
-  GEN pol, h1, H;
+  GEN T2, j, t, phi;
+  GEN J1,sqx,Xm;
   GEN c2, tc2, c2p, Nc2, Np;
   long ispcyc = zx_is_pcyc(get_Flx_mod(T));
   timer_start(&ti);
@@ -1058,19 +994,11 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
   if (DEBUGLEVEL) timer_printf(&ti,"Xm");
   j = Flxq_ellj(a4,a6,T,p);
   sqx = Flxq_powers(Flxq_lroot(polx_Flx(T[1]), T, p), p-1, T, p);
-  J1 = lift_isogeny(polmodular_ZM(p, 0), Flx_to_ZX(j), N, Xm, T2,sqx,T,p);
+  phi = polmodular_ZM(p, 0);
+  J1 = lift_isogeny(phi, Flx_to_ZX(j), N, Xm, T2,sqx,T,p);
   if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");
-  liftcurve(J1,T2,q,p,N,&A41,&A61);
-  A40 = ZpXQ_frob(A41, Xm, T2, q, p);
-  A60 = ZpXQ_frob(A61, Xm, T2, q, p);
-  if (DEBUGLEVEL) timer_printf(&ti,"liftcurve");
-  pol = FpXQ_elldivpol(A40,A60,p,T2,q);
-  if (DEBUGLEVEL) timer_printf(&ti,"p-division");
-  h1 = get_H1(A41,A61,T2,p);
-  H = ZpXQX_liftrootmod_vald(pol,h1,1,T2,pp,N);
+  c2 = get_trace_Robert(J1, phi, Xm, T2, q, p, N);
   q = diviuexact(q,p); N--;
-  if (DEBUGLEVEL) timer_printf(&ti,"kernel");
-  c2 = getc5(H,A40,A60,A41,A61,T2,q,p,N);
   if (DEBUGLEVEL) timer_printf(&ti,"c^2");
   if (!ispcyc)
   {
