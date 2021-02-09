@@ -1,12 +1,14 @@
 default(parisize,"32M");
+mwrank(E) = setrand(1); ellrank(E);
+
 {
 E=ellinit([1,0,1,34318214642441646362435632562579908747,
           3184376895814127197244886284686214848599453811643486936756]);
-ellrank(E)
+mwrank(E)
 }
 {
 E=ellinit([0,-438879732513040081/428593506250000,0,-112353213812869130368/26787094140625,3081846839375070007684953094049946244/717548412498706207275390625]);
-ellrank(E)
+mwrank(E)
 }
 dujella=
 {
@@ -86,13 +88,13 @@ womack=
 checkwomack()=
 {
   for(i=1,#womack,
-    print("W:",i,":",ellrank(ellinit(womack[i]))[1..2]));
+    print("W:",i,":",mwrank(ellinit(womack[i]))[1..2]));
 }
 checkwomack()
 checkdujella()=
 {
   for(i=1,#dujella,
-    print("D:",i,":",ellrank(ellinit(dujella[i]),1)[1..2]));
+    print("D:",i,":",setrand(1); ellrank(ellinit(dujella[i]),1)[1..2]));
 }
 checkdujella()
 crv3(D)=[0,0,1,0,(-27*D-1)/4];
@@ -100,15 +102,16 @@ quer=[-23,-3299,-3321607,-653329427];
 checkquer()=
 {
   for(i=1,#quer,
-    print("Q:",i,":",ellrank(ellinit(crv3(quer[i])))[1..2]));
+    print("Q:",i,":",mwrank(ellinit(crv3(quer[i])))[1..2]));
 }
 checkquer()
 
 F=ellrankinit(ellinit([0,1]));
-ellrank(F)
-ellrank([F,2])
-ellrank([F,157])
-ellrank([F,-157])
+mwrank(F)
+mwrank([F,2])
+mwrank([F,157])
+mwrank([F,-157])
 
 \\ check for old regressions
-ellrank(ellinit([-181^2,-1]))
+mwrank(ellinit([-181^2,-1]))
+mwrank(ellinit([1,0,1,-33,68]))
