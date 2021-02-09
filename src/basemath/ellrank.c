@@ -705,8 +705,8 @@ Qp_issquare(GEN a, GEN p)
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
 
 static GEN
-ellabs(GEN P) { return ell_is_inf(P) ? P: mkvec2(gel(P,1), Q_abs(gel(P,2))); }
-
+ellabs(GEN P)
+{ return ell_is_inf(P) ? P: mkvec2(gel(P,1), Q_abs_shallow(gel(P,2))); }
 static GEN
 vecellabs(GEN x) { pari_APPLY_same(ellabs(gel(x,i))) }
 
@@ -1057,6 +1057,7 @@ ellLS2image(GEN pol, GEN vP, GEN K, GEN vpol)
   return v;
 }
 
+/* find small points on ell; 2-torsion points must be returned first */
 static GEN
 ellsearchtrivialpoints(GEN ell, GEN lim, GEN help)
 {
@@ -1065,8 +1066,8 @@ ellsearchtrivialpoints(GEN ell, GEN lim, GEN help)
   GEN triv = ellratpoints(ell, lim, 0);
 
   if (help) triv = shallowconcat(triv, help);
-  triv = setunion(torseven, gtoset(vecellabs(triv)));
-  return gerepilecopy(av, triv);
+  triv = setminus(gtoset(vecellabs(triv)), torseven);
+  return gerepilecopy(av, shallowconcat(torseven, triv));
 }
 
 GEN
