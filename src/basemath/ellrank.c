@@ -1287,7 +1287,8 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   triv = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,(effort+1)), help);
 
   torseven = elltwistpoints(gel(triv, 1), ginv(K));
-  help = shallowconcat(torseven, gel(triv, 2));
+  help = elltwistpoints(gel(triv, 2), ginv(K));
+  help = shallowconcat(torseven, help);
   ell = ellinit(ell, NULL, prec);
   n = lg(torseven); tors2 = n - 1;
   if (lg(vbnf)-1 != n) pari_err_TYPE("ell2selmer",vbnf);
@@ -1469,9 +1470,9 @@ ell2descent(GEN ell, GEN help, long effort, long prec)
     ell = gel(ell,1); checkell_Q(ell);
     if (!ell_is_integral(ell))
       pari_err(e_MISC, "ell2descent: nonintegral model");
-    if (!signe(ell_get_a1(ell)))
+    if (signe(ell_get_a1(ell)))
       pari_err(e_MISC, "ell2descent: nonzero coefficient a1");
-    if (!signe(ell_get_a3(ell)))
+    if (signe(ell_get_a3(ell)))
       pari_err(e_MISC, "ell2descent: nonzero coefficient a3");
   }
   else

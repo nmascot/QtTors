@@ -104,5 +104,11 @@ checkquer()=
 }
 checkquer()
 
+F=ellrankinit(ellinit([0,1]));
+ellrank(F)
+ellrank([F,2])
+ellrank([F,157])
+ellrank([F,-157])
+
 \\ check for old regressions
 ellrank(ellinit([-181^2,-1]))
