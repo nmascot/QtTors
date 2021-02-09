@@ -17,7 +17,9 @@ Doc: if $E$ is an elliptic curve over $\Q$,
  curve. The parameter \kbd{effort} is a measure of the effort done to find
  rational points before giving up. If \kbd{effort} is not $0$, the search is
  randomized, so rerunning the function might find different or even
- extra points.
+ extra points. Values up to $10$ or so are sensible but the parameter can be
+ increased futher: running times increase roughly like the \emph{cube} of the
+ \kbd{effort} value.
 
  \bprog
  ? E = ellinit([-127^2,0]);
@@ -37,8 +39,8 @@ Doc: if $E$ is an elliptic curve over $\Q$,
  \misctitle{Technical explanation:}
  The algorithm uses $2$-descent which has an intrinsic limitation:
  $R$ is equal to the sum of the rank of $E$ and of the $2$-rank of the
- Tate-Shafarevich group (which is even). In particular we can never have
- $r = R$ when the Tate-Shafarevic group has $2$-torsion.
+ Tate-Shafarevich group (which is conjecturally even). In particular we can
+ never have $r = R$ when the Tate-Shafarevic group has $2$-torsion.
 
  When the conductor of $E$ is small, the BSD conjecture can be used
  to find the true rank:
@@ -56,7 +58,7 @@ Doc: if $E$ is an elliptic curve over $\Q$,
  %6 = 4.0000000000000000000000000000000000000
  @eprog
  We find that the rank is $0$ and the cardinal of the Tate-Shafarevich group
- is $4$.
+ is $4$ (assuming BSD!).
 
  When the rank is $1$ and the conductor is small, \kbd{ellheegner} can be used
  to find the point.
@@ -65,7 +67,10 @@ Doc: if $E$ is an elliptic curve over $\Q$,
   ? ellrank(E)
   %2 = [1, 1, []] \\ rank is 1, no point found
   ? ellrank(E, 5) \\ Try harder
+  time = 4,321 ms.
   %3 = [1, 1, []] \\ No luck
   ? ellheegner(E) \\ use analytic method
+  time = 608 ms.
   %4 = [69648970982596494254458225/166136231668185267540804, ...]
- @eprog
+ @eprog\noindent In this last example, an \kbd{effort} about 10 would also
+ find a random point (not necessarily the Heegner point) in 5 to 20 seconds.

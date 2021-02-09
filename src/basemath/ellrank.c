@@ -1284,7 +1284,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   pol = ell2pol(ell);
   ell_K = elltwistequation(ell, K);
   if (help) help = elltwistpoints(help, K);
-  help = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,(effort+1)), help);
+  help = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,effort+1), help);
   help = elltwistpoints(help, ginv(K));
   n = lg(vbnf) - 1; tors2 = n - 1;
   KP = gel(absZ_factor(K), 1);
