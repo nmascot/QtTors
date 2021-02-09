@@ -1065,9 +1065,8 @@ ellsearchtrivialpoints(GEN ell, GEN lim, GEN help)
   GEN triv = ellratpoints(ell, lim, 0);
 
   if (help) triv = shallowconcat(triv, help);
-  triv = gtoset(vecellabs(triv));
-  triv = setminus(triv, torseven);
-  return gerepilecopy(av, mkvec2(torseven, triv));
+  triv = setunion(torseven, gtoset(vecellabs(triv)));
+  return gerepilecopy(av, triv);
 }
 
 GEN
@@ -1275,23 +1274,18 @@ static GEN
 ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
 {
   pari_sp av;
-  GEN ell_K, KP, torseven, pol, vnf, vpol, vroots, vr1, vcrt, sbase;
+  GEN ell_K, KP, pol, vnf, vpol, vroots, vr1, vcrt, sbase;
   GEN LS2, factLS2, sqrtLS2, LS2k, selmer, helpLS2, LS2chars, helpchars;
-  GEN newselmer, factdisc, badprimes, triv, helplist, listpoints;
+  GEN newselmer, factdisc, badprimes, helplist, listpoints;
   long i, j, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u;
 
   if (!K) K = gen_1;
   pol = ell2pol(ell);
   ell_K = elltwistequation(ell, K);
   if (help) help = elltwistpoints(help, K);
-  triv = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,(effort+1)), help);
-
-  torseven = elltwistpoints(gel(triv, 1), ginv(K));
-  help = elltwistpoints(gel(triv, 2), ginv(K));
-  help = shallowconcat(torseven, help);
-  ell = ellinit(ell, NULL, prec);
-  n = lg(torseven); tors2 = n - 1;
-  if (lg(vbnf)-1 != n) pari_err_TYPE("ell2selmer",vbnf);
+  help = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,(effort+1)), help);
+  help = elltwistpoints(help, ginv(K));
+  n = lg(vbnf) - 1; tors2 = n - 1;
   KP = gel(absZ_factor(K), 1);
   factdisc = mkvec3(KP, mkcol(gen_2), gel(absZ_factor(ZX_disc(pol)), 1));
   factdisc = ZV_sort_uniq(shallowconcat1(factdisc));
