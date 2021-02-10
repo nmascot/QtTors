@@ -2007,12 +2007,13 @@ GEN
 primpart(GEN x) { return primitive_part(x, NULL); }
 
 static GEN
-Q_content_v(GEN x, long i, long l)
+Q_content_v(GEN x, long imin, long l)
 {
   pari_sp av = avma;
+  long i = l-1;
   GEN d = Q_content_safe(gel(x,i));
   if (!d) return NULL;
-  for (i++; i < l; i++)
+  for (i--; i >= imin; i--)
   {
     GEN c = Q_content_safe(gel(x,i));
     if (!c) return NULL;
