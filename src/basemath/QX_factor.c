@@ -354,12 +354,17 @@ END:
 static GEN
 shifteval(GEN Q, long n)
 {
+  pari_sp av = avma;
   long i, l = lg(Q);
   GEN s;
 
   if (!signe(Q)) return gen_0;
   s = gel(Q,l-1);
-  for (i = l-2; i > 1; i--) s = addii(gel(Q,i), shifti(s, n));
+  for (i = l-2; i > 1; i--)
+  {
+    s = addii(gel(Q,i), shifti(s, n));
+    if (gc_needed(av,1)) s = gerepileuptoint(av, s);
+  }
   return s;
 }
 
@@ -382,8 +387,9 @@ root_bound(GEN P0)
     set_avma(av);
   }
   if (k < 0) k = 0;
-  x = int2n(k);
   y = int2n(k+1);
+  if (d > 2000) return y; /* likely to be expensive, don't bother */
+  x = int2n(k);
   for(k=0; ; k++)
   {
     z = shifti(addii(x,y), -1);

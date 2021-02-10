@@ -2018,6 +2018,7 @@ Q_content_v(GEN x, long imin, long l)
     GEN c = Q_content_safe(gel(x,i));
     if (!c) return NULL;
     d = Q_gcd(d, c);
+    if (gc_needed(av,1)) d = gerepileupto(av, d);
   }
   return gerepileupto(av, d);
 }
