@@ -18,43 +18,47 @@ Doc: \sidx{algebraic dependence}
  $\fl$ may improve on the default behavior if the input number is known to a
  \emph{huge} accuracy, and you suspect the last bits are incorrect: if $\fl > 0$
  the computation is done with an accuracy of $\fl$ decimal  digits; to get
- meaningful results,  the parameter $\fl$ should be smaller than the number of
- correct decimal digits in the input.
- But default values are usually sufficient, so try without $\fl$ first:
+ meaningful results, the parameter $\fl$ should be smaller than the number of
+ correct decimal digits in the input. But default values are usually
+ sufficient, so try without $\fl$ first:
  \bprog
  ? \p200
  ? z = 2^(1/6)+3^(1/5);
- ? algdep(z, 30);      \\ right in 280ms
- ? algdep(z, 30, 100); \\ wrong in 169ms
- ? algdep(z, 30, 170); \\ right in 288ms
- ? algdep(z, 30, 200); \\ wrong in 320ms
+ ? algdep(z, 30);      \\ right in 63ms
+ ? algdep(z, 30, 100); \\ wrong in 39ms
+ ? algdep(z, 30, 170); \\ right in 61ms
+ ? algdep(z, 30, 200); \\ wrong in 146ms
  ? \p250
  ? z = 2^(1/6)+3^(1/5); \\ recompute to new, higher, accuracy !
- ? algdep(z, 30);      \\ right in 329ms
- ? algdep(z, 30, 200); \\ right in 324ms
+ ? algdep(z, 30);      \\ right in 68ms
+ ? algdep(z, 30, 200); \\ right in 68ms
  ? \p500
- ? algdep(2^(1/6)+3^(1/5), 30); \\ right in 677ms
+ ? algdep(2^(1/6)+3^(1/5), 30); \\ right in 138ms
  ? \p1000
- ? algdep(2^(1/6)+3^(1/5), 30); \\ right in 1.5s
+ ? algdep(2^(1/6)+3^(1/5), 30); \\ right in 276s
  @eprog\noindent
  The changes in \kbd{realprecision} only affect the quality of the
  initial approximation to $2^{1/6} + 3^{1/5}$, \kbd{algdep} itself uses
  exact operations. The size of its operands depend on the accuracy of the
- input of course: more accurate input means slower operations.
+ input of course: a more accurate input means slower operations.
 
  Proceeding by increments of 5 digits of accuracy, \kbd{algdep} with default
  flag produces its first correct result at 195 digits, and from then on a
  steady stream of correct results:
  \bprog
    \\ assume T contains the correct result, for comparison
-   forstep(d=100, 250, 5, localprec(d);\
+   forstep(d=100, 250, 5, \
+     localprec(d);        \
      print(d, " ", algdep(2^(1/6)+3^(1/5),30) == T))
- @eprog
-
- The above example is the test case studied in a 2000 paper by Borwein and
+ @eprog\noindent
+ This example is the test case studied in a 2000 paper by Borwein and
  Lisonek: Applications of integer relation algorithms, \emph{Discrete Math.},
  {\bf 217}, p.~65--82. The version of PARI tested there was 1.39, which
- succeeded reliably from precision 265 on, in about 200 as much time as the
- current version.
+ succeeded reliably from precision 265 on, in about 1000 as much time as the
+ current version (on slower hardware of course).
+
+ Note that this function does not work if $z$ is a power series. The function
+ \kbd{seralgdep} can be used in this case to find linear relations wich
+ polynomial coefficients between powers of $z$.
 
 Variant: Also available is \fun{GEN}{algdep}{GEN z, long k} ($\fl=0$).
