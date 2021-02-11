@@ -682,13 +682,14 @@ rnfidealup(GEN rnf,GEN x)
 {
   pari_sp av = avma;
   long i, n;
-  GEN nf, bas, bas2, I, x2;
+  GEN nf, bas, bas2, I, x2, dx;
 
   checkrnf(rnf); nf = rnf_get_nf(rnf);
   n = rnf_get_degree(rnf);
   bas = rnf_get_zk(rnf); bas2 = gel(bas,2);
 
   (void)idealtyp(&x, &I); /* I is junk */
+  x = Q_remove_denom(x, &dx);
   x2 = idealtwoelt(nf,x);
   I = cgetg(n+1,t_VEC);
   for (i=1; i<=n; i++)
@@ -697,11 +698,15 @@ rnfidealup(GEN rnf,GEN x)
     if (typ(c) == t_MAT)
     {
       c = Q_remove_denom(c,&d);
+      d = mul_denom(d, dx);
       c = idealHNF_mul(nf,c,x2);
-      if (d) c = gdiv(c,d);
     }
     else
+    {
       c = idealmul(nf,c,x);
+      d = dx;
+    }
+    if (d) c = gdiv(c,d);
     gel(I,i) = c;
   }
   return gerepilecopy(av, modulereltoabs(rnf, mkvec2(gel(bas,1), I)));

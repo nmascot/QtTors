@@ -1106,8 +1106,8 @@ idealHNF_mul_two(GEN nf, GEN x, GEN y)
   return ZM_hnfmodid(m, mulii(a, gcoeff(x,1,1)));
 }
 
-/* Assume ix and iy are integral in HNF form [NOT extended]. Not memory clean.
- * HACK: ideal in iy can be of the form [a,b], a in Z, b in Z_K */
+/* Assume x and y are integral in HNF form [NOT extended]. Not memory clean.
+ * HACK: ideal in y can be of the form [a,b], a in Z, b in Z_K */
 GEN
 idealHNF_mul(GEN nf, GEN x, GEN y)
 {
@@ -1813,7 +1813,7 @@ idealmul_aux(GEN nf, GEN x, GEN y, long tx, long ty)
   }
 }
 
-/* output the ideal product ix.iy */
+/* output the ideal product x.y */
 GEN
 idealmul(GEN nf, GEN x, GEN y)
 {
