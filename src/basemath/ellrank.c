@@ -743,11 +743,7 @@ ellredgen(GEN E, GEN vP, GEN K, long prec)
 {
   if (equali1(K)) K = NULL;
   if (K)
-  {
-    E = elltwistequation(E, K);
-    E = ellinit(E, NULL, prec);
     vP = elltwistpoints(vP, K);
-  }
   vP = vecellabs(ellQ_genreduce(E, vP, prec));
   if (K) vP = elltwistpoints(vP, ginv(K));
   return vP;
@@ -1442,7 +1438,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   mwrank = nbpoints - tors2;
   if (odd(dim - nbpoints)) mwrank++;
   listpoints = vecslice(listpoints, 1+tors2, nbpoints);
-  listpoints = ellredgen(ell, listpoints, K, prec);
+  listpoints = ellredgen(ell_K, listpoints, K, prec);
   return mkvec3(utoi(mwrank), utoi(dim-tors2), listpoints);
 }
 
