@@ -3141,7 +3141,7 @@ ZV_invdivexact(GEN y, GEN x)
       pari_sp av = avma;
       ulong a = Fl_inv(umodiu(diviuexact(gel(y,i),x[i]), x[i]), x[i]);
       set_avma(av);
-      gel(z,i) = utoipos(a);
+      gel(z,i) = utoi(a);
     }
   else
     for (i=1; i<l; i++)
