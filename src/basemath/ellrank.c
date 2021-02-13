@@ -710,6 +710,7 @@ ellabs(GEN P)
 static GEN
 vecellabs(GEN x) { pari_APPLY_same(ellabs(gel(x,i))) }
 
+/* y^2 = x^3 + K a2 x + K^2 a4 x + K^3 a6 */
 static GEN
 elltwistequation(GEN ell, GEN K)
 {
@@ -722,6 +723,7 @@ elltwistequation(GEN ell, GEN K)
   return ellinit(mkvec5(gen_0, a2, gen_0, a4, a6), NULL, DEFAULTPREC);
 }
 
+/* P=[x,y] a point on Ky^2 =  pol(x); [Kx, K^2y] point on Y^2 = K^3pol(X/K) */
 static GEN
 elltwistpoint(GEN P, GEN K, GEN K2)
 {
@@ -1259,7 +1261,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
     param = gmul(param, gdiv(den? mulii(K, den): K, zz));
     q0 = tracematrix(RgXQ_mul(zc, tttheta, pol), newb, pol);
     x = gdiv(qfeval(q0, param), K);
-    (void)issquareall(gdiv(poleval(pol, x), K), &y);
+    (void)issquareall(gdiv(poleval(pol, x), K), &y); /* K y^2 = pol(x) */
     P = mkvec2(x, y);
     if (DEBUGLEVEL) err_printf("Found point: %Ps\n", P);
     return gerepilecopy(av, P);
@@ -1278,10 +1280,12 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
 
   if (!K) K = gen_1;
   pol = ell2pol(ell);
+  /* help is a vector of rational points [x,y] satisfying K y^2 = pol(x) */
+  /* [Kx, K^2y] is on ell_K: Y^2 = K^3 pol(X/K)  */
   ell_K = elltwistequation(ell, K);
   if (help) help = elltwistpoints(help, K);
   help = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,effort+1), help);
-  help = elltwistpoints(help, ginv(K));
+  help = elltwistpoints(help, ginv(K)); /* points on K Y^2 = pol(X) */
   n = lg(vbnf) - 1; tors2 = n - 1;
   KP = gel(absZ_factor(K), 1);
   factdisc = mkvec3(KP, mkcol(gen_2), gel(absZ_factor(ZX_disc(pol)), 1));
@@ -1402,7 +1406,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   dim = lg(selmer)-1;
   newselmer = Flm_invimage(Flm_mul(LS2chars, selmer, 2), helpchars, 2);
   if (DEBUGLEVEL) err_printf("Selmer rank: %ld\n", dim);
-  listpoints = vec_lengthen(help, dim);
+  listpoints = vec_lengthen(help, dim); /* points on ell */
   nbpoints = lg(help) - 1;
   for (i=1; i <= dim; i++)
   {
@@ -1413,7 +1417,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
         vcrt, pol, selmer, K, LIM1, 1);
     if (P)
     {
-      gel(listpoints, ++nbpoints) = P;
+      gel(listpoints, ++nbpoints) = P; /* new point on ell */
       gel(newselmer, nbpoints) = vec;
       setlg(newselmer, nbpoints+1);
     } else set_avma(btop);
