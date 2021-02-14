@@ -1274,10 +1274,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   /* [Kx, K^2y] is on ell_K: Y^2 = K^3 pol(X/K)  */
   ell_K = elltwistequation(ell, K);
   if (help)
-  {
-    help = elltwistpoints(help, K);
     check_oncurve(ell_K, help);
-  }
   help = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,effort+1), help);
   help = elltwistpoints(help, ginv(K)); /* points on K Y^2 = pol(X) */
   n = lg(vbnf) - 1; tors2 = n - 1;
@@ -1476,7 +1473,7 @@ ellrank(GEN ell, long effort, GEN help, long prec)
 {
   pari_sp ltop = avma;
   GEN urst, v, vbnf;
-  GEN ellt = NULL, K = gen_1, nu = NULL, du = NULL, r = NULL;
+  GEN ellt = NULL, K = gen_1, nu = NULL, du = NULL, r = NULL, urstK = NULL;
 
   if (lg(ell)==3 && typ(ell)==t_VEC)
   {
@@ -1507,13 +1504,15 @@ ellrank(GEN ell, long effort, GEN help, long prec)
     ellt = ellintegralbmodel(ellt, &urst);
     ellrank_get_nudur(ell, ellt, &nu, &du, &r);
     K = mulii(nu, du);
+    urstK = mkvec4(nu, mulii(nu,r), gen_0, gen_0);
   }
   if (help)
   {
     if (urst) help = ellchangepoint(help, urst);
+    if (ellt) help = ellchangepointinv(help, urstK);
   }
   v = ell2selmer(ell, help, K, vbnf, effort, prec);
-  if (ellt) gel(v,3) = ellchangepoint(gel(v,3), mkvec4(nu, mulii(nu,r), gen_0, gen_0));
+  if (ellt) gel(v,3) = ellchangepoint(gel(v,3), urstK);
   if (urst) gel(v,3) = ellchangepointinv(gel(v,3), urst);
   return gerepilecopy(ltop, v);
 }
