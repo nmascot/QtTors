@@ -741,17 +741,6 @@ elltwistpoints(GEN x, GEN K)
   pari_APPLY_same(elltwistpoint(gel(x,i), K, K2))
 }
 
-static GEN
-ellredgen(GEN E, GEN vP, GEN K, long prec)
-{
-  if (equali1(K)) K = NULL;
-  if (K)
-    vP = elltwistpoints(vP, K);
-  vP = vecellabs(ellQ_genreduce(E, vP, prec));
-  if (K) vP = elltwistpoints(vP, ginv(K));
-  return vP;
-}
-
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
 /*    FUNCTIONS FOR NUMBER FIELDS              \\ */
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
@@ -1284,7 +1273,11 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   /* help is a vector of rational points [x,y] satisfying K y^2 = pol(x) */
   /* [Kx, K^2y] is on ell_K: Y^2 = K^3 pol(X/K)  */
   ell_K = elltwistequation(ell, K);
-  if (help) help = elltwistpoints(help, K);
+  if (help)
+  {
+    help = elltwistpoints(help, K);
+    check_oncurve(ell_K, help);
+  }
   help = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,effort+1), help);
   help = elltwistpoints(help, ginv(K)); /* points on K Y^2 = pol(X) */
   n = lg(vbnf) - 1; tors2 = n - 1;
@@ -1443,22 +1436,51 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   mwrank = nbpoints - tors2;
   if (odd(dim - nbpoints)) mwrank++;
   listpoints = vecslice(listpoints, 1+tors2, nbpoints);
-  listpoints = ellredgen(ell_K, listpoints, K, prec);
+  listpoints = elltwistpoints(listpoints, K);
+  listpoints = vecellabs(ellQ_genreduce(ell_K, listpoints, prec));
   return mkvec3(utoi(mwrank), utoi(dim-tors2), listpoints);
 }
 
-static GEN
-ell2descent(GEN ell, GEN help, long effort, long prec)
+static void
+ellrank_get_nudur(GEN E, GEN F, GEN *nu, GEN *du, GEN *r)
+{
+  GEN ea2 = ell_get_a2(E), ea2t = ell_get_a2(F);
+  GEN ec4 = ell_get_c4(E), ec4t = ell_get_c4(F);
+  GEN ec6 = ell_get_c6(E), ec6t = ell_get_c6(F);
+  GEN N, D, d;
+  if (signe(ec4)==0)
+  {
+    if (!Z_ispowerall(mulii(ec6,sqri(ec6t)),3,&N))
+      pari_err_TYPE("ellrank",F);
+    D = ec6t;
+  }
+  else if (signe(ec6)==0)
+  {
+    if (!Z_issquareall(mulii(ec4,ec4t),&N))
+      pari_err_TYPE("ellrank",F);
+    D = ec4t;
+  }
+  else
+  {
+    GEN d46 = mulii(gcdii(ec4,ec4t),gcdii(ec6,ec6t));
+    N = diviiexact(mulii(ec6,ec4t),d46);
+    D = diviiexact(mulii(ec6t,ec4),d46);
+  }
+  d = gcdii(N, D);
+  *nu = diviiexact(N, d); *du = diviiexact(D, d);
+  *r  = diviuexact(subii(mulii(*nu,ea2t),mulii(*du,ea2)),3);
+}
+
+GEN
+ellrank(GEN ell, long effort, GEN help, long prec)
 {
   pari_sp ltop = avma;
-  GEN urst, v, vbnf, K = gen_1;
+  GEN urst, v, vbnf;
+  GEN ellt = NULL, K = gen_1, nu = NULL, du = NULL, r = NULL;
 
   if (lg(ell)==3 && typ(ell)==t_VEC)
   {
-    K = gel(ell, 2); ell = gel(ell, 1);
-    if (typ(K) != t_INT)
-      pari_err(e_MISC, "ell2descent: nonintegral quadratic twist");
-    if (!signe(K)) pari_err(e_MISC, "ell2descent: twist by 0");
+    ellt = gel(ell, 2); ell = gel(ell, 1);
   }
   if (lg(ell)==4 && typ(ell)==t_VEC)
   {
@@ -1477,18 +1499,21 @@ ell2descent(GEN ell, GEN help, long effort, long prec)
     ell = ellintegralbmodel(ell, &urst);
     vbnf = makevbnf(ell, prec);
   }
-  if (!equali1(K) && (!gequal0(ell_get_a1(ell)) || !gequal0(ell_get_a3(ell))))
-    pari_err(e_MISC, "ell2descent: quadratic twist only allowed for a1=a3=0");
+  if (ellt)
+  {
+    checkell_Q(ellt);
+    if (!gequal(ell_get_j(ellt),ell_get_j(ell)))
+      pari_err_TYPE("ellrank",ellt);
+    ellt = ellintegralbmodel(ellt, &urst);
+    ellrank_get_nudur(ell, ellt, &nu, &du, &r);
+    K = mulii(nu, du);
+  }
   if (help)
   {
     if (urst) help = ellchangepoint(help, urst);
-    check_oncurve(ell, help);
   }
   v = ell2selmer(ell, help, K, vbnf, effort, prec);
-  if (urst) gel(v,3) = ellchangepoint(gel(v,3), ellchangeinvert(urst));
+  if (ellt) gel(v,3) = ellchangepoint(gel(v,3), mkvec4(nu, mulii(nu,r), gen_0, gen_0));
+  if (urst) gel(v,3) = ellchangepointinv(gel(v,3), urst);
   return gerepilecopy(ltop, v);
 }
-
-GEN
-ellrank(GEN ell, long effort, GEN help, long prec)
-{ return ell2descent(ell, help, effort, prec); }

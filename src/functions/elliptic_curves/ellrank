@@ -30,12 +30,10 @@ Doc: if $E$ is an elliptic curve over $\Q$,
       680061120400889506109527474197680/5329525731816164537079693913473]]]
  @eprog
 
- Finally, $E$ can be a pair $[e, K]$, where $K$ is a non-zero integer and
- $e: y^2 = x^3 + a_2 x^2 + a_4 x + a_6$
- is an elliptic curve with $a_1$ and $a_3$ coefficients equal to $0$, as
- given by \kbd{ellinit} or \kbd{ellrankinit}. We then look for points on
- the quadratic twist $K y^2 = x^3 + a_2 x^2 + a_4 x + a_6$.
- Note that the \kbd{ellrankinit} initialization is independant of $K$!
+ Finally, $E$ can be a pair $[e, f]$, where $e$ is an elliptic curve given by
+ \kbd{ellrankinit} and $f$ is a quadratic twist of $e$. We then look for
+ points on $f$.
+ Note that the \kbd{ellrankinit} initialization is independent of $f$!
 
  \misctitle{Technical explanation:}
  The algorithm uses $2$-descent which has an intrinsic limitation:

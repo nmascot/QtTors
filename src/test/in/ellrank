@@ -108,13 +108,24 @@ checkquer()=
 }
 checkquer()
 
-F=ellrankinit(ellinit([0,1]));
-mwrank(F)
-mwrank([F,2])
-mwrank([F,157])
-mwrank([F,-157])
+checktwist(e,f)=
+{
+  my(E,F,rk,R);
+  E=ellinit(e); F=ellinit(f);
+  rk = ellrankinit(E);
+  R=mwrank([rk,F]); print(R);
+  if(#R[3]&&vecmin(ellisoncurve(F,R[3]))==0,error("twist"));
+}
+checktwist([28,-172,304,-328628448,1486696690624],[66,-954,5454,-37136547171,1787447910597444]);
+checktwist([66,-954,5454,-173907,-7341759],[28,-172,304,-4064,-20032]);
+checktwist([66,-954,5454,-173502,-7327179],[28,-172,304,-3744,-20032]);
+checktwist([-1,1],[-36,216]);
 
 \\ check for old regressions
 mwrank(ellinit([-181^2,-1]))
 mwrank(ellinit([1,0,1,-33,68]))
-ellrank([ellinit([-1,1]),6])
+
+\\error
+checktwist([1,2],[1,3])
+checktwist([1,0],[2,0])
+checktwist([0,1],[0,3])
