@@ -117,3 +117,4 @@ mwrank([F,-157])
 \\ check for old regressions
 mwrank(ellinit([-181^2,-1]))
 mwrank(ellinit([1,0,1,-33,68]))
+ellrank([ellinit([-1,1]),6])

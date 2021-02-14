@@ -617,7 +617,7 @@ polrootsmodpn(GEN pol, GEN p)
   long j, l, i = 1, vd = Z_pval(ZX_disc(pol), p);
   GEN v, r, P;
 
-  if (!vd) { set_avma(av); retmkvec(mkvec2(gen_0, gen_0)); }
+  if (!vd) { set_avma(av); retmkvec(zerovec(2)); }
   pol = Q_primpart(pol);
   P = gpowers0(p, vd-1, p); av2 = avma;
   v = FpX_roots(pol, p); l = lg(v);
@@ -640,6 +640,7 @@ polrootsmodpn(GEN pol, GEN p)
     gel(v, i) = gel(r, 1);
     if (gc_needed(av2, 1)) gerepileall(av2, 1, &v);
   }
+  if (lg(v) == 1) { set_avma(av); retmkvec(zerovec(2)); }
   return gerepilecopy(av, v);
 }
 
