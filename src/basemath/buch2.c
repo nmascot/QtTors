@@ -1740,7 +1740,7 @@ dump_gen(GEN x, long flag)
 static GEN
 isprincipalall(GEN bnf, GEN x, long *pprec, long flag)
 {
-  GEN xar, Wex, Bex, gen, xc, col, A, Q, R, UA;
+  GEN xar, Wex, Bex, gen, xc, col, A, Q, R, UA, SUnits;
   GEN C = bnf_get_C(bnf), nf = bnf_get_nf(bnf), cyc = bnf_get_cyc(bnf);
   long nB, nW, e;
 
@@ -1780,6 +1780,7 @@ isprincipalall(GEN bnf, GEN x, long *pprec, long flag)
   nW = lg(Wex)-1;
   gen = bnf_get_gen(bnf);
   col = NULL;
+  SUnits = bnf_get_sunits(bnf);
   if (lg(R) == 1
       || abscmpiu(gel(R,vecindexmax(R)), 4 * bit_accuracy(*pprec)) < 0)
   { /* q = N (x / prod gj^ej) = N(alpha), denom(alpha) | d */
@@ -1789,11 +1790,11 @@ isprincipalall(GEN bnf, GEN x, long *pprec, long flag)
     if (nW) col = add(col, RgC_sub(act_arch(Q, bnf_get_GD(bnf)),
                                    act_arch(A, bnf_get_ga(bnf))));
     col = isprincipalarch(bnf, col, q, gen_1, d, &e);
-    if (col && (dump_gen(col, flag) || !fact_ok(nf,x, col,gen,R))) col = NULL;
+    if (col && ((SUnits && dump_gen(col, flag))
+                || !fact_ok(nf,x, col,gen,R))) col = NULL;
   }
   if (!col && (flag & nf_GENMAT))
   {
-    GEN SUnits = bnf_get_sunits(bnf);
     if (SUnits)
     {
       GEN X = gel(SUnits,1), U = gel(SUnits,2), C = gel(SUnits,3);

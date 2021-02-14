@@ -106,6 +106,10 @@ bnf=bnfinit(x^2-x+6);bnr=bnrinit(bnf,[29,18;0,1]);
 bnrisprincipal(bnr,1)
 bnrinit(bnf,idealfactor(bnf,1)).no \\ #1890
 
+\\ #2275
+bnr=bnrinit(bnfinit(quadpoly(1546508,y)),9);
+bnrisprincipal(bnr,idealprimedec(bnr,43)[1]);
+
 bnf=bnfinit(x^2-486);
 P2 = idealprimedec(bnf,2)[1];
 P3 = idealprimedec(bnf,3)[1];
