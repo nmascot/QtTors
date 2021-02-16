@@ -2020,15 +2020,21 @@ iterators are mainly useful for GP programming. Here are the others:
 \item \tet{forell}, \tet{forqfvec} and \tet{forsubgroup} are currently not
 implemented as an iterator but as a procedure with callbacks.
 
-\fun{void}{forell}{void *E, long fun(void*, GEN), GEN a, GEN b}
-goes through the same curves as \tet{forell(ell,a,b,)}, calling
+\fun{void}{forell}{void *E, long fun(void*, GEN), GEN a, GEN b, long flag}
+goes through the same curves as \tet{forell(ell,a,b,,flag)}, calling
 \tet{fun(E, ell)} for each curve \kbd{ell}, stopping if \kbd{fun} returns a
 nonzero value.
 
-\fun{void}{forqfvec1}{void *E, long (*fun)(void *, GEN, GEN, double), GEN A, GEN BORNE}
-goes through the same vectors as \tet{forqfvec(v,A,BORNE,)}, calling
-\tet{fun(E, v)} for each vectors \kbd{v}, stopping if \kbd{fun} returns a
-nonzero value.
+\fun{void}{forqfvec}{void *E, long (*fun)(void *, GEN, GEN, double), GEN q, GEN b}:
+Evaluate \kbd{fun(E,U,v,m)} on all $v$ such that $q(U\*v)<b$, where $U$ is a
+\typ{MAT}, $v$ is a \typ{VECSMALL} and $m=q(v)$ is a C double. The function
+\kbd{fun} must return $0$, unless \kbd{forqfvec} should stop, in which case,
+it should return $1$.
+
+\fun{void}{forqfvec1}{void *E, long (*fun)(void *, GEN), GEN q, GEN b}:
+Evaluate \kbd{fun(E,v)} on all $v$ such that $q(v)<b$, where $v$ is a
+\typ{COL}. The function \kbd{fun} must return $0$, unless \kbd{forqfvec}
+should stop, in which case, it should return $1$.
 
 \fun{void}{forsubgroup}{void *E, long fun(void*, GEN), GEN G, GEN B}
 goes through the same subgroups as \tet{forsubgroup(H = G, B,)}, calling
