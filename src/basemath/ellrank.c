@@ -1222,7 +1222,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
     {
       GEN r;
       do r = randS(sbase); while (degpol(QX_gcd(r, pol)));
-      zc = RgXQ_mul(z, QXQ_sqr(r, pol), pol);
+      zc = QXQ_mul(z, QXQ_sqr(r, pol), pol);
     }
     q2 = Q_primpart(tracematrix(zc, b, pol));
     U = redquadric(b, q2, pol, QXQ_div(zc, polprime, pol));
@@ -1232,7 +1232,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
 
     param = Q_primpart(qfparam(q2, qfsolve(q2), 0));
     param = RgM_to_RgXV_reverse(shallowtrans(param), 0);
-    q1 = RgM_neg(tracematrix(RgXQ_mul(zc, ttheta, pol), newb, pol));
+    q1 = RgM_neg(tracematrix(QXQ_mul(zc, ttheta, pol), newb, pol));
     Q = hyperellreduce(qfeval(q1, param), &R);
     if (!equali1(K)) Q = RgX_Rg_mul(Q, K);
     Q = Q_remove_denom(Q, &den);
@@ -1249,7 +1249,7 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2k, GEN LS2, GEN sqrtLS2, GEN fact
 
     param = RgXV_homogenous_evaldeg(param, x, gpowers(y, 2));
     param = gmul(param, gdiv(den? mulii(K, den): K, zz));
-    q0 = tracematrix(RgXQ_mul(zc, tttheta, pol), newb, pol);
+    q0 = tracematrix(QXQ_mul(zc, tttheta, pol), newb, pol);
     x = gdiv(qfeval(q0, param), K);
     (void)issquareall(gdiv(poleval(pol, x), K), &y); /* K y^2 = pol(x) */
     P = mkvec2(x, y);
