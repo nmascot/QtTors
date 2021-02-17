@@ -500,11 +500,34 @@ polreduce(GEN P, GEN M)
 }
 
 static GEN
+red_Cremona_Stoll(GEN Q, GEN *pM)
+{
+  GEN q1, q2, q3, M, R, den, P = Q_primitive_part(Q, &den);
+  long i, prec = nbits2prec(2*gexpo(P)) + 1;
+  GEN dP = ZX_deriv(P);
+  GEN r = roots(P, prec);
+  q1 = gen_0; q2 = gen_0; q3 = gen_0;
+  for (i = 1; i <= 4; i++)
+  {
+    GEN ri = gel(r,i);
+    GEN s = ginv(gabs(RgX_cxeval(dP,ri,NULL), prec));
+    q1 = gadd(q1, s);
+    q2 = gsub(q2, gmul(real_i(ri), s));
+    q3 = gadd(q3, gmul(gnorm(ri), s));
+  }
+  M = lllgram(mkmat22(q1,q2,q2,q3));
+  if (lg(M) != 3) M = matid(2);
+  R = polreduce(P, M); if (den) R = gmul(R, den);
+  *pM = M; return R;
+}
+
+static GEN
 hyperellreduce(GEN Q, GEN *pM)
 {
   long d = degpol(Q);
-  GEN q1, q2, q3, D, M, R, vD, den, P = Q_primitive_part(Q, &den);
+  GEN q1, q2, q3, D, vD, den, P = Q_primitive_part(Q, &den);
   GEN a = gel(P,d+2), b = gel(P,d+1), c = gel(P, d);
+  GEN M, R, M2;
 
   q1 = muliu(sqri(a), d);
   q2 = shifti(mulii(a,b), 1);
@@ -523,8 +546,9 @@ hyperellreduce(GEN Q, GEN *pM)
     M = redqfbsplit(q1, q2, q3, vD);
   else
     M = gel(qfbredsl2(mkqfb(q1,q2,q3,D), NULL), 2);
-  R = polreduce(P, M); if (den) R = gmul(R, den);
-  *pM = M; return R;
+  R = red_Cremona_Stoll(polreduce(P, M), &M2);
+  if (den) R = gmul(R, den);
+  *pM = gmul(M, M2); return R;
 }
 
 /* find point (x:y:z) on y^2 = pol, return [x,z]~ and set *py = y */
@@ -558,9 +582,9 @@ projratpointxz2(GEN pol, long lim, GEN *py)
 {
   pari_sp av = avma;
   GEN list = mkvec(mkvec4(pol, matid(2), gen_1, gen_1));
-  long i, j, first = 1;
+  long i, j, c;
 
-  for (i = 1; i < lg(list); i++)
+  for (i = 1, c = 1; i < lg(list); i++,c++)
   {
     GEN K, k, ff, co, p, M, C, r, pol, L = gel(list, i);
     long lr;
@@ -573,8 +597,9 @@ projratpointxz2(GEN pol, long lim, GEN *py)
     if (Z_issquareall(K, &k))
     {
       GEN xz, y, aux, U;
+      if (c==1) continue;
       pol = hyperellreduce(pol, &U);
-      if (first && ZM_isidentity(U)) continue; /* already known to fail */
+      if (DEBUGLEVEL>1) err_printf("  reduced quartic(%ld): Y^2 = %Ps\n", i, pol);
       xz = projratpointxz(pol, lim, &y); if (!xz) continue;
       *py = gmul(y, mulii(C, k));
       aux = RgM_RgC_mul(ZM2_mul(M, U), xz);
@@ -582,7 +607,6 @@ projratpointxz2(GEN pol, long lim, GEN *py)
       *py = gdiv(*py, gpowgs(gel(aux, 2), degpol(pol)>>1));
       return mkcol2(gdiv(gel(aux, 1), gel(aux, 2)), gen_1);
     }
-    first = 0;
     ff = Z_factor(K); co = core2(mkvec2(K, ff)); K = gel(co,1); /* > 1 */
     p = first_divisor(K, gel(ff,1));
     K = diviiexact(K, p);
