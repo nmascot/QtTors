@@ -991,28 +991,26 @@ static GEN
 elllocalimage(GEN pol, GEN K, GEN vnf, GEN p, GEN pp, GEN pts)
 {
   pari_sp av = avma;
-  long attempt = 0, p2 = RgVV_nb(pp), prank = equaliu(p, 2)? p2: p2 - 1;
+  long n, p2 = RgVV_nb(pp), prank = equaliu(p, 2)? p2: p2 - 1;
   GEN R = polrootsmodpn(pol, p), bound = addiu(p, 6);
 
-  if (!pts) pts = cgetg(1, t_MAT);
-  for(;;)
+  for(n = 1;; n++)
   {
     pari_sp btop;
-    GEN xx, y2, delta;
+    GEN x, y2, d;
     pts = Flm_image(pts, 2); if (lg(pts)-1 == prank) break;
-    attempt++;
-    if (attempt%16 == 0) bound = mulii(bound, p);
+    if ((n & 0xf) == 0) bound = mulii(bound, p);
     btop = avma;
     do
     {
       GEN r = gel(R, random_Fl(lg(R)-1)+1);
       long pprec = random_Fl(itou(gel(r, 2)) + 3) - 2; /* >= -2 */
       set_avma(btop);
-      xx = gadd(gel(r, 1), gmul(powis(p, pprec), randomi(bound)));
-      y2 = gmul(K, poleval(pol, xx));
+      x = gadd(gel(r, 1), gmul(powis(p, pprec), randomi(bound)));
+      y2 = gmul(K, poleval(pol, x));
     } while (gequal0(y2) || !Qp_issquare(y2, p));
-    delta = deg1pol_shallow(negi(K), gmul(K, xx), 0);
-    pts = vec_append(pts, kpmodsquares(vnf, delta, pp));
+    d = deg1pol_shallow(negi(K), gmul(K, x), 0);
+    pts = vec_append(pts, kpmodsquares(vnf, d, pp));
   }
   return gerepilecopy(av, pts);
 }
