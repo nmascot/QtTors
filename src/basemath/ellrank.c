@@ -1148,15 +1148,13 @@ check_oncurve(GEN ell, GEN v)
 }
 
 static GEN
-smallbasis1(GEN nf, GEN crt, GEN pol)
+basis(GEN nf, GEN x, GEN crt, GEN pol)
 {
-  GEN b, zk = nf_get_zk(nf);
-  long i, l = lg(zk);
-
-  b = cgetg(l, t_COL);
-  for (i = 1; i < l; ++i)
+  long i, l = lg(x);
+  GEN b = cgetg(l, t_COL);
+  for (i = 1; i < l; i++)
   {
-    GEN z = nf_to_scalar_or_alg(nf, gel(zk, i));
+    GEN z = nf_to_scalar_or_alg(nf, gel(x, i));
     gel(b, i) = grem(gsub(z, gmul(crt, z)), pol); /* z mod T, 0 mod (pol/T) */
   }
   return b;
@@ -1164,31 +1162,25 @@ smallbasis1(GEN nf, GEN crt, GEN pol)
 
 static GEN
 vecsmallbasis(GEN x, GEN vcrt, GEN pol)
-{ pari_APPLY_same(smallbasis1(gel(x,i), gel(vcrt,i), pol)) }
+{ pari_APPLY_same(basis(gel(x,i), nf_get_zk(gel(x,i)), gel(vcrt,i), pol)) }
 
 static GEN
 ZC_shifti(GEN x, long n) { pari_APPLY_type(t_COL, shifti(gel(x,i), n)) }
 
+/* true nf */
 static GEN
 selmerbasis(GEN nf, GEN LS2k, GEN expo, GEN sqrtLS2, GEN factLS2,
             GEN badprimes, GEN crt, GEN pol)
 {
-  GEN b, ek = vecslice(expo, LS2k[1], LS2k[2]);
+  GEN ek = vecslice(expo, LS2k[1], LS2k[2]);
   GEN sqrtzc = idealfactorback(nf, sqrtLS2, zv_neg(ek), 0);
   GEN E = ZC_shifti(ZM_zc_mul(factLS2, ek), -1);
-  long i, n = nf_get_degree(nf);
 
   if (ZV_equal0(E))
-    sqrtzc = idealhnf(nf, sqrtzc);
+    sqrtzc = idealhnf_shallow(nf, sqrtzc);
   else
     sqrtzc = idealmul(nf, sqrtzc, idealfactorback(nf, badprimes, ZC_neg(E), 0));
-  b = cgetg(n+1, t_COL);
-  for (i = 1; i <= n; i++)
-  {
-    GEN z = nf_to_scalar_or_alg(nf, gel(sqrtzc, i));
-    gel(b, i) = grem(gsub(z, gmul(crt, z)), pol); /* z mod T, 0 mod (pol/T) */
-  }
-  return b;
+  return basis(nf, sqrtzc, crt, pol);
 }
 
 static long randu(void) { return random_Fl(127) - 63; }
