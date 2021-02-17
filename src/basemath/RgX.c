@@ -2674,7 +2674,7 @@ RgXQV_factorback(GEN L, GEN e, GEN T)
 GEN
 QXQ_powers(GEN a, long n, GEN T)
 {
-  GEN den, v = RgXQ_powers(Q_remove_denom(a, &den), n, T);
+  GEN den, v = ZXQ_powers(Q_remove_denom(a, &den), n, T);
   /* den*a integral; v[i+1] = (den*a)^i in K */
   if (den)
   { /* restore denominators */
