@@ -558,7 +558,7 @@ projratpointxz2(GEN pol, long lim, GEN *py)
 {
   pari_sp av = avma;
   GEN list = mkvec(mkvec4(pol, matid(2), gen_1, gen_1));
-  long i, j;
+  long i, j, first = 1;
 
   for (i = 1; i < lg(list); i++)
   {
@@ -574,6 +574,7 @@ projratpointxz2(GEN pol, long lim, GEN *py)
     {
       GEN xz, y, aux, U;
       pol = hyperellreduce(pol, &U);
+      if (first && ZM_isidentity(U)) continue; /* already known to fail */
       xz = projratpointxz(pol, lim, &y); if (!xz) continue;
       *py = gmul(y, mulii(C, k));
       aux = RgM_RgC_mul(ZM2_mul(M, U), xz);
@@ -581,6 +582,7 @@ projratpointxz2(GEN pol, long lim, GEN *py)
       *py = gdiv(*py, gpowgs(gel(aux, 2), degpol(pol)>>1));
       return mkcol2(gdiv(gel(aux, 1), gel(aux, 2)), gen_1);
     }
+    first = 0;
     ff = Z_factor(K); co = core2(mkvec2(K, ff)); K = gel(co,1); /* > 1 */
     p = first_divisor(K, gel(ff,1));
     K = diviiexact(K, p);
