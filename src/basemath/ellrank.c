@@ -1016,10 +1016,10 @@ elllocalimage(GEN pol, GEN K, GEN vnf, GEN p, GEN pp, GEN pts)
 }
 
 static GEN
-ellLS2image(GEN pol, GEN vP, GEN K, GEN vpol)
+ellLS2image(GEN pol, GEN vP, GEN K, GEN vpol, GEN vcrt)
 {
-  GEN v;
   long i, l = lg(vP);
+  GEN v;
 
   if (l == 1) return cgetg(1, t_VEC);
   v = cgetg(l, t_VEC);
@@ -1027,20 +1027,21 @@ ellLS2image(GEN pol, GEN vP, GEN K, GEN vpol)
   {
     GEN P = gel(vP, i), x, t;
     if (ell_is_inf(P)) { gel(v, i) = gen_1; continue; }
-    x = gel(P,1); t = deg1pol_shallow(gen_m1, x, 0);
-    if (!gequal0(gel(P,2)))
-      gel(v, i) = gmul(K, t);
-    else
-    {
+    x = gel(P,1);
+    t = deg1pol_shallow(negi(K), gmul(K, x), 0);
+    if (gequal0(gel(P,2)))
+    { /* 2-torsion, x now integer and a root of exactly one linear vpol[k]=T */
       long k, lp = lg(vpol);
-      GEN aux = cgetg(lp, t_VEC);
+      GEN a;
       for (k = 1; k < lp; k++)
       {
-        GEN a = signe(poleval(gel(vpol, k), x))? gmul(K, t): ZX_deriv(pol);
-        gel(aux, k) = gmodulo(a, gel(vpol, k));
+        GEN T = gel(vpol,k), z = gel(T,2);
+        if (absequalii(x, z) && signe(x) == -signe(z)) break; /* T = X-x */
       }
-      gel(v, i) = liftpol_shallow(chinese1(aux));
+      a = ZX_Z_eval(ZX_deriv(pol), x);
+      t = gadd(a, gmul(gel(vcrt,k), gsub(t, a))); /* a mod T, t mod pol/T*/
     }
+    gel(v, i) = t;
   }
   return v;
 }
@@ -1293,7 +1294,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
     gel(vnf, k) = nf;
     gel(vpol, k) = T = nf_get_pol(nf);
     Tinv = RgX_div(pol, gel(vpol, k));
-    gel(vcrt, k) = QX_mul(QXQ_inv(T, Tinv), T);
+    gel(vcrt, k) = QX_mul(QXQ_inv(T, Tinv), T); /* 0 mod T, 1 mod pol/T */
     gel(vroots, k) = nf_get_roots(gel(vnf, k));
     uel(vr1, k) = nf_get_r1(gel(vnf, k));
 
@@ -1316,7 +1317,7 @@ ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
   sbase = shallowconcat1(vecsmallbasis(vnf, vcrt, pol));
   if (DEBUGLEVEL>2) err_printf("   local badprimes = %Ps\n", badprimes);
   LS2 = shallowconcat1(LS2);
-  helpLS2 = ellLS2image(pol, help, K, vpol);
+  helpLS2 = ellLS2image(pol, help, K, vpol, vcrt);
   selmer = kernorm(LS2, factdisc, 2, pol);
   LS2chars = vecselmersign(vnf, vpol, LS2);
   helpchars = vecselmersign(vnf, vpol, helpLS2);
