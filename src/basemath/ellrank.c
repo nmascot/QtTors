@@ -992,7 +992,7 @@ elllocalimage(GEN pol, GEN K, GEN vnf, GEN p, GEN pp, GEN pts)
 {
   pari_sp av = avma;
   long attempt = 0, p2 = RgVV_nb(pp), prank = equaliu(p, 2)? p2: p2 - 1;
-  GEN R = polrootsmodpn(gmul(K, pol), p), bound = addiu(p, 6);
+  GEN R = polrootsmodpn(pol, p), bound = addiu(p, 6);
 
   if (!pts) pts = cgetg(1, t_MAT);
   for(;;)
