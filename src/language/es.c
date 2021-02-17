@@ -262,7 +262,11 @@ GEN
 gp_read_stream(FILE *fi)
 {
   Buffer *b = new_buffer();
-  GEN x = gp_read_stream_buf(fi, b)? readseq(b->buf): gnil;
+  GEN x = NULL;
+  while (gp_read_stream_buf(fi, b))
+  {
+    if (*(b->buf)) { x = readseq(b->buf); break; }
+  }
   delete_buffer(b); return x;
 }
 
@@ -4074,7 +4078,7 @@ gpextern(const char *s)
   check_secure(s);
   F = try_pipe(s, mf_IN);
   z = gp_read_stream(F->file);
-  pari_fclose(F); return z;
+  pari_fclose(F); return z ? z : gnil;
 }
 
 GEN

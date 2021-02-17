@@ -17,6 +17,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     qficompraw, qfipowraw, qfipow, redimag
   - unify real and imaginary binary quadratic forms, include discriminant
     types t_QFI and t_QFR are replaced by t_QFB
+  - gp_read_stream now returns NULL when EOF is reached (used to be gnil).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.12 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   - the member function bnf.futu and .tufu (deprecated since 2.2) have been
