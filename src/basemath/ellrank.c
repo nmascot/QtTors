@@ -27,12 +27,12 @@ lemma6(GEN T, GEN p, long nu, GEN x)
 {
   long la, mu;
   pari_sp av = avma;
-  GEN gpx, gx = poleval(T, x);
+  GEN gpx, gx = ZX_Z_eval(T, x);
 
   if (Zp_issquare(gx, p)) return gc_long(av,1);
 
   la = Z_pval(gx, p);
-  gpx = poleval(ZX_deriv(T), x);
+  gpx = ZX_Z_eval(ZX_deriv(T), x);
   mu = signe(gpx)? Z_pval(gpx,p)
                  : la+nu+1; /* mu = +oo */
   set_avma(av);
@@ -46,11 +46,11 @@ lemma7(GEN T, long nu, GEN x)
 {
   long odd4, la, mu;
   pari_sp av = avma;
-  GEN gpx, oddgx, gx = poleval(T, x);
+  GEN gpx, oddgx, gx = ZX_Z_eval(T, x);
 
   if (Zp_issquare(gx,gen_2)) return 1;
 
-  gpx = poleval(ZX_deriv(T), x);
+  gpx = ZX_Z_eval(ZX_deriv(T), x);
   la = Z_lvalrem(gx, 2, &oddgx);
   odd4 = umodiu(oddgx,4); set_avma(av);
 

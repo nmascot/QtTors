@@ -1605,8 +1605,8 @@ lfunquadneg_naive(long D, long k)
     long c = kross(D, r);
     if (c)
     {
-      GEN tmp = poleval(B, utoi(r));
-      S = c > 0 ? addii(S, tmp) : subii(S, tmp);
+      GEN t = ZX_Z_eval(B, utoi(r));
+      S = c > 0 ? addii(S, t) : subii(S, t);
       S = gerepileuptoint(av, S);
     }
   }
@@ -9218,7 +9218,7 @@ charLFwtk(long N, long k, GEN CHI, long ord, long t)
     GEN C;
     if (ugcd(r,N) != 1) continue;
     a = mfcharevalord(CHI,r,ord);
-    C = poleval(P, utoi(r));
+    C = ZX_Z_eval(P, utoi(r));
     if (t != 1 && kross(t, r) < 0) C = gneg(C);
     S = gadd(S, Qab_Czeta(a, ord, C, vt));
   }

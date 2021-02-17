@@ -452,7 +452,7 @@ CheckSol(GEN *pS, GEN z1, GEN z2, GEN P, GEN rhs, GEN ro)
   if (e > 0) return 0;
   if (e <= -13)
   { /* y != 0 and rhs != 0; check whether P(x,y) = rhs or P(-x,-y) = rhs */
-    GEN z = poleval(ZX_rescale(P,y),x);
+    GEN z = ZX_Z_eval(ZX_rescale(P,y),x);
     if (absequalii(z, rhs)) add_pm(pS, x,y, z, degpol(P), rhs);
   }
   return 1;
@@ -633,7 +633,7 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN P, GEN rhs, long s, GEN c1)
       if (cmpii(q, bound) > 0) break;
       if (DEBUGLEVEL >= 2) err_printf("Checking (+/- %Ps, +/- %Ps)\n",p, q);
       av = avma;
-      z = poleval(ZX_rescale(P,q), p); /* = P(p/q) q^dep(P) */
+      z = ZX_Z_eval(ZX_rescale(P,q), p); /* = P(p/q) q^dep(P) */
       Q = dvmdii(rhs, z, &R);
       if (R != gen_0) { set_avma(av); continue; }
       setabssign(Q);

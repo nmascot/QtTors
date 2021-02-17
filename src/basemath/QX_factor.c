@@ -394,7 +394,7 @@ root_bound(GEN P0)
   {
     z = shifti(addii(x,y), -1);
     if (equalii(x,z) || k > 5) break;
-    if (cmpii(poleval(Q,z), mulii(lP, powiu(z, d))) < 0)
+    if (cmpii(ZX_Z_eval(Q,z), mulii(lP, powiu(z, d))) < 0)
       y = z;
     else
       x = z;

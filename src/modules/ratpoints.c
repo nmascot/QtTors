@@ -346,7 +346,7 @@ ZX_positive_region(GEN P, long h, long bitprec)
   GEN it = mkvec2(stoi(-h),stoi(h));
   GEN R = ZX_Uspensky(P, it, 1, bitprec);
   long nR = lg(R)-1;
-  long s = signe(poleval(P,gel(it,1)));
+  long s = signe(ZX_Z_eval(P,gel(it,1)));
   long i=1, j;
   GEN iv, st, en;
   if (s<0 && nR==0) return NULL;
