@@ -4418,7 +4418,7 @@ poleval(GEN x, GEN y)
 {
   long i, j, imin, tx = typ(x);
   pari_sp av0 = avma, av;
-  GEN p1, p2, r, s;
+  GEN t, t2, r, s;
 
   if (is_scalar_t(tx)) return gcopy(x);
   switch(tx)
@@ -4427,9 +4427,8 @@ poleval(GEN x, GEN y)
       i = lg(x)-1; imin = 2; break;
 
     case t_RFRAC:
-      p1 = poleval(gel(x,1),y);
-      p2 = poleval(gel(x,2),y);
-      return gerepileupto(av0, gdiv(p1,p2));
+      return gerepileupto(av0, gdiv(poleval(gel(x,1),y),
+                                    poleval(gel(x,2),y)));
 
     case t_VEC: case t_COL:
       i = lg(x)-1; imin = 1; break;
@@ -4439,12 +4438,12 @@ poleval(GEN x, GEN y)
   if (i<=imin) return (i==imin)? gmul(gel(x,imin),Rg_get_1(y)): Rg_get_0(y);
   if (isintzero(y)) return gcopy(gel(x,imin));
 
-  p1 = gel(x,i); i--;
+  t = gel(x,i); i--;
   if (typ(y)!=t_COMPLEX)
   {
 #if 0 /* standard Horner's rule */
     for ( ; i>=imin; i--)
-      p1 = gadd(gmul(p1,y),gel(x,i));
+      t = gadd(gmul(t,y),gel(x,i));
 #endif
     /* specific attention to sparse polynomials */
     for ( ; i>=imin; i=j-1)
@@ -4453,32 +4452,32 @@ poleval(GEN x, GEN y)
         if (j==imin)
         {
           if (i!=j) y = gpowgs(y, i-j+1);
-          return gerepileupto(av0, gmul(p1,y));
+          return gerepileupto(av0, gmul(t,y));
         }
       r = (i==j)? y: gpowgs(y, i-j+1);
-      p1 = gadd(gmul(p1,r), gel(x,j));
+      t = gadd(gmul(t,r), gel(x,j));
       if (gc_needed(av0,2))
       {
         if (DEBUGMEM>1) pari_warn(warnmem,"poleval: i = %ld",i);
-        p1 = gerepileupto(av0, p1);
+        t = gerepileupto(av0, t);
       }
     }
-    return gerepileupto(av0,p1);
+    return gerepileupto(av0, t);
   }
 
-  p2 = gel(x,i); i--; r = gtrace(y); s = gneg_i(gnorm(y));
+  t2 = gel(x,i); i--; r = gtrace(y); s = gneg_i(gnorm(y));
   av = avma;
   for ( ; i>=imin; i--)
   {
-    GEN p3 = gadd(p2, gmul(r, p1));
-    p2 = gadd(gel(x,i), gmul(s, p1)); p1 = p3;
+    GEN p = gadd(t2, gmul(r, t));
+    t2 = gadd(gel(x,i), gmul(s, t)); t = p;
     if (gc_needed(av0,2))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"poleval: i = %ld",i);
-      gerepileall(av, 2, &p1, &p2);
+      gerepileall(av, 2, &t, &t2);
     }
   }
-  return gerepileupto(av0, gadd(p2, gmul(y,p1)));
+  return gerepileupto(av0, gadd(t2, gmul(y, t)));
 }
 
 /* Evaluate a polynomial using Horner. Unstable!

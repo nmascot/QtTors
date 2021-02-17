@@ -445,6 +445,41 @@ ZX_translate(GEN P, GEN c)
   }
 }
 
+GEN
+ZX_Z_eval(GEN x, GEN y)
+{
+  long i = lg(x)-1, j;
+  pari_sp av = avma;
+  GEN t, r;
+
+  if (i<=2) return (i==2)? icopy(gel(x,2)): gen_0;
+  if (!signe(y)) return icopy(gel(x,2));
+
+  t = gel(x,i); i--;
+#if 0 /* standard Horner's rule */
+  for ( ; i>=2; i--)
+    t = addii(mulii(t,y),gel(x,i));
+#endif
+  /* specific attention to sparse polynomials */
+  for ( ; i>=2; i = j-1)
+  {
+    for (j = i; !signe(gel(x,j)); j--)
+      if (j==2)
+      {
+        if (i != j) y = powiu(y, i-j+1);
+        return gerepileuptoint(av, mulii(t,y));
+      }
+    r = (i==j)? y: powiu(y, i-j+1);
+    t = addii(mulii(t,r), gel(x,j));
+    if (gc_needed(av,2))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"ZX_Z_eval: i = %ld",i);
+      t = gerepileuptoint(av, t);
+    }
+  }
+  return gerepileuptoint(av, t);
+}
+
 /* Return 2^(n degpol(P))  P(x >> n) */
 GEN
 ZX_rescale2n(GEN P, long n)
