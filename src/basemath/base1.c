@@ -2288,7 +2288,7 @@ get_polchar(CG_data *d, GEN x)
 /* Choose a canonical polynomial in the pair { Pmin_a, Pmin_{-a} }, i.e.
  * { z(X), (-1)^(deg z) z(-Z) } and keeping the smallest wrt cmpii_polred
  * Either leave z alone (return 1) or set z <- (-1)^n z(-X). In place. */
-static int
+int
 ZX_canon_neg(GEN z)
 {
   long i, s;

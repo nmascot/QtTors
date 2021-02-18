@@ -1947,13 +1947,16 @@ liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry, GEN *
   pari_sp av = avma, av2;
   long t, lim = ntry * LIM1;
   GEN ttheta, tttheta, z, polprime;
+  hashtable h;
+  hash_init_GEN(&h, ntry, ZX_equal, 1);
   z = RgXQV_factorback(LS2, expo, pol);
   ttheta = RgX_shift_shallow(pol,-2);
   tttheta = RgX_shift_shallow(pol, -1);
   polprime = ZX_deriv(pol); av2 = avma;
   for (t = 1; t <= ntry; t++, set_avma(av2))
   {
-    GEN P, Q, R, den, q0, q1, q2, xz, x, y, zz, zc, U, param, newb, zden, QM;
+    GEN P, Q, Qk, R, den, q0, q1, q2, xz, x, y, zz, zc, U, param, newb, zden, QM;
+    long idx;
     if (t == 1) zc = z;
     else
     {
@@ -1979,6 +1982,10 @@ liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry, GEN *
     Q = hyperellreduce(q1, &R);
     R = gmul(gmael(QM,2,2), R);
     if (pt_Q) *pt_Q = Q;
+    Qk = shallowcopy(Q);
+    (void) ZX_canon_neg(Qk);
+    if (hash_haskey_long(&h, (void*)Qk, &idx)) continue;
+    hash_insert_long(&h, (void*)Qk, 1); av2 = avma;
     if (DEBUGLEVEL>1) err_printf("  reduced quartic: Y^2 = %Ps\n", Q);
 
     xz = projratpointxz(Q, lim, &zz);

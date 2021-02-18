@@ -697,7 +697,8 @@ long    set_optimize(long what, GEN g);
 
 /* base1.c */
 
-GEN zk_galoisapplymod(GEN nf, GEN z, GEN S, GEN p);
+GEN     zk_galoisapplymod(GEN nf, GEN z, GEN S, GEN p);
+int     ZX_canon_neg(GEN z);
 
 /* base2.c */
 
