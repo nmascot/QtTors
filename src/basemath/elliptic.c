@@ -7360,7 +7360,7 @@ ellQ_saturation(GEN E, GEN P, long B, long prec)
   (void)u_forprime_init(&S, 2, B);
   while((p = u_forprime_next(&S)))
   {
-    GEN T = gel(elltors_psylow(E, l), 3);
+    GEN T = gel(elltors_psylow(E, p), 3);
     long nb = l+lg(T)+5;
     if (lg(T)==1) T = NULL;
     while(1)
