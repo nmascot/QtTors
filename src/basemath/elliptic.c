@@ -7251,8 +7251,31 @@ ltors_Fl(ulong l, ulong p)
   return y;
 }
 
+
+/* Assume that l|o but p!=1 [l] so dim E(F_p)[l] = 1 */
 static void
-FljV_vecsat(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p, GEN S, long *m)
+FljV_vecsat_Siksek(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p, GEN S, long *m)
+{
+  long i, lA = lg(P)-1;
+  GEN v = zero_zv(lA);
+  pari_sp av = avma;
+  GEN a4a6 = a4a6_ch_Fl(E, p);
+  GEN g = gel(Fl_ellptors(l, o, a4, a6, p), 1);
+  ulong q = o/l;
+  GEN F = mkmat2(mkcols(l),mkcols(1));
+  for (i=1; i<=lA; i++)
+  {
+    GEN Q = Fle_changepointinv(Flj_to_Fle(gel(P,i), p), a4a6, p);
+    if (!ell_is_inf(Q))
+      v[i] = itou(Fle_log(Fle_mulu(Q, q, a4, p), g, F, a4, p));
+  }
+  gel(S,(*m)++) = v;
+  set_avma(av);
+}
+
+/* Assume that l|o and p=1 [l] so dim E(F_p)[l] = 1 or 2 */
+static void
+FljV_vecsat_Prickett(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p, GEN S, long *m)
 {
   long i, lA = lg(P)-1;
   GEN v = zero_zv(lA);
@@ -7289,7 +7312,7 @@ ellsatp_ker(hashtable *h, GEN e, long CM, GEN help, ulong l, long nb)
   long m = 1;
   GEN P = QEV_to_ZJV(help);
   GEN sat  = cgetg(nb+1, t_MAT);
-  (void)u_forprime_arith_init(&S, 5, ULONG_MAX,1,l);
+  (void)u_forprime_init(&S, 5, ULONG_MAX);
   while (m <= nb)
   {
     long o;
@@ -7304,7 +7327,10 @@ ellsatp_ker(hashtable *h, GEN e, long CM, GEN help, ulong l, long nb)
     if (o % l == 0)
     {
       Fl_ell_to_a4a6(e, p, &a4, &a6);
-      FljV_vecsat(e, ZM_to_Flm(P, p), o, l, a4, a6, p, sat, &m);
+      if (p%l == 1)
+        FljV_vecsat_Prickett(e, ZM_to_Flm(P, p), o, l, a4, a6, p, sat, &m);
+      else
+        FljV_vecsat_Siksek(e, ZM_to_Flm(P, p), o, l, a4, a6, p, sat, &m);
     }
   }
   return sat;
@@ -7320,6 +7346,7 @@ ellsatp(hashtable *h, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, long nb, lon
   long i, lK = lg(K), j, r = lg(H)-1, t = 0;
   GEN V = cgetg(lK, t_VEC);
   if (lK==1) return gc_NULL(av);
+  if (DEBUGLEVEL >= 3) err_printf("ellsat: potential factor %lu\n",l);
   for (i=1, j=1; i<lK; i++)
   {
     GEN R;
@@ -7333,6 +7360,8 @@ ellsatp(hashtable *h, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, long nb, lon
     }
     else
       R = ellQ_factorback(E, P, Ki, l, gdiv(h, sqru(l)), prec);
+    if (DEBUGLEVEL >= 2)
+      err_printf("ellsat: %s divisible by %lu\n",R?"":"not",l);
     if (R)
       gel(V, j++) = R;
     else
