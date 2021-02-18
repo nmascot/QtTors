@@ -7317,31 +7317,29 @@ ellsatp(hashtable *h, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, long nb, lon
   GEN S = ellsatp_ker(h, E, CM, P, l, nb);
   pari_sp av = avma;
   GEN K = Flm_ker(Flm_transpose(S), l);
-  long i, lK = lg(K), j, r = lg(H)-1;
+  long i, lK = lg(K), j, r = lg(H)-1, t = 0;
   GEN V = cgetg(lK, t_VEC);
   if (lK==1) return gc_NULL(av);
-  av = avma;
   for (i=1, j=1; i<lK; i++)
   {
     GEN R;
     GEN Ki = FpC_center(Flc_to_ZC(gel(K,i)), utoi(l), utoi(l>>1));
     GEN h = qfeval(M, T? vecslice(Ki,1,r): Ki);
-    if (isintzero(h)) continue;
-    if (T || l <= 7)
+    if (isintzero(h)) { t++; continue; }
+    if (l <= 7) /* Mazur bound for torsion of isogenous curves */
     {
       GEN Q = ellQ_factorback(E, P, Ki, 1, h, prec);
       if (!ellisdivisible(E, Q, utoi(l), &R)) R = NULL;
     }
     else
-      R = ellQ_factorback(E, P, Ki, l, gdiv(h,sqru(l)), prec);
+      R = ellQ_factorback(E, P, Ki, l, gdiv(h, sqru(l)), prec);
     if (R)
-    {
       gel(V, j++) = R;
-      av = avma;
-    }
-    set_avma(av);
+    else
+      break; /* Better to look for more primes */
   }
-  if (j==1) return NULL;
+  /* if t+1 < lK-1, we did not test all the candidate so we cannot conclude */
+  if (j==1) return t+1 >= lK-1 ? gc_NULL(av): H;
   setlg(V,j);
   return ellQ_genreduce(E, shallowconcat(P,V), prec);
 }

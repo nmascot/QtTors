@@ -454,6 +454,9 @@ ellsaturation(E,V,100)
 E=ellinit([1,0,0,-302,-2036]);
 P=ellmul(E,[-10,8],27);
 ellsaturation(E,[P],100)
+E=ellinit([1,0,0,-24432,-1471934]);
+P=ellmul(E,[-36131/400,361313/8000],27);
+ellsaturation(E,[P],100)
 
 \\ ERRORS, keep at end of file
 ellK(1)
