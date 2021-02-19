@@ -1071,10 +1071,9 @@ testDisc(GEN bad, long d) { return !bad || ugcdiu(bad, -d) == 1; }
 /* bad = product of bad primes. Return the NDISC largest fundamental
  * discriminants D < d such that (D,bad) = 1 and d is a square mod 4N */
 static GEN
-listDisc(GEN fa4N, GEN bad, long d)
+listDisc(GEN fa4N, GEN bad, long d, long ndisc)
 {
-  const long NDISC = 10;
-  GEN v = cgetg(NDISC+1, t_VECSMALL);
+  GEN v = cgetg(ndisc+1, t_VECSMALL);
   pari_sp av = avma;
   long j = 1;
   for(;;)
@@ -1083,7 +1082,7 @@ listDisc(GEN fa4N, GEN bad, long d)
     if (testDisc(bad,d) && unegisfundamental(-d) && Zn_issquare(stoi(d), fa4N))
     {
       v[j++] = d;
-      if (j > NDISC) break;
+      if (j > ndisc) break;
     }
     set_avma(av);
   }
@@ -1161,7 +1160,7 @@ rootno(GEN Q, GEN P, GEN R)
 
 static void
 heegner_find_disc(GEN *points, GEN *coefs, long *pind, GEN E,
-                  GEN indmult, long prec)
+                  GEN indmult, long ndisc, long prec)
 {
   long d = 0;
   GEN faN4, bad, N, faN, listQ, listR;
@@ -1174,7 +1173,7 @@ heegner_find_disc(GEN *points, GEN *coefs, long *pind, GEN E,
   for(;;)
   {
     pari_sp av = avma;
-    GEN list, listD = listDisc(faN4, bad, d);
+    GEN list, listD = listDisc(faN4, bad, d, ndisc);
     long k, l = lg(listD);
     list = cgetg(l, t_VEC);
     for (k = 1; k < l; ++k)
@@ -1244,7 +1243,7 @@ ellheegner(GEN E)
 {
   pari_sp av = avma;
   GEN z, P, ht, points, coefs, s, om, indmult;
-  long ind, lint, k, l, wtor, etor;
+  long ind, lint, k, l, wtor, etor, ndisc;
   long bitprec = 16, prec = nbits2prec(bitprec)+1;
   pari_timer ti;
   GEN N, cb, tam, torsion;
@@ -1276,7 +1275,8 @@ ellheegner(GEN E)
     prec = nbits2prec(bitprec)+1;
   }
   indmult = heegner_indexmult(om, wtor, tam, prec);
-  heegner_find_disc(&points, &coefs, &ind, E, indmult, prec);
+  ndisc = maxss(10, (long) rtodbl(ht)/10);
+  heegner_find_disc(&points, &coefs, &ind, E, indmult, ndisc, prec);
   if (DEBUGLEVEL) timer_start(&ti);
   s = heegner_psi(E, N, points, bitprec);
   if (DEBUGLEVEL) timer_printf(&ti,"heegner_psi");
