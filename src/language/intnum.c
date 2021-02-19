@@ -2136,7 +2136,7 @@ static GEN
 rfrac_eval0(GEN R)
 {
   GEN N, n, D = gel(R,2), d = constant_coeff(D);
-  if (gcmp0(d)) return NULL;
+  if (gequal0(d)) return NULL;
   N = gel(R,1);
   n = typ(N)==t_POL? constant_coeff(N): N;
   return gdiv(n, d);
@@ -2145,7 +2145,7 @@ static GEN
 rfrac_eval(GEN R, GEN a)
 {
   GEN D = gel(R,2), d = poleval(D,a);
-  return gcmp0(d)? NULL: gdiv(poleval(gel(R,1),a), d);
+  return gequal0(d)? NULL: gdiv(poleval(gel(R,1),a), d);
 }
 /* R = \sum_i vR[i], eval at a omitting poles */
 static GEN

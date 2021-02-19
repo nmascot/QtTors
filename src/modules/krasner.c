@@ -242,7 +242,7 @@ FieldData(KRASNER_t *data, FAD_t *fdata, GEN eis, GEN topx)
     /* First lift to a root mod p */
     for (;;) {
       p2 = FpX_FpXQ_eval(data->T, z, fdata->top, data->p);
-      if (gcmp0(p2)) break;
+      if (gequal0(p2)) break;
       p3 = FpX_FpXQ_eval(p1, z, fdata->top, data->p);
       z  = FpX_sub(z, FpXQ_div(p2, p3, fdata->top, data->p), data->p);
     }
