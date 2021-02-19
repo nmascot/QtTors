@@ -2470,7 +2470,7 @@ sumnumlagrange1init(GEN c1, long flag, long prec)
   c1d = c1 ? gtodouble(c1) : 0.332;
   N = (ulong)ceil(c1d*B); if ((N&1L) == 0) N++;
   prec2 = nbits2prec(B+(long)ceil(1.8444*N) + 16);
-  W = vecbinome(N);
+  W = vecbinomial(N);
   T = vecpowuu(N, N);
   V = cgetg(N+1, t_VEC); gel(V,N) = gel(T,N);
   for (n = N-1; n >= 1; n--)
@@ -2496,7 +2496,7 @@ sumnumlagrange2init(GEN c1, long flag, long prec)
 
   N = (ulong)ceil(c1d*B); if ((N&1L) == 0) N++;
   prec2 = nbits2prec(B+(long)ceil(1.18696*N) + 16);
-  W = vecbinome(2*N);
+  W = vecbinomial(2*N);
   T = vecpowuu(N, 2*N);
   V = cgetg(N+1, t_VEC); gel(V, N) = told = gel(T,N);
   for (n = N-1; n >= 1; n--)
