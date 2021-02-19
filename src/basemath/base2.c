@@ -242,7 +242,7 @@ get_coprimes(GEN a, GEN b)
       if (d == gen_1) continue;
       c = diviiexact(c, d);
       gel(u,i) = diviiexact(ui, d);
-      u = shallowconcat(u, d);
+      u = vec_append(u, d);
     }
     gel(u,++k) = c;
   }
@@ -301,7 +301,7 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
   {
     VOLATILE pari_sp av;
     /* includes the silly case where P[i] = -1 */
-    if (E[i] <= 1) { O = shallowconcat(O, gen_1); continue; }
+    if (E[i] <= 1) { O = vec_append(O, gen_1); continue; }
     av = avma;
     pari_CATCH(CATCH_ALL) {
       GEN N, u, err = pari_err_last();
@@ -339,7 +339,7 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
             GEN B, g, k = ZX_Dedekind(S->T, &g, p);
             k = FpX_normalize(k, p);
             B = dbasis(p, S->T, E[i], NULL, FpX_div(S->T,k,p));
-            O = shallowconcat(O, mkvec(B));
+            O = vec_append(O, B);
             pari_CATCH_reset(); continue;
           }
           break;
@@ -355,7 +355,7 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
       for (k=lP, lP=lg(P); k < lP; k++) E[k] = Z_pvalrem(N, gel(P,k), &N);
     } pari_RETRY {
       if (DEBUGLEVEL>2) err_printf("Treating p^k = %Ps^%ld\n",P[i],E[i]);
-      O = shallowconcat(O, mkvec( maxord(gel(P,i),S->T,E[i]) ));
+      O = vec_append(O, maxord(gel(P,i),S->T,E[i]));
     } pari_ENDCATCH;
   }
   S->dTP = P; return O;
