@@ -969,7 +969,7 @@ idealramgroupswild(GEN nf, GEN gal, GEN aut, GEN pr)
   {
     GEN Dg;
     g = nf_to_scalar_or_alg(nf, modpr_genFq(modpr));
-    if (!gcmpX(g)) /* p | nf.index */
+    if (!gequalX(g)) /* p | nf.index */
     {
       g = Q_remove_denom(g, &Dg);
       vDg = Z_pval(Dg,p);

@@ -406,7 +406,7 @@ precFtaylor(GEN N, GEN D, GEN z, long *pmi)
   {
     GEN Nj = gel(N,j);
     if (isint(Nj,&Nj) && signe(Nj) <= 0
-        && (!ma || absi_cmp(ma, Nj) < 0)) ma = Nj;
+        && (!ma || abscmpii(ma, Nj) < 0)) ma = Nj;
   }
   /* use less sharp fujiwara_bound_real(,1) ? */
   v = ground(realroots(gsub(P,Q), mkvec2(gen_0,mkoo()), pr));

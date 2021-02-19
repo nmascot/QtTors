@@ -16,7 +16,7 @@ Doc: returns a string built from the remaining arguments according to the
 
 Function: Strprintf
 Section: programming/specific
-C-Name: Strprintf
+C-Name: strprintf
 Prototype: ss*
 Obsolete: 2018-10-01
 Help: Strprintf(fmt,{x}*): deprecated alias for strprintf.
