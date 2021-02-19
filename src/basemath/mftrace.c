@@ -1474,8 +1474,8 @@ c_ell(long n, long d, GEN E)
 {
   pari_sp av = avma;
   GEN v;
-  if (d == 1) return gconcat(gen_0, anell(E, n));
-  v = shallowconcat(gen_0, anell(E, n*d));
+  if (d == 1) return gconcat(gen_0, ellan(E, n));
+  v = shallowconcat(gen_0, ellan(E, n*d));
   return gerepilecopy(av, c_deflate(n, d, v));
 }
 
