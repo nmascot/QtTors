@@ -1474,7 +1474,7 @@ c_ell(long n, long d, GEN E)
 {
   pari_sp av = avma;
   GEN v;
-  if (d == 1) return concat(gen_0, anell(E, n));
+  if (d == 1) return gconcat(gen_0, anell(E, n));
   v = shallowconcat(gen_0, anell(E, n*d));
   return gerepilecopy(av, c_deflate(n, d, v));
 }
@@ -8734,7 +8734,7 @@ mfbasis(GEN NK, long space)
   pari_sp av = avma;
   long N, k, dk;
   GEN mf, CHI;
-  if ((mf = checkMF_i(NK))) return concat(gel(mf,2), gel(mf,3));
+  if ((mf = checkMF_i(NK))) return gconcat(gel(mf,2), gel(mf,3));
   checkNK2(NK, &N, &k, &dk, &CHI, 0);
   if (dk == 2) return gerepilecopy(av, mf2basis(N, k>>1, CHI, NULL, space));
   mf = mfinit_Nkchi(N, k, CHI, space, 1);
