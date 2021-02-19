@@ -153,8 +153,8 @@ factor_eulerphi(GEN n)
     }
     if (e > 1) {
       if (B) {
-        gel(B,1) = shallowconcat(gel(B,1), p);
-        gel(B,2) = shallowconcat(gel(B,2), utoipos(e-1));
+        gel(B,1) = vec_append(gel(B,1), p);
+        gel(B,2) = vec_append(gel(B,2), utoipos(e-1));
       } else
         B = to_mat(p, e-1);
     }
@@ -276,8 +276,8 @@ fuse_Z_factor(GEN f, GEN B)
   /* tail / initial segment */
   P2 = vecslice(P, i, l-1); P = vecslice(P, 1, i-1);
   E2 = vecslice(E, i, l-1); E = vecslice(E, 1, i-1);
-  P = shallowconcat(P, mkvec(factorback2(P2,E2)));
-  E = shallowconcat(E, mkvec(gen_1));
+  P = vec_append(P, factorback2(P2,E2));
+  E = vec_append(E, gen_1);
   return mkmat2(P, E);
 }
 

@@ -993,7 +993,7 @@ nfrootsQ(GEN x)
   RgX_check_ZX(x,"nfrootsQ");
   val = ZX_valrem(x, &x);
   z = DDF_roots( ZX_radical(x) );
-  if (val) z = shallowconcat(z, gen_0);
+  if (val) z = vec_append(z, gen_0);
   return gerepileupto(av, sort(z));
 }
 

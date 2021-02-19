@@ -1547,7 +1547,7 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
 
   d->G = minss(-20, -prec2nbits(prec) >> 4);
 
-  vec  = shallowconcat(mkvec(gneg(beta)), row(M, d->v));
+  vec  = vec_prepend(row(M, d->v), gneg(beta));
   min = (long)prec2nbits_mul(prec, 0.75);
   max = (long)prec2nbits_mul(prec, 0.98);
   av = avma;

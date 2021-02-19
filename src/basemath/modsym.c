@@ -2729,7 +2729,7 @@ doo_decompose(GEN dinv, GEN P, GEN *pd)
 {
   long l = lg(P); *pd = gel(P, l-1);
   P = vecslice(P, 1, l-2);
-  return shallowconcat(gen_0, ZC_apply_dinv(dinv, P));
+  return vec_prepend(ZC_apply_dinv(dinv, P), gen_0);
 }
 
 static GEN

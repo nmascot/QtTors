@@ -1475,7 +1475,7 @@ c_ell(long n, long d, GEN E)
   pari_sp av = avma;
   GEN v;
   if (d == 1) return gconcat(gen_0, ellan(E, n));
-  v = shallowconcat(gen_0, ellan(E, n*d));
+  v = vec_prepend(ellan(E, n*d), gen_0);
   return gerepilecopy(av, c_deflate(n, d, v));
 }
 
@@ -5541,7 +5541,7 @@ mfstabiter(GEN *pC, GEN A0, GEN chip, GEN TMP, GEN P, long ordchi)
     A = rowslice(A, 1, lim1-1);
   if (*pC) C = C? _RgXQM_mul(*pC, C, P): *pC;
   /* put back a0 */
-  for (i = 1; i < lA; i++) gel(A,i) = shallowconcat(gen_0, gel(A,i));
+  for (i = 1; i < lA; i++) gel(A,i) = vec_prepend(gel(A,i), gen_0);
   *pC = C; return A;
 }
 

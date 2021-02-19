@@ -855,8 +855,8 @@ gauss_factor(GEN x)
         gel(E,i) = stoi(2*e);
       else
       {
-        P = shallowconcat(P, gauss_normal( conj_i(w) ));
-        E = shallowconcat(E, gel(E,i));
+        P = vec_append(P, gauss_normal( conj_i(w) ));
+        E = vec_append(E, gel(E,i));
       }
       exp -= e; /* += 3*e mod 4 */
       exp &= 3;
@@ -869,8 +869,8 @@ gauss_factor(GEN x)
 
   y = gmul(y, powIs(exp));
   if (!gequal1(y)) {
-    gel(fa,1) = shallowconcat(mkcol(y), gel(fa,1));
-    gel(fa,2) = shallowconcat(gen_1,    gel(fa,2));
+    gel(fa,1) = vec_prepend(gel(fa,1), y);
+    gel(fa,2) = vec_prepend(gel(fa,2), gen_1);
   }
   return gerepilecopy(av, fa);
 }

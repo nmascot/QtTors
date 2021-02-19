@@ -3164,7 +3164,7 @@ bnrgwsearch(GEN bnr, GEN Lpr, GEN Ld, GEN pl)
   if (!phi0) return gc_const(av, gen_0);
   gn = stoi(n);
   /* compute kernel of phi0 */
-  v = ZV_extgcd(shallowconcat(phi0, gn));
+  v = ZV_extgcd(vec_append(phi0, gn));
   U = vecslice(gel(v,2), 1,r);
   H = ZM_hnfmodid(rowslice(U, 1,r), gn);
   return gerepileupto(av, H);
