@@ -4019,7 +4019,7 @@ discriminant_with_classno_at_least(disc_info bestD[MODPOLY_MAX_DCNT],
 
         if (best_cost < 0.0 || cost < best_cost) {
           if (best_cnt)
-            for (i = 0; i < best_cnt; i++) killbloc((GEN)bestD[i].primes);
+            for (i = 0; i < best_cnt; i++) killblock((GEN)bestD[i].primes);
           (void) memcpy(bestD, Ds, Dcnt * sizeof(disc_info));
           best_cost = cost;
           best_cnt = Dcnt;
@@ -4027,7 +4027,7 @@ discriminant_with_classno_at_least(disc_info bestD[MODPOLY_MAX_DCNT],
           /* We're satisfied if n1 is within 5% of L. */
           if (L / s <= SMALL_L_BOUND || eps < 0.05) break;
         } else {
-          for (i = 0; i < Dcnt; i++) killbloc((GEN)Ds[i].primes);
+          for (i = 0; i < Dcnt; i++) killblock((GEN)Ds[i].primes);
         }
       } else {
         if (log2(maxD) > BITS_IN_LONG - 2 * (log2(L) + 2))
