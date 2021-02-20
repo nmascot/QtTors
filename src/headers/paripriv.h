@@ -734,9 +734,10 @@ GEN hnaive_max(GEN ell, GEN ht);
 
 /* elliptic.c */
 
-void ellprint(GEN e);
-GEN  ellintegralbmodel(GEN e, GEN *pv);
 GEN  ellQ_genreduce(GEN E, GEN G, GEN M, long prec);
+GEN  ellQ_isdivisible(GEN E, GEN P, ulong l);
+GEN  ellintegralbmodel(GEN e, GEN *pv);
+void ellprint(GEN e);
 
 /* es.c */
 

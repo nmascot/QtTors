@@ -5320,7 +5320,7 @@ ellQ_factorback(GEN E, GEN A, GEN L, ulong l, GEN h, long prec)
       if (signe(g) && expo(subrs(divrr(g,h),1))<-prec2nbits(prec)/2)
         return gerepileupto(av, r);
     }
-    if (hn && gcmpsg(expi(mod)>>2,hn) > 0) return NULL;
+    if (hn && gcmpsg(expi(mod)>>2,hn) > 0) return gc_NULL(av);
     bound <<=1;
   }
 }
@@ -5342,6 +5342,71 @@ ellQ_genreduce(GEN E, GEN G, GEN M, long prec)
   }
   setlg(V, j);
   return gerepilecopy(av, V);
+}
+
+static long
+ellQ_isdivisible_test(forprime_t *S,GEN E, long CM, GEN P, ulong l, long nb)
+{
+  long m;
+  GEN D = ell_get_disc(E);
+  P = QE_to_ZJ(P);
+  for (m = 1; m <= nb;)
+  {
+    pari_sp av = avma;
+    ulong a4, a6, p = u_forprime_next(S), pi = get_Fl_red(p);
+    ulong o;
+    if (dvdiu(D, p)) continue;
+    Fl_ell_to_a4a6(E, p, &a4, &a6);
+    o = p+1 - Fl_elltrace_CM(CM, a4, a6, p);
+    if (o % l == 0)
+    {
+      GEN a4a6 = a4a6_ch_Fl(E,p);
+      GEN Q = Flj_changepointinv_pre(ZV_to_Flv(P, p), a4a6, p, pi);
+      GEN R = Flj_mulu_pre(Q, o/l, a4, p, pi);
+      if (uel(R, 3) != 0)  return 0;
+      m++;
+    }
+    set_avma(av);
+  }
+  return 1;
+}
+
+/* Assume l prime to 210 */
+GEN
+ellQ_isdivisible(GEN E, GEN P, ulong l)
+{
+  pari_sp av = avma;
+  GEN worker, mod = gen_1, H = NULL, D = ell_get_disc(E);
+  forprime_t S, U;
+  long CM = ellQ_get_CM(E);
+  ulong bound = 1;
+
+  worker = snm_closure(is_entry("_ellQ_factorback_worker"),
+                       mkvec4(E, mkvec(QE_to_ZJ(P)), mkvecs(1), utoi(l)));
+  bound = 1;
+  u_forprime_init(&U, l+1, ULONG_MAX);
+  init_modular_small(&S);
+  if (!ellQ_isdivisible_test(&U, E, CM, P, l, 10)) return gc_NULL(av);
+  while (1)
+  {
+    GEN amax, r;
+    gen_inccrt("ellQ_factorback", worker, D, bound, 0,
+            &S, &H, &mod, ellQ_factorback_chinese, NULL);
+    amax = sqrti(shifti(mod,-2));
+    r = ell_is_inf(H)? NULL: FpC_ratlift(H, mod, amax, amax, NULL);
+    if (r)
+    {
+      settyp(r,t_VEC);
+      if (oncurve(E,r))
+      {
+        if (gequal(ellmul(E,r,utoi(l)),P))
+          return gerepileupto(av, r);
+        if (!ellQ_isdivisible_test(&U, E, CM, P, l, 10))
+          return gc_NULL(av);
+      }
+    }
+    bound <<=1;
+  }
 }
 
 /********************************************************************/
