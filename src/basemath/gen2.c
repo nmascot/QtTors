@@ -974,9 +974,9 @@ serequal(GEN x, GEN y)
   if (!signe(x) && !signe(y)) return 1;
   lx = lg(x); vx = valp(x); LX = lx + vx;
   ly = lg(y); vy = valp(y); LY = ly + vy;
-  if (LX > LY) { LX = LY; lx = LX - vx; } else ly = LX - vy;
-  for (lx--, ly--; lx >= 2 && ly >= 2; lx--, ly--)
-    if (!gequal(gel(x,lx), gel(y,ly))) return 0;
+  if (LX > LY) lx = LY - vx; else ly = LX - vy;
+  while (lx >= 3 && ly >= 3)
+    if (!gequal(gel(x,--lx), gel(y,--ly))) return 0;
   while(--ly >= 2) if (!gequal0(gel(y,ly))) return 0;
   while(--lx >= 2) if (!gequal0(gel(x,lx))) return 0;
   return 1;

@@ -114,6 +114,7 @@ Mod(0, 5)*x^-1 + O(x^0)
 1
 1
 0
+0
 1
 1
 1
@@ -182,4 +183,4 @@ O(x^18)
   ***   at top-level: O(y)/O(x)
   ***                     ^-----
   *** _/_: impossible inverse in RgXn_inv: 0.
-Total time spent: 7
+Total time spent: 9
