@@ -4219,6 +4219,7 @@ ellintegralbmodel(GEN e, GEN *pv)
     GEN v = mkvec4(mpodd(a1) || mpodd(a3) ? ghalf: gen_1,
                    gen_0, gdivgs(a1,-2), gdivgs(a3,-2));
     gcomposev(pv, v);
+    f = leafcopy(f); ell_reset(f);
     f = coordch(f, v);
   }
   gerepileall(av, 2, &f, pv);
