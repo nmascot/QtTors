@@ -7336,6 +7336,15 @@ ellsatp_ker(hashtable *h, GEN e, long CM, GEN help, ulong l, long nb)
   return sat;
 }
 
+INLINE long
+Flv_firstnonzero(GEN v)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++)
+    if (v[i]) break;
+  return i;
+}
+
 static GEN
 ellsatp(hashtable *h, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, long nb, long prec)
 {
@@ -7343,16 +7352,17 @@ ellsatp(hashtable *h, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, long nb, lon
   GEN S = ellsatp_ker(h, E, CM, P, l, nb);
   pari_sp av = avma;
   GEN K = Flm_ker(Flm_transpose(S), l);
-  long i, lK = lg(K), j, r = lg(H)-1, t = 0;
-  GEN V = cgetg(lK, t_VEC);
+  long i, lK = lg(K), r = lg(H)-1;
   if (lK==1) return gc_NULL(av);
   if (DEBUGLEVEL >= 3) err_printf("ellsat: potential factor %lu\n",l);
-  for (i=1, j=1; i<lK; i++)
+  for (i=1; i<lK; i++)
   {
-    GEN R;
-    GEN Ki = FpC_center(Flc_to_ZC(gel(K,i)), utoi(l), utoi(l>>1));
-    GEN h = qfeval(M, T? vecslice(Ki,1,r): Ki);
-    if (isintzero(h)) { t++; continue; }
+    GEN ki = gel(K,i), Ki, h, R;
+    long f = Flv_firstnonzero(ki);
+    if (f > r) continue;
+    if (ki[f] != 1) ki = Flv_Fl_div(ki, ki[f], l);
+    Ki = FpC_center(Flc_to_ZC(ki), utoi(l), utoi(l>>1));
+    h = qfeval(M, T? vecslice(Ki,1,r): Ki);
     if (l <= 7) /* Mazur bound for torsion of isogenous curves */
     {
       GEN Q = ellQ_factorback(E, P, Ki, 1, h, prec);
@@ -7363,14 +7373,13 @@ ellsatp(hashtable *h, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, long nb, lon
     if (DEBUGLEVEL >= 2)
       err_printf("ellsat: %s divisible by %lu\n",R?"":"not",l);
     if (R)
-      gel(V, j++) = R;
-    else
-      break; /* Better to look for more primes */
+    {
+      gel(H,f) = R;
+      return H;
+    }
+    else return gc_NULL(av);
   }
-  /* if t+1 < lK-1, we did not test all the candidate so we cannot conclude */
-  if (j==1) return t+1 >= lK-1 ? gc_NULL(av): H;
-  setlg(V,j);
-  return ellQ_genreduce(E, shallowconcat(P,V), prec);
+  return H;
 }
 
 static GEN
@@ -7398,7 +7407,7 @@ ellQ_saturation(GEN E, GEN P, long B, long prec)
       M = ellheightmatrix(E, P, prec);
     }
   }
-  return P;
+  return ellQ_genreduce(E, P, prec);
 }
 
 GEN
