@@ -1257,21 +1257,16 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2, GEN sqrtLS2, GEN factLS2,
 }
 
 static GEN
-ell2selmer(GEN ell, GEN help, GEN K, GEN vbnf, long effort, long prec)
+ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
+           long effort, long prec)
 {
   pari_sp av;
-  GEN ell_K, KP, pol, vnf, vpol, vroots, vr1, vcrt, sbase;
-  GEN LS2, factLS2, sqrtLS2, selmer, helpLS2, LS2chars, helpchars;
-  GEN newselmer, factdisc, badprimes, helplist, listpoints;
+  GEN KP, pol, vnf, vpol, vroots, vr1, vcrt, sbase, LS2, factLS2, sqrtLS2;
+  GEN selmer, helpLS2, LS2chars, helpchars, newselmer, factdisc, badprimes;
+  GEN helplist, listpoints;
   long i, j, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u;
 
-  if (!K) K = gen_1;
   pol = ell2pol(ell);
-  /* help is a vector of rational points [x,y] satisfying K y^2 = pol(x) */
-  /* [Kx, K^2y] is on ell_K: Y^2 = K^3 pol(X/K)  */
-  ell_K = elltwistequation(ell, K);
-  if (help)
-    check_oncurve(ell_K, help);
   help = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,effort+1), help);
   help = elltwistpoints(help, ginv(K)); /* points on K Y^2 = pol(X) */
   n = lg(vbnf) - 1; tors2 = n - 1;
@@ -1467,8 +1462,9 @@ GEN
 ellrank(GEN ell, long effort, GEN help, long prec)
 {
   pari_sp ltop = avma;
-  GEN urst, v, vbnf;
+  GEN urst, v, vbnf, ell_K;
   GEN ellt = NULL, K = gen_1, nu = NULL, du = NULL, r = NULL, urstK = NULL;
+  long newell = 0;
 
   if (lg(ell)==3 && typ(ell)==t_VEC)
   {
@@ -1489,6 +1485,7 @@ ellrank(GEN ell, long effort, GEN help, long prec)
   {
     checkell_Q(ell);
     ell = ellintegralbmodel(ell, &urst);
+    newell = 1;
     vbnf = makevbnf(ell, prec);
   }
   if (ellt)
@@ -1506,8 +1503,14 @@ ellrank(GEN ell, long effort, GEN help, long prec)
     if (urst) help = ellchangepoint(help, urst);
     if (ellt) help = ellchangepointinv(help, urstK);
   }
-  v = ell2selmer(ell, help, K, vbnf, effort, prec);
+  ell_K = elltwistequation(ell, K);
+  /* help is a vector of rational points [x,y] satisfying K y^2 = pol(x) */
+  /* [Kx, K^2y] is on ell_K: Y^2 = K^3 pol(X/K)  */
+  if (help) check_oncurve(ell_K, help);
+  v = ell2selmer(ell, ell_K, help, K, vbnf, effort, prec);
   if (ellt) gel(v,3) = ellchangepoint(gel(v,3), urstK);
   if (urst) gel(v,3) = ellchangepointinv(gel(v,3), urst);
+  if (newell) obj_free(ell);
+  if (ell_K != ell) obj_free(ell_K);
   return gerepilecopy(ltop, v);
 }

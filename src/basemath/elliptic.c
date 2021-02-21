@@ -6389,7 +6389,7 @@ ellnf_height(GEN E, GEN P, long prec)
 static GEN
 ellQ_height(GEN e, GEN a, long prec)
 {
-  long i, lx;
+  long i, lx, newell = 0;
   pari_sp av;
   GEN Lp, x, y, z, phi2, psi2, psi3;
   GEN v, S, b2, b4, b6, b8, a1, a2, a4, c4, D;
@@ -6408,6 +6408,7 @@ ellQ_height(GEN e, GEN a, long prec)
   }
   else
   {
+    newell = 1;
     e = ellminimalmodel_i(e, &v);
     a = ellchangepoint(a, v);
   }
@@ -6458,6 +6459,7 @@ ellQ_height(GEN e, GEN a, long prec)
     /* z -= u log(p) / v */
     z = gsub(z, divru(mulur(u, logr_abs(itor(p,prec))), v));
   }
+  if (newell) obj_free(e);
   return gerepileupto(av, gmul2n(z, 1));
 }
 
