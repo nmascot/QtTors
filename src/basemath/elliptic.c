@@ -7382,6 +7382,7 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
 
   if (lK==1) return gc_NULL(av);
   if (DEBUGLEVEL >= 3) err_printf("ellsat: potential factor %lu\n",l);
+  /* Mazur bound for torsion of isogenous curves */
   if (!*xl && l <= 7) *xl = ellxn(E, l, vxl);
   for (i = 1; i < lK; i++)
   {
@@ -7421,7 +7422,6 @@ ellQ_saturation(GEN E, GEN P, long B, long prec)
   {
     GEN xp = NULL, T = gel(elltors_psylow(E, p), 3);
     long nb = n + lg(T) + 5;
-    /* Mazur bound for torsion of isogenous curves */
     if (lg(T)==1) T = NULL;
     while (1)
     {
