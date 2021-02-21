@@ -7389,14 +7389,15 @@ static GEN
 ellQ_saturation(GEN E, GEN P, long B, long prec)
 {
   forprime_t S;
-  long l = lg(P)-1;
-  ulong p;
-  hashtable h;
   GEN M = ellheightmatrix(E, P, prec);
-  long CM = ellQ_get_CM(E);
+  long l = lg(P)-1, CM = ellQ_get_CM(E);
+  hashtable h;
+  ulong p;
+
   if (lg(P)==1) return cgetg(1, t_VEC);
   hash_init_ulong(&h, 16, 1);
   (void)u_forprime_init(&S, 2, B);
+  P = leafcopy(P); /* modified in place by ellsatp */
   while((p = u_forprime_next(&S)))
   {
     GEN T = gel(elltors_psylow(E, p), 3);
@@ -7418,10 +7419,11 @@ ellsaturation(GEN E, GEN P, long B, long prec)
 {
   pari_sp av = avma;
   GEN urst;
-  E = ellintegralmodel(E, &urst);
+  E = ellminimalmodel(E, &urst);
+  if (is_trivial_change(urst)) urst = NULL;
   if (urst) P = ellchangepoint(P, urst);
   P = ellQ_saturation(E, P, B, prec);
   if (urst) P = ellchangepoint(P, ellchangeinvert(urst));
-  return gerepilecopy(av, P);
+  obj_free(E); return gerepilecopy(av, P);
 }
 
