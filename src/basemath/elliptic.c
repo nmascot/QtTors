@@ -7349,40 +7349,36 @@ Flv_firstnonzero(GEN v)
 }
 
 static GEN
-ellsatp(hashtable *h, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, long nb, long prec)
+ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN xl, long nb, long prec)
 {
   GEN P = T ? shallowconcat(H, T): H;
-  GEN S = ellsatp_ker(h, E, CM, P, l, nb);
+  GEN S = ellsatp_ker(hh, E, CM, P, l, nb); /* fill hh */
   pari_sp av = avma;
   GEN K = Flm_ker(Flm_transpose(S), l);
   long i, lK = lg(K), r = lg(H)-1;
+
   if (lK==1) return gc_NULL(av);
   if (DEBUGLEVEL >= 3) err_printf("ellsat: potential factor %lu\n",l);
-  for (i=1; i<lK; i++)
+  for (i = 1; i < lK; i++)
   {
     GEN ki = gel(K,i), Ki, h, R;
     long f = Flv_firstnonzero(ki);
-    if (f > r) continue;
+
     if (ki[f] != 1) ki = Flv_Fl_div(ki, ki[f], l);
     Ki = FpC_center(Flc_to_ZC(ki), utoi(l), utoi(l>>1));
     h = qfeval(M, T? vecslice(Ki,1,r): Ki);
-    if (l <= 7) /* Mazur bound for torsion of isogenous curves */
+    if (l <= 7)
     {
       GEN Q = ellQ_factorback(E, P, Ki, 1, h, prec);
-      if (!ellisdivisible(E, Q, utoi(l), &R)) R = NULL;
+      if (!ellisdivisible(E, Q, xl, &R)) R = NULL;
     }
     else
       R = ellQ_factorback(E, P, Ki, l, gdiv(h, sqru(l)), prec);
     if (DEBUGLEVEL >= 2)
       err_printf("ellsat: %s divisible by %lu\n",R?"":"not",l);
-    if (R)
-    {
-      gel(H,f) = R;
-      return H;
-    }
-    else return gc_NULL(av);
+    if (R) { gel(H,f) = R; return H; }
   }
-  return H;
+  return gc_NULL(av);
 }
 
 static GEN
@@ -7390,24 +7386,25 @@ ellQ_saturation(GEN E, GEN P, long B, long prec)
 {
   forprime_t S;
   GEN M = ellheightmatrix(E, P, prec);
-  long l = lg(P)-1, CM = ellQ_get_CM(E);
+  long n = lg(P)-1, CM = ellQ_get_CM(E), w = fetch_var_higher();
   hashtable h;
   ulong p;
 
-  if (lg(P)==1) return cgetg(1, t_VEC);
   hash_init_ulong(&h, 16, 1);
   (void)u_forprime_init(&S, 2, B);
   P = leafcopy(P); /* modified in place by ellsatp */
   while((p = u_forprime_next(&S)))
   {
-    GEN T = gel(elltors_psylow(E, p), 3);
-    long nb = l+lg(T)+5;
+    GEN xp, T = gel(elltors_psylow(E, p), 3);
+    long nb = n + lg(T) + 5;
+    /* Mazur bound for torsion of isogenous curves */
+    if (p <= 7) xp = ellxn(E, p, w);
     if (lg(T)==1) T = NULL;
-    while(1)
+    while (1)
     {
-      GEN Q = ellsatp(&h, E, CM, T, P, M, p, nb, prec);
+      GEN Q = ellsatp(&h, E, CM, T, P, M, p, xp, nb, prec);
       if (!Q) break;
-      P = Q; nb += l;
+      P = Q; nb += n;
       M = ellheightmatrix(E, P, prec);
     }
   }
@@ -7419,6 +7416,8 @@ ellsaturation(GEN E, GEN P, long B, long prec)
 {
   pari_sp av = avma;
   GEN urst;
+
+  if (lg(P) == 1) return cgetg(1, t_VEC);
   E = ellminimalmodel(E, &urst);
   if (is_trivial_change(urst)) urst = NULL;
   if (urst) P = ellchangepoint(P, urst);
