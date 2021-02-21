@@ -7331,11 +7331,11 @@ FljV_vecsat_Prickett(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p
 }
 
 static GEN
-ellsatp_ker(hashtable *h, GEN e, long CM, GEN help, ulong l, long nb)
+ellsatp_ker(hashtable *h, GEN e, long CM, GEN help, ulong l)
 {
   GEN D = ell_get_disc(e);
   forprime_t S;
-  long m = 1;
+  long m = 1, nb = lg(help) + 5;
   GEN P = QEV_to_ZJV(help);
   GEN sat  = cgetg(nb+1, t_MAT);
   (void)u_forprime_init(&S, 5, ULONG_MAX);
@@ -7374,10 +7374,10 @@ Flv_firstnonzero(GEN v)
 /* update M in place */
 static GEN
 ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
-        long vxl, long nb, long prec)
+        long vxl, long prec)
 {
   GEN P = T ? shallowconcat(H, T): H;
-  GEN S = ellsatp_ker(hh, E, CM, P, l, nb); /* fill hh */
+  GEN S = ellsatp_ker(hh, E, CM, P, l); /* fill hh */
   pari_sp av = avma;
   GEN K = Flm_ker(Flm_transpose(S), l);
   long i, lK = lg(K), lH = lg(H);
@@ -7424,7 +7424,7 @@ ellQ_saturation(GEN E, GEN P, long B, long prec)
 {
   forprime_t S;
   GEN M = ellheightmatrix(E, P, prec);
-  long n = lg(P)-1, CM = ellQ_get_CM(E), w = fetch_var_higher();
+  long CM = ellQ_get_CM(E), w = fetch_var_higher();
   hashtable h;
   ulong p;
 
@@ -7434,11 +7434,10 @@ ellQ_saturation(GEN E, GEN P, long B, long prec)
   while((p = u_forprime_next(&S)))
   {
     GEN xp = NULL, T = gel(elltors_psylow(E, p), 3);
-    long nb = n + lg(T) + 5;
     if (lg(T)==1) T = NULL;
     while (1)
     {
-      GEN Q = ellsatp(&h, E, CM, T, P, M, p, &xp, w, nb, prec);
+      GEN Q = ellsatp(&h, E, CM, T, P, M, p, &xp, w, prec);
       if (!Q) break;
       P = Q;
     }
