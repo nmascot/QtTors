@@ -7365,7 +7365,7 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN xl, lon
     long f = Flv_firstnonzero(ki);
 
     if (ki[f] != 1) ki = Flv_Fl_div(ki, ki[f], l);
-    Ki = FpC_center(Flc_to_ZC(ki), utoi(l), utoi(l>>1));
+    Ki = zv_to_ZV(Flv_center(ki, l, l >> 1));
     h = qfeval(M, T? vecslice(Ki,1,r): Ki);
     if (l <= 7)
     {
