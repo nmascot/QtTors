@@ -5284,7 +5284,8 @@ ZV_is_ei(GEN v)
   return ei;
 }
 
-/* A vector of points, L a ZV, return (sum L[i]*A[i]) / l */
+/* A vector of points, L a ZV, return (sum L[i]*A[i]) / l;
+ * h is the canonical height of result */
 static GEN
 ellQ_factorback(GEN E, GEN A, GEN L, ulong l, GEN h, long prec)
 {
@@ -7370,6 +7371,7 @@ Flv_firstnonzero(GEN v)
   return i;
 }
 
+/* update M in place */
 static GEN
 ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
         long vxl, long nb, long prec)
@@ -7378,7 +7380,7 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
   GEN S = ellsatp_ker(hh, E, CM, P, l, nb); /* fill hh */
   pari_sp av = avma;
   GEN K = Flm_ker(Flm_transpose(S), l);
-  long i, lK = lg(K), r = lg(H)-1;
+  long i, lK = lg(K), lH = lg(H);
 
   if (lK==1) return gc_NULL(av);
   if (DEBUGLEVEL >= 3) err_printf("ellsat: potential factor %lu\n",l);
@@ -7391,17 +7393,28 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
 
     if (ki[f] != 1) ki = Flv_Fl_div(ki, ki[f], l);
     Ki = zv_to_ZV(Flv_center(ki, l, l >> 1));
-    h = qfeval(M, T? vecslice(Ki,1,r): Ki);
+    h = qfeval(M, T? vecslice(Ki, 1, lH-1): Ki);
     if (*xl)
     {
       GEN Q = ellQ_factorback(E, P, Ki, 1, h, prec);
-      if (!ellisdivisible(E, Q, *xl, &R)) R = NULL;
+      if (ellisdivisible(E, Q, *xl, &R))
+        h = gdiv(h, sqru(l));
+      else
+        R = NULL;
     }
     else
-      R = ellQ_factorback(E, P, Ki, l, gdiv(h, sqru(l)), prec);
+    {
+      h = gdiv(h, sqru(l));
+      R = ellQ_factorback(E, P, Ki, l, h, prec);
+    }
     if (DEBUGLEVEL >= 2)
-      err_printf("ellsat: %s divisible by %lu\n",R?"":"not",l);
-    if (R) { gel(H,f) = R; return H; }
+      err_printf("ellsat: %s divisible by %lu\n", R? "": "not", l);
+    if (!R) continue;
+    gcoeff(M, f, f) = h;
+    for (i = 1; i < lH; i++)
+      if (i != f) gcoeff(M, f, i) = gdivgs(RgV_dotproduct(gel(M,i), Ki), l);
+    for (i = 1; i < lH; i++) gcoeff(M, i, f) = gcoeff(M, f, i);
+    gel(H,f) = R; return H;
   }
   return gc_NULL(av);
 }
@@ -7427,7 +7440,7 @@ ellQ_saturation(GEN E, GEN P, long B, long prec)
     {
       GEN Q = ellsatp(&h, E, CM, T, P, M, p, &xp, w, nb, prec);
       if (!Q) break;
-      P = Q; M = ellheightmatrix(E, P, prec);
+      P = Q;
     }
   }
   return ellQ_genreduce(E, P, prec);
