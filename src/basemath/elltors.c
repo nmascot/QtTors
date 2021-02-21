@@ -88,17 +88,16 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
   return r;
 }
 
-/* Finds a multiplicative upper bound for #E_tor; assume integral model */
+/* Finds a multiplicative upper bound for #E_tor (p-Sylow if p != 0);
+ * assume integral model */
 static long
 torsbound(GEN e, ulong p)
 {
   GEN D = ell_get_disc(e);
   pari_sp av = avma, av2;
-  long m, b, bold, nb;
+  long m, b, bold, nb, CM = ellQ_get_CM(e);
   forprime_t S;
-  long CM = ellQ_get_CM(e);
-  nb = expi(D) >> 3;
-  /* nb = number of primes to try ~ 1 prime every 8 bits in D */
+  nb = expi(D) >> 3; /* number of primes to try ~ 1 prime every 8 bits in D */
   switch (p)
   {
     case 0: b = 5040; break;
@@ -162,8 +161,9 @@ t2points(GEN E, GEN *f2)
   return v;
 }
 
+/* psylow = 0 or prime (return p-Sylow subgroup) */
 static GEN
-elltors_divpol(GEN E, long psylow)
+ellQtors(GEN E, long psylow)
 {
   GEN T2 = NULL, p, P, Q, v;
   long v2, r2, B;
@@ -185,7 +185,7 @@ elltors_divpol(GEN E, long psylow)
       default: r2 = 2; v2--; break; /* 3 */
     }
     if (v2) gel(p,2) = gel(T2,1);
-    /* f = f_2 */
+    /* f = f2 */
     if (v2 > 1) { gel(p,4) = tpoint(E,4, &f); if (!gel(p,4)) v2 = 1; }
     /* if (v2>1) now f = f4 */
     if (v2 > 2) { gel(p,8) = tpoint(E,8, &f); if (!gel(p,8)) v2 = 2; }
@@ -257,6 +257,7 @@ primedec_deg1(GEN K, GEN p)
 }
 
 /* Bound for the elementary divisors of the torsion group of elliptic curve
+ * (p-Sylow if psylow = p is not 0)
  * Reduce the curve modulo some small good primes */
 static GEN
 nftorsbound(GEN E, ulong psylow)
@@ -591,7 +592,7 @@ elltors(GEN e)
   checkell(e);
   switch(ell_get_type(e))
   {
-    case t_ELL_Q:  t = elltors_divpol(e, 0); break;
+    case t_ELL_Q:  t = ellQtors(e, 0); break;
     case t_ELL_NF: t = ellnftors(e, 0); break;
     case t_ELL_Fp:
     case t_ELL_Fq: return ellgroup0(e,NULL,1);
@@ -611,7 +612,7 @@ elltors_psylow(GEN e, ulong p)
   checkell(e);
   switch(ell_get_type(e))
   {
-    case t_ELL_Q:  t = elltors_divpol(e, p); break;
+    case t_ELL_Q:  t = ellQtors(e, p); break;
     case t_ELL_NF: t = ellnftors(e, p); break;
     default: pari_err_TYPE("elltorspsylow",e);
   }
