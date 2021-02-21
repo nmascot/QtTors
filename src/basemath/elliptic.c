@@ -7339,26 +7339,29 @@ FljV_vecsat(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p,
     FljV_vecsat_Siksek(E, P, o, l, a4, a6, p, S, m);
 }
 
+/* P a vector of points in E(Q), return a linear map M from the abelian group
+ * they generate to Z/lZ; sum x[i] P[i] is l-divisible => x M = 0 */
 static GEN
-ellsatp_mat(hashtable *h, GEN e, long CM, GEN help, ulong l)
+ellsatp_mat(hashtable *h, GEN E, long CM, GEN P, ulong l)
 {
-  long m = 1, nb = lg(help) + 5;
-  GEN D = ell_get_disc(e), P = QEV_to_ZJV(help), M = cgetg(nb+1, t_MAT);
+  long m = 1, nb = lg(P) + 5;
+  GEN D = ell_get_disc(E), M = cgetg(nb+1, t_MAT);
   forprime_t S;
 
+  P = QEV_to_ZJV(P);
   (void)u_forprime_init(&S, 5, ULONG_MAX);
   while (m <= nb)
   {
     ulong a4, a6, p = u_forprime_next(&S);
     long o;
     if (dvdiu(D, p)) continue;
-    Fl_ell_to_a4a6(e, p, &a4, &a6);
+    Fl_ell_to_a4a6(E, p, &a4, &a6);
     if (!hash_haskey_long(h, (void*)p, &o))
     {
       o = p+1 - Fl_elltrace_CM(CM, a4, a6, p);
       hash_insert_long(h,(void*)p, o);
     }
-    if (o % l == 0) FljV_vecsat(e, P, o, l, a4, a6, p, M, &m);
+    if (o % l == 0) FljV_vecsat(E, P, o, l, a4, a6, p, M, &m);
   }
   return M;
 }
