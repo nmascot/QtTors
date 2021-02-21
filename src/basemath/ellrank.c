@@ -1298,7 +1298,13 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     f = mkvec3(gel(idealfactor(nf, Tinv), 1),
                gel(idealfactor(nf, id), 1), f);
     gel(badprimes, k) = S = gtoset(shallowconcat1(f));
-    sel = (NF == nf)? nf2selmer_quad(NF, S): bnfselmer(NF, S, 2);
+    if (NF == nf)
+      sel = nf2selmer_quad(NF, S);
+    else
+    {
+      sel = bnfselmer(NF, S, 2);
+      obj_free(NF); /* units */
+    }
     gel(LS2, k) = L = gel(sel, 1); lk = lg(L);
     gel(factLS2, k) = gel(sel, 2);
     gel(sqrtLS2, k) = gel(sel, 3);
