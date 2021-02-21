@@ -316,7 +316,7 @@ nftorsbound(GEN E, ulong psylow)
   if (psylow)
   {
     B1 = powuu(psylow, Z_lval(B1, psylow));
-    B2 = powuu(psylow, Z_lval(B1, psylow));
+    B2 = powuu(psylow, Z_lval(B2, psylow));
   }
   return mkvec2(B1,B2);
 }
