@@ -614,7 +614,7 @@ elltors_psylow(GEN e, ulong p)
   {
     case t_ELL_Q:  t = ellQtors(e, p); break;
     case t_ELL_NF: t = ellnftors(e, p); break;
-    default: pari_err_TYPE("elltorspsylow",e);
+    default: pari_err_TYPE("elltors_psylow",e);
   }
   return gerepilecopy(av, t);
 }
