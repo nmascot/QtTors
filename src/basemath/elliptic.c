@@ -7398,7 +7398,7 @@ ellQ_saturation(GEN E, GEN P, long B, long prec)
     GEN xp, T = gel(elltors_psylow(E, p), 3);
     long nb = n + lg(T) + 5;
     /* Mazur bound for torsion of isogenous curves */
-    if (p <= 7) xp = ellxn(E, p, w);
+    xp = (p <= 7)? ellxn(E, p, w): NULL;
     if (lg(T)==1) T = NULL;
     while (1)
     {
