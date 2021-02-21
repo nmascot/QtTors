@@ -7264,32 +7264,27 @@ ellxn(GEN e, long n, long v)
   return gerepilecopy(av, mkvec2(B,A));
 }
 
+/* l and p primes; p = 1 mod l; return an element of order l in (Z/pZ)^* */
 static ulong
 ltors_Fl(ulong l, ulong p)
 {
-  ulong x, y;
-  ulong r = (p-1)/l;
-  for (x = 2; ; x++)
-  {
-    y = Fl_powu(x, r, p);
-    if (y!=1) break;
-  }
-  return y;
+  ulong x, y, r = (p-1)/l;
+  for (x = 2;; x++) { y = Fl_powu(x, r, p); if (y != 1) return y; }
 }
 
-
-/* Assume that l|o but p!=1 [l] so dim E(F_p)[l] = 1 */
+/* Assume that l|o but p!=1 [l] so r_l E(F_p) = 1 */
 static void
 FljV_vecsat_Siksek(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p, GEN S, long *m)
 {
-  long i, lA = lg(P)-1;
-  GEN v = zero_zv(lA);
+  long i, n = lg(P)-1;
+  GEN a4a6, g, F, v = zero_zv(n);
   pari_sp av = avma;
-  GEN a4a6 = a4a6_ch_Fl(E, p);
-  GEN g = gel(Fl_ellptors(l, o, a4, a6, p), 1);
-  ulong q = o/l;
-  GEN F = mkmat2(mkcols(l),mkcols(1));
-  for (i=1; i<=lA; i++)
+  ulong q = o / l;
+
+  F = mkmat2(mkcols(l), mkcols(1));
+  a4a6 = a4a6_ch_Fl(E, p);
+  g = gel(Fl_ellptors(l, o, a4, a6, p), 1);
+  for (i=1; i <= n; i++)
   {
     GEN Q = Fle_changepointinv(Flj_to_Fle(gel(P,i), p), a4a6, p);
     if (!ell_is_inf(Q))
@@ -7299,19 +7294,20 @@ FljV_vecsat_Siksek(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p, 
   set_avma(av);
 }
 
-/* Assume that l|o and p=1 [l] so dim E(F_p)[l] = 1 or 2 */
+/* Assume that l|o and p=1 [l] so r_l E(F_p) = 1 or 2 */
 static void
 FljV_vecsat_Prickett(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p, GEN S, long *m)
 {
-  long i, lA = lg(P)-1;
-  GEN v = zero_zv(lA);
-  GEN w = zero_zv(lA);
-  pari_sp av = avma;
-  GEN a4a6 = a4a6_ch_Fl(E, p);
-  GEN G = Fl_ellptors(l, o, a4, a6, p);
-  GEN G1 = gel(G,1), G2 = lg(G)==3 ? gel(G, 2): NULL;
+  long i, n = lg(P)-1;
+  GEN a4a6, G, G1, G2, v = zero_zv(n), w = zero_zv(n);
   ulong g = ltors_Fl(l, p), q = (p-1)/l;
-  for (i=1; i<=lA; i++)
+  pari_sp av = avma;
+
+  a4a6 = a4a6_ch_Fl(E, p);
+  G = Fl_ellptors(l, o, a4, a6, p);
+  G1 = gel(G,1);
+  G2 = lg(G)==3 ? gel(G, 2): NULL;
+  for (i = 1; i <= n; i++)
   {
     GEN Q = Fle_changepointinv(Flj_to_Fle(gel(P,i), p), a4a6, p);
     if (!ell_is_inf(Q))
@@ -7333,31 +7329,27 @@ FljV_vecsat_Prickett(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p
 static GEN
 ellsatp_ker(hashtable *h, GEN e, long CM, GEN help, ulong l)
 {
-  GEN D = ell_get_disc(e);
-  forprime_t S;
   long m = 1, nb = lg(help) + 5;
-  GEN P = QEV_to_ZJV(help);
-  GEN sat  = cgetg(nb+1, t_MAT);
+  GEN D = ell_get_disc(e), P = QEV_to_ZJV(help), sat  = cgetg(nb+1, t_MAT);
+  forprime_t S;
+
   (void)u_forprime_init(&S, 5, ULONG_MAX);
   while (m <= nb)
   {
-    long o;
     ulong a4, a6, p = u_forprime_next(&S);
+    long o;
     if (dvdiu(D, p)) continue;
+    Fl_ell_to_a4a6(e, p, &a4, &a6);
     if (!hash_haskey_long(h, (void*)p, &o))
     {
-      Fl_ell_to_a4a6(e, p, &a4, &a6);
       o = p+1 - Fl_elltrace_CM(CM, a4, a6, p);
       hash_insert_long(h,(void*)p, o);
     }
-    if (o % l == 0)
-    {
-      Fl_ell_to_a4a6(e, p, &a4, &a6);
-      if (p%l == 1)
-        FljV_vecsat_Prickett(e, ZM_to_Flm(P, p), o, l, a4, a6, p, sat, &m);
-      else
-        FljV_vecsat_Siksek(e, ZM_to_Flm(P, p), o, l, a4, a6, p, sat, &m);
-    }
+    if (o % l) continue;
+    if (p%l == 1)
+      FljV_vecsat_Prickett(e, ZM_to_Flm(P, p), o, l, a4, a6, p, sat, &m);
+    else
+      FljV_vecsat_Siksek(e, ZM_to_Flm(P, p), o, l, a4, a6, p, sat, &m);
   }
   return sat;
 }
