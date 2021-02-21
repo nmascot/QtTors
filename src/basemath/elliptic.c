@@ -7405,8 +7405,7 @@ ellQ_saturation(GEN E, GEN P, long B, long prec)
     {
       GEN Q = ellsatp(&h, E, CM, T, P, M, p, &xp, w, nb, prec);
       if (!Q) break;
-      P = Q; nb += n;
-      M = ellheightmatrix(E, P, prec);
+      P = Q; M = ellheightmatrix(E, P, prec);
     }
   }
   return ellQ_genreduce(E, P, prec);
