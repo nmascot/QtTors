@@ -5284,7 +5284,7 @@ ZV_is_ei(GEN v)
   return ei;
 }
 
-/* A vector of points, L a ZV, return (A * L) / l */
+/* A vector of points, L a ZV, return (sum L[i]*A[i]) / l */
 static GEN
 ellQ_factorback(GEN E, GEN A, GEN L, ulong l, GEN h, long prec)
 {
