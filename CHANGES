@@ -26,6 +26,7 @@ BA  20- missing GC in qfsolve
     21- missing GC in nfeltval + better algorithm when valuation is huge
     22- rnfidealup(, non-integral ideal) -> division by 0
     23- memory leak in hellheight
+    24- memory leak in bnfinit
 
   Added
 HC   1- new GP function eulerreal

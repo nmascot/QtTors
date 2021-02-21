@@ -4146,7 +4146,7 @@ START:
   delete_FB(&F);
   res = gerepilecopy(av0, res);
   if (flag) obj_insert_shallow(res, MATAL, cgetg(1,t_VEC));
-  if (precdouble) gunclone(nf);
+  if (nfisclone) gunclone(nf);
   delete_cache(&cache);
   free_GRHcheck(&GRHcheck);
   return res;
