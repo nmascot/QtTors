@@ -5270,17 +5270,39 @@ ellQ_factorback_worker(GEN P, GEN E, GEN A, GEN L, ulong l)
   return V;
 }
 
+/* If a single non-zero entry, equal to 1, return its index. Else 0 */
+static long
+ZV_is_ei(GEN v)
+{
+  long i, ei = 0;
+  for (i = lg(v)-1; i; i--)
+    if (signe(gel(v,i)))
+    {
+      if (ei || !equali1(gel(v,i))) return 0;
+      ei = i;
+    }
+  return ei;
+}
+
+/* A vector of points, L a ZV, return (A * L) / l */
 static GEN
 ellQ_factorback(GEN E, GEN A, GEN L, ulong l, GEN h, long prec)
 {
   pari_sp av = avma;
-  GEN mod = gen_1, H = NULL;
+  GEN hn, D, worker, mod = gen_1, H = NULL;
   forprime_t S;
-  GEN hn = l==1 ? NULL: hnaive_max(E, h);
-  GEN D = ell_get_disc(E);
-  GEN worker = snm_closure(is_entry("_ellQ_factorback_worker"),
-               mkvec4(E, QEV_to_ZJV(A), L, utoi(l)));
   ulong bound = 1;
+
+  if (l == 1)
+  {
+    long i = ZV_is_ei(L);
+    if (i) return gel(A,i);
+  }
+  hn = l==1 ? NULL: hnaive_max(E, h);
+  D = ell_get_disc(E);
+  worker = snm_closure(is_entry("_ellQ_factorback_worker"),
+                       mkvec4(E, QEV_to_ZJV(A), L, utoi(l)));
+  bound = 1;
   if (l==1)
     init_modular_big(&S);
   else
