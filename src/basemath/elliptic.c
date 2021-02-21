@@ -7274,7 +7274,8 @@ ltors_Fl(ulong l, ulong p)
 
 /* Assume that l|o but p!=1 [l] so r_l E(F_p) = 1 */
 static void
-FljV_vecsat_Siksek(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p, GEN S, long *m)
+FljV_vecsat_Siksek(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p,
+                   GEN S, long *m)
 {
   long i, n = lg(P)-1;
   GEN a4a6, g, F, v = zero_zv(n);
@@ -7296,7 +7297,8 @@ FljV_vecsat_Siksek(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p, 
 
 /* Assume that l|o and p=1 [l] so r_l E(F_p) = 1 or 2 */
 static void
-FljV_vecsat_Prickett(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p, GEN S, long *m)
+FljV_vecsat_Prickett(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6,
+                     ulong p, GEN S, long *m)
 {
   long i, n = lg(P)-1;
   GEN a4a6, G, G1, G2, v = zero_zv(n), w = zero_zv(n);
@@ -7326,11 +7328,22 @@ FljV_vecsat_Prickett(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p
   set_avma(av);
 }
 
+static void
+FljV_vecsat(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p,
+            GEN S, long *m)
+{
+  P = ZM_to_Flm(P, p);
+  if (p % l == 1)
+    FljV_vecsat_Prickett(E, P, o, l, a4, a6, p, S, m);
+  else
+    FljV_vecsat_Siksek(E, P, o, l, a4, a6, p, S, m);
+}
+
 static GEN
-ellsatp_ker(hashtable *h, GEN e, long CM, GEN help, ulong l)
+ellsatp_mat(hashtable *h, GEN e, long CM, GEN help, ulong l)
 {
   long m = 1, nb = lg(help) + 5;
-  GEN D = ell_get_disc(e), P = QEV_to_ZJV(help), sat  = cgetg(nb+1, t_MAT);
+  GEN D = ell_get_disc(e), P = QEV_to_ZJV(help), M = cgetg(nb+1, t_MAT);
   forprime_t S;
 
   (void)u_forprime_init(&S, 5, ULONG_MAX);
@@ -7345,13 +7358,9 @@ ellsatp_ker(hashtable *h, GEN e, long CM, GEN help, ulong l)
       o = p+1 - Fl_elltrace_CM(CM, a4, a6, p);
       hash_insert_long(h,(void*)p, o);
     }
-    if (o % l) continue;
-    if (p%l == 1)
-      FljV_vecsat_Prickett(e, ZM_to_Flm(P, p), o, l, a4, a6, p, sat, &m);
-    else
-      FljV_vecsat_Siksek(e, ZM_to_Flm(P, p), o, l, a4, a6, p, sat, &m);
+    if (o % l == 0) FljV_vecsat(e, P, o, l, a4, a6, p, M, &m);
   }
-  return sat;
+  return M;
 }
 
 INLINE long
@@ -7369,7 +7378,7 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
         long vxl, long prec)
 {
   GEN P = T ? shallowconcat(H, T): H;
-  GEN S = ellsatp_ker(hh, E, CM, P, l); /* fill hh */
+  GEN S = ellsatp_mat(hh, E, CM, P, l); /* fill hh */
   pari_sp av = avma;
   GEN K = Flm_ker(Flm_transpose(S), l);
   long i, lK = lg(K), lH = lg(H);
