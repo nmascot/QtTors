@@ -2064,13 +2064,13 @@ check_modinv(long inv)
 }
 
 GEN
-polclass(GEN DD, long inv, long xvar)
+polclass(GEN DD, long inv, long vx)
 {
   GEN db, H;
-  long dummy, D;
+  long D;
 
-  if (xvar < 0) xvar = 0;
-  check_quaddisc_imag(DD, &dummy, "polclass");
+  if (vx < 0) vx = 0;
+  check_quaddisc_imag(DD, NULL, "polclass");
   check_modinv(inv);
 
   D = itos(DD);
@@ -2078,6 +2078,6 @@ polclass(GEN DD, long inv, long xvar)
     pari_err_DOMAIN("polclass", "D", "incompatible with given invariant", stoi(inv), DD);
 
   db = polmodular_db_init(inv);
-  H = polclass0(D, inv, xvar, &db);
+  H = polclass0(D, inv, vx, &db);
   gunclone_deep(db); return H;
 }

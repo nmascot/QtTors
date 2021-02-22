@@ -20,13 +20,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*******************************************************************/
 
 void
-check_quaddisc(GEN x, long *s, long *r, const char *f)
+check_quaddisc(GEN x, long *s, long *pr, const char *f)
 {
+  long r;
   if (typ(x) != t_INT) pari_err_TYPE(f,x);
   *s = signe(x);
   if (Z_issquare(x)) pari_err_DOMAIN(f,"issquare(disc)","=", gen_1,x);
-  *r = mod4(x); if (*s < 0 && *r) *r = 4 - *r;
-  if (*r > 1) pari_err_DOMAIN(f,"disc % 4",">", gen_1,x);
+  r = mod4(x); if (*s < 0 && r) r = 4 - r;
+  if (r > 1) pari_err_DOMAIN(f,"disc % 4",">", gen_1,x);
+  if (pr) *pr = r;
 }
 void
 check_quaddisc_real(GEN x, long *r, const char *f)

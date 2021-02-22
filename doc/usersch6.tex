@@ -2285,7 +2285,7 @@ automorphism. Variant of \kbd{galoisapply}.
 checks whether the \kbd{GEN} $x$ is a quadratic discriminant (\typ{INT},
 not a square, congruent to $0,1$ modulo $4$), and raise an exception
 otherwise. Set \kbd{*s} to the sign of $x$ and \kbd{*mod4} to $x$ modulo
-$4$ (0 or 1).
+$4$ (0 or 1), unless \kbd{mod4} is \kbd{NULL}.
 
 \fun{void}{check_quaddisc_real}{GEN x, long *mod4, const char *f} as
 \tet{check_quaddisc}; check that \kbd{signe(x)} is positive.
