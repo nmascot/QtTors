@@ -532,7 +532,7 @@ nfdiv(GEN nf, GEN x, GEN y)
     GEN d;
     y = Q_remove_denom(y, &d);
     z = nfmul(nf, x, zk_inv(nf,y));
-    if (d) z = RgC_Rg_mul(z, d);
+    if (d) z = typ(z) == t_COL? RgC_Rg_mul(z, d): gmul(z, d);
   }
   return gerepileupto(av, z);
 }

@@ -42,6 +42,8 @@ sqrtint(abs(D / vecprod([p^valuation(D,p) | p <-P])))
 \\#1158
 nf=nfinit(x^2+x+1);
 nfinit(nf)
+\\#2277
+nfeltdiv(nf, 0, 1+x/2)
 
 K=nfinit([x^5-x^4+x^3+100*x+20,[1,x,x^2-x,1/2*x^4-1/2*x^3+1/2*x^2+40,x^3-x^2+x]]);
 K.index

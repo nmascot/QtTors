@@ -28,6 +28,7 @@ BA  20- missing GC in qfsolve
     23- memory leak in hellheight
     24- memory leak in bnfinit
     25- zeta(-2 + O(x)) => division by 0
+    26- nfeltdiv(nfinit(x^2+1), 0, 1+x/2) -> SEGV [#2277]
 
   Added
 HC   1- new GP function eulerreal
