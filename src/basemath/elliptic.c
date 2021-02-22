@@ -5328,17 +5328,18 @@ ellQ_factorback(GEN E, GEN A, GEN L, ulong l, GEN h, long prec)
 }
 
 GEN
-ellQ_genreduce(GEN E, GEN G, long prec)
+ellQ_genreduce(GEN E, GEN G, GEN M, long prec)
 {
   pari_sp av = avma;
-  GEN M = ellheightmatrix(E, G, prec);
-  GEN L = lllgram(M);
-  long i, j, l = lg(L);
-  GEN V = cgetg(l, t_VEC);
-  for (i = 1, j = 1; i < l; i++)
+  long i, j, l = lg(G);
+  GEN L, V = cgetg(l, t_VEC);
+
+  if (!M) M = ellheightmatrix(E, G, prec);
+  L = lllgram(M);
+  for (i = j = 1; i < l; i++)
   {
-    GEN Li = gel(L, i), h = qfeval(M,Li);
-    if (expo(h)>-prec2nbits(prec)/2)
+    GEN Li = gel(L, i), h = qfeval(M, Li);
+    if (expo(h) > -prec2nbits(prec)/2)
       gel(V,j++) = ellQ_factorback(E, G, Li, 1, h, prec);
   }
   setlg(V, j);
@@ -7446,7 +7447,7 @@ ellQ_saturation(GEN E, GEN P, long B, long prec)
       P = Q;
     }
   }
-  return ellQ_genreduce(E, P, prec);
+  return ellQ_genreduce(E, P, M, prec);
 }
 
 GEN

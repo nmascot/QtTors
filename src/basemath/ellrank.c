@@ -1453,7 +1453,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   if (odd(dim - nbpoints)) mwrank++;
   listpoints = vecslice(listpoints, 1+tors2, nbpoints);
   listpoints = elltwistpoints(listpoints, K);
-  listpoints = vecellabs(ellQ_genreduce(ell_K, listpoints, prec));
+  listpoints = vecellabs(ellQ_genreduce(ell_K, listpoints, NULL, prec));
   return mkvec3(utoi(mwrank), utoi(dim-tors2), listpoints);
 }
 

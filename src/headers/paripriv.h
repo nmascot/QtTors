@@ -736,7 +736,7 @@ GEN hnaive_max(GEN ell, GEN ht);
 
 void ellprint(GEN e);
 GEN  ellintegralbmodel(GEN e, GEN *pv);
-GEN  ellQ_genreduce(GEN E, GEN G, long prec);
+GEN  ellQ_genreduce(GEN E, GEN G, GEN M, long prec);
 
 /* es.c */
 
