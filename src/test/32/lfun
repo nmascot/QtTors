@@ -301,6 +301,9 @@ zeta(s)*zeta(s-a)
 -126
 -124
 -125
+O(x)
+O(x^2)
+O(x^2)
   ***   at top-level: lfuntheta(1,0)
   ***                 ^--------------
   *** lfuntheta: domain error in lfunthetainit: t = 0
@@ -367,4 +370,4 @@ zeta(s)*zeta(s-a)
   ***   at top-level: lfun([[],[""]],1)
   ***                 ^-----------------
   *** lfun: incorrect type in lfunmisc_to_ldata (t_VEC).
-Total time spent: 3825
+Total time spent: 4138

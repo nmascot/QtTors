@@ -233,8 +233,17 @@ theta_get_isqrtN(GEN tdata)  { return gel(tdata, 7);}
 /*******************************************************************/
 /*  Helper functions related to Gamma products                     */
 /*******************************************************************/
+/* x != 0 */
+static int
+serisscalar(GEN x)
+{
+  long i;
+  if (valp(x)) return 0;
+  for (i = lg(x)-1; i > 3; i--) if (!gequal0(gel(x,i))) return 0;
+  return 1;
+}
 
-/* return -itos(s) >= 0 if s is (approximately) equal to a nonpositive
+/* return -itos(s) >= 0 if scalar s is (approximately) equal to a nonpositive
  * integer, and -1 otherwise */
 static long
 isnegint(GEN s)
@@ -242,6 +251,18 @@ isnegint(GEN s)
   GEN r = ground(real_i(s));
   if (signe(r) <= 0 && gequal(s, r)) return -itos(r);
   return -1;
+}
+static GEN
+serextendifnegint(GEN s, GEN s0, long *ext)
+{
+  if (!signe(s) || (serisscalar(s) && isnegint(gel(s,2)) >= 0))
+  { /* a + O(x^n) => a + x^n + O(x^(n+1)) */
+    long l = lg(s);
+    GEN t = cgetg(l+1, t_SER);
+    gel(t, l) = s0; while (--l > 1) gel(t,l) = gel(s,l);
+    t[1] = s[1]; s = normalize(t); *ext = 1;
+  }
+  return s;
 }
 
 /* r/x + O(1), r != 0 */
@@ -259,25 +280,30 @@ deg1ser_shallow(GEN a1, GEN a0, long v, long e)
 
 /* pi^(-s/2) Gamma(s/2) */
 static GEN
-gamma_R(GEN s, long prec)
+gamma_R(GEN s, long *ext, long prec)
 {
   GEN s2 = gmul2n(s, -1);
-  long ms = isnegint(s2);
-  if (ms >= 0)
+  long ms;
+
+  if (typ(s) == t_SER)
+    s2 = serextendifnegint(s2, ghalf, ext);
+  else if ((ms = isnegint(s2)) >= 0)
   {
-    GEN r = gmul(powru(mppi(prec), ms), gdivsg(odd(ms)? -2: 2, mpfact(ms)));
+    GEN r = gmul(powPis(stoi(ms),prec), gdivsg(odd(ms)? -2: 2, mpfact(ms)));
     return serpole(r);
   }
   return gdiv(ggamma(s2,prec), powPis(s2,prec));
 }
 /* gamma_R(s)gamma_R(s+1) = 2 (2pi)^(-s) Gamma(s) */
 static GEN
-gamma_C(GEN s, long prec)
+gamma_C(GEN s, long *ext, long prec)
 {
-  long ms = isnegint(s);
-  if (ms >= 0)
+  long ms;
+  if (typ(s) == t_SER)
+    s = serextendifnegint(s, gen_1, ext);
+  else if ((ms = isnegint(s)) >= 0)
   {
-    GEN r = gmul(powrs(Pi2n(1,prec), ms), gdivsg(odd(ms)? -2: 2, mpfact(ms)));
+    GEN r = gmul(pow2Pis(stoi(ms),prec), gdivsg(odd(ms)? -2: 2, mpfact(ms)));
     return serpole(r);
   }
   return gmul2n(gdiv(ggamma(s,prec), pow2Pis(s,prec)), 1);
@@ -372,16 +398,17 @@ fracgammaeval(GEN F, GEN s, long prec)
 }
 
 static GEN
-gammafactproduct(GEN F, GEN s, long prec)
+gammafactproduct(GEN F, GEN s, long *ext, long prec)
 {
   pari_sp av = avma;
   GEN R = gel(F,2), Rw = gel(R,1), Re = gel(R,2);
-  GEN C = gel(F,3), Cw = gel(C,1), Ce = gel(C,2), z = fracgammaeval(F, s, prec);
+  GEN C = gel(F,3), Cw = gel(C,1), Ce = gel(C,2), z = fracgammaeval(F,s,prec);
   long i, lR = lg(Rw), lC = lg(Cw);
+  *ext = 0;
   for (i = 1; i < lR; i++)
-    z = gmul(z, gpowgs(gamma_R(gadd(s,gel(Rw, i)), prec), Re[i]));
+    z = gmul(z, gpowgs(gamma_R(gadd(s,gel(Rw, i)), ext, prec), Re[i]));
   for (i = 1; i < lC; i++)
-    z = gmul(z, gpowgs(gamma_C(gadd(s,gel(Cw, i)), prec), Ce[i]));
+    z = gmul(z, gpowgs(gamma_C(gadd(s,gel(Cw, i)), ext, prec), Ce[i]));
   return gerepileupto(av, z);
 }
 
@@ -509,9 +536,9 @@ rtoR(GEN a, GEN r, GEN FVga, GEN N, long prec)
   long v = lg(r)-2;
   GEN as = deg1ser_shallow(gen_1, a, varn(r), v);
   GEN Na = gpow(N, gdivgs(as, 2), prec);
-  long d = fracgammadegree(FVga);
+  long d = fracgammadegree(FVga), ext;
   if (d) as = sertoser(as, v+d); /* make up for a possible loss of accuracy */
-  return gmul(gmul(r, Na), gammafactproduct(FVga, as, prec));
+  return gmul(gmul(r, Na), gammafactproduct(FVga, as, &ext, prec));
 }
 
 /* assume r in normalized form: t_VEC of pairs [be,re] */
@@ -933,8 +960,8 @@ lfunp_set(GEN ldata, long der, long bitprec, struct lfunp *S)
     sub += logN2*mins;
     if (gammaordinary(Vga, sig))
     {
-      GEN FVga = gammafactor(Vga);
-      GEN gas = gammafactproduct(FVga, sig, LOWDEFAULTPREC);
+      long ext;
+      GEN gas = gammafactproduct(gammafactor(Vga), sig, &ext, LOWDEFAULTPREC);
       if (typ(gas) != t_SER)
       {
         double dg = dbllog2(gas);
@@ -1632,14 +1659,14 @@ is_ser(GEN x)
 }
 
 static GEN
-lfunser(GEN res)
+lfunser(GEN L)
 {
-  long v = valp(res);
+  long v = valp(L);
   if (v > 0) return gen_0;
-  if (v == 0) res = gel(res, 2);
+  if (v == 0) L = gel(L, 2);
   else
-    setlg(res, minss(lg(res), 2-v));
-  return res;
+    setlg(L, minss(lg(L), 2-v));
+  return L;
 }
 
 static GEN
@@ -1648,6 +1675,18 @@ lfunservec(GEN x)
   if (typ(x)==t_SER) return lfunser(x);
   pari_APPLY_same(lfunser(gel(x,i)))
 }
+static GEN
+lfununext(GEN L)
+{
+  setlg(L, maxss(lg(L)-1, valp(L)? 2: 3));
+  return normalize(L);
+}
+static GEN
+lfununextvec(GEN x)
+{
+  if (typ(x)==t_SER) return lfununext(x);
+  pari_APPLY_same(lfununext(gel(x,i)));
+}
 
 /* assume lmisc is an linit, s went through get_domain and s/bitprec belong
  * to domain */
@@ -1655,7 +1694,7 @@ static GEN
 lfun_OK(GEN linit, GEN s, GEN sdom, long bitprec)
 {
   GEN N, gas, S, FVga, res, ss = s;
-  long prec = nbits2prec(bitprec);
+  long prec = nbits2prec(bitprec), ext;
 
   FVga = lfun_get_factgammavec(linit_get_tech(linit));
   S = lfunlambda_OK(linit, s, sdom, bitprec);
@@ -1668,11 +1707,11 @@ lfun_OK(GEN linit, GEN s, GEN sdom, long bitprec)
     else
       ss = deg1ser_shallow(gen_1, s, varn(r), d);
   }
-  gas = gammafactproduct(FVga, ss, prec);
+  gas = gammafactproduct(FVga, ss, &ext, prec);
   N = ldata_get_conductor(linit_get_ldata(linit));
   res = gdiv(S, gmul(gpow(N, gdivgs(ss, 2), prec), gas));
-  if (typ(s)!=t_SER && is_ser(res))
-    res = lfunservec(res);
+  if (typ(s) != t_SER && is_ser(res)) res = lfunservec(res);
+  else if (ext) res = lfununextvec(res);
   return gprec_w(res, prec);
 }
 
@@ -1765,11 +1804,7 @@ derser(GEN res, long m)
 }
 
 static GEN
-derservec(GEN x, long m)
-{
-  if (typ(x)==t_SER) return derser(x, m);
-  pari_APPLY_same(derser(gel(x,i),m))
-}
+derservec(GEN x, long m) { pari_APPLY_same(derser(gel(x,i),m)) }
 
 /* derivative of order m > 0 of L (flag = 0) or Lambda (flag = 1) */
 static GEN
@@ -2047,7 +2082,8 @@ Rtor(GEN a, GEN R, GEN ldata, long prec)
 {
   GEN FVga = gammafactor(ldata_get_gammavec(ldata));
   GEN Na = gpow(ldata_get_conductor(ldata), gdivgs(a,2), prec);
-  return gdiv(R, gmul(Na, gammafactproduct(FVga, a, prec)));
+  long ext;
+  return gdiv(R, gmul(Na, gammafactproduct(FVga, a, &ext, prec)));
 }
 
 /* v = theta~(t), vi = theta(1/t) */

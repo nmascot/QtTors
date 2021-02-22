@@ -27,6 +27,7 @@ BA  20- missing GC in qfsolve
     22- rnfidealup(, non-integral ideal) -> division by 0
     23- memory leak in hellheight
     24- memory leak in bnfinit
+    25- zeta(-2 + O(x)) => division by 0
 
   Added
 HC   1- new GP function eulerreal
