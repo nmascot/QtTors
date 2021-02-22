@@ -1499,26 +1499,24 @@ GEN
 elltwist(GEN E, GEN P)
 {
   pari_sp av = avma;
-  GEN a1, a2, a3, a4, a6;
-  GEN a, b, c, ac, D, D2;
-  GEN V;
-  checkell(E);
+  GEN a1, a2, a3, a4, a6, a, b, c, ac, D, D2, a3D, V;
+
   if (!P)
   {
-    GEN a4, a6;
+    GEN a4, a6, e, p;
     checkell_Fq(E);
     switch (ell_get_type(E))
     {
       case t_ELL_Fp:
-        {
-          GEN p = ellff_get_field(E), e = ellff_get_a4a6(E);
-          Fp_elltwist(gel(e,1), gel(e, 2), p, &a4, &a6);
-          return gerepilecopy(av, FpV_to_mod(mkvec5(gen_0, gen_0, gen_0, a4, a6), p));
-        }
+        p = ellff_get_field(E);
+        e = ellff_get_a4a6(E);
+        Fp_elltwist(gel(e,1), gel(e, 2), p, &a4, &a6);
+        return gerepilecopy(av, FpV_to_mod(mkvec5(gen_0, gen_0, gen_0, a4, a6), p));
       case t_ELL_Fq:
         return FF_elltwist(E);
     }
   }
+  checkell(E);
   a1 = ell_get_a1(E); a2 = ell_get_a2(E); a3 = ell_get_a3(E);
   a4 = ell_get_a4(E); a6 = ell_get_a6(E);
   if (typ(P) == t_INT)
@@ -1526,22 +1524,22 @@ elltwist(GEN E, GEN P)
     if (equali1(P))
       retmkvec5(gcopy(a1),gcopy(a2),gcopy(a3),gcopy(a4),gcopy(a6));
     P = quadpoly(P);
-  } else
+  }
+  else
   {
     if (typ(P) != t_POL) pari_err_TYPE("elltwist",P);
     if (degpol(P) != 2 )
       pari_err_DOMAIN("elltwist", "degree(P)", "!=", gen_2, P);
   }
-  a = gel(P, 4); b = gel(P, 3); c = gel(P, 2);
-  ac = gmul(a, c);
+  a = gel(P, 4); b = gel(P, 3); c = gel(P, 2); ac = gmul(a, c);
   D = gsub(gsqr(b), gmulsg(4, ac));
-  D2 = gsqr(D);
+  D2 = gsqr(D); a3D = gmul(a3, D);
   V = cgetg(6, t_VEC);
   gel(V, 1) =  gmul(a1, b);
   gel(V, 2) =  gsub(gmul(a2, D), gmul(gsqr(a1), ac));
-  gel(V, 3) =  gmul(gmul(a3, b), D);
-  gel(V, 4) =  gsub(gmul(a4, D2), gmul(gmul(gmul(gmulsg(2, a3), a1), ac), D));
-  gel(V, 5) =  gsub(gmul(a6, gmul(D, D2)), gmul(gmul(gsqr(a3), ac), D2));
+  gel(V, 3) =  gmul(a3D, b);
+  gel(V, 4) =  gsub(gmul(a4, D2), gmul(gmul(gmulsg(2, a3D), a1), ac));
+  gel(V, 5) =  gmul(gsub(gmul(a6, D), gmul(gsqr(a3), ac)), D2);
   return gerepilecopy(av, V);
 }
 
