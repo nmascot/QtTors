@@ -504,8 +504,7 @@ red_Cremona_Stoll(GEN Q, GEN *pM)
 {
   GEN q1, q2, q3, M, R, den, P = Q_primitive_part(Q, &den);
   long i, prec = nbits2prec(2*gexpo(P)) + 1;
-  GEN dP = ZX_deriv(P);
-  GEN r = roots(P, prec);
+  GEN dP = ZX_deriv(P), r = QX_complex_roots(P, prec);
   q1 = gen_0; q2 = gen_0; q3 = gen_0;
   for (i = 1; i <= 4; i++)
   {
