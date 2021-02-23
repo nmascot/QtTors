@@ -396,52 +396,44 @@ ellbasechar(GEN E)
  * (do not include j to allow for singular Weistrass model)
  * Also allocate room for n dynamic members. */
 static GEN
-initsmall_i(GEN x, long n)
+initsmall46(GEN a4, GEN a6, long n)
 {
-  GEN a1,a2,a3,a4,a6, b2,b4,b6,b8, c4,c6, D;
   GEN y = obj_init(15, n);
-  switch(lg(x))
-  {
-    case 1:
-    case 2:
-    case 4:
-    case 5:
-      pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
-      return NULL; /* LCOV_EXCL_LINE */
-    case 3:
-      a1 = a2 = a3 = gen_0;
-      a4 = gel(x,1);
-      a6 = gel(x,2);
-      b2 = gen_0;
-      b4 = gmul2n(a4,1);
-      b6 = gmul2n(a6,2);
-      b8 = gneg(gsqr(a4));
-      c4 = gmulgs(a4,-48);
-      c6 = gmulgs(a6,-864);
-      D = gadd(gmul(gmulgs(a4,-64), gsqr(a4)), gmulsg(-432,gsqr(a6)));
-      break;
-    default: /* l > 5 */
-    { GEN a11, a13, a33, b22;
-      a1 = gel(x,1);
-      a2 = gel(x,2);
-      a3 = gel(x,3);
-      a4 = gel(x,4);
-      a6 = gel(x,5);
-      a11= gsqr(a1);
-      b2 = gadd(a11, gmul2n(a2,2));
-      a13= gmul(a1, a3);
-      b4 = gadd(a13, gmul2n(a4,1));
-      a33= gsqr(a3);
-      b6 = gadd(a33, gmul2n(a6,2));
-      b8 = gsub(gadd(gmul(a11,a6), gmul(b6, a2)), gmul(a4, gadd(a4,a13)));
-      b22= gsqr(b2);
-      c4 = gadd(b22, gmulsg(-24,b4));
-      c6 = gadd(gmul(b2,gsub(gmulsg(36,b4),b22)), gmulsg(-216,b6));
-      D  = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
-                gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
-      break;
-    }
-  }
+  gel(y,1) = gen_0;
+  gel(y,2) = gen_0;
+  gel(y,3) = gen_0;
+  gel(y,4) = a4;
+  gel(y,5) = a6;
+  gel(y,6) = gen_0;
+  gel(y,7) = gmul2n(a4,1);
+  gel(y,8) = gmul2n(a6,2);
+  gel(y,9) = gneg(gsqr(a4));
+  gel(y,10)= gmulgs(a4,-48);
+  gel(y,11)= gmulgs(a6,-864);
+  gel(y,12)= gadd(gmul(gmulgs(a4,-64), gsqr(a4)), gmulsg(-432,gsqr(a6)));
+  gel(y,16) = zerovec(n); return y;
+}
+/* [a1,a2,a3,a4,a6] */
+static GEN
+initsmall5(GEN x, long n)
+{
+  GEN a1 = gel(x,1), a2 = gel(x,2), a3 = gel(x,3);
+  GEN a4 = gel(x,4), a6 = gel(x,5);
+  GEN y, b2, b4, b6, b8, c4, c6, D, a11, a13, a33, b22;
+  if (gequal0(a1) && gequal0(a2) && gequal0(a3)) return initsmall46(a4, a6, n);
+  a11= gsqr(a1);
+  b2 = gadd(a11, gmul2n(a2,2));
+  a13= gmul(a1, a3);
+  b4 = gadd(a13, gmul2n(a4,1));
+  a33= gsqr(a3);
+  b6 = gadd(a33, gmul2n(a6,2));
+  b8 = gsub(gadd(gmul(a11,a6), gmul(b6, a2)), gmul(a4, gadd(a4,a13)));
+  b22= gsqr(b2);
+  c4 = gadd(b22, gmulsg(-24,b4));
+  c6 = gadd(gmul(b2,gsub(gmulsg(36,b4),b22)), gmulsg(-216,b6));
+  D  = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
+            gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
+  y = obj_init(15, n);
   gel(y,1) = a1;
   gel(y,2) = a2;
   gel(y,3) = a3;
@@ -454,9 +446,29 @@ initsmall_i(GEN x, long n)
   gel(y,10)= c4; /* b2^2 - 24 b4 */
   gel(y,11)= c6; /* 36 b2 b4 - b2^3 - 216 b6 */
   gel(y,12)= D;
-  gel(y,16) = zerovec(n);
-  return y;
+  gel(y,16) = zerovec(n); return y;
 }
+
+static GEN
+get_j(GEN c4, GEN D)
+{
+  GEN g, d, c;
+  if (typ(D) != t_POL || typ(c4) != t_POL || varn(D) != varn(c4))
+    return gdiv(gmul(gsqr(c4),c4), D);
+  /* c4^3 / D, simplifying incrementally */
+  g = RgX_gcd(D, c4);
+  if (degpol(g) == 0) return gred_rfrac_simple(gmul(gsqr(c4),c4), D);
+  c = RgX_div(c4, g);
+  D = RgX_div(D, g);
+  g = RgX_gcd(D,c4);
+  if (degpol(g) == 0) return gred_rfrac_simple(gmul(gsqr(c4),c), D);
+  D = RgX_div(D, g);
+  d = RgX_div(c4, g);
+  g = RgX_gcd(D,c4);
+  if (degpol(g)) { D = RgX_div(D, g); c4 = RgX_div(c4, g); }
+  return gred_rfrac_simple(gmul(gmul(c4, d),c), D);
+}
+
 /* return basic elliptic struct y[1..13], y[14] (domain type) and y[15]
  * (domain-specific data) are left uninitialized, from x[1], ..., x[5].
  * Also allocate room for n dynamic members (actually stored in the last
@@ -464,39 +476,20 @@ initsmall_i(GEN x, long n)
 static GEN
 initsmall(GEN x, long n)
 {
-  GEN j, y = initsmall_i(x, n), c4 = ell_get_c4(y), D = ell_get_disc(y);
-  if (gequal0(D)) { gel(y, 13) = gen_0; return NULL; }
+  GEN y, D;
 
-  if (typ(D) == t_POL && typ(c4) == t_POL && varn(D) == varn(c4))
-  { /* c4^3 / D, simplifying incrementally */
-    GEN g = RgX_gcd(D, c4);
-    if (degpol(g) == 0)
-      j = gred_rfrac_simple(gmul(gsqr(c4),c4), D);
-    else
-    {
-      GEN d, c = RgX_div(c4, g);
-      D = RgX_div(D, g);
-      g = RgX_gcd(D,c4);
-      if (degpol(g) == 0)
-        j = gred_rfrac_simple(gmul(gsqr(c4),c), D);
-      else
-      {
-        D = RgX_div(D, g);
-        d = RgX_div(c4, g);
-        g = RgX_gcd(D,c4);
-        if (degpol(g))
-        {
-          D = RgX_div(D, g);
-          c4 = RgX_div(c4, g);
-        }
-        j = gred_rfrac_simple(gmul(gmul(c4, d),c), D);
-      }
-    }
+  switch(lg(x))
+  {
+    case 3: y = initsmall46(gel(x,1), gel(x,2), n); break;
+    case 6:
+    case 17: y = initsmall5(x, n); break;
+    default:
+      pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
+      return NULL; /* LCOV_EXCL_LINE */
   }
-  else
-    j = gdiv(gmul(gsqr(c4),c4), D);
-  gel(y,13) = j;
-  return y;
+  D = ell_get_disc(y);
+  if (gequal0(D)) { gel(y, 13) = gen_0; return NULL; }
+  gel(y,13) = get_j(ell_get_c4(y), D); return y;
 }
 void
 ellprint(GEN e)
@@ -7070,16 +7063,17 @@ ellgroup0(GEN E, GEN p, long flag)
     if (vu) pari_err_TYPE("ellgroup [not a p-minimal curve]",E);
     if (!equali1(kod)) /* bad reduction */
     {
-      GEN Ep = obj_init(15, 4), T = NULL, q = p, ap = ellap(E,p);
+      GEN Ep, T = NULL, q = p, ap = ellap(E,p);
       if (typ(p) == t_INT)
       {
         long i;
+        Ep = obj_init(15, 4);
         for (i = 1; i <= 12; i++) gel(Ep,i) = gel(E,i);
       }
       else
       {
         q = pr_norm(p);
-        Ep = initsmall_i(ellnf_to_Fq(ellnf_get_nf(E), E, p, &p, &T), 4);
+        Ep = initsmall5(ellnf_to_Fq(ellnf_get_nf(E), E, p, &p, &T), 4);
       }
       E = FF_ellinit(Ep, Tp_to_FF(T, p)); /* singular curve */
       obj_insert(E, FF_CARD, subii(q, ap));
