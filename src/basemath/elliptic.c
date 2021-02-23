@@ -7343,7 +7343,7 @@ FljV_vecsat(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p,
 static GEN
 ellsatp_mat(hashtable *h, GEN E, long CM, GEN P, ulong l)
 {
-  long m = 1, nb = lg(P) + 5;
+  long m = 1, nb = lg(P)-1 + 25 / log2(l) - 1; /* error ~ 2^{-25} */
   GEN D = ell_get_disc(E), M = cgetg(nb+1, t_MAT);
   forprime_t S;
 
