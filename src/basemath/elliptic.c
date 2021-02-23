@@ -1529,7 +1529,7 @@ elltwist(GEN E, GEN P)
       default: pari_err_TYPE("elltiwst [missing P]", E);
     }
   }
-  E = get_ell(E);
+  if (typ(E) != t_VEC) pari_err_TYPE("elltwist",E);
   if (typ(P) == t_INT)
   {
     if (equali1(P)) return ellinit(E, NULL, DEFAULTPREC);
@@ -1543,17 +1543,15 @@ elltwist(GEN E, GEN P)
   }
   switch(lg(E))
   {
-    case 1:
-    case 2:
-    case 4:
-    case 5:
+    default:
       pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",E);
       return NULL; /* LCOV_EXCL_LINE */
     case 3:
       a1 = a2 = a3 = gen_0;
       a4 = gel(E,1);
       a6 = gel(E,2); break;
-    default: /* l > 5 */
+    case 6:
+    case 17:
       a1 = ell_get_a1(E);
       a2 = ell_get_a2(E);
       a3 = ell_get_a3(E);
