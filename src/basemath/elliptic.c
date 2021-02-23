@@ -7481,7 +7481,7 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
   GEN S = ellsatp_mat(hh, E, CM, P, l); /* fill hh */
   pari_sp av = avma;
   GEN K = Flm_ker(Flm_transpose(S), l);
-  long i, lK = lg(K), lH = lg(H);
+  long i, lK = lg(K), nH = lg(H)-1;
 
   if (lK==1) return gc_NULL(av);
   if (DEBUGLEVEL >= 3) err_printf("ellsat: potential factor %lu\n",l);
@@ -7493,10 +7493,10 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
     long f = Flv_firstnonzero(ki);
 
     /* for T != NULL: avoid solving for [p]Q = R when R is p-torsion */
-    if (f > lH) continue;
+    if (f > nH) continue;
     if (ki[f] != 1) ki = Flv_Fl_div(ki, ki[f], l);
     Ki = zv_to_ZV(Flv_center(ki, l, l >> 1));
-    h = qfeval(M, T? vecslice(Ki, 1, lH-1): Ki);
+    h = qfeval(M, T? vecslice(Ki, 1, nH): Ki);
     if (*xl)
     {
       GEN Q = ellQ_factorback(E, P, Ki, 1, h, prec);
@@ -7514,9 +7514,9 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
       err_printf("ellsat: %s divisible by %lu\n", R? "": "not", l);
     if (!R) continue;
     gcoeff(M, f, f) = h;
-    for (i = 1; i < lH; i++)
+    for (i = 1; i <= nH; i++)
       if (i != f) gcoeff(M, f, i) = gdivgs(RgV_dotproduct(gel(M,i), Ki), l);
-    for (i = 1; i < lH; i++) gcoeff(M, i, f) = gcoeff(M, f, i);
+    for (i = 1; i <= nH; i++) gcoeff(M, i, f) = gcoeff(M, f, i);
     gel(H,f) = R; return H;
   }
   return gc_NULL(av);
