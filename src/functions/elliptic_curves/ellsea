@@ -44,7 +44,7 @@ Doc: Let $E$ be an \var{ell} structure as output by \kbd{ellinit}, defined over
      N = ellsea(E, 1); if (!N, continue);
      if (isprime(N), return(E));
      \\ try the quadratic twist for free
-     if (isprime(2*p+2 - N), return(ellinit(elltwist(E))));
+     if (isprime(2*p+2 - N), return(elltwist(E)));
    );
  }
  ? p = randomprime([2^255, 2^256]);

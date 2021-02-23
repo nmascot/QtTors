@@ -918,7 +918,7 @@ ellpadicbsd(GEN E, GEN p, long n, GEN D)
   checkell(E);
   if (D && isint1(D)) D = NULL;
   W = ellpadicL_symbol(E, p, gen_0, D);
-  ED = D? ellinit(elltwist(E,D), gen_1, 0): E;
+  ED = D? elltwist(E, D): E;
   ED = ellanal_globalred_all(ED, NULL, &ND, &tam);
   vN = Z_pval(ND, p); /* additive reduction ? */
   if (vN >= 2) pari_err_DOMAIN("ellpadicbsd","v_p(N(E_D))",">",gen_1,stoi(vN));

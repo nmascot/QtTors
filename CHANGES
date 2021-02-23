@@ -76,6 +76,8 @@ HC   1- faster implementation of eulervec + cache result
     12- allow Qfb([a,b,c]) and Vec(t_QFB)
     13- qfbredsl2(q, S): change format of S: was [D,isD], is now isD
 BA  14- [libpari] gp_read_stream now return NULL when EOF is reached (was gnil)
+    15- elltwist now returns an ellinit, and accepts the same input formats
+        as ellinit ([a1,a2,a3,a4,a6], [a4,a6], Cremona label)
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

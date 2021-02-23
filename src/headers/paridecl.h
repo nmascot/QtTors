@@ -3038,6 +3038,7 @@ GEN     ellfromeqn(GEN s);
 /* elliptic.c */
 enum { t_ELL_Rg = 0, t_ELL_Q, t_ELL_Qp, t_ELL_Fp, t_ELL_Fq, t_ELL_NF };
 long    ellQ_get_CM(GEN e);
+void    ellQ_setprec(long prec);
 int     ell_is_integral(GEN E);
 GEN     ellbasechar(GEN E);
 GEN     akell(GEN e, GEN n);

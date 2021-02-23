@@ -797,11 +797,9 @@ ellinit_nf_to_Fq(GEN nf, GEN E, GEN P)
   return T? ellinit_Fq(E,Tp_to_FF(T,p)): ellinit_Fp(E,p);
 }
 
-GEN
-ellinit(GEN x, GEN D, long prec)
+static GEN
+get_ell(GEN x)
 {
-  pari_sp av = avma;
-  GEN y;
   switch(typ(x))
   {
     case t_STR: x = gel(ellsearchcurve(x),2); break;
@@ -810,11 +808,18 @@ ellinit(GEN x, GEN D, long prec)
       break;
     default: pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
   }
+  return x;
+}
+static GEN
+ellinit_i(GEN x, GEN D, long prec)
+{
+  GEN y;
+
+  x = get_ell(x);
   if (D && get_prid(D))
   {
     if (lg(x) == 6 || ell_get_type(x) != t_ELL_NF) pari_err_TYPE("ellinit",x);
-    y = ellinit_nf_to_Fq(ellnf_get_nf(x), x, D);
-    goto END;
+    return ellinit_nf_to_Fq(ellnf_get_nf(x), x, D);
   }
   switch (base_ring(x, &D, &prec))
   {
@@ -839,7 +844,13 @@ ellinit(GEN x, GEN D, long prec)
   default:
     y = ellinit_Rg(x, 0, prec);
   }
-END:
+  return y;
+}
+GEN
+ellinit(GEN x, GEN D, long prec)
+{
+  pari_sp av = avma;
+  GEN y = ellinit_i(x, D, prec);
   if (!y) { set_avma(av); return cgetg(1,t_VEC); }
   return gerepilecopy(av,y);
 }
@@ -1499,30 +1510,29 @@ GEN
 elltwist(GEN E, GEN P)
 {
   pari_sp av = avma;
-  GEN a1, a2, a3, a4, a6, a, b, c, ac, D, D2, a3D, V;
+  GEN a1, a2, a3, a4, a6, a, b, c, ac, D, D2, V;
 
   if (!P)
   {
     GEN a4, a6, e, p;
-    checkell_Fq(E);
+    /* Could avoid this ellinit. Don't bother. */
+    if (!checkell_i(E)) E = ellinit_i(E, NULL, DEFAULTPREC);
     switch (ell_get_type(E))
     {
       case t_ELL_Fp:
         p = ellff_get_field(E);
         e = ellff_get_a4a6(E);
         Fp_elltwist(gel(e,1), gel(e, 2), p, &a4, &a6);
-        return gerepilecopy(av, FpV_to_mod(mkvec5(gen_0, gen_0, gen_0, a4, a6), p));
+        return gerepilecopy(av, ellinit_i(mkvec2(a4,a6), p, 0));
       case t_ELL_Fq:
-        return FF_elltwist(E);
+        return gerepilecopy(av, ellinit_i(FF_elltwist(E), NULL, 0));
+      default: pari_err_TYPE("elltiwst [missing P]", E);
     }
   }
-  checkell(E);
-  a1 = ell_get_a1(E); a2 = ell_get_a2(E); a3 = ell_get_a3(E);
-  a4 = ell_get_a4(E); a6 = ell_get_a6(E);
+  E = get_ell(E);
   if (typ(P) == t_INT)
   {
-    if (equali1(P))
-      retmkvec5(gcopy(a1),gcopy(a2),gcopy(a3),gcopy(a4),gcopy(a6));
+    if (equali1(P)) return ellinit(E, NULL, DEFAULTPREC);
     P = quadpoly(P);
   }
   else
@@ -1531,16 +1541,40 @@ elltwist(GEN E, GEN P)
     if (degpol(P) != 2 )
       pari_err_DOMAIN("elltwist", "degree(P)", "!=", gen_2, P);
   }
+  switch(lg(E))
+  {
+    case 1:
+    case 2:
+    case 4:
+    case 5:
+      pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",E);
+      return NULL; /* LCOV_EXCL_LINE */
+    case 3:
+      a1 = a2 = a3 = gen_0;
+      a4 = gel(E,1);
+      a6 = gel(E,2); break;
+    default: /* l > 5 */
+      a1 = ell_get_a1(E);
+      a2 = ell_get_a2(E);
+      a3 = ell_get_a3(E);
+      a4 = ell_get_a4(E);
+      a6 = ell_get_a6(E); break;
+  }
   a = gel(P, 4); b = gel(P, 3); c = gel(P, 2); ac = gmul(a, c);
-  D = gsub(gsqr(b), gmulsg(4, ac));
-  D2 = gsqr(D); a3D = gmul(a3, D);
-  V = cgetg(6, t_VEC);
-  gel(V, 1) =  gmul(a1, b);
-  gel(V, 2) =  gsub(gmul(a2, D), gmul(gsqr(a1), ac));
-  gel(V, 3) =  gmul(a3D, b);
-  gel(V, 4) =  gsub(gmul(a4, D2), gmul(gmul(gmulsg(2, a3D), a1), ac));
-  gel(V, 5) =  gmul(gsub(gmul(a6, D), gmul(gsqr(a3), ac)), D2);
-  return gerepilecopy(av, V);
+  D = gsub(gsqr(b), gmulsg(4, ac)); D2 = gsqr(D);
+  if (gequal0(a1) && gequal0(a2) && gequal0(a3))
+    V = mkvec2(gmul(a4, D2), gmul(gmul(a6, D), D2));
+  else
+  {
+    GEN a3D = gmul(a3, D);
+    V = cgetg(6, t_VEC);
+    gel(V, 1) =  gmul(a1, b);
+    gel(V, 2) =  gsub(gmul(a2, D), gmul(gsqr(a1), ac));
+    gel(V, 3) =  gmul(a3D, b);
+    gel(V, 4) =  gsub(gmul(a4, D2), gmul(gmul(gmulsg(2, a3D), a1), ac));
+    gel(V, 5) =  gmul(gsub(gmul(a6, D), gmul(gsqr(a3), ac)), D2);
+  }
+  return gerepilecopy(av, ellinit_i(V, NULL, DEFAULTPREC));
 }
 
 /********************************************************************/
@@ -1643,8 +1677,7 @@ GEN
 ellminimaltwistcond(GEN e)
 {
   pari_sp av = avma;
-  GEN D = ellminimaltwist(e);
-  GEN eD = ellinit(elltwist(e, D), NULL, DEFAULTPREC);
+  GEN D = ellminimaltwist(e), eD = elltwist(e, D);
   GEN R = localred_23(ellintegralmodel_i(eD,NULL), 2);
   long f = itos(gel(R,1)), v = vali(D);
   if (f==4) D = negi(v==3 ? D: shifti(D, v==0? 2: -2));

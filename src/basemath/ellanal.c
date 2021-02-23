@@ -910,8 +910,7 @@ static GEN
 ltwist1(GEN E, GEN d, long bitprec)
 {
   pari_sp av = avma;
-  GEN Ed = ellinit(elltwist(E, d), NULL, DEFAULTPREC);
-  GEN z = ellL1_bitprec(Ed, 0, bitprec);
+  GEN Ed = elltwist(E, d), z = ellL1_bitprec(Ed, 0, bitprec);
   obj_free(Ed); return gerepileuptoleaf(av, z);
 }
 

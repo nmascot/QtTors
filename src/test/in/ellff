@@ -74,7 +74,7 @@ check(a)=
 {
   my(E,Et,P,N);
   E=ellinit(ellfromj(a),a);
-  Et=ellinit(elltwist(E));
+  Et=elltwist(E);
   if (ellap(Et)!=-ellap(E),error("twist:",a));
   N=ellcard(E);
   if ((N==1)!=(#random(E)==1),error(a));
@@ -112,7 +112,7 @@ checkt(p,n,f,B=100)=
     until(b,b=random(a));
     E=ellinit(if(f==0,[0,b],f==1,[b,0],[b^2,b^3]));
     if(#E==0,next);
-    Et=ellinit(elltwist(E));
+    Et=elltwist(E);
     if (ellap(Et)!=-ellap(E),error("twist:",[p,n,f]));
     N=ellcard(E);
     if(#ellmul(E,random(E),N)>1,error([p,n,f],b)));

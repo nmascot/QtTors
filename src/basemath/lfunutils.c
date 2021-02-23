@@ -1537,11 +1537,10 @@ ellsympow_goodred2(GEN E, GEN F, GEN p, long m, long vN, long *cnd, long *w)
 }
 
 static GEN
-ellminimaldotwist(GEN E, GEN *pD, long prec)
+ellminimaldotwist(GEN E, GEN *pD)
 {
   GEN D = ellminimaltwistcond(E), Et = elltwist(E, D), Etmin;
   if (pD) *pD = D;
-  Et = ellinit(Et, NULL, prec);
   Etmin = ellminimalmodel(Et, NULL);
   obj_free(Et); return Etmin;
 }
@@ -1568,7 +1567,7 @@ lfunellsympow(GEN e, ulong m)
   if (ugcd(umodiu(N,6), 6) == 1)
     et = NULL;
   else
-    et = ellminimaldotwist(e, NULL, DEFAULTPREC);
+    et = ellminimaldotwist(e, NULL);
   B = gen_1;
   bad = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
@@ -1793,7 +1792,7 @@ GEN
 lfunellmfpeters(GEN E, long bitprec)
 {
   pari_sp ltop = avma;
-  GEN D, Et = ellminimaldotwist(E, &D, nbits2prec(bitprec));
+  GEN D, Et = ellminimaldotwist(E, &D);
   GEN nor = lfunellmfpetersmintwist(Et, bitprec);
   GEN nor2 = gmul(nor, elldiscfix(E, Et, D));
   obj_free(Et); return gerepileupto(ltop, nor2);

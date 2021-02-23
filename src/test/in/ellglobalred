@@ -16,6 +16,7 @@ ellsearch([11,0])
 ellsearch([11])
 ellsearch(11)
 ellinit("11a1").j
+elltwist("11a1",-3)
 iferr(ellsearch([0,0,0,0]),E,E)
 iferr(ellsearch([0,0,0]),E,E)
 iferr(ellsearch("curve"),E,E)
