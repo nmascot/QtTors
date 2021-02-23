@@ -67,15 +67,15 @@ ellorder(ellinit([0,2],1),[-1,-1]*Mod(1,997))
 
 ellinit([a1,a2,a3,a4,a6]*Mod(1,5));
 ellinit([a1,a2,a3,a4,a6]);
-ellinit(ellfromj(0)).j
-ellinit(ellfromj(1728)).j
-ellinit(ellfromj(j)).j
-ellinit(ellfromj(Mod(0,2))).j
-ellinit(ellfromj(Mod(0,5))).j
-ellinit(ellfromj(Mod(3,5))).j
-ellinit(ellfromj(j*Mod(1,2))).j
-ellinit(ellfromj(Mod(0,3))).j
-ellinit(ellfromj(j*Mod(1,3))).j
+ellinit(0).j
+ellinit(1728).j
+ellinit(j).j
+ellinit(Mod(0,2)).j
+ellinit(Mod(0,5)).j
+ellinit(Mod(3,5)).j
+ellinit(j*Mod(1,2)).j
+ellinit(Mod(0,3)).j
+ellinit(j*Mod(1,3)).j
 
 elltwist([0,a2,0,a4,a6],x^2-D/4)[1..5]
 lift(elltwist([a1,a2,a3,a4,a6]*Mod(1,2),x^2+x+T)[1..5])
@@ -88,7 +88,7 @@ e = ellinit([4,0]);
 ellminimaltwist(e)
 ellminimaltwist(e,1)
 
-e = ellinit(ellfromj(-882216989/131072));
+e = ellinit(-882216989/131072);
 e = ellintegralmodel(e,&v)
 v
 ellminimaltwist(e)
@@ -119,8 +119,8 @@ d=2; twisttest(-17*2^(2*d), 2^(3*d), T2)
 
 ellminimaltwist(ellinit([216,-432]),1)
 
-a=ffgen(2^5,'a);ellinit(ellfromj(a)).j
-a=ffgen(3^5,'a);ellinit(ellfromj(a)).j
+a=ffgen(2^5,'a);ellinit(a).j
+a=ffgen(3^5,'a);ellinit(a).j
 
 ellfromeqn(y^3+(3+2*x)*y^2 +(6+5*x+4*x^2)*y+(10+9*x+8*x^2+7*x^3))
 ellfromeqn(y^2+(2*x^2+3*x+4)*y+(5*x^4+6*x^3+7*x^2+8*x+9))
@@ -184,20 +184,20 @@ E.group
 ellminimalmodel(ellinit([1/5,1/4,1/3,1/2,1],1),&v)
 v
 
-j=ffgen(2^5,'a);e = ellinit(ellfromj(j)); e.group; elllog(e,e.gen[1],e.gen[1])
+j=ffgen(2^5,'a);e = ellinit(j); e.group; elllog(e,e.gen[1],e.gen[1])
 E = ellchangecurve(e,[3,7,1,0]);
 E.group
 
-e = ellinit(ellfromj(Mod(1,3))); e.group; elllog(e,e.gen[1],e.gen[1])
+e = ellinit(Mod(1,3)); e.group; elllog(e,e.gen[1],e.gen[1])
 E = ellchangecurve(e,[2,7,1,0]);
 E.group
 
-e = ellinit(ellfromj(Mod(1,5))); e.group; elllog(e,e.gen[1],e.gen[1])
+e = ellinit(Mod(1,5)); e.group; elllog(e,e.gen[1],e.gen[1])
 E = ellchangecurve(e,[2,7,1,0]);
 E.group
 
-e = ellinit(ellfromj(1/3) * (1 + O(3^10))); e.roots
-e = ellinit(ellfromj(1/3), O(3^5)); e.tate
+e = ellinit(1/3 +  O(3^9)); e.roots
+e = ellinit(1/3, O(3^5)); e.tate
 iferr(ellinit(e,O(5)),E,E)
 iferr(ellinit(e,5),E,E)
 iferr(ellinit(e,1.0),E,E)
@@ -206,7 +206,7 @@ E = ellchangecurve(e,[3,1,1,2]);
 E.tate
 ellztopoint(e,3)
 
-e = ellinit(ellfromj(11/8), O(2^5));
+e = ellinit(11/8, O(2^5));
 e.tate
 
 e = ellinit([1,0,1,4,-6], O(2^5));
@@ -315,10 +315,10 @@ e=ellinit([1,1,1,-10,-10], O(3^5));
 testzellQp(e, [3,-2])
 testzellQp(e, ellmul(e,[0,0],2)) \\ not on curve !
 
-e=ellinit(ellfromj(2/9), O(3^10)); x=2; y=ellordinate(e,x)[1];
+e=ellinit(2/9, O(3^10)); x=2; y=ellordinate(e,x)[1];
 testzellQp(e, [x,y])
 
-e=ellinit(ellfromj(1/4), O(2^10)); x=1/2; y=ellordinate(e,x)[1];
+e=ellinit(1/4, O(2^10)); x=1/2; y=ellordinate(e,x)[1];
 testzellQp(e, [x,y])
 
 e=ellinit([1,-1,1,98,126],O(5^10));
@@ -364,7 +364,7 @@ ellinit(ellinit([0,1]*Mod(1,5),ffgen(5^2)));
 J=[0,1728,-3375,8000,54000,-32768,287496,-884736,-12288000,16581375,-884736000,-147197952000,-262537412640768000];
 {
 for (i=1,#J,
-  my(e = ellinit(ellfromj(J[i])));
+  my(e = ellinit(J[i]));
   my(v = ellan(e,200));
   print("\n", e.j);
   forprime(p = 127, 200, print1(v[p]," "));

@@ -806,7 +806,7 @@ get_ell(GEN x)
     case t_VEC:
       if (lg(x) > 6) checkell(x);
       break;
-    default: pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
+    default: x = ellfromj(x);
   }
   return x;
 }

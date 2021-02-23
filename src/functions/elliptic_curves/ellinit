@@ -21,6 +21,9 @@ Doc:
  curve with short Weierstrass equation
  $$ Y^2 = X^3 + a_4 X + a_6, $$
 
+ \item a $j$-invariant for the curve, with the same coefficients as given
+ by \kbd{ellfromj}.
+
  \item a character string in Cremona's notation, e.g. \kbd{"11a1"}, in which
  case the curve is retrieved from the \tet{elldata} database if available.
 

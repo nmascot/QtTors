@@ -73,7 +73,7 @@ checkorder(E, N)=
 check(a)=
 {
   my(E,Et,P,N);
-  E=ellinit(ellfromj(a),a);
+  E=ellinit(a);
   Et=elltwist(E);
   if (ellap(Et)!=-ellap(E),error("twist:",a));
   N=ellcard(E);
@@ -152,7 +152,7 @@ elldivpol(E,2)
 check(q)=
 { my(g,E,x = 1,y);
   g = ffprimroot(ffgen(q,'t));
-  E = ellinit(ellfromj(g));
+  E = ellinit(g);
   for(i=1,10,
     x *= g;
     y = ellordinate(E,x);
