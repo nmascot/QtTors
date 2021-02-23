@@ -340,9 +340,6 @@ a
 [0, 1, [18446744073709551629, -1020847100762815391828969860044649660923, -55
 340232221128654887, 25108406941546723108427206932497066002105857518694949724
 756], 1]
-  ***   at top-level: E.omega
-  ***                   ^-----
-  *** _.omega: incorrect type in omega [not defined over C] (t_VEC).
 [9, [9], [[Mod(3, 7), Mod(5, 7)]]]
 [0, 0, 0, 413748, 716503104, 0, 827496, 2866012416, -171187407504, -19859904
 , -619058681856, -226311754192704000000, 97158364170048/2807086984375, Vecsm
@@ -553,19 +550,13 @@ x - 8.6658330059232182300986473411838935307*x^5 + 21.66516806678406090668397
 [0.49999999999999999999999999999999999997 + 1.000000000000000000000000000000
 0000000*I, 1.5617041082089070087003342842479112065 + 0.560285392988767405183
 91807553710802979*I]
-  ***   at top-level: ellpointtoz(e,[Mod(3,'x^2+1),1])
-  ***                 ^--------------------------------
-  *** ellpointtoz: incorrect type in ellpointtoz (t_VEC).
+error("incorrect type in ellpointtoz (t_VEC).")
 3 + 11^2 + 2*11^3 + 3*11^4 + 6*11^5 + 10*11^6 + 8*11^7 + O(11^8)
 O(11^8)
 Mod((2 + 2*3 + 2*3^2 + 2*3^3 + 2*3^4 + 2*3^5 + 2*3^6 + 2*3^7 + 2*3^8 + O(3^9
 )), x^2 + (1 + 3 + 2*3^4 + 3^8 + O(3^9)))
 Mod(O(3^9), x^2 + (1 + 3 + 2*3^4 + 3^8 + O(3^9)))
-  ***   at top-level: testzellQp(e,ellmul(e,[0,0],2))
-  ***                 ^-------------------------------
-  ***   in function testzellQp: my(a,q,Q);a=ellpointtoz(e,P);Q=ellztopoint(e,a
-  ***                                       ^----------------------------------
-  *** ellpointtoz: sorry, ellpointtoz when u not in Qp is not yet implemented.
+error("sorry, ellpointtoz when u not in Qp is not yet implemented.")
 Mod((2 + 2*3 + 3^2 + 3^3 + 3^5 + 3^7 + O(3^10))*x + (1 + 3 + 2*3^2 + 2*3^4 +
  2*3^5 + 3^6 + 3^8 + 2*3^9 + O(3^10)), x^2 + (3 + 3^3 + 2*3^4 + 3^5 + 2*3^6 
 + 3^7 + 2*3^8 + 3^9 + 2*3^10 + 3^11 + O(3^13)))
@@ -592,9 +583,7 @@ O(2^15)
 [0, 1]
 [1, 0, 0, 0]
 0.035247504442186170440172838583518049039
-  ***   at top-level: ellheight(E,[0.,0])
-  ***                 ^-------------------
-  *** ellheight: incorrect type in ellheight [not a rational point] (t_VEC).
+error("incorrect type in ellheight [not a rational point] (t_VEC).")
 [1, 0, 0, 0]
 [100000000000000000039, 0, 0, 0]
 [0, 0, 0, 1, 1, 0, 2, 4, -1, -48, -864, -496, 6912/31, Vecsmall([1]), [Vecsm
@@ -665,43 +654,18 @@ ecsmall([128, -1])], [0, 0, 0, 0, 0, 0, 0, [[2]~]]]]]]
 error("incorrect type in checkell (t_VEC).")
 [0, 0, 0, x^2, x, 0, 2*x^2, 4*x, -x^4, -48*x^2, -864*x, -64*x^6 - 432*x^2, -
 6912*x^4/(-4*x^4 - 27), Vecsmall([0]), [Vecsmall([128, 0])], [0, 0, 0, 0]]
-  ***   at top-level: ellminimalmodel(E)
-  ***                 ^------------------
-  *** ellminimalmodel: incorrect type in ellminimalmodel (E / number field) (t_VEC).
-  ***   at top-level: ellweilpairing(E,[0],[0],1)
-  ***                 ^---------------------------
-  *** ellweilpairing: incorrect type in checkell over Fq (t_VEC).
-  ***   at top-level: ellinit([1])
-  ***                 ^------------
-  *** ellinit: incorrect type in ellxxx [not an elliptic curve (ell5)] (t_VEC).
-  ***   at top-level: ellinit([1,1],quadgen(5))
-  ***                 ^-------------------------
-  *** ellinit: incorrect type in elliptic curve base_ring (t_QUAD).
-  ***   at top-level: ellinit([Mod(1,2),1],O(2))
-  ***                 ^--------------------------
-  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
-  ***   at top-level: ellinit([O(2),1],ffgen(2^3))
-  ***                 ^----------------------------
-  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
-  ***   at top-level: ellinit([O(2),1],1.)
-  ***                 ^--------------------
-  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
+error("incorrect type in ellminimalmodel (E / number field) (t_VEC).")
+error("incorrect type in checkell over Fq (t_VEC).")
 [0, 0, 0, 1, 2, 0, 2, 8, -1, -48, -1728, -1792, 432/7, Vecsmall([0]), [Vecsm
 all([128, -1])], [0, 0, 0, 0]]
 [0, 0, 0, 0, 1, 0, 0, 4, 0, 0, 1, 3, 0, Vecsmall([4]), [0, [Vecsmall([0]), V
 ecsmall([0, 1]), [Vecsmall([0, 1]), Vecsmall([0]), Vecsmall([0]), Vecsmall([
 0])]]], [0, 0, 0, 0]]
-  ***   at top-level: ellinit([ffgen(5),1],3)
-  ***                 ^-----------------------
-  *** ellinit: inconsistent moduli in ellinit: 3 != 5
 [0, 0, 0, 1.0000000000000000000000000000000000000, 1, 0, 2.00000000000000000
 00000000000000000000, 4, -1.0000000000000000000000000000000000000, -48.00000
 0000000000000000000000000000000, -864, -496.00000000000000000000000000000000
 000, 222.96774193548387096774193548387096774, Vecsmall([0]), [Vecsmall([128,
  -1])], [0, 0, 0, 0]]
-  ***   at top-level: ellinit([1.,Mod(1,3)])
-  ***                 ^----------------------
-  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
 1
 -1
 1
@@ -749,12 +713,6 @@ t + 1/3*t^3 - 1/2*t^4 + 14/15*t^5 - 1/6*t^6 - 76/315*t^7 - 7/10*t^8 + 7547/1
 00*t^16 + O(t^17)
 x + 1/3*x^3 - 1/2*x^4 + 14/15*x^5 + O(x^6)
 t + 1/3*t^3 - 1/2*t^4 + 14/15*t^5 + O(t^6)
-  ***   at top-level: ellformalw(e,0)
-  ***                 ^---------------
-  *** ellformalw: domain error in ellformalw: precision <= 0
-  ***   at top-level: ellformalw(e,-1)
-  ***                 ^----------------
-  *** ellformalw: domain error in ellformalw: precision <= 0
 242.47010035195076100129810400142304776
 0
 [-0.52751724240790530394437835702346995884*I, -0.090507650025885335533571758
@@ -768,4 +726,31 @@ t + 1/3*t^3 - 1/2*t^4 + 14/15*t^5 + O(t^6)
   ***   at top-level: ellK(1)
   ***                 ^-------
   *** ellK: domain error in ellK: k^2 = 1
-Total time spent: 1392
+  ***   at top-level: ellinit([1])
+  ***                 ^------------
+  *** ellinit: incorrect type in ellxxx [not an elliptic curve (ell5)] (t_VEC).
+  ***   at top-level: ellinit([1,1],quadgen(5))
+  ***                 ^-------------------------
+  *** ellinit: incorrect type in elliptic curve base_ring (t_QUAD).
+  ***   at top-level: ellinit([Mod(1,2),1],O(2))
+  ***                 ^--------------------------
+  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
+  ***   at top-level: ellinit([O(2),1],ffgen(2^3))
+  ***                 ^----------------------------
+  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
+  ***   at top-level: ellinit([O(2),1],1.)
+  ***                 ^--------------------
+  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
+  ***   at top-level: ellinit([ffgen(5),1],3)
+  ***                 ^-----------------------
+  *** ellinit: inconsistent moduli in ellinit: 3 != 5
+  ***   at top-level: ellinit([1.,Mod(1,3)])
+  ***                 ^----------------------
+  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
+  ***   at top-level: ellformalw(e,0)
+  ***                 ^---------------
+  *** ellformalw: domain error in ellformalw: precision <= 0
+  ***   at top-level: ellformalw(e,-1)
+  ***                 ^----------------
+  *** ellformalw: domain error in ellformalw: precision <= 0
+Total time spent: 1253

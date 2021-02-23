@@ -73,9 +73,9 @@ ellinit(j).j
 ellinit(Mod(0,2)).j
 ellinit(Mod(0,5)).j
 ellinit(Mod(3,5)).j
-ellinit(j*Mod(1,2)).j
+ellinit('j*Mod(1,2)).j
 ellinit(Mod(0,3)).j
-ellinit(j*Mod(1,3)).j
+ellinit('j*Mod(1,3)).j
 
 elltwist([0,a2,0,a4,a6],x^2-D/4)[1..5]
 lift(elltwist([a1,a2,a3,a4,a6]*Mod(1,2),x^2+x+T)[1..5])
@@ -178,7 +178,7 @@ elllocalred(E,p)
 E = ellchangecurve(e, [1,0,0,0]);
 
 E = ellchangecurve(e, [2,3,4,5]*Mod(1,7));
-E.omega
+iferr(E.omega, e, e);
 E.group
 
 ellminimalmodel(ellinit([1/5,1/4,1/3,1/2,1],1),&v)
@@ -308,12 +308,12 @@ testzellQp(e, P)=
 }
 e=ellinit([0,-1,1,0,0], O(11^5));
 \\ BIB #1840
-ellpointtoz(e,[Mod(3,'x^2+1),1]);
-testzellQp(e, [0,0])
+iferr(ellpointtoz(e,[Mod(3,'x^2+1),1]), E, E)
+iferr(testzellQp(e, [0,0]), E, E)
 
 e=ellinit([1,1,1,-10,-10], O(3^5));
 testzellQp(e, [3,-2])
-testzellQp(e, ellmul(e,[0,0],2)) \\ not on curve !
+iferr(testzellQp(e, ellmul(e,[0,0],2)), E, E) \\ not on curve !
 
 e=ellinit(2/9, O(3^10)); x=2; y=ellordinate(e,x)[1];
 testzellQp(e, [x,y])
@@ -348,7 +348,7 @@ E2=ellchangecurve(E,v); ellminimalmodel(E2,&w); w
 
 \\#1432
 E=ellinit([-3,-60,480,0,0]); ellheight(E,[0,0])
-ellheight(E,[0.,0])
+iferr(ellheight(E,[0.,0]), e, e)
 
 p=10^20+39; q=10^21+117;
 e = ellinit([p^3*q^4,p^6*q^4]);
@@ -383,18 +383,11 @@ elladd(E,[0.,125.],[0.,125+1e-38])
 iferr(ellmul([0,1,0,2,-15],[2,1],5),E,E)
 x='x;
 E=ellinit([x^2,x])
-ellminimalmodel(E)
-ellweilpairing(E,[0],[0],1)
-ellinit([1])
-ellinit([1,1],quadgen(5))
-ellinit([Mod(1,2),1],O(2))
-ellinit([O(2),1],ffgen(2^3))
-ellinit([O(2),1],1.)
+iferr(ellminimalmodel(E), e, e)
+iferr(ellweilpairing(E,[0],[0],1), e, e)
 ellinit([1,2],1.)
 ellinit([ffgen(5),1],5)
-ellinit([ffgen(5),1],3)
 ellinit([1.,1],precision(1.,60))
-ellinit([1.,Mod(1,3)])
 
 \\#1527
 E = ellinit([0,0,0,-82,0]);
@@ -424,8 +417,6 @@ e=ellinit([0,-1,1,-2,2]);
 test(f)=print(f(e,,'t)); print(f(e,5)); print(f(e,5,'t));
 F=[ellformalw,ellformalpoint,ellformaldifferential,ellformallog,ellformalexp];
 for(i=1,#F,print(F[i]);test(F[i]));
-ellformalw(e,0)
-ellformalw(e,-1)
 
 \\#1637
 U=[-245369975623514803521420211420402474815373720177518420696215292670924086780233779586506792145074717/4069861969699146045958032034788970995470603578576,-696053034387689435413673877713244121475782562610666903528251447608130654196417305610237634015759861/4069861969699146045958032034788970995470603578576,-49356694805693369953216822105035107974083562942605713355717183776373331122267882948881129025418396548321363993080002121985116427859996985649385099335/4069861969699146045958032034788970995470603578576,5996724761485351384753083917633373954904218466995628499407992841502416127074022935350022919212488198205525833829916828282709837728834438536000230267/1017465492424786511489508008697242748867650894644,-1943033527672518505867347410801184866534773028979571976479290969993491996577167508758887358085512124817167326269402804641328588524702957475568608101932310746684310251168033629279636817525659690186705/4069861969699146045958032034788970995470603578576];
@@ -461,3 +452,13 @@ ellsaturation(E,[P],100)
 
 \\ ERRORS, keep at end of file
 ellK(1)
+ellinit([1])
+ellinit([1,1],quadgen(5))
+ellinit([Mod(1,2),1],O(2))
+ellinit([O(2),1],ffgen(2^3))
+ellinit([O(2),1],1.)
+ellinit([ffgen(5),1],3)
+ellinit([1.,Mod(1,3)])
+e=ellinit([0,-1,1,-2,2]);
+ellformalw(e,0)
+ellformalw(e,-1)
