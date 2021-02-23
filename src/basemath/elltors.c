@@ -427,7 +427,8 @@ ellisdivisible(GEN E, GEN P, GEN n, GEN *pQ)
   checkellpt(P);
   if (ell_is_inf(P))
   {
-    *pQ = gcopy(P); return 1;
+    if (pQ) *pQ = gcopy(P);
+    return 1;
   }
   if (ell_get_type(E) == t_ELL_Q && typ(n)==t_INT && signe(n)>0)
   {
