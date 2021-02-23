@@ -798,8 +798,10 @@ ellinit_nf_to_Fq(GEN nf, GEN E, GEN P)
 }
 
 static GEN
-get_ell(GEN x)
+ellinit_i(GEN x, GEN D, long prec)
 {
+  GEN y;
+
   switch(typ(x))
   {
     case t_STR: x = gel(ellsearchcurve(x),2); break;
@@ -808,14 +810,6 @@ get_ell(GEN x)
       break;
     default: x = ellfromj(x);
   }
-  return x;
-}
-static GEN
-ellinit_i(GEN x, GEN D, long prec)
-{
-  GEN y;
-
-  x = get_ell(x);
   if (D && get_prid(D))
   {
     if (lg(x) == 6 || ell_get_type(x) != t_ELL_NF) pari_err_TYPE("ellinit",x);
