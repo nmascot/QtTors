@@ -7476,7 +7476,8 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
   long i, lK = lg(K), nH = lg(H)-1;
 
   if (lK==1) return gc_NULL(av);
-  if (DEBUGLEVEL >= 3) err_printf("ellsat: potential factor %lu\n",l);
+  if (DEBUGLEVEL >= 3)
+    err_printf("ellsat: potential factor %lu, dim Ker = %ld\n",l,lK-1);
   /* Mazur bound for torsion of isogenous curves */
   if (!*xl && l <= 7) *xl = ellxn(E, l, vxl);
   for (i = 1; i < lK; i++)
@@ -7492,10 +7493,7 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
     if (*xl)
     {
       GEN Q = ellQ_factorback(E, P, Ki, 1, h, prec);
-      if (ellisdivisible(E, Q, *xl, &R))
-        h = gdiv(h, sqru(l));
-      else
-        R = NULL;
+      if (ellisdivisible(E, Q, *xl, &R)) h = gdiv(h, sqru(l)); else R = NULL;
     }
     else
     {
@@ -7504,14 +7502,18 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
     }
     if (DEBUGLEVEL >= 2)
       err_printf("ellsat: %s divisible by %lu\n", R? "": "not", l);
-    if (!R) continue;
+    if (!R)
+    {
+      if (lK == 2) break;
+      return l > 7? gc_const(av,H): H; /* fail: return and retry */
+    }
     gcoeff(M, f, f) = h;
     for (i = 1; i <= nH; i++)
       if (i != f) gcoeff(M, f, i) = gdivgs(RgV_dotproduct(gel(M,i), Ki), l);
     for (i = 1; i <= nH; i++) gcoeff(M, i, f) = gcoeff(M, f, i);
-    gel(H,f) = R; return H;
+    gel(H,f) = R; return H; /* found l-divisible point: return new lattice */
   }
-  return gc_NULL(av);
+  return gc_NULL(av); /* l-saturated */
 }
 
 static GEN
