@@ -7394,6 +7394,8 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
     GEN ki = gel(K,i), Ki, h, R;
     long f = Flv_firstnonzero(ki);
 
+    /* for T != NULL: avoid solving for [p]Q = R when R is p-torsion */
+    if (f > lH) continue;
     if (ki[f] != 1) ki = Flv_Fl_div(ki, ki[f], l);
     Ki = zv_to_ZV(Flv_center(ki, l, l >> 1));
     h = qfeval(M, T? vecslice(Ki, 1, lH-1): Ki);
