@@ -462,8 +462,7 @@ get_j(GEN c4, GEN D)
   D = RgX_div(D, g);
   g = RgX_gcd(D,c4);
   if (degpol(g) == 0) return gred_rfrac_simple(gmul(gsqr(c4),c), D);
-  D = RgX_div(D, g);
-  d = RgX_div(c4, g);
+  D = RgX_div(D, g); d = RgX_div(c4, g);
   g = RgX_gcd(D,c4);
   if (degpol(g)) { D = RgX_div(D, g); c4 = RgX_div(c4, g); }
   return gred_rfrac_simple(gmul(gmul(c4, d),c), D);
@@ -480,6 +479,7 @@ initsmall(GEN x, long n)
 
   switch(lg(x))
   {
+    case 2: y = initsmall5(ellfromj(gel(x,1)), n); break;
     case 3: y = initsmall46(gel(x,1), gel(x,2), n); break;
     case 6:
     case 17: y = initsmall5(x, n); break;
@@ -487,8 +487,7 @@ initsmall(GEN x, long n)
       pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
       return NULL; /* LCOV_EXCL_LINE */
   }
-  D = ell_get_disc(y);
-  if (gequal0(D)) { gel(y, 13) = gen_0; return NULL; }
+  D = ell_get_disc(y); if (gequal0(D)) return NULL;
   gel(y,13) = get_j(ell_get_c4(y), D); return y;
 }
 void
@@ -731,6 +730,8 @@ FF_ellinit_ns(GEN x, GEN fg)
 }
 
 static GEN
+to_mod(GEN x, GEN p) { return mkintmod(Rg_to_Fp(x,p), p); }
+static GEN
 ellinit_Fp(GEN x, GEN p)
 {
   long i;
@@ -742,13 +743,13 @@ ellinit_Fp(GEN x, GEN p)
     case t_ELL_Qp: chk_p(ellQp_get_p(x),p); break;
     default: pari_err_TYPE("elliptic curve base_ring", x);
   }
+  if (lg(x) == 2) x = ellfromj(to_mod(gel(x,1), p));
   if (!(y = initsmall(x, 4))) return NULL;
   /* ell_to_a4a6_bc does not handle p<=3 */
-  if (abscmpiu(p,3)<=0) return FF_ellinit_ns(y,p_to_FF(p,0));
+  if (abscmpiu(p, 3) <= 0) return FF_ellinit_ns(y,p_to_FF(p,0));
   disc = Rg_to_Fp(ell_get_disc(y),p);
   if (!signe(disc)) return NULL;
-  for(i=1;i<=13;i++)
-    gel(y,i) = Fp_to_mod(Rg_to_Fp(gel(y,i),p),p);
+  for(i = 1; i <= 13; i++) gel(y,i) = to_mod(gel(y,i),p);
   gel(y,14) = mkvecsmall(t_ELL_Fp);
   gel(y,15) = mkvec2(p, ell_to_a4a6_bc(y, p));
   return y;
@@ -758,6 +759,12 @@ static GEN
 ellinit_Fq(GEN x, GEN fg)
 {
   GEN y;
+  if (lg(x) == 2)
+  {
+    GEN j = gel(x,1);
+    if (typ(j) != t_FFELT) j = Fq_to_FF(j, fg);
+    x = ellfromj(j);
+  }
   if (!(y = initsmall(x, 4))) return NULL;
   return FF_ellinit_ns(y,fg);
 }
@@ -799,9 +806,13 @@ ellinit_i(GEN x, GEN D, long prec)
   {
     case t_STR: x = gel(ellsearchcurve(x),2); break;
     case t_VEC:
-      if (lg(x) > 6) checkell(x);
+      switch(lg(x))
+      {
+        case 3: case 6: case 17: break;
+        default: pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
+      }
       break;
-    default: x = ellfromj(x);
+    default: x = mkvec(x);
   }
   if (D && get_prid(D))
   {
@@ -7076,6 +7087,7 @@ ellgroup0(GEN E, GEN p, long flag)
         Ep = initsmall5(ellnf_to_Fq(ellnf_get_nf(E), E, p, &p, &T), 4);
       }
       E = FF_ellinit(Ep, Tp_to_FF(T, p)); /* singular curve */
+      gel(E,14) = mkvecsmall(t_ELL_Fq);
       obj_insert(E, FF_CARD, subii(q, ap));
     }
     else
