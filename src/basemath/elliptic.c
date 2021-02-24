@@ -1715,6 +1715,14 @@ ellexpo(GEN E)
   return e;
 }
 
+
+static int
+oncurve_exact(GEN e, GEN z)
+{
+  pari_sp av = avma;
+  GEN A = ec_LHS_evalQ(e,z), B = ec_f_evalx(e,gel(z,1));
+  return gc_bool(av, gequal(A, B));
+}
 /* Exactness of lhs and rhs in the following depends in nonobvious ways
  * on the coeffs of the curve as well as on the components of the point z.
  * Thus if e is exact, with a1==0, and z has exact y coordinate only, the
@@ -5205,22 +5213,15 @@ FljV_changepointinv_pre(GEN x, GEN a4a6, ulong p, ulong pi)
 static GEN
 ellQ_factorback_filter(GEN A, GEN P, GEN *pQ)
 {
-  long i, j, l = lg(A), k = 0;
+  long i, j, k, l = lg(A);
   GEN B, Q;
-  for (i = 1; i < l; i++)
+  for (i = k = 1; i < l; i++)
     if (!ell_is_inf(gel(A,i))) k++;
-  if (k==0 || k==l-1) { *pQ = P; return A; }
-  B = cgetg(k+1, t_VEC);
-  Q = cgetg(k+1, typ(P));
-  for (i=1, j=1; i<l; i++)
-  {
-    if (!ell_is_inf(gel(A,i)))
-    {
-      gel(B,j) = gel(A,i);
-      Q[j] = P[i];
-      j++;
-    }
-  }
+  if (k == 1 || k == l) { *pQ = P; return A; }
+  B = cgetg(k, t_VEC);
+  Q = cgetg(k, typ(P));
+  for (i = j = 1; i < l; i++)
+    if (!ell_is_inf(gel(A,i))) { gel(B,j) = gel(A,i); Q[j] = P[i]; j++; }
   *pQ = Q; return B;
 }
 
@@ -5312,7 +5313,8 @@ ZV_is_ei(GEN v)
 }
 
 /* A vector of points, L a ZV, return (sum L[i]*A[i]) / l;
- * h is the canonical height of result */
+ * h is the canonical height of result. Assume the result is NOT
+ * torsion */
 static GEN
 ellQ_factorback(GEN E, GEN A, GEN L, ulong l, GEN h, long prec)
 {
@@ -5330,27 +5332,25 @@ ellQ_factorback(GEN E, GEN A, GEN L, ulong l, GEN h, long prec)
   D = ell_get_disc(E);
   worker = snm_closure(is_entry("_ellQ_factorback_worker"),
                        mkvec4(E, QEV_to_ZJV(A), L, utoi(l)));
-  bound = 1;
   if (l==1)
     init_modular_big(&S);
   else
     init_modular_small(&S);
-  while (1)
+  for (bound = 1;; bound <<= 1)
   {
     GEN amax, r;
     gen_inccrt("ellQ_factorback", worker, D, bound, 0,
-            &S, &H, &mod, ellQ_factorback_chinese, NULL);
+               &S, &H, &mod, ellQ_factorback_chinese, NULL);
     amax = sqrti(shifti(mod,-2));
-    r = ell_is_inf(H)? ellinf(): FpC_ratlift(H, mod, amax, amax, NULL);
-    if (r) settyp(r,t_VEC);
-    if (r && oncurve(E,r))
+    if (!ell_is_inf(H) && (r = FpC_ratlift(H, mod, amax, amax, NULL))
+                       && oncurve_exact(E,r))
     {
-      GEN g = ellheight(E,r,prec);
+      GEN g;
+      settyp(r,t_VEC); g = ellheight(E,r,prec);
       if (signe(g) && expo(subrs(divrr(g,h),1))<-prec2nbits(prec)/2)
         return gerepileupto(av, r);
     }
     if (hn && gcmpsg(expi(mod)>>2,hn) > 0) return gc_NULL(av);
-    bound <<=1;
   }
 }
 
@@ -5408,33 +5408,26 @@ ellQ_isdivisible(GEN E, GEN P, ulong l)
   GEN worker, mod = gen_1, H = NULL, D = ell_get_disc(E);
   forprime_t S, U;
   long CM = ellQ_get_CM(E);
-  ulong bound = 1;
+  ulong bound;
 
   worker = snm_closure(is_entry("_ellQ_factorback_worker"),
                        mkvec4(E, mkvec(QE_to_ZJ(P)), mkvecs(1), utoi(l)));
-  bound = 1;
   u_forprime_init(&U, l+1, ULONG_MAX);
   init_modular_small(&S);
   if (!ellQ_isdivisible_test(&U, E, CM, P, l, 10)) return gc_NULL(av);
-  while (1)
+  for (bound = 1;; bound <<= 1)
   {
     GEN amax, r;
     gen_inccrt("ellQ_factorback", worker, D, bound, 0,
-            &S, &H, &mod, ellQ_factorback_chinese, NULL);
+               &S, &H, &mod, ellQ_factorback_chinese, NULL);
     amax = sqrti(shifti(mod,-2));
-    r = ell_is_inf(H)? NULL: FpC_ratlift(H, mod, amax, amax, NULL);
-    if (r)
+    if (!ell_is_inf(H) && (r = FpC_ratlift(H, mod, amax, amax, NULL))
+                       && oncurve_exact(E,r))
     {
       settyp(r,t_VEC);
-      if (oncurve(E,r))
-      {
-        if (gequal(ellmul(E,r,utoi(l)),P))
-          return gerepileupto(av, r);
-        if (!ellQ_isdivisible_test(&U, E, CM, P, l, 10))
-          return gc_NULL(av);
-      }
+      if (gequal(ellmul(E,r,utoi(l)), P)) return gerepileupto(av, r);
+      if (!ellQ_isdivisible_test(&U, E, CM, P, l, 10)) return gc_NULL(av);
     }
-    bound <<=1;
   }
 }
 
