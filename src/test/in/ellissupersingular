@@ -11,7 +11,7 @@ q = p^e;
 g = ffprimroot(ffgen(q));
 S = [g^n | n <- [1 .. q - 1], ellissupersingular(g^n)];
 if (S != [6] || ellissupersingular(0 * g^0), error("Bad result"));
-S = [g^n | n <- [1 .. q - 1], ellissupersingular(ellinit(g^n))];
+S = [g^n | n <- [1 .. q - 1], ellissupersingular(ellinit([g^n]))];
 if (S != [6] || ellissupersingular(0 * g^0), error("Bad result"));
 
 p = 43;

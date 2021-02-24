@@ -73,8 +73,7 @@ checkorder(E, N)=
 check(a)=
 {
   my(E,Et,P,N);
-  E=ellinit(a);
-  Et=elltwist(E);
+  E=ellinit(a); Et=elltwist(E);
   if (ellap(Et)!=-ellap(E),error("twist:",a));
   N=ellcard(E);
   if ((N==1)!=(#random(E)==1),error(a));
@@ -84,13 +83,13 @@ check(a)=
 {
   for(a=1,8,
     g = ffprimroot(ffgen(2^a,'t));
-    for(i=0,2^a-2, check(g^i)));
+    for(i=0,2^a-2, check([g^i])));
   for(a=1,6,
     g = ffprimroot(ffgen(3^a,'t));
-    for(i=0,3^a-2, check(g^i)));
+    for(i=0,3^a-2, check([g^i])));
   for(a=1,4,
     g = ffprimroot(ffgen(5^a,'t));
-    for(i=0,5^a-2, check(g^i)));
+    for(i=0,5^a-2, check([g^i])));
 }
 
 testss(n,N)=
@@ -152,7 +151,7 @@ elldivpol(E,2)
 check(q)=
 { my(g,E,x = 1,y);
   g = ffprimroot(ffgen(q,'t));
-  E = ellinit(g);
+  E = ellinit([g]);
   for(i=1,10,
     x *= g;
     y = ellordinate(E,x);

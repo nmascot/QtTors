@@ -728,9 +728,9 @@ t + 1/3*t^3 - 1/2*t^4 + 14/15*t^5 + O(t^6)
   ***   at top-level: ellK(1)
   ***                 ^-------
   *** ellK: domain error in ellK: k^2 = 1
-  ***   at top-level: ellinit([1])
-  ***                 ^------------
-  *** ellinit: incorrect type in ellxxx [not an elliptic curve (ell5)] (t_VEC).
+  ***   at top-level: ellinit([])
+  ***                 ^-----------
+  *** ellinit: incorrect type in ellinit (t_VEC).
   ***   at top-level: ellinit([1,1],quadgen(5))
   ***                 ^-------------------------
   *** ellinit: incorrect type in elliptic curve base_ring (t_QUAD).
@@ -755,7 +755,7 @@ t + 1/3*t^3 - 1/2*t^4 + 14/15*t^5 + O(t^6)
   ***   at top-level: ellformalw(e,-1)
   ***                 ^----------------
   *** ellformalw: domain error in ellformalw: precision <= 0
-  ***   at top-level: elltwist(Mat)
-  ***                 ^-------------
-  *** elltwist: incorrect type in elltwist (t_MAT).
-Total time spent: 1354
+  ***   at top-level: elltwist([0,0])
+  ***                 ^---------------
+  *** elltwist: incorrect type in elltwist (t_VEC).
+Total time spent: 1241

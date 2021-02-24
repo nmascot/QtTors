@@ -808,11 +808,11 @@ ellinit_i(GEN x, GEN D, long prec)
     case t_VEC:
       switch(lg(x))
       {
-        case 3: case 6: case 17: break;
-        default: pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
+        case 2: case 3: case 6: case 17: break;
+        default: pari_err_TYPE("ellinit",x);
       }
       break;
-    default: x = mkvec(x);
+    default: pari_err_TYPE("ellinit",x);
   }
   if (D && get_prid(D))
   {

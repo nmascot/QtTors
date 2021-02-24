@@ -55,7 +55,7 @@ BA  17- [libpari] RgXY_derivx
 BA  19- New GP function ellsaturation
     20- [libpari] ZX_Z_eval
 BA  21- [libpari] elltors_psylow
-    22- ellinit(j invariant) [no need to use ellfromj]
+    22- ellinit([j]); no need to use ellfromj
 
   Changed
 HC   1- faster implementation of eulervec + cache result
