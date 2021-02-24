@@ -4484,7 +4484,7 @@ Z_gcd_primes(GEN a, GEN b)
     l = lg(P);
     for (k = 1; k < l; k++) gel(P,k) = gel(Z_factor(gel(P,k)), 1);
     P = shallowconcat1(P);
-    P = ZV_sort(P);
+    ZV_sort_inplace(P);
   }
   settyp(P, t_VEC); return P;
 }
@@ -4575,7 +4575,7 @@ ellnf_D_primes(GEN E)
   if (!is_pm1(DZ))
   {
     GEN Q = gel(absZ_factor(DZ),1);
-    settyp(Q, t_VEC); P = ZV_sort(shallowconcat(P, Q));
+    settyp(Q, t_VEC); P = shallowconcat(P, Q); ZV_sort_inplace(P);
   }
   return P;
 }
@@ -4839,7 +4839,11 @@ ellQ_globalred(GEN e)
   P = gel(S,1); l = lg(P); /* some known prime divisors of D */
   D  = ell_get_disc(E);
   for (k = 1; k < l; k++) (void)Z_pvalrem(D, gel(P,k), &D);
-  if (!is_pm1(D)) P = ZV_sort( shallowconcat(P, gel(absZ_factor(D),1)) );
+  if (!is_pm1(D))
+  {
+    P = shallowconcat(P, gel(absZ_factor(D),1));
+    ZV_sort_inplace(P);
+  }
   l = lg(P); c = gen_1;
   iN = 1;
   NP = cgetg(l, t_COL);
