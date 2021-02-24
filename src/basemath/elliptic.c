@@ -1514,7 +1514,11 @@ elltwist(GEN E, GEN P)
   {
     GEN a4, a6, e, p;
     /* Could avoid this ellinit. Don't bother. */
-    if (!checkell_i(E)) E = ellinit_i(E, NULL, DEFAULTPREC);
+    if (!checkell_i(E))
+    {
+      e = E; E = ellinit_i(E, NULL, DEFAULTPREC);
+      if (!E) pari_err_TYPE("elltwist", e);
+    }
     switch (ell_get_type(E))
     {
       case t_ELL_Fp:
@@ -1524,7 +1528,7 @@ elltwist(GEN E, GEN P)
         return gerepilecopy(av, ellinit_i(mkvec2(a4,a6), p, 0));
       case t_ELL_Fq:
         return gerepilecopy(av, ellinit_i(FF_elltwist(E), NULL, 0));
-      default: pari_err_TYPE("elltiwst [missing P]", E);
+      default: pari_err_TYPE("elltwist [missing P]", E);
     }
   }
   if (typ(E) != t_VEC) pari_err_TYPE("elltwist",E);
