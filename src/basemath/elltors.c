@@ -341,20 +341,18 @@ ellnfis_divisible_by(GEN E, GEN K, GEN P, GEN xn)
   return NULL;
 }
 
-/* w a variable number of highest priority */
+/* P is not the point at infinity; w a variable number of highest priority */
 static long
 ellisdivisible_divpol_i(GEN E, GEN P, GEN n, long w, GEN *pQ)
 {
   GEN xP, R, K = NULL, N = NULL;
   long i, l;
-  checkell(E);
   switch(ell_get_type(E))
   {
     case t_ELL_Q: break;
     case t_ELL_NF: K = ellnf_get_nf(E); break;
     default: pari_err_TYPE("ellisdivisible",E);
   }
-  checkellpt(P);
   switch(typ(n))
   {
     case t_INT:
@@ -381,7 +379,6 @@ ellisdivisible_divpol_i(GEN E, GEN P, GEN n, long w, GEN *pQ)
       pari_err_TYPE("ellisdivisible",n);
       break;
   }
-  if (ell_is_inf(P)) { if (pQ) *pQ = ellinf(); return 1; }
   if (!N)
   {
     long d, d2 = degpol(gel(n,1));
@@ -412,45 +409,44 @@ ellisdivisible_divpol_i(GEN E, GEN P, GEN n, long w, GEN *pQ)
 static long
 ellisdivisible_divpol(GEN E, GEN P, GEN n, GEN *pQ)
 {
-  pari_sp av = avma;
   long w = fetch_var_higher(), t = ellisdivisible_divpol_i(E, P, n, w, pQ);
-  delete_var();
-  if (!t) return gc_long(av, 0);
-  if (pQ) *pQ = gerepilecopy(av, *pQ); else set_avma(av);
-  return 1;
+  delete_var(); return t;
 }
 
 long
 ellisdivisible(GEN E, GEN P, GEN n, GEN *pQ)
 {
-  checkell(E);
-  checkellpt(P);
+  pari_sp av = avma;
+  checkell(E); checkellpt(P);
   if (ell_is_inf(P))
   {
-    if (pQ) *pQ = gcopy(P);
+    if (pQ) *pQ = ellinf();
     return 1;
   }
-  if (ell_get_type(E) == t_ELL_Q && typ(n)==t_INT && signe(n)>0)
+  if (typ(n) == t_INT)
   {
-    pari_sp av = avma;
-    ulong nn = itou(n), n2 = u_ppo(nn, 210);
-    if (n2 > 1)
+    if (!signe(n)) return 0;
+    if (ell_get_type(E) == t_ELL_Q)
     {
-      P = ellQ_isdivisible(E, P, n2);
-      if (!P) return 0;
-      if (nn == n2)
+      ulong nn = itou(n), n2 = u_ppo(nn, 210);
+      nn /= n2;
+      if (n2 > 1)
       {
-        if (pQ) *pQ = P;
-        return 1;
+        P = ellQ_isdivisible(E, P, n2);
+        if (!P) return 0;
+        if (signe(n) < 0) P = ellneg(E, P);
+        if (nn == 1)
+        {
+          if (pQ) *pQ = P;
+          return 1;
+        }
+        n = utoipos(nn); /* we may have changed n into -n (and P in -P) */
       }
-      n = utoi(nn/n2);
-      if (!ellisdivisible_divpol(E, P, n, pQ))
-        return gc_long(av, 0);
-      if (!pQ) return gc_long(av, 1);
-      *pQ = gerepileupto(av, *pQ); return 1;
     }
   }
-  return ellisdivisible_divpol(E, P, n, pQ);
+  if (!ellisdivisible_divpol(E, P, n, pQ)) return gc_long(av, 0);
+  if (!pQ) return gc_long(av, 1);
+  *pQ = gerepilecopy(av, *pQ); return 1;
 }
 
 /* 2-torsion point of abscissa x */
