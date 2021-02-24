@@ -126,6 +126,7 @@ checktwist([-289,1],[-289*5^2,-5^3],[[369/4,-2753/8]]);
 \\ check for old regressions
 mwrank(ellinit([-181^2,-1]))
 mwrank(ellinit([1,0,1,-33,68]))
+mwrank(ellinit([0,1,0,-150908,-22509312]))
 
 \\error
 checktwist([1,2],[1,3])
