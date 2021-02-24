@@ -1545,22 +1545,21 @@ elltwist(GEN E, GEN P)
   }
   switch(lg(E))
   {
-    default:
-      pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",E);
-      return NULL; /* LCOV_EXCL_LINE */
     case 3:
       a1 = a2 = a3 = gen_0;
       a4 = gel(E,1);
       a6 = gel(E,2); break;
-    case 6:
-    case 17:
+    case 6: case 17:
       a1 = ell_get_a1(E);
       a2 = ell_get_a2(E);
       a3 = ell_get_a3(E);
       a4 = ell_get_a4(E);
       a6 = ell_get_a6(E); break;
+    default:
+      pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",E);
+      return NULL; /* LCOV_EXCL_LINE */
   }
-  a = gel(P, 4); b = gel(P, 3); c = gel(P, 2); ac = gmul(a, c);
+  a = gel(P,4); b = gel(P,3); c = gel(P,2); ac = gmul(a, c);
   D = gsub(gsqr(b), gmulsg(4, ac)); D2 = gsqr(D);
   if (gequal0(a1) && gequal0(a2) && gequal0(a3))
     V = mkvec2(gmul(a4, D2), gmul(gmul(a6, D), D2));
@@ -1568,11 +1567,11 @@ elltwist(GEN E, GEN P)
   {
     GEN a3D = gmul(a3, D);
     V = cgetg(6, t_VEC);
-    gel(V, 1) =  gmul(a1, b);
-    gel(V, 2) =  gsub(gmul(a2, D), gmul(gsqr(a1), ac));
-    gel(V, 3) =  gmul(a3D, b);
-    gel(V, 4) =  gsub(gmul(a4, D2), gmul(gmul(gmulsg(2, a3D), a1), ac));
-    gel(V, 5) =  gmul(gsub(gmul(a6, D), gmul(gsqr(a3), ac)), D2);
+    gel(V,1) = gmul(a1, b);
+    gel(V,2) = gsub(gmul(a2, D), gmul(gsqr(a1), ac));
+    gel(V,3) = gmul(a3D, b);
+    gel(V,4) = gsub(gmul(a4, D2), gmul(gmul(gmulsg(2, a3D), a1), ac));
+    gel(V,5) = gmul(gsub(gmul(a6, D), gmul(gsqr(a3), ac)), D2);
   }
   return gerepilecopy(av, ellinit_i(V, NULL, DEFAULTPREC));
 }
