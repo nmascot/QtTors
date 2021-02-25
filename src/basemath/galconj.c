@@ -195,7 +195,7 @@ embed_disc(GEN z, long r1, long prec)
 /* Compute bound for the coefficients of automorphisms.
  * T a ZX, den a t_INT denominator or NULL */
 GEN
-initgaloisborne(GEN T, GEN den, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
+initgaloisborne(GEN T, GEN den, long prec, GEN *pL, GEN *pprep, GEN *pD)
 {
   GEN L, prep, nf, r;
   pari_timer ti;
@@ -209,15 +209,15 @@ initgaloisborne(GEN T, GEN den, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
     L = QX_complex_roots(T, prec);
   if (DEBUGLEVEL>=4) timer_printf(&ti,"roots");
   prep = vandermondeinverseinit(L);
-  if (!den || ptdis)
+  if (!den || pD)
   {
     GEN res = RgV_prod(gabs(prep,prec));
-    GEN D = ZX_disc_all(T, 1 + expi(ceil_safe(res))); /* +1 if inaccurate res */
-    if (ptdis) *ptdis = D;
+    GEN D = ZX_disc_all(T, 1 + gexpo(res)); /* +1 for safety */
+    if (pD) *pD = D;
     if (!den) den = indexpartial(T,D);
   }
-  if (ptprep) *ptprep = prep;
-  *ptL = L; return den;
+  if (pprep) *pprep = prep;
+  *pL = L; return den;
 }
 
 /* ||| M ||| with respect to || x ||_oo, M t_MAT */
