@@ -2612,7 +2612,9 @@ GEN     qfminim0(GEN a, GEN borne, GEN stockmax,long flag, long prec);
 GEN     qfperfection(GEN a);
 GEN     qfrep0(GEN a, GEN borne, long flag);
 GEN     seralgdep(GEN s, long p, long r);
-GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
+GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
+GEN     vandermondeinverseinit(GEN L);
+GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B);
 
 /* bibli2.c */
 
@@ -3544,7 +3546,6 @@ GEN     galoispermtopol(GEN gal, GEN perm);
 GEN     galoissubgroups(GEN G);
 GEN     galoissubfields(GEN G, long flag, long v);
 long    numberofconjugates(GEN T, long pdepart);
-GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 
 /* galois.c */
 

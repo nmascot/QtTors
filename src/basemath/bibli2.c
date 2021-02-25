@@ -1150,6 +1150,45 @@ polrecip(GEN x)
 /**                  POLYNOMIAL INTERPOLATION                      **/
 /**                                                                **/
 /********************************************************************/
+/* given complex roots L[i], i <= n of some monic T in C[X], return
+ * the T'(L[i]), computed stably via products of differences */
+GEN
+vandermondeinverseinit(GEN L)
+{
+  long i, j, l = lg(L);
+  GEN V = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
+  {
+    pari_sp av = avma;
+    GEN W = cgetg(l-1,t_VEC);
+    long k = 1;
+    for (j = 1; j < l; j++)
+      if (i != j) gel(W, k++) = gsub(gel(L,i), gel(L,j));
+    gel(V,i) = gerepileupto(av, RgV_prod(W));
+  }
+  return V;
+}
+
+/* Compute the inverse of the van der Monde matrix of T multiplied by den */
+GEN
+vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
+{
+  pari_sp av = avma;
+  long i, n = lg(L)-1;
+  GEN M = cgetg(n+1, t_MAT);
+
+  if (!prep) prep = vandermondeinverseinit(L);
+  if (den && equali1(den)) den = NULL;
+  for (i = 1; i <= n; i++)
+  {
+    GEN d = gel(prep,i);
+    GEN P = RgX_Rg_mul(RgX_div_by_X_x(T, gel(L,i), NULL),
+                       den? gdiv(den,d): ginv(d));
+    gel(M,i) = RgX_to_RgC(P,n);
+  }
+  return gerepilecopy(av, M);
+}
+
 static GEN
 RgV_polint_fast(GEN X, GEN Y, long v)
 {
@@ -1167,18 +1206,18 @@ GEN
 RgV_polint(GEN X, GEN Y, long v)
 {
   pari_sp av0 = avma, av;
-  GEN Q, P = NULL;
+  GEN Q, L, P = NULL;
   long i, l = lg(Y);
   if ((Q = RgV_polint_fast(X,Y,v))) return Q;
   if (!X) X = identity_ZV(l-1);
+  L = vandermondeinverseinit(X);
   Q = roots_to_pol(X, v); av = avma;
   for (i=1; i<l; i++)
   {
-    GEN inv, T, dP;
+    GEN T, dP;
     if (gequal0(gel(Y,i))) continue;
     T = RgX_div_by_X_x(Q, gel(X,i), NULL);
-    inv = ginv(poleval(T,gel(X,i)));
-    dP = RgX_Rg_mul(T, gmul(gel(Y,i),inv));
+    dP = RgX_Rg_mul(T, gmul(gel(Y,i), ginv(gel(L,i))));
     P = P? RgX_add(P, dP): dP;
     if (gc_needed(av,2))
     {

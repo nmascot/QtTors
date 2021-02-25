@@ -129,44 +129,6 @@ struct galois_frobenius {
   GEN psi;
 };
 
-/* given complex roots L[i], i <= n of some monic T in C[X], return
- * the T'(L[i]), computed stably via products of differences */
-static GEN
-vandermondeinverseprep(GEN L)
-{
-  long i, j, n = lg(L);
-  GEN V;
-  V = cgetg(n, t_VEC);
-  for (i = 1; i < n; i++)
-  {
-    pari_sp ltop = avma;
-    GEN W = cgetg(n-1,t_VEC);
-    long k = 1;
-    for (j = 1; j < n; j++)
-      if (i != j) gel(W, k++) = gsub(gel(L,i),gel(L,j));
-    gel(V,i) = gerepileupto(ltop, RgV_prod(W));
-  }
-  return V;
-}
-
-/* Compute the inverse of the van der Monde matrix of T multiplied by den */
-GEN
-vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
-{
-  pari_sp ltop = avma;
-  long i, n = lg(L)-1;
-  GEN M, P;
-  if (!prep) prep = vandermondeinverseprep(L);
-  if (den && !equali1(den)) T = RgX_Rg_mul(T,den);
-  M = cgetg(n+1, t_MAT);
-  for (i = 1; i <= n; i++)
-  {
-    P = RgX_Rg_div(RgX_div_by_X_x(T, gel(L,i), NULL), gel(prep,i));
-    gel(M,i) = RgX_to_RgC(P,n);
-  }
-  return gerepilecopy(ltop, M);
-}
-
 /* #r = r1 + r2 */
 GEN
 embed_roots(GEN ro, long r1)
@@ -246,7 +208,7 @@ initgaloisborne(GEN T, GEN den, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   else
     L = QX_complex_roots(T, prec);
   if (DEBUGLEVEL>=4) timer_printf(&ti,"roots");
-  prep = vandermondeinverseprep(L);
+  prep = vandermondeinverseinit(L);
   if (!den || ptdis)
   {
     GEN res = RgV_prod(gabs(prep,prec));
