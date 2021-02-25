@@ -1074,12 +1074,10 @@ static GEN
 ellsearchtrivialpoints(GEN ell, GEN lim, GEN help)
 {
   pari_sp av = avma;
-  GEN torseven = gtoset(gel(elltors_psylow(ell,2), 3));
+  GEN tors2 = gel(elltors_psylow(ell,2),3);
   GEN triv = ellratpoints(ell, lim, 0);
-
   if (help) triv = shallowconcat(triv, help);
-  triv = setminus(gtoset(vecellabs(triv)), torseven);
-  return gerepilecopy(av, shallowconcat(torseven, triv));
+  return gerepilecopy(av, shallowconcat(tors2, triv));
 }
 
 GEN
@@ -1279,6 +1277,10 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2, GEN sqrtLS2, GEN factLS2,
   return NULL;
 }
 
+static void
+gtoset_inplace(GEN x)
+{ gen_sort_inplace(x, (void*)&cmp_universal, cmp_nodata, NULL); }
+
 static GEN
 ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
            long effort, long prec)
@@ -1286,13 +1288,15 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   pari_sp av;
   GEN KP, pol, vnf, vpol, vroots, vr1, vcrt, sbase, LS2, factLS2, sqrtLS2;
   GEN selmer, helpLS2, LS2chars, helpchars, newselmer, factdisc, badprimes;
-  GEN helplist, listpoints;
+  GEN helplist, listpoints, etors2;
   long i, j, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u;
 
   pol = ell2pol(ell);
   help = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,effort+1), help);
   help = elltwistpoints(help, ginv(K)); /* points on K Y^2 = pol(X) */
   n = lg(vbnf) - 1; tors2 = n - 1;
+  etors2 = vecslice(help,1, tors2);
+  gtoset_inplace(etors2);
   KP = gel(absZ_factor(K), 1);
   factdisc = mkvec3(KP, mkcol(gen_2), gel(absZ_factor(ZX_disc(pol)), 1));
   factdisc = ZV_sort_uniq(shallowconcat1(factdisc));
@@ -1451,7 +1455,8 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   setlg(listpoints, nbpoints+1);
   mwrank = nbpoints - tors2;
   if (odd(dim - nbpoints)) mwrank++;
-  listpoints = vecslice(listpoints, 1+tors2, nbpoints);
+  gtoset_inplace(listpoints);
+  listpoints = setminus(listpoints, etors2);
   listpoints = elltwistpoints(listpoints, K);
   listpoints = vecellabs(ellQ_genreduce(ell_K, listpoints, NULL, prec));
   return mkvec3(utoi(mwrank), utoi(dim-tors2), listpoints);
