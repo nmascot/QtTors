@@ -15,15 +15,17 @@
 
 \section{Binary Quadratic Forms}
 %
-\li{create $ax^2+bxy+cy^2$ (distance $d$) }{Qfb$(a,b,c,\{d\})$}
+\li{create $ax^2+bxy+cy^2$}{Qfb$(a,b,c)$ or Qfb$([a,b,c])$}
 \li{reduce $x$ ($s =\sqrt{D}$, $l=\floor{s}$)}
    {qfbred$(x,\{\fl\},\{D\},\{l\},\{s\})$}
 \li{return $[y,g]$, $g\in \text{SL}_2(\ZZ)$, $y = g\cdot x$ reduced}
    {qfbredsl2$(x)$}
 \li{composition of forms}{$x$*$y$ {\rm or }qfbnucomp$(x,y,l)$}
 \li{$n$-th power of form}{$x$\pow$n$ {\rm or }qfbnupow$(x,n)$}
-\li{composition without reduction}{qfbcompraw$(x,y)$}
-\li{$n$-th power without reduction}{qfbpowraw$(x,n)$}
+\li{composition}{qfbcomp$(x,y)$}
+\li{\dots without reduction}{qfbcompraw$(x,y)$}
+\li{$n$-th power}{qfbpow$(x,n)$}
+\li{\dots without reduction}{qfbpowraw$(x,n)$}
 \li{prime form of disc. $x$ above prime $p$}{qfbprimeform$(x,p)$}
 \li{class number of disc. $x$}{qfbclassno$(x)$}
 \li{Hurwitz class number of disc. $x$}{qfbhclassno$(x)$}
