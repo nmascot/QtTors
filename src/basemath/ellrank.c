@@ -479,13 +479,8 @@ redqfbsplit(GEN a, GEN b, GEN c, GEN d)
   if (!equali1(w)) { p = diviiexact(p, w); q = diviiexact(q, w); }
   U = mkmat22(p, negi(v), q, u);
   Q = qfb_apply_ZM(mkvec3(a,b,c), U);
-  a = gel(Q, 1); b = gel(Q, 2); c = gel(Q,3);
-  if (signe(b) < 0)
-  {
-    b = negi(b);
-    gcoeff(U,1,2) = negi(gcoeff(U,1,2));
-    gcoeff(U,2,2) = negi(gcoeff(U,2,2));
-  }
+  b = gel(Q, 2); c = gel(Q,3);
+  if (signe(b) < 0) gel(U,2) = mkcol2(v, negi(u));
   gel(U,2) = ZC_lincomb(gen_1, truedivii(negi(c), d), gel(U,2), gel(U,1));
   return U;
 }
