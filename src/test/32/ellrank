@@ -104,6 +104,8 @@ Q:4:[8, 8]
 [1, 1, [[8, -168]]]
 [0, 0, []]
 [3, 3, [[369/4, -2753/8], [601/4, -12149/8], [2609/4, -132127/8]]]
+[0, 2, []]
+[0, 2, []]
 [1, 1, []]
 [1, 1, [[-6, 10]]]
 [2, 2, [[-228, 312], [492, 4752]]]
@@ -125,4 +127,13 @@ Q:4:[8, 8]
   ***   ellrank([rk,F],,v);pr
   ***   ^---------------------
   *** ellrank: incorrect type in ellrank (t_VEC).
-Total time spent: 12487
+  ***   at top-level: ellrank([ellinit([1/2]),1,1])
+  ***                 ^-----------------------------
+  *** ellrank: incorrect type in ellrank [nonintegral model] (t_VEC).
+  ***   at top-level: ellrank([ellinit([1,1,1,1,1]),1,1])
+  ***                 ^-----------------------------------
+  *** ellrank: incorrect type in ellrank [a1 != 0] (t_VEC).
+  ***   at top-level: ellrank([ellinit([0,1,1,1,1]),1,1])
+  ***                 ^-----------------------------------
+  *** ellrank: incorrect type in ell2rank [a3 != 0] (t_VEC).
+Total time spent: 8821

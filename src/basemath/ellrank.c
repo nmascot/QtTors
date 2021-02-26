@@ -1493,58 +1493,51 @@ ellrank_get_nudur(GEN E, GEN F, GEN *nu, GEN *du, GEN *r)
 }
 
 GEN
-ellrank(GEN ell, long effort, GEN help, long prec)
+ellrank(GEN e, long effort, GEN help, long prec)
 {
   pari_sp ltop = avma;
-  GEN urst, v, vbnf, ell_K;
-  GEN ellt = NULL, K = gen_1, nu = NULL, du = NULL, r = NULL, urstK = NULL;
+  GEN urst, v, vbnf, eK;
+  GEN et = NULL, K = gen_1, nu = NULL, du = NULL, r = NULL, urstK = NULL;
   long newell = 0;
 
-  if (lg(ell)==3 && typ(ell)==t_VEC)
+  if (lg(e)==3 && typ(e)==t_VEC) { et = gel(e,2); e = gel(e,1); }
+  if (lg(e)==4 && typ(e)==t_VEC)
   {
-    ellt = gel(ell, 2); ell = gel(ell, 1);
-  }
-  if (lg(ell)==4 && typ(ell)==t_VEC)
-  {
-    vbnf = gel(ell,3); urst = gel(ell,2);
-    ell = gel(ell,1); checkell_Q(ell);
-    if (!ell_is_integral(ell))
-      pari_err(e_MISC, "ell2descent: nonintegral model");
-    if (signe(ell_get_a1(ell)))
-      pari_err(e_MISC, "ell2descent: nonzero coefficient a1");
-    if (signe(ell_get_a3(ell)))
-      pari_err(e_MISC, "ell2descent: nonzero coefficient a3");
+    vbnf = gel(e,3); urst = gel(e,2);
+    e = gel(e,1); checkell_Q(e);
+    if (!ell_is_integral(e)) pari_err_TYPE("ellrank [nonintegral model]",e);
+    if (signe(ell_get_a1(e))) pari_err_TYPE("ellrank [a1 != 0]", e);
+    if (signe(ell_get_a3(e))) pari_err_TYPE("ell2rank [a3 != 0]", e);
   }
   else
   {
-    checkell_Q(ell);
-    ell = ellintegralbmodel(ell, &urst);
+    checkell_Q(e);
+    e = ellintegralbmodel(e, &urst);
     newell = 1;
-    vbnf = makevbnf(ell, prec);
+    vbnf = makevbnf(e, prec);
   }
-  if (ellt)
+  if (et)
   {
-    checkell_Q(ellt);
-    if (!gequal(ell_get_j(ellt),ell_get_j(ell)))
-      pari_err_TYPE("ellrank",ellt);
-    ellt = ellintegralbmodel(ellt, &urst);
-    ellrank_get_nudur(ell, ellt, &nu, &du, &r);
+    checkell_Q(et);
+    if (!gequal(ell_get_j(et),ell_get_j(e))) pari_err_TYPE("ellrank",et);
+    et = ellintegralbmodel(et, &urst);
+    ellrank_get_nudur(e, et, &nu, &du, &r);
     K = mulii(nu, du);
     urstK = mkvec4(nu, mulii(nu,r), gen_0, gen_0);
   }
   if (help)
   {
     if (urst) help = ellchangepoint(help, urst);
-    if (ellt) help = ellchangepointinv(help, urstK);
+    if (et) help = ellchangepointinv(help, urstK);
   }
-  ell_K = elltwistequation(ell, K);
+  eK = elltwistequation(e, K);
   /* help is a vector of rational points [x,y] satisfying K y^2 = pol(x) */
-  /* [Kx, K^2y] is on ell_K: Y^2 = K^3 pol(X/K)  */
-  if (help) check_oncurve(ell_K, help);
-  v = ell2selmer(ell, ell_K, help, K, vbnf, effort, prec);
-  if (ellt) gel(v,3) = ellchangepoint(gel(v,3), urstK);
+  /* [Kx, K^2y] is on eK: Y^2 = K^3 pol(X/K)  */
+  if (help) check_oncurve(eK, help);
+  v = ell2selmer(e, eK, help, K, vbnf, effort, prec);
+  if (et) gel(v,3) = ellchangepoint(gel(v,3), urstK);
   if (urst) gel(v,3) = ellchangepointinv(gel(v,3), urst);
-  if (newell) obj_free(ell);
-  if (ell_K != ell) obj_free(ell_K);
+  if (newell) obj_free(e);
+  if (eK != e) obj_free(eK);
   return gerepilecopy(ltop, v);
 }

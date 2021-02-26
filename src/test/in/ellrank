@@ -109,11 +109,9 @@ checkquer()=
 checkquer()
 
 checktwist(e,f,v=[])=
-{
-  my(E,F,rk,R);
-  E=ellinit(e); F=ellinit(f);
-  setrand(1);
-  rk = ellrankinit(E);
+{ my(E=ellinit(e), F=ellinit(f), rk, R);
+
+  setrand(1); rk = ellrankinit(E);
   R = ellrank([rk,F],,v); print(R);
   if(#R[3]&&vecmin(ellisoncurve(F,R[3]))==0,error("twist"));
 }
@@ -122,6 +120,10 @@ checktwist([66,-954,5454,-173907,-7341759],[28,-172,304,-4064,-20032]);
 checktwist([66,-954,5454,-173502,-7327179],[28,-172,304,-3744,-20032]);
 checktwist([-1,1],[-36,216]);
 checktwist([-289,1],[-289*5^2,-5^3],[[369/4,-2753/8]]);
+
+\\ gcov
+mwrank(ellinit([-3888,-97200]))
+mwrank(ellinit([-2109,-37100]))
 
 \\ check for old regressions
 mwrank(ellinit([-181^2,-1]))
@@ -132,3 +134,6 @@ mwrank(ellinit([0,1,0,-150908,-22509312]))
 checktwist([1,2],[1,3])
 checktwist([1,0],[2,0])
 checktwist([0,1],[0,3])
+ellrank([ellinit([1/2]),1,1]);
+ellrank([ellinit([1,1,1,1,1]),1,1]);
+ellrank([ellinit([0,1,1,1,1]),1,1]);
