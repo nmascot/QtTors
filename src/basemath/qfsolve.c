@@ -83,10 +83,10 @@ det_minors(GEN G)
 }
 
 static GEN
-hilberts(GEN a, GEN b, GEN P, long lP)
+hilberts(GEN a, GEN b, GEN P)
 {
+  long i, lP = lg(P);
   GEN v = cgetg(lP, t_VECSMALL);
-  long i;
   for (i = 1; i < lP; i++) v[i] = hilbertii(a, b, gel(P,i)) < 0;
   return v;
 }
@@ -98,19 +98,18 @@ qfbmat(GEN q)
   GEN a = gel(q,1), b = shifti(gel(q,2), -1), c = gel(q,3);
   return mkmat2(mkcol2(a, b), mkcol2(b, c));
 }
-/* G = list of quadratic forms with same discriminant.
- * P = factor(-abs(2*matdet(G)))[,1]. */
+/* G = list of quadratic forms with discriminant 4d.
+ * P = factor(-abs(2*d))[,1]. */
 static GEN
-qfblocalinvariants(GEN G, GEN P)
+qfblocalinvariants(GEN d, GEN G, GEN P)
 {
-  long j, lP = lg(P), l = lg(G);
-  GEN W = cgetg(l, t_MAT), D = shifti(qfb_disc(gel(G,1)), -2);
-
+  long j, l = lg(G);
+  GEN W = cgetg(l, t_MAT);
   /* in dimension 2, each invariant is a single Hilbert symbol. */
   for (j = 1; j < l; j++)
   {
-    GEN g = gel(G,j);
-    gel(W,j) = hilberts(gel(g,1), D, P, lP);
+    GEN q = gel(G,j);
+    gel(W,j) = hilberts(gel(q,1), d, P);
   }
   return W;
 }
@@ -124,7 +123,8 @@ witt(GEN v, GEN p)
     if (hilbertii(negi(gel(v,k)), gel(v,k+1),p) < 0) h = -h;
   return h;
 }
-/* General dimension, g = symmetric matrix */
+/* General dimension, g = symmetric matrix;
+ * P = factor(-abs(2*matdet(G)))[,1]. */
 static GEN
 qflocalinvariants(GEN g, GEN P)
 {
@@ -657,7 +657,7 @@ id(GEN D)
 static GEN
 quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
 {
-  GEN gen, Wgen, U2, isqrtD;
+  GEN gen, Wgen, U2, isqrtD, d;
   long i, n, r, m, vD;
 
   if (mpodd(D))
@@ -670,9 +670,9 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
 
   n = lg(Pm2D)-1; /* >= 3 since W != 0 */
   r = n-3;
-  m = (signe(D)>0)? r+1: r;
+  m = (signe(D) > 0)? r+1: r;
   /* n=4: look among forms of type q or 2*q, since Q can be imprimitive */
-  U2 = n_is_4? mkmat(hilberts(gen_2, D, Pm2D, lg(Pm2D))): NULL;
+  U2 = n_is_4? mkmat(hilberts(gen_2, D, Pm2D)): NULL;
   if (U2 && zv_equal(gel(U2,1),W)) return gmul2n(id(D),1);
 
   gen = cgetg(m+1, t_VEC);
@@ -694,7 +694,8 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
     m++; r++; gen = vec_append(gen, q2);
   }
   if (!r) return id(D);
-  Wgen = qfblocalinvariants(gen,Pm2D);
+  d = shifti(D, -2);
+  Wgen = qfblocalinvariants(d, gen, Pm2D);
   isqrtD = signe(D) > 0? sqrti(D) : NULL;
   for(;;)
   {
@@ -719,9 +720,8 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
     for (i = 1; i <= dKer; i++)
     {
       GEN q = qfb_factorback(gen, gel(Ker,i), isqrtD);
-      q = qfbsqrt(D,q,P2D,E2D);
-      gel(gen2,i) = q;
-      gel(Wgen2,i) = gel(qfblocalinvariants(mkvec(q),Pm2D), 1);
+      gel(gen2,i) = q = qfbsqrt(D, q, P2D, E2D);
+      gel(Wgen2,i) = hilberts(gel(q,1), d, Pm2D);
     }
     for (; i <=m; i++)
     {
