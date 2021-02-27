@@ -112,48 +112,46 @@ hilberts(GEN a, GEN b, GEN P, long lP)
   return v;
 }
 
-/* G symmetrix matrix or t_QFB or list of quadratic forms with same
- * discriminant. P = factor(-abs(2*matdet(G)))[,1]. */
+/* 4 | disc(q); special case of gtomat */
 static GEN
-qflocalinvariants(GEN G, GEN P)
+qfbmat(GEN q)
 {
-  GEN sol;
-  long i, j, l, lP = lg(P);
+  GEN a = gel(q,1), b = shifti(gel(q,2), -1), c = gel(q,3);
+  return mkmat2(mkcol2(a, b), mkcol2(b, c));
+}
+/* G = list of quadratic forms with same discriminant.
+ * P = factor(-abs(2*matdet(G)))[,1]. */
+static GEN
+qfblocalinvariants(GEN G, GEN P)
+{
+  long j, lP = lg(P), l = lg(G);
+  GEN W = cgetg(l, t_MAT), D = shifti(qfb_disc(gel(G,1)), -2);
 
-  /* convert G into a vector of symmetric matrices */
-  G = (typ(G) == t_VEC)? shallowcopy(G): mkvec(G);
-  l = lg(G);
+  /* in dimension 2, each invariant is a single Hilbert symbol. */
   for (j = 1; j < l; j++)
   {
     GEN g = gel(G,j);
-    if (typ(g) == t_QFB) gel(G,j) = gtomat(g);
+    gel(W,j) = hilberts(gel(g,1), D, P, lP);
   }
-  sol = cgetg(l, t_MAT);
-  if (lg(gel(G,1)) == 3)
-  { /* in dimension 2, each invariant is a single Hilbert symbol. */
-    GEN d = negi(ZM_det(gel(G,1)));
-    for (j = 1; j < l; j++)
-    {
-      GEN a = gcoeff(gel(G,j),1,1);
-      gel(sol,j) = hilberts(a, d, P, lP);
-    }
+  return W;
+}
+/* General dimension, g = symmetric matrix */
+static GEN
+qflocalinvariants(GEN g, GEN P)
+{
+  long i, lv, lP = lg(P);
+  GEN v = det_minors(g), w = cgetg(lP, t_VECSMALL);
+
+  lv = lg(v);
+  for (i = 1; i < lP; i++)
+  {
+    GEN p = gel(P,i);
+    long k = lv-2, h = hilbertii(gel(v,k), gel(v,k+1), p);
+    for (k--; k >= 1; k--)
+      if (hilbertii(negi(gel(v,k)), gel(v,k+1),p) < 0) h = -h;
+    w[i] = h < 0;
   }
-  else /* in dimension n > 2, we compute a product of n Hilbert symbols. */
-    for (j = 1; j <l; j++)
-    {
-      GEN g = gel(G,j), v = det_minors(g), w = cgetg(lP, t_VECSMALL);
-      long n = lg(v);
-      gel(sol,j) = w;
-      for (i = 1; i < lP; i++)
-      {
-        GEN p = gel(P,i);
-        long k = n-2, h = hilbertii(gel(v,k), gel(v,k+1),p);
-        for (k--; k >= 1; k--)
-          if (hilbertii(negi(gel(v,k)), gel(v,k+1),p) < 0) h = -h;
-        w[i] = h < 0;
-      }
-    }
-  return sol;
+  return w;
 }
 
 /* QUADRATIC FORM REDUCTION */
@@ -716,7 +714,7 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
     m++; r++; gen = vec_append(gen, q2);
   }
   if (!r) return id(D);
-  Wgen = qflocalinvariants(gen,Pm2D);
+  Wgen = qfblocalinvariants(gen,Pm2D);
   isqrtD = signe(D) > 0? sqrti(D) : NULL;
   for(;;)
   {
@@ -730,7 +728,7 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
       V = Flm_Flc_invimage(W2, W,2);
       if (V) {
         GEN Q = qfb_factorback(vecpermute(gen,indexim), V, isqrtD);
-        Q = gtomat(Q);
+        Q = qfbmat(Q);
         if (U2 && V[lg(V)-1]) Q = gmul2n(Q,1);
         return Q;
       }
@@ -743,7 +741,7 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
       GEN q = qfb_factorback(gen, gel(Ker,i), isqrtD);
       q = qfbsqrt(D,q,P2D,E2D);
       gel(gen2,i) = q;
-      gel(Wgen2,i) = gel(qflocalinvariants(q,Pm2D), 1);
+      gel(Wgen2,i) = gel(qfblocalinvariants(mkvec(q),Pm2D), 1);
     }
     for (; i <=m; i++)
     {
@@ -1005,8 +1003,8 @@ qfsolve_i(GEN G)
     /* p-adic invariants */
     if (n == 4)
     {
-      GEN t = qflocalinvariants(ZM_neg(G1),P);
-      for (i = 3; i < lg(P); i++) W[i] = ucoeff(t,i,1);
+      GEN t = qflocalinvariants(ZM_neg(G1), P);
+      for (i = 3; i < lg(P); i++) W[i] = t[i];
     }
     else
     {
