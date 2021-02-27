@@ -1570,17 +1570,14 @@ static GEN
 gaussred(GEN a, long signature)
 {
   GEN r, ak, al;
-  pari_sp av, av1;
+  pari_sp av = avma, av1;
   long n = lg(a), i, j, k, l, sp, sn, t;
 
   if (typ(a) != t_MAT) pari_err_TYPE("gaussred",a);
   if (n == 1) return signature? mkvec2(gen_0, gen_0): cgetg(1, t_MAT);
   if (lgcols(a) != n) pari_err_DIM("gaussred");
   n--;
-
-  av = avma;
-  r = const_vecsmall(n, 1);
-  av1= avma;
+  r = const_vecsmall(n, 1); av1= avma;
   a = RgM_shallowcopy(a);
   t = n; sp = sn = 0;
   while (t)
@@ -1690,7 +1687,7 @@ rot(GEN x, GEN y, GEN s, GEN u) {
 GEN
 jacobi(GEN a, long prec)
 {
-  pari_sp av1;
+  pari_sp av;
   long de, e, e1, e2, i, j, p, q, l = lg(a);
   GEN c, ja, L, r, L2, r2, unr;
 
@@ -1713,7 +1710,7 @@ jacobi(GEN a, long prec)
     gel(r,j) = cgetg(l,t_COL);
     for (i=1; i<l; i++) gcoeff(r,i,j) = utor(i==j? 1: 0, prec);
   }
-  av1 = avma;
+  av = avma;
 
   e2 = -(long)HIGHEXPOBIT; p = q = 1;
   c = cgetg(l,t_MAT);
@@ -1785,7 +1782,7 @@ jacobi(GEN a, long prec)
   c = indexsort(L);
   r2 = vecpermute(r, c); for (i=1; i<l; i++) gel(r,i) = gel(r2,i);
   L2 = vecpermute(L, c); for (i=1; i<l; i++) gel(L,i) = gel(L2,i);
-  set_avma(av1); return ja;
+  set_avma(av); return ja;
 }
 
 /*************************************************************************/
