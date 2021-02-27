@@ -628,10 +628,10 @@ qfb_factorback(GEN gen, GEN e, GEN isqrtD)
   return (n <= 1)? q: qfbred0(q, 0, isqrtD, NULL);
 }
 
-/* unit form, assuming 4 | D */
+/* unit form discriminant 4d */
 static GEN
-id(GEN D)
-{ return mkmat2(mkcol2(gen_1,gen_0),mkcol2(gen_0,shifti(negi(D),-2))); }
+id(GEN d)
+{ return mkmat2(mkcol2(gen_1,gen_0),mkcol2(gen_0,negi(d))); }
 
 /* Shanks/Bosma-Stevenhagen algorithm to compute the 2-Sylow of the class
  * group of discriminant D. Only works for D = fundamental discriminant.
@@ -642,44 +642,45 @@ id(GEN D)
 static GEN
 quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
 {
-  GEN gen, Wgen, U2, isqrtD, d;
-  long i, n, r, m, vD;
+  GEN U2 = NULL, gen, Wgen, isqrtD, d;
+  long i, r, m;
 
-  if (mpodd(D))
+  if (!mpodd(D)) d = shifti(D, -2);
+  else
   {
-    D = shifti(D,2);
+    d = D; D = shifti(D,2);
     E2D = shallowcopy(E2D);
     E2D[1] = 3;
   }
-  if (zv_equal0(W)) return id(D);
-
-  n = lg(Pm2D)-1; /* >= 3 since W != 0 */
-  r = n-3;
+  /* D = 4d */
+  if (zv_equal0(W)) return id(d);
+  r = lg(Pm2D) - 4; /* >= 0 since W != 0 */
   m = (signe(D) > 0)? r+1: r;
-  /* n=4: look among forms of type q or 2*q, since Q can be imprimitive */
-  U2 = n_is_4? mkmat(hilberts(gen_2, D, Pm2D)): NULL;
-  if (U2 && zv_equal(gel(U2,1),W)) return gmul2n(id(D),1);
+  if (n_is_4)
+  { /* n = 4: look among forms of type q or 2*q, since Q can be imprimitive */
+    U2 = hilberts(gen_2, d, Pm2D);
+    if (zv_equal(U2,W)) return gmul2n(id(d),1);
+    U2 = mkmat(U2);
+  }
 
-  gen = cgetg(m+1, t_VEC);
-  for (i = 1; i <= m; i++) /* no need to look at Pm2D[1]=-1, nor Pm2D[2]=2 */
-  {
-    GEN p = gel(Pm2D,i+2), d;
-    long vp = Z_pvalrem(D,p, &d);
-    gel(gen,i) = mkqfb(powiu(p,vp), gen_0, negi(shifti(d,-2)), D);
+  gen = cgetg(m+2, t_VEC);
+  for (i = 1; i <= m; i++)
+  { /* no need to look at P2D[1]=2*/
+    GEN q = powiu(gel(P2D,i+1), E2D[i+1]);
+    gel(gen,i) = mkqfb(q, gen_0, negi(diviiexact(d,q)), D);
   }
-  vD = Z_lval(D,2);  /* = 2 or 3 */
-  if (vD == 2 && smodis(D,16) != 4)
+  if (!mpodd(d))
   {
-    GEN q2 = mkqfb(gen_2,gen_2, shifti(subsi(4,D),-3), D);
-    m++; r++; gen = vec_append(gen, q2);
+    gel(gen, ++m) = mkqfb(gen_2, gen_0, negi(shifti(d,-1)), D);
+    r++;
   }
-  if (vD == 3)
+  else if (Mod4(d) != 1)
   {
-    GEN q2 = mkqfb(gen_2,gen_0, negi(shifti(D,-3)), D);
-    m++; r++; gen = vec_append(gen, q2);
+    gel(gen, ++m) = mkqfb(gen_2, gen_2, shifti(subsi(1,d),-1), D);
+    r++;
   }
-  if (!r) return id(D);
-  d = shifti(D, -2);
+  else setlg(gen, m+1);
+  if (!r) return id(d);
   Wgen = cgetg(m+1, t_MAT);
   for (i = 1; i <= m; i++) gel(Wgen,i) = hilberts(gmael(gen,i,1), d, Pm2D);
   isqrtD = signe(D) > 0? sqrti(D) : NULL;
