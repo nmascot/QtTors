@@ -98,21 +98,6 @@ qfbmat(GEN q)
   GEN a = gel(q,1), b = shifti(gel(q,2), -1), c = gel(q,3);
   return mkmat2(mkcol2(a, b), mkcol2(b, c));
 }
-/* G = list of quadratic forms with discriminant 4d.
- * P = factor(-abs(2*d))[,1]. */
-static GEN
-qfblocalinvariants(GEN d, GEN G, GEN P)
-{
-  long j, l = lg(G);
-  GEN W = cgetg(l, t_MAT);
-  /* in dimension 2, each invariant is a single Hilbert symbol. */
-  for (j = 1; j < l; j++)
-  {
-    GEN q = gel(G,j);
-    gel(W,j) = hilberts(gel(q,1), d, P);
-  }
-  return W;
-}
 /* Given a symmetric matrix G over Z, compute the Witt invariant of G at p
  * v = det_minors(G) [G diagonalized]; assume that none of the v[i] is 0. */
 static long
@@ -695,7 +680,8 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
   }
   if (!r) return id(D);
   d = shifti(D, -2);
-  Wgen = qfblocalinvariants(d, gen, Pm2D);
+  Wgen = cgetg(m+1, t_MAT);
+  for (i = 1; i <= m; i++) gel(Wgen,i) = hilberts(gmael(gen,i,1), d, Pm2D);
   isqrtD = signe(D) > 0? sqrti(D) : NULL;
   for(;;)
   {
