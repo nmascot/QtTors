@@ -82,27 +82,6 @@ det_minors(GEN G)
   return v;
 }
 
-/* Given a symmetric matrix G over Z, compute the Witt invariant
- *  of G at the prime p (at real place if p = NULL)
- * Assume that none of the determinant G[1..i,1..i] is 0. */
-static long
-qflocalinvariant(GEN G, GEN p)
-{
-  long i, j, c, l = lg(G);
-  GEN diag, v = det_minors(G);
-  /* Diagonalize G first. */
-  diag = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++) gel(diag,i) = mulii(gel(v,i+1), gel(v,i));
-
-  /* Then compute the product of the Hilbert symbols */
-  /* (diag[i],diag[j])_p for i < j */
-  c = 1;
-  for (i = 1; i < l-1; i++)
-    for (j = i+1; j < l; j++)
-      if (hilbertii(gel(diag,i), gel(diag,j), p) < 0) c = -c;
-  return c;
-}
-
 static GEN
 hilberts(GEN a, GEN b, GEN P, long lP)
 {
@@ -135,22 +114,23 @@ qfblocalinvariants(GEN G, GEN P)
   }
   return W;
 }
+/* Given a symmetric matrix G over Z, compute the Witt invariant of G at p
+ * v = det_minors(G) [G diagonalized]; assume that none of the v[i] is 0. */
+static long
+witt(GEN v, GEN p)
+{
+  long k = lg(v)-2, h = hilbertii(gel(v,k), gel(v,k+1), p);
+  for (k--; k >= 1; k--)
+    if (hilbertii(negi(gel(v,k)), gel(v,k+1),p) < 0) h = -h;
+  return h;
+}
 /* General dimension, g = symmetric matrix */
 static GEN
 qflocalinvariants(GEN g, GEN P)
 {
-  long i, lv, lP = lg(P);
+  long i, lP = lg(P);
   GEN v = det_minors(g), w = cgetg(lP, t_VECSMALL);
-
-  lv = lg(v);
-  for (i = 1; i < lP; i++)
-  {
-    GEN p = gel(P,i);
-    long k = lv-2, h = hilbertii(gel(v,k), gel(v,k+1), p);
-    for (k--; k >= 1; k--)
-      if (hilbertii(negi(gel(v,k)), gel(v,k+1),p) < 0) h = -h;
-    w[i] = h < 0;
-  }
+  for (i = 1; i < lP; i++) w[i] = witt(v, gel(P,i)) < 0;
   return w;
 }
 
@@ -975,11 +955,7 @@ qfsolve_i(GEN G)
   }
 
   /* now, d is squarefree */
-  if (!np)
-  { /* |d| = 1 */
-     G2 = G1;
-     M2 = NULL;
-  }
+  if (!np) { G2 = G1; M2 = NULL; } /* |d| = 1 */
   else
   { /* |d| > 1: increment dimension by 2 */
     GEN factdP, factdE, W;
@@ -987,8 +963,8 @@ qfsolve_i(GEN G)
     codim += 2;
     d = ZV_prod(P); /* d = abs(matdet(G1)); */
     if (odd(signG[2])) togglesign_safe(&d); /* d = matdet(G1); */
-    /* solubility at 2 (this is the only remaining bad prime). */
-    if (n == 4 && smodis(d,8) == 1 && qflocalinvariant(G,gen_2) == 1)
+    /* solubility at 2, the only remaining bad prime */
+    if (n == 4 && smodis(d,8) == 1 && witt(det_minors(G), gen_2) == 1)
       return gen_2;
 
     P = shallowconcat(mpodd(d)? mkvec2(NULL,gen_2): mkvec(NULL), P);
