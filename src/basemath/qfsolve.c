@@ -112,8 +112,8 @@ hilberts(GEN a, GEN b, GEN P, long lP)
   return v;
 }
 
-/* G symmetrix matrix or qfb or list of quadratic forms with same discriminant.
- * P must be equal to factor(-abs(2*matdet(G)))[,1]. */
+/* G symmetrix matrix or t_QFB or list of quadratic forms with same
+ * discriminant. P = factor(-abs(2*matdet(G)))[,1]. */
 static GEN
 qflocalinvariants(GEN G, GEN P)
 {
@@ -157,33 +157,6 @@ qflocalinvariants(GEN G, GEN P)
 }
 
 /* QUADRATIC FORM REDUCTION */
-static GEN
-qfb(GEN D, GEN a, GEN b, GEN c)
-{ return mkqfb(a,b,c,D); }
-
-/* Gauss reduction of the binary quadratic form
- * Q = a*X^2+2*b*X*Y+c*Y^2 of discriminant D (divisible by 4)
- * returns the reduced form */
-static GEN
-qfbreduce(GEN Q)
-{
-  GEN a = gel(Q,1), b = shifti(gel(Q,2),-1), c = gel(Q,3), D = gel(Q,4);
-  while (signe(a))
-  {
-    GEN r, q, nexta, nextc;
-    q = dvmdii(b,a, &r); /* FIXME: export as dvmdiiround ? */
-    if (signe(r) > 0 && abscmpii(shifti(r,1), a) > 0)
-    {
-      r = subii(r, absi_shallow(a));
-      q = addis(q, signe(a));
-    }
-    nextc = a; nexta = subii(c, mulii(q, addii(r,b)));
-    if (abscmpii(nexta, a) >= 0) break;
-    c = nextc; b = negi(r); a = nexta;
-  }
-  return qfb(D,a,shifti(b,1),c);
-}
-
 /* private version of qfgaussred:
  * - early abort if k-th principal minor is singular, return stoi(k)
  * - else return a matrix whose upper triangular part is qfgaussred(a) */
@@ -676,20 +649,20 @@ qfbsqrt(GEN D, GEN q, GEN P, GEN E)
   b = gel(M,2);
   c = gel(M,3);
   if (mpodd(a))
-    return qfb(D, a, shifti(b,1), shifti(c,1));
+    return mkqfb(a, shifti(b,1), shifti(c,1), D);
   else
-    return qfb(D, c, shifti(negi(b),1), shifti(a,1));
+    return mkqfb(c, shifti(negi(b),1), shifti(a,1), D);
 }
 
 /* \prod gen[i]^e[i] as a Qfb, e in {0,1}^n nonzero */
 static GEN
-qfb_factorback(GEN gen, GEN e)
+qfb_factorback(GEN gen, GEN e, GEN isqrtD)
 {
   GEN q = NULL;
   long j, l = lg(gen), n = 0;
   for (j = 1; j < l; j++)
     if (e[j]) { n++; q = q? qfbcompraw(q, gel(gen,j)): gel(gen,j); }
-  return (n <= 1)? q: qfbreduce(q);
+  return (n <= 1)? q: qfbred0(q, 0, isqrtD, NULL);
 }
 
 /* unit form, assuming 4 | D */
@@ -706,7 +679,7 @@ id(GEN D)
 static GEN
 quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
 {
-  GEN gen, Wgen, U2;
+  GEN gen, Wgen, U2, isqrtD;
   long i, n, r, m, vD;
 
   if (mpodd(D))
@@ -729,21 +702,22 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
   {
     GEN p = gel(Pm2D,i+2), d;
     long vp = Z_pvalrem(D,p, &d);
-    gel(gen,i) = qfb(D, powiu(p,vp), gen_0, negi(shifti(d,-2)));
+    gel(gen,i) = mkqfb(powiu(p,vp), gen_0, negi(shifti(d,-2)), D);
   }
   vD = Z_lval(D,2);  /* = 2 or 3 */
   if (vD == 2 && smodis(D,16) != 4)
   {
-    GEN q2 = qfb(D, gen_2,gen_2, shifti(subsi(4,D),-3));
+    GEN q2 = mkqfb(gen_2,gen_2, shifti(subsi(4,D),-3), D);
     m++; r++; gen = vec_append(gen, q2);
   }
   if (vD == 3)
   {
-    GEN q2 = qfb(D, gen_2,gen_0, negi(shifti(D,-3)));
+    GEN q2 = mkqfb(gen_2,gen_0, negi(shifti(D,-3)), D);
     m++; r++; gen = vec_append(gen, q2);
   }
   if (!r) return id(D);
   Wgen = qflocalinvariants(gen,Pm2D);
+  isqrtD = signe(D) > 0? sqrti(D) : NULL;
   for(;;)
   {
     GEN Wgen2, gen2, Ker, indexim = gel(Flm_indexrank(Wgen,2), 2);
@@ -755,7 +729,7 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
       if (U2) W2 = shallowconcat(W2,U2);
       V = Flm_Flc_invimage(W2, W,2);
       if (V) {
-        GEN Q = qfb_factorback(vecpermute(gen,indexim), V);
+        GEN Q = qfb_factorback(vecpermute(gen,indexim), V, isqrtD);
         Q = gtomat(Q);
         if (U2 && V[lg(V)-1]) Q = gmul2n(Q,1);
         return Q;
@@ -766,7 +740,7 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
     Wgen2 = cgetg(m+1, t_MAT);
     for (i = 1; i <= dKer; i++)
     {
-      GEN q = qfb_factorback(gen, gel(Ker,i));
+      GEN q = qfb_factorback(gen, gel(Ker,i), isqrtD);
       q = qfbsqrt(D,q,P2D,E2D);
       gel(gen2,i) = q;
       gel(Wgen2,i) = gel(qflocalinvariants(q,Pm2D), 1);
