@@ -228,7 +228,7 @@ qflllgram_indefgoon(GEN G)
   V = rowpermute(vecslice(G3, 2,n-1), mkvecsmall2(1,n));
   A = mkmat2(mkcol2(gcoeff(G3,1,1),gcoeff(G3,1,n)),
              mkcol2(gcoeff(G3,1,n),gcoeff(G3,2,2)));
-  B = ground(RgM_neg(RgM_mul(RgM_inv(A), V)));
+  B = ground(RgM_neg(QM_mul(QM_inv(A), V)));
   U3 = matid(n);
   for (j = 2; j < n; j++)
   {
@@ -553,7 +553,7 @@ qfminimize(GEN G, GEN P, GEN E)
   { /* apply LLL to avoid coefficient explosion */
     GEN u = lllint(Q_primpart(U));
     G = qf_apply_ZM(G, u);
-    U = RgM_mul(U, u);
+    U = QM_mul(U, u);
   }
   return mkvec4(G, U, faP, faE);
 }
@@ -881,7 +881,7 @@ qfsolve_i(GEN G)
   Min = qfminimize(G, P, E);
   if (typ(Min) == t_INT) return Min;
 
-  M = RgM_mul(M, gel(Min,2));
+  M = QM_mul(M, gel(Min,2));
   G = gel(Min,1);
   P = gel(Min,3);
   E = gel(Min,4);
@@ -895,9 +895,9 @@ qfsolve_i(GEN G)
   /* Reduction of G and search for trivial solutions. */
   /* When |det G|=1, such trivial solutions always exist. */
   U = qflllgram_indef(G,0,&fail);
-  if(typ(U) == t_COL) return Q_primpart(RgM_RgC_mul(M,U));
+  if (typ(U) == t_COL) return Q_primpart(RgM_RgC_mul(M,U));
   G = gel(U,1);
-  M = RgM_mul(M, gel(U,2));
+  M = QM_mul(M, gel(U,2));
   /* P,E = factor(|det(G))| */
 
   /* If n >= 6 is even, need to increment the dimension by 1 to suppress all
@@ -1001,25 +1001,23 @@ qfsolve_i(GEN G)
   while(gequal0(principal_minor(gel(solG2,1), dim))) dim ++;
   solG2 = vecslice(gel(solG2,2), 1, dim-1);
 
-  if (!M2)
-    solG1 = solG2;
+  if (!M2) solG1 = solG2;
   else
   { /* solution of G1 is simultaneously in solG2 and x[n+1] = x[n+2] = 0*/
     GEN K;
-    solG1 = RgM_mul(M2,solG2);
-    K = ker(rowslice(solG1,n+1,n+2));
-    solG1 = RgM_mul(rowslice(solG1,1,n), K);
+    solG1 = QM_mul(M2,solG2);
+    K = QM_ker(rowslice(solG1,n+1,n+2));
+    solG1 = QM_mul(rowslice(solG1,1,n), K);
   }
-  if (!M1)
-    sol = solG1;
+  if (!M1) sol = solG1;
   else
   { /* solution of G1 is simultaneously in solG2 and x[n] = 0 */
     GEN K;
-    sol = RgM_mul(M1,solG1);
-    K = ker(rowslice(sol,n,n));
-    sol = RgM_mul(rowslice(sol,1,n-1), K);
+    sol = QM_mul(M1,solG1);
+    K = QM_ker(rowslice(sol,n,n));
+    sol = QM_mul(rowslice(sol,1,n-1), K);
   }
-  sol = Q_primpart(RgM_mul(M, sol));
+  sol = Q_primpart(QM_mul(M, sol));
   if (lg(sol) == 2) sol = gel(sol,1);
   return sol;
 }
