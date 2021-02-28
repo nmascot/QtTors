@@ -577,10 +577,8 @@ qfbsqrt(GEN D, GEN md, GEN q, GEN P, GEN E)
   for (i = 1; i < lg(P); i++)
   {
     GEN p = gel(P,i);
-    if (dvdii(a,p))
-    { n = Fp_sqrt(c, p); m = Fp_div(mb, n, p); }
-    else
-    { m = Fp_sqrt(a, p); n = Fp_div(mb, m, p); }
+    if (dvdii(a,p)) { n = Fp_sqrt(c, p); m = Fp_div(mb, n, p); }
+    else            { m = Fp_sqrt(a, p); n = Fp_div(mb, m, p); }
     gel(M, i) = m;
     gel(N, i) = n;
   }
