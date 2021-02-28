@@ -79,10 +79,13 @@ Doc:
  ? E = ellinit([0,0,0,0,1]); \\ y^2 = x^3 + 1, over Q
  ? E = ellinit([0,1]);       \\ the same curve, short form
  ? E = ellinit("36a1");      \\ sill the same curve, Cremona's notations
+ ? E = ellinit([0]);         \\ a curve of j-invariant 0
  ? E = ellinit([0,1], 2)     \\ over F2: singular curve
  %4 = []
  ? E = ellinit(['a4,'a6] * Mod(1,5));  \\ over F_5[a4,a6], basic support !
- @eprog\noindent
+ @eprog\noindent Note that the given curve of $j$-invariant $0$ happens
+ to be \kbd{36a1} but a priori any model for an arbitrary twist could have
+ been returned. See \kbd{ellfromj}.
 
  The result of \tet{ellinit} is an \tev{ell} structure. It contains at least
  the following information in its components:
