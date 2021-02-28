@@ -568,10 +568,10 @@ static GEN
 qfbsqrt(GEN D, GEN md, GEN q, GEN P, GEN E)
 {
   GEN a = gel(q,1), b = shifti(gel(q,2),-1), c = gel(q,3), B = negi(b);
-  GEN an, bm, cm, m, n, Q, M, N, d = negi(md); /* ac - b^2 */
+  GEN m, n, Q, M, N, d = negi(md); /* ac - b^2 */
   long i, lP = lg(P);
 
-  /* 1) solve m^2 = a, m*n = -b, n^2 = c in Z/dZ */
+  /* 1) solve m^2 = a, m*n = -b, n^2 = c in Z/dZ => q(n,m) = 0 mod d */
   M = cgetg(lP, t_VEC);
   N = cgetg(lP, t_VEC);
   for (i = 1; i < lg(P); i++)
@@ -586,11 +586,9 @@ qfbsqrt(GEN D, GEN md, GEN q, GEN P, GEN E)
   n = ZV_chinese_center(N, P, NULL);
 
   /* 2) build Q, with det=-1 such that Q(x,y,0) = G(x,y) */
-  an = mulii(a,n); bm = mulii(b,m); cm = mulii(c,m);
-  N = negi(diviiexact(addii(an, bm), d));
-  M = negi(diviiexact(addii(mulii(b,n), cm), d));
-  Q = addii(mulii(addii(an, shifti(bm,1)), n), mulii(cm,m));
-  Q = diviiexact(subii(Q, d), sqri(d)); /* (q(n,m) - d) / d^2 */
+  N = diviiexact(addii(mulii(a,n), mulii(b,m)), d);
+  M = diviiexact(addii(mulii(b,n), mulii(c,m)), d);
+  Q = diviiexact(subiu(addii(mulii(m,M), mulii(n,N)), 1), d); /*(q(n,m)-d)/d^2 */
   Q = mkmat3(mkcol3(a,b,N), mkcol3(b,c,M), mkcol3(N,M,Q)); /* det = -1 */
 
   /* 3) reduce Q to [0,0,-1; 0,1,0; -1,0,0] */
