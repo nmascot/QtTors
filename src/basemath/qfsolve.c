@@ -115,16 +115,6 @@ witt(GEN v, GEN p)
     if (hilbertii(negi(gel(v,k)), gel(v,k+1),p) < 0) h = -h;
   return h;
 }
-/* General dimension, g = symmetric matrix;
- * P = factor(-abs(2*matdet(G)))[,1]. */
-static GEN
-qflocalinvariants(GEN g, GEN P)
-{
-  long i, lP = lg(P);
-  GEN v = det_minors(g), w = cgetg(lP, t_VECSMALL);
-  for (i = 1; i < lP; i++) w[i] = witt(v, gel(P,i)) < 0;
-  return w;
-}
 
 /* QUADRATIC FORM REDUCTION */
 /* private version of qfgaussred:
@@ -924,11 +914,11 @@ qfsolve_i(GEN G)
     GEN aux;
     long i;
     codim = 1; n++;
-    /* largest square divisor of d */
     aux = gen_1;
     for (i = 1; i <= np; i++)
       if (E[i] == 2) { aux = mulii(aux, gel(P,i)); E[i] = 3; }
-    /* Choose sign(aux) so as to balance the signature of G1 */
+    /* aux = largest square divisor of d; choose sign(aux) so as to balance
+     * the signature of G1 */
     if (signG[1] > signG[2])
     {
       signG[2]++;
@@ -950,29 +940,31 @@ qfsolve_i(GEN G)
   if (!np) { G2 = G1; M2 = NULL; } /* |d| = 1 */
   else
   { /* |d| > 1: increment dimension by 2 */
-    GEN factdP, factdE, W;
-    long i, lfactdP;
+    GEN factdP, factdE, W, v = NULL;
+    long i, lfactdP, lP;
     codim += 2;
     d = ZV_prod(P); /* d = abs(matdet(G1)); */
     if (odd(signG[2])) togglesign_safe(&d); /* d = matdet(G1); */
-    /* solubility at 2, the only remaining bad prime */
-    if (n == 4 && smodis(d,8) == 1 && witt(det_minors(G), gen_2) == 1)
-      return gen_2;
-
+    if (n == 4)
+    { /* solubility at 2, the only remaining bad prime */
+      v = det_minors(G1);
+      if (Mod8(d) == 1 && witt(v, gen_2) == 1) return gen_2;
+    }
     P = shallowconcat(mpodd(d)? mkvec2(NULL,gen_2): mkvec(NULL), P);
     /* build a binary quadratic form with given Witt invariants */
-    W = const_vecsmall(lg(P)-1, 0);
+    lP = lg(P); W = const_vecsmall(lP-1, 0);
     /* choose signature of Q (real invariant and sign of the discriminant) */
     dQ = absi(d);
     if (signG[1] > signG[2]) togglesign_safe(&dQ); /* signQ = [2,0]; */
-    if (n == 4 && smodis(dQ,4) != 1) dQ = shifti(dQ,2);
+    if (n == 4 && Mod4(dQ) != 1) dQ = shifti(dQ,2);
     if (n >= 5) dQ = shifti(dQ,3);
 
     /* p-adic invariants */
     if (n == 4)
     {
-      GEN t = qflocalinvariants(ZM_neg(G1), P);
-      for (i = 3; i < lg(P); i++) W[i] = t[i];
+      togglesign(gel(v,2));
+      togglesign(gel(v,4)); /* v = det_minors(-G1) */
+      for (i = 3; i < lP; i++) W[i] = witt(v, gel(P,i)) < 0;
     }
     else
     {
@@ -980,11 +972,9 @@ qfsolve_i(GEN G)
       GEN t;
       if (odd((n-3)/2)) s = -s;
       t = s > 0? utoipos(8): utoineg(8);
-      for (i = 3; i < lg(P); i++)
-        W[i] = hilbertii(t, gel(P,i), gel(P,i)) > 0;
+      for (i = 3; i < lP; i++) W[i] = hilbertii(t, gel(P,i), gel(P,i)) > 0;
     }
-    /* for p = 2, the choice is fixed from the product formula */
-    W[2] = Flv_sum(W, 2);
+    W[2] = Flv_sum(W, 2); /* for p = 2, use product formula */
 
     /* Construction of the 2-class group of discriminant dQ until some product
      * of the generators gives the desired invariants. */
