@@ -560,39 +560,36 @@ qfminimize(GEN G, GEN P, GEN E)
 
 /* CLASS GROUP COMPUTATIONS */
 
-/* Compute the square root of the quadratic form q of discriminant D. Not
- * fully implemented; it only works for detqfb squarefree except at 2, where
- * the valuation is 2 or 3.
- * mkmat2(P,zv_to_ZV(E)) = factor(2*abs(det q)) */
+/* Compute the square root of the quadratic form q of discriminant D = 4 * md
+ * Not fully implemented; only works for D squarefree except at 2,
+ * where the valuation is 2 or 3; mkmat2(P,zv_to_ZV(E)) = factor(2*abs(det q)) */
 static GEN
-qfbsqrt(GEN D, GEN q, GEN P, GEN E)
+qfbsqrt(GEN D, GEN md, GEN q, GEN P, GEN E)
 {
   GEN a = gel(q,1), b = shifti(gel(q,2),-1), c = gel(q,3), mb = negi(b);
-  GEN m,n, aux,Q1,M, A,B,C;
-  GEN d = subii(mulii(a,c), sqri(b));
-  long i;
+  GEN m, n, Q, Q1, M, N, A, B, C, d = negi(md);
+  long i, j, lP = lg(P);
 
   /* 1st step: solve m^2 = a (d), m*n = -b (d), n^2 = c (d) */
-  m = n = mkintmod(gen_0,gen_1);
+  M = cgetg(lP, t_VEC);
+  N = cgetg(lP, t_VEC);
+  Q = cgetg(lP, t_VEC);
   E[1] -= 3;
-  for (i = 1; i < lg(P); i++)
+  for (i = j = 1; i < lg(P); i++)
   {
-    GEN p = gel(P,i), N, M;
+    GEN p = gel(P,i);
     if (!E[i]) continue;
-    if (dvdii(a,p)) {
-      aux = Fp_sqrt(c, p);
-      N = aux;
-      M = Fp_div(mb, aux, p);
-    } else {
-      aux = Fp_sqrt(a, p);
-      M = aux;
-      N = Fp_div(mb, aux, p);
-    }
-    n = chinese(n, mkintmod(N,p));
-    m = chinese(m, mkintmod(M,p));
+    if (dvdii(a,p))
+    { n = Fp_sqrt(c, p); m = Fp_div(mb, n, p); }
+    else
+    { m = Fp_sqrt(a, p); n = Fp_div(mb, m, p); }
+    gel(M, j) = m;
+    gel(N, j) = n;
+    gel(Q, j) = p; j++;
   }
-  m = centerlift(m);
-  n = centerlift(n);
+  setlg(M, j); setlg(N, j); setlg(Q, j);
+  m = ZV_chinese_center(M, Q, NULL);
+  n = ZV_chinese_center(N, Q, NULL);
   if (DEBUGLEVEL >=4) err_printf("    [m,n] = [%Ps, %Ps]\n",m,n);
 
   /* 2nd step: build Q1, with det=-1 such that Q1(x,y,0) = G(x,y) */
@@ -608,10 +605,8 @@ qfbsqrt(GEN D, GEN q, GEN P, GEN E)
   a = gel(M,1);
   b = gel(M,2);
   c = gel(M,3);
-  if (mpodd(a))
-    return mkqfb(a, shifti(b,1), shifti(c,1), D);
-  else
-    return mkqfb(c, shifti(negi(b),1), shifti(a,1), D);
+  if (!mpodd(a)) { swap(a, c); togglesign_safe(&b); }
+  return mkqfb(a, shifti(b,1), shifti(c,1), D);
 }
 
 /* \prod gen[i]^e[i] as a Qfb, e in {0,1}^n nonzero */
@@ -702,7 +697,7 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
     for (i = 1; i <= dKer; i++)
     {
       GEN q = qfb_factorback(gen, gel(Ker,i), isqrtD);
-      gel(gen2,i) = q = qfbsqrt(D, q, P2D, E2D);
+      gel(gen2,i) = q = qfbsqrt(D, d, q, P2D, E2D);
       gel(Wgen2,i) = hilberts(gel(q,1), d, Pm2D);
     }
     for (; i <=m; i++)
