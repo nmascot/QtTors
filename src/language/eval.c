@@ -1808,7 +1808,7 @@ parsum(GEN a, GEN b, GEN code)
   worker = snm_closure(is_entry("_parapply_slice_worker"), mkvec(code));
   b = gfloor(b);
   N = addiu(subii(b, a), 1);
-  m = itou(sqrti(N)); if (cmpiu(N, m) < 0) m = itou(N);
+  m = itou(sqrti(N));
   mt_queue_start_lim(&pt, worker, m);
   L = cgetg(m + 2, t_VEC); v = mkvec(L);
   s = gen_0; a = setloop(a); pending = 0; av2 = avma;
