@@ -561,46 +561,41 @@ qfminimize(GEN G, GEN P, GEN E)
 /* CLASS GROUP COMPUTATIONS */
 
 /* Compute the square root of the quadratic form q of discriminant D = 4 * md
- * Not fully implemented; only works for D squarefree except at 2,
- * where the valuation is 2 or 3; mkmat2(P,zv_to_ZV(E)) = factor(2*abs(det q)) */
+ * Not fully implemented; only works for D squarefree except at 2, where the
+ * valuation is 2 or 3. Finally, [P,E] = factor(2*abs(D)) if valuation is 3 and
+ * factor(abs(D / 4)) otherwise */
 static GEN
 qfbsqrt(GEN D, GEN md, GEN q, GEN P, GEN E)
 {
   GEN a = gel(q,1), b = shifti(gel(q,2),-1), c = gel(q,3), mb = negi(b);
-  GEN m, n, Q, Q1, M, N, A, B, C, d = negi(md);
-  long i, j, lP = lg(P);
+  GEN m, n, Q, M, N, A, B, C, d = negi(md);
+  long i, lP = lg(P);
 
-  /* 1st step: solve m^2 = a (d), m*n = -b (d), n^2 = c (d) */
+  /* 1) solve m^2 = a, m*n = -b, n^2 = c in Z/dZ */
   M = cgetg(lP, t_VEC);
   N = cgetg(lP, t_VEC);
-  Q = cgetg(lP, t_VEC);
-  E[1] -= 3;
-  for (i = j = 1; i < lg(P); i++)
+  for (i = 1; i < lg(P); i++)
   {
     GEN p = gel(P,i);
-    if (!E[i]) continue;
     if (dvdii(a,p))
     { n = Fp_sqrt(c, p); m = Fp_div(mb, n, p); }
     else
     { m = Fp_sqrt(a, p); n = Fp_div(mb, m, p); }
-    gel(M, j) = m;
-    gel(N, j) = n;
-    gel(Q, j) = p; j++;
+    gel(M, i) = m;
+    gel(N, i) = n;
   }
-  setlg(M, j); setlg(N, j); setlg(Q, j);
-  m = ZV_chinese_center(M, Q, NULL);
-  n = ZV_chinese_center(N, Q, NULL);
-  if (DEBUGLEVEL >=4) err_printf("    [m,n] = [%Ps, %Ps]\n",m,n);
+  m = ZV_chinese_center(M, P, NULL);
+  n = ZV_chinese_center(N, P, NULL);
 
-  /* 2nd step: build Q1, with det=-1 such that Q1(x,y,0) = G(x,y) */
-  A = diviiexact(subii(sqri(n),c), d);
+  /* 2) build Q, with det=-1 such that Q(x,y,0) = G(x,y) */
+  A = diviiexact(subii(sqri(n), c),    d);
   B = diviiexact(addii(b, mulii(m,n)), d);
-  C = diviiexact(subii(sqri(m), a), d);
-  Q1 = mkmat3(mkcol3(A,B,n), mkcol3(B,C,m), mkcol3(n,m,d));
-  Q1 = gneg(adj(Q1));
+  C = diviiexact(subii(sqri(m), a),    d);
+  Q = mkmat3(mkcol3(A,B,n), mkcol3(B,C,m), mkcol3(n,m,d));
+  Q = gneg(adj(Q));
 
-  /* 3rd step: reduce Q1 to [0,0,-1;0,1,0;-1,0,0] */
-  M = qflllgram_indefgoon2(Q1);
+  /* 3) reduce Q to [0,0,-1; 0,1,0; -1,0,0] */
+  M = qflllgram_indefgoon2(Q);
   if (signe(gel(M,1)) < 0) M = ZC_neg(M);
   a = gel(M,1);
   b = gel(M,2);
@@ -636,14 +631,9 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
 {
   GEN U2 = NULL, gen, Wgen, isqrtD, d;
   long i, r, m;
+  int splice2 = mpodd(D);
 
-  if (!mpodd(D)) d = shifti(D, -2);
-  else
-  {
-    d = D; D = shifti(D,2);
-    E2D = shallowcopy(E2D);
-    E2D[1] = 3;
-  }
+  if (!splice2) d = shifti(D,-2); else { d = D; D = shifti(D,2); }
   /* D = 4d */
   if (zv_equal0(W)) return id(d);
   r = lg(Pm2D) - 4; /* >= 0 since W != 0 */
@@ -672,6 +662,8 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
   }
   else setlg(gen, m+1);
   if (!r) return id(d);
+  /* remove 2^3; leave alone 2^4 */
+  if (splice2) { P2D = vecsplice(P2D, 1); E2D = vecsplice(E2D, 1); }
   Wgen = cgetg(m+1, t_MAT);
   for (i = 1; i <= m; i++) gel(Wgen,i) = hilberts(gmael(gen,i,1), d, Pm2D);
   isqrtD = signe(D) > 0? sqrti(D) : NULL;
