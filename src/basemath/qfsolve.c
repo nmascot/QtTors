@@ -567,8 +567,8 @@ qfminimize(GEN G, GEN P, GEN E)
 static GEN
 qfbsqrt(GEN D, GEN md, GEN q, GEN P, GEN E)
 {
-  GEN a = gel(q,1), b = shifti(gel(q,2),-1), c = gel(q,3), mb = negi(b);
-  GEN m, n, Q, M, N, A, B, C, d = negi(md);
+  GEN a = gel(q,1), b = shifti(gel(q,2),-1), c = gel(q,3), B = negi(b);
+  GEN an, bm, cm, m, n, Q, M, N, d = negi(md); /* ac - b^2 */
   long i, lP = lg(P);
 
   /* 1) solve m^2 = a, m*n = -b, n^2 = c in Z/dZ */
@@ -577,8 +577,8 @@ qfbsqrt(GEN D, GEN md, GEN q, GEN P, GEN E)
   for (i = 1; i < lg(P); i++)
   {
     GEN p = gel(P,i);
-    if (dvdii(a,p)) { n = Fp_sqrt(c, p); m = Fp_div(mb, n, p); }
-    else            { m = Fp_sqrt(a, p); n = Fp_div(mb, m, p); }
+    if (dvdii(a,p)) { n = Fp_sqrt(c, p); m = Fp_div(B, n, p); }
+    else            { m = Fp_sqrt(a, p); n = Fp_div(B, m, p); }
     gel(M, i) = m;
     gel(N, i) = n;
   }
@@ -586,11 +586,12 @@ qfbsqrt(GEN D, GEN md, GEN q, GEN P, GEN E)
   n = ZV_chinese_center(N, P, NULL);
 
   /* 2) build Q, with det=-1 such that Q(x,y,0) = G(x,y) */
-  A = diviiexact(subii(sqri(n), c),    d);
-  B = diviiexact(addii(b, mulii(m,n)), d);
-  C = diviiexact(subii(sqri(m), a),    d);
-  Q = mkmat3(mkcol3(A,B,n), mkcol3(B,C,m), mkcol3(n,m,d));
-  Q = gneg(adj(Q));
+  an = mulii(a,n); bm = mulii(b,m); cm = mulii(c,m);
+  N = negi(diviiexact(addii(an, bm), d));
+  M = negi(diviiexact(addii(mulii(b,n), cm), d));
+  Q = addii(mulii(addii(an, shifti(bm,1)), n), mulii(cm,m));
+  Q = diviiexact(subii(Q, d), sqri(d)); /* (q(n,m) - d) / d^2 */
+  Q = mkmat3(mkcol3(a,b,N), mkcol3(b,c,M), mkcol3(N,M,Q)); /* det = -1 */
 
   /* 3) reduce Q to [0,0,-1; 0,1,0; -1,0,0] */
   M = qflllgram_indefgoon2(Q);
