@@ -98,6 +98,13 @@ qfbmat(GEN q)
   GEN a = gel(q,1), b = shifti(gel(q,2), -1), c = gel(q,3);
   return mkmat2(mkcol2(a, b), mkcol2(b, c));
 }
+/* 2*qfbmat(q) */
+static GEN
+qfbmat2(GEN q)
+{
+  GEN a = shifti(gel(q,1), 1), b = gel(q,2), c = shifti(gel(q,3), 1);
+  return mkmat2(mkcol2(a, b), mkcol2(b, c));
+}
 /* Given a symmetric matrix G over Z, compute the Witt invariant of G at p
  * v = det_minors(G) [G diagonalized]; assume that none of the v[i] is 0. */
 static long
@@ -660,7 +667,6 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
   { /* n = 4: look among forms of type q or 2*q, since Q can be imprimitive */
     U2 = hilberts(gen_2, d, Pm2D);
     if (zv_equal(U2,W)) return gmul2n(id(d),1);
-    U2 = mkmat(U2);
   }
 
   gen = cgetg(m+2, t_VEC);
@@ -692,13 +698,12 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
     {
       GEN W2 = Wgen, V;
       if (lg(indexim) < lg(Wgen)) W2 = vecpermute(Wgen,indexim);
-      if (U2) W2 = shallowconcat(W2,U2);
-      V = Flm_Flc_invimage(W2, W,2);
-      if (V) {
+      if (U2) W2 = vec_append(W2,U2);
+      V = Flm_Flc_invimage(W2, W, 2);
+      if (V)
+      {
         GEN Q = qfb_factorback(vecpermute(gen,indexim), V, isqrtD);
-        Q = qfbmat(Q);
-        if (U2 && V[lg(V)-1]) Q = gmul2n(Q,1);
-        return Q;
+        return (U2 && V[lg(V)-1])? qfbmat2(Q): qfbmat(Q);
       }
     }
     Ker = Flm_ker(Wgen,2); dKer = lg(Ker)-1;
