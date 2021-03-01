@@ -565,7 +565,7 @@ qfminimize(GEN G, GEN P, GEN E)
  * valuation is 2 or 3. Finally, [P,E] = factor(2*abs(D)) if valuation is 3 and
  * factor(abs(D / 4)) otherwise */
 static GEN
-qfbsqrt(GEN D, GEN md, GEN q, GEN P, GEN E)
+qfbsqrt(GEN D, GEN md, GEN q, GEN P)
 {
   GEN a = gel(q,1), b = shifti(gel(q,2),-1), c = gel(q,3), B = negi(b);
   GEN m, n, Q, M, N, d = negi(md); /* ac - b^2 */
@@ -660,7 +660,7 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
   else setlg(gen, m+1);
   if (!r) return id(d);
   /* remove 2^3; leave alone 2^4 */
-  if (splice2) { P2D = vecsplice(P2D, 1); E2D = vecsplice(E2D, 1); }
+  if (splice2) P2D = vecsplice(P2D, 1);
   Wgen = cgetg(m+1, t_MAT);
   for (i = 1; i <= m; i++) gel(Wgen,i) = hilberts(gmael(gen,i,1), d, Pm2D);
   isqrtD = signe(D) > 0? sqrti(D) : NULL;
@@ -686,7 +686,7 @@ quadclass2(GEN D, GEN P2D, GEN E2D, GEN Pm2D, GEN W, int n_is_4)
     for (i = 1; i <= dKer; i++)
     {
       GEN q = qfb_factorback(gen, gel(Ker,i), isqrtD);
-      gel(gen2,i) = q = qfbsqrt(D, d, q, P2D, E2D);
+      gel(gen2,i) = q = qfbsqrt(D, d, q, P2D);
       gel(Wgen2,i) = hilberts(gel(q,1), d, Pm2D);
     }
     for (; i <=m; i++)
