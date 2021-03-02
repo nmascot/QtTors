@@ -821,8 +821,10 @@ nfC_prV_val(GEN nf, GEN G, GEN P)
 static GEN
 _factorbackmod(GEN nf, GEN g, GEN e, ulong p)
 {
-  GEN y = nffactorback(nf, g, e);
-  return nfmul(nf, y, nfsqr(nf, idealredmodpower(nf, y, p, 0)));
+  GEN y = nffactorback(nf, g, e), den;
+  GEN z = nfmul(nf, y, nfsqr(nf, idealredmodpower(nf, y, p, 0)));
+  z = Q_remove_denom(z, &den);
+  return den ? gmul(z, den): z;
 }
 static GEN
 nfV_factorbackmod(GEN nf, GEN x, ulong p)
