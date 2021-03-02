@@ -952,7 +952,76 @@ heegner_indexmultD(GEN faN, GEN a, long D, GEN sqrtD)
 }
 
 static GEN
-heegner_try_point(GEN E, GEN lambdas, GEN ht, GEN z, long prec)
+nf_to_basis(GEN nf, GEN x)
+{
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x)!=t_COL)
+    x = scalarcol(x, nf_get_degree(nf));
+  return x;
+}
+
+static GEN
+etnf_to_basis(GEN et, GEN x)
+{
+  long i, l = lg(et);
+  GEN V = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
+    gel(V,i) = nf_to_basis(gel(et,i), x);
+  return shallowconcat1(V);
+}
+
+static GEN
+etnf_get_M(GEN et)
+{
+  long i, l = lg(et);
+  GEN V = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
+    gel(V,i)=nf_get_M(gel(et,i));
+  return shallowmatconcat(diagonal(V));
+}
+
+static long
+etnf_get_varn(GEN et)
+{
+  return nf_get_varn(gel(et,1));
+}
+
+static GEN
+heegner_descent_try_point(GEN E, GEN nfA, GEN z, GEN den, long prec)
+{
+  pari_sp av = avma;
+  GEN etal = gel(nfA,1), A = gel(nfA,2), cb = gel(nfA,3);
+  GEN al = gel(nfA,4), th = gel(nfA, 5);
+  GEN et = gel(etal,1), zk = gel(etal, 2), T = gel(etal,3);
+  GEN M = etnf_get_M(et);
+  long i, j, n = lg(th)-1, l = lg(al);
+  GEN u2 = gsqr(gel(cb,1)), r = gel(cb,2);
+  GEN zz = gdiv(gsub(z,r), u2);
+  GEN be = cgetg(n+1, t_COL);
+  for (j = 1; j < l; j++)
+  {
+    GEN aj = gel(al, j), Aj = gel(A,j);
+    for (i = 1; i <= n; i++)
+      gel(be,i) = gsqrt(gmul(gsub(zz, gel(th,i)), gel(aj,i)), prec);
+    for (i = 0; i <= (1<<(n-1))-1; i++)
+    {
+      long eps;
+      GEN s = gmul(den, RgM_solve_realimag(M, be));
+      GEN S = grndtoi(s, &eps), V, S2;
+      gel(be,1+odd(i)) = gneg(gel(be,1+odd(i)));
+      if (eps > -7) continue;
+      S2 = QXQ_sqr(RgV_RgC_mul(zk, S), T);
+      V = gdiv(QXQ_mul(S2, Aj, T), sqri(den));
+      if (typ(V) != t_POL || degpol(V) != 1) continue;
+      if (gequalm1(gel(V,3)))
+        return gerepileupto(av,gadd(gmul(gel(V,2),u2),r));
+    }
+  }
+  return gc_NULL(av);
+}
+
+static GEN
+heegner_try_point(GEN E, GEN nfA, GEN lambdas, GEN ht, GEN z, long prec)
 {
   long l = lg(lambdas);
   long i, eps;
@@ -962,23 +1031,25 @@ heegner_try_point(GEN E, GEN lambdas, GEN ht, GEN z, long prec)
   {
     GEN logd = shiftr(gsub(rh, gel(lambdas, i)), -1);
     GEN d, approxd = gexp(logd, prec);
-    if (DEBUGLEVEL > 2)
-      err_printf("Trying lambda number %ld, logd=%Ps, approxd=%Ps\n", i, logd, approxd);
     d = grndtoi(approxd, &eps);
     if (signe(d) > 0 && eps<-10)
     {
-      GEN X, ylist, d2 = sqri(d), approxn = mulir(d2, x);
-      if (DEBUGLEVEL > 2) err_printf("approxn=%Ps  eps=%ld\n", approxn,eps);
-      X = gdiv(ground(approxn), d2);
-      ylist = ellordinate(E, X, prec);
-      if (lg(ylist) > 1)
+      GEN X, ylist;
+      if (DEBUGLEVEL > 2)
+        err_printf("\nTrying lambda number %ld, logd=%Ps, approxd=%Ps\n", i, logd, approxd);
+      X = heegner_descent_try_point(E, nfA, x, d, prec);
+      if (X)
       {
-        GEN P = mkvec2(X, gel(ylist, 1));
-        GEN hp = ellheight(E,P,prec);
-        if (signe(hp) && cmprr(hp, shiftr(ht,1)) < 0 && cmprr(hp, shiftr(ht,-1)) > 0)
-          return P;
-        if (DEBUGLEVEL)
-          err_printf("found non-Heegner point %Ps\n", P);
+        ylist = ellordinate(E, X, prec);
+        if (lg(ylist) > 1)
+        {
+          GEN P = mkvec2(X, gel(ylist, 1));
+          GEN hp = ellheight(E,P,prec);
+          if (signe(hp) && cmprr(hp, shiftr(ht,1)) < 0 && cmprr(hp, shiftr(ht,-1)) > 0)
+            return P;
+          if (DEBUGLEVEL)
+            err_printf("found non-Heegner point %Ps\n", P);
+        }
       }
     }
   }
@@ -986,25 +1057,25 @@ heegner_try_point(GEN E, GEN lambdas, GEN ht, GEN z, long prec)
 }
 
 static GEN
-heegner_find_point(GEN e, GEN om, GEN ht, GEN z1, long k, long prec)
+heegner_find_point(GEN e, GEN nfA, GEN om, GEN ht, GEN z1, long k, long prec)
 {
   GEN lambdas = lambdalist(e, prec);
   pari_sp av = avma;
   long m;
   GEN Ore = gel(om, 1), Oim = gel(om, 2);
   if (DEBUGLEVEL)
-    err_printf("%ld*%ld multipliers to test\n",k,lg(lambdas)-1);
+    err_printf("%ld*%ld multipliers to test: ",k,lg(lambdas)-1);
   for (m = 0; m < k; m++)
   {
     GEN P, z2 = divru(addrr(z1, mulsr(m, Ore)), k);
     if (DEBUGLEVEL > 2)
-      err_printf("Trying multiplier %ld\n",m);
-    P = heegner_try_point(e, lambdas, ht, z2, prec);
+      err_printf("%ld ",m);
+    P = heegner_try_point(e, nfA, lambdas, ht, z2, prec);
     if (P) return P;
     if (signe(ell_get_disc(e)) > 0)
     {
       z2 = gadd(z2, gmul2n(Oim, -1));
-      P = heegner_try_point(e, lambdas, ht, z2, prec);
+      P = heegner_try_point(e, nfA, lambdas, ht, z2, prec);
       if (P) return P;
     }
     set_avma(av);
@@ -1237,22 +1308,55 @@ ellanal_globalred_all(GEN e, GEN *cb, GEN *N, GEN *tam)
   return E;
 }
 
+static GEN
+vecelnfembed(GEN x, GEN M, GEN et)
+{ pari_APPLY_same(gmul(M, etnf_to_basis(et, gel(x,i)))) }
+
+static GEN
+QXQV_inv(GEN x, GEN T)
+{ pari_APPLY_same(QXQ_inv(gel(x,i), T)) }
+
+static GEN
+etnfnewprec(GEN x, long prec)
+{ pari_APPLY_same(nfnewprec(gel(x,i),prec)) }
+
+static GEN
+vec_etnf_to_basis(GEN et, GEN x)
+{ pari_APPLY_same(etnf_to_basis(et,gel(x,i))) }
+
+static GEN
+makenfA(GEN E, GEN sel, GEN A, GEN cb)
+{
+  GEN etal = gel(sel,1), T = gel(etal,3);
+  GEN et = gel(etal,1), M = etnf_get_M(et);
+  long v = etnf_get_varn(et);
+  GEN al = vecelnfembed(A, M, et);
+  GEN th = gmul(M, etnf_to_basis(et, pol_x(v)));
+  return mkvec5(etal,QXQV_inv(A, T),cb,al,th);
+}
+
 GEN
 ellheegner(GEN E)
 {
   pari_sp av = avma;
   GEN z, P, ht, points, coefs, s, om, indmult;
-  long ind, lint, k, l, wtor, etor, ndisc;
+  GEN sel, etal, et, cbb, A, dAi, T, Ag, At;
+  long ind, indx, lint, k, l, wtor, etor, ndisc, ltors2, selrank;
   long bitprec = 16, prec = nbits2prec(bitprec)+1;
   pari_timer ti;
-  GEN N, cb, tam, torsion;
-
+  GEN N, cb, tam, torsion, nfA;
   E = ellanal_globalred_all(E, &cb, &N, &tam);
   if (ellrootno_global(E) == 1)
     pari_err_DOMAIN("ellheegner", "(analytic rank)%2","=",gen_0,E);
   torsion = elltors(E);
   wtor = itos( gel(torsion,1) ); /* #E(Q)_tor */
   etor = wtor > 1? itou(gmael(torsion, 2, 1)): 1; /* exponent of E(Q)_tor */
+  sel = ell2selmer_basis(E, &cbb, prec);
+  etal = gel(sel,1); A = gel(sel,2); et = gel(etal,1); T = gel(etal,3);
+  ltors2 = lg(et)-2; selrank = lg(A)-1;
+  Ag = selrank > ltors2+1 ? pol_1(etnf_get_varn(et)): gel(A,selrank);
+  At = vecslice(A,1,ltors2);
+  dAi = gsupnorm(vec_etnf_to_basis(et,A),prec);
   while (1)
   {
     GEN hnaive, l1;
@@ -1267,7 +1371,8 @@ ellheegner(GEN E)
     if (DEBUGLEVEL) err_printf("Expected height=%Ps\n", ht);
     hnaive = hnaive_max(E, ht);
     if (DEBUGLEVEL) err_printf("Naive height <= %Ps\n", hnaive);
-    bitneeded = itos(gceil(divrr(hnaive, mplog2(prec)))) + 10;
+    hnaive = gadd(shiftr(hnaive,-1),glog(dAi,prec));
+    bitneeded = itos(gceil(divrr(hnaive, mplog2(prec)))) + 12;
     if (DEBUGLEVEL) err_printf("precision = %ld\n", bitneeded);
     if (bitprec>=bitneeded) break;
     bitprec = bitneeded;
@@ -1282,10 +1387,17 @@ ellheegner(GEN E)
   l = lg(points);
   z = mulsr(coefs[1], gel(s, 1));
   for (k = 2; k < l; ++k) z = addrr(z, mulsr(coefs[k], gel(s, k)));
-  if (DEBUGLEVEL) err_printf("z=%Ps\n", z);
   z = gsub(z, gmul(gel(om,1), ground(gdiv(z, gel(om,1)))));
+  if (DEBUGLEVEL) err_printf("z=%.*Pg\n",nbits2ndec(bitprec), z);
   lint = wtor > 1 ? ugcd(ind, etor): 1;
-  P = heegner_find_point(E, om, ht, gmulsg(2*lint, z), lint*2*ind, prec);
+  indx = lint*2*ind;
+  if (vals(indx) >= vals(etor))
+    A = mkvec(Ag);
+  else
+    A = mkvec2(Ag, QXQ_mul(Ag, gel(At,1), T));
+  gmael(sel,1,1) = etnfnewprec(et, prec);
+  nfA = makenfA(E, sel, A, cbb);
+  P = heegner_find_point(E, nfA, om, ht, gmulsg(2*lint, z), indx, prec);
   if (DEBUGLEVEL) timer_printf(&ti,"heegner_find_point");
   if (cb) P = ellchangepointinv(P, cb);
   return gerepilecopy(av, P);
