@@ -1072,7 +1072,7 @@ ellsearchtrivialpoints(GEN ell, GEN lim, GEN help)
 {
   pari_sp av = avma;
   GEN tors2 = gel(elltors_psylow(ell,2),3);
-  GEN triv = ellratpoints(ell, lim, 0);
+  GEN triv = lim ? ellratpoints(ell, lim, 0): cgetg(1,t_VEC);
   if (help) triv = shallowconcat(triv, help);
   return gerepilecopy(av, shallowconcat(tors2, triv));
 }
@@ -1280,7 +1280,7 @@ gtoset_inplace(GEN x)
 
 static GEN
 ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
-           long effort, long prec)
+           long effort, long flag, long prec)
 {
   pari_sp av;
   GEN KP, pol, vnf, vpol, vroots, vr1, vcrt, sbase, LS2, factLS2, sqrtLS2;
@@ -1289,7 +1289,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   long i, j, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u;
 
   pol = ell2pol(ell);
-  help = ellsearchtrivialpoints(ell_K, muluu(LIMTRIV,effort+1), help);
+  help = ellsearchtrivialpoints(ell_K, flag ? NULL:muluu(LIMTRIV,effort+1), help);
   help = elltwistpoints(help, ginv(K)); /* points on K Y^2 = pol(X) */
   n = lg(vbnf) - 1; tors2 = n - 1;
   etors2 = vecslice(help,1, tors2);
@@ -1415,10 +1415,19 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   helpchars = shallowextract(helpchars, helplist);
   helpLS2 = shallowextract(helpLS2, helplist);
   dim = lg(selmer)-1;
-  newselmer = Flm_invimage(Flm_mul(LS2chars, selmer, 2), helpchars, 2);
   if (DEBUGLEVEL) err_printf("Selmer rank: %ld\n", dim);
+  newselmer = Flm_invimage(Flm_mul(LS2chars, selmer, 2), helpchars, 2);
   listpoints = vec_lengthen(help, dim); /* points on ell */
   nbpoints = lg(help) - 1;
+  if (flag==1)
+  {
+    GEN u = nbpoints ? Flm_mul(selmer,Flm_suppl(newselmer,2), 2): selmer;
+    long l = lg(u);
+    GEN z = cgetg(l, t_VEC);
+    for (i = 1; i < l; i++)
+      gel(z,i) = RgXQV_factorback(LS2, gel(u,i), pol);
+    return mkvec2(mkvec3(vnf,sbase,pol),z);
+  }
   for (i=1; i <= dim; i++)
   {
     pari_sp btop = avma;
@@ -1457,6 +1466,16 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   listpoints = elltwistpoints(listpoints, K);
   listpoints = vecellabs(ellQ_genreduce(ell_K, listpoints, NULL, prec));
   return mkvec3(utoi(mwrank), utoi(dim-tors2), listpoints);
+}
+
+GEN
+ell2selmer_basis(GEN ell, GEN *cb, long prec)
+{
+  GEN E = ellintegralbmodel(ell, cb);
+  GEN vbnf = makevbnf(E, prec);
+  GEN sel = ell2selmer(E, E, NULL, gen_1, vbnf, 0, 1, prec);
+  obj_free(E);
+  return sel;
 }
 
 static void
@@ -1531,7 +1550,7 @@ ellrank(GEN e, long effort, GEN help, long prec)
   /* help is a vector of rational points [x,y] satisfying K y^2 = pol(x) */
   /* [Kx, K^2y] is on eK: Y^2 = K^3 pol(X/K)  */
   if (help) check_oncurve(eK, help);
-  v = ell2selmer(e, eK, help, K, vbnf, effort, prec);
+  v = ell2selmer(e, eK, help, K, vbnf, effort, 0, prec);
   if (et) gel(v,3) = ellchangepoint(gel(v,3), urstK);
   if (urst) gel(v,3) = ellchangepointinv(gel(v,3), urst);
   if (newell) obj_free(e);

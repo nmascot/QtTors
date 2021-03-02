@@ -725,8 +725,8 @@ GEN     subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound);
 void random_curves_with_m_torsion(ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, long m, ulong p);
 
 /* dirichlet.c */
-GEN direuler_factor(GEN s, long n);
 
+GEN direuler_factor(GEN s, long n);
 
 /* ellanal.c */
 
@@ -738,6 +738,10 @@ GEN  ellQ_genreduce(GEN E, GEN G, GEN M, long prec);
 GEN  ellQ_isdivisible(GEN E, GEN P, ulong l);
 GEN  ellintegralbmodel(GEN e, GEN *pv);
 void ellprint(GEN e);
+
+/* ellrank.c */
+
+GEN     ell2selmer_basis(GEN ell, GEN *cb, long prec);
 
 /* es.c */
 
