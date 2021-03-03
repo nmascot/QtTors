@@ -2626,6 +2626,7 @@ znchargauss(GEN G, GEN chi, GEN a, long bitprec)
   {
     if (typ(a) != t_INT) pari_err_TYPE("znchargauss",a);
     a = modii(a, N);
+    if (!signe(a)) { set_avma(av); return is_pm1(F)? eulerphi(N): gen_0; }
     v = Z_ppio(a, F);
     aF = gel(v,2);
     a1 = gel(v,3);
