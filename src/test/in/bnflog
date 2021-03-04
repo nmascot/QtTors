@@ -53,3 +53,5 @@ bnflog(K, 5)
 
 F=bnfinit(x^2-4565649,1);
 bnflog(F,2)
+
+bnflog(bnrinit(bnfinit(x^2+1),3),2)

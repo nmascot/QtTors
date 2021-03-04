@@ -377,8 +377,7 @@ bnflog_i(GEN bnf, GEN ell)
   GEN D, Ap, cycAp, fu;
   long imin, i, j, lvAp;
 
-  checkbnf(bnf);
-  nf = checknf(bnf);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   S = idealprimedec(nf, ell);
   US = sunits_mod_units(bnf, S);
   prec0 = maxss(30, vtilde_prec(nf, US, ell));

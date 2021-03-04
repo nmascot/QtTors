@@ -31,6 +31,7 @@ BA  20- missing GC in qfsolve
     26- nfeltdiv(nfinit(x^2+1), 0, 1+x/2) -> SEGV [#2277]
     27- numerical instability in polinterpolate [#2278]
     28- znchargauss(g,chi,0) -> oo loop
+    29- bnflog(bnr, ...) -> SEGV
 
   Added
 HC   1- new GP function eulerreal
