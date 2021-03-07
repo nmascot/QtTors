@@ -61,6 +61,8 @@ BA  21- [libpari] elltors_psylow
     22- ellinit([j]); no need to use ellfromj
     23- ideallist(nf, negative bound) to return ideals of norm |bound|
         (in factored form)
+    24- rnfconductor(bnf,pol,flag): add flag=2 to only return the conductor
+        and its factorization (which comes for free)
 
   Changed
 HC   1- faster implementation of eulervec + cache result

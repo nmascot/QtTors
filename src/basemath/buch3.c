@@ -1517,7 +1517,7 @@ bnrconductor0(GEN A, GEN B, GEN C, long flag)
 {
   pari_sp av = avma;
   GEN H, bnr = ABC_to_bnr(A,B,C,&H, 0);
-  return gerepilecopy(av, bnrconductor_i(bnr, H, flag));
+  return gerepilecopy(av, bnrconductor(bnr, H, flag));
 }
 
 long
@@ -1897,6 +1897,7 @@ rnfconductor0(GEN bnf, GEN T, long flag)
   pari_sp av = avma;
   GEN D, nf, module, bnr, H, lim, Tr, MOD;
 
+  if (flag < 0 || flag > 2) pari_err_FLAG("rnfconductor");
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   Tr = rnfdisc_get_T(nf, T, &lim);
   T = nfX_to_monic(nf, Tr, NULL);
@@ -1933,7 +1934,8 @@ rnfconductor0(GEN bnf, GEN T, long flag)
   MOD = flag? utoipos(degpol(T)): NULL;
   bnr = Buchraymod_i(bnf, module, nf_INIT|nf_GEN, MOD);
   H = rnfnormgroup_i(bnr,T); if (!H) return gc_const(av,gen_0);
-  return gerepilecopy(av, bnrconductormod(bnr, H, MOD));
+  return gerepilecopy(av, flag == 2? bnrconductor_factored(bnr, H)
+                                   : bnrconductormod(bnr, H, MOD));
 }
 GEN
 rnfconductor(GEN bnf, GEN T) { return rnfconductor0(bnf, T, 0); }
