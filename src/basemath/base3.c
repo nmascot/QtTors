@@ -3458,6 +3458,12 @@ Ideallist(GEN bnf, ulong bound, long flag)
 GEN
 ideallist0(GEN bnf,long bound, long flag) {
   if (flag<0 || flag>15) pari_err_FLAG("ideallist");
+  if (bound < 0)
+  {
+    pari_sp av = avma;
+    if (flag != 4) pari_err_IMPL("ideallist with bid for single norm");
+    return gerepilecopy(av, ideals_by_norm(bnf, stoi(-bound)));
+  }
   return Ideallist(bnf,bound,flag);
 }
 GEN

@@ -30,7 +30,7 @@ Doc: computes the list
 
  \quad 3: as 2, but include the generators in the \var{bid}.
 
- \quad 4: give only the HNF of the ideal.
+ \quad 4: give only the ideal (in HNF).
 
  \bprog
  ? nf = nfinit(x^2+1);
@@ -56,3 +56,9 @@ Doc: computes the list
  three ideals of norm $25$. In fact, for all moduli with finite part of norm
  $25$ and trivial Archimedean part, as the last 3 commands show. See
  \tet{ideallistarch} to treat general moduli.
+
+ Finally, on can input a negative \kbd{bound}. The function
+ then returns the ideals of norm $|\kbd{bound}|$, given by their
+ factorization matrix. If needed, one can obtain their HNF using
+ \kbd{idealfactorback}, and the corresponding \var{bid} structures using
+ \kbd{idealstar} (which accepts ideals in factored form).

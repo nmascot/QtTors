@@ -1510,9 +1510,8 @@ isintnorm_loop(struct sol_abs *T, long i)
 }
 
 static int
-get_sol_abs(struct sol_abs *T, GEN bnf, GEN fact, GEN *ptPR)
+get_sol_abs(struct sol_abs *T, GEN bnf, GEN nf, GEN fact, GEN *ptPR)
 {
-  GEN nf = bnf_get_nf(bnf);
   GEN P = gel(fact,1), E = gel(fact,2), PR;
   long N = nf_get_degree(nf), nP = lg(P)-1, Ngen, max, nPR, i, j;
 
@@ -1552,8 +1551,8 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN fact, GEN *ptPR)
 
   T->u = cgetg(nPR+1, t_VECSMALL);
   T->S = new_chunk(nPR+1);
-  T->cyc = bnf_get_cyc(bnf);
-  Ngen = lg(T->cyc)-1;
+  if (bnf) { T->cyc = bnf_get_cyc(bnf); Ngen = lg(T->cyc)-1; }
+  else { T->cyc = NULL; Ngen = 0; }
   if (Ngen == 0)
     T->rel = T->partrel = NULL; /* trivial Cl(K), no relations to check */
   else
@@ -1622,7 +1621,7 @@ bnfisintnormabs(GEN bnf, GEN a)
   if (!signe(a)) return mkvec(gen_0);
   if (is_pm1(a)) return mkvec(gen_1);
   if (!F) F = absZ_factor(a);
-  if (!get_sol_abs(&T, bnf, F, &PR)) return cgetg(1, t_VEC);
+  if (!get_sol_abs(&T, bnf, nf, F, &PR)) return cgetg(1, t_VEC);
   /* |a| > 1 => T.nPR > 0 */
   res = cgetg(T.sindex+1, t_VEC);
   for (i=1; i<=T.sindex; i++)
@@ -1630,6 +1629,28 @@ bnfisintnormabs(GEN bnf, GEN a)
     GEN x = vecsmall_to_col( gel(T.normsol,i) );
     x = isprincipalfact(bnf, NULL, PR, x, nf_FORCE | nf_GEN_IF_PRINCIPAL);
     gel(res,i) = nf_to_scalar_or_alg(nf, x); /* x solution, up to sign */
+  }
+  return res;
+}
+
+GEN
+ideals_by_norm(GEN nf, GEN a)
+{
+  struct sol_abs T;
+  GEN res, PR, F;
+  long i;
+
+  if ((F = check_arith_pos(a,"ideals_by_norm")))
+    a = typ(a) == t_VEC? gel(a,1): factorback(F);
+  nf = checknf(nf);
+  if (is_pm1(a)) return mkvec(trivial_fact());
+  if (!F) F = absZ_factor(a);
+  if (!get_sol_abs(&T, NULL, nf, F, &PR)) return cgetg(1, t_VEC);
+  res = cgetg(T.sindex+1, t_VEC);
+  for (i=1; i<=T.sindex; i++)
+  {
+    GEN x = vecsmall_to_col( gel(T.normsol,i) );
+    gel(res,i) = famat_remove_trivial(mkmat2(PR, x));
   }
   return res;
 }

@@ -5146,6 +5146,7 @@ GEN     zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec);
 
 GEN     bnfisintnorm(GEN x, GEN y);
 GEN     bnfisintnormabs(GEN bnf, GEN a);
+GEN     ideals_by_norm(GEN nf, GEN a);
 GEN     thue(GEN thueres, GEN rhs, GEN ne);
 GEN     thueinit(GEN pol, long flag, long prec);
 
