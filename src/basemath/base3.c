@@ -3467,7 +3467,7 @@ ideallist0(GEN bnf,long bound, long flag) {
   return Ideallist(bnf,bound,flag);
 }
 GEN
-ideallist(GEN bnf,long bound) { return Ideallist(bnf,bound,4); }
+ideallist(GEN bnf,long bound) { return ideallist0(bnf,bound,4); }
 
 /* bid = for module m (without arch. part), arch = archimedean part.
  * Output: bid for [m,arch] */
