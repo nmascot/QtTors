@@ -1469,7 +1469,7 @@ FpV_producttree(GEN xa, GEN s, GEN p, long vs)
   GEN t = cgetg(ls, t_VEC);
   for (j=1, k=1; j<ls; k+=s[j++])
     gel(t, j) = s[j] == 1 ?
-             deg1pol(gen_1, Fp_neg(gel(xa,k), p), vs):
+             deg1pol_shallow(gen_1, Fp_neg(gel(xa,k), p), vs):
              deg2pol_shallow(gen_1,
                Fp_neg(Fp_add(gel(xa,k), gel(xa,k+1), p), p),
                Fp_mul(gel(xa,k), gel(xa,k+1), p), vs);
@@ -1532,7 +1532,7 @@ FpVV_polint_tree(GEN T, GEN R, GEN s, GEN xa, GEN ya, GEN p, long vs)
     {
       GEN a = Fp_mul(gel(ya,k), gel(R,k), p);
       GEN b = Fp_mul(gel(ya,k+1), gel(R,k+1), p);
-      gel(t, j) = deg1pol(Fp_add(a, b, p),
+      gel(t, j) = deg1pol_shallow(Fp_add(a, b, p),
               Fp_neg(Fp_add(Fp_mul(gel(xa,k), b, p ),
               Fp_mul(gel(xa,k+1), a, p), p), p), vs);
     }
