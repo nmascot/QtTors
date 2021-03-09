@@ -839,7 +839,7 @@ check_ecppcertentry(GEN c)
   return 1;
 }
 
-static long
+long
 check_ecppcert(GEN c)
 {
   long i, l;

@@ -4985,6 +4985,7 @@ GEN     polmodular_ZXX(long L, long inv, long xvar, long yvar);
 long    BPSW_isprime(GEN x);
 long    BPSW_psp(GEN N);
 GEN     addprimes(GEN primes);
+long    check_ecppcert(GEN c);
 GEN     gisprime(GEN x, long flag);
 GEN     gispseudoprime(GEN x, long flag);
 GEN     gprimepi_upper_bound(GEN x);

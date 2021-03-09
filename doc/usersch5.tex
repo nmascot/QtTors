@@ -8392,6 +8392,9 @@ MAGMA or Primo format; underlies \kbd{primecertexport}.
 \fun{long}{ecppisvalid}{GEN cert} checks whether a PARI ECPP certificate
 is valid; underlies \kbd{primecertisvalid}.
 
+\fun{long}{check_ecppcert}{GEN cert} checks whether \kbd{cert} looks
+like a PARI ECPP certificate, (valid or invalid) without doing any computation.
+
 \subsec{Iterators over primes}
 
 \fun{int}{forprime_init}{forprime_t *T, GEN a, GEN b} initialize an
