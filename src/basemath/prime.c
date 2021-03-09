@@ -825,7 +825,7 @@ primecertisvalid(GEN c)
 }
 
 static long
-check_eccpcertentry(GEN c)
+check_ecppcertentry(GEN c)
 {
   GEN v;
   long i,l = lg(c);
@@ -840,7 +840,7 @@ check_eccpcertentry(GEN c)
 }
 
 static long
-check_eccpcert(GEN c)
+check_ecppcert(GEN c)
 {
   long i, l;
   switch(typ(c))
@@ -851,7 +851,7 @@ check_eccpcert(GEN c)
   }
   l = lg(c); if (l == 1) return 0;
   for (i = 1; i < l; i++)
-    if (check_eccpcertentry(gel(c,i))==0) return 0;
+    if (check_ecppcertentry(gel(c,i))==0) return 0;
   return 1;
 }
 
@@ -859,7 +859,7 @@ GEN
 primecertexport(GEN c, long flag)
 {
   if (cert_type(c) != c_ECPP) pari_err_IMPL("N-1 certificate");
-  if (!check_eccpcert(c))
+  if (!check_ecppcert(c))
     pari_err_TYPE("primecertexport - invalid certificate", c);
   return ecppexport(c, flag);
 }
