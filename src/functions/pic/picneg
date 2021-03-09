@@ -1,0 +1,11 @@
+Function: picneg
+Section: modular_forms
+C-Name: PicNeg
+Prototype: GGL
+Help: picneg(J,W,flag): Negative of the point W in the Jacobian J. TODO flag
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog

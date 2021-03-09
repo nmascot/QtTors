@@ -1,0 +1,11 @@
+Function: picmul
+Section: modular_forms
+C-Name: PicMul
+Prototype: GGGL
+Help: picmul(J,W,n,flag): Multiplcation by n of the point W in the Jacobian J. The meanig of flag is TODO
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog

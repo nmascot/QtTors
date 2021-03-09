@@ -1,0 +1,11 @@
+Function: picfrob
+Section: modular_forms
+C-Name: PicFrob
+Prototype: GG
+Help: picfrob(J,W): Image of the point W of the p-adic Jacobian J by the absolute Frobenius
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog

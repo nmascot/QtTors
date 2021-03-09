@@ -1,0 +1,11 @@
+Function: picmemberval
+Section: modular_forms
+C-Name: PicMember_val
+Prototype: uGG
+Help: picmemberval(J,W): Given a p-adic Jacobian J of p-adic precision e, returns the largest e' <= e such that W repreesents a mod p^e' point of J.
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog

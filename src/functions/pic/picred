@@ -1,0 +1,11 @@
+Function: picred
+Section: modular_forms
+C-Name: PicRed
+Prototype: GU
+Help: picred(J,e): Reduction mod p^e of the p-adic Jacobian J. e must be less than or equal to the p-adic precision of J.
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog

@@ -6666,3 +6666,18 @@ INLINE void    pari_err_TYPE(const char *f, GEN x);
 INLINE void    pari_err_TYPE2(const char *f, GEN x, GEN y);
 INLINE void    pari_err_VAR(const char *f, GEN x, GEN y);
 INLINE void    pari_err_ROOTS0(const char *f);
+
+/* pic.c */
+GEN PicAdd(GEN J, GEN W1, GEN W2);
+GEN PicChord(GEN J, GEN W1, GEN W2, long flag);
+GEN PicMul(GEN J, GEN W, GEN n, long flag);
+GEN PicNeg(GEN J, GEN W, long flag);
+GEN PicSub(GEN J, GEN W1, GEN W2);
+GEN PicFrob(GEN J, GEN W);
+GEN PicFrobPoly(GEN J, GEN W, GEN F);
+ulong PicMember_val(GEN J, GEN W);
+ulong PicIsZero_val(GEN J, GEN W);
+ulong PicEq_val(GEN J, GEN W1, GEN W2);
+GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, long e);
+GEN PicLiftTors(GEN J, GEN W, long eini, GEN l);
+GEN PicRed(GEN J, ulong e);

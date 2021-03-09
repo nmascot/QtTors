@@ -1,0 +1,11 @@
+Function: picinit
+Section: modular_forms
+C-Name: PicInit
+Prototype: GGUUGGGUL
+Help: picinit(f,Auts,g,d0,L,badlocus,p,a,e): TODO
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog

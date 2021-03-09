@@ -1,0 +1,11 @@
+Function: picsub
+Section: modular_forms
+C-Name: PicSub
+Prototype: GGG
+Help: picsub(J,W1,W2): Subtraction W1 - W2 in the Jacobian J
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog
