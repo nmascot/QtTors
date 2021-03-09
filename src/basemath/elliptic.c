@@ -2581,8 +2581,8 @@ check_complex(GEN z, int *real, int *imag)
 static void
 reduce_z(GEN z, ellred_t *T)
 {
-  long p;
-  GEN Z;
+  GEN x, Z;
+  long p, e;
   switch(typ(z))
   {
     case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX: break;
@@ -2593,9 +2593,14 @@ reduce_z(GEN z, ellred_t *T)
   }
   Z = gdiv(z, T->W2);
   T->z = z;
-  T->x = ground(gdiv(imag_i(Z), imag_i(T->Tau)));
+  x = gdiv(imag_i(Z), imag_i(T->Tau));
+  T->x = grndtoi(x, &e); /* |Im(Z - x*Tau)| <= Im(Tau)/2 */
+  /* Avoid Im(Z) << 0; take 0 <= Im(Z - x*Tau) < Im(Tau) instead.
+   * Leave round when Im(Z - x*Tau) ~ 0 to allow detecting Z in <1,Tau>
+   * at the end */
+  if (e > -10) T->x = gfloor(x);
   if (signe(T->x)) Z = gsub(Z, gmul(T->x,T->Tau));
-  T->y = ground(real_i(Z));
+  T->y = ground(real_i(Z));/* |Re(Z - y)| <= 1/2 */
   if (signe(T->y)) Z = gsub(Z, T->y);
   T->abs_u_is_1 = (typ(Z) != t_COMPLEX);
   /* Z = - y - x tau + z/W2, x,y integers */
@@ -2610,8 +2615,7 @@ reduce_z(GEN z, ellred_t *T)
       check_complex(Z, &(T->some_z_is_pure_imag), &(T->some_z_is_real));
   }
   p = precision(Z);
-  if (gequal0(Z) || (p && gexpo(Z) < 5 - prec2nbits(p)))
-    Z = NULL; /*z in L*/
+  if (gequal0(Z) || (p && gexpo(Z) < 5 - prec2nbits(p))) Z = NULL; /*z in L*/
   if (p && p < T->prec) T->prec = p;
   T->Z = Z;
 }

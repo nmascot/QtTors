@@ -32,6 +32,8 @@ BA  20- missing GC in qfsolve
     27- numerical instability in polinterpolate [#2278]
     28- znchargauss(g,chi,0) -> oo loop
     29- bnflog(bnr, ...) -> SEGV
+    30- elliptic functions: incorrect reduction of z/w1 mod [1,tau] =>
+        catastrophic cancellation
 
   Added
 HC   1- new GP function eulerreal
