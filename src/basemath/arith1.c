@@ -2739,7 +2739,7 @@ Z_ZV_mod_tree(GEN A, GEN P, GEN T)
   long m = lg(T)-1, n = lg(P)-1;
   GEN t;
   GEN Tp = cgetg(m+1, t_VEC);
-  gel(Tp, m) = mkvec(A);
+  gel(Tp, m) = mkvec(modii(A, gmael(T,m,1)));
   for (i=m-1; i>=1; i--)
   {
     GEN u = gel(T, i);
