@@ -76,13 +76,22 @@ Doc:
  %3 = 0
  ? primecert(41)
  %4 = 41
+
  ? N = 2^2000+841;
  ? Cp1 = primecert(N,,1500); \\ partial certificate
- ? Cp2 = primecert(Cp1,,1000); \\ partial certificate
+ time = 16,018 ms.
+ ? Cp2 = primecert(Cp1,,1000); \\ (longer) partial certificate
+ time = 5,890 ms.
  ? C = primecert(Cp2); \\ full certificate for N
+ time = 1,777 ms.
  ? primecertisvalid(C)
  %9 = 1
- @eprog\smallskip
+ ? primecert(N);
+ time = 23,625 ms.
+ @eprog\noindent As the last command shows, attempting a succession of
+ partial certificates should be about as fast as a direct computation.
+
+ \smallskip
 
  If $\fl = 1$ (very slow), return an $N-1$ certificate (Pocklington Lehmer)
 
