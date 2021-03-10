@@ -6668,6 +6668,7 @@ INLINE void    pari_err_VAR(const char *f, GEN x, GEN y);
 INLINE void    pari_err_ROOTS0(const char *f);
 
 /* pic.c */
+GEN mateqnpadic(GEN A, GEN T, GEN pe, GEN p, long e);
 GEN PicAdd(GEN J, GEN W1, GEN W2);
 GEN PicChord(GEN J, GEN W1, GEN W2, long flag);
 GEN PicMul(GEN J, GEN W, GEN n, long flag);
@@ -6677,7 +6678,19 @@ GEN PicFrob(GEN J, GEN W);
 GEN PicFrobPoly(GEN J, GEN W, GEN F);
 ulong PicMember_val(GEN J, GEN W);
 ulong PicIsZero_val(GEN J, GEN W);
+ulong PicIsTors_val(GEN J, GEN W, GEN F);
 ulong PicEq_val(GEN J, GEN W1, GEN W2);
+int PicMember(GEN J, GEN W);
+int PicIsZero(GEN J, GEN W);
+int PicIsTors(GEN J, GEN W, GEN F);
+int PicEq(GEN J, GEN W1, GEN W2);
+GEN PicTorsOrd(GEN J, GEN W, GEN l);
 GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, long e);
+GEN PicRand(GEN J, GEN randseed);
 GEN PicLiftTors(GEN J, GEN W, long eini, GEN l);
 GEN PicRed(GEN J, ulong e);
+GEN OnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T, GEN pe);
+GEN PicLift_worker(GEN V0j, ulong shift, GEN uv, GEN AinvB, GEN CAinv, GEN T, GEN pe21);
+GEN PicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, GEN KM, GEN pe1, GEN pe21, long e21, GEN c0, ulong P0, GEN P1);
+GEN TorsSpaceFrob_worker(GEN W1, GEN X1, GEN W2, GEN X2, GEN J);
+GEN PicEval_worker(GEN W, GEN J);

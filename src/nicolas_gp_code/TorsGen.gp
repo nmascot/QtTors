@@ -12,11 +12,11 @@ RandTorsPt(J,l,a,Lp,Chi,Phi,seed)=
 		 Phi: work in the submodule J[Phi] of J=J[x^a-1]
 	*/
 	my(A,B,W,N,v,M,chi,Psi,d,T,o);
-	setrand(seed);
+	if(seed,setrand(seed));
 	A = B = 'x^a-1;
-	W = PicRand(J,0);
+	W = picrand(J);
 	if(Phi,
-		W = PicFrobPoly(J,W,B/Phi); \\ Project onto J[Phi]
+		W = picfrobpoly(J,W,B/Phi); \\ Project onto J[Phi]
 		A = B = Phi
 	);
   \\ Order of the submodule we work in
@@ -24,7 +24,7 @@ RandTorsPt(J,l,a,Lp,Chi,Phi,seed)=
   v = valuation(N,l); \\ N = l^v*M
   if(v==0,error("No l-torsion!"));
   M = N/l^v; \\ Cofactor, used to project on l-power part
-	W = PicMul(J,W,M,0); \\ Project onto l-power part (main bottleneck!)
+	W = picmul(J,W,M); \\ Project onto l-power part (main bottleneck!)
 	B = gcd(Mod(Lp,l),Mod(B,l)); \\ now [l^...]W in J[l,B]
 	if(Chi,
 		chi = gcd(Chi,B);
@@ -37,13 +37,13 @@ RandTorsPt(J,l,a,Lp,Chi,Phi,seed)=
       	Psi = Mod(polhensellift(A,[liftint(A/Psi),liftint(Psi)],l,v)[2],l^v);
 			);
 			Psi = centerlift(Psi);
-			W = PicFrobPoly(J,W,Psi) \\ Project onto J[chi]
+			W = picfrobpoly(J,W,Psi) \\ Project onto J[chi]
 		);
 		B = chi;
 		d = poldegree(B);
 		B = centerlift(B/polcoef(B,d))
 	);
-	[T,o] = TorsOrd(J,W,l);
+	[T,o] = pictorsionorder(J,W,l);
   if(o,return([W,o,T,B]));
   if(default(debug),print("RandTorsPt got zero (Phi=",Phi,")"));
   return(0);

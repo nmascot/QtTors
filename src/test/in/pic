@@ -1,15 +1,29 @@
 read("../../nicolas_gp_code/GalRep.gp");
 \\ Equation for the curve: y²+h(x)*y=f(x)
 f = x^5+x^4; h = x^3+x+1; \\ X1(13)
-f = [f,h];
 l = 7; \\ The representation occurs in the 7-torsion of the Jacobian
 p = 17; \\ We choose to get it 17-adically
-e = 32; \\ Target p-adic accuracy is O(17^32)
+e = 8; \\ Target p-adic accuracy is O(17^32)
+a = 3; \\  Unramified degree 3
 chi = x^2-x-2; \\ Char.poly. of the Frobenius at p (another possible choice is x^2-2*x-1)
 P1 = [-1,1]; P2 = [0,0]; \\ We need two non-conjugate rational points
-Lp = hyperellcharpoly(Mod(f,p));
-[f,Auts,KnownAuts,g,d0,L,LL,L1,L2]=Hyper2RR(f,P1,P2);
-J = picinit(f,Auts,g,d0,[L,LL,L1,L2],['y],p,6,e);
+Lp = hyperellcharpoly(Mod([f,h],p));
+[F,Auts,KnownAuts,g,d0,L,LL,L1,L2]=Hyper2RR([f,h],P1,P2);
+J = picinit(F,Auts,g,d0,[L,LL,L1,L2],['y],p,a,e);
+J1 = picred(J,1);
+W1 = picrand(J1);
+picmember(J1,W1)
+picistorsion(J1,W1,Lp)
+picistorsion(J1,W1,polresultant(Lp,'x^a-1))
+W1 = RandTorsPt(J1,l,a,Lp,chi,0,0)[3];
+picistorsion(J1,W1,l)
+picistorsion(J1,W1,chi)
+W = piclifttors(J,W1,1,l);
+picmember(J,W)
+picistorsion(J,W,l)
+picistorsion(J,W,chi)
+piciszero(J,W)
+
 /*[F,ZF] = HyperGalRep([f,h],l,p,e,P1,P2,chi);
 printf("\nPolynomial defining the linear representation:\n");
 print(F);

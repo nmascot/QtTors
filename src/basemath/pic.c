@@ -1028,6 +1028,16 @@ ulong PicMember_val(GEN J, GEN W)
   return res;
 }
 
+int PicMember(GEN J, GEN W)
+{
+	long e;
+	ulong v;
+	e = Jgete(J);
+	v = PicMember_val(J,W);
+	if(v==e) return 1;
+	return 0;
+}
+
 ulong PicEq_val(GEN J, GEN WA, GEN WB)
 {
   pari_sp av = avma;
@@ -1049,6 +1059,16 @@ ulong PicEq_val(GEN J, GEN WA, GEN WB)
   return r;
 }
 
+int PicEq(GEN J, GEN WA, GEN WB)
+{
+  long e;
+  ulong v;
+  e = Jgete(J);
+  v = PicEq_val(J,WA,WB);
+  if(v==e) return 1;
+  return 0;
+}
+
 ulong PicIsZero_val(GEN J, GEN W)
 {
   pari_sp av = avma;
@@ -1063,6 +1083,26 @@ ulong PicIsZero_val(GEN J, GEN W)
   r = DivSub_dimval(V1,W,1,KV1,T,p,e,pe);
   avma = av;
   return r;
+}
+
+int PicIsZero(GEN J, GEN W)
+{
+	long e;
+	ulong v;
+	e = Jgete(J);
+	v = PicIsZero_val(J,W);
+	if(v==e) return 1;
+	return 0;
+}
+
+ulong PicIsTors_val(GEN J, GEN W, GEN F)
+{
+	return PicIsZero_val(J, PicFrobPoly(J,W,F));
+}
+
+int PicIsTors(GEN J, GEN W, GEN F)
+{
+  return PicIsZero(J, PicFrobPoly(J,W,F));
 }
 
 GEN PicChord(GEN J, GEN WA, GEN WB, long flag)
@@ -1204,7 +1244,7 @@ GEN PicLC(GEN J, GEN C, GEN W)
   return gerepileupto(av,S);
 }
 
-GEN TorsOrd(GEN J, GEN W, GEN l)
+GEN PicTorsOrd(GEN J, GEN W, GEN l)
 {
 /*Given that W is an l-power torsion point of J,
 finds v s.t. the order of W is l^v,
@@ -1961,7 +2001,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
   if(DEBUGLEVEL) printf("PicInit: Computing equation matrices\n");
   KV = cgetg(4,t_VEC);
   E = stoi(e);
-  worker = strtofunction("mateqnpadic");
+  worker = strtofunction("_mateqnpadic");
   mt_queue_start_lim(&pt,worker,3);
   for(k=1;k<=3||pending;k++)
   {
@@ -2078,7 +2118,7 @@ GEN Jlift(GEN J, ulong e2)
       gcoeff(M,i,j) = gcoeff(V2,I[i],j);
   }
   gel(U,4) = ZpXQMinv(M,T,pe2,p,e2);
-  worker = strtofunction("mateqnpadic");
+  worker = strtofunction("_mateqnpadic");
   mt_queue_start_lim(&pt,worker,3);
   for(k=1;k<=3||pending;k++)
   {
@@ -2443,7 +2483,7 @@ GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
 		gel(vFixedParams,4) = T;
 		gel(vFixedParams,5) = pe21;
 		args = cgetg(3,t_VEC);
-		worker = snm_closure(is_entry("PicLift_worker"),vFixedParams);
+		worker = snm_closure(is_entry("_PicLift_worker"),vFixedParams);
 		pending = 0;
     i = 1;
 		j = 1;
@@ -2528,7 +2568,7 @@ GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
       	gel(vFixedParams,10) = c0;
       	gel(vFixedParams,11) = utoi(P0);
       	gel(vFixedParams,12) = P1;
-      	worker = snm_closure(is_entry("PicLiftTors_Chart_worker"),vFixedParams);
+      	worker = snm_closure(is_entry("_PicLiftTors_Chart_worker"),vFixedParams);
     		pending = 0;
 				liftsOK = 1;
     		mt_queue_start_lim(&pt,worker,g+1);
@@ -2904,7 +2944,7 @@ GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
 	printf("Evaluating %lu points\n",nmodF);
 	vW = cgetg(2,t_VEC);
 	ZmodF = cgetg(nmodF+1,t_VEC);
-	worker = snm_closure(is_entry("RREval_worker"),vJ);
+	worker = snm_closure(is_entry("_PicEval_worker"),vJ);
 	mt_queue_start_lim(&pt,worker,nmodF);
 	for(n=1;n<=nmodF||pending;n++)
 	{
@@ -3077,7 +3117,7 @@ GEN AllPols(GEN Z, ulong l, GEN JFrobMat, GEN QqFrobMat, GEN T, GEN pe, GEN p, l
     }
   }
   pending = 0;
-  worker = strtofunction("OnePol");
+  worker = strtofunction("_OnePol");
   args = cgetg(9,t_VEC);
   gel(args,3) = ImodF;
   gel(args,4) = Jfrobmat;

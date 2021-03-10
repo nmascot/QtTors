@@ -1,0 +1,11 @@
+Function: picmember
+Section: modular_forms
+C-Name: PicMember
+Prototype: iGG
+Help: picmember(J,W): Tests whether W represents a point of the Jacobian J.
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog

@@ -2,7 +2,7 @@ Function: piclifttors
 Section: modular_forms
 C-Name: PicLiftTors
 Prototype: GGLG
-Help: piclifttors(J,W,l,e): p-adic lift of a non-trivial multiple of the mod p^eini l-torsion point W of the p-adic Jacobian J to an l-torsion point at the p-adic precision of J.
+Help: piclifttors(J,W,l,e): p-adic lift of a non-trivial multiple of the mod p^e l-torsion point W of the p-adic Jacobian J to an l-torsion point at the p-adic precision of J.
 Doc: TODO 
  \bprog
  ? TODO

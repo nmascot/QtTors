@@ -2,10 +2,5 @@ Function: piceqval
 Section: modular_forms
 C-Name: PicEq_val
 Prototype: uGGG
-Help: piciszero(J,W1,W2): Given a p-adic Jacobian J of p-adic precision e, returns the largest e' <= e such that the points W1 and W2 of J agree mod p^e'.
+Help: piceqval(J,W1,W2): Given a p-adic Jacobian J of p-adic precision e, returns the largest e <= e such that the points W1 and W2 of J agree mod p^e'.
 Doc: TODO 
- \bprog
- ? TODO
- %2 = 
- TODO
- @eprog

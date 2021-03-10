@@ -1,8 +1,8 @@
 Function: picaddflip
 Section: modular_forms
 C-Name: PicChord
-Prototype: GGGL
-Help: picaddflip(J,W1,W2,flag): Negative of the sum of the points W1 and W2 in the Jacobian J. TODO flag
+Prototype: GGGD0,L,
+Help: picaddflip(J,W1,W2,{flag=0}): Negative of the sum of the points W1 and W2 in the Jacobian J. TODO flag
 Doc: TODO 
  \bprog
  ? TODO

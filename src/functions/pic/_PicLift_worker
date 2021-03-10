@@ -1,0 +1,11 @@
+Function: _PicLift_worker
+Section: programming/internals
+C-Name: PicLift_worker
+Prototype: GUGGGGG
+Help: TODO
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog

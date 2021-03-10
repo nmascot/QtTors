@@ -1,0 +1,6 @@
+Function: piceq
+Section: modular_forms
+C-Name: PicEq
+Prototype: iGGG
+Help: piceq(J,W1,W2): Test whether the points W1 and W2 agree on the Jacobian J.
+Doc: TODO 

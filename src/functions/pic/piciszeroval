@@ -2,10 +2,5 @@ Function: piciszeroval
 Section: modular_forms
 C-Name: PicIsZero_val
 Prototype: uGG
-Help: piciszero(J,W): Given a point W on the p-adic Jacobian J of p-adic precision e, returns the largest e' <= e such that W agrees mod p^e' with the origin of J.
+Help: piciszeroval(J,W): Given a point W on the p-adic Jacobian J of p-adic precision e, returns the largest e' <= e such that W agrees mod p^e' with the origin of J.
 Doc: TODO 
- \bprog
- ? TODO
- %2 = 
- TODO
- @eprog

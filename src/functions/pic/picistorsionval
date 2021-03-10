@@ -1,0 +1,6 @@
+Function: picistorsionval
+Section: modular_forms
+C-Name: PicIsTors_val
+Prototype: uGGG
+Help: piciszeroval(J,W): Given a point W on the p-adic Jacobian J of p-adic precision e and a polynomial F in Z[x], returns the largest e' <= e such that F(Frob_p).W agrees mod p^e' with the origin of J. F is also allowed to be an integer.
+Doc: TODO 
