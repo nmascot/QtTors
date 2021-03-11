@@ -6674,7 +6674,7 @@ GEN PicChord(GEN J, GEN W1, GEN W2, long flag);
 GEN PicMul(GEN J, GEN W, GEN n, long flag);
 GEN PicNeg(GEN J, GEN W, long flag);
 GEN PicSub(GEN J, GEN W1, GEN W2);
-GEN PicAut(GEN J, GEN W, ulong nAut); /* TODO */
+GEN PicAut(GEN J, GEN W, ulong nAut);
 GEN PicFrob(GEN J, GEN W);
 GEN PicFrobPoly(GEN J, GEN W, GEN F);
 ulong PicMember_val(GEN J, GEN W);
@@ -6697,3 +6697,6 @@ GEN TorsSpaceFrob_worker(GEN W1, GEN X1, GEN W2, GEN X2, GEN J);
 GEN PicEval_worker(GEN W, GEN J);
 GEN PicTorsPairings(GEN J, GEN W, GEN l, GEN LinTests, GEN FRparams);
 GEN PicLC(GEN J, GEN C, GEN W);
+GEN PlaneZeta(GEN f, ulong p);
+GEN SuperZeta(GEN f, ulong m, ulong p);
+GEN Jlift(GEN J, ulong e);

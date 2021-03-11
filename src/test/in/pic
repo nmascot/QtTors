@@ -1,13 +1,8 @@
 default(parisize,"128M");
 read("../src/nicolas_gp_code/GalRep.gp");
-\\ Equation for the curve: y²+h(x)*y=f(x)
-f = x^5+x^4; h = x^3+x+1; \\ X1(13)
-l = 7; \\ The representation occurs in the 7-torsion of the Jacobian
-p = 17; \\ We choose to get it 17-adically
-e = 8; \\ Target p-adic accuracy is O(17^32)
-a = 3; \\  Unramified degree 3
-chi = x^2-x-2; \\ Char.poly. of the Frobenius at p (another possible choice is x^2-2*x-1)
-P1 = [-1,1]; P2 = [0,0]; \\ We need two non-conjugate rational points
+f = x^5+x^4; h = x^3+x+1; \\ X1(13): y²+h(x)*y=f(x)
+l = 7; p = 17; e = 8; a = 3; chi = 'x^2-'x-2;
+P1 = [-1,1]; P2 = [0,0];
 Lp = hyperellcharpoly(Mod([f,h],p));
 [F,Auts,KnownAuts,g,d0,L,LL,L1,L2]=Hyper2RR([f,h],P1,P2);
 J = picinit(F,Auts,g,d0,[L,LL,L1,L2],['y],p,a,e);
@@ -29,3 +24,17 @@ e=32;
 [F,ZF] = HyperGalRep([f,h],l,p,e,P1,P2,chi);
 [G,ZG,VG] = ProjPol(ZF,l,2,0);
 polredabs(G)
+
+f = x^3*y+y^3+x;
+P1 = [0,0,1]; P2 = [1,0,0];
+l = 2; p = 5; e = 32;
+[F,ZF] = SmoothGalRep(f,l,p,e,[P1],[P2],0);
+apply(poldegree,factor(F)[,1])
+
+f = x^3+x+1; m=4; \\ Superell curve y^m=f(x). Its Jacobian contains the elliptic curve y^2=f(x).
+l = 5; p = 13; e = 16;
+chi = x^2+4*x+p; \\ Char.poly. of the Frobenius at p, used here to pick the piece of the 5-torsion coming from the elliptic curve quotient y^2=f(x) of this curve
+P = [Mod(w,w^2+1),1]; \\ Test: can also use algebraic points, although this is much less efficient
+[F,ZF] = SuperGalRep(f,m,l,p,e,P,chi);
+nfisisom(F,'x^24 - 250*'x^20 - 7720*'x^18 + 209035*'x^16 - 1337504*'x^14 + 874180*'x^12 + 10432720*'x^10 - 25758425*'x^8 + 95896800*'x^6 + 30090262*'x^4 + 132925720*'x^2 + 48081005)!=0
+

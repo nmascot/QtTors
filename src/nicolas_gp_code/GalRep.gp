@@ -31,7 +31,7 @@ mordroot(f,p)=
 	e=vecmax(fa[,2]);
 	if(e>1,
 	 e=p^ceil(log(e)/log(p));
-	 warning("mordroot returning upper bound ",N*e,", but order may be as low as ",N);
+	 \\warning("mordroot returning upper bound ",N*e,", but order may be as low as ",N);
 	 N*=e
 	);
 	N;
@@ -137,8 +137,8 @@ GalRep(C,l,p,e,Lp,chi,force_a)=
 		e1=e;
 		e*=2;
 		pe = pe^2;
-		warning("Could not identify any squarefree polynomial. Increasing p-adic accuracy: ",O(p^e),".");
-		J = Jlift(J,e);
+		\\warning("Could not identify any squarefree polynomial. Increasing p-adic accuracy: ",O(p^e),".");
+		J = jaclift(J,e);
 	);
 	J = Z = WB = 0;
 	F = AF[1][3];
@@ -183,7 +183,7 @@ SmoothGalRep(f,l,p,e,P1,P2,chi,force_a)=
 {
   my(Lp,C);
   C = Smooth2RR(f,P1,P2);
-	Lp = PlaneZeta(C[1],p); \\ Local L factor at p
+	Lp = smoothplanecharpoly(C[1],p); \\ Local L factor at p
   C=concat(C,[1]);
   GalRep(C,l,p,e,Lp,chi,force_a);
 }
@@ -203,7 +203,7 @@ SuperGalRep(f,m,l,p,e,P,chi,force_a)=
 	my(Lp,C);
 	if(!issquarefree(Mod(f,p)),error(f," is not squarefree mod ",p));
 	C = Super2RR(f,m,P);
-	Lp = SuperZeta(f,m,p);
+	Lp = superellcharpoly(f,m,p);
 	C = concat(C,['y]);
 	GalRep(C,l,p,e,Lp,chi,force_a);
 }
@@ -236,7 +236,7 @@ SmoothBestp(f0,D,l,pmax)=
 	P = primes([3,pmax]);
 	P = select(p->Mod(D,p),P);
 	export(mordroot,mordroot1);
-	A = parapply(p->mordroot(PlaneZeta(f,p),l),P);
+	A = parapply(p->mordroot(smoothplanecharpoly(f,p),l),P);
 	a = vecmin(A,&i);
 	[P[i],a];
 }
