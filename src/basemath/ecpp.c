@@ -1281,12 +1281,12 @@ ecpp0(GEN C, long stopat)
   {
     GEN C2, param, x = gel(tune, tunelen);
     pari_timer T;
-    dbg_mode() timer_start(&T);
-    param = ecpp_param_set(tune, x);
     dbg_mode() {
-      err_printf(ANSI_BRIGHT_WHITE "\n%Ps" ANSI_RESET, x);
-      err_printf(ANSI_WHITE "  %8ld" ANSI_RESET, timer_delay(&T));
+      timer_start(&T);
+      err_printf(ANSI_BRIGHT_WHITE "\nECPP: parameters %Ps:" ANSI_RESET, x);
     }
+    param = ecpp_param_set(tune, x);
+    dbg_mode() err_printf(ANSI_WHITE "  %8ld" ANSI_RESET, timer_delay(&T));
     C2 = ecpp_param(N, param, stopat);
     if (C2)
       return typ(C)==t_INT? C2: gerepilecopy(av, shallowconcat(C,C2));
