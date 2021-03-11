@@ -1,0 +1,6 @@
+Function: piclc
+Section: modular_forms
+C-Name: PicLC
+Prototype: GGG
+Help: piclc(J,C,W): Given a vector W of points on the Jacobian J and a vector C of integers of the same length as W, returns the sum of the C[i]*W[i] in J.
+Doc: TODO 

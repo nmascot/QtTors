@@ -1,3 +1,4 @@
+read("../../nicolas_gp_code/install.gp");
 read("../../nicolas_gp_code/TorsSpace.gp");
 read("../../nicolas_gp_code/TorsGen.gp");
 read("../../nicolas_gp_code/Hyper2RR.gp");
@@ -35,8 +36,6 @@ mordroot(f,p)=
 	);
 	N;
 }
-
-PicIsTorsion_val(J,W,N)=PicIsZero_val(J,PicFrobPoly(J,W,N)); \\ For debugging purposes. N can be an integer or a polynomial.
 
 TorsSpaceGetPols(Z,l,JFrobMat,QqFrobMat,T,pe,p,e)=
 \\ Given a vector Z of evaluations of the points of a submodule T of J[l],
@@ -103,8 +102,8 @@ GalRep(C,l,p,e,Lp,chi,force_a)=
 		a = if(force_a,force_a,mordroot(Lp,l))
 	);
 	print("Working with q=",p,"^",a);
-	J=PicInit(f,Auts,g,d0,[L,LL,L1,L2],Bad,p,a,e);
-	J1 = PicRed(J,1); \\ Reduction mod p
+	J=picinit(f,Auts,g,d0,[L,LL,L1,L2],Bad,p,a,e);
+	J1 = picred(J,1); \\ Reduction mod p
 	[B,matFrob,matAuts] = TorsBasis(J1,l,Lp,chi,KnownAuts); \\ Basis of the mod p^1 space and matrix of Frob_p
 	print("The matrix of Frob_",p," is");
 	printp(centerlift(matfrobenius(Mod(matFrob,l))));
@@ -122,9 +121,9 @@ GalRep(C,l,p,e,Lp,chi,force_a)=
 	while(1,
 		print("\n--> Lifting ",#WB," points ",p,"-adically, target O(",p,"^",e,")");
 		if(#WB > Jgetg(J),
-  		my(J=J,e1=e1,l=l); WB = parapply(W->PicLiftTors(J,W,e1,l),WB); \\ More efficient in parallel
+  		my(J=J,e1=e1,l=l); WB = parapply(W->piclifttors(J,W,e1,l),WB); \\ More efficient in parallel
 		,
-  		WB = apply(W->PicLiftTors(J,W,e1,l),WB); \\ Less efficient in parallel (TODO tune)
+  		WB = apply(W->piclifttors(J,W,e1,l),WB); \\ Less efficient in parallel (TODO tune)
 		);
 		print("Time lifting: ",timestr(~t0));
 		print("\n--> All of T");

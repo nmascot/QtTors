@@ -44,7 +44,7 @@ TorsSpaceFrobGen(J,l,B,matFrob)=
   	c=Q[,n];
   	listput(cWB,c);
   	c=centerlift(Mod(c,l));
-  	listput(WB,PicLC(J,c,B));
+  	listput(WB,piclc(J,c,B));
   	n+=NF[i]
 	);
 	WB = Vec(WB); \\ Generating set of T under Frob

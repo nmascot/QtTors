@@ -63,7 +63,7 @@ Tors_UpdateLinTests(J,BT,Tnew,l,LinTests,R,FRparams)=
 	d = #BT;
 	print("  Computing pairings...");
   \\ New col of R
-  Rnew = TorsTestPt(J,Tnew,l,LinTests,FRparams);
+  Rnew = pictorspairings(J,Tnew,l,LinTests,FRparams);
   print("  Looking for relations...");
 	BT2 = concat([BT,[Tnew]]);
 	R2 = matconcat([R,Rnew]);
@@ -75,7 +75,7 @@ Tors_UpdateLinTests(J,BT,Tnew,l,LinTests,R,FRparams)=
 	);
 	rel = KR2[,1];
 	print(" Found pseudo-relation: ",rel);
-	if(PicIsZero_val(J,PicLC(J,rel,BT2))==Jgete(J),
+	if(piciszero(J,piclc(J,rel,BT2)),
 		print(" It actually holds.");
 		return([0,rel])
 	);
@@ -84,8 +84,8 @@ Tors_UpdateLinTests(J,BT,Tnew,l,LinTests,R,FRparams)=
   \\ Find a new one, and replace one the appropriate old one with it
   print("  Changing linear tests so that we don't get a false positive again.");
   until(Mod(Rnew*rel,l), \\ loop until new pairing breaks pseudo-relation
-		NewTest = PicChord(J,PicRand(J,0),PicRand(J,0),1);
-		Rnew = parapply(T->TorsTestPt(J,T,l,[NewTest],FRparams)[1],BT2);
+		NewTest = picaddflip(J,picrand(J),picrand(J),1);
+		Rnew = parapply(T->pictorspairings(J,T,l,[NewTest],FRparams)[1],BT2);
 		if(default(debug),print("  New test gives parings ",Rnew));
 	);
   \\ So now we have r+1 forms of rank r.
@@ -135,7 +135,7 @@ TorsGetMatAuts(J,KnownAuts,B,l,LinTests,R,FRparams)=
 			print(" Aut #",i," claimed to act as ",KnownAuts[i]);
 			matAuts[i] = Mod(KnownAuts[i]*matid(#B),l);
 		,
-			Ri = parapply(W->TorsTestPt(J,PicAut(J,W,i),l,LinTests,FRparams),B);
+			Ri = parapply(W->pictorspairings(J,picaut(J,W,i),l,LinTests,FRparams),B);
 			matAuts[i] = Mod(R,l)^(-1)*matconcat(Ri)
 		)
 	);
@@ -166,12 +166,12 @@ TorsBasis(J,l,Lp,chi,KnownAuts,GetPairings)=
 	BW = vector(d); \\ list of l-power tors pts
   Bo = vector(d); \\ list of exponents of orders
   BT = vector(d); \\ list of l-tors pts
-	LinTests = parvector(d,i,PicChord(J,PicRand(J,i+random()),PicRand(J,i+d+random()),1)); \\ list of pts to pair l-tors with
+	LinTests = parvector(d,i,picaddflip(J,picrand(J,i+random()),picrand(J,i+d+random()),1)); \\ list of pts to pair l-tors with
 	R = matrix(d,0); \\ matrix of pairings
 	matFrob = Mod(matrix(d,d),l);
-	AddC = AddChain(l,0);
+	AddC = AddFlipChain(l,0);
   W0 = JgetW0(J);
-  W0 = PicChord(J,W0,W0,1); \\ Non-trivial origin, needed for pairings
+  W0 = picaddflip(J,W0,W0,1); \\ Non-trivial origin, needed for pairings
   z = Fq_zeta_l(JgetT(J),Jgetp(J),l); \\ primitive l-th root of 1, to linearize parings
 	FRparams = [AddC,W0,z];
   r = 0; \\ dim of l-tors obtained so far
@@ -229,7 +229,7 @@ TorsBasis(J,l,Lp,chi,KnownAuts,GetPairings)=
 						if(M,
 							matFrob = M
 						,
-							M = TorsTestPt(J,PicFrob(J,BT[d]),l,LinTests,FRparams);
+							M = TorsTestPt(J,picfrob(J,BT[d]),l,LinTests,FRparams);
 							rel = matker(Mod(matconcat([R,M]),l));
 							if(#rel!=1,error("Bug in TorsGen, please report"));
 							rel = rel[,1];
@@ -240,8 +240,8 @@ TorsBasis(J,l,Lp,chi,KnownAuts,GetPairings)=
 					);
 					\\ Apply Frob and start over
 					print(" Applying Frobenius");
-					W = PicFrob(J,W);
-					T = if(o==1,W,PicFrob(J,T));
+					W = picfrob(J,W);
+					T = if(o==1,W,picfrob(J,T));
 				);
 				\\ A relation broke the above loop. Try to use it to make a new point.
 				m = vecmin([Bo[i]|i<-[1..r],rel[i]]);
@@ -256,7 +256,7 @@ TorsBasis(J,l,Lp,chi,KnownAuts,GetPairings)=
 					break;
 				);
         S = vector(r,i,if(rel[i],l^(Bo[i]-m)*rel[i],0));
-        W = PicLC(J,S,BW[1..r]);
+        W = piclc(J,S,BW[1..r]);
 				B = 0;
         r--; \\ Erase data about previous point, start over with this new one
         [T,o] = TorsOrd(J,W,l);

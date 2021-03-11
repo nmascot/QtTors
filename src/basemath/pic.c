@@ -2786,7 +2786,7 @@ GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
 	// gen_m1: we will get this pt by applying Auts and Frob
 	// Vecmall([n,m]): this pt is Frob^m * VmodF[n]
 	// Vecsmall([0,0]): this is the origin
-	for(n=1;n<ld;n++) // Initalise
+	for(n=1;n<ld;n++) // Initialise
 		gel(done,n) = NULL;
 	gel(done,ld) = mkvecsmall2(0,0);
 	ndone = 1; // Number of pts; we stop when this reaches ld
@@ -2795,7 +2795,7 @@ GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
 	// Prepare cloure for parallel code
 	vJ = cgetg(2,t_VEC);
   gel(vJ,1) = J;
-	worker = snm_closure(is_entry("TorsSpaceFrob_worker"),vJ);
+	worker = snm_closure(is_entry("_TorsSpaceFrob_worker"),vJ);
 	// matFrob and matAuts, version Flm
 	mfrob = M2Flm(matFrob,l,d,d);
 	nAuts = lg(matAuts);
@@ -3452,3 +3452,20 @@ GEN Fq_mu_l_log(GEN x, GEN z, GEN T, GEN p, GEN l)
   return gerepileupto(av,utoi(n));
 }
 
+GEN PicTorsPairings(GEN J, GEN W, GEN l, GEN LinTests, GEN FRparams)
+{
+  pari_sp av = avma;
+  GEN T,p,AddC,W0,z,fr,res;
+  ulong n,i;
+  T = JgetT(J);
+  p = Jgetp(J);
+  AddC = gel(FRparams,1);
+  W0 = gel(FRparams,2);
+  z = gel(FRparams,3);
+  fr = PicFreyRuckMulti(J,W,l,LinTests,W0,AddC);
+  n = lg(fr);
+  res = cgetg(n,t_COL);
+  for(i=1;i<n;i++)
+    gel(res,i) = Fq_mu_l_log(gel(fr,i),z,T,p,l);
+  return gerepileupto(av,res);
+}

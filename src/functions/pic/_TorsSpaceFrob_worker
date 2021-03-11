@@ -1,7 +1,7 @@
 Function: _TorsSpaceFrob_worker
 Section: programming/internals
-C-Name: PicLift_worker
-Prototype: GUGGGGG
+C-Name: TorsSpaceFrob_worker
+Prototype: GGGGG
 Help: TODO
 Doc: TODO 
  \bprog
