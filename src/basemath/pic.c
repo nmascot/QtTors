@@ -1585,7 +1585,7 @@ GEN FnsEvalAt_Rescale(GEN Fns, GEN Z, GEN vars, GEN T, GEN p, long e, GEN pe)
       if(DEBUGLEVEL) printf("Good, no relation\n");
       return gerepileupto(av,S);
     }
-    pari_printf("Found %ld relations, eliminating and re-evaluating\n",nK-1);
+    if(DEBUGLEVEL) pari_printf("Found %ld relations, eliminating and re-evaluating\n",nK-1);
     /* No. We assume Z def / Q, so K has entries in Fp */
     /* Do elimination and start over */
     redo = cgetg(nK,t_VECSMALL);
@@ -2443,7 +2443,7 @@ GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
     if(e2>efin) e2 = efin;
 		e21 = e2-e1;
 		pe21 = e21==e1 ? pe1 : powiu(p,e21);
-    pari_printf("Lifting from prec O(%Ps^%lu) to O(%Ps^%lu)\n",p,e1,p,e2);
+    if(DEBUGLEVEL) pari_printf("Lifting from prec O(%Ps^%lu) to O(%Ps^%lu)\n",p,e1,p,e2);
     J2 = e2<efin ? PicRed(J,e2) : J;
 		pe2 = Jgetpe(J2);
 		/* START LIFTING */
@@ -2585,7 +2585,7 @@ GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
       		{
 						if(done==gen_0)
 						{
-							printf("Lift %ld had a chart issue\n",workid);
+							if(DEBUGLEVEL) printf("Lift %ld had a chart issue\n",workid);
 							liftsOK = 0;
 						}
 						else
@@ -2598,7 +2598,7 @@ GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
     		mt_queue_end(&pt);
 				if(liftsOK==0)
         { /* This chart does not work. Take the next one, reset data, and restart */
-         	printf("Changing chart\n");
+         	if(DEBUGLEVEL) printf("Changing chart\n");
 					P0++; /* New chart */
           printf("P0=%lu\n",P0);
           if(P0>nZ+g-d0)
@@ -2612,10 +2612,14 @@ GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
     		n = lg(Ktors)-1;
     		if(n!=1)
     		{ /* l-tors is étale, so this can only happen if Chart is not diffeo - > change chart */
-      		printf("Dim ker tors = %ld (expected 1), changing charts\n",n);
-      		printf("nZ=%lu, g=%lu, d0=%lu\n",nZ,g,d0);
 					P0++; /* New chart */
-					printf("P0=%lu\n",P0);
+      		if(DEBUGLEVEL)
+					{
+						printf("Dim ker tors = %ld (expected 1), changing charts\n",n);
+      			printf("nZ=%lu, g=%lu, d0=%lu\n",nZ,g,d0);
+						printf("P0=%lu\n",P0);
+					}
+					P0++; /* New chart */
 					if(P0>nZ+g-d0)
             pari_err(e_MISC,"Run out of charts while computing coords of 0");
 					P0_tested = 0;
@@ -2630,7 +2634,10 @@ GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
       		red = ZX_add(red,gel(Ktors,i));
     		}
     		if(ZX_is0mod(red,p)) /* TODO can this happen ? why, or why not ? */
-				{	printf("Sum of Ktors is zero!\n"); continue;}
+				{
+					if(DEBUGLEVEL) printf("Sum of Ktors is zero!\n");
+					continue;
+				}
     		Ktors = FqC_Fq_mul(Ktors,ZpXQ_inv(red,T,p,e2),T,pe2); /* Normalise so that sum = 1 */
 				W = NULL; /* If done, return updated W; else update U. */
 				for(i=1;i<=g+1;i++) gel(Ulifts,i) = FqM_Fq_mul(gel(Ulifts,i),gel(Ktors,i),T,pe2);
@@ -2647,7 +2654,7 @@ GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
 					avma = avtesttors;
 					if(testtors<e2)
           {
-            printf("Not actually l-torsion!!! Changing charts\n");
+            if(DEBUGLEVEL) printf("Not actually l-torsion!!! Changing charts\n");
             P0++;
             c0 = NULL;
 						av3 = av2;
@@ -2827,7 +2834,7 @@ GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
 	todo = cgetg(ld,t_VEC); // list of operations to be executed in parallel; used later
 	while(ndone<ld)
 	{
-		printf("Main loop, touched %lu/%lu\n",ndone,ld);
+		if(DEBUGLEVEL) printf("TorsSpaceFrob: main loop, touched %lu/%lu\n",ndone,ld);
 		// Use Auts as much as possible
 		do
 		{
@@ -2862,7 +2869,7 @@ GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
 			}
 			//printf("Applying auts gave %lu new Frob orbits\n",newmodF);
 		} while(newmodF);
-		if(nAuts>1) printf("Done with auts, now touched %lu/%lu\n",ndone,ld);
+		if(DEBUGLEVEL && nAuts>1) printf("TorsSpaceFrob: done with auts, now touched %lu/%lu\n",ndone,ld);
 		if(ndone==ld) break; // Are we done?
 		// TODO gerepile?
 		// Now use group law
@@ -2916,7 +2923,7 @@ GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
 			}
 		}
 		// Execute operations in J in parallel
-		printf("Computing %lu new points\n",ntodo);
+		if(DEBUGLEVEL) printf("TorsSpaceFrob: computing %lu new points\n",ntodo);
 		mt_queue_start_lim(&pt,worker,ntodo);
 	  for(n=1;n<=ntodo||pending;n++)
   	{
@@ -2941,7 +2948,7 @@ GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
   	mt_queue_end(&pt);
 	}
 
-	printf("Evaluating %lu points\n",nmodF);
+	if(DEBUGLEVEL) printf("TorsSpaceFrob: Evaluating %lu points\n",nmodF);
 	vW = cgetg(2,t_VEC);
 	ZmodF = cgetg(nmodF+1,t_VEC);
 	worker = snm_closure(is_entry("_PicEval_worker"),vJ);
@@ -3087,7 +3094,7 @@ GEN AllPols(GEN Z, ulong l, GEN JFrobMat, GEN QqFrobMat, GEN T, GEN pe, GEN p, l
 		if(All0) avma = avj; /* Drop this j */
     else j0++;
   }
-	printf("Reducing lF from %lu to %lu\n",lF-1,j0-1);
+	if(DEBUGLEVEL) printf("AllPols: Reducing lF from %lu to %lu\n",lF-1,j0-1);
 	lF = j0;
   F1 = cgetg(lF,t_VEC);
   npols = 0;

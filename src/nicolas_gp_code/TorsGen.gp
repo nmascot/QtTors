@@ -61,28 +61,28 @@ Tors_UpdateLinTests(J,BT,Tnew,l,LinTests,R,FRparams)=
 	*/
 	my(d,Rnew,BT2,R2,KR2,rel,NewTest,i);
 	d = #BT;
-	print("  Computing pairings...");
+	\\print("  Computing pairings...");
   \\ New col of R
   Rnew = pictorspairings(J,Tnew,l,LinTests,FRparams);
-  print("  Looking for relations...");
+  \\print("  Looking for relations...");
 	BT2 = concat([BT,[Tnew]]);
 	R2 = matconcat([R,Rnew]);
   KR2 = centerlift(matker(Mod(R2,l)));
 	if(#KR2>1,error("Bug in Tors_UpdateLinTests, please report")); \\ Not supposed to happen by (H)
   if(#KR2==0,
-    print("  Good, no relation");
+    \\print("  Good, no relation");
 		return([1,[LinTests,R2]]);
 	);
 	rel = KR2[,1];
-	print(" Found pseudo-relation: ",rel);
+	\\print(" Found pseudo-relation: ",rel);
 	if(piciszero(J,piclc(J,rel,BT2)),
-		print(" It actually holds.");
+		\\print(" It actually holds.");
 		return([0,rel])
 	);
-	print(" Good, it does not actually hold.");
+	\\print(" Good, it does not actually hold.");
   \\ So our linear forms are not independent.
   \\ Find a new one, and replace one the appropriate old one with it
-  print("  Changing linear tests so that we don't get a false positive again.");
+  \\print("  Changing linear tests so that we don't get a false positive again.");
   until(Mod(Rnew*rel,l), \\ loop until new pairing breaks pseudo-relation
 		NewTest = picaddflip(J,picrand(J),picrand(J),1);
 		Rnew = parapply(T->pictorspairings(J,T,l,[NewTest],FRparams)[1],BT2);
@@ -132,7 +132,7 @@ TorsGetMatAuts(J,KnownAuts,B,l,LinTests,R,FRparams)=
 	matAuts = vector(nAuts);
 	for(i=1,nAuts,
 		if(KnownAuts[i],
-			print(" Aut #",i," claimed to act as ",KnownAuts[i]);
+			\\print(" Aut #",i," claimed to act as ",KnownAuts[i]);
 			matAuts[i] = Mod(KnownAuts[i]*matid(#B),l);
 		,
 			Ri = parapply(W->pictorspairings(J,picaut(J,W,i),l,LinTests,FRparams),B);
@@ -180,22 +180,22 @@ TorsBasis(J,l,Lp,chi,KnownAuts,GetPairings)=
 	while(1,
 		\\ Make new batch
 		nBatch = max(ceil((d-r)/a),ceil(default(nbthreads)/2));
-		print(" Generating a new batch of ",nBatch," points in parallel");
+		\\print(" Generating a new batch of ",nBatch," points in parallel");
     my(RandTorsPt=RandTorsPt,seed=vector(nBatch,i,random()));
     if(Phi,
       UsedPhi = vector(nBatch,i,Phi[(iPhi+i-1)%#Phi+1]); \\ TODO monitor dim of each Phi-part to choose Phi as needed
       iPhi += nBatch;
-      print("   Using Phi=",UsedPhi)
+      \\print("   Using Phi=",UsedPhi)
     ,
       UsedPhi = vector(nBatch,i,0);
     );
     Batch = parvector(nBatch,i,RandTorsPt(J,l,a,Lp,chi,UsedPhi[i],seed[i]));
-    print(" Batch of points generated.");
+    \\print(" Batch of points generated.");
 		\\ Loop through batch
 		for(iBatch=1,nBatch,
 			if(Batch[iBatch]==0,next); \\ Did we unluckily genrate the 0 pt?
 			[W,o,T,B] = Batch[iBatch];
-			print(" Picking point ",iBatch," from batch; its order is ",l,"^",o);
+			\\print(" Picking point ",iBatch," from batch; its order is ",l,"^",o);
 			while(1,
 				iFrob = 0;
 				while(1,
@@ -213,7 +213,7 @@ TorsBasis(J,l,Lp,chi,KnownAuts,GetPairings)=
 					[LinTests,R] = res[2]; \\ Update Lintests and R
 					iFrob++;
 					if(B && iFrob==poldegree(B), \\ We know that next time will be dependent and the relation
-						print(" B = ",centerlift(B), " says we'll get linear dependency next time");
+						\\print(" B = ",centerlift(B), " says we'll get linear dependency next time");
 						for(i=1,poldegree(B)-1,matFrob[r+1-i,r-i]=Mod(1,l));
             for(i=0,poldegree(B)-1,matFrob[r+1-poldegree(B)+i,r]=Mod(-polcoef(B,i),l));
 						if(r==d,
@@ -224,14 +224,14 @@ TorsBasis(J,l,Lp,chi,KnownAuts,GetPairings)=
 					);
 					if(r==d,
 						for(i=1,iFrob-1,matFrob[r+1-i,r-i]=Mod(1,l));
-						print("Guessing last column of matFrob from charpoly");
+						\\print("Guessing last column of matFrob from charpoly");
 						M = GuessColFromCharpoly(matFrob,Mod(if(chi,chi,Lp),l));
 						if(M,
 							matFrob = M
 						,
 							M = TorsTestPt(J,picfrob(J,BT[d]),l,LinTests,FRparams);
 							rel = matker(Mod(matconcat([R,M]),l));
-							if(#rel!=1,error("Bug in TorsGen, please report"));
+							\\if(#rel!=1,error("Bug in TorsGen, please report"));
 							rel = rel[,1];
 							for(i=1,d,matFrob[i,d] = -rel[i]/rel[d+1])
 						);
@@ -239,7 +239,7 @@ TorsBasis(J,l,Lp,chi,KnownAuts,GetPairings)=
 						return(if(GetPairings,[BT,matFrob,matAuts,LinTests,R,FRparams],[BT,matFrob,matAuts]));
 					);
 					\\ Apply Frob and start over
-					print(" Applying Frobenius");
+					\\print(" Applying Frobenius");
 					W = picfrob(J,W);
 					T = if(o==1,W,picfrob(J,T));
 				);
@@ -251,7 +251,7 @@ TorsBasis(J,l,Lp,chi,KnownAuts,GetPairings)=
         );
 				if(m<=1,
 					\\ Cannot divide -> Give up
-					print(" Giving up this point");
+					\\print(" Giving up this point");
 					r--; \\ Erase data about this point
 					break;
 				);
@@ -260,7 +260,7 @@ TorsBasis(J,l,Lp,chi,KnownAuts,GetPairings)=
 				B = 0;
         r--; \\ Erase data about previous point, start over with this new one
         [T,o] = TorsOrd(J,W,l);
-				print(" Dividing relation ",rel~," gives point of order ",l,"^",o);
+				\\print(" Dividing relation ",rel~," gives point of order ",l,"^",o);
 				if(o==0,break)
 			)
 		)

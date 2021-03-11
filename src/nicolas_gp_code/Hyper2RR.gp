@@ -1,4 +1,4 @@
-read("../../nicolas_gp_code/PtIsOnCurve.gp");
+read("../src/nicolas_gp_code/PtIsOnCurve.gp");
 
 HyperRR(n,g,u,v)=
 {

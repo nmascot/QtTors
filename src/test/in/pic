@@ -1,4 +1,5 @@
-read("../../nicolas_gp_code/GalRep.gp");
+default(parisize,"128M");
+read("../src/nicolas_gp_code/GalRep.gp");
 \\ Equation for the curve: y²+h(x)*y=f(x)
 f = x^5+x^4; h = x^3+x+1; \\ X1(13)
 l = 7; \\ The representation occurs in the 7-torsion of the Jacobian
@@ -8,7 +9,7 @@ a = 3; \\  Unramified degree 3
 chi = x^2-x-2; \\ Char.poly. of the Frobenius at p (another possible choice is x^2-2*x-1)
 P1 = [-1,1]; P2 = [0,0]; \\ We need two non-conjugate rational points
 Lp = hyperellcharpoly(Mod([f,h],p));
-/*[F,Auts,KnownAuts,g,d0,L,LL,L1,L2]=Hyper2RR([f,h],P1,P2);
+[F,Auts,KnownAuts,g,d0,L,LL,L1,L2]=Hyper2RR([f,h],P1,P2);
 J = picinit(F,Auts,g,d0,[L,LL,L1,L2],['y],p,a,e);
 J1 = picred(J,1);
 W1 = picrand(J1);
@@ -22,14 +23,9 @@ W = piclifttors(J,W1,1,l);
 picmember(J,W)
 picistorsion(J,W,l)
 picistorsion(J,W,chi)
-piciszero(J,W)*/
+piciszero(J,W)
 
 e=32;
 [F,ZF] = HyperGalRep([f,h],l,p,e,P1,P2,chi);
-printf("\nPolynomial defining the linear representation:\n");
-print(F);
 [G,ZG,VG] = ProjPol(ZF,l,2,0);
-printf("\nPolynomial defining the projective representation:\n");
-print(G);
-printf("\nReduced version:\n");
-print(polredabs(G));
+polredabs(G)

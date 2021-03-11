@@ -1,9 +1,9 @@
-read("../../nicolas_gp_code/install.gp");
-read("../../nicolas_gp_code/TorsSpace.gp");
-read("../../nicolas_gp_code/TorsGen.gp");
-read("../../nicolas_gp_code/Hyper2RR.gp");
-read("../../nicolas_gp_code/Smooth2RR.gp");
-read("../../nicolas_gp_code/Super2RR.gp");
+read("../src/nicolas_gp_code/install.gp");
+read("../src/nicolas_gp_code/TorsSpace.gp");
+read("../src/nicolas_gp_code/TorsGen.gp");
+read("../src/nicolas_gp_code/Hyper2RR.gp");
+read("../src/nicolas_gp_code/Smooth2RR.gp");
+read("../src/nicolas_gp_code/Super2RR.gp");
 
 mordroot1(f,p)=
 \\ Computes the order of x in Fp[x]/(f). Assumes f irreducible mod p.
@@ -47,12 +47,12 @@ TorsSpaceGetPols(Z,l,JFrobMat,QqFrobMat,T,pe,p,e)=
   my(A,nA,nI);
   A = AllPols(Z,l,JFrobMat,QqFrobMat,T,pe,p,e); \\ p-adic approximation of a set of polynomials which all define a subfield of the field cut out by the representation, with equality iff. no repeated roots
 	nA = #A;
-	print(nA," candidate polynomials");
+	\\print(nA," candidate polynomials");
   A = select(x->x[3]!=[],A); \\ Drop the approximations that could not be identified as rationals
 	nI = #A;
-  print(nI," identified polynomials");
+  \\print(nI," identified polynomials");
   A = select(x->#Set(x[1])==#(x[1]),A); \\ Drop the polynomials having multiple roots
-  print(#A," faithful polynomials");
+  \\print(#A," faithful polynomials");
 	if(#A==0 && nA==nI,error("None of the evaluation maps gives a squarefree polynomial. Try again with different points."));
   vecsort(A,x->sizebyte(x[3]));
 }
@@ -93,46 +93,46 @@ GalRep(C,l,p,e,Lp,chi,force_a)=
   L2 = RR_rescale(L2,p);
   Bad *= lcm(apply(S->lcm(apply(f->denominator(content(f)),S)),[L,L1,L2]));
   if(chi,
-		print("T = part of J[",l,"] where Frob_",p," acts by ",chi);
+		\\print("T = part of J[",l,"] where Frob_",p," acts by ",chi);
 		d = poldegree(chi); \\ Dimension of representation
 		a = if(force_a,force_a,mordroot(chi,l)) \\ q = p^a
 	,
-		print("T = all of J[",l,"]");
+		\\print("T = all of J[",l,"]");
 		d=2*g;
 		a = if(force_a,force_a,mordroot(Lp,l))
 	);
-	print("Working with q=",p,"^",a);
+	\\print("Working with q=",p,"^",a);
 	J=picinit(f,Auts,g,d0,[L,LL,L1,L2],Bad,p,a,e);
 	J1 = picred(J,1); \\ Reduction mod p
 	[B,matFrob,matAuts] = TorsBasis(J1,l,Lp,chi,KnownAuts); \\ Basis of the mod p^1 space and matrix of Frob_p
-	print("The matrix of Frob_",p," is");
-	printp(centerlift(matfrobenius(Mod(matFrob,l))));
+	\\print("The matrix of Frob_",p," is");
+	\\printp(centerlift(matfrobenius(Mod(matFrob,l))));
 	i=1;M=Mod(matFrob,l);
 	while(M!=1,M*=matFrob;i++);
-	print("It has order ",i);
-	if(i<a,warning("Therefore working in degree a=",a," is not optimal. Consider restarting the computation while forcing a=",i,"."));
+	\\print("It has order ",i);
+	\\if(i<a,warning("Therefore working in degree a=",a," is not optimal. Consider restarting the computation while forcing a=",i,"."));
 	for(i=1,#matAuts,
-		print("The matrix of Aut #",i," (possibly on a different basis) is");
-  	printp(centerlift(matfrobenius(Mod(matAuts[i],l))));
+		\\print("The matrix of Aut #",i," (possibly on a different basis) is");
+  	\\printp(centerlift(matfrobenius(Mod(matAuts[i],l))));
 	);
 	[WB,cWB] = TorsSpaceFrobGen(J1,l,B,matFrob); \\ Generating set of T under Frob and coordinates of these generators on B TODO use Auts
-	print("Time getting basis of T over F_",p,": ",timestr(~t0));
+	\\print("Time getting basis of T over F_",p,": ",timestr(~t0));
 	J1 = B = 0;
 	while(1,
-		print("\n--> Lifting ",#WB," points ",p,"-adically, target O(",p,"^",e,")");
+		\\print("\n--> Lifting ",#WB," points ",p,"-adically, target O(",p,"^",e,")");
 		if(#WB > Jgetg(J),
   		my(J=J,e1=e1,l=l); WB = parapply(W->piclifttors(J,W,e1,l),WB); \\ More efficient in parallel
 		,
   		WB = apply(W->piclifttors(J,W,e1,l),WB); \\ Less efficient in parallel (TODO tune)
 		);
-		print("Time lifting: ",timestr(~t0));
-		print("\n--> All of T");
+		\\print("Time lifting: ",timestr(~t0));
+		\\print("\n--> All of T");
 		Z = TorsSpaceFrobEval(J,WB,cWB,l,matFrob,matAuts);
-		print("Time span and eval: ",timestr(~t0));
-		print("\n--> Expansion and identification");
+		\\print("Time span and eval: ",timestr(~t0));
+		\\print("\n--> Expansion and identification");
 		JT = JgetT(J);
 		AF = TorsSpaceGetPols(Z,l,matFrob,JgetFrobMat(J),JT,pe,p,e); \\ List of polynomials defining the representation
-		print("Time polynomials: ",timestr(~t0));
+		\\print("Time polynomials: ",timestr(~t0));
 		if(AF!=[],break);
 		e1=e;
 		e*=2;

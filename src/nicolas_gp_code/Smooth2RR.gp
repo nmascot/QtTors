@@ -1,4 +1,4 @@
-read("../../nicolas_gp_code/PtIsOnCurve.gp");
+read("../src/nicolas_gp_code/PtIsOnCurve.gp");
 
 LSmooth(n,d,x,y)=
 {
