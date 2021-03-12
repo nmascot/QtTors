@@ -1163,6 +1163,7 @@ powcx(GEN x, GEN logx, GEN n, long prec)
         xa = mpexp(xa); shiftr_inplace(xa, sh);
       }
   }
+  if (typ(xb) != t_REAL) return xa;
   if (gexpo(xb) > 30)
   {
     GEN q, P = Pi2n(-2, p), z = addrr(xb,P); /* = x + Pi/4 */

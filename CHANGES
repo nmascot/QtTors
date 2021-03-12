@@ -34,6 +34,7 @@ BA  20- missing GC in qfsolve
     29- bnflog(bnr, ...) -> SEGV
     30- elliptic functions: incorrect reduction of z/w1 mod [1,tau] =>
         catastrophic cancellation
+    31- powcx(x, t_COMPLEX with 0 imaginary part) -> crash
 
   Added
 HC   1- new GP function eulerreal
