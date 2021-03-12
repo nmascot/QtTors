@@ -11968,8 +11968,8 @@ mftocoset_i(ulong N, GEN M, GEN cosets)
   GEN ga;
   c = cbezout(N*A, C, &u, &v); Nc = N/c;
   ga = coset_complete(c, umodsu(v*D, Nc), Nc);
-  i = gen_search(cosets, ga, 0, (void*)N, &cmp_coset);
-  if (!i) pari_err_BUG("mftocoset [no coset found]");
+  i = gen_search(cosets, ga, (void*)N, &cmp_coset);
+  if (i < 0) pari_err_BUG("mftocoset [no coset found]");
   return gc_long(av,i);
 }
 /* (U * V^(-1))[2,2] mod N, assuming V in SL2(Z) */

@@ -89,6 +89,9 @@ HC   1- faster implementation of eulervec + cache result
 BA  14- [libpari] gp_read_stream now return NULL when EOF is reached (was gnil)
     15- elltwist now returns an ellinit, and accepts the same input formats
         as ellinit ([a1,a2,a3,a4,a6], [a4,a6], Cremona label)
+    16- gen_search / vecvecsmall_search: remove flag; the result is now
+        positive if the element is found else -i if element should be
+        inserted at position i.
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

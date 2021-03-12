@@ -12010,16 +12010,17 @@ let \kbd{fx} and \kbd{fy} be factorization matrices for $X$ and $Y$
 sorted with respect to the comparison function \kbd{cmp} (see
 \tet{sort_factor}), returns the factorization of $X * Y$.
 
-\fun{long}{gen_search}{GEN v, GEN y, long flag, void *data, int
+\fun{long}{gen_search}{GEN v, GEN y, void *data, int
 (*cmp)(void*,GEN,GEN)}.\hfil\break
-Let \kbd{v} be a vector sorted according to \kbd{cmp(data,a,b)}; look for an
-index $i$ such that  \kbd{v[$i$]} is equal to \kbd{y}. \kbd{flag} has the
-same meaning as in \kbd{setsearch}: if \kbd{flag} is 0, return $i$ if it
-exists and 0 otherwise; if \kbd{flag} is nonzero, return $0$ if $i$ exists
-and the index where \kbd{y} should be inserted otherwise.
+Let $v$ be a vector sorted according to \kbd{cmp(data,a,b)}; look for an
+index $i$ such that  $v[i]$ is equal to $y$. If $y$ is found, return $i$
+(not necessarily the first occurence in case of multisets), else return $-i$
+where $i$ is the index where $y$ should be inserted.
 
 \fun{long}{tablesearch}{GEN T, GEN x, int (*cmp)(GEN,GEN)} is a faster
-implementation for the common case \kbd{gen\_search(T,x,0,cmp,cmp\_nodata)}.
+implementation for the common case \kbd{gen\_search(T,x,cmp,cmp\_nodata)}
+when we have no need to insert missing elements; return $0$ in case $x$
+is not found.
 
 \subsec{Further useful comparison functions}
 
@@ -14872,9 +14873,8 @@ the vector \kbd{x}, removing duplicates entries.
 sorting of the components of the vector \kbd{x} and return a permutation
 stored in a \typ{VECSMALL}.
 
-\fun{long}{vecvecsmall_search}{GEN x, GEN y, long flag} \kbd{x} being a sorted
+\fun{long}{vecvecsmall_search}{GEN x, GEN y} \kbd{x} being a sorted
 vecvecsmall and \kbd{y} a \typ{VECSMALL}, search \kbd{y} inside \kbd{x}.
-\kbd{flag} has the same meaning as for \kbd{setsearch}.
 
 \fun{GEN}{vecvecsmall_max}{GEN x} returns the largest entry in all $x[i]$,
 assumed nonempty. Shallow function.

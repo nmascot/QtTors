@@ -1801,8 +1801,8 @@ vecsearch(GEN v, GEN x, GEN k)
   if (tv == t_VECSMALL)
     x = (GEN)itos(x);
   else if (!is_matvec_t(tv)) pari_err_TYPE("vecsearch", v);
-  r = CMP? gen_search(v, x, 0, E, CMP): key_search(v, x, k);
-  return gc_long(av, r);
+  r = CMP? gen_search(v, x, E, CMP): key_search(v, x, k);
+  return gc_long(av, r < 0? 0: r);
 }
 
 GEN
@@ -1872,20 +1872,19 @@ tablesearch(GEN T, GEN x, int (*cmp)(GEN,GEN))
 
 /* looks if x belongs to the set T and returns the index if yes, 0 if no */
 long
-gen_search(GEN T, GEN x, long flag, void *data, int (*cmp)(void*,GEN,GEN))
+gen_search(GEN T, GEN x, void *data, int (*cmp)(void*,GEN,GEN))
 {
   long u = lg(T)-1, i, l, s;
 
-  if (!u) return flag? 1: 0;
+  if (!u) return -1;
   l = 1;
   do
   {
-    i = (l+u)>>1; s = cmp(data, x, gel(T,i));
-    if (!s) return flag? 0: i;
-    if (s<0) u=i-1; else l=i+1;
-  } while (u>=l);
-  if (!flag) return 0;
-  return (s<0)? i: i+1;
+    i = (l+u) >> 1; s = cmp(data, x, gel(T,i));
+    if (!s) return i;
+    if (s < 0) u = i-1; else l = i+1;
+  } while (u >= l);
+  return -((s < 0)? i: i+1);
 }
 
 long
@@ -2132,7 +2131,7 @@ setisset(GEN x)
 long
 setsearch(GEN T, GEN y, long flag)
 {
-  long lx;
+  long i, lx;
   switch(typ(T))
   {
     case t_VEC: lx = lg(T); break;
@@ -2143,7 +2142,9 @@ setsearch(GEN T, GEN y, long flag)
       return 0; /*LCOV_EXCL_LINE*/
   }
   if (lx==1) return flag? 1: 0;
-  return gen_search(T,y,flag,(void*)cmp_universal,cmp_nodata);
+  i = gen_search(T,y,(void*)cmp_universal,cmp_nodata);
+  if (i > 0) return flag? 0: i;
+  return flag ? -i: 0;
 }
 
 GEN

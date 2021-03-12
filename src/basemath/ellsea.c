@@ -1669,10 +1669,9 @@ static void
 add_atkin(GEN atkin, GEN trace, long *nb)
 {
   long l = lg(atkin)-1;
-  long i, k = gen_search(atkin, trace, 1, NULL, cmp_atkin);
-  if (k==0 || k > l) return;
-  for (i = l; i > k; i--)
-    gel(atkin,i) = gel(atkin,i-1);
+  long i, k = gen_search(atkin, trace, NULL, cmp_atkin);
+  if (k > 0 || (k = -k) > l) return;
+  for (i = l; i > k; i--) gel(atkin,i) = gel(atkin,i-1);
   if (typ(gel(atkin,l))==t_INT) (*nb)++;
   gel(atkin,k) = trace;
 }

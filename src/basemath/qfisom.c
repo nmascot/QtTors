@@ -208,8 +208,8 @@ fingerprint(struct fingerprint *fp, struct qfauto *qf)
   for (i = 1; i <= dim; i++)
   {
     fp->diag[i] = mael(Mf,i,fp->per[i]); /* only diag(f) is needed later */
-    fp->e[i] = vecvecsmall_search(V,vecsmall_ei(dim,fp->per[i]),0);
-    if (!fp->e[i]) pari_err_BUG("qfisom, standard basis vector not found");
+    if ((fp->e[i] = vecvecsmall_search(V,vecsmall_ei(dim,fp->per[i]))) < 0)
+      pari_err_BUG("qfisom, standard basis vector not found");
   }
   set_avma(av);
 }
@@ -373,7 +373,7 @@ checkvecs(GEN V, GEN F, GEN norm)
   {
     GEN normvec = cgetg(f+1, t_VECSMALL), Vi = gel(V,i);
     for (k = 1; k <= f; ++k) normvec[k] = scp(Vi, gel(F,k), Vi);
-    if (!vecvecsmall_search(norm,normvec,0)) ++j;
+    if (vecvecsmall_search(norm,normvec) < 0) ++j;
     else
     {
       gel(V,i-j) = Vi;
@@ -392,8 +392,8 @@ operate(long nr, GEN A, GEN V)
   GEN w = zm_zc_mul(A,gel(V,labs(nr)));
   eps = zv_canon(w);
   if (nr < 0) eps = -eps; /* -w */
-  im = vecvecsmall_search(V,w,0);
-  if (!im) pari_err_BUG("qfauto, image of vector not found");
+  if ((im = vecvecsmall_search(V,w)) < 0)
+    pari_err_BUG("qfauto, image of vector not found");
   return gc_long(av, eps * im);
 }
 
@@ -742,8 +742,8 @@ qfisom_candidates(GEN CI, long I, GEN x, struct qfauto *qf,
     if (!zv_equal0(scpvec))
     {
       sign = zv_canon(scpvec);
-      num = vecvecsmall_search(list,scpvec,0);
-      if (!num) return gc_long(av,0); /* x[0..I-1] not a partial automorphism */
+      /* x[0..I-1] not a partial automorphism ? */
+      if ((num = vecvecsmall_search(list,scpvec)) < 0) return gc_long(av,0);
       else
       {
         GEN xnum = gel(xvec,num);
@@ -1055,8 +1055,7 @@ static GEN
 scpvecs(GEN *pt_vec, long I, GEN b, long dep, struct qfauto *qf)
 {
   GEN list, vec, V = qf->V, F = qf->F, v = qf->v;
-  long n = lg(V)-1, dim = lg(gel(F,1))-1, len = (lg(F)-1)*dep;
-  long j;
+  long j, n = lg(V)-1, dim = lg(gel(F,1))-1, len = (lg(F)-1)*dep;
   /* the first vector in the list is the 0-vector and is not counted */
   list = mkvec(zero_Flv(len));
   vec  = mkvec(zero_Flv(dim));
@@ -1066,7 +1065,7 @@ scpvecs(GEN *pt_vec, long I, GEN b, long dep, struct qfauto *qf)
     long i, nr, sign;
     if (zv_equal0(scpvec)) continue;
     sign = zv_canon(scpvec);
-    nr = vecvecsmall_search(list, scpvec, 0);
+    nr = vecvecsmall_search(list, scpvec);
     if (nr > 0) /* scpvec already in list */
     {
       GEN vecnr = gel(vec,nr);
@@ -1074,7 +1073,7 @@ scpvecs(GEN *pt_vec, long I, GEN b, long dep, struct qfauto *qf)
     }
     else /* scpvec is a new scalar product combination */
     {
-      nr = vecvecsmall_search(list, scpvec, 1);
+      nr = -nr;
       list = vec_insert(list,nr,scpvec);
       vec = vec_insert(vec,nr,sign < 0 ? zv_neg(Vvj) : zv_copy(Vvj));
     }
@@ -1585,8 +1584,7 @@ qforbits(GEN G, GEN V)
         GEN Vij = zm_zc_mul(gel(gen, j), gel(v, o[cnd]));
         long k;
         (void) zv_canon(Vij);
-        k = vecvecsmall_search(v, Vij, 0);
-        if (k == 0) return gc_const(av, gen_0);
+        if ((k = vecvecsmall_search(v, Vij)) < 0) return gc_const(av, gen_0);
         if (w[k] == 0) { o[++no] = k; w[k] = nborbits; }
       }
     gel(orb, nborbits) = T = cgetg(no+1, t_VEC);

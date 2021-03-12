@@ -3417,7 +3417,7 @@ static long
 cc_id(GEN cc, GEN g)
 {
   GEN conj = gel(cc,2);
-  long k = signe(gel(cc,4))? g[1]: vecvecsmall_search(gel(cc,1),g,0);
+  long k = signe(gel(cc,4))? g[1]: vecvecsmall_search(gel(cc,1), g);
   return conj[k];
 }
 

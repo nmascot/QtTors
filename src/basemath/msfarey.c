@@ -261,7 +261,7 @@ msfarey(GEN F, void *E, long (*in)(void *, GEN), GEN *pCM)
     r = gel(M,m)[a]; ig = SL2_inv_shallow(gel(C,r));
     gel(V2, j) = normalise(ZM_mul(gel(C,m), gel(V,a)));
     gel(gam2, j) = normalise(ZM_mul(ZM_mul(gel(C,m), gel(gam,a)), ig));
-    v2[1] = r; v2[2] = ast[a]; ast2[j] = perm[vecvecsmall_search(B, v2, 0)];
+    v2[1] = r; v2[2] = ast[a]; ast2[j] = perm[vecvecsmall_search(B, v2)];
   }
   F = rectify(V2, ast2, gam2);
   if (pCM) *pCM = mkvec2(C,M);

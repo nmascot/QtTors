@@ -248,7 +248,7 @@ rnfislocalcyclo(GEN rnf)
     long lSL = lg(SL);
     for (j = 1; j < lSL; j++)
     {
-      long iS = gen_search(SL2, gel(SL,j), 0, (void*)&cmp_prime_over_p,
+      long iS = gen_search(SL2, gel(SL,j), (void*)&cmp_prime_over_p,
                 &cmp_nodata);
       long eL = etilde(L, gel(SL,j), gel(TL,iS));
       if (dvdui(eL/eK, ell)) return gc_long(av,0);

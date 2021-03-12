@@ -280,8 +280,8 @@ vecvecsmall_indexsort(GEN x)
 { return gen_indexsort(x, (void*)&vecsmall_lexcmp, cmp_nodata); }
 
 long
-vecvecsmall_search(GEN x, GEN y, long flag)
-{ return gen_search(x,y,flag,(void*)vecsmall_prefixcmp, cmp_nodata); }
+vecvecsmall_search(GEN x, GEN y)
+{ return gen_search(x,y,(void*)vecsmall_prefixcmp, cmp_nodata); }
 
 /* assume x non empty */
 long
@@ -1380,9 +1380,8 @@ groupelts_conjclasses(GEN elts, long *pnbcl)
       if (j != i)
       {
         GEN h = perm_conj(gel(elts,j), g);
-        long i2 = gen_search(elts,h,0,(void*)&vecsmall_lexcmp,&cmp_nodata);
-        c[i2] = cl;
-        set_avma(av);
+        long i2 = gen_search(elts,h,(void*)&vecsmall_lexcmp,&cmp_nodata);
+        c[i2] = cl; set_avma(av);
       }
   }
   if (pnbcl) *pnbcl = cl;
