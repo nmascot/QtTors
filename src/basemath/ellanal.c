@@ -987,7 +987,7 @@ etnf_get_varn(GEN et)
 }
 
 static GEN
-heegner_descent_try_point(GEN E, GEN nfA, GEN z, GEN den, long prec)
+heegner_descent_try_point(GEN nfA, GEN z, GEN den, long prec)
 {
   pari_sp av = avma;
   GEN etal = gel(nfA,1), A = gel(nfA,2), cb = gel(nfA,3);
@@ -1037,7 +1037,7 @@ heegner_try_point(GEN E, GEN nfA, GEN lambdas, GEN ht, GEN z, long prec)
       GEN X, ylist;
       if (DEBUGLEVEL > 2)
         err_printf("\nTrying lambda number %ld, logd=%Ps, approxd=%Ps\n", i, logd, approxd);
-      X = heegner_descent_try_point(E, nfA, x, d, prec);
+      X = heegner_descent_try_point(nfA, x, d, prec);
       if (X)
       {
         ylist = ellordinate(E, X, prec);
@@ -1325,7 +1325,7 @@ vec_etnf_to_basis(GEN et, GEN x)
 { pari_APPLY_same(etnf_to_basis(et,gel(x,i))) }
 
 static GEN
-makenfA(GEN E, GEN sel, GEN A, GEN cb)
+makenfA(GEN sel, GEN A, GEN cb)
 {
   GEN etal = gel(sel,1), T = gel(etal,3);
   GEN et = gel(etal,1), M = etnf_get_M(et);
@@ -1396,7 +1396,7 @@ ellheegner(GEN E)
   else
     A = mkvec2(Ag, QXQ_mul(Ag, gel(At,1), T));
   gmael(sel,1,1) = etnfnewprec(et, prec);
-  nfA = makenfA(E, sel, A, cbb);
+  nfA = makenfA(sel, A, cbb);
   P = heegner_find_point(E, nfA, om, ht, gmulsg(2*lint, z), indx, prec);
   if (DEBUGLEVEL) timer_printf(&ti,"heegner_find_point");
   if (cb) P = ellchangepointinv(P, cb);
