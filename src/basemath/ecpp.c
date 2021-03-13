@@ -691,7 +691,7 @@ ecpp_step2_worker(GEN S, GEN HD, GEN primelist, long dbg)
   if (dbg >= 2) C2 = timer_delay(&ti);
   /* C3: Convert root from previous step into the appropriate j-invariant */
   J = Fp_modinv_to_j(rt, inv, N); /* root of polclass(D) */
-  if (dbg >= 3) C3 = timer_delay(&ti);
+  if (dbg >= 2) C3 = timer_delay(&ti);
   /* D1: Find an elliptic curve E with a point P satisfying the theorem */
   s = diviiexact(m, q);
   EP = find_EP(N, D, q, g, J, s);
