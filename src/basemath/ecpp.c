@@ -672,7 +672,7 @@ FpX_classtower_oneroot(GEN P, GEN Dfac, GEN sq, GEN p)
 }
 
 GEN
-ecpp_step2_worker(GEN S, GEN HD, GEN primelist)
+ecpp_step2_worker(GEN S, GEN HD, GEN primelist, long dbg)
 {
   pari_sp av = avma;
   pari_timer ti;
@@ -686,16 +686,16 @@ ecpp_step2_worker(GEN S, GEN HD, GEN primelist)
   GEN c = getrand();
   setrand(gen_1); /* for reproducibility */
   /* C2: Find a root modulo N of polclass(D,inv) */
-  dbg_mode() timer_start(&ti);
+  if (dbg >= 2) timer_start(&ti);
   rt = FpX_classtower_oneroot(HD, Dfacp, sq, N);
-  dbg_mode() C2 = timer_delay(&ti);
+  if (dbg >= 2) C2 = timer_delay(&ti);
   /* C3: Convert root from previous step into the appropriate j-invariant */
   J = Fp_modinv_to_j(rt, inv, N); /* root of polclass(D) */
-  dbg_mode() C3 = timer_delay(&ti);
+  if (dbg >= 3) C3 = timer_delay(&ti);
   /* D1: Find an elliptic curve E with a point P satisfying the theorem */
   s = diviiexact(m, q);
   EP = find_EP(N, D, q, g, J, s);
-  dbg_mode() D1 = timer_delay(&ti);
+  if (dbg >= 2) D1 = timer_delay(&ti);
 
   /* D2: Compute for t and s */
   t = subii(addiu(N, 1), m); /* t = N+1-m */
@@ -738,7 +738,8 @@ ecpp_step2(GEN step1, GEN *X0, GEN primelist)
     gel(Hi, i) = HD;
   }
   gunclone_deep(db);
-  worker = snm_closure(is_entry("_ecpp_step2_worker"),mkvec(primelist));
+  worker = snm_closure(is_entry("_ecpp_step2_worker"),
+                       mkvec2(primelist,stoi(DEBUGLEVEL)));
   mt_queue_start_lim(&pt, worker, ls-1);
   for (j = 1; j < ls || pending; j++)
   {

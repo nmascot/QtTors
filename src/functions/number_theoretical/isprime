@@ -71,5 +71,5 @@ Help: worker for isprime (ECPP ispseudoprime step)
 Function: _ecpp_step2_worker
 Section: programming/internals
 C-Name: ecpp_step2_worker
-Prototype: GGG
+Prototype: GGGL
 Help: worker for isprime (step 2)
