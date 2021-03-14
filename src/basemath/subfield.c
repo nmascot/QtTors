@@ -1163,29 +1163,18 @@ subfields_get_fa(GEN pol, GEN nf, GEN fa)
 static long
 subfields_get_ero(GEN pol, GEN nf)
 {
-  GEN ro;
-  long ero, e, i;
-  if (nf)   ro = nf_get_roots(nf);
-  else      ro = roots(pol, LOWDEFAULTPREC);
-  ero = 0;
-  for (i=1; i<lg(ro); i++)
-  {
-    e = 1+gexpo(gel(ro,i));
-    if (e > ero) ero = e;
-  }
-  return ero+1;
-};
+  return 1 + gexpo(nf? nf_get_roots(nf):
+                       QX_complex_roots(pol, LOWDEFAULTPREC));
+}
 
 static GEN
 try_imag(GEN x, GEN c, GEN pol, long v, ulong p, GEN emb, GEN galpol, long fl)
 {
-  GEN a;
-  a = Q_primpart(RgX_sub(RgX_RgXQ_eval(x,c,pol),x));
+  GEN a = Q_primpart(RgX_sub(RgX_RgXQ_eval(x,c,pol),x));
   if (Flx_is_squarefree(Flxq_charpoly(ZX_to_Flx(a,p),ZX_to_Flx(pol,p),p),p))
   {
-    emb = RgX_RgXQ_eval(a, emb, galpol);
     pol = ZXQ_charpoly(a, pol, v);
-    return fl ? pol : mkvec2(pol, emb);
+    return fl ? pol : mkvec2(pol, RgX_RgXQ_eval(a, emb, galpol));
   }
   return NULL;
 }
