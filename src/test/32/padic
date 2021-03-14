@@ -1,11 +1,5 @@
 +oo
 [O(2)]~
-  ***   at top-level: padicappr(x^2+1+O(3),Mod(-1+O(5^10),y^2-2))
-  ***                 ^-------------------------------------------
-  *** padicappr: inconsistent moduli in Zp_to_Z: 5 != 3
-  ***   at top-level: padicappr(x^2+1+O(3),-1+O(5^10))
-  ***                 ^--------------------------------
-  *** padicappr: inconsistent moduli in Zp_to_Z: 5 != 3
 [Mod(0, t)]~
 [Mod(0, t^2 + 1)]~
 
@@ -163,4 +157,10 @@ O(x)
 0
 6139557
 3626068*x + 3626068
-Total time spent: 9
+  ***   at top-level: padicappr(x^2+1+O(3),Mod(-1+O(5^10),y^2-2))
+  ***                 ^-------------------------------------------
+  *** padicappr: inconsistent moduli in Zp_to_Z: 5 != 3
+  ***   at top-level: padicappr(x^2+1+O(3),-1+O(5^10))
+  ***                 ^--------------------------------
+  *** padicappr: inconsistent moduli in Zp_to_Z: 5 != 3
+Total time spent: 8
