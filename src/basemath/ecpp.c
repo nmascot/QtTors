@@ -647,8 +647,6 @@ realgenusfield(GEN Dfac, GEN sq, GEN p)
 static GEN
 FpX_classtower_oneroot(GEN P, GEN Dfac, GEN sq, GEN p)
 {
-  pari_sp av = avma;
-  GEN C;
   if (degpol(P) > 1)
   {
     GEN N = NULL, V = realgenusfield(Dfac, sq, p), v = gel(V,1), R = gel(V,2);
@@ -667,8 +665,7 @@ FpX_classtower_oneroot(GEN P, GEN Dfac, GEN sq, GEN p)
     if (N)
       P = FpXY_evalx(Q_primpart(P), R, p);
   }
-  C = FpX_oneroot_split(P, p);
-  return gerepileupto(av, C);
+  return P;
 }
 
 GEN
@@ -682,16 +679,18 @@ ecpp_step2_worker(GEN S, GEN HD, GEN primelist, long dbg)
   GEN g = NDmqg_get_g(S), sq = NDmqg_get_sqrt(S);
   long D = Dinfo_get_D(Dinfo), inv = Dinfo_get_bi(Dinfo);
   GEN Dfacp = Dfac_to_p(Dinfo_get_Dfac(Dinfo), primelist);
-  long C2 = 0, C3 = 0, D1 = 0;
-  GEN c = getrand();
+  long C2 = 0, C3 = 0, C4 = 0, D1 = 0;
+  GEN P, c = getrand();
   setrand(gen_1); /* for reproducibility */
   /* C2: Find a root modulo N of polclass(D,inv) */
   if (dbg >= 2) timer_start(&ti);
-  rt = FpX_classtower_oneroot(HD, Dfacp, sq, N);
+  P = FpX_classtower_oneroot(HD, Dfacp, sq, N);
   if (dbg >= 2) C2 = timer_delay(&ti);
+  rt = FpX_oneroot_split(P, N);
+  if (dbg >= 2) C3 = timer_delay(&ti);
   /* C3: Convert root from previous step into the appropriate j-invariant */
   J = Fp_modinv_to_j(rt, inv, N); /* root of polclass(D) */
-  if (dbg >= 2) C3 = timer_delay(&ti);
+  if (dbg >= 2) C4 = timer_delay(&ti);
   /* D1: Find an elliptic curve E with a point P satisfying the theorem */
   s = diviiexact(m, q);
   EP = find_EP(N, D, q, g, J, s);
@@ -699,7 +698,7 @@ ecpp_step2_worker(GEN S, GEN HD, GEN primelist, long dbg)
 
   /* D2: Compute for t and s */
   t = subii(addiu(N, 1), m); /* t = N+1-m */
-  res = mkvec2(mkvec5(N, t, s, gel(EP,1), gel(EP,2)),mkvecsmall3(C2,C3,D1));
+  res = mkvec2(mkvec5(N, t, s, gel(EP,1), gel(EP,2)),mkvecsmall4(C2,C3,C4,D1));
   setrand(c);
   return gerepilecopy(av, res);
 }
@@ -754,7 +753,8 @@ ecpp_step2(GEN step1, GEN *X0, GEN primelist)
       err_printf(ANSI_BRIGHT_GREEN "\n[ %3d | %4ld bits]" ANSI_RESET, jj, expi(N));
       err_printf(" %6ld", time_record(X0, "C2", T[1]));
       err_printf(" %6ld", time_record(X0, "C3", T[2]));
-      err_printf(" %6ld", time_record(X0, "D1", T[3]));
+      err_printf(" %6ld", time_record(X0, "C4", T[3]));
+      err_printf(" %6ld", time_record(X0, "D1", T[4]));
     }
     gel(step2, jj) = gel(done,1);
   }
@@ -1201,8 +1201,8 @@ ecpp_param(GEN N, GEN param, long stopat)
   if (expi(N) < stopat) return N;
 
   /* Timers and Counters */
-  Tv = mkvec4(zero_zv(5), zero_zv(3), zero_zv(3), zero_zv(1));
-  Cv = mkvec4(zero_zv(5), zero_zv(3), zero_zv(3), zero_zv(1));
+  Tv = mkvec4(zero_zv(5), zero_zv(3), zero_zv(4), zero_zv(1));
+  Cv = mkvec4(zero_zv(5), zero_zv(3), zero_zv(4), zero_zv(1));
   X0 = mkvec3(Tv, Cv, zero_zv(1));
 
   step1 = ecpp_step1(N, param, &X0, stopat);
