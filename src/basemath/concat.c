@@ -293,7 +293,7 @@ shallowconcat1(GEN x)
   GEN z;
   switch(typ(x))
   {
-    case t_VEC:
+    case t_VEC: case t_COL:
       lx = lg(x);
       if (lx==1) pari_err_DOMAIN("concat","vector","=",x,x);
       break;

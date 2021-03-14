@@ -474,7 +474,7 @@ ZX_Zp_roots(GEN f, GEN p, long prec)
   r = FpX_roots(f, p);
   l = lg(r); if (l == 1) return r;
   for (i = 1; i < l; i++) gel(r,i) = ZX_Zp_root(f, gel(r,i), p, prec);
-  settyp(r, t_VEC); return ZV_to_ZpV(shallowconcat1(r), p, prec);
+  return ZV_to_ZpV(shallowconcat1(r), p, prec);
 }
 /* vector of p-adic roots of the ZXX f, leading term prime to p. Shallow */
 static GEN
@@ -487,7 +487,7 @@ ZXY_ZpQ_roots(GEN f, GEN T, GEN p, long prec)
   r = FqX_roots(f, FpX_red(T,p), p);
   l = lg(r); if (l == 1) return r;
   for (i = 1; i < l; i++) gel(r,i) = ZXY_ZpQ_root(f, gel(r,i), T, p, prec);
-  settyp(r, t_VEC); return ZXV_to_ZpXQV(shallowconcat1(r), T, p, prec);
+  return ZXV_to_ZpXQV(shallowconcat1(r), T, p, prec);
 }
 
 /* return p-adic roots of f, precision prec */
@@ -547,10 +547,9 @@ famat_flatten(GEN fa)
   {
     GEN p = gel(P,i);
     long e = itou(gel(E,i));
-    gel(y,i) = const_vec(e, p);
+    gel(y,i) = const_col(e, p);
   }
-  y = shallowconcat1(y); settyp(y, t_COL);
-  return mkmat2(y, const_col(lg(y)-1, gen_1));
+  y = shallowconcat1(y); return mkmat2(y, const_col(lg(y)-1, gen_1));
 }
 
 GEN

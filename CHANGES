@@ -92,6 +92,7 @@ BA  14- [libpari] gp_read_stream now return NULL when EOF is reached (was gnil)
     16- gen_search / vecvecsmall_search: remove flag; the result is now
         positive if the element is found else -i if element should be
         inserted at position i.
+    17- allow t_COL of objects in gconcat1 / shallowconcat1
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

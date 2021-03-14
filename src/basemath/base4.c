@@ -703,10 +703,8 @@ Q_nffactor(GEN nf, GEN y, ulong lim)
     gel(P,i) = idealprimedec(nf, gel(P,i));
     gel(E,i) = prV_e_muls(gel(P,i), itos(gel(E,i)));
   }
-  settyp(P,t_VEC); P = shallowconcat1(P);
-  settyp(E,t_VEC); E = shallowconcat1(E);
-  gel(f,1) = P; settyp(P, t_COL);
-  gel(f,2) = E; return f;
+  P = shallowconcat1(P); gel(f,1) = P; settyp(P, t_COL);
+  E = shallowconcat1(E); gel(f,2) = E; return f;
 }
 
 GEN

@@ -1075,14 +1075,7 @@ twoembequation(GEN pol, GEN fa, GEN lambda)
       poly = RgXQX_rem(RgX_shift(poly,1), gel(fa,i), pol);
     }
   }
-
-  for(j=1; j<=dx; j++)
-  {
-    settyp(gel(m,j),t_VEC);
-    gel(m,j) = shallowconcat1(gel(m,j));
-    settyp(gel(m,j),t_COL);
-  }
-
+  for(j=1; j<=dx; j++) gel(m,j) = shallowconcat1(gel(m,j));
   return QM_ker(m);
 }
 
