@@ -665,10 +665,29 @@ genusfield(GEN Dfac, GEN sq, GEN p, long real)
 }
 
 static GEN
-FpX_classtower_oneroot(GEN P, GEN Dfac, GEN sq, GEN p, long real)
+realpart(GEN P, GEN R)
 {
+  GEN G = galoisinit(rnfequation(P,R), NULL);
+  GEN T = galoisfixedfield(G, gel(gal_get_gen(G),2), 1, -1);
+  setvarn(T,1); return T;
+}
+
+static GEN
+dihedralpol(long D, long l)
+{
+  GEN P = quadpoly0(utoineg(-D), 1);
+  GEN bnf = Buchall(P, 1, BIGDEFAULTPREC);
+  GEN x = bnrclassfield(bnf, utoipos(l), 0, BIGDEFAULTPREC);
+  pari_APPLY_same(realpart(P, gel(x,i)))
+}
+
+static GEN
+FpX_classtower_oneroot(GEN P, GEN Dinfo, GEN Dfac, GEN sq, GEN p)
+{
+  long D = Dinfo_get_D(Dinfo), h = Dinfo_get_h(Dinfo);
   if (degpol(P) > 1)
   {
+    long real = !modinv_is_double_eta(Dinfo_get_bi(Dinfo));
     GEN V = genusfield(Dfac, sq, p, real), v = gel(V,1), R = gel(V,2);
     GEN N = NULL;
     long i, l = lg(v);
@@ -682,6 +701,25 @@ FpX_classtower_oneroot(GEN P, GEN Dfac, GEN sq, GEN p, long real)
         N = gel(cm,1); P = gsubst(P, 1, gel(cm,2));
       }
       P = liftpol_shallow(gmael(nffactor(N,P),1,1));
+    }
+    if (h%3 == 0 && (!N || degpol(N)*3<degpol(P)))
+    {
+      GEN v = dihedralpol(D,3);
+      long i, l = lg(v);
+      for (i = 1; i < l; i++)
+      {
+        GEN Q = gel(v,i);
+        if (!N) N = Q;
+        else
+        {
+          GEN cm = polcompositum0(N, Q, 3);
+          N = gel(cm,1); P = gsubst(P, 1, gel(cm,2));
+          R = Fp_mul(R, gel(cm,4),p);
+        }
+        R = Fp_add(R, FpX_oneroot_split(Q, p), p);
+        P = liftpol_shallow(gmael(nffactor(N,P),1,1));
+        if (degpol(N)*3>=degpol(P)) break;
+      }
     }
     if (N)
       P = FpXY_evalx(Q_primpart(P), R, p);
@@ -698,15 +736,14 @@ ecpp_step2_worker(GEN S, GEN HD, GEN primelist, long dbg)
   GEN N = NDmqg_get_N(S), Dinfo = NDmqg_get_Dinfo(S);
   GEN m = NDmqg_get_m(S), q = NDmqg_get_q(S);
   GEN g = NDmqg_get_g(S), sq = NDmqg_get_sqrt(S);
-  long D = Dinfo_get_D(Dinfo), inv = Dinfo_get_bi(Dinfo), real;
+  long D = Dinfo_get_D(Dinfo), inv = Dinfo_get_bi(Dinfo);
   GEN Dfacp = Dfac_to_p(Dinfo_get_Dfac(Dinfo), primelist);
   long C2 = 0, C3 = 0, C4 = 0, D1 = 0;
   GEN P, c = getrand();
   setrand(gen_1); /* for reproducibility */
   /* C2: Find a root modulo N of polclass(D,inv) */
   if (dbg >= 2) timer_start(&ti);
-  real = !modinv_is_double_eta(Dinfo_get_bi(Dinfo));
-  P = FpX_classtower_oneroot(HD, Dfacp, sq, N, real);
+  P = FpX_classtower_oneroot(HD, Dinfo, Dfacp, sq, N);
   if (dbg >= 2) C2 = timer_delay(&ti);
   rt = FpX_oneroot_split(P, N);
   if (dbg >= 2) C3 = timer_delay(&ti);
