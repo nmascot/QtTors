@@ -36,6 +36,9 @@ BA  20- missing GC in qfsolve
         catastrophic cancellation
     31- powcx(x, t_COMPLEX with 0 imaginary part) -> crash
     32- nfsubfields(t_POL in other var than x,,1) -> SEGV
+    33- extra terms in power t_SER substitutions [#2281]
+        f=1+4*t^2+36*t^4+O(t^6); g=q-4*q^3+14*q^5+O(q^7); subst(f,t,g)
+        -> spurious extra term -400*q^6
 
   Added
 HC   1- new GP function eulerreal

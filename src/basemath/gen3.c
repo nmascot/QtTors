@@ -325,7 +325,7 @@ gppadicprec(GEN x, GEN p)
   return v == LONG_MAX? mkoo(): stoi(v);
 }
 
-/* ABSOLUTE padic precision */
+/* ABSOLUTE X-adic precision */
 long
 serprec(GEN x, long v)
 {
@@ -1549,6 +1549,7 @@ gsubst(GEN x, long v, GEN y)
           }
           if (vy != vx)
           {
+            long n;
             av = avma; z = gel(x,lx-1);
             for (i=lx-2; i>=2; i--)
             {
@@ -1560,6 +1561,8 @@ gsubst(GEN x, long v, GEN y)
               }
             }
             if (ex) z = gmul(z, gpowgs(y,ex));
+            n = (ex + lx - 2) * ey; /* + O(t^n) */
+            if (lg(z)-2 + valp(z) > n) z = gadd(z, zeroser(varn(z), n));
             return gerepileupto(av,z);
           }
           l = (lx-2)*ey + 2;

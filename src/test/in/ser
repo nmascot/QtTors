@@ -123,6 +123,9 @@ laurentseries(x->sin(x)/x^2, 3)
 laurentseries(x->sin(x)/x^2, 3, t)
 laurentseries(x->(cos(x)-1)/x)
 
+f=1+4*t^2+36*t^4+O(t^6);
+g=q-4*q^3+14*q^5+O(q^7); subst(f,t,g)
+
 \\ Errors. Keep at end of file
 subst(x^-1+O(x),x,Mod(0,3))
 subst(O(x^-1),x,Mod(0,3))
