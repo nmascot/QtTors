@@ -119,7 +119,10 @@ GuessColFromCharpoly(A,chi)=
 	);
 	for(k=1,n-1,M[k,n] = polcoef(chi0,k-1));
 	M = matker(M);
-	if(#M!=1,print("Unable to guess last column from charpoly");return(0));
+	if(#M!=1,
+		\\print("Unable to guess last column from charpoly");
+		return(0)
+	);
 	for(i=1,n-1,A[i,n] = M[i,1]/M[n,1]);
 	A;
 }
@@ -229,7 +232,7 @@ TorsBasis(J,l,Lp,chi,KnownAuts,GetPairings)=
 						if(M,
 							matFrob = M
 						,
-							M = TorsTestPt(J,picfrob(J,BT[d]),l,LinTests,FRparams);
+							M = pictorspairings(J,picfrob(J,BT[d]),l,LinTests,FRparams);
 							rel = matker(Mod(matconcat([R,M]),l));
 							\\if(#rel!=1,error("Bug in TorsGen, please report"));
 							rel = rel[,1];
