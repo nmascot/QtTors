@@ -35,6 +35,7 @@ BA  20- missing GC in qfsolve
     30- elliptic functions: incorrect reduction of z/w1 mod [1,tau] =>
         catastrophic cancellation
     31- powcx(x, t_COMPLEX with 0 imaginary part) -> crash
+    32- nfsubfields(t_POL in other var than x,,1) -> SEGV
 
   Added
 HC   1- new GP function eulerreal

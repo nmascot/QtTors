@@ -271,6 +271,9 @@ x^6 - 48*x^5 + 37*x^4 - 23*x^3 + 12*x^2 - 4*x + 1, x]]
 15
 2
 2
+[y^2 - 2]
+[y, y^2 - 2, y^4 - 2]
+[]
   ***   at top-level: nfsubfieldscm(1)
   ***                 ^----------------
   *** nfsubfieldscm: incorrect type in subfields_cleanup (t_INT).
@@ -298,4 +301,4 @@ x^6 - 48*x^5 + 37*x^4 - 23*x^3 + 12*x^2 - 4*x + 1, x]]
   ***   at top-level: nfsubfieldscm(x^0)
   ***                 ^------------------
   *** nfsubfieldscm: incorrect type in subfields_cleanup [constant polynomial] (t_POL).
-Total time spent: 24048
+Total time spent: 11572

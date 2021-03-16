@@ -797,12 +797,17 @@ subfields_of_given_degree(blockdata *B)
   return gc_const(av,L);
 }
 
+static void
+setvarn2(GEN t, long v) { setvarn(gel(t,1),v); setvarn(gel(t,2),v); }
 static GEN
-fix_var(GEN x, long v)
+fix_var(GEN x, long v, long fl)
 {
   long i, l = lg(x);
   if (!v) return x;
-  for (i=1; i<l; i++) { GEN t = gel(x,i); setvarn(gel(t,1),v); setvarn(gel(t,2),v); }
+  if (fl)
+    for (i = 1; i < l; i++) setvarn(gel(x,i), v);
+  else
+    for (i = 1; i < l; i++) setvarn2(gel(x,i), v);
   return x;
 }
 
@@ -877,7 +882,7 @@ subfieldsall(GEN nf0, long fl)
   (void)delete_var(); /* from init_primedata() */
   LSB = shallowconcat(LSB, fl==1? mkvec(T):_subfield(T, pol_x(0)));
   if (DEBUGLEVEL) err_printf("\n***** Leaving subfields\n\n");
-  return fix_var(gerepilecopy(av, LSB), v);
+  return fix_var(gerepilecopy(av, LSB), v, fl);
 }
 
 GEN
@@ -933,7 +938,7 @@ nfsubfields0(GEN nf0, long d, long fl)
   set_avma(av);
   if (!LSB) return cgetg(1, t_VEC);
   G = gcopy(LSB); gunclone(LSB);
-  return fix_var(G, v0);
+  return fix_var(G, v0, fl);
 }
 
 GEN
