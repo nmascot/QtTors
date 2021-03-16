@@ -1039,6 +1039,7 @@ ZV_neg_inplace(GEN M)
 GEN
 ZC_neg(GEN x)
 { pari_APPLY_type(t_COL, negi(gel(x,i))) }
+
 GEN
 zv_neg(GEN x)
 { pari_APPLY_long(-x[i]) }
@@ -1049,6 +1050,9 @@ zv_neg_inplace(GEN M)
   while (--l > 0) M[l] = -M[l];
   return M;
 }
+GEN
+zv_abs(GEN x)
+{ pari_APPLY_ulong(labs(x[i])) }
 GEN
 ZM_neg(GEN x)
 { pari_APPLY_same(ZC_neg(gel(x,i))) }
