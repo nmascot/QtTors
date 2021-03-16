@@ -1243,15 +1243,19 @@ galoissubfieldcm(GEN G, long fl)
   c = galoispermtopol(G,c);
   if (d<n)
   {
-    GEN M = cgetg(d+1,t_MAT);
+    GEN M = cgetg(d+1,t_MAT), contc, contM;
     gel(M,1) = col_ei(n,1); a = pol_1(v);
     for (i=2; i<=d; i++)
     {
       a = RgX_rem(QX_mul(a,emb), galpol);
       gel(M,i) = RgX_to_RgC(a,n);
     }
-    c = RgX_to_RgC(Q_primpart(c),n);
-    c = RgM_RgC_invimage(Q_primpart(M), c);
+    c = RgX_RgXQ_eval(emb,c,galpol);
+    c = Q_primitive_part(c,&contc);
+    c = RgX_to_RgC(c,n);
+    M = Q_primitive_part(M,&contM);
+    c = RgM_RgC_invimage(M,c);
+    c = RgV_Rg_mul(c, gdiv(contc,contM));
     c = RgV_to_RgX(c, v);
   }
 
