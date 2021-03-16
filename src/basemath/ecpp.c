@@ -143,11 +143,13 @@ ecpp_param_get_maxdisc(GEN param) { return umael3(param, 1, 1, 2); }
 INLINE ulong
 ecpp_param_get_maxpcdg(GEN param) { return umael3(param, 1, 1, 3); }
 INLINE GEN
-ecpp_param_get_primelist(GEN param) { return gmael(param, 1, 2); }
+ecpp_param_get_uprimelist(GEN param) { return gmael(param, 1, 2); }
 INLINE GEN
-ecpp_param_get_disclist(GEN param) { return gmael(param, 1, 3); }
+ecpp_param_get_primelist(GEN param) { return gmael(param, 1, 3); }
 INLINE GEN
-ecpp_param_get_primeord(GEN param) { return gmael(param, 1, 4); }
+ecpp_param_get_disclist(GEN param) { return gmael(param, 1, 4); }
+INLINE GEN
+ecpp_param_get_primeord(GEN param) { return gmael(param, 1, 5); }
 INLINE GEN
 ecpp_param_get_primorial_vec(GEN param) { return gel(param, 2); }
 INLINE GEN
@@ -438,10 +440,12 @@ ecpp_param_set(GEN tune, GEN x)
   ulong maxdisc = maxsqrt * maxsqrt;
   GEN T = mkvecsmall3(maxsqrt, maxdisc, maxpcdg);
   GEN Plist = ecpp_primelist_init(maxsqrt);
+  GEN U = zv_abs(Plist);
+  GEN Utree = mkvec2(U, ZV_producttree(U));
   GEN Dlist = ecpp_disclist_init(maxdisc, Plist);
   GEN Olist = ecpp_primeord_init(Plist, Dlist);
   GEN primorial = primorial_vec(tdivexp);
-  return gerepilecopy(av, mkvec3(mkvec4(T,Plist,Dlist,Olist), primorial, tune));
+  return gerepilecopy(av, mkvec3(mkvec5(T,Utree,Plist,Dlist,Olist), primorial, tune));
 }
 
 /* cert contains [N, t, s, a4, [x, y]] as documented in ??ecpp; the following
@@ -781,8 +785,6 @@ ecpp_parsqrt(GEN N, GEN param, GEN kroP, GEN sqrtlist, GEN g, long nb, long *nbs
   for (i=n, k=1; k<=nb && i<l; i++)
   {
     long pi = ordinv[i];
-    long s = kroP[pi];
-    if (s > 1) kroP[pi] = s = krosi(primelist[pi], N); /* update cache */
     if (kroP[pi] > 0)
       gel(W,k++) = stoi(primelist[pi]);
   }
@@ -861,17 +863,14 @@ D_collectcards(GEN N, GEN param, GEN* X0, GEN Dinfo, GEN sqrtlist, GEN g, GEN Dm
 {
   long i, l, corn_succ, wD, D = Dinfo_get_D(Dinfo);
   GEN U, V, sqrtofDmodN, Dfac = Dinfo_get_Dfac(Dinfo);
-  GEN primelist = ecpp_param_get_primelist(param);
   pari_timer ti;
 
   /* A1: Check (p*|N) = 1 for all primes dividing D */
   l = lg(Dfac);
   for (i = 1; i < l; i++)
   {
-    long j = Dfac[i], s = kroP[j];
-    if (s > 1) kroP[j] = s = krosi(primelist[j], N); /* update cache */
-    if (s == 0) return -1; /* N is composite */
-    if (s < 0) return 0;
+    long j = Dfac[i];
+    if (kroP[j] < 0) return 0;
   }
   /* A3: Get square root of D mod N */
   dbg_mode() timer_start(&ti);
@@ -1012,12 +1011,13 @@ N_downrun(GEN N, GEN param, GEN worker, GEN *X0, long *depth, long persevere, lo
   long lgdisclist, lprimelist, nbsqrt = 0, t, i, j, expiN = expi(N);
   long persevere_next = 0, FAIL = 0;
   ulong maxpcdg;
-  GEN primelist, disclist, sqrtlist, g, Dmbatch, kroP;
+  GEN primelist, uprimelist, disclist, sqrtlist, g, Dmbatch, kroP, Np;
 
   dbg_mode() timer_start(&T);
   (*depth)++; /* we're going down the tree. */
   maxpcdg = ecpp_param_get_maxpcdg(param);
   primelist = ecpp_param_get_primelist(param);
+  uprimelist = ecpp_param_get_uprimelist(param);
   disclist = ecpp_param_get_disclist(param);
   lgdisclist = lg(disclist);
   t = tunevec_batchsize(expiN, param);
@@ -1032,7 +1032,7 @@ N_downrun(GEN N, GEN param, GEN worker, GEN *X0, long *depth, long persevere, lo
   /* A2: Check (p*|N) = 1 for all p */
   dbg_mode() timer_start(&ti);
   /* kroP[i] will contain (primelist[i] | N) */
-  kroP = const_vecsmall(lprimelist-1, 2/*sentinel*/);
+  kroP = cgetg(lprimelist,t_VECSMALL);
   switch(mod8(N))
   { /* primelist[1,2,3] = [8,-4,-8]; N is odd */
     case 1: kroP[1] = kroP[2] = kroP[3] = 1; break;
@@ -1040,8 +1040,12 @@ N_downrun(GEN N, GEN param, GEN worker, GEN *X0, long *depth, long persevere, lo
     case 5: kroP[1] = -1; kroP[2] = 1; kroP[3] =-1; break;
     case 7: kroP[1] =  1; kroP[2] =-1; kroP[3] =-1; break;
   }
+  Np = Z_ZV_mod_tree(N, gel(uprimelist,1), gel(uprimelist,2));
   for(i=4; i<lprimelist; i++)
-    kroP[i]= krosi(primelist[i],N);
+  {
+    if (Np[i]==0) return gen_0;
+    kroP[i] = kross(Np[i],primelist[i]);
+  }
   dbg_mode() timer_record(X0, "A2", &ti);
 
   /* Print the start of this iteration. */
@@ -1140,6 +1144,7 @@ N_downrun(GEN N, GEN param, GEN worker, GEN *X0, long *depth, long persevere, lo
                                   ANSI_RESET, o, *depth, expiN, c); }
           continue; /* downrun failed */
         }
+        if (isintzero(z)) return z;
       }
       return mkNDmqg(z, N, Dmq, g, sqrtlist); /* SUCCESS */
     }
@@ -1163,7 +1168,6 @@ ecpp_flattencert(GEN x, long depth)
 {
   long i, l = depth+1;
   GEN ret = cgetg(l, t_VEC);
-  if (typ(x) != t_VEC) return gen_0;
   for (i = 1; i < l; i++) { gel(ret, i) = gel(x,1); x = gel(x,2); }
   return ret;
 }
@@ -1181,6 +1185,7 @@ ecpp_step1(GEN N, GEN param, GEN* X0, long stopat)
   GEN worker = strtofunction("_ecpp_ispsp_worker");
   GEN downrun = N_downrun(N, param, worker, X0, &depth, 1, stopat);
   if (downrun == NULL) return gc_NULL(av);
+  if (typ(downrun) != t_VEC) return gen_0;
   return gerepilecopy(av, ecpp_flattencert(downrun, depth));
 }
 
