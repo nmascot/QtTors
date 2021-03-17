@@ -695,8 +695,10 @@ kervirtualunit(struct rnfkummer *kum, GEN vselmer)
   for (i = 1; i <= rc; i++) B = mulii(B, nfnorm(nf, gel(U2,i)));
   if (LIMC > 1)
   {
-    GEN U; (void)absZ_factor_limit_strict(B, LIMC, &U);
+    GEN U, fa = absZ_factor_limit_strict(B, LIMC, &U), P = gel(fa,1);
+    long lP = lg(P);
     B = U? gel(U,1): gen_1;
+    if (lP > 1 && cmpiu(gel(P,lP-1), LIMC) >= 0) B = mulii(B, gel(P,lP-1));
   }
   if (is_pm1(B)) B = NULL;
   vy = cgetg(l, t_MAT);
