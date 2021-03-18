@@ -1,0 +1,6 @@
+Function: isoncurve
+Section: modular_forms
+C-Name: PtIsOnPlaneCurve
+Prototype: lGG
+Help: isoncurve(F,P): true(1) if P is on the plane curve of equation F=0, false(0) if not. F can be a polynomial in two variables, or a homogenous polynomial in three variables. TODO In the former case, P must be of the form [x,y], in the latter, P can be of the form [x,y] or [x,y,z].
+Doc: TODO 

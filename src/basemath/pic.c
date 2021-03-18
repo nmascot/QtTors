@@ -714,7 +714,7 @@ Structure of a Jacobian:
 13: EvalData [U1,U2,I,M]: pair of subspaces Ui of the form V2(-E) with E effective of degree d0-g, used for construction of eval map, then vecsmall I of row indices, and matrix M such that v in V should be taken to M*(v_I) for evaluation
 14: If B=O_X(D0), vector Z of points at which the sections are evaluated; else []
 15: FrobCyc, permutation describing the action of Frob on Z
-16: AutsCyc, vector of permutations describing the action of Auts on Z
+16: Auts, vector of pairs [P,n], P permutation describing the action of Aut on Z, n nonzero if this Auts acts a [n] on J, n=0 else
 
 Note: usually, B=O_X(D0), in which case W0=V1=L(D0).
 Note: if either of f, one of the RR spaces L(...), or Z are not available, then the p-adic accuracy cannot be increased.
@@ -738,7 +738,9 @@ GEN JgetW0(GEN J) {return gel(J,12);}
 GEN JgetEvalData(GEN J) {return gel(J,13);}
 GEN JgetZ(GEN J) {return gel(J,14);}
 GEN JgetFrobCyc(GEN J) {return gel(J,15);}
-GEN JgetAutsCyc(GEN J) {return gel(J,16);}
+GEN JgetAutData(GEN J) {return gel(J,16);}
+GEN JgetAutCyc(GEN J, ulong n) {return gmael3(J,16,n,1);}
+GEN JgetAutKnown(GEN J, ulong n) {return gmael3(J,16,n,2);}
 
 void JgetTpe(GEN J, GEN* T, GEN* pe, GEN* p, long* e)
 {
@@ -748,7 +750,7 @@ void JgetTpe(GEN J, GEN* T, GEN* pe, GEN* p, long* e)
   *pe = gel(J,8);
 }
 
-GEN PicRed(GEN J, ulong e)
+GEN JacRed(GEN J, ulong e)
 {
   pari_sp av = avma;
   GEN Je,p,pe;
@@ -769,14 +771,21 @@ GEN PicRed(GEN J, ulong e)
   gel(Je,11) = cgetg(4,t_VEC);
   for(i=1;i<=3;i++) gmael(Je,11,i) = FpXM_red(gmael(J,11,i),pe);
   gel(Je,12) = FpXM_red(JgetW0(J),pe);
-  gel(Je,13) = cgetg(5,t_VEC);
-  gmael(Je,13,1) = FpXM_red(gmael(J,13,1),pe);
-  gmael(Je,13,2) = FpXM_red(gmael(J,13,2),pe);
-  gmael(Je,13,3) = gcopy(gmael(J,13,3));
-  gmael(Je,13,4) = FpXM_red(gmael(J,13,4),pe);
+	if(gequal0(gel(J,13)))
+	{
+		gel(Je,13) = gen_0;
+	}
+	else
+	{
+  	gel(Je,13) = cgetg(5,t_VEC);
+  	gmael(Je,13,1) = FpXM_red(gmael(J,13,1),pe);
+  	gmael(Je,13,2) = FpXM_red(gmael(J,13,2),pe);
+  	gmael(Je,13,3) = gcopy(gmael(J,13,3));
+  	gmael(Je,13,4) = FpXM_red(gmael(J,13,4),pe);
+	}
   gel(Je,14) = FpXT_red(JgetZ(J),pe);
   gel(Je,15) = gcopy(JgetFrobCyc(J));
-  gel(Je,16) = gcopy(JgetAutsCyc(J));
+  gel(Je,16) = gcopy(JgetAutData(J));
   return gerepileupto(av,Je);
 }
 
@@ -1386,6 +1395,8 @@ GEN PicFrobPoly(GEN J, GEN W, GEN F)
   ulong d,i;
   GEN n,FW,res;
 
+	if(gequal0(F))
+		return gcopy(JgetW0(J));
   d = degree(F);
   FW = W;
   n = truecoeff(F,0);
@@ -1406,7 +1417,7 @@ GEN PicAut(GEN J, GEN W, ulong nAut)
   GEN W2,Cyc;
   long i,j,nW,nZ;
 
-  Cyc = gel(JgetAutsCyc(J),nAut);
+  Cyc = JgetAutCyc(J,nAut);
   RgM_dimensions(W,&nZ,&nW);
 
   W2 = cgetg(nW+1,t_MAT);
@@ -1781,14 +1792,16 @@ GEN CurveRandPt(GEN f, GEN T, GEN p, long e, GEN bad)
   }
 }
 
-GEN PicEvalInit(GEN L, GEN vars, GEN Z, GEN V2, GEN T, GEN p, long e, GEN pe)
+GEN PicEvalInit(GEN L12, GEN vars, GEN Z, GEN V2, GEN T, GEN p, long e, GEN pe)
 {
   pari_sp av = avma;
   GEN res,I,M;
   ulong i,j,nV2;
+	if(gequal0(L12))
+		return gen_0;
   res = cgetg(5,t_VEC);
   for(i=1;i<=2;i++) /* TODO parallelise */
-    gel(res,i) = RRspaceEval(gel(L,i+2),vars,Z,T,p,e,pe);
+    gel(res,i) = RRspaceEval(gel(L12,i),vars,Z,T,p,e,pe);
   nV2 = lg(V2);
   I = FqM_indexrank(V2,T,p);
   I = gel(I,1); /* Rows of V2 forming invertible block */
@@ -1901,7 +1914,7 @@ GEN CurveAutFrobClosure(GEN P, GEN Auts, GEN vars, GEN FrobMat, GEN T, GEN pe, G
         for(;;)
         {
           /* Apply aut to P */
-          if(i) P = CurveApplyAut(gel(Auts,i),P,vars,T,pe,p,e);
+          if(i) P = CurveApplyAut(gmael(Auts,i,1),P,vars,T,pe,p,e);
           else P = CurveApplyFrob(P,FrobMat,T,pe);
           /* Is the result a point we already know? */
           k = FindMod(P,OP,nO,p,1);
@@ -1940,7 +1953,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
   pari_sp av = avma;
   long t;
   ulong nZ,nAuts,n,nOP,m,i;
-  GEN vars,pe,T,FrobMat,Z,P,FrobCyc,AutsCyc,OP,V1,V2,V3,W0,V,KV,U,J;
+  GEN vars,pe,T,FrobMat,Z,P,FrobCyc,AutData,OP,V1,V2,V3,W0,V,KV,U,J;
   struct pari_mt pt;
   GEN worker,done,E;
   long workid,pending,k;
@@ -1960,9 +1973,13 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
   /* Initialise empty cycles */
   FrobCyc = cgetg(1,t_VECSMALL);
   nAuts = lg(Auts);
-  AutsCyc = cgetg(nAuts,t_VEC);
+  AutData = cgetg(nAuts,t_VEC);
   for(i=1;i<nAuts;i++)
-    gel(AutsCyc,i) = cgetg(1,t_VECSMALL);
+	{
+		gel(AutData,i) = cgetg(3,t_VEC);
+    gmael(AutData,i,1) = cgetg(1,t_VECSMALL);
+		gmael(AutData,i,2) = gmael(Auts,i,2);
+	}
   /* Loop until we have enough pts */
   while(n<nZ)
   {
@@ -1987,7 +2004,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
     /* Add these permutaton data */
     FrobCyc = gconcat(FrobCyc,gel(OP,2));
     for(i=1;i<nAuts;i++)
-      gel(AutsCyc,i) = gconcat(gel(AutsCyc,1),gmael(OP,3,i));
+      gmael(AutData,i,1) = gconcat(gmael(AutData,i,1),gmael(OP,3,i));
     /* Update # pts */
     n += nOP;
   }
@@ -2012,11 +2029,11 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
   mt_queue_end(&pt);
   if(DEBUGLEVEL) printf("PicInit: Constructing evaluation maps\n");
   U = PicEvalInit(L,vars,Z,V2,T,p,e,pe);
-  J = mkvecn(lgJ,f,stoi(g),stoi(d0),L,T,p,stoi(e),pe,FrobMat,V,KV,W0,U,Z,FrobCyc,AutsCyc);
+  J = mkvecn(lgJ,f,stoi(g),stoi(d0),L,T,p,stoi(e),pe,FrobMat,V,KV,W0,U,Z,FrobCyc,AutData);
   return gerepilecopy(av,J);
 }
 
-GEN Jlift(GEN J, ulong e2)
+GEN JacLift(GEN J, ulong e2)
 {
   pari_sp av = avma, avZ;
   GEN J2,T,p,pe2,f,vars,L,FrobCyc,FrobMat2;
@@ -2028,18 +2045,18 @@ GEN Jlift(GEN J, ulong e2)
   long pending,k,workid;
   if(Jgete(J)>=e2)
   {
-    pari_warn(warner,"Current accuracy already higher than required in Jlift, not changing anything");
+    pari_warn(warner,"Current accuracy already higher than required in JacLift, not changing anything");
     return gcopy(J);
   }
   f = Jgetf(J);
   if(gequal0(f))
-    pari_err(e_MISC,"Cannot increase accuracy for this curve (missing equation)");
+    pari_err(e_MISC,"Cannot increase accuracy for this Jacobian (missing equation)");
   L = JgetL(J);
-  if(lg(L)!=5)
-    pari_err(e_MISC,"Cannot increase accuracy for this curve (missing RR spaces)");
+  if(lg(L)!=4)
+    pari_err(e_MISC,"Cannot increase accuracy for this Jacobian (missing RR spaces)");
   Z = JgetZ(J);
   if(lg(Z)==1)
-    pari_err(e_MISC,"Cannot increase accuracy for this curve (missing points)");
+    pari_err(e_MISC,"Cannot increase accuracy for this Jacobian (missing points)");
   T = JgetT(J);
   p = Jgetp(J);
   vars = variables_vecsmall(f);
@@ -2104,20 +2121,28 @@ GEN Jlift(GEN J, ulong e2)
   printf("End RR\n"); */
   gel(V,1) = gel(RRspaceEval(gel(L,1),vars,Z2,T,p,e2,pe2),1);
   V2 = gel(V,2) = gel(RRspaceEval(gel(L,2),vars,Z2,T,p,e2,pe2),1);
-  gel(U,1) = RRspaceEval(gel(L,3),vars,Z2,T,p,e2,pe2);
-  gel(U,2) = RRspaceEval(gel(L,4),vars,Z2,T,p,e2,pe2);
-  gel(V,3) = DivAdd(gel(V,1),gel(V,2),3*d0+1-g,T,p,e2,pe2,0);
+	gel(V,3) = DivAdd(gel(V,1),gel(V,2),3*d0+1-g,T,p,e2,pe2,0);
   W0 = gel(V,1); /* TODO can it happen that W0 != V1 even though all data is present? */
-  I = gel(U,3) = gmael(J,13,3);
-  nV2 = lg(V2);
-  M = cgetg(nV2,t_MAT);
-  for(j=1;j<nV2;j++)
-  {
-    gel(M,j) = cgetg(nV2,t_COL);
-    for(i=1;i<nV2;i++)
-      gcoeff(M,i,j) = gcoeff(V2,I[i],j);
-  }
-  gel(U,4) = ZpXQMinv(M,T,pe2,p,e2);
+	if(gequal0(gel(L,3)))
+	{
+		U = gen_0;
+	}
+	else
+	{
+		U = cgetg(5,t_VEC);
+  	gel(U,1) = RRspaceEval(gmael(L,3,1),vars,Z2,T,p,e2,pe2);
+  	gel(U,2) = RRspaceEval(gmael(L,3,2),vars,Z2,T,p,e2,pe2);
+  	I = gel(U,3) = gmael(J,13,3);
+  	nV2 = lg(V2);
+  	M = cgetg(nV2,t_MAT);
+  	for(j=1;j<nV2;j++)
+  	{
+    	gel(M,j) = cgetg(nV2,t_COL);
+    	for(i=1;i<nV2;i++)
+      	gcoeff(M,i,j) = gcoeff(V2,I[i],j);
+  	}
+  	gel(U,4) = ZpXQMinv(M,T,pe2,p,e2);
+	}
   worker = strtofunction("_mateqnpadic");
   mt_queue_start_lim(&pt,worker,3);
   for(k=1;k<=3||pending;k++)
@@ -2133,8 +2158,18 @@ GEN Jlift(GEN J, ulong e2)
   gel(J2,13) = U;
   gel(J2,14) = Z2;
   gel(J2,15) = JgetFrobCyc(J);
-  gel(J2,16) = JgetAutsCyc(J);
+  gel(J2,16) = JgetAutData(J);
   return gerepilecopy(av,J2);
+}
+
+GEN PicSetPrec(GEN J, long e2)
+{
+	long e = Jgete(J);
+	if(e==e2)
+		return gcopy(J);
+	if(e2<e)
+		return JacRed(J,e2);
+	return JacLift(J,e2);
 }
 
 GEN PicEval(GEN J, GEN W)
@@ -2146,13 +2181,15 @@ GEN PicEval(GEN J, GEN W)
   GEN S1,S2,I,M,s2,s2I,K;
   ulong d0,g,nV,i;
 
-  JgetTpe(J,&T,&pe,&p,&e);
+  U = JgetEvalData(J); /* L(2D0-Ei), deg Ei = d0-g (i=1,2), repeated for each embedding into Qq */
+  if(gequal0(U))
+		pari_err(e_MISC,"this Jacobian does not contain the data required to evaluate points");
+	JgetTpe(J,&T,&pe,&p,&e);
   d0 = Jgetd0(J);
   g = Jgetg(J);
   V = JgetV(J,2);
   nV = lg(V);
   KV = JgetKV(J,2);
-  U = JgetEvalData(J); /* L(2D0-Ei), deg Ei = d0-g (i=1,2), repeated for each embedding into Qq */
   n1 = lg(gel(U,1)); /* Deg of E1 / Q */
   n2 = lg(gel(U,2)); /* Deg of E2 / Q */
   I = gel(U,3); /* Row indices to look at to ID an elt of V */
@@ -2381,7 +2418,7 @@ GEN PicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, G
 	return res;
 }
 
-GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
+GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
 {
   pari_sp av=avma,av1,av2,av3,avrho,avtesttors;
 	GEN T,p,V;
@@ -2404,12 +2441,18 @@ GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
   ulong r,i,j,k,n;
 	ulong testtors;
 
+	if(eini==0)
+	{
+		eini = PicMember_val(J,W);
+		J1 = JacRed(J,eini);
+		eini = PicIsTors_val(J1,W,l);
+		avma = av;
+	}
 	JgetTpe(J,&T,&pefin,&p,&efin);
-	if(eini >= efin) return W;
+	if(eini >= efin) return gcopy(W);
 	g = Jgetg(J);
   d0 = Jgetd0(J);
   V = JgetV(J,2);
-  /*GV = JgetGV(J2);*/
   nV = lg(V)-1;
   nZ = lg(gel(V,1))-1;
   nW = lg(W)-1;
@@ -2431,7 +2474,7 @@ GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
 	e1 = eini;
 	pe1 = powiu(p,e1);
 	av1 = avma; /* Use to collect garbage at each iteration */
-	J1 = PicRed(J,e1);
+	J1 = JacRed(J,e1);
 	U = PicDeflate_U(J1,W,nGW); /* IGS of W1 // basis of V */
 	U = gerepileupto(av1,U);
 
@@ -2444,7 +2487,7 @@ GEN PicLiftTors(GEN J, GEN W, long eini, GEN l)
 		e21 = e2-e1;
 		pe21 = e21==e1 ? pe1 : powiu(p,e21);
     if(DEBUGLEVEL) pari_printf("Lifting from prec O(%Ps^%lu) to O(%Ps^%lu)\n",p,e1,p,e2);
-    J2 = e2<efin ? PicRed(J,e2) : J;
+    J2 = e2<efin ? JacRed(J,e2) : J;
 		pe2 = Jgetpe(J2);
 		/* START LIFTING */
   	GWV = cgetg(nGW*nV+1,t_MAT); /* w*V for w in GW */
@@ -3631,4 +3674,214 @@ GEN SuperZeta(GEN f, ulong m, ulong p) /* y^m = f(x), assumes f sqfree and gcd(d
   }
 	L = ZetaFromPointCount(N,p,g);
 	return gerepileupto(av,L);
+}
+
+/* Tests: Is this point on that curve? */
+
+long PtIsOnSuperellCurve(GEN f, ulong m, GEN P)
+{
+	pari_sp av = avma;
+	long res;
+	res = gequal(gpowgs(gel(P,2),m),poleval(f,gel(P,1)));
+	avma = av;
+	return res;
+}
+
+long PtIsOnHyperellCurve(GEN F, GEN P)
+{
+	pari_sp av = avma;
+	GEN x,y,y2,f,h,fx;
+	long res;
+
+	x = gel(P,1);
+	y = gel(P,2);
+	if(typ(F)==t_VEC)
+	{
+		f = gel(F,1);
+		h = gel(F,2);
+		y2 = poleval(h,x);
+		y2 = gadd(y2,y);
+		y2 = gmul(y2,y);
+		fx = poleval(f,x);
+	}
+	else
+	{
+		y2 = gsqr(y);
+		fx = poleval(F,x);
+	}
+	res = gequal(y2,fx);
+	avma = av;
+	return res;
+}
+
+long PtIsOnPlaneCurve(GEN F, GEN P)
+{ /* TODO clean version by homogenising first */
+	pari_sp av = avma;
+	GEN vars, val;
+	long res;
+
+	vars = variables_vecsmall(F);
+	val = gsubst(F,vars[1],gel(P,1));
+	val = gsubst(val,vars[2],gel(P,2));
+	if(lg(vars)==4)
+	{
+		if(lg(P)==4)
+		{
+			val = gsubst(val,vars[3],gel(P,3));
+		}
+		else
+		{
+			val = gsubst(val,vars[3],gen_1);
+		}
+	}
+	res = gequal0(val);
+	avma = av;
+	return res;
+}
+
+// RR spaces, easy cases
+
+GEN HyperRR(ulong n, ulong g, GEN u, GEN v, long varx, long vary)
+{ /* L(n*OO - {u(x)=0, y=v(x)}) on hyperell y²=f_{2g+2}(x) */
+	pari_sp av = avma;
+	GEN L,x,y;
+	ulong a,b,i;
+	a = n+1-degree(u);
+	b = n-g;
+	x = mkpoln(2,gen_1,gen_0);
+	x[1] = 0;
+	setvarn(x,varx);
+	setsigne(x,1);
+	y = mkpoln(2,gen_1,gen_0);
+  y[1] = 0;
+  setvarn(y,vary);
+  setsigne(y,1);
+	L = cgetg(a+b+1,t_VEC);
+	gel(L,1) = gcopy(u);
+	for(i=2;i<=a;i++)
+		gel(L,i) = gmul(gel(L,i-1),x);
+	gel(L,a+1) = gsub(y,v);
+	for(i=2;i<=b;i++)
+		gel(L,a+i) = gmul(gel(L,a+i-1),x);
+	return gerepileupto(av,L);
+}
+
+GEN HyperRRdata(GEN f, GEN P12)
+{ /* RR data needed to initialise Jacobian J of C:y²=f(x).
+		 P12 must be a vector of two points on C which are not conj by hyperell invol.
+		 P12 is used to construst a map J -> A1. If P12=NULL, this map is not constructed. */
+	pari_sp av = avma;
+	GEN h,x,y,xshift,P1,P2,x1,y1,x2,y2,L,L1,L2,eqn,Auts,res;
+	ulong d,g;
+	if(P12)
+	{
+		P1 = gel(P12,1);
+		if(PtIsOnHyperellCurve(f,P1)!=1)
+			pari_err(e_MISC,"the point %Ps is not on the hyperelliptic curve defined by %Ps",P1,f);
+		x1 = gel(P1,1);
+		y1 = gel(P1,2);
+		P2 = gel(P12,2);
+    if(PtIsOnHyperellCurve(f,P2)!=1)
+      pari_err(e_MISC,"the point %Ps is not on the hyperelliptic curve defined by %Ps",P2,f);
+    x2 = gel(P2,1);
+    y2 = gel(P2,2);
+	}
+	else x1=x2=y1=y2=NULL; /* Prevent compiler from freaking out */
+	if(typ(f)==t_VEC)
+	{
+		h = gel(f,2);
+		f = gel(f,1);
+		f = gadd(gmul(f,stoi(4)),gsqr(h));
+		if(P12)
+		{
+			y1 = gadd(gmul(y1,gen_2),poleval(h,x1));
+			y2 = gadd(gmul(y2,gen_2),poleval(h,x2));
+		}
+	}
+	f = gcopy(f);
+	setvarn(f,0); /* Make var = x */
+	d = degree(f);
+	if(d%2)
+	{ /* f has odd degree, change model */
+		xshift = mkpoln(2,gen_1,gen_1);
+  	xshift[1] = 0;
+  	setvarn(xshift,0);
+		while(1)
+		{
+			if(gequal0(gel(f,2))==0)
+			{
+				if(P12)
+				{
+					if(gequal0(x1)==0 && gequal0(x2)==0)
+					{
+						break;
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+			f = poleval(f,xshift); /* f(x+1) */
+			if(P12)
+			{
+				x1 = gsub(x1,gen_1);
+				x2 = gsub(x2,gen_1);
+			}
+		}
+		f = RgX_shift(polrecip(f),1); /* x^{d+1}*f(1/x) */
+		d++;
+		if(P12)
+		{
+			x1 = ginv(x1);
+			x2 = ginv(x2);
+			y1 = gdiv(y1,gpowgs(x1,d/2));
+			y2 = gdiv(y2,gpowgs(x2,d/2));
+		}
+	}
+	g = d/2-1;
+	L = cgetg(4,t_VEC);
+	gel(L,1) = HyperRR(g+1,g,gen_1,gen_0,0,1);
+	gel(L,2) = HyperRR(d,g,gen_1,gen_0,0,1);
+	x = mkpoln(2,gen_1,gen_0);
+  x[1] = 0;
+  setvarn(x,0);
+	y = mkpoln(2,gen_1,gen_0);
+  y[1] = 0;
+  setvarn(y,1);
+	if(P12)
+  {
+		if(g%2)
+		{
+			L1 = HyperRR(3*(g+1)/2,g,gsub(x,x1),y1,0,1);
+			L2 = HyperRR(3*(g+1)/2,g,gsub(x,x2),y2,0,1);
+		}
+		else
+		{
+			L1 = HyperRR(3*g/2+2,g,gmul(gsub(x,x1),gsub(x,x2)),gdiv(gadd(gmul(gsub(y2,y1),x),gsub(gmul(y1,x2),gmul(y2,x1))),gsub(x2,x1)),0,1);
+			L2 = HyperRR(3*g/2+1,g,gen_1,gen_0,0,1);
+		}
+		gel(L,3) = mkvec2(L1,L2);
+  }
+  else gel(L,3) = gen_0;
+	eqn = gsub(gsqr(y),f);
+	Auts = cgetg(2,t_VEC);
+	gel(Auts,1) = cgetg(3,t_VEC);
+	gmael(Auts,1,1) = mkvecn(3,x,gneg(y),gen_1); /* Hyperell invol */
+	gmael(Auts,1,2) = gen_m1; /* Action on J */
+	res = mkvecn(5,eqn,Auts,utoi(g),utoi(d),L);
+	return gerepilecopy(av,res);
+}
+
+GEN HyperPicInit(GEN f, GEN p, ulong a, long e, GEN P12)
+{
+	pari_sp av = avma;
+	GEN J,RRdata,bad;
+	RRdata = HyperRRdata(f,P12);
+	pari_printf("%Ps\n",RRdata);
+	bad = mkpoln(2,gen_1,gen_0);
+  bad[1] = 0;
+  setvarn(bad,1);
+	J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),bad,p,a,e);
+	return gerepileupto(av,J);
 }

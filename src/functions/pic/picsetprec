@@ -1,0 +1,6 @@
+Function: picsetprec
+Section: modular_forms
+C-Name: PicSetPrec
+Prototype: GL
+Help: picsetprec(J,e): Construct model of the p-adic Jacobian J to accuracy O(p^e). If e is more than the accuracy of J, this is only possible if J contains enough data to increase this accuracy.
+Doc: TODO 

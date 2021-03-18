@@ -1,0 +1,11 @@
+Function: picaut
+Section: modular_forms
+C-Name: PicAut
+Prototype: GGU
+Help: picfrob(J,W,n): Image of the point W of Jacobian J by the n-th automorphism of J.
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog

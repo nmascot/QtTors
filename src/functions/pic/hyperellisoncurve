@@ -1,0 +1,6 @@
+Function: hyperellisoncurve
+Section: modular_forms
+C-Name: PtIsOnHyperellCurve
+Prototype: lGG
+Help: hyperellisoncurve(F,P): true(1) if P is on the hyperellptic curve y²=F(x), false(0) if not. F can also be a vector [f(x),h(x)], in which case whe check whether P lies on y²+h(x)*y=f(x).
+Doc: TODO 
