@@ -3714,25 +3714,64 @@ long PtIsOnHyperellCurve(GEN F, GEN P)
 	return res;
 }
 
+long TotalDegree(GEN F)
+{
+	GEN Fi;
+	long D,d,di,i;
+	if(gequal0(F)) return -1;
+	if(typ(F)!=t_POL) return 0;
+	d = degree(F);
+	D = -1;
+	for(i=0;i<=d;i++)
+	{
+		Fi = gel(F,i+2);
+		if(gequal0(Fi)) continue;
+		di = i+TotalDegree(Fi);
+		if(di>D) D = di;
+	}
+	return D;
+}
+
+GEN PolHomogenise(GEN f, GEN z, long D)
+{
+	pari_sp av = avma;
+	GEN F;
+	long d,i;
+	if(gequal0(f)) return gcopy(gen_0);
+  if(typ(f)!=t_POL)
+	{
+		if(D==-1) return gcopy(f);
+		F = gmul(f,gpowgs(z,D));
+		return gerepileupto(av,F);
+	}
+	F = gcopy(f);
+	d = degree(f);
+	if(D==-1) D = TotalDegree(F);
+	for(i=0;i<=d;i++)
+	{	
+		gel(F,i+2) = PolHomogenise(gel(f,i+2),z,D-i);
+	}
+	return gerepilecopy(av,F);
+}
+
 long PtIsOnPlaneCurve(GEN F, GEN P)
-{ /* TODO clean version by homogenising first */
+{
 	pari_sp av = avma;
 	GEN vars, val;
-	long res;
+	long res,nvars;
 
 	vars = variables_vecsmall(F);
+	nvars = lg(vars);
+	if(lg(P) > nvars)
+		F = PolHomogenise(F,gel(P,nvars),-1);
 	val = gsubst(F,vars[1],gel(P,1));
 	val = gsubst(val,vars[2],gel(P,2));
-	if(lg(vars)==4)
+	if(nvars==4)
 	{
 		if(lg(P)==4)
-		{
 			val = gsubst(val,vars[3],gel(P,3));
-		}
 		else
-		{
 			val = gsubst(val,vars[3],gen_1);
-		}
 	}
 	res = gequal0(val);
 	avma = av;
@@ -3741,21 +3780,13 @@ long PtIsOnPlaneCurve(GEN F, GEN P)
 
 // RR spaces, easy cases
 
-GEN HyperRR(ulong n, ulong g, GEN u, GEN v, long varx, long vary)
+GEN HyperRR(ulong n, ulong g, GEN u, GEN v, GEN x, GEN y)
 { /* L(n*OO - {u(x)=0, y=v(x)}) on hyperell y²=f_{2g+2}(x) */
 	pari_sp av = avma;
-	GEN L,x,y;
+	GEN L;
 	ulong a,b,i;
 	a = n+1-degree(u);
 	b = n-g;
-	x = mkpoln(2,gen_1,gen_0);
-	x[1] = 0;
-	setvarn(x,varx);
-	setsigne(x,1);
-	y = mkpoln(2,gen_1,gen_0);
-  y[1] = 0;
-  setvarn(y,vary);
-  setsigne(y,1);
 	L = cgetg(a+b+1,t_VEC);
 	gel(L,1) = gcopy(u);
 	for(i=2;i<=a;i++)
@@ -3840,26 +3871,26 @@ GEN HyperRRdata(GEN f, GEN P12)
 		}
 	}
 	g = d/2-1;
-	L = cgetg(4,t_VEC);
-	gel(L,1) = HyperRR(g+1,g,gen_1,gen_0,0,1);
-	gel(L,2) = HyperRR(d,g,gen_1,gen_0,0,1);
 	x = mkpoln(2,gen_1,gen_0);
   x[1] = 0;
   setvarn(x,0);
-	y = mkpoln(2,gen_1,gen_0);
+  y = mkpoln(2,gen_1,gen_0);
   y[1] = 0;
   setvarn(y,1);
+	L = cgetg(4,t_VEC);
+	gel(L,1) = HyperRR(g+1,g,gen_1,gen_0,x,y);
+	gel(L,2) = HyperRR(d,g,gen_1,gen_0,x,y);
 	if(P12)
   {
 		if(g%2)
 		{
-			L1 = HyperRR(3*(g+1)/2,g,gsub(x,x1),y1,0,1);
-			L2 = HyperRR(3*(g+1)/2,g,gsub(x,x2),y2,0,1);
+			L1 = HyperRR(3*(g+1)/2,g,gsub(x,x1),y1,x,y);
+			L2 = HyperRR(3*(g+1)/2,g,gsub(x,x2),y2,x,y);
 		}
 		else
 		{
-			L1 = HyperRR(3*g/2+2,g,gmul(gsub(x,x1),gsub(x,x2)),gdiv(gadd(gmul(gsub(y2,y1),x),gsub(gmul(y1,x2),gmul(y2,x1))),gsub(x2,x1)),0,1);
-			L2 = HyperRR(3*g/2+1,g,gen_1,gen_0,0,1);
+			L1 = HyperRR(3*g/2+2,g,gmul(gsub(x,x1),gsub(x,x2)),gdiv(gadd(gmul(gsub(y2,y1),x),gsub(gmul(y1,x2),gmul(y2,x1))),gsub(x2,x1)),x,y);
+			L2 = HyperRR(3*g/2+1,g,gen_1,gen_0,x,y);
 		}
 		gel(L,3) = mkvec2(L1,L2);
   }
@@ -3878,10 +3909,333 @@ GEN HyperPicInit(GEN f, GEN p, ulong a, long e, GEN P12)
 	pari_sp av = avma;
 	GEN J,RRdata,bad;
 	RRdata = HyperRRdata(f,P12);
-	pari_printf("%Ps\n",RRdata);
 	bad = mkpoln(2,gen_1,gen_0);
   bad[1] = 0;
   setvarn(bad,1);
 	J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),bad,p,a,e);
 	return gerepileupto(av,J);
+}
+
+GEN SuperRR(ulong n, ulong d, ulong m, GEN x, GEN y)
+{ /* L(n*OO) on y^m=f_d(x)
+		 assuming fsqfree and (m,d)=1
+		 so deg x = m, deg y = d
+		 -> x^a*y^b for m*a+b*d<=n */
+	pari_sp av = avma;
+	GEN yb,xayb,L;
+	ulong A,B,a,b,i;
+	B = n/d;
+	if(B >= m)
+		B = m-1;
+	L = cgetg(1+(1+n/m)*(1+B),t_VEC);
+	i = 1;
+	for(b=0;b<=B;b++)
+	{
+		A = (n-d*b)/m;
+		if(b==0)
+			yb = gen_1;
+		else
+			yb = gmul(yb,y);
+		gel(L,i++) = yb;
+		for(a=1;a<=A;a++)
+		{
+			xayb = gmul(gel(L,i-1),x);
+	    gel(L,i++) = xayb;
+		}
+	}
+	setlg(L,i);
+	return gerepilecopy(av,L);
+}
+
+GEN SuperRRdata(GEN f, ulong m, GEN P)
+{
+	pari_sp av = avma;
+	ulong d,g,d0;
+	GEN x,y,L,L2,E2,Auts,eqn,res;
+
+	if(issquarefree(f)==0)
+		pari_err(e_MISC,"%Ps is not squarefree");
+	d = degree(f);
+	if(ugcd(m,d)>1)
+		pari_err(e_IMPL,"%lu and the degree of %Ps are not coprime",m,f);
+	if(P)
+	{
+		if(PtIsOnSuperellCurve(f,m,P)==0)
+			pari_err(e_MISC,"%Ps is not on this superelliptic curve",P);
+	}
+	g = ((d-1)*(m-1))/2;
+	d0 = 2*g+1;
+	x = mkpoln(2,gen_1,gen_0);
+  x[1] = 0;
+  setvarn(x,0);
+  y = mkpoln(2,gen_1,gen_0);
+  y[1] = 0;
+  setvarn(y,1);
+	L = cgetg(4,t_VEC);
+	gel(L,1) = SuperRR(d0,d,m,x,y);
+	gel(L,2) = SuperRR(2*d0,d,m,x,y);
+	if(P)
+	{
+		gel(L,3) = cgetg(3,t_VEC);
+		gmael(L,3,1) = SuperRR(d0+g,d,m,x,y);
+		L2 = SuperRR(d0+g+1,d,m,x,y);
+		E2 = gsubst(gsubst(L2,0,gel(P,1)),1,gel(P,2));
+		gmael(L,3,2) = gmul(L2,QM_ker(gtomat(E2)));
+	}
+	else gel(L,3) = gen_0;
+	if(m%2)
+	{
+		Auts = cgetg(1,t_VEC);
+	}
+	else
+	{
+		Auts = cgetg(2,t_VEC);
+	  gel(Auts,1) = cgetg(3,t_VEC);
+	  gmael(Auts,1,1) = mkvecn(3,x,gneg(y),gen_1); /* Hyperell invol */
+	  gmael(Auts,1,2) = gen_m1; /* Action on J */
+	}
+	f = gcopy(f);
+	setvarn(f,0);
+	eqn = gsub(gpowgs(y,m),f);
+	res = mkvecn(5,eqn,Auts,utoi(g),utoi(d0),L);
+	return gerepilecopy(av,res);
+}
+
+GEN SuperPicInit(GEN f, ulong m, GEN p, ulong a, long e, GEN P)
+{
+  pari_sp av = avma;
+  GEN J,RRdata,bad;
+  RRdata = SuperRRdata(f,m,P);
+  bad = mkpoln(2,gen_1,gen_0);
+  bad[1] = 0;
+  setvarn(bad,1);
+  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),bad,p,a,e);
+  return gerepileupto(av,J);
+}
+
+GEN SmoothRR(ulong n, ulong d, GEN x, GEN y)
+{ /* L(n*OO) on smooth plane curve of deg d: x^a*y^b for a+b<=n */
+	pari_sp av = avma;
+  GEN yb,xayb,L;
+  ulong A,B,a,b,i;
+  B = n;
+  if(B >= d)
+    B = d-1;
+  L = cgetg(1+(B+1)*(n+1)-(B*(B+1))/2,t_VEC);
+  i = 1;
+  for(b=0;b<=B;b++)
+  {
+    A = n-b;
+    if(b==0)
+      yb = gen_1;
+    else
+      yb = gmul(yb,y);
+    gel(L,i++) = yb;
+    for(a=1;a<=A;a++)
+    {
+      xayb = gmul(gel(L,i-1),x);
+      gel(L,i++) = xayb;
+    }
+  }
+  return gerepileupto(av,L);
+}
+
+int SmoothIsGeneric(GEN f, ulong d, GEN p, long x, long y, GEN P)
+{ /* Coeff of x^d and y^d must be nonzero, and none of the pts in P at infty */
+	pari_sp av = avma;
+	ulong i,j,n;
+	if(gequal0(modii(polcoef_i(f,d,x),p)))
+	{
+		avma = av;
+		return 0;
+	}
+	if(gequal0(modii(polcoef_i(f,d,y),p)))
+  {
+    avma = av;
+    return 0;
+  }
+	avma = av;
+	if(P==NULL) return 1;
+	for(i=1;i<=2;i++)
+	{
+		n = lg(gel(P,i));
+		for(j=1;j<n;j++)
+		{
+			if(gequal0(modii(gmael3(P,i,j,3),p)))
+    		return 0;
+		}
+	}
+	return 1;
+}
+
+GEN SmoothGeneric(GEN f0, ulong d, GEN pr, GEN P0)
+{
+	pari_sp av = avma;
+	GEN f,A,Vars,vars,xy1,uvw,u,v,w,P,p,B,B2,C,ci,cij;
+	ulong i,j,n,b;
+	
+	P = gen_0;
+	Vars = variables_vec(f0);
+	vars = variables_vecsmall(f0);
+	if(lg(Vars)==4)
+		f0 = gsubst(f0,vars[3],gen_1); /* Dehomogenise */
+	if(P0)
+	{ /* Switch to proj coords */
+		P0 = gcopy(P0);
+		for(i=1;i<=2;i++)
+  	{
+    	n = lg(gel(P0,i));
+    	for(j=1;j<n;j++)
+    	{
+      	if(lg(gmael(P0,i,j))==3)
+				{
+        	p = cgetg(4,t_VEC);
+					gel(p,1) = gmael3(P0,i,j,1);
+					gel(p,2) = gmael3(P0,i,j,2);
+					gel(p,3) = gen_1;
+					gmael(P0,i,j) = p;
+				}
+			}
+    }
+		P = gcopy(P0);
+  }
+	xy1 = cgetg(4,t_COL);
+	gel(xy1,1) = gel(Vars,1);
+	gel(xy1,2) = gel(Vars,2);
+	gel(xy1,3) = gen_1;
+	f = f0;
+	A = cgetg(4,t_MAT);
+	for(i=1;i<=3;i++)
+		gel(A,i) = cgetg(4,t_COL);
+	for(b=1;;b++)
+	{
+		if(SmoothIsGeneric(f,d,pr,vars[1],vars[2],P)) break;
+		/* get random change of vars */
+		B = utoi(b);
+		B2 = utoi(2*b+1);
+		do
+		{
+			for(j=1;j<=3;j++)
+			{
+				C = gel(A,j);
+				for(i=1;i<=3;i++)
+					gel(C,i) = subii(genrand(B2),B);
+			}
+		} while(gequal0(modii(ZM_det(A),pr)));
+		uvw = gmul(A,xy1); /* change of vars */
+		u = gel(uvw,1); v = gel(uvw,2); w = gel(uvw,3);
+		f = gen_0;
+		for(i=0;i<=d;i++)
+		{
+			ci = polcoef_i(f0,i,vars[1]);
+			for(j=0;j<=d;j++)
+			{
+				cij = polcoef_i(ci,j,vars[2]);
+				f = gadd(f,gmul(gmul(cij,gpowgs(w,d-i-j)),gmul(gpowgs(u,i),gpowgs(v,j))));
+			}
+		}
+		if(P0)
+		{
+			A = shallowtrans(RgM_inv(A));
+			for(i=1;i<=2;i++)
+			{
+				n = lg(gel(P0,i));
+				for(j=1;j<n;j++)
+				{
+					p = gmael(P0,i,j);
+					p = gmul(p,A);
+					p = gdiv(p,content0(p,NULL));
+					gmael(P,i,j) = p;
+				}
+			}
+		}
+	}
+	if(P0)
+	{
+		/* Switch to affine coordinates */
+		for(i=1;i<=2;i++)
+  	{
+    	n = lg(gel(P0,i));
+    	for(j=1;j<n;j++)
+			{
+    		p = gmael(P,i,j);
+				gmael(P,i,j) = mkvec2(gdiv(gel(p,1),gel(p,3)),gdiv(gel(p,1),gel(p,3)));
+    	}
+		}	
+	}
+	return gerepilecopy(av,mkvec2(f,P));
+}
+
+GEN SmoothRRdata(GEN f, GEN p, GEN P)
+{
+	pari_sp av = avma;
+	ulong d,i,j,n,g,d0,m;
+	long lx,ly;
+	GEN res,vars,x,y,L,M,MP;
+
+	d = TotalDegree(f);
+  if(d<=2)
+    pari_err(e_MISC,"This curve has genus zero");
+	if(P)
+	{
+		for(i=1;i<=2;i++)
+    {
+      n = lg(gel(P,i));
+			if(d%2)
+			{
+				if(n!=d)
+					pari_err(e_MISC,"For smooth curves of degree %lu, please provide two distinct vectors of %lu distinct points.",d,d-1);
+			}
+			else
+			{
+        if(n!=d/2)
+          pari_err(e_MISC,"For smooth curves of degree %lu, please provide two distinct vectors of %lu distinct points.",d,d/2-1);
+      }
+      for(j=1;j<n;j++)
+      {
+        if(PtIsOnPlaneCurve(f,gmael(P,i,j))==0)
+					pari_err(e_MISC,"The point %Ps is not on this curve",gmael(P,i,j));
+			}
+    }
+	}
+	res = SmoothGeneric(f,d,p,P);
+	f = gel(res,1);
+	vars = variables_vec(f);
+	x = gel(vars,1);
+	y = gel(vars,2);
+	if(P) P = gel(res,2);
+	g = ((d-1)*(d-2))/2;
+	d0 = (d-2)*d;
+	L = cgetg(4,t_VEC);
+	gel(L,1) = SmoothRR(d-2,d,x,y);
+	gel(L,2) = SmoothRR(2*(d-2),d,x,y);
+	if(P)
+	{
+		vars = variables_vecsmall(f);
+		lx = vars[1]; ly = vars[2];
+		gel(L,3) = cgetg(3,t_VEC);
+		if(d%2) m = (3*d-5)/2;
+		else m = 3*(d/2-1);
+		M = SmoothRR(m,d,x,y);
+		for(i=1;i<=2;i++)
+		{
+			n = lg(gel(P,i));
+			MP = cgetg(n,t_COL);
+			for(j=1;j<n;j++)
+				gel(MP,j) = gsubst(gsubst(M,lx,gmael3(P,i,j,1)),ly,gmael3(P,i,j,2));
+			gmael(L,3,i) = gmul(M,QM_ker(matconcat(MP)));
+		}
+	}
+	else gel(L,3) = gen_0;
+	res = mkvecn(5,f,cgetg(1,t_VEC),utoi(g),utoi(d0),L);
+	return gerepilecopy(av,res);
+}
+
+GEN SmoothPicInit(GEN f, GEN p, ulong a, long e, GEN P)
+{
+	pari_sp av = avma;
+  GEN J,RRdata;
+  RRdata = SmoothRRdata(f,p,P);
+  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,a,e);
+  return gerepileupto(av,J);
 }

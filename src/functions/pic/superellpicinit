@@ -1,0 +1,6 @@
+Function: superellpicinit
+Section: modular_forms
+C-Name: SuperPicInit
+Prototype: GUGULDG
+Help: superellpicinit(f,m,p,a,e,{P}): Initiatilises the Jacobian of the superellptic curve y^m=f(x) over Zq/p^e, where Zq is the ring of integers of the unramified extension of Qp of degree a. p must be a prime of good reduction of the curve, and m must be coprime with the degree of f. P, if present, should be an affine point on the curve; it is required to construct maps from the Jacobian to A1.
+Doc: TODO 

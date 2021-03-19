@@ -1,9 +1,6 @@
 read("../src/nicolas_gp_code/install.gp");
 read("../src/nicolas_gp_code/TorsSpace.gp");
 read("../src/nicolas_gp_code/TorsGen.gp");
-read("../src/nicolas_gp_code/Hyper2RR.gp");
-read("../src/nicolas_gp_code/Smooth2RR.gp");
-read("../src/nicolas_gp_code/Super2RR.gp");
 
 mordroot1(f,p)=
 \\ Computes the order of x in Fp[x]/(f). Assumes f irreducible mod p.

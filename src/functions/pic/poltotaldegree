@@ -1,0 +1,11 @@
+Function: poltotaldegree
+Section: modular_forms
+C-Name: TotalDegree
+Prototype: lG
+Help: poltotaldegree(f): Total degree of the (possibly) multivariate polynomial f.
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog
