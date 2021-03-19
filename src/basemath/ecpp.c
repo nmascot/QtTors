@@ -435,16 +435,26 @@ ecpp_primeord_init(GEN primelist, GEN disclist)
 static GEN
 ecpp_param_set(GEN tune, GEN x)
 {
+  pari_timer ti;
   pari_sp av = avma;
   ulong maxsqrt = uel(x,1), maxpcdg = uel(x,2), tdivexp = uel(x,3);
   ulong maxdisc = maxsqrt * maxsqrt;
   GEN T = mkvecsmall3(maxsqrt, maxdisc, maxpcdg);
+  dbg_mode() {
+    err_printf(ANSI_BRIGHT_WHITE "\nECPP: parameters %Ps:\n"
+               "init time: " ANSI_RESET, x);
+    timer_start(&ti);
+  }
   GEN Plist = ecpp_primelist_init(maxsqrt);
   GEN U = zv_abs(Plist);
   GEN Utree = mkvec2(U, ZV_producttree(U));
+  dbg_mode() err_printf("%ld",timer_delay(&ti));
   GEN Dlist = ecpp_disclist_init(maxdisc, Plist);
+  dbg_mode() err_printf(", %ld",timer_delay(&ti));
   GEN Olist = ecpp_primeord_init(Plist, Dlist);
+  dbg_mode() err_printf(", %ld",timer_delay(&ti));
   GEN primorial = primorial_vec(tdivexp);
+  dbg_mode() err_printf(", %ld\n",timer_delay(&ti));
   return gerepilecopy(av, mkvec3(mkvec5(T,Utree,Plist,Dlist,Olist), primorial, tune));
 }
 
@@ -1286,13 +1296,7 @@ ecpp0(GEN C, long stopat)
   for(;;)
   {
     GEN C2, param, x = gel(tune, tunelen);
-    pari_timer T;
-    dbg_mode() {
-      timer_start(&T);
-      err_printf(ANSI_BRIGHT_WHITE "\nECPP: parameters %Ps:" ANSI_RESET, x);
-    }
     param = ecpp_param_set(tune, x);
-    dbg_mode() err_printf(ANSI_WHITE "  %8ld" ANSI_RESET, timer_delay(&T));
     C2 = ecpp_param(N, param, stopat);
     if (C2)
       return typ(C)==t_INT? C2: gerepilecopy(av, shallowconcat(C,C2));
