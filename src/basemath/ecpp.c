@@ -638,13 +638,12 @@ find_EP(GEN N, long D, GEN q, GEN g, GEN J, GEN s)
   }
 }
 
-/* Convert the disc. factorisation of a genus field to the
- * disc. factorisation of its real part. */
+/* Return the genus field. If real is set only the real part */
 static GEN
-realgenusfield(GEN Dfac, GEN sq, GEN p)
+genusfield(GEN Dfac, GEN sq, GEN p, long real)
 {
   long i, j, l = lg(Dfac), dn, n = 0;
-  GEN sn, s = gen_0, R = cgetg(l-1, t_VECSMALL);
+  GEN sn, s = gen_0, R = cgetg(l-1+!real, t_VECSMALL);
   for (i = 1; i < l; i++)
     if (Dfac[i] < 0) { n = i; break; }
   if (n == 0) pari_err_BUG("realgenusfield");
@@ -657,15 +656,21 @@ realgenusfield(GEN Dfac, GEN sq, GEN p)
       R[j++] = d > 0 ? d : d * dn;
       s = Fp_add(s, d > 0? si: Fp_mul(si, sn, p), p);
     }
+  if (!real)
+  {
+    R[j++] = dn;
+    s = Fp_add(s,sn, p);
+  }
   return mkvec2(R, s);
 }
 
 static GEN
-FpX_classtower_oneroot(GEN P, GEN Dfac, GEN sq, GEN p)
+FpX_classtower_oneroot(GEN P, GEN Dfac, GEN sq, GEN p, long real)
 {
   if (degpol(P) > 1)
   {
-    GEN N = NULL, V = realgenusfield(Dfac, sq, p), v = gel(V,1), R = gel(V,2);
+    GEN V = genusfield(Dfac, sq, p, real), v = gel(V,1), R = gel(V,2);
+    GEN N = NULL;
     long i, l = lg(v);
     for (i = 1; i < l; i++)
     {
@@ -693,14 +698,15 @@ ecpp_step2_worker(GEN S, GEN HD, GEN primelist, long dbg)
   GEN N = NDmqg_get_N(S), Dinfo = NDmqg_get_Dinfo(S);
   GEN m = NDmqg_get_m(S), q = NDmqg_get_q(S);
   GEN g = NDmqg_get_g(S), sq = NDmqg_get_sqrt(S);
-  long D = Dinfo_get_D(Dinfo), inv = Dinfo_get_bi(Dinfo);
+  long D = Dinfo_get_D(Dinfo), inv = Dinfo_get_bi(Dinfo), real;
   GEN Dfacp = Dfac_to_p(Dinfo_get_Dfac(Dinfo), primelist);
   long C2 = 0, C3 = 0, C4 = 0, D1 = 0;
   GEN P, c = getrand();
   setrand(gen_1); /* for reproducibility */
   /* C2: Find a root modulo N of polclass(D,inv) */
   if (dbg >= 2) timer_start(&ti);
-  P = FpX_classtower_oneroot(HD, Dfacp, sq, N);
+  real = !modinv_is_double_eta(Dinfo_get_bi(Dinfo));
+  P = FpX_classtower_oneroot(HD, Dfacp, sq, N, real);
   if (dbg >= 2) C2 = timer_delay(&ti);
   rt = FpX_oneroot_split(P, N);
   if (dbg >= 2) C3 = timer_delay(&ti);
