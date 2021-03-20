@@ -293,7 +293,7 @@ mkDinfo(GEN c, long D, long h)
   long bi, pd, p1, p2;
   bi = disc_best_modinv(D);
   pd = (modinv_degree(&p1,&p2,bi) && (-D)%p1==0 && (-D)%p2==0)? h/2: h;
-  gel(c,1) = mkvecsmall4(D, h, bi, pd); return c;
+  return mkvec2(mkvecsmall4(D, h, bi, pd), c);
 }
 
 static GEN
@@ -360,7 +360,7 @@ ecpp_disclist_init(ulong maxdisc, GEN primelist)
   /* second pass: sieve by primes and record factorization */
   for (t = 1; t <= lenv; t++)
   {
-    if (od[t]) gel(od,t) = mkvec2(NULL, vecsmalltrunc_init(N));
+    if (od[t]) gel(od,t) = vecsmalltrunc_init(N);
     if (ev[t])
     {
       GEN F = vecsmalltrunc_init(N);
@@ -372,7 +372,7 @@ ecpp_disclist_init(ulong maxdisc, GEN primelist)
         default:id = 2; break;
       }
       vecsmalltrunc_append(F, id);
-      gel(ev,t) = mkvec2(NULL, F);
+      gel(ev,t) = F;
     }
   }
   lp = lg(primelist);
@@ -383,13 +383,13 @@ ecpp_disclist_init(ulong maxdisc, GEN primelist)
     for (t = (s*p+1)>>2; t <= lenv; t += p, s += 4)
     {
       GEN c = gel(od,t);
-      if (c) vecsmalltrunc_append(gel(c,2), ip);
+      if (c) vecsmalltrunc_append(c, ip);
     }
     s = 1;
     for (t = p; t <= lenv; t += p, s++)
     {
       GEN c = gel(ev,t);
-      if (c) vecsmalltrunc_append(gel(c,2), ip);
+      if (c) vecsmalltrunc_append(c, ip);
     }
   }
   /* merging the two arrays */
