@@ -6707,3 +6707,4 @@ long PtIsOnHyperellCurve(GEN F, GEN P);
 GEN HyperPicInit(GEN f, GEN p, ulong a, long e, GEN P12);
 GEN SuperPicInit(GEN f, ulong m, GEN p, ulong a, long e, GEN P12);
 GEN SmoothPicInit(GEN f, GEN p, ulong a, long e, GEN P);
+GEN PicRandTors(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN seed, long returnlpow);

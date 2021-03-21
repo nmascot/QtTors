@@ -3954,7 +3954,7 @@ GEN SuperRRdata(GEN f, ulong m, GEN P)
 	GEN x,y,L,L2,E2,Auts,eqn,res;
 
 	if(issquarefree(f)==0)
-		pari_err(e_MISC,"%Ps is not squarefree");
+		pari_err(e_MISC,"%Ps is not squarefree",f);
 	d = degree(f);
 	if(ugcd(m,d)>1)
 		pari_err(e_IMPL,"%lu and the degree of %Ps are not coprime",m,f);
@@ -4109,7 +4109,7 @@ GEN SmoothGeneric(GEN f0, ulong d, GEN pr, GEN P0)
 		gel(A,i) = cgetg(4,t_COL);
 	for(b=1;;b++)
 	{
-		if(SmoothIsGeneric(f,d,pr,vars[1],vars[2],P)) break;
+		if(SmoothIsGeneric(f,d,pr,vars[1],vars[2],P0?P:NULL)) break;
 		/* get random change of vars */
 		B = utoi(b);
 		B2 = utoi(2*b+1);
@@ -4184,12 +4184,12 @@ GEN SmoothRRdata(GEN f, GEN p, GEN P)
 			if(d%2)
 			{
 				if(n!=d)
-					pari_err(e_MISC,"For smooth curves of degree %lu, please provide two distinct vectors of %lu distinct points.",d,d-1);
+					pari_err(e_MISC,"For smooth curves of degree %lu, please provide two distinct vectors of %lu distinct points",d,d-1);
 			}
 			else
 			{
         if(n!=d/2)
-          pari_err(e_MISC,"For smooth curves of degree %lu, please provide two distinct vectors of %lu distinct points.",d,d/2-1);
+          pari_err(e_MISC,"For smooth curves of degree %lu, please provide two distinct vectors of %lu distinct points",d,d/2-1);
       }
       for(j=1;j<n;j++)
       {
@@ -4238,4 +4238,82 @@ GEN SmoothPicInit(GEN f, GEN p, ulong a, long e, GEN P)
   RRdata = SmoothRRdata(f,p,P);
   J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,a,e);
   return gerepileupto(av,J);
+}
+
+// TorsGen
+
+GEN PicRandTors(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN seed, long returnlpow)
+{ /* Random pt in J[l].
+		 Lp = charpoly Frobp.
+		 If Chi, get pt in J[l,Chi].
+		 If Phi, Phi is a cyclo pol | x^a-1, get pt in J[Phi] (smaller card -> faster mul).
+		 If seed, set randseed.
+		 If return lpow, return [W,o,T,B] where W has order l^o, T=l^(o-1)*W in J[l], B in Ann_Z[x] T. */
+	pari_sp av = avma;
+	GEN J1,A,B,W,N,M,Psi,fa,lv,res,T,o;
+	ulong a,v,d;
+	if(Jgete(J)>1)
+	{
+		J1 = JacRed(J,1);
+		T = PicRandTors(J1,l,Lp,Chi,Phi,seed,0);
+		T = PicLiftTors(J,T,l,1);
+		return gerepileupto(av,T);
+	}
+	a = degree(JgetT(J));
+	A = cgetg(a+3,t_POL); /* x^a-1 */
+	A[1] = 0;
+	setsigne(A,1);
+	setvarn(A,0);
+	gel(A,2) = gen_m1;
+	gel(A,a+2) = gen_1;
+	for(v=1;v<a;v++)
+		gel(A,v+2) = gen_0;
+	B = A;
+	W = PicRand(J,seed);
+	if(Phi)
+	{ /* Project onto J[Phi] */
+		W = PicFrobPoly(J,W,RgX_div(B,Phi));
+		A = B = Phi;
+	}
+	N = ZX_resultant(Lp,B); /* Order of submodule we work in */
+	v = Z_pvalrem(N,l,&M);
+	if(v==0)
+		pari_err(e_MISC,"No %Ps-torsion",l);
+	W = PicMul(J,W,M,0); /* Project onto l^oo part, main bottleneck! */
+	B = FpX_gcd(Lp,B,l); /* [l^...]W in J[l,B] */
+	if(Chi)
+	{
+		Chi = FpX_gcd(Chi,B,l);
+		Psi = FpX_div(B,Chi,l);
+		d = degree(Psi);
+		if(d)
+		{
+			Psi = FpX_normalize(Psi,l);
+			if(v>1)
+			{ /* Lift Psi mod l^v as a factor of A */
+				fa = mkvec2(Psi,FpX_div(A,Psi,l));
+				fa = polhensellift(A,fa,l,v);
+				Psi = gel(fa,1);
+			}
+			lv = powis(l,v);
+			Psi = FpX_center_i(Psi,lv,shifti(lv,-1));
+			W = PicFrobPoly(J,W,Psi); /* Project onto J[Chi] */
+		}
+	}
+	res = PicTorsOrd(J,W,l); /*[T,o], W of order l^o, T=[l^(o-1)]W */
+	o = gel(res,2);
+	if(gequal0(o))
+	{
+		if(DEBUGLEVEL>=2)
+			pari_printf("PicRandTorsPt got zero (Phi=%Ps)\n",Phi?Phi:gen_0);
+	}
+	T = gel(res,1);
+	if(returnlpow==0)
+	{
+		return gerepileupto(av,T);
+	}
+	if(Chi)
+		B = FpX_normalize(Chi,l);
+	res = mkvecn(4,W,o,T,B);
+	return gerepilecopy(av,res);
 }
