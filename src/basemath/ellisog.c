@@ -15,6 +15,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_ellisogeny
+
 /* Return 1 if the point Q is a Weierstrass (2-torsion) point of the
  * curve E, return 0 otherwise */
 static long

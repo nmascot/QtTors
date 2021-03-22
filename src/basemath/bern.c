@@ -12,13 +12,16 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
+#include "pari.h"
+#include "paripriv.h"
+
+#define DEBUGLEVEL DEBUGLEVEL_bern
+
 /********************************************************************/
 /**                                                                **/
 /**                     BERNOULLI NUMBERS B_2k                     **/
 /**                                                                **/
 /********************************************************************/
-#include "pari.h"
-#include "paripriv.h"
 
 /* D = divisorsu(n). Return a/b = \sum_{p-1 | 2n: p prime} 1/p
  * B_2k + a/b in Z [Clausen-von Staudt] */

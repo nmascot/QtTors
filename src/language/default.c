@@ -516,7 +516,11 @@ sd_secure(const char *v, long flag)
 
 GEN
 sd_debug(const char *v, long flag)
-{ return sd_ulong(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL); }
+{
+  GEN r = sd_ulong(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL);
+  if (v) setalldebug(DEBUGLEVEL);
+  return r;
+}
 
 GEN
 sd_debugfiles(const char *v, long flag)

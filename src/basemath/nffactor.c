@@ -20,6 +20,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_nffactor
+
 static GEN nfsqff(GEN nf,GEN pol,long fl,GEN den);
 static int nfsqff_use_Trager(long n, long dpol);
 

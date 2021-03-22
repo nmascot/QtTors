@@ -4087,6 +4087,8 @@ void    paristack_resize(ulong newsize);
 void    paristack_setsize(size_t rsize, size_t vsize);
 void    parivstack_resize(ulong newsize);
 void    parivstack_reset(void);
+void    setalldebug(long lvl);
+GEN     setdebug(const char *s, long lvl);
 void    shiftaddress(GEN x, long dec);
 void    shiftaddress_canon(GEN x, long dec);
 long    timer(void);

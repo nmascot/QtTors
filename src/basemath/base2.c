@@ -19,6 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_nf
+
 /* allow p = -1 from factorizations, avoid oo loop on p = 1 */
 static long
 safe_Z_pvalrem(GEN x, GEN p, GEN *z)

@@ -21,6 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "paripriv.h"
 #undef pow /* AIX: pow(a,b) is a macro, wrongly expanded on grp->pow(a,b,c) */
 
+#define DEBUGLEVEL DEBUGLEVEL_bb_group
+
 /***********************************************************************/
 /**                                                                   **/
 /**                    POWERING                                       **/

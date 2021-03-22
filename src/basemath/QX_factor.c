@@ -14,6 +14,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_factor
+
 /* x,y two ZX, y non constant. Return q = x/y if y divides x in Z[X] and NULL
  * otherwise. If not NULL, B is a t_INT upper bound for ||q||_oo. */
 static GEN

@@ -14,6 +14,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_nflist
+
 /* Code s: if s >= 0 number of complex embeddings; s = -1: all signatures;
  * s = -2: all signatures separated.
  * Known groups: C1 = 1T1, C2 = 2T1, C3 = 3T1, S3 = 3T2, C4 = 4T1, V4 = 4T2,

@@ -20,6 +20,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_trans
+
 #ifdef LONG_IS_64BIT
 static const long SQRTVERYBIGINT = 3037000500L; /* ceil(sqrt(LONG_MAX)) */
 #else

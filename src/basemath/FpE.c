@@ -15,6 +15,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_ellcard
+
 /* Not so fast arithmetic with points over elliptic curves over Fp */
 
 /***********************************************************************/

@@ -20,6 +20,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_nf
+
 int new_galois_format = 0;
 
 /* v a t_VEC, lg(v) = 13, sanity check for true rnf */

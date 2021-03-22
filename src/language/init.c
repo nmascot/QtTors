@@ -52,6 +52,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #if defined(USE_TIMES)
 #  include <sys/times.h>
 #endif
+#define PARI_INIT
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
@@ -773,6 +774,14 @@ pari_init_errcatch(void)
   global_err_data = NULL;
 }
 
+void
+setalldebug(long lvl)
+{
+  long i, l = sizeof(pari_DEBUGLEVEL_ptr)/sizeof(*pari_DEBUGLEVEL_ptr);
+  for (i = 0; i < l; i++)
+    *pari_DEBUGLEVEL_ptr[i] =lvl;
+}
+
 /*********************************************************************/
 /*                           INIT DEFAULTS                           */
 /*********************************************************************/
@@ -790,6 +799,7 @@ pari_init_defaults(void)
 
   precdl = 16;
   DEBUGFILES = DEBUGLEVEL = 0;
+  setalldebug(0);
   DEBUGMEM = 1;
   disable_color = 1;
   pari_logstyle = logstyle_none;
@@ -2895,6 +2905,41 @@ getwalltime(void)
 /*                   FUNCTIONS KNOWN TO THE ANALYZER               */
 /*                                                                 */
 /*******************************************************************/
+
+GEN
+setdebug(const char *s, long lvl)
+{
+  long i, l = sizeof(pari_DEBUGLEVEL_str)/sizeof(*pari_DEBUGLEVEL_str);
+  if (s)
+  {
+    if (lvl > 20) pari_err_DOMAIN("setdebug", "lvl", ">", utoipos(20), stoi(lvl));
+    for (i=0; i<l; i++)
+      if (!strcmp(s,pari_DEBUGLEVEL_str[i]))
+        break;
+    if (i == l)
+      pari_err_DOMAIN("setdebug", "dmn", "not a valid", strtoGENstr("debug domain"), strtoGENstr(s));
+    if (lvl >= 0)
+    {
+      *pari_DEBUGLEVEL_ptr[i] = lvl;
+      return gnil;
+    }
+    else
+      return stoi(*pari_DEBUGLEVEL_ptr[i]);
+  }
+  else
+  {
+    GEN V = cgetg(3,t_MAT), V1, V2;
+    V1 = gel(V,1) = cgetg(l+1, t_COL);
+    V2 = gel(V,2) = cgetg(l+1, t_COL);
+    for (i = 0; i < l; i++)
+    {
+      gel(V1, i+1) = strtoGENstr(pari_DEBUGLEVEL_str[i]);
+      gel(V2, i+1) = stoi(*pari_DEBUGLEVEL_ptr[i]);
+    }
+    return V;
+  }
+}
+
 GEN
 pari_version(void)
 {

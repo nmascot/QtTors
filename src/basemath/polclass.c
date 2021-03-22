@@ -15,6 +15,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_polclass
+
 #define dbg_printf(lvl) if (DEBUGLEVEL >= (lvl) + 3) err_printf
 
 /*
@@ -1985,7 +1987,8 @@ polclass0(long D, long inv, long xvar, GEN *db)
     gel(H, i) = polclass_roots_modp(&n_curves_tested, ne, rho_inv, G, *db);
     uel(plist, i) = ne->p;
     uel(pilist, i) = ne->pi;
-    if (DEBUGLEVEL>2 && (i & 3L)==0) err_printf(" %ld%%", i*100/nprimes);
+    if (DEBUGLEVEL>2 && (i & 3L)==0)
+      err_printf(" %ld%%", i*100/nprimes);
   }
   dbg_printf(0)("\n");
 

@@ -14,6 +14,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_bnf
+
 /* if x a famat, assume it is a true unit (very costly to check even that
  * it's an algebraic integer) */
 GEN

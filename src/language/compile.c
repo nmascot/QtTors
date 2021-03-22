@@ -18,6 +18,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "tree.h"
 #include "opcode.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_compiler
+
 #define tree pari_tree
 
 enum COflags {COsafelex=1, COsafedyn=2};

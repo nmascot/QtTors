@@ -34,6 +34,8 @@ ANY WARRANTY WHATSOEVER. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_ellsea
+
 static THREAD GEN modular_eqn;
 
 void

@@ -20,6 +20,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_hyperell
+
 /* Implementation of Kedlaya Algorithm for counting point on hyperelliptic
 curves by Bill Allombert based on a GP script by Bernadette Perrin-Riou.
 

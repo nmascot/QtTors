@@ -15,6 +15,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_ms
+
 /* Adapted from shp_package/moments by Robert Pollack
  * http://www.math.mcgill.ca/darmon/programs/shp/shp.html */
 static GEN mskinit(ulong N, long k, long sign);

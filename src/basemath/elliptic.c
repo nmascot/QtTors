@@ -19,6 +19,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
+
+#define DEBUGLEVEL DEBUGLEVEL_ell
+
 #undef coordch
 
 /* Transforms a curve E into short Weierstrass form E' modulo p.

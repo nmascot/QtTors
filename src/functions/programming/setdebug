@@ -1,0 +1,15 @@
+Function: setdebug
+Section: programming/control
+C-Name: setdebug
+Prototype: DsD-1,L,
+Help: setdebug({dmn},{lvl}):
+ set level of debug domain dmn to lvl (lvl must be between 0 and 20).
+ If lvl is omitted, return the current level.
+ if dmn is omitted, return a two-column matrix which lists the available domains
+ with their levels.
+Doc: set level of debug domain dmn to lvl (lvl must be between 0 and 20).
+ If \var{lvl} is omitted, return the current level.
+ if \var{dmn} is omitted, return a two-column matrix which lists the available domains
+ with their levels.
+Variant: Also available is
+  \fun{void}{setalldebug(long lvl): set all debug domains to level \var{lvl}.

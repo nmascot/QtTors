@@ -21,6 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_mod
+
 /* assume z[1] was created last */
 #define fix_frac_if_int(z) if (equali1(gel(z,2)))\
   z = gerepileupto((pari_sp)(z+3), gel(z,1));

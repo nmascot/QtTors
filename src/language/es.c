@@ -40,6 +40,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "../systems/emscripten/emscripten.h"
 #endif
 
+#define DEBUGLEVEL DEBUGLEVEL_io
+
 typedef void (*OUT_FUN)(GEN, pariout_t *, pari_str *);
 
 static void bruti_sign(GEN g, pariout_t *T, pari_str *S, int addsign);

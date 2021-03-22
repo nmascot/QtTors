@@ -17,6 +17,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "../src/language/anal.h"
 #include "mt.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_mt
+
 static THREAD int pari_MPI_size, pari_MPI_rank;
 static THREAD long nbreq = 0, mt_issingle = 0;
 
