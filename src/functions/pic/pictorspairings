@@ -1,6 +1,0 @@
-Function: pictorspairings
-Section: modular_forms
-C-Name: PicTorsPairings
-Prototype: GGGGG
-Help: pictorspairings(J,W,l,X,params): Given an l-torsion point W on the p-adic Jacobian J, a vector X of points of J, and parameters param TODO, retrun the vector of Frey-Rueck pairings <W,x>_l for x in X.
-Doc: TODO 

@@ -3502,22 +3502,51 @@ GEN Fq_mu_l_log(GEN x, GEN z, GEN T, GEN p, GEN l)
   return gerepileupto(av,utoi(n));
 }
 
-GEN PicTorsPairings(GEN J, GEN W, GEN l, GEN LinTests, GEN FRparams)
+GEN PicTorsPairingInit(GEN J, GEN l)
+{
+	GEN res,T,p,W0;
+	T = JgetT(J);
+	p = Jgetp(J);
+	W0 = JgetW0(J);
+	res = cgetg(5,t_VEC);
+	gel(res,1) = gcopy(l);
+	gel(res,2) = Fq_zeta_l(T,p,l);
+	gel(res,3) = AddFlipChain(l,0);
+	gel(res,4) = PicChord(J,W0,W0,1); /* Non-trivial version of origin */
+	return res;
+}
+
+GEN PicTorsPairing(GEN J, GEN FRparams, GEN W, GEN LinTests)
 {
   pari_sp av = avma;
-  GEN T,p,AddC,W0,z,fr,res;
+  GEN T,p,l,AddC,W0,z,fr,res;
   ulong n,i;
+	if(typ(LinTests)!=t_VEC)
+	{ /* Case of only 1 pt */
+		res = PicTorsPairing(J,FRparams,W,mkvec(LinTests));
+		return gerepilecopy(av,gel(res,1));
+	}
   T = JgetT(J);
   p = Jgetp(J);
-  AddC = gel(FRparams,1);
-  W0 = gel(FRparams,2);
-  z = gel(FRparams,3);
+	l = gel(FRparams,1);
+  z = gel(FRparams,2);
+  AddC = gel(FRparams,3);
+  W0 = gel(FRparams,4);
   fr = PicFreyRuckMulti(J,W,l,LinTests,W0,AddC);
   n = lg(fr);
   res = cgetg(n,t_COL);
   for(i=1;i<n;i++)
     gel(res,i) = Fq_mu_l_log(gel(fr,i),z,T,p,l);
   return gerepileupto(av,res);
+}
+
+GEN PicTorsPairing_Modl(GEN J, GEN FRparams, GEN W, GEN LinTests)
+{
+	pari_sp av = avma;
+	GEN l,res;
+	l = gel(FRparams,1);
+	res = PicTorsPairing(J,FRparams,W,LinTests);
+	return gerepilecopy(av,gmodulo(res,l));
 }
 
 // Zeta functions

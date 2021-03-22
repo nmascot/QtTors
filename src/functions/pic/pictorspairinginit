@@ -1,0 +1,6 @@
+Function: pictorspairinginit
+Section: modular_forms
+C-Name: PicTorsPairingInit
+Prototype: GG
+Help: pictorspairings(J,l): Initialises data to evalaute l-torsion Frey-Rueck pairings on the Jacobian J.
+Doc: TODO 

@@ -6695,7 +6695,8 @@ GEN PicLift_worker(GEN V0j, ulong shift, GEN uv, GEN AinvB, GEN CAinv, GEN T, GE
 GEN PicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, GEN KM, GEN pe1, GEN pe21, long e21, GEN c0, ulong P0, GEN P1);
 GEN TorsSpaceFrob_worker(GEN W1, GEN X1, GEN W2, GEN X2, GEN J);
 GEN PicEval_worker(GEN W, GEN J);
-GEN PicTorsPairings(GEN J, GEN W, GEN l, GEN LinTests, GEN FRparams);
+GEN PicTorsPairingInit(GEN J, GEN l);
+GEN PicTorsPairing_Modl(GEN J, GEN FRparams, GEN W, GEN X);
 GEN PicLC(GEN J, GEN C, GEN W);
 GEN PlaneZeta(GEN f, ulong p);
 GEN SuperZeta(GEN f, ulong m, ulong p);

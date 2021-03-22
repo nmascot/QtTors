@@ -1,7 +1,7 @@
 Function: picmul
 Section: modular_forms
 C-Name: PicMul
-Prototype: GGGD0,L,
+Prototype: GGGD2,L,
 Help: picmul(J,W,n,{flag=0}): Multiplcation by n of the point W in the Jacobian J. The meanig of flag is TODO
 Doc: TODO 
  \bprog
