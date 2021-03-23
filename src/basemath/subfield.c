@@ -1260,7 +1260,12 @@ galoissubfieldcm(GEN G, long fl)
     c = RgX_to_RgC(c,n);
     M = Q_primitive_part(M,&contM);
     c = RgM_RgC_invimage(M,c);
-    c = RgV_Rg_mul(c, gdiv(contc,contM));
+    if (contc)
+    {
+      if (contM) contc = gdiv(contc,contM);
+      c = RgV_Rg_mul(c, contc);
+    }
+    else if (contM) c = RgV_Rg_mul(c, ginv(contM));
     c = RgV_to_RgX(c, v);
   }
 
