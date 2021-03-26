@@ -2,6 +2,8 @@ Function: polroots
 Section: polynomials
 C-Name: roots
 Prototype: Gp
+Description:
+  (gen):vec:prec roots($1, $prec)
 Help: polroots(T): complex roots of the polynomial T using
  Schonhage's method, as modified by Gourdon.
 Doc: complex roots of the polynomial $T$, given as a column vector where each
