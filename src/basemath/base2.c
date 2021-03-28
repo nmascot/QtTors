@@ -3582,7 +3582,7 @@ rnfdisc_factored(GEN nf, GEN pol, GEN *pd)
 
   nf = checknf(nf);
   pol = rnfdisc_get_T(nf, pol, &lim);
-  disc = nf_to_scalar_or_basis(nf, nfX_disc(nf, Q_primpart(pol)));
+  disc = nf_to_scalar_or_basis(nf, nfX_disc(nf, pol));
   pol = nfX_to_monic(nf, pol, NULL);
   fa = idealfactor_partial(nf, disc, lim);
   P = gel(fa,1); l = lg(P);
