@@ -203,6 +203,14 @@ ec_bmodel(GEN e)
   return mkpoln(4, utoipos(4), b2, b42, b6);
 }
 
+/* X^4 - b4*X^2 - 2b6*X - b8 */
+GEN
+ec_phi2(GEN e)
+{
+  GEN b4 = ell_get_b4(e), b6 = ell_get_b6(e), b8 = ell_get_b8(e);
+  return mkpoln(5, gen_1, gen_0, gneg(b4), gmul2n(gneg(b6),1), gneg(b8));
+}
+
 static int
 invcmp(void *E, GEN x, GEN y) { (void)E; return -gcmp(x,y); }
 
@@ -7338,12 +7346,8 @@ ellxn(GEN e, long n, long v)
   }
   else if (n == 2)
   {
-    GEN b4 = ell_get_b4(e);
-    GEN b6 = ell_get_b6(e);
-    GEN b8 = ell_get_b8(e);
     A = d2;
-    /* phi_2 = x^4 - b4*x^2 - 2b6*x - b8 */
-    B = mkpoln(5, gen_1, gen_0, gneg(b4), gmul2n(gneg(b6),1), gneg(b8));
+    B = ec_phi2(e);
     setvarn(B,v);
   }
   else
