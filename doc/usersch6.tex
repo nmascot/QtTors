@@ -2880,6 +2880,10 @@ Finds a small $e$ such that the rank of $G_e$ is equal to the rank of $G$
 step to speed up LLL reductions, see \tet{nf_get_Gtwist}.
 Suitable for \kbd{gerepileupto}, but does not collect garbage.
 
+\fun{GEN}{Hermite_bound}{long n, long prec}
+Remove a majoration of $\gamma_n^n$ where $\gamma_n$ is the
+Hermite constant for lattices of dimension $n$.
+
 \subsec{Linear dependencies}
 
 The following functions underly the \kbd{lindep} GP function:

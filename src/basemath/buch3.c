@@ -724,8 +724,8 @@ zimmertbound(GEN D, long N, long R2)
 }
 
 /* return \gamma_n^n if known, an upper bound otherwise */
-static GEN
-hermiteconstant(long n)
+GEN
+Hermite_bound(long n, long prec)
 {
   GEN h,h1;
   pari_sp av;
@@ -740,10 +740,11 @@ hermiteconstant(long n)
     case 6: return mkfrac(utoipos(64), utoipos(3));
     case 7: return utoipos(64);
     case 8: return utoipos(256);
+    case 24: return int2n(48);
   }
   av = avma;
-  h  = powru(divur(2,mppi(DEFAULTPREC)), n);
-  h1 = sqrr(ggamma(sstoQ(n+4,2),DEFAULTPREC));
+  h  = powru(divur(2,mppi(prec)), n);
+  h1 = sqrr(ggamma(sstoQ(n+4,2),prec));
   return gerepileuptoleaf(av, mulrr(h,h1));
 }
 
@@ -801,7 +802,7 @@ regulatorbound(GEN bnf)
 
   p1 = sqrr(glog(gdiv(dK,c1),DEFAULTPREC));
   p1 = divru(gmul2n(powru(divru(mulru(p1,3),N*(N*N-1)-6*R2),R),R2), N);
-  p1 = sqrtr(gdiv(p1, hermiteconstant(R)));
+  p1 = sqrtr(gdiv(p1, Hermite_bound(R, DEFAULTPREC)));
   if (DEBUGLEVEL>1) err_printf("Mahler bound for regulator: %Ps\n",p1);
   return gmax_shallow(p1, dbltor(0.2));
 }
@@ -1056,7 +1057,7 @@ lowerboundforregulator(GEN bnf, GEN units)
   if (DEBUGLEVEL>1) err_printf("M* = %Ps\n", dbltor(bound));
   M0 = compute_M0(dbltor(bound), N);
   if (DEBUGLEVEL>1) err_printf("M0 = %.28Pg\n",M0);
-  M = gmul2n(divru(gdiv(powrs(M0,RU),hermiteconstant(RU)),N),R2);
+  M = gmul2n(divru(gdiv(powrs(M0,RU),Hermite_bound(RU, DEFAULTPREC)),N),R2);
   if (cmprr(M, dbltor(0.04)) < 0) return NULL;
   M = sqrtr(M);
   if (DEBUGLEVEL>1)

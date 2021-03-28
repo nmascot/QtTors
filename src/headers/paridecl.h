@@ -2791,6 +2791,7 @@ GEN     signunits(GEN bnf);
 
 /* buch3.c */
 
+GEN     Hermite_bound(long n, long prec);
 void    bnr_subgroup_sanitize(GEN *pbnr, GEN *pH);
 void    bnr_char_sanitize(GEN *pbnr, GEN *pchi);
 GEN     ABC_to_bnr(GEN A, GEN B, GEN C, GEN *H, int gen);

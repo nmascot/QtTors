@@ -80,6 +80,7 @@ BA  21- [libpari] elltors_psylow
     24- rnfconductor(bnf,pol,flag): add flag=2 to only return the conductor
         and its factorization (which comes for free)
 HC  25- New GP functions nflist, nfresolvent
+BA  26- [libpari] Hermite_bound
 
   Changed
 HC   1- faster implementation of eulervec + cache result
