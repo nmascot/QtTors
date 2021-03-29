@@ -517,7 +517,11 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
     if (f) u = gmul(u, f(E, p, prec0)); /* f(p) p^s */
     S = gadd(S, gmul(gel(W, N / p), u));
     precp = p;
-    if ((p & 0x1ff) == 1) S = gerepileupto(av2, S);
+    if ((p & 0x1ff) == 1)
+    {
+      if (!logp) S = gerepileupto(av2,S);
+      else gerepileall(av2, 2, &S, &logp);
+    }
   }
   P = mkvecsmall2(2, 3);
   Z = cgetg(sq+1, t_VEC);
