@@ -439,23 +439,25 @@ ecpp_param_set(GEN tune, GEN x)
   pari_sp av = avma;
   ulong maxsqrt = uel(x,1), maxpcdg = uel(x,2), tdivexp = uel(x,3);
   ulong maxdisc = maxsqrt * maxsqrt;
-  GEN T = mkvecsmall3(maxsqrt, maxdisc, maxpcdg);
+  GEN Plist, U, Utree, Dlist, Olist, primorial, T;
+  T = mkvecsmall3(maxsqrt, maxdisc, maxpcdg);
   dbg_mode() {
     err_printf(ANSI_BRIGHT_WHITE "\nECPP: parameters %Ps:\n"
                "init time: " ANSI_RESET, x);
     timer_start(&ti);
   }
-  GEN Plist = ecpp_primelist_init(maxsqrt);
-  GEN U = zv_abs(Plist);
-  GEN Utree = mkvec2(U, ZV_producttree(U));
+  Plist = ecpp_primelist_init(maxsqrt);
+  U = zv_abs(Plist);
+  Utree = mkvec2(U, ZV_producttree(U));
   dbg_mode() err_printf("%ld",timer_delay(&ti));
-  GEN Dlist = ecpp_disclist_init(maxdisc, Plist);
+  Dlist = ecpp_disclist_init(maxdisc, Plist);
   dbg_mode() err_printf(", %ld",timer_delay(&ti));
-  GEN Olist = ecpp_primeord_init(Plist, Dlist);
+  Olist = ecpp_primeord_init(Plist, Dlist);
   dbg_mode() err_printf(", %ld",timer_delay(&ti));
-  GEN primorial = primorial_vec(tdivexp);
+  primorial = primorial_vec(tdivexp);
   dbg_mode() err_printf(", %ld\n",timer_delay(&ti));
-  return gerepilecopy(av, mkvec3(mkvec5(T,Utree,Plist,Dlist,Olist), primorial, tune));
+  return gerepilecopy(av, mkvec3(mkvec5(T,Utree,Plist,Dlist,Olist),
+                                 primorial, tune));
 }
 
 /* cert contains [N, t, s, a4, [x, y]] as documented in ??ecpp; the following
