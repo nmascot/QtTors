@@ -373,7 +373,7 @@ pnormalize(GEN f, GEN p, GEN T, long prec, long n,
     if (v1 < v)
     {
       *prev = 1;
-      f = RgX_recip_shallow(f); /* f(0) != 0 so degree is the same */
+      f = RgX_recip_i(f); /* f(0) != 0 so degree is the same */
      /* beware loss of precision from lc(factor), whose valuation is <= v */
       *pprec += v; v = v1;
     }
@@ -586,7 +586,7 @@ factorpadic(GEN f, GEN p, long r)
     for (i=1; i<l; i++)
     {
       GEN t = gel(P,i);
-      if (reverse) t = normalizepol(RgX_recip_shallow(t));
+      if (reverse) t = RgX_recip_shallow(t);
       gel(P,i) = ZX_to_ZpX_normalized(t,p,ppow,r);
     }
     if (!gequal1(lt)) gel(P,1) = gmul(gel(P,1), lt);

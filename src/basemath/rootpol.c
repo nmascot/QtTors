@@ -505,7 +505,7 @@ logmin_modulus(GEN p, double tau)
 {
   pari_sp av = avma;
   if (gequal0(gel(p,2))) return -pariINFINITY;
-  return gc_double(av, - logmax_modulus(RgX_recip_shallow(p),tau));
+  return gc_double(av, - logmax_modulus(RgX_recip_i(p),tau));
 }
 
 /* return the log of the k-th modulus (ascending order) of p, rel. error tau*/
@@ -1064,9 +1064,9 @@ optimize_split(GEN p, long k, double delta, long bit,
     split_fromU(p,k,delta,bit,F,G,param,param2);
   else
   {
-    split_fromU(RgX_recip_shallow(p),n-k,delta,bit,&FF,&GG,param,param2);
-    *F = RgX_recip_shallow(GG);
-    *G = RgX_recip_shallow(FF);
+    split_fromU(RgX_recip_i(p),n-k,delta,bit,&FF,&GG,param,param2);
+    *F = RgX_recip_i(GG);
+    *G = RgX_recip_i(FF);
   }
 }
 
@@ -1128,7 +1128,7 @@ conformal_pol(GEN p, GEN a)
   Q = conformal_pol(Q, a);
   R = conformal_pol(R, a);
   S = gpowgs(deg1pol_shallow(gen_1, gneg(a), v), d);
-  T = RgX_recip_shallow(S);
+  T = RgX_recip_i(S);
   if (typ(a) == t_COMPLEX) T = gconj(T);
   if (odd(d)) T = RgX_neg(T);
   /* S = (X - a)^d, T = (conj(a) X - 1)^d */
@@ -1464,13 +1464,13 @@ split_0(GEN p, long bit, GEN *F, GEN *G)
     if (lr < LOG1_9) split_0_1(p, bit, F, G);
     else
     {
-      q = RgX_recip_shallow(p);
+      q = RgX_recip_i(p);
       lr = logmax_modulus(q,0.05);
       if (lr < LOG1_9)
       {
         split_0_1(q, bit, F, G);
-        *F = RgX_recip_shallow(*F);
-        *G = RgX_recip_shallow(*G);
+        *F = RgX_recip_i(*F);
+        *G = RgX_recip_i(*G);
       }
       else
         split_2(p,bit,NULL, 1.2837,F,G);

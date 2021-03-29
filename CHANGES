@@ -63,7 +63,7 @@ HC  13- allow hypergeom(N, D, t_SER)
     15- general composition of binary quadratic forms (in different orders)
 BA  16- New GP functions ellrank, ellrankinit : implement 2-descent on
         elliptic curve following a GP script by Denis Simon.
-BA  17- [libpari] RgXY_derivx
+BA  17- [libpari] RgXY_derivx, RgX_recip_i
     18- [libpari] RgC_RgV_mulrealsym, RgM_to_RgXV_reverse
 BA  19- New GP function ellsaturation
     20- [libpari] ZX_Z_eval

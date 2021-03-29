@@ -1044,6 +1044,15 @@ RgX_recip_shallow(GEN x)
   long lx, i, j;
   GEN y = cgetg_copy(x, &lx);
   y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) gel(y,i) = gel(x,j);
+  return normalizepol_lg(y,lx);
+}
+
+GEN
+RgX_recip_i(GEN x)
+{
+  long lx, i, j;
+  GEN y = cgetg_copy(x, &lx);
+  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) gel(y,i) = gel(x,j);
   return y;
 }
 /*******************************************************************/
@@ -1393,8 +1402,8 @@ RgX_mulhigh_i2(GEN f, GEN g, long n)
   long d = degpol(f)+degpol(g) + 1 - n;
   GEN h;
   if (d <= 2) return RgX_shift_shallow(RgX_mul(f,g), -n);
-  h = RgX_recip_shallow(RgXn_mul2(RgX_recip_shallow(f),
-                                  RgX_recip_shallow(g), d));
+  h = RgX_recip_i(RgXn_mul2(RgX_recip_i(f),
+                                  RgX_recip_i(g), d));
   return RgX_shift_shallow(h, d-1-degpol(h)); /* possibly (fg)(0) = 0 */
 }
 
@@ -1405,7 +1414,7 @@ RgX_sqrhigh_i2(GEN f, long n)
   long d = 2*degpol(f)+ 1 - n;
   GEN h;
   if (d <= 2) return RgX_shift_shallow(RgX_sqr(f), -n);
-  h = RgX_recip_shallow(RgXn_sqr(RgX_recip_shallow(f), d));
+  h = RgX_recip_i(RgXn_sqr(RgX_recip_i(f), d));
   return RgX_shift_shallow(h, d-1-degpol(h)); /* possibly (fg)(0) = 0 */
 }
 
@@ -1983,8 +1992,8 @@ ZXQX_dvd(GEN x, GEN y, GEN T)
   dx = degpol(x);
   if (dx < dy) return !signe(x);
   (void)new_chunk(2);
-  x = RgX_recip_shallow(x)+2;
-  y = RgX_recip_shallow(y)+2;
+  x = RgX_recip_i(x)+2;
+  y = RgX_recip_i(y)+2;
   /* pay attention to sparse divisors */
   for (i = 1; i <= dy; i++)
     if (!signe(gel(y,i))) gel(y,i) = NULL;
@@ -2040,8 +2049,8 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
   dx = degpol(x);
   if (dx < dy) return RgX_copy(x);
   (void)new_chunk(2);
-  x = RgX_recip_shallow(x)+2;
-  y = RgX_recip_shallow(y)+2;
+  x = RgX_recip_i(x)+2;
+  y = RgX_recip_i(y)+2;
   /* pay attention to sparse divisors */
   for (i = 1; i <= dy; i++)
     if (isexactzero(gel(y,i))) gel(y,i) = NULL;
@@ -2073,7 +2082,7 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
   lx = dx+3; x -= 2;
   x[0] = evaltyp(t_POL) | evallg(lx);
   x[1] = evalsigne(1) | evalvarn(vx);
-  x = RgX_recip_shallow(x);
+  x = RgX_recip_i(x);
   if (p)
   { /* multiply by y[0]^p   [beware dummy vars from FpX_FpXY_resultant] */
     GEN t = y_lead;
@@ -2116,8 +2125,8 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
     *ptr = gerepileupto(av, r); return scalarpol(x_lead, vx);
   }
   (void)new_chunk(2);
-  x = RgX_recip_shallow(x)+2;
-  y = RgX_recip_shallow(y)+2;
+  x = RgX_recip_i(x)+2;
+  y = RgX_recip_i(y)+2;
   /* pay attention to sparse divisors */
   for (i = 1; i <= dy; i++)
     if (isexactzero(gel(y,i))) gel(y,i) = NULL;
@@ -2169,9 +2178,9 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
     lx = dx+3; x -= 2;
     x[0] = evaltyp(t_POL) | evallg(lx);
     x[1] = evalsigne(1) | evalvarn(vx);
-    x = RgX_recip_shallow(x);
+    x = RgX_recip_i(x);
   }
-  z = RgX_recip_shallow(z);
+  z = RgX_recip_i(z);
   r = x;
   if (p)
   {

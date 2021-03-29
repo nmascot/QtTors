@@ -1213,6 +1213,7 @@ GEN     RgX_normalize(GEN x);
 GEN     RgX_pseudodivrem(GEN x, GEN y, GEN *ptr);
 GEN     RgX_pseudorem(GEN x, GEN y);
 GEN     RgX_recip(GEN x);
+GEN     RgX_recip_i(GEN x);
 GEN     RgX_recip_shallow(GEN x);
 GEN     RgX_rem(GEN x, GEN y);
 GEN     RgX_renormalize_lg(GEN x, long lx);

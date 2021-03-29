@@ -3019,8 +3019,8 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
     if (mpr < 0) return NULL;
     if (! RgX_valrem(Ppr, &Ppr))
     { /* nonzero constant coefficient */
-      Ppr = RgX_shift_shallow(RgX_recip_shallow(Ppr), m - mpr);
-      P = RgX_recip_shallow(P);
+      Ppr = RgX_shift_shallow(RgX_recip_i(Ppr), m - mpr);
+      P = RgX_recip_i(P);
     }
     else
     {
@@ -3031,7 +3031,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
         P = RgX_translate(P, z);
       else
         P = RgXQX_translate(P, z, T);
-      P = RgX_recip_shallow(P);
+      P = RgX_recip_i(P);
       Ppr = nfX_to_FqX(P, nf, modpr); /* degpol(P) = degpol(Ppr) = m */
     }
   }
