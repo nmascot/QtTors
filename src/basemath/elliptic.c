@@ -4987,7 +4987,7 @@ ellanal_globalred(GEN e, GEN *ch)
 }
 
 static long
-nb_real_components(GEN E) { return signe(ell_get_disc(E)) > 0? 2: 1; }
+nb_real_components(GEN E) { return gsigne(ell_get_disc(E)) > 0? 2: 1; }
 /* E minimal, \Omega_E^s in "La constante de Manin et le degre modulaire
  * d'une courbe elliptique" */
 GEN

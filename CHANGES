@@ -41,6 +41,7 @@ BA  20- missing GC in qfsolve
         -> spurious extra term -400*q^6
     34- k=bnfinit(quadpoly(-2923,a)); bnrclassfield(k,3) -> SEGV [#2280]
 BA  35- rnfdisc mishandled polynomials with denominators [#2284]
+BA  36- elltamagawa(ellinit([-1456/243,93184/19683])) -> wrong result
 
   Added
 HC   1- new GP function eulerreal

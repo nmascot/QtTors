@@ -402,16 +402,24 @@ E = ellinit([0,0,0,-82,0]);
 ellrootno(E,2)
 ellrootno(E)
 ellrootno(E,2)
+
 E=ellinit([0,20,0,-352,512]);
 ellrootno(E,2)
-
 E.disc
 elltamagawa(E)
 ellbsd(E)
+
+F=ellinit([-1456/243,93184/19683]); /* isomorphic to E */
+ellrootno(F,2)
+F.disc
+elltamagawa(F)
+ellbsd(F)
+
 E=ellinit([1,0,1,4,-6]);
 E.disc
 elltamagawa(E)
 ellbsd(E)
+
 ellbsd(ellinit([-5*36^4,0]))
 
 \\#1558
