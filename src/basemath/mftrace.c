@@ -8437,6 +8437,7 @@ mfsearch(GEN NK, GEN V, long space)
     default: pari_err_TYPE("mfsearch [V]", V);
   }
   vN = search_levels(gel(NK,1), "mfsearch [N]");
+  if (gequal0(V)) { set_avma(av); retmkvec(mftrivial()); }
   lvN = lg(vN);
 
   Qtoss(gk, &nk,&dk);
