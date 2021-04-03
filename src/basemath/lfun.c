@@ -1868,7 +1868,7 @@ lfunhardy(GEN lmisc, GEN t, long bitprec)
 {
   pari_sp ltop = avma;
   long prec = nbits2prec(bitprec), d;
-  GEN argz, z, linit, ldata, tech, dom, w2, k2, expot, h, a, k;
+  GEN argz, z, linit, ldata, tech, dom, w2, k2, E, h, a, k;
 
   switch(typ(t))
   {
@@ -1885,16 +1885,14 @@ lfunhardy(GEN lmisc, GEN t, long bitprec)
   tech = linit_get_tech(linit);
   w2 = lfun_get_w2(tech);
   k2 = lfun_get_k2(tech);
-  expot = lfun_get_expot(tech);
+  E = lfun_get_expot(tech); /* 4E = d(k2 - 1) + real(vecsum(Vga)) */
   z = mkcomplex(k2, t);
-  if (gequal0(k2))
-    argz = Pi2n(-1, prec);
-  else
-    argz = gatan(gdiv(t, k2), prec);/* more accurate than garg since k/2 \in Q */
-  /* prec may have increased: don't lose accuracy if |z|^2 is exact */
+  /* more accurate than garg: k/2 in Q */
+  argz = gequal0(k2)? Pi2n(-1, prec): gatan(gdiv(t, k2), prec);
   prec = precision(argz);
+  /* prec may have increased: don't lose accuracy if |z|^2 is exact */
   a = gsub(gmulsg(d, gmul(t, gmul2n(argz,-1))),
-           gmul(expot,glog(gnorm(z),prec)));
+           gmul(E, glog(gnorm(z),prec)));
   h = lfunlambda_OK(linit, z, dom, bitprec);
   if (!isint1(w2) && typ(ldata_get_dual(ldata))==t_INT)
     h = mulrealvec(h, w2);
