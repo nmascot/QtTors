@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: sqrtint0
 Prototype: GD&
 Help: sqrtint(x,{&r}): integer square root y of x, where x is a nonnegative
- integer. If r is present, set it to the remainder x^2 - y.
+ integer. If r is present, set it to the remainder x - y^2.
 Description:
  (gen):int sqrtint($1)
 Doc: returns the integer square root of $x$, i.e. the largest integer $y$
