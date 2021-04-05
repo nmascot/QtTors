@@ -3519,8 +3519,26 @@ GEN PicTorsPairingInit(GEN J, GEN l)
 GEN PicTorsPairing(GEN J, GEN FRparams, GEN W, GEN LinTests)
 {
   pari_sp av = avma;
-  GEN T,p,l,AddC,W0,z,fr,res;
+  GEN T,p,l,AddC,W0,z,fr,res,worker,done;
   ulong n,i;
+	long pending,j,workid;
+	struct pari_mt pt;
+	if(typ(W)==t_VEC)
+	{ /* Case of multiple tors pts */
+		n = lg(W);
+		res = cgetg(n,typ(LinTests)==t_MAT?t_VEC:t_MAT);
+		pending = 0;
+  	worker = strtofunction("_PicTorsPairing");
+  	mt_queue_start_lim(&pt,worker,n-1);
+  	for(j=1;j<n||pending;j++)
+  	{
+    	mt_queue_submit(&pt,j,j<n?mkvecn(4,J,FRparams,gel(W,j),LinTests):NULL);
+    	done = mt_queue_get(&pt,&workid,&pending);
+    	if(done) gel(res,workid) = done;
+  	}
+  	mt_queue_end(&pt);
+		return gerepilecopy(av,res);
+	}
 	if(typ(LinTests)!=t_VEC)
 	{ /* Case of only 1 pt */
 		res = PicTorsPairing(J,FRparams,W,mkvec(LinTests));
@@ -4288,6 +4306,8 @@ GEN PicRandTors(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN seed, long returnlpo
 		T = PicLiftTors(J,T,l,1);
 		return gerepileupto(av,T);
 	}
+	if(Chi && gequal0(Chi)) Chi = NULL;
+	if(Phi && gequal0(Phi)) Phi = NULL;
 	a = degree(JgetT(J));
 	A = cgetg(a+3,t_POL); /* x^a-1 */
 	A[1] = 0;
@@ -4335,6 +4355,7 @@ GEN PicRandTors(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN seed, long returnlpo
 	{
 		if(DEBUGLEVEL>=2)
 			pari_printf("PicRandTorsPt got zero (Phi=%Ps)\n",Phi?Phi:gen_0);
+		return gen_0;
 	}
 	T = gel(res,1);
 	if(returnlpow==0)
@@ -4344,5 +4365,454 @@ GEN PicRandTors(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN seed, long returnlpo
 	if(Chi)
 		B = FpX_normalize(Chi,l);
 	res = mkvecn(4,W,o,T,B);
+	return gerepilecopy(av,res);
+}
+
+GEN VecExtend1_shallow(GEN V, GEN X)
+{
+	ulong n,i;
+	GEN W;
+	n = lg(V);
+	W = cgetg(n+1,t_VEC);
+	for(i=1;i<n;i++)
+		gel(W,i) = gel(V,i);
+	gel(W,n) = X;
+	return W;
+}
+
+GEN VecSmallExtend1_shallow(GEN V, long x)
+{
+  ulong n,i;
+  GEN W;
+  n = lg(V);
+  W = cgetg(n+1,t_VECSMALL);
+  for(i=1;i<n;i++)
+    W[i] = V[i];
+  W[n] = x;
+  return W;
+}
+
+GEN Fp_Long2ShortRel(GEN A, GEN p)
+{ /* [a1,..,an,b] -> -1/b * [a1,..,an] */
+	GEN B,b,p1;
+	ulong n,i;
+	n = lg(A)-1;
+	B = cgetg(n,t_VEC);
+	if(n>1)
+	{
+		b = gel(A,n);
+		b = Fp_inv(b,p);
+		b = negi(b);
+		p1 = shifti(p,-1);
+		for(i=1;i<n;i++)
+			gel(B,i) = Fp_center(Fp_mul(gel(A,i),b,p),p,p1);
+	}
+	return B;
+}
+
+GEN PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN TnewPairings, int* replace)
+{
+  /* BT contains d=#BT pts of J[l]
+     Tnew pt of J[l]
+     Assume that the matrix R = <BT[j]|LinTests[i]> has rank d. (H)
+     If Tnew lies in the span of BT, set replace to -1,
+		 and return coeffs of a lin dep relation between Tnew on BT.
+		 If Tnew is indep of BT, let R2 = [BT,Tnew|LinTests2] of rank d+1,
+		 and LinTests2 is either exactly equal to LinTests,
+		 in which case replace is set to 0 and we retrun R2,
+		 or differs from LinTests at exactly one place,
+		 in which case replace is set to this index and we return [R2,NewTest].
+  */
+	pari_sp av=avma, avK;
+	GEN l,R2,KR2,KR,BT2,NewTest,Rnew;
+	ulong d,nTests,j,rk;
+	int i;
+	l = gel(FRparams,1);
+	d = lg(R);
+	R2 = cgetg(d+1,t_MAT); /* Right append new pairings to old pairings */
+	for(j=1;j<d;j++)
+		gel(R2,j) = gel(R,j);
+	nTests = lg(TnewPairings);
+	gel(R2,d) = cgetg(nTests,t_COL);
+	for(i=1;i<nTests;i++)
+		gcoeff(R2,i,d) = gel(TnewPairings,i);
+	avK = avma;
+	KR2 = FpM_ker(R2,l); /* Look for relations */
+	rk = lg(KR2);
+	if(rk>2) /* Not supposed to happen by (H) */
+		pari_err(e_MISC,"Bug in PicTors_UpdatePairings, please report");
+	if(rk==1) /* No relation? */
+	{
+		if(DEBUGLEVEL) printf("UpdatePairings: good, no relation.\n");
+		avma = avK;
+		*replace = 0;
+		return R2;
+	}
+	KR2 = gel(KR2,1); /* Possibile relation */
+	if(DEBUGLEVEL) pari_printf("UpdatePairings: found pseudo-relation %Ps.\n",KR2);
+	KR = Fp_Long2ShortRel(KR2,l);
+	if(PicEq(J,Tnew,PicLC(J,KR,BT)))
+	{ /* The relation really holds */
+		if(DEBUGLEVEL) printf("UpdatePairings: the pseudo-relation actually holds.\n");
+		*replace = -1;
+		return gerepileupto(av,KR2);
+	}
+	/* The relation does not actually hold -> our Tests are not independent. */
+	if(DEBUGLEVEL) printf("UpdatePairings: the pseudo-relation does not hold, changing LinTests.\n");
+	BT2 = VecExtend1_shallow(BT,Tnew);
+	avK = avma;
+	do
+	{
+		avma = avK;
+		NewTest = PicChord(J,PicRand(J,NULL),PicRand(J,NULL),1);
+		Rnew = PicTorsPairing(J,FRparams,BT2,NewTest);
+		if(DEBUGLEVEL) pari_printf("UpdatePairings: the new test gives pairings %Ps.\n",Rnew);
+	} while(gequal0(FpV_FpC_mul(Rnew,KR2,l))); /* Find new test which disproves this fake relation */
+	/* Now we have d+1 forms of rank d; find one we can drop */
+	KR2 = FpM_ker(shallowtrans(R2),l); /* Relation between forms */
+	KR2 = gel(KR2,1);
+	for(i=1;gequal0(gel(KR2,i));i++) {}
+	for(j=1;j<d;j++)
+		gcoeff(R2,i,j) = gel(Rnew,j);
+	if(DEBUGLEVEL>=2) pari_printf("UpdatePairings: dropping test %lu; now R=%Ps.\n",i,R2);
+	*replace = i;
+	return gerepilecopy(av,mkvec2(R2,NewTest));
+}
+
+GEN FpM_GuessLastColFromCharpoly(GEN A, GEN chi, GEN p)
+{
+	pari_sp av = avma;
+	ulong n,i,j;
+	GEN x,B,chi0,M,u;
+	n = lg(A)-1;
+	A = gcopy(A);
+	for(i=1;i<=n;i++)
+		gcoeff(A,i,n) = gen_0;
+	pari_printf("Trace %Ps, coef %Ps\n",gtrace(A),gel(chi,n+1));
+	gcoeff(A,n,n) = Fp_neg(addii(gtrace(A),gel(chi,n+1)),p);
+	pari_printf("A=%Ps\n",A);
+	chi0 = FpX_sub(chi,FpM_charpoly(A,p),p);
+	pari_printf("chi0=%Ps\n",chi0);
+	x = mkpoln(2,gen_1,gen_0);
+	x[1] = 0;
+	setvarn(x,0);
+	B = adjsafe(gsub(x,A));
+	pari_printf("B=%Ps\n",B);
+	M = cgetg(n+1,t_MAT);
+	for(j=1;j<n;j++)
+	{
+		gel(M,j) = cgetg(n,t_COL);
+		for(i=1;i<n;i++)
+			gcoeff(M,i,j) = polcoef(gcoeff(B,n,j),i-1,0);
+	}
+	gel(M,n) = cgetg(n,t_COL);
+	for(i=1;i<n;i++)
+		gcoeff(M,i,n) = polcoef(chi0,i-1,0);
+	pari_printf("M=%Ps\n",M);
+	M = FpM_ker(M,p);
+	if(lg(M)!=2)
+	{
+		if(DEBUGLEVEL) printf("Unable to guess last column from charpoly.\n");
+		avma = av;
+		return NULL;
+	}
+	u = Fp_inv(gcoeff(M,n,1),p);
+	for(i=1;i<n;i++)
+		gcoeff(A,i,n) = Fp_mul(gcoeff(M,i,1),u,p);
+	return gerepilecopy(av,A);
+}
+
+GEN PicTorsGetAutMats(GEN J, GEN B, GEN FRparams, GEN LinTests, GEN R)
+{
+	pari_sp av = avma;
+	ulong nAuts,d,i;
+	GEN l,mats,Ri,k;
+	l = gel(FRparams,1);
+	R = FpM_inv(R,l);
+	nAuts = lg(JgetAutData(J));
+	d = lg(B)-1;
+	mats = cgetg(nAuts,t_VEC);
+	for(i=1;i<nAuts;i++)
+	{
+		k = JgetAutKnown(J,i);
+		if(gequal0(k))
+		{
+			Ri = PicTorsPairing(J,FRparams,B,LinTests);
+			gel(mats,i) = FpM_mul(R,Ri,l);
+		}
+		else
+			gel(mats,i) = gmul(k,matid(d));
+	}
+	return gerepilecopy(av,mats);
+}
+
+GEN PicTorsBasis_worker(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN FRparams, GEN Lintests, GEN LinTestsNames, GEN seed)
+{
+	pari_sp av = avma;
+	GEN res,W,o,T,B,Pairings;
+
+	res = PicRandTors(J,l,Lp,Chi,Phi,seed,1);
+	W = gel(res,1);
+	o = gel(res,2);
+	T = gel(res,3);
+	B = gel(res,4);
+	Pairings = PicTorsPairing(J,FRparams,T,Lintests);
+	res = mkvecn(6,W,o,T,B,Pairings,LinTestsNames);
+	return gerepilecopy(av,res);
+}
+
+GEN PicRefreshPairings(GEN J, GEN FRparams, GEN T, GEN Pairings, GEN UsedNames, GEN Want, GEN WantNames)
+{ /* We have [T,u] for u in Used, but we want [T,w] for w in Want. Get that without recomputing anything that we already have. */
+	pari_sp av = avma;
+	ulong nUsed,nWant,i,j,k;
+	GEN res,todo,todoindex,NewPairings;
+
+	nUsed = lg(UsedNames);
+	nWant = lg(Want);
+	res = cgetg(nWant,t_COL);
+	todo = cgetg(nWant,t_VEC);
+	todoindex = cgetg(nWant,t_VECSMALL);
+	k = 1;
+	for(i=1;i<nWant;i++)
+	{ /* Do we already have [T,Want[i]] somewhere? */
+		gel(res,i) = NULL; /* For now, no */
+		for(j=1;i<nUsed;j++)
+		{
+			if(WantNames[i]==UsedNames[j])
+			{
+				gel(res,i) = gel(Pairings,j);
+				break;
+			}
+		}
+		if(gel(res,i)==NULL) /* Have not found it? */
+		{ /* Then we'll have to compute it. Store this info for later */
+			gel(todo,k) = gel(Want,i);
+			todoindex[k] = i;
+			k++;
+		}
+	}
+	/* OK, do we need to compute any new pairings? */
+	if(k>1)
+	{
+		setlg(todo,k);
+		NewPairings = PicTorsPairing(J,FRparams,T,todo);
+		for(j=1;j<k;j++)
+		{
+			gel(res,todoindex[j]) = gel(NewPairings,j);
+		}
+	}
+	return gerepilecopy(av,res);
+}
+
+void FpM_ConcatRelBlock(GEN* pA, ulong n, GEN rel, GEN p)
+{
+	GEN A,B;
+	ulong m,i,j;
+
+	if(n==0) return;
+	A = *pA;
+	m = lg(A);
+	*pA = B = cgetg(m+n,t_MAT);
+	for(j=1;j<m+n-1;j++)
+		gel(B,j) = cgetg(m+n,t_COL);
+	for(j=1;j<m;j++)
+	{
+		for(i=1;i<m+n;i++)
+			gcoeff(B,i,j) = i<m?gcoeff(A,i,j):gen_0;
+	}
+	for(j=m;j<m+n-1;j++)
+	{
+		for(i=1;i<m+n;i++)
+			gcoeff(B,i,j) = i==j+1?gen_1:gen_0;
+	}
+	if(rel)
+		gel(B,m+n-1) = Fp_Long2ShortRel(rel,p);
+	else
+	{
+		gel(B,m+n-1) = cgetg(m+n,t_COL);
+		for(i=1;i<m+n;i++)
+			gcoeff(B,i,m+n-1) = gen_0;
+	}
+	*pA = B;
+}
+
+void PicTorsBasis_UsePt(GEN J, GEN Pt, GEN Chi, ulong d, ulong* pr, GEN* pBW, GEN* pBo, GEN* pBT, GEN* pmatFrob, GEN FRparams, GEN* pmatPairings, GEN* pLinTests, GEN* pLinTestsNames, ulong* pNewTestName)
+{ /* Generate as much as possible from this point. Returns nothing, modifies its pointer arguments */
+	GEN W,T,B,Tpairings,UsedTestsNames,rel,res,l;
+	ulong o,dB,iFrob,i;
+	long m;
+	int replace;
+	l = gel(FRparams,1);
+	W = gel(Pt,1);
+  o = itou(gel(Pt,2));
+  T = gel(Pt,3);
+  B = gel(Pt,4);
+  dB = gequal0(B)?0:degree(B);
+  Tpairings = gel(Pt,5);
+  UsedTestsNames = gel(Pt,6);
+  /* Make sure pairings are current */
+  Tpairings = PicRefreshPairings(J,FRparams,T,Tpairings,UsedTestsNames,*pLinTests,*pLinTestsNames);
+	rel = NULL;
+  for(iFrob=0;;iFrob++)
+  {
+		res = PicTors_UpdatePairings(J,FRparams,*pBT,*pmatPairings,T,Tpairings,&replace);
+		if(replace==-1)
+		{ /* T is dependent on BT */
+			rel = res;
+			break;
+		}
+		/* T is independent on BT */
+		*pBW = VecExtend1_shallow(*pBW,W);
+		*pBo = VecSmallExtend1_shallow(*pBo,o);
+		*pBT = VecExtend1_shallow(*pBT,T);
+		if(replace)
+		{
+			*pmatPairings = gel(res,1);
+			gel(*pLinTests,replace) = gel(res,2);
+			(*pLinTestsNames)[replace] = (*pNewTestName)++;
+		}
+		else
+			*pmatPairings = res;
+		(*pr)++;
+		if(*pr==d)
+		{ /* We are done. We know matFrob except its last column, we try to guess it. */
+			FpM_ConcatRelBlock(pmatFrob,iFrob+1,NULL,l);
+			res = FpM_GuessLastColFromCharpoly(*pmatFrob,Chi,l);
+			if(res)
+  		{ /* Success! */
+    		gel(*pmatFrob,d) = gel(res,d);
+    		return;
+  		}
+  		/* Failure, we must resort to pairings */
+  		Tpairings = PicTorsPairing(J,FRparams,PicFrob(J,gel(*pBT,d)),*pLinTests);
+  		gel(*pmatFrob,d) = FpM_FpC_gauss(*pmatPairings,Tpairings,l);
+			return;
+		}
+		/* Apply Frob and iterate, unless B tells us that we won't get anything new */
+		if(dB && iFrob+1==dB)
+		{
+			rel = cgetg(*pr+2,t_COL);
+			for(i=1;i<=*pr-d;i++)
+				gel(rel,i) = gen_0;
+			for(i=0;i<=dB;i++)
+				gel(rel,(*pr+1+i)-d) = gel(B,i+2);
+			break;
+		}
+  }
+	/* Use rel to fill in matFrob */
+	FpM_ConcatRelBlock(pmatFrob,iFrob+1,rel,l);
+	/* Try to use rel to find a new torsion point */
+	m = -1;
+	for(i=1;i<lg(rel);i++)
+	{
+		if(gequal0(gel(rel,i))) continue;
+		if(m==-1 || m > (*pBo)[i])
+			m = (*pBo)[i];
+		if(m==0) return;
+	}
+	for(i=1;i<lg(rel);i++)
+	{
+		if(gequal0(gel(rel,i))) continue;
+		gel(rel,i) = mulii(gel(rel,i),powis(l,(*pBo)[i]-m));
+	}
+	W = PicLC(J,rel,VecExtend1_shallow(*pBW,W));
+	T = PicMul(J,W,powis(l,m-1),0);
+	PicTorsBasis_UsePt(J,mkvec4(W,stoi(m),T,gen_0),Chi,d,pr,pBW,pBo,pBT,pmatFrob,FRparams,pmatPairings,pLinTests,pLinTestsNames,pNewTestName);
+}
+
+GEN PicTorsBasis(GEN J, GEN l, GEN Lp, GEN Chi)
+{
+	/* Computes a basis B of the subspace T of J[l] on which Frob acts with charpoly Chi
+     Assumes Lp = charpoly(Frob|J), so Chi | Lp
+     If Chi==NULL, then we take T=J[l]
+     Also computes the matrix M of Frob and list of matrices MA of Auts w.r.t B, and returns the vector [B,M,MA] */
+  /* TODO use auts that are not known to be scalars */
+	pari_sp av = avma;
+  GEN Diva,Phi,phi,ChiT,BW,Bo,BT,matFrob,FRparams,LinTests,LinTestsNames,matPairings,Batch,res;
+  ulong a,r,d,i,j,nPhi,iPhi,nBatch,iBatch,NewTestName;
+	struct pari_mt pt;
+  GEN worker,done;
+  long pending,workid;
+
+  a = degree(JgetT(J)); /* Residual degree */
+  if(a%itou(l))
+  {
+    Diva = divisorsu(a);
+    Diva = vecsort0(Diva,NULL,4); /* Divisors of a sorted in reverse */
+    nPhi = lg(Diva);
+    Phi = cgetg(nPhi,t_VEC);
+    j = 0;
+    for(i=1;i<lg(Phi);i++)
+    {
+      phi = polcyclo(Diva[i],0);
+      if(degree(FpX_gcd(phi,Chi?Chi:Lp,l)))
+        gel(Phi,++j) = phi;
+    }
+    nPhi = j;
+  }
+  else Phi=NULL;
+	
+	if(Chi)
+	{
+		d = degree(Chi); /* dim T */
+		ChiT = Chi;
+	}
+	else
+	{
+		d = degree(Lp);
+		Chi = gen_0;
+		ChiT = Lp;
+	}
+	r = 0; /* dim we have so far */
+	BW = BT = cgetg(1,t_VEC);
+	Bo = cgetg(1,t_VECSMALL);
+	matFrob = matPairings = cgetg(1,t_MAT);
+	FRparams = PicTorsPairingInit(J,l);
+  LinTests = cgetg(d+1,t_VEC); /* pts to take pairings with */
+	LinTestsNames = cgetg(d+1,t_VECSMALL); /* Name them with integers */
+	for(i=1;i<=d;i++)
+	{
+		gel(LinTests,i) = PicChord(J,PicRand(J,NULL),PicRand(J,NULL),1); /* Random pt, well-mixed so as not throw off Pairings */
+		LinTestsNames[i] = i;
+	}
+	NewTestName = d+1;
+
+	nBatch = (mt_nbthreads()+1)/2; //TODO
+	worker = strtofunction("_PicTorsBasis_worker");
+  mt_queue_start(&pt,worker);
+	Batch = cgetg(nBatch+1,t_VEC);
+	for(iPhi=1;;)
+	{
+		mt_queue_start(&pt,worker);
+		for(iBatch=0;iBatch<nBatch||pending;iBatch++,iPhi++)
+		{
+			if(iBatch<nBatch)
+			{
+				if(Phi)
+    		{
+      		if(iPhi>nPhi) iPhi -= nPhi;
+      		phi = gel(Phi,iPhi);
+				}
+				else phi = gen_0;
+				mt_queue_submit(&pt,iBatch,mkvecn(9,J,l,Lp,Chi,phi,FRparams,LinTests,LinTestsNames,genrand(NULL)));
+			}
+			else mt_queue_submit(&pt,iBatch,NULL);
+			done = mt_queue_get(&pt,&workid,&pending);
+			if(done)
+			{
+				gel(Batch,workid) = done;
+			}
+		}
+		mt_queue_end(&pt);
+		for(i=1;i<=nBatch && r<d;i++)
+		{
+			PicTorsBasis_UsePt(J,gel(Batch,i),ChiT,d,&r,&BW,&Bo,&BT,&matFrob,FRparams,&matPairings,&LinTests,&LinTestsNames,&NewTestName);
+		}
+		if(r==d) break;
+	}
+	res = cgetg(4,t_VEC);
+	gel(res,1) = BT;
+	gel(res,2) = matFrob;
+	gel(res,3) = PicTorsGetAutMats(J,BT,FRparams,LinTests,matPairings);
 	return gerepilecopy(av,res);
 }
