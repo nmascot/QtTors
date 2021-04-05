@@ -895,8 +895,7 @@ compositum_red(compo_s *C, GEN P, GEN Q)
   p = gel(gel(z,2), 2);
   q = gel(gel(z,3), 2);
   C->k = itos( gel(z,4) );
-  /* reduce R. FIXME: should be polredbest(a, 1), but breaks rnfkummer bench */
-  z = polredabs0(a, nf_ORIG|nf_PARTIALFACT);
+  z = polredbest(a, nf_ORIG);
   C->R = gel(z,1);
   a = gel(gel(z,2), 2);
   C->p = RgX_RgXQ_eval(p, a, C->R);
