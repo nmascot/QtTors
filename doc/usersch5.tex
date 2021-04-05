@@ -8022,12 +8022,16 @@ and $q^k$ is the largest power of $q$ dividing $n$.
 \fun{GEN}{boundfact}{GEN x, ulong lim} as \tet{Z_factor_limit}, applying to
 \typ{INT} or \typ{FRAC} inputs.
 
-\fun{GEN}{Z_smoothen}{GEN n, GEN L, GEN *pP, GEN *pE} given a \typ{VECSMALL}
-$L$ containing a list of small primes and a \typ{INT} $n$, trial divide
+\fun{GEN}{Z_smoothen}{GEN n, GEN L, GEN *pP, GEN *pE} given a \typ{VEC}
+$L$ containing a list of primes and a \typ{INT} $n$, trial divide
 $n$ by the elements of $L$ and return the cofactor. Return \kbd{NULL} if the
 cofactor is $\pm 1$. \kbd{*P} and \kbd{*E} contain the list of prime divisors
 found and their exponents, as \typ{VECSMALL}s. Neither memory-clean, nor
 suitable for \tet{gerepileupto}.
+
+\fun{GEN}{Z_lsmoothen}{GEN n, GEN L, GEN *pP, GEN *pE} as
+\kbd{Z\_smoothen} where $L$ is a \typ{VECSMALL} of small primes and both
+\kbd{*P} and \kbd{*E} are given as \typ{VECSMALL}.
 
 \fun{GEN}{Z_factor_listP}{GEN N, GEN L} given a \typ{INT} $N$, a vector or
 primes $L$ containing all prime divisors of $N$ (and possibly others). Return

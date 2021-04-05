@@ -2083,6 +2083,7 @@ GEN     Zn_quad_roots(GEN N, GEN B, GEN C);
 
 int     RgV_is_ZVpos(GEN v);
 int     RgV_is_ZVnon0(GEN v);
+GEN     Z_lsmoothen(GEN N, GEN L, GEN *pP, GEN *pe);
 GEN     Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pe);
 GEN     boundfact(GEN n, ulong lim);
 GEN     check_arith_pos(GEN n, const char *f);

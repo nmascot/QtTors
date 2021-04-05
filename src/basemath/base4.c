@@ -409,7 +409,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
     const long FB[] = { _evallg(15+1) | evaltyp(t_VECSMALL),
       2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47
     };
-    GEN P, E, a1 = Z_smoothen(xZ, (GEN)FB, &P, &E);
+    GEN P, E, a1 = Z_lsmoothen(xZ, (GEN)FB, &P, &E);
     if (!a1) /* factors completely */
       a = idealapprfact_i(nf, idealfactor(nf,x), 1);
     else if (lg(P) == 1) /* no small factors */

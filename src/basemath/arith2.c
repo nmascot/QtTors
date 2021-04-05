@@ -41,18 +41,36 @@ boundfact(GEN n, ulong lim)
 
 /* NOT memory clean */
 GEN
-Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pe)
+Z_lsmoothen(GEN N, GEN L, GEN *pP, GEN *pE)
 {
   long i, j, l = lg(L);
-  GEN e = new_chunk(l), P = new_chunk(l);
+  GEN E = new_chunk(l), P = new_chunk(l);
   for (i = j = 1; i < l; i++)
   {
     ulong p = uel(L,i);
     long v = Z_lvalrem(N, p, &N);
-    if (v) { P[j] = p; e[j] = v; j++; if (is_pm1(N)) { N = NULL; break; } }
+    if (v) { P[j] = p; E[j] = v; j++; if (is_pm1(N)) { N = NULL; break; } }
   }
-  P[0] = evaltyp(t_VECSMALL) | evallg(j); *pP = P;
-  e[0] = evaltyp(t_VECSMALL) | evallg(j); *pe = e; return N;
+  P[0] = evaltyp(t_VECSMALL) | evallg(j); if (pP) *pP = P;
+  E[0] = evaltyp(t_VECSMALL) | evallg(j); if (pE) *pE = E; return N;
+}
+GEN
+Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pE)
+{
+  long i, j, l = lg(L);
+  GEN E = new_chunk(l), P = new_chunk(l);
+  for (i = j = 1; i < l; i++)
+  {
+    GEN p = gel(L,i);
+    long v = Z_pvalrem(N, p, &N);
+    if (v)
+    {
+      gel(P,j) = p; gel(E,j) = utoipos(v); j++;
+     if (is_pm1(N)) { N = NULL; break; }
+    }
+  }
+  P[0] = evaltyp(t_VEC) | evallg(j); if (pP) *pP = P;
+  E[0] = evaltyp(t_VEC) | evallg(j); if (pE) *pE = E; return N;
 }
 /***********************************************************************/
 /**                                                                   **/
