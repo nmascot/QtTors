@@ -385,6 +385,57 @@ Flx_cubic_root(GEN ff, ulong p)
   }
 }
 
+/* Assume f is normalized */
+static GEN
+FpX_cubic_root(GEN ff, GEN p)
+{
+  GEN f = FpX_normalize(ff,p);
+  GEN a = gel(f,4), b = gel(f,3), c = gel(f,2);
+  ulong pm3 = umodiu(p,3);
+  GEN p3 = pm3==1 ? diviuexact(addiu(shifti(p,1),1),3)
+                  : diviuexact(addiu(p,1),3);
+  GEN t = Fp_mul(a, p3, p), t2 = Fp_sqr(t, p);
+  GEN A = Fp_sub(b, Fp_mulu(t2, 3, p), p);
+  GEN B = Fp_addmul(c, t, Fp_sub(shifti(t2, 1), b, p), p);
+  GEN A3 =  Fp_mul(A, p3, p);
+  GEN A32 = Fp_sqr(A3, p), A33 = Fp_mul(A3, A32, p);
+  GEN S = Fp_neg(B,p), P = Fp_neg(A3,p);
+  GEN D = Fp_add(Fp_sqr(S, p), shifti(A33, 2), p);
+  if (kronecker(D,p) >= 0)
+  {
+    GEN s = Fp_sqrt(D, p), vS1, vS2;
+    GEN S1 = S==s ? S: Fp_halve(Fp_sub(S, s, p), p);
+    if (pm3 == 2) /* 1 solutions */
+      vS1 = Fp_pow(S1, diviuexact(addiu(shifti(p, 1), 1), 3), p);
+    else
+    {
+      vS1 = Fp_sqrtn(S1, utoi(3), p, NULL);
+      if (!vS1) return p; /*0 solutions*/
+      /*3 solutions*/
+    }
+    vS2 = P? Fp_mul(P, Fp_inv(vS1, p), p): 0;
+    return Fp_sub(Fp_add(vS1,vS2, p), t, p);
+  }
+  else
+  {
+    pari_sp av = avma;
+    GEN T = deg2pol_shallow(gen_1, gen_0, negi(D), 0);
+    GEN S1 = deg1pol_shallow(Fp_halve(gen_1, p), Fp_halve(S, p), 0);
+    GEN vS1 = FpXQ_sqrtn(S1, utoi(3), T, p, NULL);
+    GEN Sa;
+    if (!vS1) return p; /*0 solutions, p%3==2*/
+    Sa = gel(vS1,2);
+    if (pm3 == 1) /*1 solutions*/
+    {
+      GEN Fa = FpXQ_norm(vS1, T, p);
+      if (!equalii(Fa,P))
+        Sa = Fp_mul(Sa, Fp_div(Fa, P, p),p);
+    }
+    set_avma(av);
+    return Fp_sub(shifti(Sa,1),t,p);
+  }
+}
+
 /* assume p > 2 prime */
 static ulong
 Flx_oneroot_i(GEN f, ulong p, long fl)
@@ -441,7 +492,7 @@ Flx_oneroot_i(GEN f, ulong p, long fl)
   }
 }
 
-/* assume p > 2 prime */
+/* assume p > 3 prime */
 static GEN
 FpX_oneroot_i(GEN f, GEN p)
 {
@@ -453,6 +504,7 @@ FpX_oneroot_i(GEN f, GEN p)
   {
     case 1: return subii(p, gel(f,2));
     case 2: return FpX_quad_root(f, p, 1);
+    case 3: return FpX_cubic_root(f, p);
   }
 
   a = FpXQ_pow(pol_x(varn(f)), subiu(p,1), f,p);
@@ -581,11 +633,11 @@ FpX_oneroot_split(GEN fact, GEN p)
   GEN prim, expo, minfactor, xplusa, zeta, xpow;
   fact = FpX_normalize(fact, p);
   deg_f = degpol(fact);
-  if (deg_f<=2) return FpX_oneroot(fact, p);
+  if (deg_f <= 3) return FpX_oneroot(fact, p);
   minfactor = fact; /* factor of minimal degree found so far */
   dmin = degpol(minfactor);
   xplusa = pol_x(varn(fact));
-  while (dmin != 1)
+  while (dmin > 3)
   {
     /* split minfactor by computing its gcd with (X+a)^exp-zeta, where    */
     /* zeta varies over the roots of unity in F_p                         */
@@ -615,7 +667,7 @@ FpX_oneroot_split(GEN fact, GEN p)
       zeta = Fp_mul (zeta, prim, p);
     }
   }
-  return gerepileuptoint(av, Fp_neg(gel(minfactor,2), p));
+  return gerepileuptoint(av, FpX_oneroot(minfactor, p));
 }
 
 /*******************************************************************/
