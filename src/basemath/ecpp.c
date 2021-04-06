@@ -275,7 +275,7 @@ allh(ulong maxD)
     for (b = 1; b < a; b++)
     {
       ulong B = b*b, D = (aa4 - B) >> 1;
-      if (D > maxD2) break;
+      if (D > maxD2) continue;
       H[D]++; D += a2; /* c = a */
       for (c = a+1; D <= maxD2; c++) { H[D] += 2; D += a2; }
     }

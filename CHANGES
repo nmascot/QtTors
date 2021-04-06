@@ -43,6 +43,7 @@ BA  20- missing GC in qfsolve
 BA  35- rnfdisc mishandled polynomials with denominators [#2284]
 BA  36- elltamagawa(ellinit([-1456/243,93184/19683])) -> wrong result
     37- nfsearch would sometimes miss the trivial form
+    38- typo in allh [affects ECPP tunings]
 
   Added
 HC   1- new GP function eulerreal
