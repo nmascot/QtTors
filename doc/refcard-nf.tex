@@ -97,6 +97,9 @@ to relative extensions $L/K$.\hfill\break
 \smallskip
 \section{Fields, subfields, embeddings}
 \subsec{Defining polynomials, embeddings}
+\li{(some) number fields with Galois group $G$}{nflist$(G)$}
+\li{\dots and $|\text{disc}(K)| = N$ and $s$ complex places}{nflist$(G, N, \{s\})$}
+\li{\dots and $a \leq |\text{disc}(K)| \leq b$}{nflist$(G, [a,b], \{s\})$}
 \li{smallest poly defining $f=0$ (slow)}{polredabs$(f,\{\fl\})$}
 \li{small poly defining $f=0$ (fast)}{polredbest$(f,\{\fl\})$}
 \li{random Tschirnhausen transform of $f$}{poltschirnhaus$(f)$}
@@ -280,6 +283,7 @@ $\var{bnr},H$ (congruence subgroup) or $\var{bnr},\chi$ (character on
 \li{conjugates of a root $\theta$ of \var{nf}}{nfgaloisconj$(\var{nf},\{\fl\})$}
 \li{apply Galois automorphism $s$ to $x$}{nfgaloisapply$(\var{nf},s,x)$}
 \li{Galois group of field $\QQ[x]/(f)$}{polgalois$(f)$}
+\li{resolvent field of $\QQ[x]/(f)$}{nfresolvent$(f)$}
 \li{initializes a Galois group structure $G$}{galoisinit$(\var{pol},\{den\})$}
 \li{character table of $G$}{galoischartable$(G)$}
 \li{conjugacy classes of $G$}{galoisconjclasses$(G)$}
