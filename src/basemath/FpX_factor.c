@@ -351,9 +351,9 @@ Flx_cubic_root(GEN ff, ulong p)
   ulong A32 = Fl_sqr_pre(A3, p, pi), A33 = Fl_mul_pre(A3, A32, p, pi);
   ulong S = Fl_neg(B,p), P = Fl_neg(A3,p);
   ulong D = Fl_add(Fl_sqr_pre(S, p, pi), Fl_double(Fl_double(A33, p), p), p);
-  ulong s = Fl_sqrt_pre(D, p, pi), vS1, vS2;
-  if (s!=~0UL)
+  if (krouu(D,p) >= 0)
   {
+    ulong s = Fl_sqrt_pre(D, p, pi), vS1, vS2;
     ulong S1 = S==s ? S: Fl_halve(Fl_sub(S, s, p), p);
     if (p%3==2) /* 1 solutions */
       vS1 = Fl_powu_pre(S1, (2*p-1)/3, p, pi);
