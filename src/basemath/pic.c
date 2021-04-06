@@ -830,7 +830,7 @@ GEN DivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN p, long e, GEN pe, ulong excess)
     r = lg(WAB)-1;
     if(r==d)
       return gerepileupto(av,WAB);
-    if(DEBUGLEVEL) err_printf("add1(%lu/%lu)",r,d);
+    if(DEBUGLEVEL>=4) err_printf("divadd(%lu/%lu)",r,d);
     excess++;
     avma = av;
   }
@@ -871,7 +871,7 @@ GEN DivSub(GEN WA, GEN WB, GEN KV, ulong d, GEN T, GEN p, long e, GEN pe, ulong 
     res = matkerpadic(K,T,pe,p,e);
     r = lg(res)-1;
     if(r==d) return gerepileupto(av,res);
-    if(DEBUGLEVEL) err_printf("sub(%lu/%lu)",r,d);
+    if(DEBUGLEVEL>=4) err_printf("divsub(%lu/%lu)",r,d);
     avma = av1;
   }
 }
@@ -1184,12 +1184,12 @@ GEN PicMul(GEN J, GEN W, GEN n, long flag)
   if(gequal(n,gen_1)) return gcopy(W);
   C = AddFlipChain(n,flag&2);
   nC = lg(C);
-  if(DEBUGLEVEL)
+  if(DEBUGLEVEL>=2)
   {
     if(flag&2)
-      pari_printf("   PicMul : Mul by %Ps in %lu steps\n",n,nC-2);
+      pari_printf("PicMul : Mul by %Ps in %lu steps\n",n,nC-2);
     else
-      pari_printf("   PicMul : Mul by ±%Ps in %lu steps\n",n,nC-2);
+      pari_printf("PicMul : Mul by ±%Ps in %lu steps\n",n,nC-2);
   }
   Wlist = cgetg(nC,t_VEC);
   gel(Wlist,1) = W;
@@ -1253,11 +1253,12 @@ GEN PicLC(GEN J, GEN C, GEN W)
   return gerepileupto(av,S);
 }
 
-GEN PicTorsOrd(GEN J, GEN W, GEN l)
+GEN PicTorsOrd(GEN J, GEN W, GEN l, long flag)
 {
 /*Given that W is an l-power torsion point of J,
 finds v s.t. the order of W is l^v,
 and returns [+-l^(v-1)W, v]*/
+	// TODO deal with sign in a better way
   pari_sp av = avma;
   GEN lW;
   ulong e,v;
@@ -1267,7 +1268,7 @@ and returns [+-l^(v-1)W, v]*/
   for(v=0;PicIsZero_val(J,lW)<e;v++)
   {
     W = lW;
-    lW = PicMul(J,W,l,0);
+    lW = PicMul(J,W,l,flag);
   }
   W = mkvec2(W,utoi(v));
   return gerepilecopy(av,W);
@@ -1593,10 +1594,10 @@ GEN FnsEvalAt_Rescale(GEN Fns, GEN Z, GEN vars, GEN T, GEN p, long e, GEN pe)
     /* Are the evals (and hence the fns) independent ? */
     if(nK==1)
     {
-      if(DEBUGLEVEL) printf("Good, no relation\n");
+      if(DEBUGLEVEL>=5) printf("FnsEvalAt_Rescale: Good, no relation\n");
       return gerepileupto(av,S);
     }
-    if(DEBUGLEVEL) pari_printf("Found %ld relations, eliminating and re-evaluating\n",nK-1);
+    if(DEBUGLEVEL>=5) pari_printf("FnsEvalAt_Rescale: Found %ld relations, eliminating and re-evaluating\n",nK-1);
     /* No. We assume Z def / Q, so K has entries in Fp */
     /* Do elimination and start over */
     redo = cgetg(nK,t_VECSMALL);
@@ -1967,7 +1968,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
   pe = powis(p,e);
   FrobMat = ZpXQ_FrobMat(T,p,e,pe);
 
-  if(DEBUGLEVEL) printf("PicInit: Finding points\n");
+  if(DEBUGLEVEL>=2) printf("PicInit: Finding points\n");
   n = 0; /* current #pts */
   Z = cgetg(1,t_VEC); /* list of pts */
   /* Initialise empty cycles */
@@ -1987,11 +1988,11 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
     P = CurveRandPt(f,T,p,e,bad);
     /* Is it new mod p ? */
     if(FindMod(P,Z,n,p,0)) continue;
-    if(DEBUGLEVEL) printf("Got new pt\n");
+    if(DEBUGLEVEL>=3) printf("PicInit: Got new pt\n");
     /* Compute closure under Frob and Auts */
     OP = CurveAutFrobClosure(P,Auts,vars,FrobMat,T,pe,p,e);
     nOP = lg(gel(OP,1))-1; /* # new pts */
-    if(DEBUGLEVEL) printf("Got closure of size %lu\n",nOP);
+    if(DEBUGLEVEL>=3) printf("PicInit: Got closure of size %lu\n",nOP);
     /* Add new pts */
     Z = gconcat(Z,gel(OP,1));
     /* Shift permutation describing Frob and Auts */
@@ -2009,13 +2010,13 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
     n += nOP;
   }
 
-  if(DEBUGLEVEL) printf("PicInit: Evaluating rational functions\n");
+  if(DEBUGLEVEL>=2) printf("PicInit: Evaluating rational functions\n");
   V1 = FnsEvalAt_Rescale(gel(L,1),Z,vars,T,p,e,pe);
   V2 = FnsEvalAt_Rescale(gel(L,2),Z,vars,T,p,e,pe);
   V3 = DivAdd(V1,V2,3*d0+1-g,T,p,e,pe,0);
   W0 = V1;
   V = mkvecn(3,V1,V2,V3);
-  if(DEBUGLEVEL) printf("PicInit: Computing equation matrices\n");
+  if(DEBUGLEVEL>=2) printf("PicInit: Computing equation matrices\n");
   KV = cgetg(4,t_VEC);
   E = stoi(e);
   worker = strtofunction("_mateqnpadic");
@@ -2027,7 +2028,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
     if(done) gel(KV,workid) = done;
   }
   mt_queue_end(&pt);
-  if(DEBUGLEVEL) printf("PicInit: Constructing evaluation maps\n");
+  if(DEBUGLEVEL>=2) printf("PicInit: Constructing evaluation maps\n");
   U = PicEvalInit(L,vars,Z,V2,T,p,e,pe);
   J = mkvecn(lgJ,f,stoi(g),stoi(d0),L,T,p,stoi(e),pe,FrobMat,V,KV,W0,U,Z,FrobCyc,AutData);
   return gerepilecopy(av,J);
@@ -2550,11 +2551,11 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
   	/* Find a random solution to the inhomogeneous system */
   	KM = matkerpadic(K,T,pe21,p,e21);
 		KM = gerepileupto(avrho,KM);
-		if(DEBUGLEVEL||(lg(KM)==1)) printf("dim ker lift: %ld\n",lg(KM)-1);
+		if(DEBUGLEVEL>=3||(lg(KM)==1)) printf("PicLiftTors: dim ker lift: %ld\n",lg(KM)-1);
 		if(cmpii(pe21,powiu(l,g+1))<=0)
   	{
 			av2 = avma;
-    	if(DEBUGLEVEL) printf("Lift by mul\n");
+    	if(DEBUGLEVEL>=2) printf("PicLiftTors by mul\n");
 			U = PicLift_RandLift_U(U,U0,KM,T,p,pe1,pe21,e21);
 			W = PicInflate_U(J2,U,NULL);
 			W = gerepileupto(av2,W);
@@ -2566,7 +2567,7 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
 		}
 		else
 		{
-			if(DEBUGLEVEL) printf("Lift by chart\n");
+			if(DEBUGLEVEL>=2) printf("PicLiftTors by chart\n");
 			Clifts = cgetg(g+2,t_MAT);
 			Ulifts = cgetg(g+2,t_VEC);
 			vFixedParams = cgetg(13,t_VEC);
@@ -2580,12 +2581,12 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
       		/* Find coords of 0 */
 					for(;;)
 					{
-						if(DEBUGLEVEL) printf("Computing coords of 0, P0=%lu\n",P0);
+						if(DEBUGLEVEL>=2) printf("PicLiftTors: Computing coords of 0, P0=%lu\n",P0);
 						c0 = PicChart(J,JgetW0(J),P0,NULL);
 						if(c0) break;
 						P0++;
 						if(P0>nZ+g-d0)
-							pari_err(e_MISC,"Run out of charts while computing coords of 0");
+							pari_err(e_MISC,"PicLiftTors: Run out of charts while computing coords of 0");
 					}
 					c0 = gerepileupto(av3,c0);
       		nc = lg(c0)-1;
@@ -2628,7 +2629,7 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
       		{
 						if(done==gen_0)
 						{
-							if(DEBUGLEVEL) printf("Lift %ld had a chart issue\n",workid);
+							if(DEBUGLEVEL>=3) printf("PicLiftTors: Lift %ld had a chart issue\n",workid);
 							liftsOK = 0;
 						}
 						else
@@ -2641,11 +2642,11 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
     		mt_queue_end(&pt);
 				if(liftsOK==0)
         { /* This chart does not work. Take the next one, reset data, and restart */
-         	if(DEBUGLEVEL) printf("Changing chart\n");
+         	if(DEBUGLEVEL>=3) printf("PicLiftTors: Changing chart\n");
 					P0++; /* New chart */
           printf("P0=%lu\n",P0);
           if(P0>nZ+g-d0)
-            pari_err(e_MISC,"Run out of charts while computing coords of 0");
+            pari_err(e_MISC,"PicLiftTors: run out of charts while computing coords of 0");
           P0_tested = 0;
           c0 = NULL; /* Coords of 0 must be recomputed */
           av3 = av2;
@@ -2656,15 +2657,15 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
     		if(n!=1)
     		{ /* l-tors is étale, so this can only happen if Chart is not diffeo - > change chart */
 					P0++; /* New chart */
-      		if(DEBUGLEVEL)
+      		if(DEBUGLEVEL>=3)
 					{
-						printf("Dim ker tors = %ld (expected 1), changing charts\n",n);
-      			printf("nZ=%lu, g=%lu, d0=%lu\n",nZ,g,d0);
-						printf("P0=%lu\n",P0);
+						printf("PicLiftTors: Dim ker tors = %ld (expected 1), changing charts\n",n);
+      			if(DEBUGLEVEL>=5)
+							printf("nZ=%lu, g=%lu, d0=%lu\nP0=%lu\n",nZ,g,d0,P0);
 					}
 					P0++; /* New chart */
 					if(P0>nZ+g-d0)
-            pari_err(e_MISC,"Run out of charts while computing coords of 0");
+            pari_err(e_MISC,"PicLiftTors: run out of charts while computing coords of 0");
 					P0_tested = 0;
 					c0 = NULL; /* Coords of 0 must be recomputed */
 					av3 = av2;
@@ -2678,7 +2679,7 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
     		}
     		if(ZX_is0mod(red,p)) /* TODO can this happen ? why, or why not ? */
 				{
-					if(DEBUGLEVEL) printf("Sum of Ktors is zero!\n");
+					if(DEBUGLEVEL>=3) printf("PicLiftTors: Sum of Ktors is zero!\n");
 					continue;
 				}
     		Ktors = FqC_Fq_mul(Ktors,ZpXQ_inv(red,T,p,e2),T,pe2); /* Normalise so that sum = 1 */
@@ -2690,14 +2691,14 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
 				/* But first check if really l-tors, as the chart might not be injective ! */
     		if(P0_tested == 0)
 				{
-					if(DEBUGLEVEL) pari_printf("Checking %Ps-tors\n",l);
+					if(DEBUGLEVEL>=3) pari_printf("PicLiftTors: Checking %Ps-tors\n",l);
 					W = PicInflate_U(J2,U2,NULL);
 					avtesttors = avma;
 					testtors = PicIsZero_val(J2,PicMul(J2,W,l,0));
 					avma = avtesttors;
 					if(testtors<e2)
           {
-            if(DEBUGLEVEL) printf("Not actually l-torsion!!! Changing charts\n");
+            if(DEBUGLEVEL>=3) printf("Not actually l-torsion!!! Changing charts\n");
             P0++;
             c0 = NULL;
 						av3 = av2;
@@ -2912,7 +2913,7 @@ GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
 			}
 			//printf("Applying auts gave %lu new Frob orbits\n",newmodF);
 		} while(newmodF);
-		if(DEBUGLEVEL && nAuts>1) printf("TorsSpaceFrob: done with auts, now touched %lu/%lu\n",ndone,ld);
+		if(DEBUGLEVEL>=2 && nAuts>1) printf("TorsSpaceFrob: done with auts, now touched %lu/%lu\n",ndone,ld);
 		if(ndone==ld) break; // Are we done?
 		// TODO gerepile?
 		// Now use group law
@@ -2966,7 +2967,7 @@ GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
 			}
 		}
 		// Execute operations in J in parallel
-		if(DEBUGLEVEL) printf("TorsSpaceFrob: computing %lu new points\n",ntodo);
+		if(DEBUGLEVEL>=2) printf("TorsSpaceFrob: computing %lu new points\n",ntodo);
 		mt_queue_start_lim(&pt,worker,ntodo);
 	  for(n=1;n<=ntodo||pending;n++)
   	{
@@ -3137,7 +3138,7 @@ GEN AllPols(GEN Z, ulong l, GEN JFrobMat, GEN QqFrobMat, GEN T, GEN pe, GEN p, l
 		if(All0) avma = avj; /* Drop this j */
     else j0++;
   }
-	if(DEBUGLEVEL) printf("AllPols: Reducing lF from %lu to %lu\n",lF-1,j0-1);
+	if(DEBUGLEVEL>=3) printf("AllPols: Reducing lF from %lu to %lu\n",lF-1,j0-1);
 	lF = j0;
   F1 = cgetg(lF,t_VEC);
   npols = 0;
@@ -3308,7 +3309,7 @@ GEN PicNorm(GEN J, GEN F1, GEN F2, GEN WE, ulong n)
 	M1 = detratio(matkerpadic(M,T,pe,p,e),T,p,e,pe);
 	if(ZX_is0mod(M1,p))
 	{
-		if(DEBUGLEVEL) err_printf("PicNorm: F1 has zeros on D, giving up\n");
+		if(DEBUGLEVEL>=3) err_printf("PicNorm: F1 has zeros on D, giving up\n");
 		avma = av;
 		return NULL;
 	}
@@ -3321,7 +3322,7 @@ GEN PicNorm(GEN J, GEN F1, GEN F2, GEN WE, ulong n)
 	M2 = detratio(matkerpadic(M,T,pe,p,e),T,p,e,pe);
 	if(ZX_is0mod(M2,p))
 	{
-		if(DEBUGLEVEL) err_printf("PicNorm: F2 has zeros on D, giving up\n");
+		if(DEBUGLEVEL>=3) err_printf("PicNorm: F2 has zeros on D, giving up\n");
 		avma = av;
 		return NULL;
 	}
@@ -3456,7 +3457,7 @@ GEN PicFreyRuckMulti(GEN J, GEN Wtors, GEN l, GEN Wtest, GEN W0, GEN C)
 	{
 		res = PicFreyRuckMulti1(J,Wtors1,l,Wtest1,W01,F1,F2,F3,C);
 		if(res) return gerepileupto(av,res);
-		if(DEBUGLEVEL) err_printf("Error in Frey-Ruck, retrying\n");
+		if(DEBUGLEVEL>=3) err_printf("Error in Frey-Ruck, retrying\n");
 		avma = av1;
 		Wtors1 = PicNeg(J,Wtors,1);
 		W01 = PicNeg(J,W0,1);
@@ -3525,6 +3526,7 @@ GEN PicTorsPairing(GEN J, GEN FRparams, GEN W, GEN LinTests)
 	struct pari_mt pt;
 	if(typ(W)==t_VEC)
 	{ /* Case of multiple tors pts */
+		printf("Into MultiPairing\n");
 		n = lg(W);
 		res = cgetg(n,typ(LinTests)==t_MAT?t_VEC:t_MAT);
 		pending = 0;
@@ -3544,6 +3546,7 @@ GEN PicTorsPairing(GEN J, GEN FRparams, GEN W, GEN LinTests)
 		res = PicTorsPairing(J,FRparams,W,mkvec(LinTests));
 		return gerepilecopy(av,gel(res,1));
 	}
+	printf("Into Pairing\n");
   T = JgetT(J);
   p = Jgetp(J);
 	l = gel(FRparams,1);
@@ -4349,7 +4352,7 @@ GEN PicRandTors(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN seed, long returnlpo
 			W = PicFrobPoly(J,W,Psi); /* Project onto J[Chi] */
 		}
 	}
-	res = PicTorsOrd(J,W,l); /*[T,o], W of order l^o, T=[l^(o-1)]W */
+	res = PicTorsOrd(J,W,l,2); /*[T,o], W of order l^o, T=[l^(o-1)]W */
 	o = gel(res,2);
 	if(gequal0(o))
 	{
@@ -4443,22 +4446,22 @@ GEN PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN Tne
 		pari_err(e_MISC,"Bug in PicTors_UpdatePairings, please report");
 	if(rk==1) /* No relation? */
 	{
-		if(DEBUGLEVEL) printf("UpdatePairings: good, no relation.\n");
+		if(DEBUGLEVEL>=3) printf("UpdatePairings: good, no relation.\n");
 		avma = avK;
 		*replace = 0;
 		return R2;
 	}
 	KR2 = gel(KR2,1); /* Possibile relation */
-	if(DEBUGLEVEL) pari_printf("UpdatePairings: found pseudo-relation %Ps.\n",KR2);
+	if(DEBUGLEVEL>=3) pari_printf("UpdatePairings: found pseudo-relation %Ps.\n",KR2);
 	KR = Fp_Long2ShortRel(KR2,l);
 	if(PicEq(J,Tnew,PicLC(J,KR,BT)))
 	{ /* The relation really holds */
-		if(DEBUGLEVEL) printf("UpdatePairings: the pseudo-relation actually holds.\n");
+		if(DEBUGLEVEL>=3) printf("UpdatePairings: the pseudo-relation actually holds.\n");
 		*replace = -1;
 		return gerepileupto(av,KR2);
 	}
 	/* The relation does not actually hold -> our Tests are not independent. */
-	if(DEBUGLEVEL) printf("UpdatePairings: the pseudo-relation does not hold, changing LinTests.\n");
+	if(DEBUGLEVEL>=3) printf("UpdatePairings: the pseudo-relation does not hold, changing LinTests.\n");
 	BT2 = VecExtend1_shallow(BT,Tnew);
 	avK = avma;
 	do
@@ -4466,15 +4469,15 @@ GEN PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN Tne
 		avma = avK;
 		NewTest = PicChord(J,PicRand(J,NULL),PicRand(J,NULL),1);
 		Rnew = PicTorsPairing(J,FRparams,BT2,NewTest);
-		if(DEBUGLEVEL) pari_printf("UpdatePairings: the new test gives pairings %Ps.\n",Rnew);
+		if(DEBUGLEVEL>=4) pari_printf("UpdatePairings: the new test gives pairings %Ps.\n",Rnew);
 	} while(gequal0(FpV_FpC_mul(Rnew,KR2,l))); /* Find new test which disproves this fake relation */
 	/* Now we have d+1 forms of rank d; find one we can drop */
 	KR2 = FpM_ker(shallowtrans(R2),l); /* Relation between forms */
 	KR2 = gel(KR2,1);
 	for(i=1;gequal0(gel(KR2,i));i++) {}
-	for(j=1;j<d;j++)
+	for(j=1;j<=d;j++)
 		gcoeff(R2,i,j) = gel(Rnew,j);
-	if(DEBUGLEVEL>=2) pari_printf("UpdatePairings: dropping test %lu; now R=%Ps.\n",i,R2);
+	if(DEBUGLEVEL>=3) pari_printf("UpdatePairings: dropping test %lu; now R=%Ps.\n",i,R2);
 	*replace = i;
 	return gerepilecopy(av,mkvec2(R2,NewTest));
 }
@@ -4488,16 +4491,12 @@ GEN FpM_GuessLastColFromCharpoly(GEN A, GEN chi, GEN p)
 	A = gcopy(A);
 	for(i=1;i<=n;i++)
 		gcoeff(A,i,n) = gen_0;
-	pari_printf("Trace %Ps, coef %Ps\n",gtrace(A),gel(chi,n+1));
 	gcoeff(A,n,n) = Fp_neg(addii(gtrace(A),gel(chi,n+1)),p);
-	pari_printf("A=%Ps\n",A);
 	chi0 = FpX_sub(chi,FpM_charpoly(A,p),p);
-	pari_printf("chi0=%Ps\n",chi0);
 	x = mkpoln(2,gen_1,gen_0);
 	x[1] = 0;
 	setvarn(x,0);
 	B = adjsafe(gsub(x,A));
-	pari_printf("B=%Ps\n",B);
 	M = cgetg(n+1,t_MAT);
 	for(j=1;j<n;j++)
 	{
@@ -4508,11 +4507,10 @@ GEN FpM_GuessLastColFromCharpoly(GEN A, GEN chi, GEN p)
 	gel(M,n) = cgetg(n,t_COL);
 	for(i=1;i<n;i++)
 		gcoeff(M,i,n) = polcoef(chi0,i-1,0);
-	pari_printf("M=%Ps\n",M);
 	M = FpM_ker(M,p);
 	if(lg(M)!=2)
 	{
-		if(DEBUGLEVEL) printf("Unable to guess last column from charpoly.\n");
+		if(DEBUGLEVEL>=3) printf("Unable to guess last column from charpoly.\n");
 		avma = av;
 		return NULL;
 	}
@@ -4551,13 +4549,16 @@ GEN PicTorsBasis_worker(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN FRparams, GE
 	pari_sp av = avma;
 	GEN res,W,o,T,B,Pairings;
 
+	printf("Into worker\n");
 	res = PicRandTors(J,l,Lp,Chi,Phi,seed,1);
+	if(gequal0(res)) return res;
 	W = gel(res,1);
 	o = gel(res,2);
 	T = gel(res,3);
 	B = gel(res,4);
 	Pairings = PicTorsPairing(J,FRparams,T,Lintests);
 	res = mkvecn(6,W,o,T,B,Pairings,LinTestsNames);
+	printf("Out of worker\n");
 	return gerepilecopy(av,res);
 }
 
@@ -4576,7 +4577,7 @@ GEN PicRefreshPairings(GEN J, GEN FRparams, GEN T, GEN Pairings, GEN UsedNames, 
 	for(i=1;i<nWant;i++)
 	{ /* Do we already have [T,Want[i]] somewhere? */
 		gel(res,i) = NULL; /* For now, no */
-		for(j=1;i<nUsed;j++)
+		for(j=1;j<nUsed;j++)
 		{
 			if(WantNames[i]==UsedNames[j])
 			{
@@ -4592,6 +4593,7 @@ GEN PicRefreshPairings(GEN J, GEN FRparams, GEN T, GEN Pairings, GEN UsedNames, 
 		}
 	}
 	/* OK, do we need to compute any new pairings? */
+	if(DEBUGLEVEL>=2) printf("Refreshing %lu pairings\n",k-1);
 	if(k>1)
 	{
 		setlg(todo,k);
@@ -4648,76 +4650,99 @@ void PicTorsBasis_UsePt(GEN J, GEN Pt, GEN Chi, ulong d, ulong* pr, GEN* pBW, GE
   T = gel(Pt,3);
   B = gel(Pt,4);
   dB = gequal0(B)?0:degree(B);
+	if(DEBUGLEVEL) pari_printf("Bound B=%Ps\n",B);
   Tpairings = gel(Pt,5);
   UsedTestsNames = gel(Pt,6);
   /* Make sure pairings are current */
+	if(DEBUGLEVEL) printf("PicTorsBasis: Refreshing pairings\n");
   Tpairings = PicRefreshPairings(J,FRparams,T,Tpairings,UsedTestsNames,*pLinTests,*pLinTestsNames);
 	rel = NULL;
   for(iFrob=0;;iFrob++)
   {
+		if(DEBUGLEVEL) printf("PicTorsBasis: Working on %luth iterate under Frob\n",iFrob);
 		res = PicTors_UpdatePairings(J,FRparams,*pBT,*pmatPairings,T,Tpairings,&replace);
 		if(replace==-1)
 		{ /* T is dependent on BT */
 			rel = res;
+			if(DEBUGLEVEL) pari_printf("PicTorsBasis: This point is linearly dependent on the previous ones: %Ps\n",rel);
 			break;
 		}
+		if(DEBUGLEVEL) printf("PicTorsBasis: This point is independent from the previous ones\n");
 		/* T is independent on BT */
+		(*pr)++;
 		*pBW = VecExtend1_shallow(*pBW,W);
 		*pBo = VecSmallExtend1_shallow(*pBo,o);
 		*pBT = VecExtend1_shallow(*pBT,T);
 		if(replace)
 		{
+			if(DEBUGLEVEL>=2) printf("PicTorsBasis: Form %d had to be changed\n",replace);
 			*pmatPairings = gel(res,1);
 			gel(*pLinTests,replace) = gel(res,2);
 			(*pLinTestsNames)[replace] = (*pNewTestName)++;
 		}
 		else
 			*pmatPairings = res;
-		(*pr)++;
-		if(*pr==d)
-		{ /* We are done. We know matFrob except its last column, we try to guess it. */
-			FpM_ConcatRelBlock(pmatFrob,iFrob+1,NULL,l);
-			res = FpM_GuessLastColFromCharpoly(*pmatFrob,Chi,l);
-			if(res)
-  		{ /* Success! */
-    		gel(*pmatFrob,d) = gel(res,d);
-    		return;
-  		}
-  		/* Failure, we must resort to pairings */
-  		Tpairings = PicTorsPairing(J,FRparams,PicFrob(J,gel(*pBT,d)),*pLinTests);
-  		gel(*pmatFrob,d) = FpM_FpC_gauss(*pmatPairings,Tpairings,l);
-			return;
-		}
-		/* Apply Frob and iterate, unless B tells us that we won't get anything new */
+		/* Apply Frob and iterate, unless B tells us that we won't get anything new, or we are done */
 		if(dB && iFrob+1==dB)
 		{
+			if(DEBUGLEVEL) printf("PicTorsBasis: Reached bound\n");
 			rel = cgetg(*pr+2,t_COL);
-			for(i=1;i<=*pr-d;i++)
+			for(i=1;i<=*pr-dB;i++)
 				gel(rel,i) = gen_0;
 			for(i=0;i<=dB;i++)
-				gel(rel,(*pr+1+i)-d) = gel(B,i+2);
+				gel(rel,(*pr+1+i)-dB) = gel(B,i+2);
+			iFrob = dB;
 			break;
 		}
+		if(*pr==d)
+    { /* We are done. We know matFrob except its last column, we try to guess it. */
+			if(DEBUGLEVEL) printf("PicTorsBasis: Attempting to guess last column of the matrix of Frob\n");
+      FpM_ConcatRelBlock(pmatFrob,iFrob+1,NULL,l);
+      res = FpM_GuessLastColFromCharpoly(*pmatFrob,Chi,l);
+      if(res)
+      { /* Success! */
+				if(DEBUGLEVEL) printf("PicTorsBasis: Last column successfully guessed\n");
+        gel(*pmatFrob,d) = gel(res,d);
+        return;
+      }
+      /* Failure, we must resort to pairings */
+			if(DEBUGLEVEL) printf("PicTorsBasis: Unable to guess last column, resorting to pairings\n");
+      Tpairings = PicTorsPairing(J,FRparams,PicFrob(J,gel(*pBT,d)),*pLinTests);
+      gel(*pmatFrob,d) = FpM_FpC_gauss(*pmatPairings,Tpairings,l);
+      return;
+    }
+		if(DEBUGLEVEL) printf("PicTorsBasis: Applying Frob\n");
+		W = PicFrob(J,W);
+		T = PicFrob(J,T);
+		Tpairings = PicTorsPairing(J,FRparams,T,*pLinTests);
   }
 	/* Use rel to fill in matFrob */
-	FpM_ConcatRelBlock(pmatFrob,iFrob+1,rel,l);
+	FpM_ConcatRelBlock(pmatFrob,iFrob,rel,l);
+	if(*pr==d) return;
 	/* Try to use rel to find a new torsion point */
-	m = -1;
-	for(i=1;i<lg(rel);i++)
+	if(o==1) return;
+	if(DEBUGLEVEL) pari_printf("PicTorsBasis: Attempting division of the relation %Ps, Bo=%Ps, o=%lu\n",rel,*pBo,o);
+	m = o;
+	for(i=1;i<lg(rel)-1;i++)
 	{
 		if(gequal0(gel(rel,i))) continue;
-		if(m==-1 || m > (*pBo)[i])
+		if(m > (*pBo)[i])
 			m = (*pBo)[i];
-		if(m==0) return;
+		if(m<=1) return;
 	}
-	for(i=1;i<lg(rel);i++)
+	for(i=1;i<=*pr;i++)
 	{
 		if(gequal0(gel(rel,i))) continue;
 		gel(rel,i) = mulii(gel(rel,i),powis(l,(*pBo)[i]-m));
 	}
+	gel(rel,1+*pr) = mulii(gel(rel,1+*pr),powis(l,o-m));
 	W = PicLC(J,rel,VecExtend1_shallow(*pBW,W));
-	T = PicMul(J,W,powis(l,m-1),0);
-	PicTorsBasis_UsePt(J,mkvec4(W,stoi(m),T,gen_0),Chi,d,pr,pBW,pBo,pBT,pmatFrob,FRparams,pmatPairings,pLinTests,pLinTestsNames,pNewTestName);
+	T = PicTorsOrd(J,W,l,2);
+	if(DEBUGLEVEL) pari_printf("Division of the relation yields point of order %Ps^%Ps\n",l,gel(T,2));
+	if(gequal0(gel(T,2))) return;
+	Tpairings = PicTorsPairing(J,FRparams,gel(T,1),*pLinTests);
+	Pt = mkvecn(6,W,gel(T,2),gel(T,1),gen_0,Tpairings,*pLinTestsNames);
+	PicTorsBasis_UsePt(J,Pt,Chi,d,pr,pBW,pBo,pBT,pmatFrob,FRparams,pmatPairings,pLinTests,pLinTestsNames,pNewTestName);
 }
 
 GEN PicTorsBasis(GEN J, GEN l, GEN Lp, GEN Chi)
@@ -4728,7 +4753,7 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Lp, GEN Chi)
      Also computes the matrix M of Frob and list of matrices MA of Auts w.r.t B, and returns the vector [B,M,MA] */
   /* TODO use auts that are not known to be scalars */
 	pari_sp av = avma;
-  GEN Diva,Phi,phi,ChiT,BW,Bo,BT,matFrob,FRparams,LinTests,LinTestsNames,matPairings,Batch,res;
+  GEN Diva,Phi,phi,ChiT,BW,Bo,BT,matFrob,FRparams,LinTests,LinTestsNames,matPairings,Batch,Pt,res;
   ulong a,r,d,i,j,nPhi,iPhi,nBatch,iBatch,NewTestName;
 	struct pari_mt pt;
   GEN worker,done;
@@ -4777,16 +4802,16 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Lp, GEN Chi)
 	}
 	NewTestName = d+1;
 
-	nBatch = (mt_nbthreads()+1)/2; //TODO
+	nBatch = (mt_nbthreads()+1)/2;//TODO
 	worker = strtofunction("_PicTorsBasis_worker");
-  mt_queue_start(&pt,worker);
 	Batch = cgetg(nBatch+1,t_VEC);
 	for(iPhi=1;;)
 	{
+		if(DEBUGLEVEL) printf("PicTorsBasis: Generating new batch of %lu torsion points\n",nBatch);
 		mt_queue_start(&pt,worker);
-		for(iBatch=0;iBatch<nBatch||pending;iBatch++,iPhi++)
+		for(iBatch=1;iBatch<=nBatch||pending;iBatch++,iPhi++)
 		{
-			if(iBatch<nBatch)
+			if(iBatch<=nBatch)
 			{
 				if(Phi)
     		{
@@ -4799,14 +4824,19 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Lp, GEN Chi)
 			else mt_queue_submit(&pt,iBatch,NULL);
 			done = mt_queue_get(&pt,&workid,&pending);
 			if(done)
-			{
 				gel(Batch,workid) = done;
-			}
 		}
 		mt_queue_end(&pt);
 		for(i=1;i<=nBatch && r<d;i++)
 		{
-			PicTorsBasis_UsePt(J,gel(Batch,i),ChiT,d,&r,&BW,&Bo,&BT,&matFrob,FRparams,&matPairings,&LinTests,&LinTestsNames,&NewTestName);
+			if(DEBUGLEVEL) printf("PicTorsBasis: Got dimension r=%lu out of d=%lu, moving on to point %lu of batch\n",r,d,i);
+			Pt = gel(Batch,i);
+			if(gequal0(Pt))
+			{
+				if(DEBUGLEVEL>=2) printf("PicTorsBasis: This point is zero, moving on to the next one\n");
+				continue;
+			}
+			PicTorsBasis_UsePt(J,Pt,ChiT,d,&r,&BW,&Bo,&BT,&matFrob,FRparams,&matPairings,&LinTests,&LinTestsNames,&NewTestName);
 		}
 		if(r==d) break;
 	}
