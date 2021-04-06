@@ -2508,14 +2508,11 @@ ZX_red_disc2(GEN pol, GEN Xinf, GEN X)
 static GEN
 makeCL_f(long ell, GEN F)
 {
-  long k, l;
-  GEN bnf, v, P;
+  GEN bnf, P;
   if (!checkcondCL(F, ell, &P)) return cgetg(1,t_VEC);
   bnf = bnfY(pol_x(1));
   P = Pell2prfa(bnf_get_nf(bnf), P, ell, F);
-  v = mybnrclassfield(bnf, P, ell);
-  l = lg(v); for (k = 1; k < l; k++) gel(v,k) = polredabs(gel(v,k));
-  return v;
+  return mybnrclassfield(bnf, P, ell);
 }
 /* ell odd prime */
 static GEN
@@ -5382,10 +5379,9 @@ polsubcycloV4_i(GEN n, long s, long fli)
   l = lg(R);
   for (i = c = 1; i < l; i++)
   {
-    GEN t = gel(R, i), P, D1 = gel(V, t[1]), D2 = gel(V, t[2]);
+    GEN t = gel(R, i), D1 = gel(V, t[1]), D2 = gel(V, t[2]);
     if (fli && !equalii(lcmii(D1, D2), n)) continue;
-    P = polcompositum0(quadpoly_i(D1), quadpoly_i(D2), 2);
-    gel(R, c++) = polredbest(P, 0);
+    gel(R, c++) = polcompositum0(quadpoly_i(D1), quadpoly_i(D2), 2);
   }
   setlg(R, c); return R;
 }
@@ -5423,7 +5419,7 @@ polsubcycloC6(GEN n, long s)
   {
     GEN p3 = gel(v3, i);
     for (j = 1; j <= n2; j++)
-      gel(R, c++) = polredbest(polcompositum0(p3, gel(v2,j), 2), 0);
+      gel(R, c++) = polcompositum0(p3, gel(v2,j), 2);
   }
   return R;
 }
@@ -5453,19 +5449,18 @@ polsubcycloC6_i(GEN n, long s)
         GEN p3 = gel(V3, i3);
         long i2;
         for (i2 = 1; i2 < l2; i2++)
-          gel(R, c++) = polredbest(polcompositum0(p3, gel(V2,i2), 2), 0);
+          gel(R, c++) = polcompositum0(p3, gel(V2,i2), 2);
       }
     }
   }
   setlg(R, c); return R;
 }
 
-/* Set fli = 1 if you want exact conductor n, otherwise for fli = 0
- * all subfields of Q(zeta_n). */
-static GEN
-polsubcyclosmall_i(GEN n, long ell, long s, long fli)
+/* n > 0, t_INT; set fli = 1 for exact conductor n, otherwise all subfields
+ * of Q(zeta_n). Assume ell = -4 (C4), 4 (V4), 1 (C1), 6 (C6) or ell prime*/
+GEN
+polsubcyclosmall(GEN n, long ell, long s, long fli)
 {
-  if (typ(n) != t_INT || signe(n) <= 0) pari_err_TYPE("polsubcyclo", n);
   if (ell <= 0 && ell != -4)
     pari_err_DOMAIN("polsubcyclo", "d", "<=", gen_0, stoi(ell));
   /* translate wrt r2 for compatibility with nflist functions */
@@ -5488,7 +5483,7 @@ polsubcyclosmall_i(GEN n, long ell, long s, long fli)
     retmkvec(pol_x(0));
   }
   if (equali1(n)) return NULL;
-  if (ell >= 7 && uisprime(ell)) return fli? makeCLall(ell,n): makeCL_f(ell,n);
+  if (ell >= 7) return fli? makeCLall(ell,n): makeCL_f(ell,n);
   switch(ell)
   {
     case 2: return fli? polsubcycloC2_i(n, s): polsubcycloC2(n, s);
@@ -5497,15 +5492,6 @@ polsubcyclosmall_i(GEN n, long ell, long s, long fli)
     case -4:return polsubcycloC4_i(n, s, fli, NULL);
     case 5: return fli? polsubcycloC5_i(n, NULL): polsubcycloC5(n);
     case 6: return fli? polsubcycloC6_i(n, s): polsubcycloC6(n, s);
-    default: pari_err_IMPL("polsubcyclosmall for this degree");
   }
   return NULL; /* LCOV_EXCL_LINE */
-}
-GEN
-polsubcyclosmall(GEN n, long ell, long s, long fli)
-{
-  pari_sp av = avma;
-  GEN v = polsubcyclosmall_i(n, ell, s, fli);
-  if (!v) { set_avma(av); return cgetg(1,t_VEC); }
-  return gerepilecopy(av, v);
 }

@@ -1,2 +1,9 @@
 polsubcyclo(8,1)
 polsubcyclo(1048,2)
+
+polsubcyclo(13*17*29,4)
+polsubcyclo(10^17+21,5)
+polsubcyclo(10^17+3,7)
+polsubcyclo(10^7+189,11)
+polsubcyclo(10^5+153,13)
+

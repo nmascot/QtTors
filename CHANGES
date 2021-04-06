@@ -104,6 +104,7 @@ BA  14- [libpari] gp_read_stream now return NULL when EOF is reached (was gnil)
     17- allow t_COL of objects in gconcat1 / shallowconcat1
     18- [libpari] Z_smoothen now uses (and returns) t_VEC arguments.
         Use Z_lsmoothen to input small primes as a t_VECSMALL.
+    19- polsubcyclo: faster algorithm for large conductor and small degree
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

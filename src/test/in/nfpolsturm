@@ -1,5 +1,4 @@
-nf = nfinit(polsubcyclo(11,5,'y));
-t = x^2 - nf.zk[2];
+nf = nfinit(y^5+y^4-4*y^3-3*y^2+3*y+1); t = x^2 - nf.zk[2];
 nfpolsturm(nf, t)
 nfpolsturm(nf, t, 1)
 nfpolsturm(nf, t, [1..4])

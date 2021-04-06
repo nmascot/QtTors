@@ -162,7 +162,7 @@ bnrclassfield(bnrinit(bnfinit(y), p,, 3), 3)
 print("tough conductor factorization");
 setrand(1);
 p=randomprime(2^200,7);
-q=randomprime(2^200,7); bnf=bnfinit(polsubcyclo(7,2,a));
+q=randomprime(2^200,7); bnf=bnfinit(a^2+a+2);
 M=matconcat([idealfactor(bnf,p),idealfactor(bnf,q)]~);
 bnr=bnrinit(bnf,M,,7); bnrclassfield(bnr)
 

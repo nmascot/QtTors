@@ -1,5 +1,4 @@
-nf = nfinit(polsubcyclo(11,5));
-t = nf.zk[2];
+nf = nfinit(x^5+x^4-4*x^3-3*x^2+3*x+1); t = nf.zk[2];
 nfeltsign(nf, t)
 nfeltsign(nf, t, 1)
 nfeltsign(nf, t, [1..4])
