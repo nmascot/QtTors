@@ -4667,9 +4667,9 @@ void PicTorsBasis_UsePt(GEN J, GEN Pt, GEN Chi, ulong d, ulong* pr, GEN* pBW, GE
 			if(DEBUGLEVEL) pari_printf("PicTorsBasis: This point is linearly dependent on the previous ones: %Ps\n",rel);
 			break;
 		}
-		if(DEBUGLEVEL) printf("PicTorsBasis: This point is independent from the previous ones\n");
 		/* T is independent on BT */
 		(*pr)++;
+		if(DEBUGLEVEL) printf("PicTorsBasis: This point is independent from the previous ones; now r=%lu\n",*pr);
 		*pBW = VecExtend1_shallow(*pBW,W);
 		*pBo = VecSmallExtend1_shallow(*pBo,o);
 		*pBT = VecExtend1_shallow(*pBT,T);
@@ -4809,14 +4809,14 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Lp, GEN Chi)
 	{
 		if(DEBUGLEVEL) printf("PicTorsBasis: Generating new batch of %lu torsion points\n",nBatch);
 		mt_queue_start(&pt,worker);
-		for(iBatch=1;iBatch<=nBatch||pending;iBatch++,iPhi++)
+		for(iBatch=1;iBatch<=nBatch||pending;iBatch++)
 		{
 			if(iBatch<=nBatch)
 			{
 				if(Phi)
     		{
       		if(iPhi>nPhi) iPhi -= nPhi;
-      		phi = gel(Phi,iPhi);
+      		phi = gel(Phi,iPhi++);
 				}
 				else phi = gen_0;
 				mt_queue_submit(&pt,iBatch,mkvecn(9,J,l,Lp,Chi,phi,FRparams,LinTests,LinTestsNames,genrand(NULL)));
