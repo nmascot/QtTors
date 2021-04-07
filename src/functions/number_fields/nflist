@@ -231,8 +231,8 @@ Doc: auxiliary
 Function: _C32C4_worker
 Section: programming/internals
 C-Name: _C32C4_worker
-Prototype: GGG
-Help: _C32C4_worker(P4, X, GAL): auxiliary.
+Prototype: GGGG
+Help: _C32C4_worker(P4, X, Xinf, GAL): auxiliary.
 Doc: auxiliary
 
 Function: _C32D4_worker

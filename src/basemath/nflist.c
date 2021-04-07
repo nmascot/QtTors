@@ -4389,16 +4389,18 @@ ideallistsquare(GEN bnf, long lim)
 }
 
 GEN
-_C32C4_worker(GEN P4, GEN X, GEN GAL)
+_C32C4_worker(GEN P4, GEN X, GEN Xinf, GEN GAL)
 {
   pari_sp av = avma;
   GEN bnf = bnfY(P4), D4 = bnf_get_disc(bnf), D2 = nfdisc(_nfsubfields1(P4, 2));
-  GEN vI, v, w;
-  long limf = itos(sqrti(divii(X, mulii(D4, D2)))), f, c;
+  GEN vI, v, w, D4D2 = mulii(D4, D2);
+  long limf = itos(sqrti(divii(X, D4D2))), f, c;
+  long liminf = itos(sqrti(divii(Xinf, D4D2)));
 
+  while (cmpii(mulsi(liminf * liminf, D4D2), Xinf) < 0) liminf++;
   vI = ideallistsquare(bnf, limf);
   v = cgetg(limf + 1, t_VEC);
-  for (f = c = 1; f <= limf; f++)
+  for (c = 1, f = liminf; f <= limf; f++)
     if ((w = doC32C4_i(bnf,  gel(vI, f), GAL))) gel(v, c++) = w;
   setlg(v,c); return gerepilecopy(av, gtoset_shallow(myshallowconcat1(v)));
 }
@@ -4418,7 +4420,7 @@ makeC32C4vec(GEN X, GEN Xinf, GEN field, long s)
     L = mkvec(field);
   }
   else L = makeC4vec(divis(X, 5), gen_1, NULL, s == -2? -1: s);
-  v = gen_parapply(closure("_C32C4_worker", mkvec2(X, GAL)), L);
+  v = gen_parapply(closure("_C32C4_worker", mkvec3(X, Xinf, GAL)), L);
   return sturmseparate(myshallowconcat1(v), s, 6);
 }
 /************************************************************************/

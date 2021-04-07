@@ -606,7 +606,7 @@ GEN _A462_worker(GEN P3, GEN X, GEN listarch, GEN GAL);
 GEN _S3C3_worker(GEN D2, GEN X, GEN Xinf);
 GEN _S462_worker(GEN P3, GEN X, GEN listarch13, GEN GAL);
 GEN _S36_worker(GEN pol, GEN X, GEN Xinf);
-GEN _C32C4_worker(GEN P4, GEN X, GEN GAL);
+GEN _C32C4_worker(GEN P4, GEN X, GEN Xinf, GEN GAL);
 GEN _C32D4_worker(GEN P, GEN X, GEN Xinf, GEN gs);
 GEN _C9_worker(GEN P, GEN X, GEN Xinf);
 GEN _C3C3_worker(GEN gi, GEN V3, GEN V3D, GEN X);
