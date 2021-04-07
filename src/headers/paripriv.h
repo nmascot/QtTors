@@ -592,7 +592,7 @@ GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
 GEN _C3_worker(GEN gv, GEN T);
 GEN _C4vec_worker(GEN gm, GEN X, GEN Xinf, GEN gs);
 GEN _V4_worker(GEN D1, GEN X, GEN Xinf, GEN gs);
-GEN _D4_worker(GEN D, GEN X, GEN listarch);
+GEN _D4_worker(GEN D, GEN X, GEN Xinf, GEN listarch);
 GEN _A4S4_worker(GEN P3, GEN X, GEN Xinf, GEN cards);
 GEN _C5_worker(GEN N, GEN bnfC5);
 GEN _CL_worker(GEN Fcond, GEN bnf, GEN ellprec);

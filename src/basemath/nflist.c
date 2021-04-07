@@ -1756,11 +1756,12 @@ makeD4(GEN N, GEN field, long s)
 }
 
 GEN
-_D4_worker(GEN D, GEN X, GEN listarch)
+_D4_worker(GEN D, GEN X, GEN Xinf, GEN listarch)
 {
   pari_sp av = avma, av2;
-  GEN bnf, G, vI, v0, v1, v2, Arch;
-  long c0, c1, c2, cond, l = itos(divii(X, sqri(D))) + 1;
+  GEN bnf, G, vI, v0, v1, v2, Arch, D2 = sqri(D);
+  long c0, c1, c2, cond, l = itos(divii(X, D2)) + 1;
+  long lmin = itos(divii(subis(addii(Xinf, D2), 1), D2));
   bnf = Buchall(Y2m(D), nf_FORCE, DEFAULTPREC);
   vI = ideallist(bnf, l-1);
   Arch = signe(D) > 0 ? listarch : mkvec(cgetg(1,t_VECSMALL));
@@ -1769,7 +1770,7 @@ _D4_worker(GEN D, GEN X, GEN listarch)
   v0 = const_vec(l-1, cgetg(1,t_VEC));
   v1 = const_vec(l-1, cgetg(1,t_VEC));
   v2 = const_vec(l-1, cgetg(1,t_VEC)); c0 = c1 = c2 = 1;
-  for (cond = 1; cond < l; cond++)
+  for (cond = lmin; cond < l; cond++)
   {
     pari_sp av3 = avma;
     GEN R, R1, R2, R3;
@@ -1827,7 +1828,7 @@ makeD4vec(GEN X, GEN Xinf, GEN field, long s)
     if (m) gel(D, c++) = utoineg(da);
   }
   setlg(D, c);
-  v = gen_parapply(closure("_D4_worker", mkvec2(X, getarchD4(s))), D);
+  v = gen_parapply(closure("_D4_worker", mkvec3(X, Xinf, getarchD4(s))), D);
   if (s >= 0) v = Sextract(v,s);
   else
   {

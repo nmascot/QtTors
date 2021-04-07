@@ -133,8 +133,8 @@ Doc: auxiliary
 Function: _D4_worker
 Section: programming/internals
 C-Name: _D4_worker
-Prototype: GGG
-Help: _D4_worker(D, X, X21, listarch): auxiliary.
+Prototype: GGGG
+Help: _D4_worker(D, X, Xinf, listarch): auxiliary.
 Doc: auxiliary
 
 Function: _A4S4_worker
