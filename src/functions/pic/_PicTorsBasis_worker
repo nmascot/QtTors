@@ -1,6 +1,6 @@
 Function: _PicTorsBasis_worker
-Section: modular_forms
+Section: programming/internals
 C-Name: PicTorsBasis_worker
 Prototype: GGGGGGGGG
-Help: 
+Help:
 Doc: TODO 

@@ -3921,12 +3921,8 @@ GEN HyperRRdata(GEN f, GEN P12)
 		}
 	}
 	g = d/2-1;
-	x = mkpoln(2,gen_1,gen_0);
-  x[1] = 0;
-  setvarn(x,0);
-  y = mkpoln(2,gen_1,gen_0);
-  y[1] = 0;
-  setvarn(y,1);
+	x = pol_x(0);
+	y = pol_x(1);
 	L = cgetg(4,t_VEC);
 	gel(L,1) = HyperRR(g+1,g,gen_1,gen_0,x,y);
 	gel(L,2) = HyperRR(d,g,gen_1,gen_0,x,y);
@@ -3959,9 +3955,7 @@ GEN HyperPicInit(GEN f, GEN p, ulong a, long e, GEN P12)
 	pari_sp av = avma;
 	GEN J,RRdata,bad;
 	RRdata = HyperRRdata(f,P12);
-	bad = mkpoln(2,gen_1,gen_0);
-  bad[1] = 0;
-  setvarn(bad,1);
+	bad = pol_x(1); /* y */
 	J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),bad,p,a,e);
 	return gerepileupto(av,J);
 }
@@ -4015,12 +4009,8 @@ GEN SuperRRdata(GEN f, ulong m, GEN P)
 	}
 	g = ((d-1)*(m-1))/2;
 	d0 = 2*g+1;
-	x = mkpoln(2,gen_1,gen_0);
-  x[1] = 0;
-  setvarn(x,0);
-  y = mkpoln(2,gen_1,gen_0);
-  y[1] = 0;
-  setvarn(y,1);
+	x = pol_x(0);
+	y = pol_x(1);
 	L = cgetg(4,t_VEC);
 	gel(L,1) = SuperRR(d0,d,m,x,y);
 	gel(L,2) = SuperRR(2*d0,d,m,x,y);
@@ -4056,9 +4046,7 @@ GEN SuperPicInit(GEN f, ulong m, GEN p, ulong a, long e, GEN P)
   pari_sp av = avma;
   GEN J,RRdata,bad;
   RRdata = SuperRRdata(f,m,P);
-  bad = mkpoln(2,gen_1,gen_0);
-  bad[1] = 0;
-  setvarn(bad,1);
+	bad = pol_x(1); /* y */
   J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),bad,p,a,e);
   return gerepileupto(av,J);
 }
@@ -4493,9 +4481,7 @@ GEN FpM_GuessLastColFromCharpoly(GEN A, GEN chi, GEN p)
 		gcoeff(A,i,n) = gen_0;
 	gcoeff(A,n,n) = Fp_neg(addii(gtrace(A),gel(chi,n+1)),p);
 	chi0 = FpX_sub(chi,FpM_charpoly(A,p),p);
-	x = mkpoln(2,gen_1,gen_0);
-	x[1] = 0;
-	setvarn(x,0);
+	x = pol_x(0);
 	B = adjsafe(gsub(x,A));
 	M = cgetg(n+1,t_MAT);
 	for(j=1;j<n;j++)
@@ -4845,4 +4831,103 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Lp, GEN Chi)
 	gel(res,2) = matFrob;
 	gel(res,3) = PicTorsGetAutMats(J,BT,FRparams,LinTests,matPairings);
 	return gerepilecopy(av,res);
+}
+
+/* GalRep */
+
+GEN FpX_root_order_bound(GEN f, GEN p)
+{ /* Upper bound on order of FpM whose charpoly is f */
+	pari_sp av = avma;
+	GEN fa,x,g,fad,a,pu,b;
+	ulong n,e,d,dg,i;
+	int nil = 0;
+	fa = FpX_factor(f,p);
+	n = lg(gel(fa,1)); /* Number of factors */
+	x = pol_x(varn(f));
+	d = 0;
+	fad = NULL;
+	a = gen_1;
+	pu = gen_1;
+	for(i=1;i<n;i++)
+	{
+		g = gmael(fa,1,i);
+		e = gel(fa,2)[i];
+		dg = degpol(g);
+		if(dg!=d)
+		{
+			d = dg;
+			fad = factor_pn_1(p,d);
+		}
+		a = lcmii(a,FpXQ_order(x,fad,g,p));
+		while(cmpiu(pu,e)==-1)
+		{
+			nil = 1;
+			pu = mulii(pu,p);
+		}
+	}
+	b = nil? mulii(a,pu) : a;
+	if(nil && DEBUGLEVEL) pari_printf("FpX_root_order_bound returning upper bound %Ps, but order may be as low as %Ps\n",b,a);
+	return gerepilecopy(av,b);
+}
+
+GEN PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
+{ /* Let B be an Fl-basis of a Galois-stable subspace T of J[l]
+		 and MFrob the matrix of Frob on B.
+		 Finds minimal generating set G of T as an Fl[Frob]-module.
+		 Returns [G,CG,M] where CG are the coordinates of G
+		 and M is the rational canonical form of MFrob. */
+	/* TODO use Auts? */
+	pari_sp av = avma;
+	GEN M,Q,piv,G,CG,res;
+	ulong n,i;
+	M = RgM_Frobenius(gmodulo(MFrob,l),0,&Q,&piv);
+	Q = centerlift(Q);
+	M = centerlift(M);
+	n = lg(piv);
+	G = cgetg(n,t_VEC);
+	CG = cgetg(n,t_VEC);
+	for(i=1;i<n;i++)
+	{
+		gel(CG,i) = gel(Q,piv[i]);
+		gel(G,i) = PicLC(J,gel(CG,i),B);
+	}
+	res = mkvec3(G,CG,M);
+	return gerepilecopy(av,res);
+}
+
+GEN PicTorsGalRep(GEN J, GEN l, GEN Lp, GEN chi)
+{
+	pari_sp av = avma;
+	GEN J1,B;
+
+	J1 = PicSetPrec(J,1);
+	B = PicTorsBasis(J1,l,Lp,chi);
+	B = PicTors_FrobGen(J1,l,gel(B,1),gel(B,2));
+	gerepileupto(av,B);
+	//TODO;
+	return NULL;
+}
+
+GEN HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN chi, GEN P, ulong force_a)
+{
+	/* Computes the Galois representation afforded by
+   the piece of l-torsion of the Jacobian
+   of the hyperelliptic curve C:y²=f(x)
+   (in case f=[P,Q], the curve C:y²+Q(x)*y=P(x))
+   on which Frob_p has charpoly chi
+   (chi=0 means take all the l-torsion)
+   by working at p-adic accuracy O(p^e).
+   P must be a pair of points of C(Q)
+   which are not conjugate under the hyperelliptic involution.
+   If chi is nonzero,
+   we must have chi || (Lp mod l)
+   where Lp is the local L factor at p.*/
+	pari_sp av = avma;
+	GEN Lp, J, R;
+	ulong a;
+	Lp = hyperellcharpoly(gmodulo(f,p));
+	a = force_a ? force_a : itou(FpX_root_order_bound(Lp,l));
+	J = HyperPicInit(f,p,a,e,P);
+	R = PicTorsGalRep(J,l,Lp,chi);
+	return gerepileupto(av,R);
 }

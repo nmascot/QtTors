@@ -580,7 +580,7 @@ weakfrobenius_step3(GEN M, GEN P, long j0, long j)
 }
 
 /* flag: 0 -> full Frobenius from , 1 -> weak Frobenius form */
-static GEN
+GEN
 RgM_Frobenius(GEN M, long flag, GEN *pt_P, GEN *pt_v)
 {
   pari_sp av = avma, av2, ltop;

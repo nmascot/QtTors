@@ -1904,6 +1904,7 @@ GEN     Flm_hess(GEN x, ulong p);
 GEN     FpM_charpoly(GEN x, GEN p);
 GEN     FpM_hess(GEN x, GEN p);
 GEN     Frobeniusform(GEN V, long n);
+GEN			RgM_Frobenius(GEN A, long flag, GEN* pt_P, GEN* pt_v);
 GEN     QM_minors_coprime(GEN x, GEN pp);
 GEN     QM_ImZ(GEN x);
 GEN     QM_ImZ_all(GEN x, GEN *U, long remove, long hnf);
