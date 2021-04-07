@@ -3993,15 +3993,16 @@ makeA462(GEN N, GEN field, long s)
 }
 
 GEN
-_A462_worker(GEN P3, GEN X, GEN Arch, GEN GAL)
+_A462_worker(GEN P3, GEN X, GEN Xinf, GEN Arch, GEN GAL)
 {
   pari_sp av = avma;
   GEN bnf = bnfY(P3), aut = cycfindaut(bnf), v, t;
-  GEN G = galoisinit(bnf, NULL);
-  long c, l, j, limf = itos(divii(X, sqri(bnf_get_disc(bnf))));
-
+  GEN G = galoisinit(bnf, NULL), D2 = sqri(bnf_get_disc(bnf));
+  long c, l, j, limf = itos(divii(X, D2));
+  long liminf = itos(divii(subis(addii(Xinf, D2), 1), D2));
+  
   v = ideallist(bnf, limf); l = lg(v);
-  for (j = c = 1; j < l; j++)
+  for (c = 1, j = liminf; j < l; j++)
     if ((t = doA462(bnf, gel(v,j), Arch, aut, G, GAL))) gel(v,c++) = t;
   setlg(v, c); return gerepilecopy(av, myshallowconcat1(v));
 }
@@ -4021,7 +4022,7 @@ makeA462vec(GEN X, GEN Xinf, GEN field, long s)
   }
   else if (!(v = makeC3vec(sqrti(X), gen_1, NULL, 0))) return NULL;
   GAL = mkvecsmall3(24, -1, 2);
-  v = gen_parapply(closure("_A462_worker", mkvec3(X, archA462(s), GAL)), v);
+  v = gen_parapply(closure("_A462_worker", mkvec4(X, Xinf, archA462(s), GAL)), v);
   return sturmseparate(myshallowconcat1(v), s, 6);
 }
 

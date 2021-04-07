@@ -203,8 +203,8 @@ Doc: auxiliary
 Function: _A462_worker
 Section: programming/internals
 C-Name: _A462_worker
-Prototype: GGGG
-Help: _A462_worker(P3, X, listarch, GAL): auxiliary.
+Prototype: GGGGG
+Help: _A462_worker(P3, X, Xinf, listarch, GAL): auxiliary.
 Doc: auxiliary
 
 Function: _S3C3_worker
