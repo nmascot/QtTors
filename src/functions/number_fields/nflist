@@ -92,11 +92,11 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
 
  \item $C_n$: $O(b^{1/\phi(n)})$ for $n = 2, 4, 6, 9$ or any odd prime;
 
- \item $D_n$: $O(b^{2/(n-1)})$ for $n$ any odd prime;
+ \item $D_n$: $O(b^{2/\phi(n)})$ for $n = 4$ or any odd prime;
 
- \item $C_3$: $O(b^{1/2})$, $S_3$ : $O(b)$;
+ \item $S_3$ : $O(b)$;
 
- \item $V_4$: $O(b^{1/2})$, $D_4$: $O(b)$, $A_4$: $O(b^{1/2})$, $S_4$: $O(b)$;
+ \item $V_4$, $A_4$: $O(b^{1/2})$, $S_4$: $O(b)$;
  N.B. The subexponential terms are expensive for $A_4$ and $S_4$.
 
  \item $M_{20}$: $O(b)$.

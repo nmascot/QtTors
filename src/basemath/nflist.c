@@ -4000,7 +4000,7 @@ _A462_worker(GEN P3, GEN X, GEN Xinf, GEN Arch, GEN GAL)
   GEN G = galoisinit(bnf, NULL), D2 = sqri(bnf_get_disc(bnf));
   long c, l, j, limf = itos(divii(X, D2));
   long liminf = itos(divii(subis(addii(Xinf, D2), 1), D2));
-  
+
   v = ideallist(bnf, limf); l = lg(v);
   for (c = 1, j = liminf; j < l; j++)
     if ((t = doA462(bnf, gel(v,j), Arch, aut, G, GAL))) gel(v,c++) = t;
@@ -4927,7 +4927,6 @@ grouptranslate(const char *g)
   if (!strcmp(g, "F5")) return 503;
   if (!strcmp(g, "M20")) return 503;
   if (!strcmp(g, "A5")) return 504;
-//  if (!strcmp(g, "S5")) return 505;
   if (!strcmp(g, "A5cond")) return 509;
   if (!strcmp(g, "C6")) return 601;
   if (!strcmp(g, "S36")) return 602;
