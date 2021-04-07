@@ -2298,7 +2298,7 @@ A4S4_fa(GEN DATA, GEN fa, long cond, long s)
     return gc_NULL(av);
   return gerepilecopy(av, w);
 }
-GEN
+static GEN
 _A4S4_worker_i(GEN P3, GEN X, GEN Xinf, long s)
 {
   GEN v, w, F, DATA = S4data(P3, s), D3 = absi_shallow(S4_get_disc(DATA));
