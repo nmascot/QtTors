@@ -2876,10 +2876,11 @@ makeMgen(long ell, long a, GEN N, GEN field, long s)
   return sturmseparate(gtoset_shallow(myshallowconcat1(v)), s, ell);
 }
 
+/* (ell,a) = (5,4), (7,3) or (7,6) */
 static GEN
 makeMgenresolvent(long ell, long a, GEN pol, long flag)
 {
-  GEN Dpow = checkfield(pol, ell), G, R, DR, F, F2, nf, pell;
+  GEN Dpow = checkfield(pol, ell), G, R, DR, F2, nf, pell, F;
 
   G = galoissplitting(pol, utoipos(a*ell));
   if (typ(G) == t_INT) pari_err_BUG("nfresolvent [Galois group]");
@@ -2899,8 +2900,8 @@ makeMgenresolvent(long ell, long a, GEN pol, long flag)
       F = idealmul(nf, F, pell);
     }
   }
-  else if (ell == 7 && (a == 3 || a == 6))
-  {
+  else
+  { /* ell == 7 && (a == 3 || a == 6) */
     long v;
     if (a == 3) DR = sqri(DR);
     if (!Z_issquareall(divii(Dpow, DR), &F2))
@@ -2917,7 +2918,6 @@ makeMgenresolvent(long ell, long a, GEN pol, long flag)
       F = idealmul(nf, F, idealpows(nf, pell, v));
     }
   }
-  else pari_err_IMPL("other metacyclic groups");
   return mkvec2(R, F);
 }
 
@@ -3026,7 +3026,7 @@ A5vec(GEN X, GEN Xinf, long s, long fl)
   if (!fl && cmpii(X, powuu(10,12)) > 0) pari_err(e_MISC, "A5 table too short");
   L1 = L5 = NULL;
   if (s <= 0) L5 = truncA5(A5file(fl? "A55cond": "A55"), Xinf, X, fl);
-  if (s) ; L1 = truncA5(A5file(fl? "A51cond": "A51"), Xinf, X, fl);
+  if (s) L1 = truncA5(A5file(fl? "A51cond": "A51"), Xinf, X, fl);
   switch (s)
   {
     case 2: return L1;
