@@ -633,7 +633,7 @@ gammamellininvinit(GEN Vga, long m, long bitprec)
   A2 = gaddsg(m*(2-d) + 1-d, sumVga(Vga));
   cd = (d <= 2)? gen_2: gsqrt(gdivgs(int2n(d+1), d), nbits2prec(bitprec));
   /* if in Klarge, we have |t| > tmax = E/C2, thus nlim < E*C2/D. */
-  M = gammamellininvasymp_i(RgV_gtofp(Vga, prec), nlimmax, m, &status);
+  M = gammamellininvasymp_i(Vga, nlimmax, m, &status);
   if (status == 2)
   {
     tmax = -1.; /* only use Klarge */
