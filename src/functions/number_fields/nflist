@@ -109,177 +109,177 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
 
  \item $C_3\times C_3$: $O(b^{1/3})$
 
-Function: _C3_worker
+Function: nflist_C3_worker
 Section: programming/internals
-C-Name: _C3_worker
+C-Name: nflist_C3_worker
 Prototype: GG
-Help: _C3_worker(gv, T): auxiliary.
+Help: nflist_C3_worker(gv, T): auxiliary.
 Doc: auxiliary
 
-Function: _C4vec_worker
+Function: nflist_C4vec_worker
 Section: programming/internals
-C-Name: _C4vec_worker
+C-Name: nflist_C4vec_worker
 Prototype: GGGG
-Help: _C4vec_worker(gm, X, Xinf, X2, gs): auxiliary.
+Help: nflist_C4vec_worker(gm, X, Xinf, X2, gs): auxiliary.
 Doc: auxiliary
 
-Function: _V4_worker
+Function: nflist_V4_worker
 Section: programming/internals
-C-Name: _V4_worker
+C-Name: nflist_V4_worker
 Prototype: GGGG
-Help: _V4_worker(D1, X, Xinf, gs): auxiliary.
+Help: nflist_V4_worker(D1, X, Xinf, gs): auxiliary.
 Doc: auxiliary
 
-Function: _D4_worker
+Function: nflist_D4_worker
 Section: programming/internals
-C-Name: _D4_worker
+C-Name: nflist_D4_worker
 Prototype: GGGG
-Help: _D4_worker(D, X, Xinf, listarch): auxiliary.
+Help: nflist_D4_worker(D, X, Xinf, listarch): auxiliary.
 Doc: auxiliary
 
-Function: _A4S4_worker
+Function: nflist_A4S4_worker
 Section: programming/internals
-C-Name: _A4S4_worker
+C-Name: nflist_A4S4_worker
 Prototype: GGGG
-Help: _A4S4_worker(P3, X, Xinf, cardsprec): auxiliary.
+Help: nflist_A4S4_worker(P3, X, Xinf, cardsprec): auxiliary.
 Doc: auxiliary
 
-Function: _C5_worker
+Function: nflist_C5_worker
 Section: programming/internals
-C-Name: _C5_worker
+C-Name: nflist_C5_worker
 Prototype: GG
-Help: _C5_worker(N, bnfC5): auxiliary.
+Help: nflist_C5_worker(N, bnfC5): auxiliary.
 Doc: auxiliary
 
-Function: _CL_worker
+Function: nflist_CL_worker
 Section: programming/internals
-C-Name: _CL_worker
+C-Name: nflist_CL_worker
 Prototype: GGG
-Help: _CL_worker(Fcond, bnf, ellprec): auxiliary.
+Help: nflist_CL_worker(Fcond, bnf, ellprec): auxiliary.
 Doc: auxiliary
 
-Function: _DL_worker
+Function: nflist_DL_worker
 Section: programming/internals
-C-Name: _DL_worker
+C-Name: nflist_DL_worker
 Prototype: GGGGGG
-Help: _DL_worker(P2, X1p, X0p, X, Xinf, ells): auxiliary.
+Help: nflist_DL_worker(P2, X1p, X0p, X, Xinf, ells): auxiliary.
 Doc: auxiliary
 
-Function: _Mgen_worker
+Function: nflist_Mgen_worker
 Section: programming/internals
-C-Name: _Mgen_worker
+C-Name: nflist_Mgen_worker
 Prototype: GGGG
-Help: _Mgen_worker(field, X, Xinf, ella): auxiliary.
+Help: nflist_Mgen_worker(field, X, Xinf, ella): auxiliary.
 Doc: auxiliary
 
-Function: _C6_worker
+Function: nflist_C6_worker
 Section: programming/internals
-C-Name: _C6_worker
+C-Name: nflist_C6_worker
 Prototype: GGGGG
-Help: _C6_worker(P3, X, Xinf, M, T): auxiliary.
+Help: nflist_C6_worker(P3, X, Xinf, M, T): auxiliary.
 Doc: auxiliary
 
-Function: _D612_worker
+Function: nflist_D612_worker
 Section: programming/internals
-C-Name: _D612_worker
+C-Name: nflist_D612_worker
 Prototype: GGGG
-Help: _D612_worker(P3, X, Xinf, X2, limd2s2): auxiliary.
+Help: nflist_D612_worker(P3, X, Xinf, X2, limd2s2): auxiliary.
 Doc: auxiliary
 
-Function: _A46S46P_worker
+Function: nflist_A46S46P_worker
 Section: programming/internals
-C-Name: _A46S46P_worker
+C-Name: nflist_A46S46P_worker
 Prototype: GGGG
-Help: _A46S46P_worker(P3, Xinf, sqX, cards): auxiliary.
+Help: nflist_A46S46P_worker(P3, Xinf, sqX, cards): auxiliary.
 Doc: auxiliary
 
-Function: _S46M_worker
+Function: nflist_S46M_worker
 Section: programming/internals
-C-Name: _S46M_worker
+C-Name: nflist_S46M_worker
 Prototype: GGGG
-Help: _S46M_worker(P3, X, Xinf, sprec): auxiliary.
+Help: nflist_S46M_worker(P3, X, Xinf, sprec): auxiliary.
 Doc: auxiliary
 
-Function: _A462_worker
+Function: nflist_A462_worker
 Section: programming/internals
-C-Name: _A462_worker
+C-Name: nflist_A462_worker
 Prototype: GGGGG
-Help: _A462_worker(P3, X, Xinf, listarch, GAL): auxiliary.
+Help: nflist_A462_worker(P3, X, Xinf, listarch, GAL): auxiliary.
 Doc: auxiliary
 
-Function: _S3C3_worker
+Function: nflist_S3C3_worker
 Section: programming/internals
-C-Name: _S3C3_worker
+C-Name: nflist_S3C3_worker
 Prototype: GGG
-Help: _S3C3_worker(D2, X, Xinf, X2): auxiliary.
+Help: nflist_S3C3_worker(D2, X, Xinf, X2): auxiliary.
 Doc: auxiliary
 
-Function: _S462_worker
+Function: nflist_S462_worker
 Section: programming/internals
-C-Name: _S462_worker
+C-Name: nflist_S462_worker
 Prototype: GGGGG
-Help: _S462_worker(P3, X, Xinf, listarch, GAL): auxiliary.
+Help: nflist_S462_worker(P3, X, Xinf, listarch, GAL): auxiliary.
 Doc: auxiliary
 
-Function: _S36_worker
+Function: nflist_S36_worker
 Section: programming/internals
-C-Name: _S36_worker
+C-Name: nflist_S36_worker
 Prototype: GGG
-Help: _S36_worker(pol, X, Xinf, X2): auxiliary.
+Help: nflist_S36_worker(pol, X, Xinf, X2): auxiliary.
 Doc: auxiliary
 
-Function: _C32C4_worker
+Function: nflist_C32C4_worker
 Section: programming/internals
-C-Name: _C32C4_worker
+C-Name: nflist_C32C4_worker
 Prototype: GGGG
-Help: _C32C4_worker(P4, X, Xinf, GAL): auxiliary.
+Help: nflist_C32C4_worker(P4, X, Xinf, GAL): auxiliary.
 Doc: auxiliary
 
-Function: _C32D4_worker
+Function: nflist_C32D4_worker
 Section: programming/internals
-C-Name: _C32D4_worker
+C-Name: nflist_C32D4_worker
 Prototype: GGGG
-Help: _C32D4_worker(P, X, Xinf, gs): auxiliary.
+Help: nflist_C32D4_worker(P, X, Xinf, gs): auxiliary.
 Doc: auxiliary
 
-Function: _C9_worker
+Function: nflist_C9_worker
 Section: programming/internals
-C-Name: _C9_worker
+C-Name: nflist_C9_worker
 Prototype: GGG
-Help: _C9_worker(P, X, Xinf): auxiliary.
+Help: nflist_C9_worker(P, X, Xinf): auxiliary.
 Doc: auxiliary
 
-Function: _C3C3_worker
+Function: nflist_C3C3_worker
 Section: programming/internals
-C-Name: _C3C3_worker
+C-Name: nflist_C3C3_worker
 Prototype: GGGG
-Help: _C3C3_worker(gi, V3, V3D, X): auxiliary.
+Help: nflist_C3C3_worker(gi, V3, V3D, X): auxiliary.
 Doc: auxiliary
 
-Function: _S3R_worker
+Function: nflist_S3R_worker
 Section: programming/internals
-C-Name: _S3R_worker
+C-Name: nflist_S3R_worker
 Prototype: GG
-Help: _S3R_worker(ga, ALLCTS): auxiliary.
+Help: nflist_S3R_worker(ga, ALLCTS): auxiliary.
 Doc: auxiliary
 
-Function: _S3I_worker
+Function: nflist_S3I_worker
 Section: programming/internals
-C-Name: _S3I_worker
+C-Name: nflist_S3I_worker
 Prototype: GG
-Help: _S3I_worker(ga, ALLCTS): auxiliary.
+Help: nflist_S3I_worker(ga, ALLCTS): auxiliary.
 Doc: auxiliary
 
-Function: _D9_worker
+Function: nflist_D9_worker
 Section: programming/internals
-C-Name: _D9_worker
+C-Name: nflist_D9_worker
 Prototype: GGG
-Help: _D9_worker(P2, X, Xinf): auxiliary.
+Help: nflist_D9_worker(P2, X, Xinf): auxiliary.
 Doc: auxiliary
 
-Function: _S32_worker
+Function: nflist_S32_worker
 Section: programming/internals
-C-Name: _S32_worker
+C-Name: nflist_S32_worker
 Prototype: GGGGG
-Help: _S32_worker(all1, X, Xinf, V3, sprec): auxiliary.
+Help: nflist_S32_worker(all1, X, Xinf, V3, sprec): auxiliary.
 Doc: auxiliary
