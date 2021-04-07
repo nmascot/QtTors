@@ -600,7 +600,7 @@ GEN _DL_worker(GEN P2, GEN X1pow, GEN X0pow, GEN X, GEN Xinf, GEN ells);
 GEN _Mgen_worker(GEN field, GEN X, GEN Xinf, GEN ella);
 GEN _C6_worker(GEN P3, GEN X, GEN Xinf, GEN M, GEN T);
 GEN _D612_worker(GEN P3, GEN X, GEN Xinf, GEN limd2s2);
-GEN _A46S46P_worker(GEN P3, GEN X, GEN Xinf, GEN SQX, GEN cards);
+GEN _A46S46P_worker(GEN P3, GEN Xinf, GEN sqX, GEN cards);
 GEN _S46M_worker(GEN P3, GEN X, GEN Xinf, GEN gs);
 GEN _A462_worker(GEN P3, GEN X, GEN listarch, GEN GAL);
 GEN _S3C3_worker(GEN D2, GEN X, GEN Xinf);

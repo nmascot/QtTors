@@ -189,8 +189,8 @@ Doc: auxiliary
 Function: _A46S46P_worker
 Section: programming/internals
 C-Name: _A46S46P_worker
-Prototype: GGGGG
-Help: _A46S46P_worker(P3, X, Xinf, SQX, cards): auxiliary.
+Prototype: GGGG
+Help: _A46S46P_worker(P3, Xinf, sqX, cards): auxiliary.
 Doc: auxiliary
 
 Function: _S46M_worker

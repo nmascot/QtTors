@@ -699,10 +699,10 @@ makeC1(GEN N, GEN field, long s)
   return mkvec(s != -2? pol_x(0): mkvec(pol_x(0)));
 }
 static GEN
-makeC1resolvent(GEN pol, long flag)
+makeC1resolvent(long flag)
 { return odd(flag)? mkvec2(pol_x(0), gen_1): pol_x(0); }
 static GEN
-makeC1vec(GEN X, GEN Xinf, GEN field, long s) { return makeC1(Xinf, field, s); }
+makeC1vec(GEN Xinf, GEN field, long s) { return makeC1(Xinf, field, s); }
 
 /**********************************************************************/
 /*                                 C2                                 */
@@ -1363,7 +1363,7 @@ static GEN
 condrel(GEN P, GEN pol, long flag)
 { return odd(flag)? condrel_i(P, pol): P; }
 static GEN
-condrel_dummy(GEN P, GEN pol, long flag)
+condrel_dummy(GEN P, long flag)
 { return odd(flag)? mkvec2(P, gen_1): P; }
 static GEN
 condrelresolvent(GEN pol, long d, long flag)
@@ -1662,7 +1662,7 @@ authI(GEN nf, GEN I, GEN *pstable, GEN D)
 
 /* kronecker(D, cond) != -1, Arch a vector of arch in t_VECSMALL form */
 static GEN
-polD4onecond(GEN bnf, GEN G, GEN D, GEN I, GEN Arch, long cond)
+polD4onecond(GEN bnf, GEN G, GEN D, GEN I, GEN Arch)
 {
   GEN stable, v0, v1, v2;
   long j, k, m, l, lA, ok = 0, r1 = signe(D) > 0? 2: 0;
@@ -1731,7 +1731,7 @@ makeD4(GEN N, GEN field, long s)
     Arch = signe(D) > 0 ? listarch : archempty;
     /* restrict to fields which are not Galois over Q [eliminate V4/C4] */
     G = s != 1? mkvec2(galoisinit(bnf, NULL), gen_0): NULL;
-    if (!(RET = polD4onecond(bnf, G, D, I, Arch, cond)))
+    if (!(RET = polD4onecond(bnf, G, D, I, Arch)))
     { set_avma(av3); continue; }
     gel(v0,i) = gel(RET,1);
     gel(v1,i) = gel(RET,2);
@@ -1774,7 +1774,7 @@ _D4_worker(GEN D, GEN X, GEN listarch)
     pari_sp av3 = avma;
     GEN R, R1, R2, R3;
     if (kroiu(D, cond) == -1) continue;
-    if (!(R = polD4onecond(bnf, G, D, gel(vI, cond), Arch, cond)))
+    if (!(R = polD4onecond(bnf, G, D, gel(vI, cond), Arch)))
     { set_avma(av3); continue; }
     R1 = gel(R,1); if (lg(R1) > 1) gel(v0, c0++) = R1;
     R2 = gel(R,2); if (lg(R2) > 1) gel(v1, c1++) = R2;
@@ -1799,6 +1799,7 @@ Sextract(GEN v, long s)
   for (j = 1; j < l; j++) gel(w, j) = gmael(v, j, ind);
   return myshallowconcat1(w);
 }
+/* FIXME: Xinf */
 static GEN
 makeD4vec(GEN X, GEN Xinf, GEN field, long s)
 {
@@ -3038,9 +3039,9 @@ static GEN
 makeA5_i(GEN N, long s, long fl)
 { return (s == 1 || (!fl && !Z_issquare(N)))? NULL: A5vec(N, N, s, fl); }
 static GEN
-makeA5(GEN N, GEN field, long s) { return makeA5_i(N, s, 0); }
+makeA5(GEN N, long s) { return makeA5_i(N, s, 0); }
 static GEN
-makeA5cond(GEN N, GEN field, long s) { return makeA5_i(N, s, 1); }
+makeA5cond(GEN N, long s) { return makeA5_i(N, s, 1); }
 
 /* Sextic resolvent of A5 field */
 static GEN
@@ -3116,7 +3117,7 @@ makeA56vec_i(GEN V, GEN X, GEN Xinf)
 }
 
 static GEN
-makeA56vec(GEN X, GEN Xinf, GEN field, long s)
+makeA56vec(GEN X, GEN Xinf, long s)
 {
   GEN v;
   if (s == 1 || s == 3 || !(v = makeA5vec(X, Xinf, NULL, s))) return NULL;
@@ -3127,7 +3128,7 @@ makeA56vec(GEN X, GEN Xinf, GEN field, long s)
 
 /* Stupid for now */
 static GEN
-makeA56(GEN N, GEN field, long s) { return makeA56vec(N, N, field, s); }
+makeA56(GEN N, long s) { return makeA56vec(N, N, s); }
 
 static GEN
 makeA56resolvent(GEN pol, long flag)
@@ -3702,13 +3703,13 @@ makeS46P(GEN N, GEN field, long s)
 }
 
 GEN
-_A46S46P_worker(GEN P3, GEN X, GEN Xinf, GEN SQX, GEN cards)
+_A46S46P_worker(GEN P3, GEN Xinf, GEN sqX, GEN cards)
 {
   pari_sp av = avma;
   long card = cards[1], s = cards[2];
   GEN w, F, V, DATA = S4data(P3, s), D3 = S4_get_disc(DATA);
   GEN D3a = absi_shallow(D3);
-  long limf = itos(divii(SQX, D3a)), linf = 1, snew, f, i, c;
+  long limf = itos(divii(sqX, D3a)), linf = 1, snew, f, i, c;
 
   if (cmpii(Xinf, sqri(shifti(D3a, 2))) >= 0)
     linf = ceilsqrtdiv(Xinf, sqri(D3));
@@ -3740,7 +3741,7 @@ makeA46S46Pvec(long card, GEN X, GEN Xinf, GEN field, long s)
     v = card == 12? makeC3vec(sqX, gen_1, NULL, 0)
                   : makeS3vec(sqX, gen_1, NULL, s? -1: 0);
   if (!v) return NULL;
-  T = mkvec4(X, Xinf, sqX, mkvecsmall2(card, s == -2? -1: s));
+  T = mkvec3(Xinf, sqX, mkvecsmall2(card, s == -2? -1: s));
   v = gen_parapply(closure("_A46S46P_worker", T), v);
   return sturmseparate(myshallowconcat1(v), s, 6);
 }
@@ -4004,6 +4005,7 @@ _A462_worker(GEN P3, GEN X, GEN Arch, GEN GAL)
   setlg(v, c); return gerepilecopy(av, myshallowconcat1(v));
 }
 
+/* FIXME: Xinf */
 static GEN
 makeA462vec(GEN X, GEN Xinf, GEN field, long s)
 {
@@ -4245,7 +4247,7 @@ _S462_worker(GEN P3, GEN X, GEN listarch13, GEN GAL)
   setlg(v,c); v = myshallowconcat1(v);
   return gerepilecopy(av, gtoset_shallow(v));
 }
-
+/* FIXME: Xinf */
 static GEN
 makeS462vec(GEN X, GEN Xinf, GEN field, long s)
 {
@@ -4400,6 +4402,7 @@ _C32C4_worker(GEN P4, GEN X, GEN GAL)
   setlg(v,c); return gerepilecopy(av, gtoset_shallow(myshallowconcat1(v)));
 }
 
+/* FIXME: Xinf */
 static GEN
 makeC32C4vec(GEN X, GEN Xinf, GEN field, long s)
 {
@@ -4691,8 +4694,8 @@ makeS32resolvent(GEN pol, long flag)
   long i;
   for (i = 1; i < lg(v); i++) gel(v, i) = polredabs(gel(v,i));
   v = gtoset_shallow(v); if (lg(v) != 3) pari_err_BUG("nfresolvent");
-  w = condrel_dummy(gel(v,1), P, flag);
-  if (flag >= 2) w = mkvec2(w, condrel_dummy(gel(v,2), P, flag));
+  w = condrel_dummy(gel(v,1), flag);
+  if (flag >= 2) w = mkvec2(w, condrel_dummy(gel(v,2), flag));
   return w;
 }
 
@@ -4993,8 +4996,8 @@ nfmakenum(long g, GEN N, GEN field, long s)
     case 501: return makeC5(N, field, s);
     case 502: return makeDL(5, N, field, s);
     case 503: return makeMgen(5, 4, N, field, s); /*F5*/
-    case 504: return makeA5(N, field, s);
-    case 509: return makeA5cond(N, field, s);
+    case 504: return makeA5(N, s);
+    case 509: return makeA5cond(N, s);
     case 601: return makeC6(N, field, s);
     case 602: return makeS36(N, field, s);
     case 603: return makeD612(N, field, s);
@@ -5006,7 +5009,7 @@ nfmakenum(long g, GEN N, GEN field, long s)
     case 609: return makeS32(N, field, s);
     case 610: return makeC32C4(N, field, s);
     case 611: return makeS462(N, field, s);
-    case 612: return makeA56(N, field, s);
+    case 612: return makeA56(N, s);
     case 613: return makeC32D4(N, field, s);
     case 701: return makeCL(7, N, field, s);
     case 702: return makeDL(7, N, field, s);
@@ -5030,7 +5033,7 @@ nfresolvent_small(GEN pol, long flag)
 {
   long deg = degpol(pol), dP, s, k;
   GEN G;
-  if (deg == 1) return makeC1resolvent(pol, flag);
+  if (deg == 1) return makeC1resolvent(flag);
   if (deg == 2) return makeC2resolvent(pol, flag);
   G = polgalois(pol, DEFAULTPREC);
   dP = itos(gel(G,1)); s = itos(gel(G,2)); k = itos(gel(G,3));
@@ -5116,7 +5119,7 @@ nfmakevecnum(long g, GEN X, GEN Xinf, GEN field, long s)
   long ell;
   switch(g)
   {
-    case 101: return makeC1vec(X, Xinf, field, s);
+    case 101: return makeC1vec(Xinf, field, s);
     case 201: return makeC2vec(X, Xinf, field, s);
     case 301: return makeC3vec(X, Xinf, field, s);
     case 302: return makeS3vec(X, Xinf, field, s);
@@ -5141,7 +5144,7 @@ nfmakevecnum(long g, GEN X, GEN Xinf, GEN field, long s)
     case 609: return makeS32vec(X, Xinf, field, s);
     case 610: return makeC32C4vec(X, Xinf, field, s);
     case 611: return makeS462vec(X, Xinf, field, s);
-    case 612: return makeA56vec(X, Xinf, field, s);
+    case 612: return makeA56vec(X, Xinf, s);
     case 613: return makeC32D4vec(X, Xinf, field, s);
     case 701: return makeCLvec(7, X, Xinf, field, s);
     case 702: return makeDLvec(7, X, Xinf, field, s);
