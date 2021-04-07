@@ -4391,18 +4391,13 @@ _C32C4_worker(GEN P4, GEN X, GEN Xinf, GEN GAL)
   pari_sp av = avma;
   GEN bnf = bnfY(P4), D4 = bnf_get_disc(bnf), D2 = nfdisc(_nfsubfields1(P4, 2));
   GEN vI, v, w, D4D2 = mulii(D4, D2);
-  long limf = itos(sqrti(divii(X, D4D2))), f, c;
-  long liminf = itos(sqrti(divii(Xinf, D4D2)));
+  long f, c, limf = floorsqrtdiv(X, D4D2), liminf = ceilsqrtdiv(Xinf, D4D2);
 
-  while (cmpii(mulsi(liminf * liminf, D4D2), Xinf) < 0) liminf++;
-  vI = ideallistsquare(bnf, limf);
-  v = cgetg(limf + 1, t_VEC);
+  vI = ideallistsquare(bnf, limf); v = cgetg(limf + 1, t_VEC);
   for (c = 1, f = liminf; f <= limf; f++)
     if ((w = doC32C4_i(bnf,  gel(vI, f), GAL))) gel(v, c++) = w;
   setlg(v,c); return gerepilecopy(av, gtoset_shallow(myshallowconcat1(v)));
 }
-
-/* FIXME: Xinf */
 static GEN
 makeC32C4vec(GEN X, GEN Xinf, GEN field, long s)
 {
