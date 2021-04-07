@@ -9694,7 +9694,9 @@ mfisetaquo_i(GEN F, long flag)
   if (!RgV_is_ZV(S)) return NULL;
   for (vS = 1; vS <= L+1; vS++)
     if (signe(gel(S,vS))) break;
-  vS--; if (vS) { S = vecslice(S, vS+1, L+1); L -= vS; }
+  vS--;
+  if (vS >= bextra - 1) { L += vS; S = mfcoefs_i(F, L, 1); }
+  if (vS) { S = vecslice(S, vS+1, L+1); L -= vS; }
   S = RgV_to_RgX(S, 0); l = lg(S)-2;
   P = cgetg(l, t_COL);
   E = cgetg(l, t_COL); w = v = gen_0; /* w = weight, v = valuation */
