@@ -217,8 +217,8 @@ Doc: auxiliary
 Function: _S462_worker
 Section: programming/internals
 C-Name: _S462_worker
-Prototype: GGGG
-Help: _S462_worker(P3, X, listarch13, GAL): auxiliary.
+Prototype: GGGGG
+Help: _S462_worker(P3, X, Xinf, listarch, GAL): auxiliary.
 Doc: auxiliary
 
 Function: _S36_worker

@@ -3998,16 +3998,13 @@ _A462_worker(GEN P3, GEN X, GEN Xinf, GEN Arch, GEN GAL)
   pari_sp av = avma;
   GEN bnf = bnfY(P3), aut = cycfindaut(bnf), v, t;
   GEN G = galoisinit(bnf, NULL), D2 = sqri(bnf_get_disc(bnf));
-  long c, l, j, limf = itos(divii(X, D2));
-  long liminf = itos(divii(subis(addii(Xinf, D2), 1), D2));
+  long c, l, j, lim = itos(divii(X, D2)), liminf = itos(ceildiv(Xinf, D2));
 
-  v = ideallist(bnf, limf); l = lg(v);
+  v = ideallist(bnf, lim); l = lg(v);
   for (c = 1, j = liminf; j < l; j++)
     if ((t = doA462(bnf, gel(v,j), Arch, aut, G, GAL))) gel(v,c++) = t;
   setlg(v, c); return gerepilecopy(av, myshallowconcat1(v));
 }
-
-/* FIXME: Xinf */
 static GEN
 makeA462vec(GEN X, GEN Xinf, GEN field, long s)
 {
@@ -4219,16 +4216,16 @@ makeS462(GEN N, GEN field, long s)
 }
 
 GEN
-_S462_worker(GEN P3, GEN X, GEN listarch13, GEN GAL)
+_S462_worker(GEN P3, GEN X, GEN Xinf, GEN vArch, GEN GAL)
 {
   pari_sp av = avma;
-  GEN bnf = bnfY(P3), nf = bnf_get_nf(bnf);
-  long limf = itos(divii(X, sqri(nf_get_disc(nf)))), c, j, k, l, m;
-  GEN vI = ideallist(bnf, limf), v;
-  GEN Arch = gel(listarch13, nf_get_r1(nf) == 1 ? 1 : 2);
+  GEN bnf = bnfY(P3), nf = bnf_get_nf(bnf), D2 = sqri(nf_get_disc(nf));
+  long limf = itos(divii(X, D2)), liminf = itos(ceildiv(Xinf, D2));
+  long r1 = nf_get_r1(nf), c, j, k, l, m;
+  GEN v, vI = ideallist(bnf, limf), Arch = gel(vArch, r1 == 1? 1 : 2);
 
   v = cgetg(limf + 1, t_VEC);
-  for (j = c = 1; j <= limf; j++)
+  for (c = 1, j = liminf; j <= limf; j++)
   {
     GEN I = gel(vI, j), REU = cgetg(1, t_VEC);
     for (k = 1; k < lg(I); k++)
@@ -4249,7 +4246,6 @@ _S462_worker(GEN P3, GEN X, GEN listarch13, GEN GAL)
   setlg(v,c); v = myshallowconcat1(v);
   return gerepilecopy(av, gtoset_shallow(v));
 }
-/* FIXME: Xinf */
 static GEN
 makeS462vec(GEN X, GEN Xinf, GEN field, long s)
 {
@@ -4265,7 +4261,7 @@ makeS462vec(GEN X, GEN Xinf, GEN field, long s)
   else if (!(v = makeS3vec(sqrti(X), gen_1, NULL, (s==0 || s==1)? 0: -1)))
     return NULL;
   GAL = mkvecsmall3(48, -1, 1);
-  T = mkvec3(X, mkvec2(archS4621(s), archS4623(s)), GAL);
+  T = mkvec4(X, Xinf, mkvec2(archS4621(s), archS4623(s)), GAL);
   v = gen_parapply(closure("_S462_worker", T), v);
   return sturmseparate(myshallowconcat1(v), s, 6);
 }
