@@ -1,4 +1,4 @@
-\\ package: A5data
+\\ package: nflistdata
 default(parisize,"80M");
 
 G = "A5";

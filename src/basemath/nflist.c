@@ -3008,17 +3008,11 @@ truncA5(GEN V, GEN Xinf, GEN X, long fl)
 static GEN
 A5file(const char *name)
 {
-  pari_sp av = avma;
-  char *s = stack_malloc(strlen(pari_datadir) + 11 + 7 + 1);
-  pariFILE *F;
-  GEN V;
-  sprintf(s, "%s/A5data/%s.gp", pari_datadir, name);
-  F = pari_fopengz(s);
-  if (!F) pari_err_FILE("A5data file",s);
-  set_avma(av);
-  V = gp_read_stream(F->file);
-  if (!V || typ(V)!=t_VEC) pari_err_FILE("A5data file [read]",s);
-  pari_fclose(F); return V;
+  char *s = stack_malloc(strlen(pari_datadir) + 15 + 7 + 1);
+  GEN v;
+  sprintf(s, "%s/nflistdata/%s.gp", pari_datadir, name);
+  if (!(v = gp_readvec_file(s))) pari_err_FILE("nflistdata file [read]",s);
+  return v;
 }
 
 static GEN
