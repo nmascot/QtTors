@@ -2,7 +2,7 @@ Function: polhomogenise
 Section: modular_forms
 C-Name: PolHomogenise
 Prototype: GGD-1,L,
-Help: poltotaldegree(f,z,{deg}): Homogenisation of the (poosibly) multivariate polynomial f by using the variable z, in degree deg if provided, and in the smallest possible degree else.
+Help: polhomogenise(f,z,{deg}): Homogenisation of the (possibly) multivariate polynomial f by using the variable z, in degree deg if provided, and in the smallest possible degree else.
 Doc: TODO 
  \bprog
  ? TODO

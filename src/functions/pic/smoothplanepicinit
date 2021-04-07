@@ -2,5 +2,5 @@ Function: smoothplanepicinit
 Section: modular_forms
 C-Name: SmoothPicInit
 Prototype: GGUD1,L,DG
-Help: smoothplanepicinit(f,p,a,e,{Pts}): Initiatilises the Jacobian of the smooth plane curve f(x,y)=0 over Zq/p^e, where Zq is the ring of integers of the unramified extension of Qp of degree a. p must be a prime of good reduction of the curve. Pts, if present, should be a pair of distinct vectors of distinct n points on the curve, where n = d-1 if d is odd and n = d/2 -1 if d is even, and where d is the total degree of f; this is required to construct maps from the Jacobian to A1.
+Help: smoothplanepicinit(f,p,a,{e=1},{Pts}): Initiatilises the Jacobian of the smooth plane curve f(x,y)=0 over Zq/p^e, where Zq is the ring of integers of the unramified extension of Qp of degree a. p must be a prime of good reduction of the curve. Pts, if present, should be a pair of distinct vectors of distinct n points on the curve, where n = d-1 if d is odd and n = d/2 -1 if d is even, and where d is the total degree of f; this is required to construct maps from the Jacobian to A1.
 Doc: TODO 

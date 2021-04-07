@@ -9755,7 +9755,11 @@ entries of $x$ (its determinant if it is indeed triangular).
 divisors for $M - x\text{Id}$, where $M$ is an $n\times n$ square matrix.
 Returns the Frobenius form of $M$.
 
-\fun{GEN}{RgM_Frobenius}{GEN A, long flag, GEN* P, GEN* v} given a square matrix $A$, returns the Frobenius form of A if $flag$ is 0, or a weak Frobenius form of $A$ if $flag$ is 1. If $P$ is nonzero, set it to the change of basis matrix. If $v$ is nonzero, set it to the Vecsmall containing the column indices of the left column of each diagonal block.
+\fun{GEN}{RgM_Frobenius}{GEN A, long flag, GEN *pP, GEN *pv}
+given a square matrix $A$, returns the Frobenius form of A if \kbd{flag} is $0$,
+or a weak Frobenius form of $A$ if \kbd{flag} is $1$.
+If \kbd{pP} is nonzero, set \kbd{*pP} to the change of basis matrix.
+If \kbd{pv} is nonzero, set \kbd{*pv} to the \typ{VECSMALL} containing the column indices of the left column of each diagonal block.
 
 \fun{int}{RgM_QR_init}{GEN x, GEN *pB, GEN *pQ, GEN *pL, long prec}
 QR-decomposition of a square invertible \typ{MAT} $x$ with real coefficients.
