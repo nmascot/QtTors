@@ -101,20 +101,39 @@ ellconvertname(GEN n)
   return NULL; /*LCOV_EXCL_LINE*/
 }
 
+THREAD GEN ellcondfile_cache;
+THREAD long ellcondfile_cache_cond;
+
+void
+pari_init_ellcondfile(void)
+{
+  ellcondfile_cache = NULL;
+  ellcondfile_cache_cond = -1;
+}
+
 static GEN
 ellcondfile(long n)
 {
-  pari_sp av = avma;
-  char *s = stack_malloc(strlen(pari_datadir) + 12 + 20 + 1);
-  pariFILE *F;
-  GEN V;
-  sprintf(s, "%s/elldata/ell%ld", pari_datadir, n);
-  F = pari_fopengz(s);
-  if (!F) pari_err_FILE("elldata file",s);
-  set_avma(av);
-  V = gp_read_stream(F->file);
-  if (!V || typ(V)!=t_VEC ) pari_err_FILE("elldata file [read]",s);
-  pari_fclose(F); return V;
+  if (ellcondfile_cache_cond >= 0 && n == ellcondfile_cache_cond)
+    return gcopy(ellcondfile_cache);
+  else
+  {
+    pari_sp av = avma;
+    char *s = stack_malloc(strlen(pari_datadir) + 12 + 20 + 1);
+    pariFILE *F;
+    GEN V;
+    sprintf(s, "%s/elldata/ell%ld", pari_datadir, n);
+    F = pari_fopengz(s);
+    if (!F) pari_err_FILE("elldata file",s);
+    set_avma(av);
+    V = gp_read_stream(F->file);
+    if (!V || typ(V)!=t_VEC ) pari_err_FILE("elldata file [read]",s);
+    ellcondfile_cache_cond = -1; /* disable cache until update */
+    if (ellcondfile_cache) gunclone(ellcondfile_cache);
+    ellcondfile_cache = gclone(V);
+    ellcondfile_cache_cond = n; /* reenable cache */
+    pari_fclose(F); return V;
+  }
 }
 
 /* return the vector of all curves of conductor f */

@@ -627,6 +627,7 @@ void pari_close_primes(void);
 void pari_init_buffers(void);
 void pari_init_compiler(void);
 void pari_init_defaults(void);
+void pari_init_ellcondfile(void);
 void pari_init_evaluator(void);
 void pari_init_files(void);
 void pari_init_floats(void);

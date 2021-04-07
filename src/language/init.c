@@ -1189,6 +1189,7 @@ pari_thread_init(void)
   pari_init_compiler();
   pari_init_evaluator();
   pari_init_files();
+  pari_init_ellcondfile();
 }
 
 void
