@@ -1761,7 +1761,8 @@ _D4_worker(GEN D, GEN X, GEN Xinf, GEN listarch)
   pari_sp av = avma, av2;
   GEN bnf, G, vI, v0, v1, v2, Arch, D2 = sqri(D);
   long c0, c1, c2, cond, l = itos(divii(X, D2)) + 1;
-  long lmin = itos(divii(subis(addii(Xinf, D2), 1), D2));
+  long lmin = itos(ceildiv(Xinf, D2));
+
   bnf = Buchall(Y2m(D), nf_FORCE, DEFAULTPREC);
   vI = ideallist(bnf, l-1);
   Arch = signe(D) > 0 ? listarch : mkvec(cgetg(1,t_VECSMALL));
@@ -1800,7 +1801,6 @@ Sextract(GEN v, long s)
   for (j = 1; j < l; j++) gel(w, j) = gmael(v, j, ind);
   return myshallowconcat1(w);
 }
-/* FIXME: Xinf */
 static GEN
 makeD4vec(GEN X, GEN Xinf, GEN field, long s)
 {
