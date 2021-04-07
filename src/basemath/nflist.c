@@ -746,6 +746,7 @@ makeC2vec(GEN X, GEN Xinf, GEN field, long s)
     if (p) gel(v, cv++) = quadpoly_i(N);
     if (m) gel(w, cw++) = quadpoly_i(negi(N));
   }
+  if (cv == 1 && cw == 1) return NULL;
   switch (s)
   {
     case 0:  setlg(v, cv); return v;
@@ -1312,6 +1313,7 @@ polsubcycloC4_i(GEN n, long s, long fli, GEN D)
       A = diviiexact(n2, mpodd(d)? d: shifti(d,-1));
       gel(v,c++) = polsubC4_D(Q, A, D, n2, v2, s, fli);
     }
+    if (c == 1) return NULL;
     setlg(v, c); v = shallowconcat1(v);
   }
   return v;
@@ -1443,7 +1445,7 @@ static GEN
 makeV4(GEN N, GEN field, long s)
 {
   GEN V, R;
-  long lV, i1, i2, ct = 1;
+  long lV, i1, i2, c = 1;
   if (s == 1) return NULL;
   if (field)
   {
@@ -1470,12 +1472,13 @@ makeV4(GEN N, GEN field, long s)
         D12 = mulii(D1, D2); D3 = coredisc(D12);
         if (cmpii(D2, D3) < 0 && !equalii(D1, D3)
             && absequalii(mulii(D12, D3), N))
-          gel(R, ct++) = mkpoln(5, gen_1, gen_0, mulsi(-2, addii(D1, D2)),
+          gel(R, c++) = mkpoln(5, gen_1, gen_0, mulsi(-2, addii(D1, D2)),
                                 gen_0, sqri(subii(D1, D2)));
       }
     }
   }
-  setlg(R, ct); return sturmseparate(R, s, 4);
+  if (c == 1) return NULL;
+  setlg(R, c); return sturmseparate(R, s, 4);
 }
 
 static GEN
@@ -2264,6 +2267,7 @@ makeS4_i(GEN N, GEN field, long s)
         if (c == 1) continue;
         setlg(D, c); gel(v, cv++) = shallowconcat1(D);
       }
+    if (cv == 1) return NULL;
     setlg(v,cv); v = shallowconcat1(v);
   }
   return v;
@@ -3985,6 +3989,7 @@ makeA462(GEN N, GEN field, long s)
     GEN G = galoisinit(bnf, NULL);
     if ((T = doA462(bnf, I, Arch, aut, G, GAL))) gel(v, c++) = T;
   }
+  if (c == 1) return NULL;
   setlg(v, c); return sturmseparate(shallowconcat1(v), s, 6);
 }
 
@@ -4131,6 +4136,7 @@ makeS3C3vec(GEN X, GEN Xinf, GEN field, long s)
       if (p) gel(v, c++) = utoipos(Da);
       if (m) gel(v, c++) = utoineg(Da);
     }
+    if (c == 1) return NULL;
     setlg(v, c);
   }
   v = gen_parapply(closure("nflist_S3C3_worker", mkvec2(X, Xinf)), v);
@@ -4187,6 +4193,7 @@ makeS462(GEN N, GEN field, long s)
     for (i = c = 1; i < lg(L); i++)
       if ((T = makeDL(3, gel(L,i), NULL, (s == 0 || s == 1) ? 0 : -1)))
         gel(L, c++) = T;
+    if (c == 1) return NULL;
     setlg(L, c); L = shallowconcat1(L);
   }
   for (i = 1; i < lg(L); i++)

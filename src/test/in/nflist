@@ -3,6 +3,11 @@ default(parisize,"15M");
 do(G,lim)=
 { my(B = [1,ceil(10^lim)], field, D, v, T);
   print("group = ",G);
+  nflist(G,1);
+  nflist(G,1,0);
+  nflist(G,1,1);
+  nflist(G,1,2);
+  nflist(G,1,-2);
   v = nflist(G,B,-2);
   print(apply(length,v));
   print(vector(#v, i, #nflist(G,B,i-1)));
@@ -41,6 +46,7 @@ nflist("C2",125,-2)
 nflist("C4",8000,-2)
 nflist("S3",756,-2)
 nflist("S3",,-2)
+nflist("S4",193)
 nflist("F5",2382032,-2)
 nflist("D612",91125,-2)
 nflist("C9",31381059609,-2)
