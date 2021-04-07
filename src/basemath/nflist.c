@@ -4927,7 +4927,7 @@ grouptranslate(const char *g)
   if (!strcmp(g, "F5")) return 503;
   if (!strcmp(g, "M20")) return 503;
   if (!strcmp(g, "A5")) return 504;
-  if (!strcmp(g, "S5")) return 505;
+//  if (!strcmp(g, "S5")) return 505;
   if (!strcmp(g, "A5cond")) return 509;
   if (!strcmp(g, "C6")) return 601;
   if (!strcmp(g, "S36")) return 602;
@@ -4967,7 +4967,7 @@ grouptranslate(const char *g)
 static long
 group_nTk(GEN g)
 {
-  long v[] = { 0, 1, 1, 2, 5, 5, 13, 4, 0, 3 };
+  long v[] = { 0, 1, 1, 2, 5, 4, 13, 4, 0, 3 };
   long n, k;
   if (lg(g) != 3 || !RgV_is_ZV(g)) return 0;
   n = itos(gel(g,1)); k = itos(gel(g,2));
