@@ -1,6 +1,7 @@
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_pic
 #define lgJ 16
 
 /* Linear algebra */
@@ -612,7 +613,7 @@ GEN NAF(GEN n)
   }
   C[1] = B2[l] = B2[l+1] = 0;
   for(i=1;i<=l;i++)
-  { 
+  {
     C[i+1] = (C[i]+B2[i]+B2[i+1])/2;
     N[i] = B2[i]+C[i]-2*C[i+1];
   }
@@ -728,6 +729,7 @@ GEN JgetL(GEN J) {return gel(J,4);}
 GEN JgetT(GEN J) {return gel(J,5);}
 GEN Jgetp(GEN J) {return gel(J,6);}
 long Jgete(GEN J) {return itos(gel(J,7));}
+GEN JgetE(GEN J) {return gel(J,7);}
 GEN Jgetpe(GEN J) {return gel(J,8);}
 GEN JgetFrobMat(GEN J) {return gel(J,9);}
 GEN JgetV(GEN J, ulong n) {return gmael(J,10,n);}
@@ -2029,7 +2031,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
   }
   mt_queue_end(&pt);
   if(DEBUGLEVEL>=2) printf("PicInit: Constructing evaluation maps\n");
-  U = PicEvalInit(L,vars,Z,V2,T,p,e,pe);
+  U = PicEvalInit(gel(L,3),vars,Z,V2,T,p,e,pe);
   J = mkvecn(lgJ,f,stoi(g),stoi(d0),L,T,p,stoi(e),pe,FrobMat,V,KV,W0,U,Z,FrobCyc,AutData);
   return gerepilecopy(av,J);
 }
@@ -2487,7 +2489,7 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
     if(e2>efin) e2 = efin;
 		e21 = e2-e1;
 		pe21 = e21==e1 ? pe1 : powiu(p,e21);
-    if(DEBUGLEVEL) pari_printf("Lifting from prec O(%Ps^%lu) to O(%Ps^%lu)\n",p,e1,p,e2);
+    if(DEBUGLEVEL) pari_printf("PicLiftTors: from prec O(%Ps^%lu) to O(%Ps^%lu)\n",p,e1,p,e2);
     J2 = e2<efin ? JacRed(J,e2) : J;
 		pe2 = Jgetpe(J2);
 		/* START LIFTING */
@@ -2740,7 +2742,7 @@ ulong c2i(GEN c, ulong l)
 	for(n=1;n<=d;n++)
 	{
 		i *= l;
-		i += (c[n]%l);
+		i += umodsu(c[n],l);
 	}
 	return i?i:upowuu(l,d);
 }
@@ -2771,6 +2773,19 @@ ulong Chordi(ulong i1, ulong i2, ulong l, ulong d)
 	n = c2i(c3,l);
 	avma = av;
 	return n;
+}
+
+ulong mulOni(long k,ulong i, ulong l, ulong d)
+{ /* Scalar multiplication by k in terms of integers */
+	pari_sp av = avma;
+	GEN c;
+	ulong n;
+	c = i2c(i,l,d);
+	for(n=1;n<=d;n++)
+		c[n] *= k;
+	i = c2i(c,l);
+	avma = av;
+	return i;
 }
 
 ulong ActOni(GEN m, ulong i, ulong l)
@@ -2814,12 +2829,12 @@ GEN M2Flm(GEN A, ulong l, ulong m, ulong n)
   {
     gel(a,j) = cgetg(m+1,t_VECSMALL);
     for(k=1;k<=m;k++)
-      gel(a,j)[k] = itos(liftint(gcoeff(A,k,j)));
+      gel(a,j)[k] = umodiu(liftint(gcoeff(A,k,j)),l);
   }
 	return a;
 }
 
-GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matAuts)
+GEN PicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matAuts)
 {
 	pari_sp av = avma;
 	ulong d,ld,ndone,ngens,nmodF,newmodF,new,ntodo,i,j,k,m,n,ij,ik,xj,xk,x,nAuts,a;
@@ -2843,7 +2858,7 @@ GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
 	ndone = 1; // Number of pts; we stop when this reaches ld
 	nmodF = 0; // Number of pts mod Frob
 	ngens = lg(gens)-1;
-	// Prepare cloure for parallel code
+	// Prepare closure for parallel code
 	vJ = cgetg(2,t_VEC);
   gel(vJ,1) = J;
 	worker = snm_closure(is_entry("_TorsSpaceFrob_worker"),vJ);
@@ -2856,13 +2871,11 @@ GEN TorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
 	// We will always keep done closed under Frob
 	
 	// Throw in generators and their Frob orbits
-	c = cgetg(d+1,t_VECSMALL);
 	for(n=1;n<=ngens;n++)
 	{
 		nmodF++; // new Frob orbit
 		gel(VmodF,nmodF) = gel(gens,n); // store W in VmodF
-		for(i=1;i<=d;i++) // Convert coords into index
-			c[i] = itou(gmael(cgens,n,i));
+		c = gel(cgens,n); // get its coordinates
 		ImodF[nmodF] = i = c2i(c,l);
 		gel(done,i) = mkvecsmall2(nmodF,0); // store [nmodF,0] in done[i]
 		ndone++; // got new pt
@@ -3021,17 +3034,21 @@ GEN PolExpID(GEN Z, GEN T, GEN pe) /* bestappr of prod(x-z), z in Z */
 {
   pari_sp av;
   GEN res,f;
-	res = cgetg(4,t_VEC);
 	av = avma;
   f = FqV_roots_to_pol(Z,T,pe,0);
   if(poldegree(f,varn(T))>0) pari_err(e_MISC,"Irrational coefficient: %Ps",f);
   f = simplify_shallow(f);
   f = gmodulo(f,pe);
-	f = gerepileupto(av,f);
-	gel(res,2) = f;
-	gel(res,3) = bestappr(f,NULL);
-	gel(res,1) = gmodulo(gmodulo(Z,T),pe);
-	return res;
+	res = cgetg(3,t_VEC);
+	f = bestappr(f,NULL);
+	if(typ(f)==t_VEC)
+	{ /* bestappr failed */
+		avma = av;
+		return gen_0;
+	}
+	gel(res,1)= f;
+	gel(res,2) = gcopy(Z);
+	return gerepileupto(av,res);
 }
 
 GEN OnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T, GEN pe)
@@ -3041,9 +3058,10 @@ GEN OnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T,
   ulong d,ld,j,k,n,i1,i2,i;
   long n1,n2,n12;
   n = lg(N);
+	//pari_printf("N=%Ps\nD=%Ps\n",N,D);
   RgM_dimensions(gel(N,1),&n2,&n1);
   /* N, D vectors of length n-1 of n2*n1 matrices
-   * N[i]/D[i] = value at pt indexed by ImodF[i]
+   * N[i]*D[i] = value at pt indexed by ImodF[i]
    * Get the others by applying Frob */
   d = lg(Jfrobmat)-1;
   ld = upowuu(l,d);
@@ -3082,34 +3100,36 @@ GEN OnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T,
         z = Frob(z,QqFrobMat,T,pe);
       }
     }
-    Fi = PolExpID(Z,T,pe);
-    if(n12>1) Fi = gerepileupto(av1,Fi);
+		if(vec_is1to1(Z)==0) /* Multiple roots? */
+    	Fi = gen_0;
+		else
+			Fi = PolExpID(Z,T,pe);
+    if(n12>1 && !gequal0(Fi))
+			Fi = gerepileupto(av1,Fi);
     gel(F,i+1) = Fi;
   }
   return gerepileupto(av,F);
 }
 
-GEN AllPols(GEN Z, ulong l, GEN JFrobMat, GEN QqFrobMat, GEN T, GEN pe, GEN p, long e)
+GEN AllPols(GEN J, GEN Z, ulong l, GEN JFrobMat)
 {
   pari_sp av = avma, avj;
-  GEN F,ImodF,Jfrobmat,Ft,F1,f,pols,args;
+	GEN QqFrobMat,T,pe,p;
+  GEN F,ImodF,Jfrobmat,Ft,F1,f,pols,args,res;
   ulong d,nF,lF,npols,n,i,j,j0,i1,i2,m,k;
+	long e;
 	int All0;
   long n1,n2,n12;
   struct pari_mt pt;
   GEN worker,done;
   long pending,workid;
-
+	
+	JgetTpe(J,&T,&pe,&p,&e);
+	QqFrobMat = JgetFrobMat(J);
 	F = gel(Z,1);
 	ImodF = gel(Z,2);
 	d = lg(JFrobMat)-1;
-  Jfrobmat = cgetg(d+1,t_MAT); /* JFrobMat, version Flm */
-  for(j=1;j<=d;j++)
-  {
-    gel(Jfrobmat,j) = cgetg(d+1,t_VECSMALL);
-    for(k=1;k<=d;k++)
-      gel(Jfrobmat,j)[k] = itos(liftint(gcoeff(JFrobMat,k,j)));
-  }
+  Jfrobmat = M2Flm(JFrobMat,l,d,d); /* JFrobMat, version Flm */
   nF = lg(F); /* Number of vectors */
   RgM_dimensions(gel(F,1),&n2,&n1);
   n12 = n1*n2;
@@ -3200,13 +3220,15 @@ GEN AllPols(GEN Z, ulong l, GEN JFrobMat, GEN QqFrobMat, GEN T, GEN pe, GEN p, l
     {
       for(k=1;k<=n12;k++)
       {
-        gel(pols,m) = gel(done,k);
-        m++;
+				res = gel(done,k);
+				if(gequal0(res)) continue;
+        gel(pols,m++) = res;
       }
     }
   }
   mt_queue_end(&pt);
-  return gerepileupto(av,pols);
+	setlg(pols,m);
+  return gerepilecopy(av,pols);
 }
 
 /* Frey-Rueck pairing over Fq */
@@ -3526,7 +3548,7 @@ GEN PicTorsPairing(GEN J, GEN FRparams, GEN W, GEN LinTests)
 	struct pari_mt pt;
 	if(typ(W)==t_VEC)
 	{ /* Case of multiple tors pts */
-		printf("Into MultiPairing\n");
+		//printf("Into MultiPairing\n");
 		n = lg(W);
 		res = cgetg(n,typ(LinTests)==t_MAT?t_VEC:t_MAT);
 		pending = 0;
@@ -3546,7 +3568,7 @@ GEN PicTorsPairing(GEN J, GEN FRparams, GEN W, GEN LinTests)
 		res = PicTorsPairing(J,FRparams,W,mkvec(LinTests));
 		return gerepilecopy(av,gel(res,1));
 	}
-	printf("Into Pairing\n");
+	//printf("Into Pairing\n");
   T = JgetT(J);
   p = Jgetp(J);
 	l = gel(FRparams,1);
@@ -4535,7 +4557,6 @@ GEN PicTorsBasis_worker(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN FRparams, GE
 	pari_sp av = avma;
 	GEN res,W,o,T,B,Pairings;
 
-	printf("Into worker\n");
 	res = PicRandTors(J,l,Lp,Chi,Phi,seed,1);
 	if(gequal0(res)) return res;
 	W = gel(res,1);
@@ -4544,7 +4565,6 @@ GEN PicTorsBasis_worker(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN FRparams, GE
 	B = gel(res,4);
 	Pairings = PicTorsPairing(J,FRparams,T,Lintests);
 	res = mkvecn(6,W,o,T,B,Pairings,LinTestsNames);
-	printf("Out of worker\n");
 	return gerepilecopy(av,res);
 }
 
@@ -4636,11 +4656,11 @@ void PicTorsBasis_UsePt(GEN J, GEN Pt, GEN Chi, ulong d, ulong* pr, GEN* pBW, GE
   T = gel(Pt,3);
   B = gel(Pt,4);
   dB = gequal0(B)?0:degree(B);
-	if(DEBUGLEVEL) pari_printf("Bound B=%Ps\n",B);
+	if(DEBUGLEVEL>=2) pari_printf("Bound B = %Ps\n",B);
   Tpairings = gel(Pt,5);
   UsedTestsNames = gel(Pt,6);
   /* Make sure pairings are current */
-	if(DEBUGLEVEL) printf("PicTorsBasis: Refreshing pairings\n");
+	if(DEBUGLEVEL>=2) printf("PicTorsBasis: Refreshing pairings\n");
   Tpairings = PicRefreshPairings(J,FRparams,T,Tpairings,UsedTestsNames,*pLinTests,*pLinTestsNames);
 	rel = NULL;
   for(iFrob=0;;iFrob++)
@@ -4879,36 +4899,136 @@ GEN PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
 	/* TODO use Auts? */
 	pari_sp av = avma;
 	GEN M,Q,piv,G,CG,res;
-	ulong n,i;
+	ulong n,d,k,i;
+	d = lg(B);
 	M = RgM_Frobenius(gmodulo(MFrob,l),0,&Q,&piv);
 	Q = centerlift(Q);
-	M = centerlift(M);
+	res = cgetg(4,t_VEC);
+	gel(res,3) = centerlift(M);
 	n = lg(piv);
-	G = cgetg(n,t_VEC);
-	CG = cgetg(n,t_VEC);
-	for(i=1;i<n;i++)
+	gel(res,1) = G = cgetg(n,t_VEC);
+	gel(res,2) = CG = cgetg(n,t_VEC);
+	for(k=1;k<n;k++)
 	{
-		gel(CG,i) = gel(Q,piv[i]);
-		gel(G,i) = PicLC(J,gel(CG,i),B);
+		gel(G,k) = PicLC(J,gel(Q,piv[k]),B);
+		gel(CG,k) = cgetg(d,t_VECSMALL);
+		for(i=1;i<d;i++)
+			gel(CG,k)[i] = itos(gcoeff(Q,i,piv[k]));
 	}
-	res = mkvec3(G,CG,M);
-	return gerepilecopy(av,res);
+	return gerepileupto(av,res);
 }
 
 GEN PicTorsGalRep(GEN J, GEN l, GEN Lp, GEN chi)
 {
 	pari_sp av = avma;
-	GEN J1,B;
+	GEN J1,B,C,MFrob,MAuts,Z,AF,best,c,cbest;
+	long e1,e2; /* Prec before and after lift */
+	ulong ul,n,i,d;
+	long sbest,s;
+	int comp;
 
+	ul = itou(l);
+	if(DEBUGLEVEL) printf("PicTorsGalRep: Getting basis of rep space mod p\n");
 	J1 = PicSetPrec(J,1);
 	B = PicTorsBasis(J1,l,Lp,chi);
-	B = PicTors_FrobGen(J1,l,gel(B,1),gel(B,2));
-	gerepileupto(av,B);
-	//TODO;
-	return NULL;
+	MFrob = gel(B,2);
+	MAuts = gel(B,3);
+	B = gel(B,1);
+	d = lg(B)-1; /* dim */
+	B = PicTors_FrobGen(J1,l,B,MFrob);
+	//return gerepilecopy(av,tmp);
+	C = gel(B,2);
+	B = gel(B,1);
+	n = lg(B); /* Number of generators */
+	e1 = 1;
+	e2 = Jgete(J);
+	for(;;)
+	{ /* Loop until accuracy high enough to get result */
+		if(DEBUGLEVEL) printf("PicTorsGalRep: Hensel-lifting %lu points\n",n-1);
+		/* TODO parallel version */
+		for(i=1;i<n;i++)
+			gel(B,i) = PicLiftTors(J,gel(B,i),l,e1);
+		e1 = e2;
+		if(DEBUGLEVEL) printf("PicTorsGalRep: Evaluating all points\n");
+		Z = PicTorsSpaceFrobEval(J,B,C,ul,MFrob,MAuts);
+		if(DEBUGLEVEL) printf("PicTorsGalRep: Getting polynomials\n");
+		AF = AllPols(J,Z,ul,MFrob);
+		if(lg(AF)>1) break; /* Success! */
+		if(DEBUGLEVEL) pari_printf("PicTorsGalRep: unable to determine representation at accuracy O(%Ps^%ld); doubling accuracy and retrying\n",Jgetp(J),Jgete(J));
+		e2 *= 2;
+		J = PicSetPrec(J,e2);
+	}
+	n = lg(AF);
+	best = gel(AF,1);
+	sbest = gsizebyte(gel(best,1));
+	cbest = Q_denom(gel(best,1));
+	for(i=2;i<n;i++)
+	{
+		c = Q_denom(gmael(AF,i,1));
+		comp = cmpii(c,cbest);
+		s = gsizebyte(gmael(AF,i,1));
+		if(comp<0 || (comp==0 && s<sbest))
+		{
+			best = gel(AF,i);
+			cbest = c;
+			sbest = s;
+		}
+	}
+	return gerepilecopy(av,mkvecn(7,gel(best,1),l,utoi(d),gel(best,2),JgetT(J),Jgetp(J),JgetE(J)));
 }
 
-GEN HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN chi, GEN P, ulong force_a)
+GEN ProjGalRep(GEN R)
+{ /* Projectivisation of Gal rep */
+	pari_sp av = avma;
+	GEN Z,z,done,PZ,PV,PF,T,p,E,pe,L,D;
+	ulong l,d,ld,i,n,j,k;
+	/* TODO incr padic accuracy automatically */
+	/* TODO Tschirnhaus */
+	L = gel(R,2);
+	D = gel(R,3);
+	Z = gel(R,4);
+	T = gel(R,5);
+	p = gel(R,6);
+	E = gel(R,7);
+	pe = powii(p,E);
+	l = itou(L);
+	d = itou(D);
+	ld = upowuu(l,d);
+	done = cgetg(ld,t_VECSMALL);
+	PZ = cgetg(ld,t_VECSMALL);
+	PV = cgetg(ld,t_VECSMALL);
+	for(i=1;i<ld;i++) done[i] = 0;
+	n = 0; /* Number of roots */
+	for(i=1;i<ld;i++)
+	{
+		if(done[i]) continue;
+		n++;
+		z = gel(Z,i);
+		for(k=2;k<l;k++)
+		{
+			j = mulOni(k,i,l,d);
+			done[j] = 1;
+			z = gadd(z,gel(Z,j));
+		}
+		gel(PZ,n) = z;
+		gel(PV,n) = mkvec2(z,i2c(i,l,d));
+	}
+	for(i=1;i<=n;i++)
+		pari_printf("%Ps\n",gel(PV,i));
+	setlg(PZ,n+1);
+	setlg(PV,n+1);
+	printf("lg\n");
+	for(i=1;i<=n;i++)
+    pari_printf("%Ps\n",gel(PV,i));
+	printf("Exp\n");
+	PF = gel(PolExpID(PZ,T,pe),1);
+	for(i=1;i<=n;i++)
+    pari_printf("%Ps\n",gel(PV,i));
+	return gerepilecopy(av,mkvecn(7,PF,L,D,PV,T,p,E));
+}
+
+
+GEN HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
 {
 	/* Computes the Galois representation afforded by
    the piece of l-torsion of the Jacobian

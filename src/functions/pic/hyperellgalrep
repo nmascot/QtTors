@@ -1,0 +1,6 @@
+Function: hyperellgalrep
+Section: modular_forms
+C-Name: HyperGalRep
+Prototype: GGGLGDGD0,U,
+Help: hyperellgalrep(f,l,p,e,P,{Chi},{a}): Computes p-adically the Galois representation afforded by the l-torsion of the hyperelliptic curve y²=f(x). If f is a vector [f,h], consider instead the curve y²+h(x)y=f(x). P must be a pair of points on the curve which are not conjugate by the hyperelliptic involution. e is a guess for the required p-adic accuracy. If present, Chi must divide hyperellcharpoly(Mod(f,p)) mod l, and be coprime with is cofactor; in this case, we compute the Galois representation attached to the piece of the l-torsion where Frob_p acts with characteristic polynomial Chi. If a is present, work in the unramified extension of Qp of degree a; else a is chosen automatically.
+Doc: TODO 

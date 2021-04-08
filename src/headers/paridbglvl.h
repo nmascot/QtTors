@@ -29,7 +29,7 @@ BEGINEXTERN
   ID(lfun), \
   ID(mat), ID(mathnf), ID(mf), ID(mod), ID(mpqs), ID(ms), ID(mt),\
   ID(nf), ID(nffactor), ID(nflist), ID(nfsubfields), \
-  ID(padicfields), \
+  ID(padicfields), ID(pic),\
   ID(pol), ID(polclass), ID(polgalois), ID(polmodular), ID(polroots),\
   ID(qf), ID(qflll), ID(qfsolve), ID(qfisom), ID(quadclassunit),\
   ID(rnf), \

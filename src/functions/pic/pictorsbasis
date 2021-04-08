@@ -2,5 +2,5 @@ Function: pictorsbasis
 Section: modular_forms
 C-Name: PicTorsBasis
 Prototype: GGGDG
-Help: pictorsbasis(J,l,Lp,{Chi}): Given a p-adic Jacobian J, a prime l, and the characteristic polynomail Lp of Frob_p on J, returns [B,MFrob,MAuts], where B is an Fl-basis of J[l], MFrob is the matrix of Frob_p on J[l], and MAuts the vector of matrices of the automorphisms contained in J on J[l]. If Chi is present, it must be a divisor of Lp mod l which is coprime to its cofactor mod l, and we return a basis of T and the matrices of Frob and of the automorphisms on T, where T is the Fl-subspace of J[l] on which Frob_p acts with characteristic polynomial Chi.
+Help: pictorsbasis(J,l,Lp,{Chi}): Given a p-adic Jacobian J, a prime l, and the characteristic polynomial Lp of Frob_p on J, returns [B,MFrob,MAuts], where B is an Fl-basis of J[l], MFrob is the matrix of Frob_p on J[l], and MAuts the vector of matrices of the automorphisms contained in J on J[l]. If Chi is present, it must be a divisor of Lp mod l which is coprime to its cofactor mod l, and we return a basis of T and the matrices of Frob and of the automorphisms on T, where T is the Fl-subspace of J[l] on which Frob_p acts with characteristic polynomial Chi.
 Doc: TODO 

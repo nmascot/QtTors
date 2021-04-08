@@ -6713,3 +6713,6 @@ GEN SmoothPicInit(GEN f, GEN p, ulong a, long e, GEN P);
 GEN PicRandTors(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN seed, long returnlpow);
 GEN PicTorsBasis_worker(GEN J, GEN l, GEN Lp, GEN Chi, GEN Phi, GEN FRparams, GEN Lintests, GEN LinTestsNames, GEN seed);
 GEN PicTorsBasis(GEN J, GEN l, GEN Lp, GEN Chi);
+GEN PicTorsGalRep(GEN J, GEN l, GEN Lp, GEN Chi);
+GEN ProjGalRep(GEN R);
+GEN HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a);
