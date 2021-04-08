@@ -3032,23 +3032,19 @@ GEN PicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN m
 
 GEN PolExpID(GEN Z, GEN T, GEN pe) /* bestappr of prod(x-z), z in Z */
 {
-  pari_sp av;
-  GEN res,f;
-	av = avma;
+  pari_sp av=avma;
+  GEN f;
   f = FqV_roots_to_pol(Z,T,pe,0);
   if(poldegree(f,varn(T))>0) pari_err(e_MISC,"Irrational coefficient: %Ps",f);
   f = simplify_shallow(f);
   f = gmodulo(f,pe);
-	res = cgetg(3,t_VEC);
 	f = bestappr(f,NULL);
 	if(typ(f)==t_VEC)
 	{ /* bestappr failed */
 		avma = av;
 		return gen_0;
 	}
-	gel(res,1)= f;
-	gel(res,2) = gcopy(Z);
-	return gerepileupto(av,res);
+	return gerepileupto(av,f);
 }
 
 GEN OnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T, GEN pe)
@@ -3104,8 +3100,8 @@ GEN OnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T,
     	Fi = gen_0;
 		else
 			Fi = PolExpID(Z,T,pe);
-    if(n12>1 && !gequal0(Fi))
-			Fi = gerepileupto(av1,Fi);
+		if(!gequal0(Fi))
+			Fi = gerepilecopy(av1,mkvec2(Fi,Z));
     gel(F,i+1) = Fi;
   }
   return gerepileupto(av,F);
@@ -4219,7 +4215,7 @@ GEN SmoothGeneric(GEN f0, ulong d, GEN pr, GEN P0)
     	for(j=1;j<n;j++)
 			{
     		p = gmael(P,i,j);
-				gmael(P,i,j) = mkvec2(gdiv(gel(p,1),gel(p,3)),gdiv(gel(p,1),gel(p,3)));
+				gmael(P,i,j) = mkvec2(gdiv(gel(p,1),gel(p,3)),gdiv(gel(p,2),gel(p,3)));
     	}
 		}	
 	}
@@ -4902,9 +4898,15 @@ GEN PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
 	ulong n,d,k,i;
 	d = lg(B);
 	M = RgM_Frobenius(gmodulo(MFrob,l),0,&Q,&piv);
-	Q = centerlift(Q);
+	Q = centerlift(RgM_inv(Q));
 	res = cgetg(4,t_VEC);
-	gel(res,3) = centerlift(M);
+	M = centerlift(M);
+  if(DEBUGLEVEL)
+  {
+    printf("The matrix of Frob is\n");
+    printp(M);
+  }
+	gel(res,3) = M;
 	n = lg(piv);
 	gel(res,1) = G = cgetg(n,t_VEC);
 	gel(res,2) = CG = cgetg(n,t_VEC);
@@ -5021,7 +5023,7 @@ GEN ProjGalRep(GEN R)
 	for(i=1;i<=n;i++)
     pari_printf("%Ps\n",gel(PV,i));
 	printf("Exp\n");
-	PF = gel(PolExpID(PZ,T,pe),1);
+	PF = PolExpID(PZ,T,pe);
 	for(i=1;i<=n;i++)
     pari_printf("%Ps\n",gel(PV,i));
 	return gerepilecopy(av,mkvecn(7,PF,L,D,PV,T,p,E));
@@ -5037,7 +5039,7 @@ GEN HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
    on which Frob_p has charpoly chi
    (chi=0 means take all the l-torsion)
    by working at p-adic accuracy O(p^e).
-   P must be a pair of points of C(Q)
+   P must be a pair of points of C
    which are not conjugate under the hyperelliptic involution.
    If chi is nonzero,
    we must have chi || (Lp mod l)
@@ -5051,3 +5053,49 @@ GEN HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
 	R = PicTorsGalRep(J,l,Lp,chi);
 	return gerepileupto(av,R);
 }
+
+GEN SuperGalRep(GEN f, ulong m, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
+{
+  /* Computes the Galois representation afforded by
+   the piece of l-torsion of the Jacobian
+   of the superelliptic curve C:y^m=f(x)
+   on which Frob_p has charpoly chi
+   (chi=0 means take all the l-torsion)
+   by working at p-adic accuracy O(p^e).
+   P must be a point of C.
+   If chi is nonzero,
+   we must have chi || (Lp mod l)
+   where Lp is the local L factor at p.*/
+  pari_sp av = avma;
+  GEN Lp, J, R;
+  ulong a;
+  Lp = SuperZeta(f,m,itou(p));
+  a = force_a ? force_a : itou(FpX_root_order_bound(Lp,l));
+  J = SuperPicInit(f,m,p,a,e,P);
+  R = PicTorsGalRep(J,l,Lp,chi);
+  return gerepileupto(av,R);
+}
+
+GEN SmoothGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
+{
+  /* Computes the Galois representation afforded by
+   the piece of l-torsion of the Jacobian
+   of the smooth plane curve C:f(x,y)=0
+   on which Frob_p has charpoly chi
+   (chi=0 means take all the l-torsion)
+   by working at p-adic accuracy O(p^e).
+   P must be 
+   If chi is nonzero,
+   we must have chi || (Lp mod l)
+   where Lp is the local L factor at p.*/
+  pari_sp av = avma;
+  GEN RRdata, Lp, J, R;
+  ulong a;
+	RRdata = SmoothRRdata(f,p,P);
+	Lp = PlaneZeta(gel(RRdata,1),itou(p));
+  a = force_a ? force_a : itou(FpX_root_order_bound(Lp,l));
+  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,a,e);
+	R = PicTorsGalRep(J,l,Lp,chi);
+  return gerepileupto(av,R);
+}
+

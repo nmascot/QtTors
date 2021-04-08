@@ -6716,3 +6716,5 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Lp, GEN Chi);
 GEN PicTorsGalRep(GEN J, GEN l, GEN Lp, GEN Chi);
 GEN ProjGalRep(GEN R);
 GEN HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a);
+GEN SuperGalRep(GEN f, ulong m ,GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a);
+GEN SmoothGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a);
