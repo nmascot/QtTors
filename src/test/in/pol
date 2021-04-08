@@ -81,6 +81,9 @@ polroots(T)
 exponent(polrootsbound(T))
 polrootsbound('x)
 
+\\#2286
+polroots(1.E-47*t^6 + 1.E-47*t^5 + 4.E-46*t^4)
+
 polzagier(-1,1)
 
 \\ Errors

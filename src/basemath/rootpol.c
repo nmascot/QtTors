@@ -1773,7 +1773,7 @@ all_roots(GEN p, long bit)
   pd = RgX_deflate_max(p, &h); elc = gexpo(leading_coeff(pd));
   fb = fujiwara_bound(pd);
   e = (fb < 0)? 0: (long)(2 * fb);
-  bit2 = bit + gexpo(pd) + (long)log2(n/h)+1+e;
+  bit2 = bit + maxss(0, gexpo(pd)) + (long)log2(n/h)+1+e;
   e = 0;
   for (av=avma,i=1;; i++,set_avma(av))
   {
