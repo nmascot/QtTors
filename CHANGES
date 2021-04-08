@@ -44,6 +44,7 @@ BA  35- rnfdisc mishandled polynomials with denominators [#2284]
 BA  36- elltamagawa(ellinit([-1456/243,93184/19683])) -> wrong result
     37- nfsearch would sometimes miss the trivial form
     38- typo in allh [affects ECPP tunings]
+HC  39- mfisetaquo(mffrometaquo([1,12;193,12])) -> 0
 
   Added
 HC   1- new GP function eulerreal
