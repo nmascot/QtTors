@@ -4038,7 +4038,7 @@ GEN SuperRRdata(GEN f, ulong m, GEN P)
 		gmael(L,3,1) = SuperRR(d0+g,d,m,x,y);
 		L2 = SuperRR(d0+g+1,d,m,x,y);
 		E2 = gsubst(gsubst(L2,0,gel(P,1)),1,gel(P,2));
-		gmael(L,3,2) = gmul(L2,QM_ker(gtomat(E2)));
+		gmael(L,3,2) = gmul(L2,ker(gtomat(E2)));
 	}
 	else gel(L,3) = gen_0;
 	if(m%2)
@@ -4279,7 +4279,7 @@ GEN SmoothRRdata(GEN f, GEN p, GEN P)
 			MP = cgetg(n,t_COL);
 			for(j=1;j<n;j++)
 				gel(MP,j) = gsubst(gsubst(M,lx,gmael3(P,i,j,1)),ly,gmael3(P,i,j,2));
-			gmael(L,3,i) = gmul(M,QM_ker(matconcat(MP)));
+			gmael(L,3,i) = gmul(M,ker(matconcat(MP)));
 		}
 	}
 	else gel(L,3) = gen_0;
