@@ -403,15 +403,10 @@ Kderivlarge(GEN K, GEN t, GEN t2d, long bitprec0)
   z = gmul(pi, t2d);
   P = gmul(tdA, gexp(gmulsg(-d, z), prec));
   if (m) P = gmul(P, gpowgs(mulsr(-2, pi), m));
-  M = gel(Ms,1);
-  status = itos(gel(Ms,2));
+  M = gel(Ms,1); status = itos(gel(Ms,2));
   if (status == 2)
-  {
-    if (lg(M) == 2) /* shortcut: continued fraction is constant */
-      S = gel(M,1);
-    else
-      S = poleval(RgV_to_RgX(M, 0), ginv(z));
-  }
+    S = (lg(M) == 2)? gel(M,1) /* constant continued fraction */
+                    : poleval(RgV_to_RgX(M, 0), ginv(z));
   else
   {
     S = contfraceval_inv(M, z, nlim/2);
@@ -665,14 +660,17 @@ gammamellininvinit(GEN Vga, long m, long bitprec)
  * initialization data. Use Taylor expansion at 0 for |s2d| < tmax, and
  * asymptotic expansion at oo otherwise. WARNING: assume that accuracy
  * has been increased according to tmax by the CALLING program. */
-GEN
-gammamellininvrt(GEN K, GEN s2d, long bitprec)
+static GEN
+gammamellininvrt_i(GEN K, GEN s, GEN s2d, long bit)
 {
-  if (dblmodulus(s2d) < GMi_get_tmax(K, bitprec))
-    return Kderivsmall(K, NULL, s2d, bitprec);
+  if (dblmodulus(s2d) < GMi_get_tmax(K, bit))
+    return Kderivsmall(K, s, s2d, bit);
   else
-    return Kderivlarge(K, NULL, s2d, bitprec);
+    return Kderivlarge(K, s, s2d, bit);
 }
+GEN
+gammamellininvrt(GEN K, GEN s2d, long bit)
+{ return gammamellininvrt_i(K, NULL, s2d, bit); }
 
 /* Compute inverse Mellin at s. K from gammamellininv OR a Vga, in which
  * case the initialization data is computed. */
@@ -680,16 +678,12 @@ GEN
 gammamellininv(GEN K, GEN s, long m, long bitprec)
 {
   pari_sp av = avma;
-  GEN z, s2d;
+  GEN s2d;
   long d;
 
   if (!is_vec_t(typ(K)) || lg(K) != 6 || !is_vec_t(typ(GMi_get_Vga(K))))
     K = gammamellininvinit(K, m, bitprec);
   d = GMi_get_degree(K);
   s2d = gpow(s, gdivgs(gen_2, d), nbits2prec(bitprec));
-  if (dblmodulus(s2d) < GMi_get_tmax(K, bitprec))
-    z = Kderivsmall(K, s, s2d, bitprec);
-  else
-    z = Kderivlarge(K, s, s2d, bitprec);
-  return gerepileupto(av, z);
+  return gerepileupto(av, gammamellininvrt_i(K, s, s2d, bitprec));
 }
