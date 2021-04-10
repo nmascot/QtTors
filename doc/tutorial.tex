@@ -2789,6 +2789,97 @@ $\sqrt{D}$ is a generator of $K$. The result is that $K$ is the splitting
 field of $Q(x^2)$.  We can check that with
 \kbd{nfisisom(P,subst(Q,x,x\^{}2))}.
 
+\subsec{Creating and Listing Number Fields}
+
+Suppose you want to work with cyclic quartic fields (i.e., fields with
+Galois group $C_4=\Z/4\Z$ over $\Q$): you could look in a database or in
+a book for examples, but PARI provides the simple but powerful \kbd{nflist}
+command: in this case you could simply write \kbd{V = nflist("C4")},
+which would immediately return a list of polynomials (in the present case
+$18$, in some random order) defining cyclic quartic fields. Note that these
+polynomials are usually not the simplest, you can for instance do
+\kbd{V = apply(polredabs, V)} to reduce them.
+
+Using \kbd{vecmax(apply(z->abs(nfdisc(z)),V))}, you can check that the largest
+discriminant is $35152$. Thus, if you only want discriminants up to $10000$
+you would write \kbd{V = nflist("C4", [1, 10000])}, which would now output only
+$10$ number fields. Or if you want only fields with absolute discriminant
+exactly equal to $8000$, you would write \kbd{V = nflist("C4", 8000)}, which
+would output the two polynomials $x^4\pm10x^2+20$, which define non-isomorphic
+number fields (using \kbd{polsturm}, you can check that one is totally real,
+the other totally complex). Finally, if you only want $C_4$-fields with a
+given number \kbd{s} of complex places, you would write \kbd{nflist("C4",,s)}
+(don't forget the two consecutive commas, since the second argument is the
+discriminant range), for instance:
+
+\bprog
+for(s = 0, 2, print1([s, #nflist("C4", , s)]," "))
+@eprog\noindent
+would output \kbd{[0, 10] [1, 0], [2, 10]}, so \kbd{nflist} gives you
+$10$ totally real and $10$ totally complex cyclic quartic fields, but none
+with mixed signature $(2,1)$, which is a good thing since they do not exist!
+
+Of course you can ask for many more: for instance in a few seconds
+\bprog apply(length, #nflist("C4", [1, 10^14], -2))@eprog
+\noindent will return
+\kbd{[607589, 0, 607609]}, which tells you that there are $607589$ totally
+real and $607609$ totally complex cyclic quartic fields with absolute
+discriminant up to $10^{14}$: this illustrates the special use of the
+parameter $s=-2$, which separates the number fields by increasing number of
+complex places (the default is $s=-1$ which ignores the signature altogether).
+
+\smallskip
+
+Of course, \kbd{nflist} applies to many other Galois groups than $C_4$
+(where ``Galois group'' is understood as Galois group of the Galois closure,
+see below), but before leaving cyclic quartic fields, let us see two more
+related instructions. Starting again with \kbd{V = nflist("C4")}, write
+\kbd{R = apply(nfresolvent, V)}: this outputs a list of $18$ quadratic
+polynomials, which define the unique quadratic subfield of each quartic
+field. In the present example, the \kbd{nfsubfields} command
+(more precisely \kbd{R = apply(z -> polredabs(nfsubfields(z, 2, 1)[1]), V)})
+would have given an identical result, but the purpose of \kbd{nfresolvent}
+is different. First, for many Galois groups, it really outputs what one usually
+calls the resolvent polynomial, for instance a quadratic polynomial for
+an $S_3$ field, a cubic for a non-Galois quartic, etc... Second, as here,
+the fields are often constructed as extensions of subfields, and
+\kbd{nfresolvent} gives the subfield on which the field has been constructed.
+Better, typing \kbd{nfresolvent(V[1], 1)} outputs
+\kbd{[x\^{}2 - x - 1, [[5, 2; 0, 1], [1, 1]]]}, which not only gives the
+subfield, but the relative conductor as a \kbd{module} (a pair ideal,
+list of real places).
+
+The second instruction is \kbd{polsubcyclo}, which has existed for a long time
+in PARI. The manual states that \kbd{polsubcyclo(n,d)} gives the subfields
+of degree $d$ of $\Q(\zeta_n)$. However, if $n$ is very large, previous
+versions would take an inordinate amount of time. The present version
+allows us to take $n$ very large, but the price to pay is that the degree
+$d$ of the desired subfields must be very small, for instance $d\le30$,
+and in addition must be a prime number if $d\ge7$. For instance:
+
+\bprog
+? p = 10^16 + 649759; /* A prime chosen so that p = 1 mod 11*19*29*41
+? polsubcyclo(p, 11);
+time = 42 ms. /* Would have been impossible in previous versions */
+? polsubcyclo(p, 19);
+time = 348 ms.
+? polsubcyclo(p, 29);
+time = 10,304 ms. /* Still reasonable */
+? polsubcyclo(p, 41);
+time = 6min, 43,181 ms. /* Slow but feasible. */
+@eprog
+
+\medskip
+
+The most common Galois groups corresponding to number fields of small
+degree have been implemented: all solvable groups up to degree $7$
+(there are $13$ in degree $6$ for instance), the groups $C_{\ell}$ and
+$D_{\ell}$ for $\ell$ prime. In addition, the simple group $A_5$ has also
+been included, but by cheating since it is obtained by table lookup
+(and available only of you have downloaded and installed the
+\kbd{nflistdata} package), in particular because of its relation with
+modular forms of weight $1$.
+
 \section{Working with Associative Algebras}
 
 Beyond the realm of number fields, we can perform operations with more
