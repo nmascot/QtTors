@@ -3039,11 +3039,6 @@ GEN PolExpID(GEN Z, GEN T, GEN pe) /* bestappr of prod(x-z), z in Z */
   f = simplify_shallow(f);
   f = gmodulo(f,pe);
 	f = bestappr(f,NULL);
-	if(typ(f)==t_VEC)
-	{ /* bestappr failed */
-		avma = av;
-		return gen_0;
-	}
 	return gerepileupto(av,f);
 }
 
@@ -3097,11 +3092,21 @@ GEN OnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T,
       }
     }
 		if(vec_is1to1(Z)==0) /* Multiple roots? */
+		{
+			avma = av1;
     	Fi = gen_0;
+		}
 		else
+		{
 			Fi = PolExpID(Z,T,pe);
-		if(!gequal0(Fi))
-			Fi = gerepilecopy(av1,mkvec2(Fi,Z));
+			if(typ(Fi)!=t_VEC)
+				Fi = gerepilecopy(av1,mkvec2(Fi,Z));
+			else
+			{ /* Bestappr failed */
+				avma = av1;
+				Fi = gen_m1;
+			}
+		}
     gel(F,i+1) = Fi;
   }
   return gerepileupto(av,F);
@@ -3112,7 +3117,7 @@ GEN AllPols(GEN J, GEN Z, ulong l, GEN JFrobMat)
   pari_sp av = avma, avj;
 	GEN QqFrobMat,T,pe,p;
   GEN F,ImodF,Jfrobmat,Ft,F1,f,pols,args,res;
-  ulong d,nF,lF,npols,n,i,j,j0,i1,i2,m,k;
+  ulong d,nF,lF,npols,n,i,j,j0,i1,i2,m,k,nmult,nfail;
 	long e;
 	int All0;
   long n1,n2,n12;
@@ -3184,6 +3189,7 @@ GEN AllPols(GEN J, GEN Z, ulong l, GEN JFrobMat)
     }
   }
   pending = 0;
+	nmult = nfail = 0;
   worker = strtofunction("_OnePol");
   args = cgetg(9,t_VEC);
   gel(args,3) = ImodF;
@@ -3217,12 +3223,25 @@ GEN AllPols(GEN J, GEN Z, ulong l, GEN JFrobMat)
       for(k=1;k<=n12;k++)
       {
 				res = gel(done,k);
-				if(gequal0(res)) continue;
+				if(gequal(res,gen_m1))
+        { /* Bestappr failed */
+          nfail++;
+          continue;
+        }
+				if(gequal0(res))
+				{ /* Repeated roots */
+					nmult++;
+					continue;
+				}
         gel(pols,m++) = res;
       }
     }
   }
   mt_queue_end(&pt);
+	if(DEBUGLEVEL)
+		printf("Out of %lu polynomials, %lu had repeated roots, %lu could not be identified, and %lu were identified.\n",npols,nmult,nfail,m-1);
+	if(nmult==npols)
+		pari_err(e_MISC,"No squarefree polynomial, Try again with another evaluation map.");
 	setlg(pols,m);
   return gerepilecopy(av,pols);
 }
