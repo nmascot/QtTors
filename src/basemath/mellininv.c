@@ -362,10 +362,8 @@ Kderivlarge_optim(GEN K, long abs, GEN t2d,GEN gcd, long *pbitprec, long *pnlim)
   double a, rtd, E = M_LN2*bitprec;
 
   rtd = (typ(t2d) == t_COMPLEX)? gtodouble(gel(t2d,1)): td;
-
   /* A2/2 = A, log(td) = (2/d)*log t */
-  a = d*gtodouble(A2)*log2(td)/2 - (M_PI/M_LN2)*d*rtd + log2(cd); /*log2 K(t)~a*/
-
+  a = d*gtodouble(A2)*log2(td)/2 - (M_PI/M_LN2)*d*rtd + log2(cd);/*log2 K(t)~a*/
   /* if bitprec <= 0, caller should return K(t) ~ 0 */
   bitprec += 64;
   if (abs)
@@ -413,7 +411,7 @@ Kderivlarge(GEN K, GEN t, GEN t2d, long bitprec0)
     if (DEBUGLEVEL>3)
     {
       GEN S0 = contfraceval_inv(M, z, nlim/2 + 1);
-      long e = gexpo(gmul(P, gabs(gsub(S,S0),0)));
+      long e = gexpo(gmul(P, gsub(S,S0)));
       if (-e < bitprec0)
         err_printf("Kderivlarge: e = %ld, bit = %ld\n",e,bitprec0);
     }
