@@ -1412,7 +1412,7 @@ are powers of 2. This is true: prove it, and more precisely find an explicit
 formula for the $k$-th symmetric power not involving (nonrational) algebraic
 numbers.
 
-\section{Power series}
+\section{Power Series}
 
 Now let's play with power series as we have done at the beginning.  Type
 \bprog
@@ -2539,7 +2539,7 @@ package. Remember that when a matrix (usually in HNF) is output, it is always
 a $\Z$-basis of the result expressed on the \emph{integral basis} \kbd{nf.zk}
 of the number field, which is usually \emph{not} a power basis.
 
-\subsec{Class groups and units, \kbd{bnf}}
+\subsec{Class Groups and Units, \kbd{bnf}}
 
 Apart from the above functions you have at your disposal the powerful
 function \kbd{bnfinit}, which initializes a \kbd{bnf} structure, i.e.~a
@@ -2652,7 +2652,7 @@ computation may take some time, you can just add the flag $1$ (see the online
 help) to the arguments of \kbd{bnfisprincipal}, so that it only returns the
 position of \kbd{pr} in the class group. \smallskip
 
-\subsec{Class field theory, \kbd{bnr}}
+\subsec{Class Field Theory, \kbd{bnr}}
 
 We now survey quickly some class field theoretic routines. We must first
 initialize a Buchmann Number Ray, or \kbd{bnr}, structure, attached to a
@@ -2714,7 +2714,7 @@ $K(\sqrt{-\epsilon})$. We can check this directly:
   rnfconductor(bnf, x^2 + bnf.fu[1])
 @eprog\noindent
 
-\subsec{Galois theory over $\Q$}
+\subsec{Galois Theory over $\Q$}
 
 PARI includes a nearly complete set of routines to compute with Galois
 extensions of $\Q$. We start with a very simple example.
@@ -2789,7 +2789,7 @@ $\sqrt{D}$ is a generator of $K$. The result is that $K$ is the splitting
 field of $Q(x^2)$.  We can check that with
 \kbd{nfisisom(P,subst(Q,x,x\^{}2))}.
 
-\section{Working with associative algebras}
+\section{Working with Associative Algebras}
 
 Beyond the realm of number fields, we can perform operations with more
 general associative algebras, that need not even be commutative! Of course
@@ -2801,7 +2801,7 @@ fields, which are some nice algebras that behave a lot like number fields.
 Like in other parts of~\kbd{gp}, every function that has to do with
 associative algebras begins with the same prefix:~\kbd{alg}.
 
-\subsec{Arbitrary associative algebras}
+\subsec{Arbitrary Associative Algebras}
 
 In order to create an associative algebra, you need to tell~\kbd{gp} how to
 multiply elements. We do this by providing a \emph{multiplication table} for the
@@ -2988,7 +2988,7 @@ algcenter(dec4[3])
 we see that this algebra has center~$\F_5$, so that~\kbd{al4} is isomorphic
 to~$\F_5\times\F_5\times M_2(\F_5)$.
 
-\subsec{Central simple algebras over number fields}
+\subsec{Central Simple Algebras over Number Fields}
 
 As we saw, simple algebras are building blocks for more complicated algebras.
 The center of a simple algebra is always a field, and we say that an
