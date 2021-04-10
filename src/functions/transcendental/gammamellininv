@@ -7,6 +7,10 @@ Help: gammamellininv(G,t,{m=0}): returns G(t), where G is as output
 Doc: returns the value at $t$ of the inverse Mellin transform
  $G$ initialized by \tet{gammamellininvinit}. If the optional parameter
  $m$ is present, return the $m$-th derivative $G^{(m)}(t)$.
+
+ \misctitle{Caveat} Contrary to the PARI convention, this function
+ guarantees an \emph{absolute} (rather than relative) error bound.
+
  \bprog
  ? G = gammamellininvinit([0]);
  ? gammamellininv(G, 2) - 2*exp(-Pi*2^2)
