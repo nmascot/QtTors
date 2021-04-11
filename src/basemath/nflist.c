@@ -4935,9 +4935,7 @@ grouptranslate(const char *g)
   if (!strcmp(g, "A46C2")) return 606;
   if (!strcmp(g, "A462")) return 606;
   if (!strcmp(g, "S46+")) return 607;
-  if (!strcmp(g, "S46P")) return 607;
   if (!strcmp(g, "S46-")) return 608;
-  if (!strcmp(g, "S46M")) return 608;
   if (!strcmp(g, "S32")) return 609;
   if (!strcmp(g, "C32C4")) return 610;
   if (!strcmp(g, "S46C2")) return 611;
