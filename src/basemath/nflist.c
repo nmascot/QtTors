@@ -1099,7 +1099,7 @@ nflist_S3I_worker(GEN ga, GEN ALLCTS)
       {
         double tmp1 = 4 * xd / cc;
         limdsup = (long)floor(min((bc + tmp1) / a, limd1));
-        limdinf = (long)ceil(min((bc - tmp1) / a, -limd1));
+        limdinf = (long)ceil(max((bc - tmp1) / a, -limd1));
       }
       else { limdsup = (long)floor(limd1); limdinf = -limdsup; }
       if (!b) limdinf = max(limdinf, 1);
