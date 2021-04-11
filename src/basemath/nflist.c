@@ -5268,7 +5268,7 @@ nflist(GEN GP, GEN N, long s, GEN field)
   if (!g)
   {
     const char *s =
-    "Unsupported group: %Ps. Use one of\n\
+    "unsupported group (%Ps). Use one of\n\
   \"C1\"=[1,1];\n\
   \"C2\"=[2,1];\n\
   \"C3\"=[3,1], \"S3\"=[3,2];\n\
