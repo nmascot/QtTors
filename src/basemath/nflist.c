@@ -5265,7 +5265,23 @@ nflist(GEN GP, GEN N, long s, GEN field)
     case t_STR: g = grouptranslate(GSTR(GP)); break;
     case t_VEC: g = group_nTk(GP); break;
   }
-  if (!g) return gen_0;
+  if (!g)
+  {
+    const char *s =
+    "Unsupported group: %Ps. Use one of\n\
+  \"C1\"=[1,1];\n\
+  \"C2\"=[2,1];\n\
+  \"C3\"=[3,1], \"S3\"=[3,2];\n\
+  \"C4\"=[4,1], \"V4\"=[4,2], \"D4\"=[4,3], \"A4\"=[4,4], \"S4\"=[]4,5];\n\
+  \"C5\"=[5,1], \"D5\"=[5,2], \"F5\"=\"M20\"=[5,3], \"A5\"=[5,4];\n\
+  \"C6\"=[6,1], \"S36\"=\"D66\"=[6,2], \"D612\"=[6,3], \"A46\"=[6,4], \"S3C3\"=[6,5], \n\
+    \"A462\"=\"A46C2\"=[6,6], \"S46+\"=[6,7], \"S46-\"=[6,8], \"S32\"=[6,9],\n\
+    \"C32C4\"=[6,10], \"S462\"=\"S46C2\"=[6,11], \"A56\"=\"PSL25\"=[6,12], \"C32D4\"=[6,13];\n\
+  \"C7\"=[7,1], \"D7\"=[7,2], \"M21\"=[7,3], \"M42\"=[7,4];\n\
+  \"C9\"=[9,1], \"C32\"=\"C3C3\"=[9,2], \"D9\"=[9,3].\"\n\
+  Also supported are \"Cp\"=[p, 1] and \"Dp\"=[p, 2] for any odd prime p";
+    pari_err(e_MISC, s, GP);
+  }
   deg = g / (g > 1000? 1000: 100);
   if (s > (deg >> 1)) return cgetg(1, t_VEC);
   if (!N) return gerepilecopy(av, nfmakesome(g, deg, s));
