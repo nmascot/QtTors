@@ -2,19 +2,19 @@ Function: nflist
 Section: number_fields
 C-Name: nflist
 Prototype: GDGD-1,L,DG
-Help: nflist(G, {N}, {s = -1}, {field}): find all number fields (up to
+Help: nflist(G, {N}, {s = -1}, {F}): find all number fields (up to
  isomorphism) with Galois group of Galois closure isomorphic to G, and s
  complex places.
 
  If s = -1 (default) all signatures, s = -2 is identical to s = -1 except
- signatures are separated by increasing number of complex places. If field is
- specified, give only number fields having field as a subfield (or a resolvent
- field in the case of S3, Dl, A4, S4, F5, M21 and M42).
+ signatures are separated by increasing number of complex places. If field F is
+ specified (by a polynomial), give only number fields having F as a subfield
+ (or a resolvent field in the case of S3, Dl, A4, S4, F5, M21 and M42).
 
  The parameter N can be the following: a positive integer (absolute
  value of discriminant is N); a vector [a,b] find fields with absolute
  discriminant between a and b. Finally, N can be omitted (default), in which
- case a few fields are given and 'field' is ignored.
+ case a few fields are given and F is ignored.
 Doc: find all number fields (up to isomorphism) with Galois group of Galois
  closure isomorphic to $G$ with $s$ complex places. This function supports
  the following groups:
@@ -66,10 +66,10 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  places; in degree $n$, this means a vector with $1 + \text{floor}(n/2)$
  components: the $i$-th entry corresponds to $s = i - 1$.
 
- If \kbd{field} is specified, give only number fields having
- \kbd{field} as a subfield, or in the case of $S_3$, $D_\ell$, $A_4$, $S_4$,
- $F_5$, $M_{21}$ and $M_{42}$, as a resolvent field (see also the function
- \kbd{nfresolvent} for these cases).
+ If the irreducible monic polynomial $F\in \Z[X]$ is specified, give only
+ number fields having $\Q[X]/(F)$ as a subfield, or in the case of
+ $S_3$, $D_\ell$, $A_4$, $S_4$, $F_5$, $M_{21}$ and $M_{42}$, as a resolvent
+ field (see also the function \kbd{nfresolvent} for these cases).
 
  The parameter $N$ can be the following:
 
@@ -83,7 +83,7 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  \item omitted (default): a few fields of small discriminant (not always
  those with smallest absolute discriminant) are output with given $G$
  and $s$; usually about 10, less if too difficult to find. The parameter
- \kbd{field} is ignored.
+ $F$ is ignored.
 
  \misctitle{Complexity} : For a positive integer $N$, the complexity is
  subexponential in $\log N$ (and involves factoring $N$). For an interval
@@ -93,8 +93,6 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  \item $C_n$: $O(b^{1/\phi(n)})$ for $n = 2, 4, 6, 9$ or any odd prime;
 
  \item $D_n$: $O(b^{2/\phi(n)})$ for $n = 4$ or any odd prime;
-
- \item $S_3$ : $O(b)$;
 
  \item $V_4$, $A_4$: $O(b^{1/2})$, $S_4$: $O(b)$;
  N.B. The subexponential terms are expensive for $A_4$ and $S_4$.
