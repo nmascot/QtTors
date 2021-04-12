@@ -2692,6 +2692,7 @@ makeDLvec(long ell, GEN X, GEN Xinf, GEN field, long s)
   X1pow = sqrtnint(X, pow);
   X0pow = gceilsqrtn(Xinf, pow);
   V2 = field? mkvec(field): makeC2vec(X1pow, gen_1, NULL, s == -2? -1: s);
+  if (!V2) return NULL;
   v = gen_parapply(closure("_nflist_DL_worker", mkvec5(X1pow, X0pow, sqri(X),
                            sqri(Xinf), mkvecsmall(ell))), V2);
   return sturmseparate(myshallowconcat1(v), s, ell);
@@ -2784,6 +2785,7 @@ makeD9vec(GEN X, GEN Xinf, GEN field, long s)
   if (s == 4) s = 1;
   X1pow = sqrtnint(X, 4);
   V2 = field? mkvec(field): makeC2vec(X1pow, gen_1, NULL, s == -2? -1: s);
+  if (!V2) return NULL;
   v = gen_parapply(closure("_nflist_D9_worker", mkvec2(X, Xinf)), V2);
   return sturmseparate(myshallowconcat1(v), s, 9);
 }
@@ -3862,8 +3864,9 @@ makeS46Mvec(GEN X, GEN Xinf, GEN field, long s)
   else
   {
     long s3 = s == 3? 1: (s < 0? -1: 0), l2, i, c;
-    GEN v2 = makeC2vec(sqrtnint(X,3), gen_1, NULL, s3); l2 = lg(v2);
-    v = cgetg(l2, t_VEC);
+    GEN v2 = makeC2vec(sqrtnint(X,3), gen_1, NULL, s3);
+    if (!v2) return NULL;
+    l2 = lg(v2); v = cgetg(l2, t_VEC);
     for (i = c = 1; i < l2; i++)
     {
       GEN tmp = gel(v2, i), D2a = absi_shallow(nfdisc(tmp));
