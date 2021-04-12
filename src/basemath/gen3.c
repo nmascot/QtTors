@@ -2346,6 +2346,7 @@ gfloor(GEN x)
       x = Q_remove_denom(x, &d);
       u = gel(x,2);
       v = gel(x,3); b = gel(Q,3);
+      if (typ(u) != t_INT || typ(v) != t_INT) break;
       /* x0 = (2u + v*(-b + sqrt(D))) / (2d) */
       z = sqrti(mulii(D, sqri(v)));
       if (signe(v) < 0) { z = addiu(z,1); togglesign(z); }

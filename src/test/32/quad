@@ -50,4 +50,7 @@ w
   ***   at top-level: sign(w8)
   ***                 ^--------
   *** sign: incorrect type in gsigne (t_QUAD).
+  ***   at top-level: floor(Mod(0,3)*quadgen(5))
+  ***                 ^--------------------------
+  *** floor: incorrect type in gfloor (t_QUAD).
 Total time spent: 0
