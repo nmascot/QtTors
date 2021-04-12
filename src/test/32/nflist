@@ -390,6 +390,12 @@ x^6 - 2*x^5 + 3*x^4 - 4*x^2 + 4*x - 3
 4
 5
 1
+[x^2 - x - 1, x^2 - 2, x^2 - 3, x^2 - x - 3, x^2 - x - 4, x^2 - x - 5, x^2 -
+ 6, x^2 - x + 1, x^2 + 1, x^2 - x + 2, x^2 + 2, x^2 - x + 3, x^2 - x + 4, x^
+2 - x + 5, x^2 + 5, x^2 - x + 6, x^2 + 6]
+[x^3 + x + 1, x^3 + 2*x + 1, x^3 + x^2 + x + 2, x^3 + x^2 + 2*x + 1, x^3 + x
+^2 + 3*x + 1, x^3 + x^2 + 3*x + 2, x^3 + 2*x^2 + 2*x + 2, x^3 + 2*x^2 + 3*x 
++ 3, x^3 + 3*x^2 + 3*x + 3, x^3 + 2*x^2 + 6*x + 4]
   ***   at top-level: nflist("S3",-1)
   ***                 ^---------------
   *** nflist: domain error in nflist: Xinf <= 0
@@ -399,4 +405,4 @@ x^6 - 2*x^5 + 3*x^4 - 4*x^2 + 4*x - 3
   ***   at top-level: nflist("S3",[1,-2])
   ***                 ^-------------------
   *** nflist: domain error in nflist: X <= 0
-Total time spent: 28111
+Total time spent: 29193

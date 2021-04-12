@@ -4917,8 +4917,10 @@ grouptranslate(const char *g)
 
   if (!strcmp(g, "C1")) return 101;
   if (!strcmp(g, "C2")) return 201;
+  if (!strcmp(g, "D2")) return 201;
   if (!strcmp(g, "C3")) return 301;
   if (!strcmp(g, "S3")) return 302;
+  if (!strcmp(g, "D3")) return 302;
   if (!strcmp(g, "C4")) return 401;
   if (!strcmp(g, "V4")) return 402;
   if (!strcmp(g, "D4")) return 403;
