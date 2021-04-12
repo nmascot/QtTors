@@ -5016,8 +5016,8 @@ GEN ProjGalRep(GEN R)
 	d = itou(D);
 	ld = upowuu(l,d);
 	done = cgetg(ld,t_VECSMALL);
-	PZ = cgetg(ld,t_VECSMALL);
-	PV = cgetg(ld,t_VECSMALL);
+	PZ = cgetg(ld,t_VEC);
+	PV = cgetg(ld,t_VEC);
 	for(i=1;i<ld;i++) done[i] = 0;
 	n = 0; /* Number of roots */
 	for(i=1;i<ld;i++)
@@ -5032,20 +5032,12 @@ GEN ProjGalRep(GEN R)
 			z = gadd(z,gel(Z,j));
 		}
 		gel(PZ,n) = z;
-		gel(PV,n) = mkvec2(z,i2c(i,l,d));
+		gel(PV,n) = i2c(i,l,d);
 	}
-	for(i=1;i<=n;i++)
-		pari_printf("%Ps\n",gel(PV,i));
 	setlg(PZ,n+1);
 	setlg(PV,n+1);
-	printf("lg\n");
-	for(i=1;i<=n;i++)
-    pari_printf("%Ps\n",gel(PV,i));
-	printf("Exp\n");
 	PF = PolExpID(PZ,T,pe);
-	for(i=1;i<=n;i++)
-    pari_printf("%Ps\n",gel(PV,i));
-	return gerepilecopy(av,mkvecn(7,PF,L,D,PV,T,p,E));
+	return gerepilecopy(av,mkvecn(8,PF,L,D,PZ,PV,T,p,E));
 }
 
 
