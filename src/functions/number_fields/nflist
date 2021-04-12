@@ -40,11 +40,11 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
 
  The groups are coded as $[n,t]$ using the \kbd{nTt} format where $n$ is the
  degree and $t$ is the $T$-number (the index in the classification of
- transitive subgroups of $S_n$). Alternatively, they can be input as
- character strings exactly as written, removing parentheses, multiplication,
- and $:$ symbols, lifting subscripts and lowering exponents; for instance
- \kbd{"S46+"} or \kbd{"A46C2"}. If the group is not recognized or is
- unsupported the function returns $0$.
+ transitive subgroups of $S_n$). Alternatively, the groups $C_n$, $D_n$,
+ $A_n$, $S_n$, $V_4$, $F_5 = M_{20}$, $M_{21}$ and $M_{42}$ can be input as
+ character strings exactly as written, lifting subscripts; for instance
+ \kbd{"S4"} or \kbd{"M21"}. If the group is not recognized or is
+ unsupported the function raises an exception.
 
  The fields are computed on the fly (and not from a preexisting table) using
  a variety of algorithms, with the exception of $A_5$ and $A_5(6)$.
@@ -53,12 +53,12 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  degrees, use class field theory to build abelian extensions over a known
  base, select subfields using Galois theory.
 
- To avoid wasting time in some cases, the output polynomials defining the
- number fields are usually not the simplest possible, use \kbd{polredbest}
- or \kbd{polredabs} to reduce them.
+ To avoid wasting time, the output polynomials defining the number fields are
+ usually not the simplest possible, use \kbd{polredbest} or \kbd{polredabs}
+ to reduce them.
 
- The non-negative integer $s$ specifies the number of complex places.
- Additional supported values are:
+ The non-negative integer $s$ specifies the number of complex places, between
+ $0$ and $n/2$. Additional supported values are:
 
  \item $s = -1$ (default) all signatures;
 

@@ -18,7 +18,7 @@ nflist(G,[100,500])
 nflist(G,633)
 nflist(G,[634, 1000])
 
-G = "A56";
+G = [6,12];
 nflist(G)
 nflist(G,,-2)
 nflist(G,,2)
