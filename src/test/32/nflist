@@ -390,4 +390,13 @@ x^6 - 2*x^5 + 3*x^4 - 4*x^2 + 4*x - 3
 4
 5
 1
-Total time spent: 27628
+  ***   at top-level: nflist("S3",-1)
+  ***                 ^---------------
+  *** nflist: domain error in nflist: Xinf <= 0
+  ***   at top-level: nflist("S3",[-1,2])
+  ***                 ^-------------------
+  *** nflist: domain error in nflist: Xinf <= 0
+  ***   at top-level: nflist("S3",[1,-2])
+  ***                 ^-------------------
+  *** nflist: domain error in nflist: X <= 0
+Total time spent: 28111

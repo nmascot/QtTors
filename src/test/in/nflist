@@ -56,3 +56,8 @@ nflist("S5")
 #nflist("A462",[100000,150000])
 #nflist("S462",[20000,30000])
 #nflist("C32C4",[802816, 2175624])
+
+\\ ERRORS
+nflist("S3",-1)
+nflist("S3",[-1,2])
+nflist("S3",[1,-2])

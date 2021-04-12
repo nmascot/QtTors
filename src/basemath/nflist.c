@@ -995,7 +995,7 @@ checkU(long a, long b, long c, long d, long P, long Q, long R, long D)
 GEN
 nflist_S3R_worker(GEN ga, GEN ALLCTS)
 {
-  long a = itos(ga), a9 = 9 * a, b, c, d;
+  long a = itos(ga), a3 = 3 * a, a9 = 9 * a, b, c, d;
   long x = itos(gel(ALLCTS, 1)), xinf = itos(gel(ALLCTS, 2));
   double xd = (double)x, sqx = rtodbl(gel(ALLCTS, 3));
   double cplus = rtodbl(gel(ALLCTS, 4));
@@ -1005,10 +1005,11 @@ nflist_S3R_worker(GEN ga, GEN ALLCTS)
   double limcsup0 = cbrt(cplus / a), limcinf0 = -cbrt(cminus / a);
   double dsupsura = dsup / a, dminsura = dmin / a;
   GEN RET = cgetg(x / 3, t_VEC); ct = 1;
+
   for (b = limbinf; b <= limbsup; b++)
   {
     double sqxb, limcsupdbl = limcsup0, limcinfdbl = limcinf0, cpb = 0, cpm = 0;
-    long bb = b * b, limcsup, gcdab = cgcd(a, b);
+    long bb = b * b, b3 = 3 * b, limcsup, gcdab = cgcd(a, b);
     if (b)
     { long bbb = bb * b; sqxb = sqx/b; cpb = cplus/bbb; cpm = -cminus/bbb; }
     if (b < 0) limcsupdbl = -1;
@@ -1019,7 +1020,7 @@ nflist_S3R_worker(GEN ga, GEN ALLCTS)
     {
       double limdsupdbl = dsupsura, limdinfdbl = dminsura;
       long limdsup, gcdabc = cgcd(gcdab, c);
-      long bc = b * c, cc = c * c, P = bb - 3 * a * c;
+      long bc = b * c, cc = c * c, P = bb - a3 * c;
       limdsupdbl = min(limdsupdbl, bc / a9);
       if (c)
       {
@@ -1038,7 +1039,7 @@ nflist_S3R_worker(GEN ga, GEN ALLCTS)
         GEN F;
         if (cgcd(gcdabc, d) > 1) continue;
         Q = bc - a9 * d;
-        R = cc - 3 * b * d; D = 4 * P * R - Q * Q; DF = D / 3;
+        R = cc - b3 * d; D = 4 * P * R - Q * Q; DF = D / 3;
         if (R <= 0 || Q < 0 || Q > P || P > R || DF > x || DF < xinf || uissquare(DF)) continue;
         if ((Q == 0 && b <= 0) || (P == Q && labs(b) >= labs(3 * a - b)))
           continue;
@@ -4979,8 +4980,6 @@ nfmakenum(long g, GEN N, GEN field, long s)
 {
   GEN v = NULL;
   long ell;
-  if (typ(N) != t_INT || signe(N) <= 0) pari_err_TYPE("nflist", N);
-  if (field && !okfield(field)) pari_err_TYPE("nflist", field);
   switch(g)
   {
     case 101: return makeC1(N, field, s);
@@ -5260,6 +5259,7 @@ nflist(GEN GP, GEN N, long s, GEN field)
   long g = 0, deg;
 
   if (s < -2) pari_err_DOMAIN("nflist", "s", "<", gen_m2, stoi(s));
+  if (field && !okfield(field)) pari_err_TYPE("nflist", field);
   switch(typ(GP))
   {
     case t_STR: g = grouptranslate(GSTR(GP)); break;
@@ -5294,7 +5294,8 @@ nflist(GEN GP, GEN N, long s, GEN field)
       Xinf = X = NULL;/*LCOV_EXCL_LINE*/
   }
   if (typ(X) != t_INT || typ(Xinf) != t_INT) pari_err_TYPE("nflist", N);
-  if (signe(Xinf) <= 0) Xinf = gen_1;
+  if (signe(Xinf) <= 0) pari_err_DOMAIN("nflist", "Xinf", "<=", gen_0, Xinf);
+  if (signe(X) <= 0) pari_err_DOMAIN("nflist", "X", "<=", gen_0, X);
   switch(cmpii(Xinf, X))
   {
     case 1: v = NULL; break;
