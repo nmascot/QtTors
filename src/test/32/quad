@@ -16,6 +16,7 @@
 2
 1
 0
+0
 1
 0
 1
@@ -49,4 +50,4 @@ w
   ***   at top-level: sign(w8)
   ***                 ^--------
   *** sign: incorrect type in gsigne (t_QUAD).
-Total time spent: 1
+Total time spent: 0

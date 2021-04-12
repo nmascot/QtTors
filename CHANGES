@@ -46,6 +46,7 @@ BA  36- elltamagawa(ellinit([-1456/243,93184/19683])) -> wrong result
     38- typo in allh [affects ECPP tunings]
 HC  39- mfisetaquo(mffrometaquo([1,12;193,12])) -> 0
     40- polroots(1.E-47*t^6 + 1.E-47*t^5 + 4.E-46*t^4) -> bug in type [#2286]
+    41- ceil(quadgen(5)) -> 1 instead of 0 [#2288]
 
   Added
 HC   1- new GP function eulerreal

@@ -2398,6 +2398,7 @@ gceil(GEN x)
       return y;
     case t_QUAD:
       if (!is_realquad(x)) break;
+      if (gequal0(gel(x,3))) return gceil(gel(x,2));
       av = avma; return gerepileupto(av, addiu(gfloor(x), 1));
     case t_RFRAC:
       return gdeuc(gel(x,1),gel(x,2));
