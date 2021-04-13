@@ -5000,57 +5000,73 @@ GEN PicTorsGalRep(GEN J, GEN l, GEN Lp, GEN chi)
 	return gerepilecopy(av,mkvecn(7,gel(best,1),l,utoi(d),gel(best,2),JgetT(J),Jgetp(J),JgetE(J)));
 }
 
-GEN ProjGalRep_aux(GEN f, GEN Z, ulong l, ulong d, ulong ld, GEN T, GEN p, long e, GEN pe)
-{ /* Projectivisation of Gal rep. Assumes f in Z[x], not necessarily monic */
+GEN ProjGalRep_aux(GEN f, GEN Z, ulong l, ulong d, ulong ld, GEN T, GEN p, long e, GEN pe, ulong m)
+{ /* Projectivisation of Gal rep */
   pari_sp av = avma;
-  GEN z,done,PZ,PV,PF,Z2;
+  GEN z,done,PZ,PV,PF,Z2,U;
   ulong i,j,k,n;
-  /* TODO Tschirnhaus */
+  if(m>1)
+  {
+    U = pol_x(0);
+    U = gpowgs(U,m);
+    U = ZX_Z_mul(U,utoi(m+1));
+    U = genrand(U);
+    if(DEBUGLEVEL) pari_printf("ProjGalRep: Using U=%Ps\n",U);
+  }
+  else U = NULL;
   done = cgetg(ld,t_VECSMALL);
   PZ = cgetg(ld,t_VEC);
   PV = cgetg(ld,t_VEC);
-  for(i=1;i<ld;i++) done[i] = 0;
-  n = 0; /* Number of roots */
-  for(i=1;i<ld;i++)
-  {
-    if(done[i]) continue;
-    n++;
-    z = gel(Z,i);
-    for(k=2;k<l;k++)
-    {
-      j = mulOni(k,i,l,d);
-      done[j] = 1;
-      z = gadd(z,gel(Z,j));
-    }
-    gel(PZ,n) = z;
-    gel(PV,n) = i2c(i,l,d);
-  }
-  setlg(PZ,n+1);
-  setlg(PV,n+1);
-  PF = PolExpID(PZ,T,pe);
-  if(typ(PF)==t_VEC)
-  {
-		e <<= 1;
+	for(;;)
+  { /* Increase accuracy until PF is identified */
+  	for(i=1;i<ld;i++) done[i] = 0;
+  	n = 0; /* Number of roots */
+  	for(i=1;i<ld;i++)
+  	{
+    	if(done[i]) continue;
+    	n++;
+    	z = U ? FqX_eval(U,gel(Z,i),T,pe) : gel(Z,i);
+    	for(k=2;k<l;k++)
+    	{
+      	j = mulOni(k,i,l,d);
+      	done[j] = 1;
+      	z = gadd(z, U ? FqX_eval(U,gel(Z,j),T,pe) : gel(Z,j));
+    	}
+    	gel(PZ,n) = z;
+    	gel(PV,n) = i2c(i,l,d);
+  	}
+  	setlg(PZ,n+1);
+  	/* Multiple roots ? TODO no need to recheck after increasing accuracy */
+  	if(lg(gen_indexsort_uniq(PZ,(void*)&cmp_universal,&cmp_nodata))<lg(PZ))
+  	{
+    	avma = av;
+    	return ProjGalRep_aux(f,Z,l,d,ld,T,p,e,pe,m+1);
+  	}
+  	setlg(PV,n+1);
+    PF = PolExpID(PZ,T,pe);
+    if(typ(PF)!=t_VEC)
+      break;
+    e <<= 1;
     if(DEBUGLEVEL) pari_printf("ProjGalRep: Increasing accuracy to O(%Ps^%ld)\n",p,e);
-		Z2 = cgetg(ld,t_VEC);
-		for(i=1;i<ld;i++)
-		{ /* TODO could parallelise this, but is that really useful? */
-			/* NB in general, f has coeffs in Q, and roots not all distinct mod p! */
-			z = gel(Z,i);
-			z = gadd(gmodulo(z,T),zeropadic(p,e));
-  		z = padicappr(f,z);
-			for(j=1;j<lg(z);j++)
-			{
-				gel(z,j) = liftall(gel(z,j));
-				if(gequal(FpX_red(gel(z,j),pe),gel(Z,i)))
-				{
-					gel(Z2,i) = gel(z,j);
-					break;
-				}
-			}
-		}
-		pe = sqri(pe);
-		return gerepileupto(av,ProjGalRep_aux(f,Z2,l,d,ld,T,p,e,pe));
+    Z2 = cgetg(ld,t_VEC);
+    for(i=1;i<ld;i++)
+    { /* TODO could parallelise this, but is that really useful? */
+      /* NB in general, f has coeffs in Q, and roots not all distinxt mod p! */
+      z = gel(Z,i);
+      z = gadd(gmodulo(z,T),zeropadic(p,e));
+      z = padicappr(f,z);
+      for(j=1;j<lg(z);j++)
+      {
+        gel(z,j) = liftall(gel(z,j));
+        if(gequal(FpX_red(gel(z,j),pe),gel(Z,i)))
+        {
+          gel(Z2,i) = gel(z,j);
+          break;
+        }
+      }
+    }
+    pe = sqri(pe);
+    Z = Z2;
   }
   return gerepilecopy(av,mkvecn(4,PF,PZ,PV,stoi(e)));
 }
@@ -5058,8 +5074,9 @@ GEN ProjGalRep_aux(GEN f, GEN Z, ulong l, ulong d, ulong ld, GEN T, GEN p, long 
 GEN ProjGalRep(GEN R)
 { /* Projectivisation of Gal rep */
 	pari_sp av = avma;
-	GEN f,Z,T,p,E,pe,L,D,res;
+	GEN f,Z,T,p,pe,L,D,res;
 	ulong l,d,ld;
+	long e;
 	f = gel(R,1);
 	f = primpart(f);
 	L = gel(R,2);
@@ -5067,12 +5084,12 @@ GEN ProjGalRep(GEN R)
 	Z = gel(R,4);
 	T = gel(R,5);
 	p = gel(R,6);
-	E = gel(R,7);
-	pe = powii(p,E);
+	e = itos(gel(R,7));
+	pe = powis(p,e);
 	l = itou(L);
 	d = itou(D);
 	ld = upowuu(l,d);
-	res = ProjGalRep_aux(f,Z,l,d,ld,T,p,itos(E),pe);
+	res = ProjGalRep_aux(f,Z,l,d,ld,T,p,e,pe,1);
 	return gerepilecopy(av,mkvecn(8,gel(res,1),L,D,gel(res,2),gel(res,3),T,p,gel(res,4)));
 }
 
