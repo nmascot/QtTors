@@ -732,6 +732,293 @@ quartic_disc(GEN q)
 }
 
 static GEN
+quartic_lead(GEN P)
+{ return degpol(P) < 4 ? gen_0: gel(P, 6); }
+
+/*
+ Based on ECLIB, minim.cc by J.E. Cremona, and the paper
+ Minimisation and reduction of 2-, 3- and 4-coverings of elliptic curves
+ J.E. Cremona, T.A. Fisher, AND M. Stoll
+ https://arxiv.org/pdf/0908.1741.pdf
+*/
+
+static GEN
+quartic_root_p(GEN P0, GEN p)
+{
+  GEN P = FpX_red(P0, p);
+  GEN e = gel(P,2), d = gel(P,3), c = gel(P,4), b = gel(P,5), a = quartic_lead(P);
+  GEN b2, ac, p_seminv;
+  ulong pp = itou_or_0(p);
+  if (!signe(e) && !signe(d)) return gen_0;
+  if (pp == 2) return gen_1;
+  if (pp == 3)
+  {
+    if (!signe(a))  return Fp_neg(mulii(b,e),p);
+    else            return Fp_neg(mulii(a,d),p);
+  }
+  b2 = sqri(b);
+  ac = mulii(a,c);
+  p_seminv = Fp_sub(muliu(b2,3),shifti(ac,3), p);
+  if (signe(p_seminv)==0) /* quadruple root */
+    return Fp_div(negi(b),shifti(a,2),p);
+  else /* triple root only */
+  {
+    if (!signe(a)) /* fourth root is at infinity */
+      return Fp_div(Fp_neg(c,p), muliu(b,3), p);
+    else
+    {
+      GEN t = Fp_inv(shifti(mulii(a,p_seminv),2), p);
+      GEN r_seminv = subii(addii(mulii(b,b2), shifti(mulii(sqri(a),d),3)),
+                           shifti(mulii(ac,b),2));
+      return Fp_mul(Fp_sub(muliu(r_seminv,3), mulii(b,p_seminv),p),t,p);
+    }
+  }
+}
+
+static void
+m_invert(GEN M) /* multiples by [0,1; -1,0] */
+{
+  GEN m = gel(M,2);
+  GEN A = gcoeff(m,1,1), B = gcoeff(m,1,2);
+  GEN C = gcoeff(m,2,1), D = gcoeff(m,2,2);
+  gcoeff(m,1,1) = B; gcoeff(m,1,2) = negi(A);
+  gcoeff(m,2,1) = D; gcoeff(m,2,2) = negi(C);
+}
+
+static void
+scale_u(GEN M, GEN u)
+{ gel(M,1) = mulii(u, gel(M,1)); }
+
+static void
+scale_x(GEN m, GEN c)
+{
+  GEN M = gel(m,2);
+  gcoeff(M,1,1) = mulii(c, gcoeff(M,1,1));
+  gcoeff(M,2,1) = mulii(c, gcoeff(M,2,1));
+}
+
+static void
+shift_x(GEN m, GEN a)
+{
+  GEN M = gel(m,2);
+  gcoeff(M,1,2) = addii(gcoeff(M,1,2), mulii(a, gcoeff(M,1,1)));
+  gcoeff(M,2,2) = addii(gcoeff(M,2,2), mulii(a, gcoeff(M,2,1)));
+}
+
+static void
+shift_y(GEN m, GEN a)
+{
+  GEN M = gel(m,2);
+  gcoeff(M,1,1) = addii(gcoeff(M,1,1), mulii(a, gcoeff(M,1,2)));
+  gcoeff(M,2,1) = addii(gcoeff(M,2,1), mulii(a, gcoeff(M,2,2)));
+}
+
+static GEN
+ZX_invtranslate(GEN P, GEN c)
+{
+  return RgX_recip_shallow(ZX_translate(RgX_recip_shallow(P), c));
+}
+
+static GEN
+ZX_invert(GEN P)
+{
+  return RgX_unscale(RgX_recip_shallow(P),gen_m1);
+}
+
+static GEN
+quartic_minim_p(GEN P, GEN p, GEN m)
+/* assuming p^4|I, p^6|J, (or stronger conditions when p=2 or p=3)
+   returns an equivalent quartic with invariants divided by p^4, p^6;
+   m holds the transformation matrix, must be initialized (say with identity)
+   returns success, can be 0 only for p=2 */
+{
+  ulong pp = itou_or_0(p);
+  long v = ZX_pval(P, p);
+  GEN p2 = sqri(p);
+  if (v >= 2) /* trivial case, all coeffs divisible by p^2 */
+  {
+    scale_u(m, p);
+    return  ZX_Z_divexact(P, p2);
+  }
+
+  if (v==1)
+  {
+    GEN P0 = ZX_Z_divexact(P, p);
+    GEN a0 = quartic_lead(P0), b0 = gel(P0,5), d0 = gel(P0,3), e0 = gel(P0,2);
+    if (dvdii(a0,p) && dvdii(b0,p))  /* mult root is at infty move to 0 */
+    {
+      m_invert(m);
+      P = ZX_invert(P);
+    }
+    else
+    {
+      if (!dvdii(e0,p) || !dvdii(d0,p)) /* mult root is finite and not zero */
+        /* find it and shift it to 0 */
+      {
+        GEN alpha = quartic_root_p(P0,p);
+        P = ZX_translate(P,alpha);
+        shift_x(m, alpha);
+        if (!dvdii(gel(P,2),p2) || !dvdii(gel(P,3),p2) || !dvdii(gel(P,4),p2))
+          pari_err_BUG("quartic_minim_p");
+      }
+    }
+    a0 = diviiexact(quartic_lead(P),p);
+    b0 = diviiexact(gel(P,5),p);
+    if (!dvdii(a0,p) && !dvdii(b0,p))
+    {
+      GEN gamma = Fp_div(negi(a0), b0, p);
+      P = ZX_invtranslate(P, gamma);
+      shift_y(m, gamma);
+    }
+    if (pp==2)
+    {
+      if (!dvdiu(gel(P,2),16))
+        /* failure (cannot happen if 2^6|I, 2^7|J or 2^5|I & Q_2-soluble) */
+        return mkvec(P);
+    }
+    scale_x(m, p);
+    scale_u(m, p2);
+    return ZX_Z_divexact(ZX_unscale(P, p), sqri(p2));
+  }
+
+  if (dvdii(quartic_lead(P),p) && dvdii(gel(P,5),p)) /* mult root is at infty,  move it to 0 */
+  {
+    m_invert(m);
+    P = ZX_invert(P);
+  }
+  else
+  {
+    if (!dvdii(gel(P,2),p) || !dvdii(gel(P,3),p)) /* mult root finite and not zero */
+    {
+      GEN alpha = quartic_root_p(P,p);
+      P = ZX_translate(P, alpha);
+      shift_x(m, alpha);
+      if (!dvdii(gel(P,4),p) || !dvdii(gel(P,3),p) || !dvdii(gel(P,2),p))
+        pari_err_BUG("quartic_minim_p");
+    }
+  }
+  if (!dvdii(quartic_lead(P), p) && !dvdii(gel(P,5), p))
+  {
+    GEN gamma = Fp_div(negi(gel(P,6)), gel(P,5), p);
+    P = ZX_invtranslate(P, gamma);
+    shift_y(m, gamma);
+  }
+  if (dvdii(quartic_lead(P),p)) /* triple root case */
+  {
+    GEN beta = gen_0, p3;
+    GEN a = quartic_lead(P), b = gel(P,5), c = gel(P,4), d = gel(P,3), e = gel(P,2);
+    if (pp==3)
+    {
+      long vpi = Z_lval(addii(subii(muliu(mulii(a,e),12),muliu(mulii(b,d),3)),sqri(c)),3);
+      GEN tp = vpi==4 ? diviuexact(negi(e),27): diviuexact(negi(c),9);
+      if (!dvdiu(tp,3)) beta = muliu(Fp_div(tp,b,p), 3);
+    }
+    else
+    {
+      GEN tp = diviiexact(negi(c),p);
+      if (!dvdii(tp,p)) beta = mulii(p, Fp_div(tp, muliu(b,3), p));
+    }
+    p3 = mulii(p,p2);
+    P = ZX_translate(P, beta);
+    shift_x(m, beta);
+    scale_x(m, p2);
+    scale_u(m, p3);
+    return ZX_Z_divexact(ZX_unscale(P,p2),sqri(p3));
+  }
+  else  /* quadruple root case */
+  {
+    if (pp==3)
+    {
+      GEN b0 = diviuexact(gel(P,5),3);
+      if (!dvdiu(b0,3))
+      {
+        GEN beta = Fp_div(mulis(b0,-3), gel(P,6), p);
+        P = ZX_translate(P,beta);
+        shift_x(m,beta);
+      }
+    }
+    if (pp==2)
+    {
+      if (!dvdiu(gel(P,2),16))
+        return mkvec(P);
+    }
+    scale_x(m, p);
+    scale_u(m, p2);
+    return ZX_Z_divexact(ZX_unscale(P,p), sqri(p2));
+  }
+}
+
+/* Given vpi = val(p,I) and vpj=val(p,J) returns 1 if non-minimal
+   smallp = p if p=2,3 else =0.
+   p=3: needs also vpd=val(p,disc)
+   p=2: may or may not be minimizable, but worth a try
+
+   References:
+   Stoll, M., & Cremona, J. (2002).
+   Minimal Models for 2-coverings of Elliptic Curves.
+   LMS Journal of Computation and Mathematics, 5, 220-243
+   https://johncremona.github.io/papers/twoadic_jcm.pdf
+
+   Tom Fisher, A new approach to minimising binary quartics and ternary cubics
+   Mathematical Research Letters Volume 14 (2007) no 4 597-613
+   https://www.dpmms.cam.ac.uk/~taf1000/papers/minbqtc.pdf
+*/
+static int
+is_nonmin(int smallp, long vpi, long vpj, long vpd)
+{
+  if (smallp==3) return (vpi > 4 && vpj > 8) || (vpi==4 && vpj==6 && vpd > 14);
+  return vpi > 3 && vpj > 5;
+}
+
+static GEN
+quartic_minim_all(GEN P)
+{
+  GEN IJ = quartic_IJ(P), I = gel(IJ,1), J = gel(IJ,2);
+  GEN plist = gel(Z_factor(gcdii(I,J)),1);
+  long i, l = lg(plist);
+  GEN m = mkvec2(gen_1, matid(2));
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(plist,i);
+    long smallp = itou_or_0(p);
+    long vpi = LONG_MAX, vpj = LONG_MAX, vpd = 0;
+    int nonmin;
+    if (signe(I)) vpi = Z_pval(I,p);
+    if (signe(J)) vpj = Z_pval(J,p);
+    if (smallp==3)
+      vpd = Z_lval(subii(shifti(gpowgs(I,3),2), sqri(J)),3);
+    nonmin = is_nonmin(smallp,vpi,vpj,vpd);
+    if (!nonmin)
+      continue;
+    while (nonmin)
+    {
+      P = quartic_minim_p(P, p, m);
+      if (typ(P)==t_POL) /* can only fail for p=2 */
+      {
+        GEN IJ = quartic_IJ(P);
+        vpi-=4; vpj-=6;
+        I = diviiexact(I, powiu(p,4));
+        J = diviiexact(J, powiu(p,6));
+        if (!equalii(gel(IJ,1),I) || !equalii(gel(IJ,2),J))
+          pari_err_BUG("quartic_minim_all");
+        if (smallp==3) vpd-=12;
+        nonmin = is_nonmin(smallp,vpi,vpj,vpd);
+      }
+      else
+      {
+        P = gel(P,1);
+        break;
+      }
+    }
+  }
+  return mkvec2(P, m);
+}
+
+/*******************************************************************/
+/*                         Cassels' pairing                        */
+/*******************************************************************/
+
+static GEN
 nfsqrt(GEN nf, GEN z)
 {
   long v = fetch_var_higher();
@@ -741,8 +1028,16 @@ nfsqrt(GEN nf, GEN z)
 }
 
 static GEN
+nfsqrt_safe(GEN nf, GEN z)
+{
+  GEN r = nfsqrt(nf, z);
+  if (!r) pari_err_BUG("ellrank");
+  return r;
+}
+
+static GEN
 vecnfsqrtmod(GEN x, GEN P)
-{ pari_APPLY_same(gmodulo(nfsqrt(gel(x,i),P),gel(x,i))) }
+{ pari_APPLY_same(gmodulo(nfsqrt_safe(gel(x,i), P), gel(x,i))) }
 
 static GEN
 enfsqrt(GEN T, GEN P)
@@ -1667,6 +1962,7 @@ liftselmer_cover(GEN b, GEN expo, GEN LS2, GEN pol, GEN K)
 {
   GEN P, Q, Q4, R, den, q0, q1, q2, xz, x, y, y2m, U, param, newb;
   GEN ttheta, tttheta, zc, polprime;
+  GEN QM, zden;
   zc = RgXQV_factorback(LS2, expo, pol);
   if (typ(zc)==t_INT) zc = scalarpol(zc, varn(pol));
   ttheta = RgX_shift_shallow(pol,-2);
@@ -1681,13 +1977,17 @@ liftselmer_cover(GEN b, GEN expo, GEN LS2, GEN pol, GEN K)
   q1 = RgM_neg(tracematrix(QXQ_mul(zc, ttheta, pol), newb, pol));
   q1 = Q_remove_denom(qfeval(q1, param), &den);
   if (den) q1 = ZX_Z_mul(q1, den);
+  if (!equali1(K)) q1 = RgX_Rg_mul(q1, K);
+  QM = quartic_minim_all(q1);
+  q1 = gel(QM,1);
+  zden = gmael(QM,2,1);
   Q = hyperellreduce(q1, &R);
-  if (!equali1(K)) Q = RgX_Rg_mul(Q, K);
+  R = gmul(gmael(QM,2,2), R);
   if (DEBUGLEVEL>1) err_printf("  reduced quartic: Y^2 = %Ps\n", Q);
   xz = mkcol2(pol_x(0),gen_1);
   P = RgM_RgC_mul(R, xz); x = gel(P,1); y = gel(P,2);
   param = RgXV_homogenous_evaldeg(param, x, gpowers(y, 2));
-  param = gmul(param, den? mulii(K, den): K);
+  param = gmul(param, gdiv(den? mulii(K, den): K, zden));
   q0 = tracematrix(QXQ_mul(zc, tttheta, pol), newb, pol);
   x = gdiv(qfeval(q0, param), K);
   Q4 = gpowers(Q,4);
@@ -1711,7 +2011,7 @@ liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry, GEN *
   polprime = ZX_deriv(pol); av2 = avma;
   for (t = 1; t <= ntry; t++, set_avma(av2))
   {
-    GEN P, Q, R, den, q0, q1, q2, xz, x, y, zz, zc, U, param, newb;
+    GEN P, Q, R, den, q0, q1, q2, xz, x, y, zz, zc, U, param, newb, zden, QM;
     if (t == 1) zc = z;
     else
     {
@@ -1730,8 +2030,12 @@ liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry, GEN *
     q1 = RgM_neg(tracematrix(QXQ_mul(zc, ttheta, pol), newb, pol));
     q1 = Q_remove_denom(qfeval(q1, param), &den);
     if (den) q1 = ZX_Z_mul(q1, den);
+    if (!equali1(K)) q1 = RgX_Rg_mul(q1, K);
+    QM = quartic_minim_all(q1);
+    q1 = gel(QM,1);
+    zden = gmael(QM,2,1);
     Q = hyperellreduce(q1, &R);
-    if (!equali1(K)) Q = RgX_Rg_mul(Q, K);
+    R = gmul(gmael(QM,2,2), R);
     if (pt_Q) *pt_Q = Q;
     if (DEBUGLEVEL>1) err_printf("  reduced quartic: Y^2 = %Ps\n", Q);
 
@@ -1745,12 +2049,12 @@ liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry, GEN *
       }
     }
     P = RgM_RgC_mul(R, xz); x = gel(P,1); y = gel(P,2);
-
     param = RgXV_homogenous_evaldeg(param, x, gpowers(y, 2));
-    param = gmul(param, gdiv(den? mulii(K, den): K, zz));
+    param = gmul(param, gdiv(den? mulii(K, den): K, gmul(zz, zden)));
     q0 = tracematrix(QXQ_mul(zc, tttheta, pol), newb, pol);
     x = gdiv(qfeval(q0, param), K);
-    (void)issquareall(gdiv(poleval(pol, x), K), &y); /* K y^2 = pol(x) */
+    if (!issquareall(gdiv(poleval(pol, x), K), &y)) /* K y^2 = pol(x) */
+      pari_err_BUG("ellrank");
     P = mkvec2(x, y);
     if (DEBUGLEVEL) err_printf("Found point: %Ps\n", P);
     if (pt_Q) *pt_Q = gen_0;

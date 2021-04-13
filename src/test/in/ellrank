@@ -149,6 +149,9 @@ E=ellinit([0,-7396/27]); ellglobalred(E); mwrank(E)
 mwrank(ellinit([0,-1,0,-260,-1530]))
 E=ellinit([0,0,0,-1,351298031616]); mwrank(E)
 mwrank(ellinit([-625,3125]))
+mwrank(ellinit([1,0,1,54,-4676]));
+mwrank(ellinit([0,0,1,0,11864580]))
+mwrank(ellinit([0,-1,0,-877,-9662]))
 
 \\error
 checktwist([1,2],[1,3])
