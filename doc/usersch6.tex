@@ -2881,8 +2881,9 @@ step to speed up LLL reductions, see \tet{nf_get_Gtwist}.
 Suitable for \kbd{gerepileupto}, but does not collect garbage.
 
 \fun{GEN}{Hermite_bound}{long n, long prec}
-Remove a majoration of $\gamma_n^n$ where $\gamma_n$ is the
-Hermite constant for lattices of dimension $n$.
+return a majoration of $\gamma_n^n$ where $\gamma_n$ is the
+Hermite constant for lattices of dimension $n$. The bound is sharp in
+dimension $n \leq 8$ and $n = 24$.
 
 \subsec{Linear dependencies}
 
