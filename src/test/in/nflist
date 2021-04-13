@@ -24,6 +24,7 @@ do(G,lim)=
 }
 
 { vG=[
+  ["C1",1],
   ["C2",4],
   ["C3",10],["S3",4],
   ["C4",8],["V4",8],["D4",3],["A4",5],["S4",3],
@@ -41,9 +42,11 @@ nflist([9,9])
 nflist([11,1], 41426511213649)
 nflist([11,3])
 
+nfresolvent(x)
 T=x^5-x^4+2*x^2-2*x+2; nfresolvent(T)
 T=polsubcyclo(53,13); nfresolvent(T,1)
 T=x^13-x^12-50*x^11+25*x^10+722*x^9-226*x^8-4207*x^7+1158*x^6+10465*x^5-2535*x^4-9399*x^3+1079*x^2+1316*x-49; nfresolvent(T,1)
+T=x^4+14*x^2+1; nfresolvent(T,3)
 
 \\ regression tests
 nflist("D5",10^6)
