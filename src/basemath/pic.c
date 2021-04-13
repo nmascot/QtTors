@@ -4149,7 +4149,7 @@ GEN SmoothGeneric(GEN f0, ulong d, GEN pr, GEN P0)
 {
 	pari_sp av = avma;
 	GEN f,A,Vars,vars,xy1,uvw,u,v,w,P,p,B,B2,C,ci,cij;
-	ulong i,j,n,b;
+	ulong i,j,n,b,b2;
 	
 	P = gen_0;
 	Vars = variables_vec(f0);
@@ -4184,8 +4184,14 @@ GEN SmoothGeneric(GEN f0, ulong d, GEN pr, GEN P0)
 	A = cgetg(4,t_MAT);
 	for(i=1;i<=3;i++)
 		gel(A,i) = cgetg(4,t_COL);
-	for(b=1;;b++)
+	b=1;
+	for(b2=1;;b2++)
 	{
+		if(b2==10)
+		{
+			b2 = 0;
+			b++;
+		}
 		if(SmoothIsGeneric(f,d,pr,vars[1],vars[2],P0?P:NULL)) break;
 		/* get random change of vars */
 		B = utoi(b);
