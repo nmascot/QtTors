@@ -733,11 +733,11 @@ Hermite_bound(long n, long prec)
   switch(n)
   {
     case 1: return gen_1;
-    case 2: return mkfrac(utoipos(4), utoipos(3));
+    case 2: retmkfrac(utoipos(4), utoipos(3));
     case 3: return gen_2;
     case 4: return utoipos(4);
     case 5: return utoipos(8);
-    case 6: return mkfrac(utoipos(64), utoipos(3));
+    case 6: retmkfrac(utoipos(64), utoipos(3));
     case 7: return utoipos(64);
     case 8: return utoipos(256);
     case 24: return int2n(48);
