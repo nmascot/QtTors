@@ -127,17 +127,13 @@ closure(const char *s, GEN v) { return snm_closure(is_entry(s), v); }
 /*                        Utility functions                               */
 /**************************************************************************/
 static long
-divissquare(GEN x, GEN y)
-{ GEN r, q = dvmdii(x, y, &r); return r == gen_0 && Z_issquare(q); }
-static long
 divissquareall(GEN x, GEN y, GEN *f)
 { GEN r, q = dvmdii(x, y, &r); return r == gen_0 && Z_issquareall(q,f); }
 static long
+divissquare(GEN x, GEN y) { return divissquareall(x, y, NULL); }
+static long
 divispowerall(GEN x, GEN y, ulong k, GEN *f)
 { GEN r, q = dvmdii(x, y, &r); return r == gen_0 && Z_ispowerall(q,k,f); }
-static long
-divispower(GEN x, GEN y, ulong k)
-{ GEN r, q = dvmdii(x, y, &r); return r == gen_0 && Z_ispower(q,k); }
 /* x / y if y | x, else NULL */
 static GEN
 divide(GEN x, GEN y)
@@ -3367,7 +3363,7 @@ makeS36(GEN N, GEN field, long s)
     else
     {
       GEN D2 = checkfield(field, 2);
-      if (!divispower(N,  powiu(absi_shallow(D2),3), 4)) return NULL;
+      if (!divispowerall(N,  powiu(D2,3), 4, NULL)) return NULL;
       vD = mkvec(D2);
     }
   }
@@ -5281,8 +5277,12 @@ nflist(GEN GP, GEN N, long s, GEN field)
       Xinf = X = NULL;/*LCOV_EXCL_LINE*/
   }
   if (typ(X) != t_INT || typ(Xinf) != t_INT) pari_err_TYPE("nflist", N);
-  if (signe(Xinf) <= 0) pari_err_DOMAIN("nflist", "Xinf", "<=", gen_0, Xinf);
-  if (signe(X) <= 0) pari_err_DOMAIN("nflist", "X", "<=", gen_0, X);
+  if (signe(Xinf) <= 0)
+  {
+    if (signe(Xinf) < 0) pari_err_DOMAIN("nflist", "Xinf", "<=", gen_0, Xinf);
+    Xinf = gen_1;
+  }
+  if (signe(X) < 0) pari_err_DOMAIN("nflist", "X", "<=", gen_0, X);
   switch(cmpii(Xinf, X))
   {
     case 1: v = NULL; break;

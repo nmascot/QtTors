@@ -68,6 +68,9 @@ nflist("S5")
 #nflist([6,10],[802816, 2175624])
 nflist("D2")
 nflist("D3")
+#nflist("C4", [5000,10000], 0)
+nflist("C4",0)
+nflist("C4",[0,0])
 
 \\ ERRORS
 nflist("S3",-1)
