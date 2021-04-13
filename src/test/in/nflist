@@ -76,6 +76,7 @@ nflist("C4",0)
 nflist("C4",[0,0])
 nflist("C2",2^64+1)
 nflist("C4",(2^64+1)^3)
+nflist("D4",100,,x^2+1)
 
 \\ ERRORS
 nflist("S3",-1)
