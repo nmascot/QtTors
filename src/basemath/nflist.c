@@ -1269,7 +1269,7 @@ zv_is_1(GEN x, long i0)
   return 1;
 }
 
-/* n > 0, D sqfree, sumsq(odd(D)? D: 4*D) is true */
+/* n > 0, D sqfree, sum2sq(odd(D)? D: 4*D) is true */
 static GEN
 polsubcycloC4_i(GEN n, long s, long fli, GEN D)
 {

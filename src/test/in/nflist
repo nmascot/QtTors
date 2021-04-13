@@ -71,6 +71,8 @@ nflist("D3")
 #nflist("C4", [5000,10000], 0)
 nflist("C4",0)
 nflist("C4",[0,0])
+nflist("C2",2^64+1)
+nflist("C4",(2^64+1)^3)
 
 \\ ERRORS
 nflist("S3",-1)
