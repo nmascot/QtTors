@@ -1974,7 +1974,7 @@ quadcubpow(GEN bnf, GEN Gid, GEN ideal, GEN a)
   long t;
   if (mpodd(nf_get_disc(nf)))
     switch (lg(Sprk))
-    { /* 2 = P3, P2 * P1, P1 * P1* P1 */
+    { /* 2 = P3, P2*P1, P1*P1*P1 */
       case 2: return issolvable(nf, a, gel(Sprk,1))? 0: 3; /* ideal is odd */
       case 3:
         t = issolvable(nf, a, gel(Sprk,2))? 2: 3;
@@ -5257,11 +5257,9 @@ nflist(GEN GP, GEN N, long s, GEN field)
   \"C3\"=[3,1], \"S3\"=[3,2];\n\
   \"C4\"=[4,1], \"V4\"=[4,2], \"D4\"=[4,3], \"A4\"=[4,4], \"S4\"=[]4,5];\n\
   \"C5\"=[5,1], \"D5\"=[5,2], \"F5\"=\"M20\"=[5,3], \"A5\"=[5,4];\n\
-  \"C6\"=[6,1], \"S36\"=\"D66\"=[6,2], \"D612\"=[6,3], \"A46\"=[6,4], \"S3C3\"=[6,5], \n\
-    \"A462\"=\"A46C2\"=[6,6], \"S46+\"=[6,7], \"S46-\"=[6,8], \"S32\"=[6,9],\n\
-    \"C32C4\"=[6,10], \"S462\"=\"S46C2\"=[6,11], \"A56\"=\"PSL25\"=[6,12], \"C32D4\"=[6,13];\n\
+  \"C6\"=[6,1], [6,2], [6,3], ..., [6,13];\n\
   \"C7\"=[7,1], \"D7\"=[7,2], \"M21\"=[7,3], \"M42\"=[7,4];\n\
-  \"C9\"=[9,1], \"C32\"=\"C3C3\"=[9,2], \"D9\"=[9,3].\"\n\
+  \"C9\"=[9,1], [9,2], \"D9\"=[9,3].\"\n\
   Also supported are \"Cp\"=[p, 1] and \"Dp\"=[p, 2] for any odd prime p";
     pari_err(e_MISC, s, GP);
   }
@@ -5276,7 +5274,16 @@ nflist(GEN GP, GEN N, long s, GEN field)
     default: pari_err_TYPE("nflist", N);
       Xinf = X = NULL;/*LCOV_EXCL_LINE*/
   }
-  if (typ(X) != t_INT || typ(Xinf) != t_INT) pari_err_TYPE("nflist", N);
+  if (typ(X) != t_INT)
+  {
+    X = gfloor(X);
+    if (typ(X) != t_INT) pari_err_TYPE("nflist", N);
+  }
+  if (typ(Xinf) != t_INT)
+  {
+    Xinf = gceil(Xinf);
+    if (typ(Xinf) != t_INT) pari_err_TYPE("nflist", N);
+  }
   if (signe(Xinf) <= 0)
   {
     if (signe(Xinf) < 0) pari_err_DOMAIN("nflist", "Xinf", "<=", gen_0, Xinf);
