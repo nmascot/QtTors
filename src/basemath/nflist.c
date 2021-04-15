@@ -2334,7 +2334,7 @@ makeA4S4vec(long A4, GEN X, GEN Xinf, GEN field, long s)
   {
     GEN D = checkfield(field, 3);
     long sD = signe(D);
-    if (A4 != Z_issquare(D) || cmpii(absi_shallow(D), X) > 0 ||
+    if (A4 != Z_issquare(D) || abscmpii(D, X) > 0 ||
         (!A4 && ((sD > 0 && snew == 1) || (sD < 0 && !odd(snew)))))
           return NULL;
     v = nflist_A4S4_worker_i(field, X, Xinf, snew);
