@@ -829,6 +829,8 @@ RgX_isscalar(GEN x)
 }
 INLINE long
 RgX_equal_var(GEN x, GEN y) { return varn(x) == varn(y) && RgX_equal(x,y); }
+INLINE GEN
+RgX_to_RgV(GEN x, long N) { x = RgX_to_RgC(x, N); settyp(x, t_VEC); return x; }
 
 INLINE int
 RgX_is_rational(GEN x)

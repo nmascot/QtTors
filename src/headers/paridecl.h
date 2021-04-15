@@ -6002,6 +6002,7 @@ INLINE int    RgX_is_ZX(GEN x);
 INLINE int    RgX_isscalar(GEN x);
 INLINE GEN    RgX_shift_inplace(GEN x, long v);
 INLINE void   RgX_shift_inplace_init(long v);
+INLINE GEN    RgX_to_RgV(GEN x, long N);
 INLINE GEN    RgXQX_div(GEN x, GEN y, GEN T);
 INLINE GEN    RgXQX_rem(GEN x, GEN y, GEN T);
 INLINE GEN    RgX_coeff(GEN x, long n);

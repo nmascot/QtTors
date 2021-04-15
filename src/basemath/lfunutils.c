@@ -2196,12 +2196,10 @@ eta_product_ZXn(GEN eta, long L)
 static GEN
 vecan_eta(GEN an, long L)
 {
-  GEN D = gel(an, 1), R = gel(an, 2), V;
-  long v = 0, i;
-  for (i = 1; i < lg(D); i++) v += R[i] * D[i];
-  v = v / 24 - 1;
-  V = RgX_to_RgC(RgX_shift(eta_product_ZXn(an, L - v), v), L);
-  settyp(V, t_VEC); return V;
+  long v = itos(gel(an, 3));
+  GEN t = eta_product_ZXn(an, L - v);
+  if (v) t = RgX_shift_shallow(t, v);
+  return RgX_to_RgV(t, L);
 }
 /* return 1 if cuspidal, 0 if holomorphic, -1 otherwise */
 static int
@@ -2307,7 +2305,7 @@ lfunetaquo(GEN eta0)
   if (!cusp) pari_err_IMPL("noncuspidal eta quotient");
   if (!sd) pari_err_IMPL("non self-dual eta quotient");
   if (typ(k) != t_INT) pari_err_TYPE("lfunetaquo [nonintegral weight]", eta0);
-  BR = mkvec2(ZV_to_zv(gel(eta,1)), ZV_to_zv(gel(eta,2)));
+  BR = mkvec3(ZV_to_zv(gel(eta,1)), ZV_to_zv(gel(eta,2)), stoi(v - 1));
   Ldata = mkvecn(6, tag(BR,t_LFUN_ETA), gen_0, mkvec2(gen_0,gen_1), k,N, gen_1);
   return gerepilecopy(ltop, Ldata);
 }
