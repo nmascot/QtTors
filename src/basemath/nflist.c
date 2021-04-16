@@ -4927,6 +4927,7 @@ grouptranslate(const char *g)
   if (!strcmp(g, "A5")) return 504;
   if (!strcmp(g, "A5cond")) return 509;
   if (!strcmp(g, "C6")) return 601;
+  if (!strcmp(g, "D6")) return 602;
   if (!strcmp(g, "C7")) return 701;
   if (!strcmp(g, "D7")) return 702;
   if (!strcmp(g, "M21")) return 703;
@@ -4934,7 +4935,7 @@ grouptranslate(const char *g)
   if (!strcmp(g, "C9")) return 901;
   if (!strcmp(g, "D9")) return 903;
   r = *g; ell = itos( strtoi(g + 1) );
-  if (uisprime(ell))
+  if (ell >= 8 && uisprime(ell))
   {
     if (r == 'C') return 1000 * ell + 1;
     if (r == 'D') return 1000 * ell + 2;
@@ -5252,12 +5253,12 @@ nflist(GEN GP, GEN N, long s, GEN field)
   \"C1\"=[1,1];\n\
   \"C2\"=[2,1];\n\
   \"C3\"=[3,1], \"S3\"=[3,2];\n\
-  \"C4\"=[4,1], \"V4\"=[4,2], \"D4\"=[4,3], \"A4\"=[4,4], \"S4\"=[]4,5];\n\
+  \"C4\"=[4,1], \"V4\"=[4,2], \"D4\"=[4,3], \"A4\"=[4,4], \"S4\"=[4,5];\n\
   \"C5\"=[5,1], \"D5\"=[5,2], \"F5\"=\"M20\"=[5,3], \"A5\"=[5,4];\n\
-  \"C6\"=[6,1], [6,2], [6,3], ..., [6,13];\n\
+  \"C6\"=[6,1], \"D6\"=[6,2], [6,3], [6,4],..., [6,13];\n\
   \"C7\"=[7,1], \"D7\"=[7,2], \"M21\"=[7,3], \"M42\"=[7,4];\n\
   \"C9\"=[9,1], [9,2], \"D9\"=[9,3].\"\n\
-  Also supported are \"Cp\"=[p, 1] and \"Dp\"=[p, 2] for any odd prime p";
+  Also supported are \"Cp\"=[p,1] and \"Dp\"=[p,2] for any odd prime p";
     pari_err(e_MISC, s, GP);
   }
   deg = g / (g > 1000? 1000: 100);
