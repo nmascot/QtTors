@@ -47,7 +47,9 @@ T=x^4+14*x^2+1; nfresolvent(T,3)
 T=x^7-8*x^5-2*x^4+16*x^3+6*x^2-6*x-2;nfresolvent(T,3)
 T=x^7-2;nfresolvent(T,3)
 T=x^7-2*x^6-2*x^5+x^4+6*x^3-x-4;nfresolvent(T,3)
-
+T=x^6+2*x^5-9*x^4-14*x^3+10*x^2+8*x+1;nfresolvent(T)
+nfresolvent(T,3)
+T=x^6-3*x^5+7*x^4-9*x^3+7*x^2-3*x+1;nfresolvent(T,3)
 
 \\ regression tests
 nflist("D5",10^6)
@@ -88,6 +90,10 @@ nflist("D4",100,,x^2+1)
 nflist("D4",21^2,,x^2+x+1)
 nflist("A4",[1,10^4],,x^3-x-1)
 nflist("C6",1229312,,x^3-x^2-2*x+1)
+nflist("C6",[1229312,2*10^6],,x^3-x^2-2*x+1)
+nflist([6,2],29791,,x^2-x+8)
+nflist([6,2],[29791,30000],,x^2-x+8)
+
 
 \\ ERRORS
 nflist("S3",-1)

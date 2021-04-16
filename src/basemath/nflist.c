@@ -3351,7 +3351,7 @@ makeS36(GEN N, GEN field, long s)
     else
     {
       GEN D2 = checkfield(field, 2);
-      if (!divispowerall(N,  powiu(D2,3), 4, NULL)) return NULL;
+      if (!divispowerall(N,  powiu(absi_shallow(D2),3), 4, NULL)) return NULL;
       vD = mkvec(D2);
     }
   }
