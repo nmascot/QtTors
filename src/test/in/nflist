@@ -37,10 +37,7 @@ do(G, lim)=
 ];}
 
 for(i=1,#vG,my([GP,lim]=vG[i]); do(GP,lim));
-nflist([10,1])
-nflist([9,9])
 nflist([11,1], 41426511213649)
-nflist([11,3])
 
 nfresolvent(x)
 T=x^5-x^4+2*x^2-2*x+2; nfresolvent(T)
@@ -90,3 +87,6 @@ nflist("D4",21^2,,x^2+x+1)
 nflist("S3",-1)
 nflist("S3",[-1,2])
 nflist("S3",[1,-2])
+nflist([10,1])
+nflist([9,9])
+nflist([11,3])
