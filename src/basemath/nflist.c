@@ -2622,23 +2622,16 @@ makeDL(long ell, GEN N, GEN field, long s)
   if (c == 1) return NULL;
   setlg(v, c); return sturmseparate(myshallowconcat1(v), s, ell);
 }
-
+/* ell >= 5 prime */
 static GEN
 makeDLresolvent(long ell, GEN pol, long flag)
 {
   GEN Dpow = checkfield(pol, ell), D, DF, F;
-  long pow = (ell - 1) >> 1, si = signe(Dpow);
-  if (ell > 3)
-  {
-    long d4;
-    D = si > 0 ? sqrtnint(Dpow, pow) : negi(sqrtnint(negi(Dpow), pow));
-    d4 = Mod4(D);
-    if (d4 == 3) D = negi(D);
-    else if (d4 == 2) D = shifti(D, 2);
-    else if (d4 == 0 && si > 0 && pol2s(pol)) D = negi(D);
-  }
-  else D = Dpow;
-  if (equali1(D)) pari_err_BUG("nfresolvent [incorrect Galois group]");
+  long d4, pow = (ell - 1) >> 1, si = signe(Dpow);
+  D = si > 0 ? sqrtnint(Dpow, pow) : negi(sqrtnint(negi(Dpow), pow));
+  d4 = Mod4(D);
+  if (d4 == 3 || (d4 == 0 && si > 0 && pol2s(pol))) D = negi(D);
+  else if (d4 == 2) D = shifti(D, 2);
   DF = coredisc2(D); D = quadpoly_i(gel(DF, 1)); F = gel(DF, 2);
   return flag? mkvec2(D, F): D;
 }
