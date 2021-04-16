@@ -44,6 +44,10 @@ T=x^5-x^4+2*x^2-2*x+2; nfresolvent(T)
 T=polsubcyclo(53,13); nfresolvent(T,1)
 T=x^13-x^12-50*x^11+25*x^10+722*x^9-226*x^8-4207*x^7+1158*x^6+10465*x^5-2535*x^4-9399*x^3+1079*x^2+1316*x-49; nfresolvent(T,1)
 T=x^4+14*x^2+1; nfresolvent(T,3)
+T=x^7-8*x^5-2*x^4+16*x^3+6*x^2-6*x-2;nfresolvent(T,3)
+T=x^7-2;nfresolvent(T,3)
+T=x^7-2*x^6-2*x^5+x^4+6*x^3-x-4;nfresolvent(T,3)
+
 
 \\ regression tests
 nflist("D5",10^6)
@@ -91,3 +95,4 @@ nflist("S3",[1,-2])
 nflist([10,1])
 nflist([9,9])
 nflist([11,3])
+nflist("M21",[1,10^4],,x)
