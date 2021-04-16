@@ -378,6 +378,7 @@ x^6 - 2*x^5 + 3*x^4 - 4*x^2 + 4*x - 3
 []
 []
 []
+[]
   ***   at top-level: nflist("S3",-1)
   ***                 ^---------------
   *** nflist: domain error in nflist: Xinf <= 0
@@ -423,4 +424,4 @@ x^6 - 2*x^5 + 3*x^4 - 4*x^2 + 4*x - 3
   "C7"=[7,1], "D7"=[7,2], "M21"=[7,3], "M42"=[7,4];
   "C9"=[9,1], [9,2], "D9"=[9,3]."
   Also supported are "Cp"=[p, 1] and "Dp"=[p, 2] for any odd prime p.
-Total time spent: 31849
+Total time spent: 30925

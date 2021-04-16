@@ -2133,11 +2133,9 @@ S4data(GEN pol, long s)
   long isA4;
 
   if (checkS4data(pol)) return pol;
-  if (typ(pol) != t_POL) pari_err_BUG("");
-  bnf = (typ(pol) != t_POL)? checkbnf(pol): Buchall(pol, nf_FORCE, DEFAULTPREC);
-  nf = bnf_get_nf(bnf);
+  bnf = Buchall(pol, nf_FORCE, DEFAULTPREC);
+  nf = bnf_get_nf(bnf); Gid = makeGid(nf);
   lvunit = makevunits(bnf); isA4 = Z_issquare(nf_get_disc(nf));
-  Gid = makeGid(nf);
   sgnu = (s != -1 && nf_get_r1(nf) == 3)? nfsign(nf, lvunit): gen_0;
   return mkvecn(5, bnf, lvunit, Gid, sgnu, mkvecsmall(isA4));
 }
@@ -2150,7 +2148,7 @@ cmp2(void *E,GEN x,GEN y)
 
 /* Find quartic A4 or S4-extensions of Q with resolvent pol and square root of
  * norm of relative discriminant = L; disc(K/Q) = L^2 nfdisc(pol).
- * Here s number of complex places (0, 1, 2) or -1 if all desired signatures. */
+ * Here s = -1 or (0, 1, 2) */
 static GEN
 makeA4S4(GEN pol, GEN L, long s)
 {
@@ -2335,7 +2333,7 @@ makeA4S4vec(long A4, GEN X, GEN Xinf, GEN field, long s)
     GEN D = checkfield(field, 3);
     long sD = signe(D);
     if (A4 != Z_issquare(D) || abscmpii(D, X) > 0 ||
-        (!A4 && ((sD > 0 && snew == 1) || (sD < 0 && !odd(snew)))))
+        (sD > 0 && snew == 1) || (sD < 0 && !odd(snew)))
           return NULL;
     v = nflist_A4S4_worker_i(field, X, Xinf, snew);
   }
