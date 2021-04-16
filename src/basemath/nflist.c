@@ -3117,18 +3117,17 @@ makeA56vec(GEN X, GEN Xinf, long s)
   return mkvec3(makeA56vec_i(gel(v, 1), X, Xinf), cgetg(1, t_VEC),
                 makeA56vec_i(gel(v, 3), X, Xinf));
 }
-
-/* Stupid for now */
 static GEN
 makeA56(GEN N, long s) { return makeA56vec(N, N, s); }
 
+/* Stupid for now */
 static GEN
 makeA56resolvent(GEN pol, long flag)
 {
   GEN V, D6 = sqrti(nfdisc(pol)), LD = divisors(D6);
-  long i, s;
-  pol = polredabs(pol); s = pol2s(pol);
-  V = A5file(s ? "A51" : "A55");
+  long i;
+  pol = polredabs(pol);
+  V = A5file(pol2s(pol)? "A51": "A55");
   for (i = 1; i < lg(LD); i++)
   {
     GEN D52 = sqri(gel(LD,i));
@@ -3191,7 +3190,7 @@ makeC6(GEN N, GEN field, long s)
     GEN M = diviiexact(N, powiu(D2a, 3)), F, L, V2;
     long l, l2;
     if (!Z_issquareall(M, &F)) continue;
-    if (d3) { L = mkvec(field); l = 2; }
+    if (d3) { L = mkvec(mkvec(field)); l = 2; }
     else
     {
       long k;

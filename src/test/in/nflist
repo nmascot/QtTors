@@ -87,6 +87,7 @@ nflist("C4",2^192)
 nflist("D4",100,,x^2+1)
 nflist("D4",21^2,,x^2+x+1)
 nflist("A4",[1,10^4],,x^3-x-1)
+nflist("C6",1229312,,x^3-x^2-2*x+1)
 
 \\ ERRORS
 nflist("S3",-1)

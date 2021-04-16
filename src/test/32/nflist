@@ -383,6 +383,9 @@ x^6 - 2*x^5 + 3*x^4 - 4*x^2 + 4*x - 3
 []
 []
 []
+[x^6 + 2*x^5 - 9*x^4 - 14*x^3 + 10*x^2 + 8*x + 1, x^6 + 2*x^5 + 3*x^4 + 2*x^
+3 + 18*x^2 + 16*x + 41, x^6 + 2*x^5 - 9*x^4 - 14*x^3 + 10*x^2 + 8*x + 1, x^6
+ + 2*x^5 + 3*x^4 + 2*x^3 + 18*x^2 + 16*x + 41]
   ***   at top-level: nflist("S3",-1)
   ***                 ^---------------
   *** nflist: domain error in nflist: Xinf <= 0
@@ -431,4 +434,4 @@ x^6 - 2*x^5 + 3*x^4 - 4*x^2 + 4*x - 3
   ***   at top-level: nflist("M21",[1,10^4],,x)
   ***                 ^-------------------------
   *** nflist: incorrect type in makeMgenvec [field] (t_POL).
-Total time spent: 31803
+Total time spent: 33616
