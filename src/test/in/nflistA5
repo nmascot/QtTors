@@ -9,6 +9,7 @@ nflist(G,[100,18000])
 nflist(G,18496)
 nflist(G,42849)
 nflist(G,[18497,10^5])
+nflist(G,[18497,10^5],-2)
 
 G = "A5cond";
 nflist(G)
@@ -25,3 +26,4 @@ nflist(G,,2)
 nflist(G,[100,280000])
 nflist(G,287296)
 nflist(G,[287297,10^6])
+nflist(G,[287297,10^6],-2)
