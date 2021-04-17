@@ -2981,8 +2981,10 @@ makeMgenvec(long ell, long a, GEN X, GEN Xinf, GEN field, long s)
 /**********************************************************************/
 /*                        A5 by table lookup                          */
 /**********************************************************************/
+/* V a vector of [T, n] sorted wrt t_INT n. Return elts with Xinf <= n <= X.
+ * If fl is set return only the T's. */
 static GEN
-truncA5(GEN V, GEN Xinf, GEN X, long fl)
+vectrunc(GEN V, GEN Xinf, GEN X, long fl)
 {
   long l = lg(V), i = 1, c;
   GEN W;
@@ -3001,26 +3003,31 @@ truncA5(GEN V, GEN Xinf, GEN X, long fl)
   setlg(W, c); return W;
 }
 
+/* assume 1 <= t < 100, 1 <= 2s <= n < 100 */
 static GEN
-A5file(const char *name)
+nflistfile(const char *suf, long n, long t, long s)
 {
-  char *s = stack_malloc(strlen(pari_datadir) + 19 + 7 + 1);
+  char *f = stack_malloc(strlen(pari_datadir) + strlen(suf)
+                         + 1+10+1+1+1+3 + 4/*n/t*/ + 1);
   pariFILE *F;
-  sprintf(s, "%s/nflistdata/5/4/%s.gp", pari_datadir, name);
-  F = pari_fopengz(s);
-  if (!F) pari_err_FILE("nflistdata file",s);
+  sprintf(f, "%s/nflistdata/%ld/%ld/%ld%s.gp", pari_datadir, n, t,s, suf?suf:"");
+  F = pari_fopengz(f);
+  if (!F) pari_err_FILE("nflistdata file",f);
   return gp_readvec_stream(F->file);
 }
 
 static GEN
+A5file(const char *suf, long s) { return nflistfile(suf, 5, 4, s); }
+static GEN
 A5vec(GEN X, GEN Xinf, long s, long fl)
 {
   GEN L1, L5;
+  const char *suf = fl? "cond": "";
 
   if (!fl && cmpii(X, powuu(10,12)) > 0) pari_err(e_MISC, "A5 table too short");
   L1 = L5 = NULL;
-  if (s <= 0) L5 = truncA5(A5file(fl? "0cond": "0"), Xinf, X, fl);
-  if (s) L1 = truncA5(A5file(fl? "2cond": "2"), Xinf, X, fl);
+  if (s <= 0) L5 = vectrunc(A5file(suf, 0), Xinf, X, fl);
+  if (s) L1 = vectrunc(A5file(suf, 2), Xinf, X, fl);
   switch (s)
   {
     case 2: return L1;
@@ -3129,13 +3136,13 @@ makeA56resolvent(GEN pol, long flag)
   GEN V, D6 = sqrti(nfdisc(pol)), LD = divisors(D6);
   long i;
   pol = polredabs(pol);
-  V = A5file(pol2s(pol)? "2": "0");
+  V = A5file("", pol2s(pol)? 2: 0);
   for (i = 1; i < lg(LD); i++)
   {
     GEN D52 = sqri(gel(LD,i));
     if (dvdii(D52, D6))
     {
-      GEN L = truncA5(V, D52, D52, 0);
+      GEN L = vectrunc(V, D52, D52, 0);
       long j;
       for (j = 1; j < lg(L); j++)
       {
