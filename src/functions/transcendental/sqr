@@ -4,6 +4,8 @@ C-Name: gsqr
 Prototype: G
 Help: sqr(x): square of x. NOT identical to x*x.
 Description:
+ (usmall):int     sqru($1)
+ (small):int      sqrs($1)
  (int):int        sqri($1)
  (mp):mp          gsqr($1)
  (gen):gen        gsqr($1)
