@@ -671,7 +671,7 @@ realpart(GEN P, GEN R)
 {
   GEN G = galoisinit(rnfequation(P,R), NULL);
   GEN T = galoisfixedfield(G, gel(gal_get_gen(G),2), 1, -1);
-  setvarn(T,1); return T;
+  setvarn(T,1); return polredbest(T,0);
 }
 
 static GEN
