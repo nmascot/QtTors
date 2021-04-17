@@ -4334,7 +4334,7 @@ makeC32C4resolvent(GEN pol, long flag)
   return condrel(mynfsubfield(P12,4), P12, flag);
 }
 
-/* ideals of of square norm < lim^2 */
+/* ideals of square norm < lim^2 */
 static GEN
 ideallistsquare(GEN bnf, long lim)
 {
@@ -4749,31 +4749,31 @@ makeS32vec(GEN X, GEN Xinf, GEN field, long s)
 
 static GEN
 makeC32D4resolvent(GEN pol, long flag) { return makeC32C4resolvent(pol, flag); }
+static int
+cyc_is_trivial(GEN c) { return lg(c) == 1 || equali1(gel(c,1)); }
 
 static GEN
-makeC32D4pol(GEN bnf, GEN id)
+C32D4pol(GEN bnf, GEN id)
 {
-  GEN g3 = utoipos(3), bnr = bnrinitmod(bnf, id, 0, g3);
-  GEN VQ = bnrclassfield(bnr, g3, 0, DEFAULTPREC), WQ;
-  long lv, i, c = 1;
+  GEN v, g3 = utoipos(3), bnr = bnrinitmod(bnf, id, 0, g3);
+  long l, i, c;
 
-  if (typ(VQ) == t_POL)
+  if (cyc_is_trivial(bnr_get_cyc(bnr))) return NULL;
+  v = bnrclassfield(bnr, g3, 0, DEFAULTPREC);
+  if (typ(v) == t_POL) v = mkvec(v);
+  l = lg(v);
+  for (i = c = 1; i < l; i++)
   {
-    if (degpol(VQ) != 3) return cgetg(1, t_VEC);
-    VQ = mkvec(VQ);
-  }
-  lv = lg(VQ); WQ = cgetg(lv, t_VEC);
-  for (i = c = 1; i < lv; i++)
-  {
-    GEN Q = rnfequation0(bnf, gel(VQ, i), 0);
+    GEN Q = rnfequation0(bnf, gel(v, i), 0);
     Q = _nfsubfields(Q, 6);
     if (lg(Q) > 1)
     {
       Q = polredabs(gel(Q, 1));
-      if (okgal1(Q, 72)) gel(WQ, c++) = Q;
+      if (okgal1(Q, 72)) gel(v, c++) = Q;
     }
   }
-  setlg(WQ, c); return WQ;
+  if (c == 1) return NULL;
+  setlg(v, c); return v;
 }
 
 static GEN
@@ -4814,8 +4814,7 @@ nflist_C32D4_worker(GEN P, GEN X, GEN Xinf, GEN gs)
   long s = itos(gs), lim, j;
 
   if (absi_cmp(bd, X) > 0) { avma = av; return cgetg(1, t_VEC); }
-  bnf = bnfY(P); nf = bnf_get_nf(bnf);
-  aut = cycfindaut(nf);
+  bnf = bnfY(P); nf = bnf_get_nf(bnf); aut = cycfindaut(nf);
   lim = itos(divii(X, absi_shallow(bd)));
   L = ideallistsquare(bnf, lim);
   for (j = 1; j <= lim; j++)
@@ -4826,8 +4825,8 @@ nflist_C32D4_worker(GEN P, GEN X, GEN Xinf, GEN gs)
     {
       GEN R, vk = gel(v, k);
       long m, n, c, lR;
-      if (!vk) continue;
-      R = makeC32D4pol(bnf, vk); lR = lg(R);
+      if (!vk || !(R = C32D4pol(bnf, vk))) continue;
+      lR = lg(R);
       for (m = c = 1; m < lR; m++)
       {
         GEN Z = gel(R, m);
@@ -4998,20 +4997,21 @@ nfmakenum(long g, GEN N, GEN field, long s)
     case 1: return makeCL(ell, N, field, s);
     case 2: return makeDL(ell, N, field, s);
   }
-  return v? v: gen_0;
+  return NULL;/*LCOV_EXCL_LINE*/
 }
 /* deg(pol) < 8 */
 static GEN
 nfresolvent_small(GEN pol, long flag)
 {
-  long deg = degpol(pol), dP, s, k;
+  long deg = degpol(pol), dP, s;
   GEN G;
   if (deg == 1) return makeC1resolvent(flag);
   if (deg == 2) return makeC2resolvent(pol, flag);
   G = polgalois(pol, DEFAULTPREC);
-  dP = itos(gel(G,1)); s = itos(gel(G,2)); k = itos(gel(G,3));
+  dP = itos(gel(G,1));
   if (deg == 3) return dP == 3? makeC3resolvent(pol, flag)
                               : makeS3resolvent(pol, flag);
+  s = itos(gel(G,2));
   if (deg == 4)
   {
     if (dP == 4) return s == -1? makeC4resolvent(pol, flag)
@@ -5030,6 +5030,7 @@ nfresolvent_small(GEN pol, long flag)
   {
     if (dP == 6 && s == -1)
     { /* works both with new_galois_format set or unset */
+      long k = itos(gel(G,3));
       return k == 1? makeC6resolvent(pol, flag)
                    : makeS36resolvent(pol, flag);
     }
@@ -5131,7 +5132,7 @@ nfmakevecnum(long g, GEN X, GEN Xinf, GEN field, long s)
     case 1: return makeCLvec(ell, X, Xinf, field, s);
     case 2: return makeDLvec(ell, X, Xinf, field, s);
   }
-  return gen_0;
+  return NULL;/*LCOV_EXCL_LINE*/
 }
 
 /* s > -2 */

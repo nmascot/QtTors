@@ -51,6 +51,7 @@ T=x^6+2*x^5-9*x^4-14*x^3+10*x^2+8*x+1;nfresolvent(T)
 nfresolvent(T,3)
 T=x^6-3*x^5+7*x^4-9*x^3+7*x^2-3*x+1;nfresolvent(T,3)
 T=x^9-15*x^7-4*x^6+54*x^5+12*x^4-38*x^3-9*x^2+6*x+1;nfresolvent(T,3)
+nfresolvent(x^5-x-1)
 
 \\ regression tests
 nflist("D5",10^6)

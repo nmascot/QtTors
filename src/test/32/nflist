@@ -330,6 +330,7 @@ x^2 - 2
  [1]]], [x^2 - x + 8, 1]]
 [[x^3 - 3*x - 1, 7], [x^3 - 21*x - 35, 1], [x^3 - x^2 - 2*x + 1, 9], [x^3 - 
 21*x - 28, 1]]
+0
 [x^5 - 5*x - 12]
 [x^5 - 2*x^4 + 6*x^3 - 9*x^2 + 4*x + 1]
 [x^5 + 10*x^3 - 10*x^2 - 15*x - 18]
@@ -447,4 +448,4 @@ x^2 - 2
   ***   at top-level: nflist("M21",[1,10^4],,x)
   ***                 ^-------------------------
   *** nflist: incorrect type in makeMgenvec [field] (t_POL).
-Total time spent: 38824
+Total time spent: 33743
