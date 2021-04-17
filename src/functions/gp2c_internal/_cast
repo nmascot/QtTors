@@ -136,6 +136,10 @@ Description:
  (FpX):gen
  (Fq):gen
  (FqX):gen
+ (gen):Fp
+ (gen):FpX
+ (gen):Fq
+ (gen):FqX
 
  (gen):genstr GENtoGENstr($1)
  (str):genstr strtoGENstr($1)
