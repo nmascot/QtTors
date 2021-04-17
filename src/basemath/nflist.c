@@ -3004,11 +3004,12 @@ truncA5(GEN V, GEN Xinf, GEN X, long fl)
 static GEN
 A5file(const char *name)
 {
-  char *s = stack_malloc(strlen(pari_datadir) + 15 + 7 + 1);
-  GEN v;
-  sprintf(s, "%s/nflistdata/%s.gp", pari_datadir, name);
-  if (!(v = gp_readvec_file(s))) pari_err_FILE("nflistdata file [read]",s);
-  return v;
+  char *s = stack_malloc(strlen(pari_datadir) + 19 + 7 + 1);
+  pariFILE *F;
+  sprintf(s, "%s/nflistdata/5/4/%s.gp", pari_datadir, name);
+  F = pari_fopengz(s);
+  if (!F) pari_err_FILE("nflistdata file",s);
+  return gp_readvec_stream(F->file);
 }
 
 static GEN
@@ -3018,8 +3019,8 @@ A5vec(GEN X, GEN Xinf, long s, long fl)
 
   if (!fl && cmpii(X, powuu(10,12)) > 0) pari_err(e_MISC, "A5 table too short");
   L1 = L5 = NULL;
-  if (s <= 0) L5 = truncA5(A5file(fl? "A55cond": "A55"), Xinf, X, fl);
-  if (s) L1 = truncA5(A5file(fl? "A51cond": "A51"), Xinf, X, fl);
+  if (s <= 0) L5 = truncA5(A5file(fl? "0cond": "0"), Xinf, X, fl);
+  if (s) L1 = truncA5(A5file(fl? "2cond": "2"), Xinf, X, fl);
   switch (s)
   {
     case 2: return L1;
@@ -3128,7 +3129,7 @@ makeA56resolvent(GEN pol, long flag)
   GEN V, D6 = sqrti(nfdisc(pol)), LD = divisors(D6);
   long i;
   pol = polredabs(pol);
-  V = A5file(pol2s(pol)? "A51": "A55");
+  V = A5file(pol2s(pol)? "2": "0");
   for (i = 1; i < lg(LD); i++)
   {
     GEN D52 = sqri(gel(LD,i));
