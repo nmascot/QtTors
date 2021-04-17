@@ -1056,7 +1056,7 @@ cubicreal(long x, long xinf)
   long lima, limbsup, limbinf;
   GEN V, ALL;
 
-  if (x < 148) return cgetg(1, t_VEC);
+  if (x < 148) return NULL;
   xd = (double)x; sqx = sqrt(xd); sqx4 = sqrt(sqx);
   sq13 = sqrt(13.); cplus = (-35 + 13 * sq13) * xd / 216;
   cminus = (35 + 13 * sq13) * xd / 216;
@@ -1067,7 +1067,7 @@ cubicreal(long x, long xinf)
   limbinf = (long)ceil(-sqx4);
   ALL= mkvecn(10, utoipos(x), utoipos(xinf), dbltor(sqx), dbltor(cplus), dbltor(cminus), dbltor(cmin), dbltor(dmin), dbltor(dsup), utoipos(limbsup), stoi(limbinf));
   V = gen_parapply(closure("_nflist_S3R_worker", mkvec(ALL)), identity_ZV(lima));
-  return myshallowconcat1(V);
+  V = myshallowconcat1(V); return lg(V) == 1? NULL: V;
 }
 
 /* x > 0 */
@@ -1127,14 +1127,14 @@ cubicimag(long x, long xinf)
   long lima, limb, limad;
   GEN V, ALL;
 
-  if (x < 31) return cgetg(1, t_VEC);
+  if (x < 31) return NULL;
   xd = (double)x; sqx = sqrt(xd / 27); sqx4 = sqrt(sqx);
   cplus = (11 + 5 * sqrt(5.)) / 8 * xd; limad = 3 * sqx;
   lima = (long)floor(2 * sqx4);
   limb = (long)floor(sqrt(3.) * 2 * sqx4);
   ALL= mkvecn(5, utoipos(x), utoipos(xinf), dbltor(cplus), dbltor(limad), utoipos(limb));
   V = gen_parapply(closure("_nflist_S3I_worker", mkvec(ALL)), identity_ZV(lima));
-  return myshallowconcat1(V);
+  V = myshallowconcat1(V); return lg(V) == 1? NULL: V;
 }
 
 static GEN
@@ -1148,19 +1148,20 @@ makeS3resolvent(GEN T, long flag)
 static GEN
 makeS3vec(GEN X, GEN Xinf, GEN field, long s)
 {
-  GEN VR, VI;
+  GEN R, I;
   long x, xinf;
 
   if (field) return makeDLvec(3, X, Xinf, field, s);
   x = itos(X); xinf = itos(Xinf);
-  VR = (s <= 0)? cubicreal(x, xinf): NULL;
-  VI = s? cubicimag(x, xinf): NULL;
+  R = (s <= 0)? cubicreal(x, xinf): NULL;
+  I = s? cubicimag(x, xinf): NULL;
   switch (s)
   {
-    case 0: return VR;
-    case 1: return VI;
-    case -1: return shallowconcat(VR, VI);
-    default: return mkvec2(VR, VI); /* -2 */
+    case 0: return R;
+    case 1: return I;
+    case -1: return R? (I? shallowconcat(R, I): R): I;
+    default: if (!R && !I) return NULL; /* -2 */
+             return mkvec2(R? R: cgetg(1,t_VEC), I? I: cgetg(1,t_VEC));
   }
 }
 
@@ -2341,9 +2342,9 @@ makeA4S4vec(long A4, GEN X, GEN Xinf, GEN field, long s)
   {
     v = A4? makeC3vec(X, gen_1, NULL, 0)
           : makeS3vec(X, gen_1, NULL, odd(snew)? snew: 0);
-    if (!v || lg(v) == 1) return NULL;
-    v = gen_parapply(closure("_nflist_A4S4_worker", mkvec3(X,Xinf,mkvecsmall(snew))),
-                     v);
+    if (!v) return NULL;
+    v = gen_parapply(closure("_nflist_A4S4_worker",
+                             mkvec3(X,Xinf,mkvecsmall(snew))), v);
     v = myshallowconcat1(v);
   }
   return sturmseparate(v, s, 4);
@@ -3446,7 +3447,7 @@ makeS36vec(GEN X, GEN Xinf, GEN field, long s)
     }
   }
   else
-    v = makeS3vec(sqrti(divis(X, 3)), gen_1, NULL, s);
+    if (!(v = makeS3vec(sqrti(divis(X, 3)), gen_1, NULL, s))) return NULL;
   if (s != -2) return parselectS36(v, X, Xinf);
   return mkvec4(parselectS36(gel(v,1), X, Xinf), cgetg(1, t_VEC),
                 cgetg(1, t_VEC), parselectS36(gel(v,2), X, Xinf));
@@ -3579,7 +3580,8 @@ makeD612vec(GEN X, GEN Xinf, GEN field, long s)
     {
       GEN D2a = absi_shallow(checkfield(field, 2));
       long l, j, c;
-      v = makeS3vec(sqrti(divii(X, D2a)), gen_1, NULL, s3); l = lg(v);
+      if (!(v = makeS3vec(sqrti(divii(X, D2a)), gen_1, NULL, s3))) return NULL;
+      l = lg(v);
       for (j = c = 1; j < l; j++)
       {
         GEN P = makepol6(gel(v, j), field);
@@ -3588,7 +3590,7 @@ makeD612vec(GEN X, GEN Xinf, GEN field, long s)
       setlg(v, c); return sturmseparate(v, s, 6);
     }
   }
-  else v = makeS3vec(sqrti(X), gen_1, NULL, s3);
+  else if (!(v = makeS3vec(sqrti(X), gen_1, NULL, s3))) return NULL;
   T = mkvecsmall2(floorsqrtn(X, 3), s2);
   v = gen_parapply(closure("_nflist_D612_worker", mkvec3(X, Xinf, T)), v);
   return sturmseparate(myshallowconcat1(v), s, 6);
@@ -3731,7 +3733,7 @@ makeA46S46Pvec(long card, GEN X, GEN Xinf, GEN field, long s)
   else
     v = card == 12? makeC3vec(sqX, gen_1, NULL, 0)
                   : makeS3vec(sqX, gen_1, NULL, s? -1: 0);
-  if (!v || lg(v) == 1) return NULL;
+  if (!v) return NULL;
   T = mkvec3(Xinf, sqX, mkvecsmall2(card, s == -2? -1: s));
   v = gen_parapply(closure("_nflist_A46S46P_worker", T), v);
   return sturmseparate(myshallowconcat1(v), s, 6);
@@ -3853,10 +3855,8 @@ makeS46Mvec(GEN X, GEN Xinf, GEN field, long s)
     l2 = lg(v2); v = cgetg(l2, t_VEC);
     for (i = c = 1; i < l2; i++)
     {
-      GEN tmp = gel(v2, i), D2a = absi_shallow(nfdisc(tmp));
-      GEN limD3 = sqrti(divii(X, D2a)), V3i;
-      V3i = makeS3vec(limD3, gen_1, tmp, s3);
-      if (lg(V3i) > 1) gel(v, c++) = V3i;
+      GEN w, T = gel(v2, i), D2a = absi_shallow(nfdisc(T));
+      if ((w = makeS3vec(sqrti(divii(X, D2a)), gen_1, T, s3))) gel(v, c++) = w;
     }
     setlg(v,c); v = myshallowconcat1(v);
   }
