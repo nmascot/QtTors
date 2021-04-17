@@ -54,6 +54,7 @@ T=x^9-15*x^7-4*x^6+54*x^5+12*x^4-38*x^3-9*x^2+6*x+1;nfresolvent(T,3)
 nfresolvent(x^5-x-1)
 
 \\ regression tests
+nflist("C2",[3.5,4.5])
 nflist("D5",10^6)
 nflist("D5",[717000,717409],2)
 nflist("D5",6250000)
@@ -119,3 +120,5 @@ nflist([10,1])
 nflist([9,9])
 nflist([11,3])
 nflist("M21",[1,10^4],,x)
+nflist("C1",x)
+nflist("C1",[x])
