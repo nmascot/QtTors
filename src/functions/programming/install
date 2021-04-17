@@ -47,16 +47,17 @@ Doc: loads from dynamic library \var{lib} the function \var{name}. Assigns to it
    ??prototype
  @eprog
 
- \item First character \kbd{i}, \kbd{l}, \kbd{v} : return type int / long /
- void. (Default: \kbd{GEN})
+ \item First character \kbd{i}, \kbd{l}, \kbd{u}, \kbd{v} : return type
+ \kbd{int} / \kbd{long} / \kbd{ulong} / \kbd{void}. (Default: \kbd{GEN})
 
  \item One letter for each mandatory argument, in the same order as they appear
  in the argument list: \kbd{G} (\kbd{GEN}), \kbd{\&}
- (\kbd{GEN*}), \kbd{L} (\kbd{long}), \kbd{s} (\kbd{char *}), \kbd{n}
- (variable).
+ (\kbd{GEN*}), \kbd{L} (\kbd{long}), \kbd{U} (\kbd{ulong}),
+ \kbd{s} (\kbd{char *}), \kbd{n} (variable).
 
   \item \kbd{p} to supply \kbd{realprecision} (usually \kbd{long prec} in the
-  argument list), \kbd{P} to supply \kbd{seriesprecision}
+  argument list), \kbd{b} to supply \kbd{realbitprecision}
+  (usually \kbd{long bitprec}), \kbd{P} to supply \kbd{seriesprecision}
   (usually \kbd{long precdl}).
 
   \noindent We also have special constructs for optional arguments and default
