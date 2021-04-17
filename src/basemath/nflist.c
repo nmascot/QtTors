@@ -2341,7 +2341,7 @@ makeA4S4vec(long A4, GEN X, GEN Xinf, GEN field, long s)
   {
     v = A4? makeC3vec(X, gen_1, NULL, 0)
           : makeS3vec(X, gen_1, NULL, odd(snew)? snew: 0);
-    if (!v) return NULL;
+    if (!v || lg(v) == 1) return NULL;
     v = gen_parapply(closure("_nflist_A4S4_worker", mkvec3(X,Xinf,mkvecsmall(snew))),
                      v);
     v = myshallowconcat1(v);
@@ -3731,7 +3731,7 @@ makeA46S46Pvec(long card, GEN X, GEN Xinf, GEN field, long s)
   else
     v = card == 12? makeC3vec(sqX, gen_1, NULL, 0)
                   : makeS3vec(sqX, gen_1, NULL, s? -1: 0);
-  if (!v) return NULL;
+  if (!v || lg(v) == 1) return NULL;
   T = mkvec3(Xinf, sqX, mkvecsmall2(card, s == -2? -1: s));
   v = gen_parapply(closure("_nflist_A46S46P_worker", T), v);
   return sturmseparate(myshallowconcat1(v), s, 6);
