@@ -3913,6 +3913,9 @@ cycfindaut(GEN nf)
   return nfgaloismatrix(nf, gel(A, gequalX(gel(A,1))? 2 : 1));
 }
 
+static int
+isprM(GEN x)
+{ return typ(x) == t_MAT && lg(x) == 3; }
 static GEN
 doA462(GEN bnf, GEN L, GEN Arch, GEN aut, GEN G, GEN GAL)
 {
@@ -3922,7 +3925,7 @@ doA462(GEN bnf, GEN L, GEN Arch, GEN aut, GEN G, GEN GAL)
   GEN v;
   if (l == 1) return NULL;
   v = cgetg((lA-1) * (l-1) + 1, t_VEC);
-  stable0 = (typ(gmael(L,l-1,1)) == t_MAT); /* not implemented for prM */
+  stable0 = !isprM(gel(L,l-1)); /* not implemented for prM */
   for (i = c = 1; i < lA; i++)
   {
     GEN arch = gel(Arch, i);
@@ -3932,7 +3935,7 @@ doA462(GEN bnf, GEN L, GEN Arch, GEN aut, GEN G, GEN GAL)
       GEN R, id = gel(L,k), F = mkvec2(id, arch);
       long cR, lR;
       if (stable && ZM_equal(nfgaloismatrixapply(bnf, aut, id), id))
-        R = mybnrclassfield_X(bnf, F, 2, NULL, NULL, mkvec2(G,gen_0));
+        R = mybnrclassfield_X(bnf, F, 2, NULL, NULL, G);
       else
         R = mybnrclassfield(bnf, F, 2);
       lR = lg(R);
@@ -3977,7 +3980,7 @@ makeA462(GEN N, GEN field, long s)
   {
     GEN bnf = bnfY(gel(L,i)), aut = cycfindaut(bnf);
     GEN T, I = ideals_by_norm(bnf, divii(N, sqri(bnf_get_disc(bnf))));
-    GEN G = galoisinit(bnf, NULL);
+    GEN G = mkvec2(galoisinit(bnf, NULL), gen_0);
     if ((T = doA462(bnf, I, Arch, aut, G, GAL))) gel(v, c++) = T;
   }
   if (c == 1) return NULL;
@@ -3989,7 +3992,7 @@ nflist_A462_worker(GEN P3, GEN X, GEN Xinf, GEN Arch, GEN GAL)
 {
   pari_sp av = avma;
   GEN bnf = bnfY(P3), aut = cycfindaut(bnf), v, t;
-  GEN G = galoisinit(bnf, NULL), D2 = sqri(bnf_get_disc(bnf));
+  GEN G = mkvec2(galoisinit(bnf, NULL), gen_0), D2 = sqri(bnf_get_disc(bnf));
   long c, l, j, lim = itos(divii(X, D2)), liminf = itos(ceildiv(Xinf, D2));
 
   v = ideallist(bnf, lim); l = lg(v);
