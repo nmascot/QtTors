@@ -468,7 +468,7 @@ HC  94- new GP function polylogmult
     98- [libpari] Idealstarmod, ZV_snf_gcd, ideallog_units0
 BA  99- [libpari] FqC_FqV_mul
    100- [libpari] gen_sort_shallow, vecvecsmall_sort_shallow
-BA 101- new GP functions parforprimestep, parforeach
+BA 101- new GP functions foreach, parforprimestep, parforeach
 BA 102- [libpari] ZXQ_powers, ZXX_Q_mul, QXQX_mul, QXQX_sqr, QXQX_powers
 BA 103- [libpari] Kronecker_to_ZXQX, QXQX_QXQ_mul, ZXQX_ZXQ_mul
    104- [libpari] zv_sumpart, div_content, hash_zv
