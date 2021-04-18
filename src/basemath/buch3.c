@@ -1862,7 +1862,7 @@ rnfisabelian_i(GEN nf, GEN pol)
   C = gel(eq,1); setvarn(C, v); /* L = Q[t]/(C) */
   a = gel(eq,2); setvarn(a, v); /* root of K.pol in L */
   nfL = C;
-  ro = nfroots_if_split(&nfL, QXX_QXQ_eval(pol, a, C));
+  ro = nfroots_if_split(&nfL, QXY_QXQ_evalx(pol, a, C));
   if (!ro) return 0;
   l = lg(ro)-1;
   /* small groups are abelian, as are groups of prime order */

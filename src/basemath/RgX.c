@@ -2725,8 +2725,9 @@ do_QXQ_eval(GEN v, long imin, GEN a, GEN T)
 GEN
 QXV_QXQ_eval(GEN v, GEN a, GEN T)
 { return do_QXQ_eval(v, 1, a, T); }
+
 GEN
-QXX_QXQ_eval(GEN v, GEN a, GEN T)
+QXY_QXQ_evalx(GEN v, GEN a, GEN T)
 { return normalizepol(do_QXQ_eval(v, 2, a, T)); }
 
 GEN

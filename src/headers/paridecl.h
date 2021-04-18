@@ -1163,7 +1163,7 @@ GEN     QXQV_to_mod(GEN V, GEN T);
 GEN     QXQX_to_mod_shallow(GEN z, GEN T);
 GEN     QXQXV_to_mod(GEN V, GEN T);
 GEN     QXV_QXQ_eval(GEN v, GEN a, GEN T);
-GEN     QXX_QXQ_eval(GEN v, GEN a, GEN T);
+GEN     QXY_QXQ_evalx(GEN v, GEN a, GEN T);
 GEN     Rg_RgX_sub(GEN x, GEN y);
 GEN     Rg_get_0(GEN x);
 GEN     Rg_get_1(GEN x);

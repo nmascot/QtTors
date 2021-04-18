@@ -111,6 +111,7 @@ BA  14- [libpari] gp_read_stream now return NULL when EOF is reached (was gnil)
     18- [libpari] Z_smoothen now uses (and returns) t_VEC arguments.
         Use Z_lsmoothen to input small primes as a t_VECSMALL.
     19- polsubcyclo: faster algorithm for large conductor and small degree
+BA  20- [libpari] QXX_QXQ_eval renamed to QXY_QXQ_evalx
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

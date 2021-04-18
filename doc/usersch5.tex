@@ -9880,10 +9880,10 @@ suitable for \kbd{gerepileupto}.
 \kbd{QX}. Return the vector of evaluations at $a$ modulo $T$.
 Not memory clean, nor suitable for \kbd{gerepileupto}.
 
-\fun{GEN}{QXX_QXQ_eval}{GEN P, GEN a, GEN T} $P(X,Y)$ is a \typ{POL} with
+\fun{GEN}{QXY_QXQ_evalx}{GEN P, GEN a, GEN T} $P(X,Y)$ is a \typ{POL} with
 \kbd{QX} coefficients (possibly scalars, i.e.~rational numbers, for
-convenience) , $a$ and $T$ both \kbd{QX}. Return the \kbd{QX} $P(X, a \mod
-T)$. Not memory clean, nor suitable for \kbd{gerepileupto}.
+convenience) , $a$ and $T$ both \kbd{QX}. Return the \kbd{QX} $P(a \mod
+T, Y)$. Not memory clean, nor suitable for \kbd{gerepileupto}.
 
 \subsec{\kbd{QXQX}}
 
