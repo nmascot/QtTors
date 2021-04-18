@@ -700,7 +700,7 @@ FpX_classtower_oneroot(GEN P, GEN Dinfo, GEN Dfac, GEN sq, GEN p)
       else
       {
         GEN cm = polcompositum0(N,Q,3);
-        N = gel(cm,1); P = gsubst(P, 1, gel(cm,2));
+        N = gel(cm,1); P = QXY_QXQ_evalx(P,gmael(cm,2,2),N);
       }
       P = liftpol_shallow(gmael(nffactor(N,P),1,1));
     }
@@ -715,7 +715,7 @@ FpX_classtower_oneroot(GEN P, GEN Dinfo, GEN Dfac, GEN sq, GEN p)
         else
         {
           GEN cm = polcompositum0(N, Q, 3);
-          N = gel(cm,1); P = gsubst(P, 1, gel(cm,2));
+          N = gel(cm,1); P = QXY_QXQ_evalx(P,gmael(cm,2,2),N);
           R = Fp_mul(R, gel(cm,4),p);
         }
         R = Fp_add(R, FpX_oneroot_split(Q, p), p);
