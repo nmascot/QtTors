@@ -1458,24 +1458,21 @@ makeV4(GEN N, GEN field, long s)
   lV = lg(V); R = cgetg((lV - 1) * (lV - 2) >> 1, t_VEC);
   for (i1 = 1; i1 < lV; i1++)
   {
-    GEN D1 = gel(V, i1);
+    GEN V2, D1 = gel(V, i1);
     if (s == 0 && signe(D1) < 0) continue;
-    if (cmpii(sqri(D1), N) <= 0)
+    if (cmpii(sqri(D1), N) > 0) continue;
+    V2 = divisorsdisc(diviiexact(N, absi_shallow(D1)), -1);
+    for (i2 = 1; i2 < lg(V2); i2++)
     {
-      GEN Da1 = absi_shallow(D1), tmp = divii(N, Da1);
-      GEN V2 = divisorsdisc(tmp, -1);
-      for (i2 = 1; i2 < lg(V2); i2++)
-      {
-        GEN D2 = gel(V2, i2), D3, D12;
-        if (s == 0 && signe(D2) < 0) continue;
-        if (s > 0 && signe(D1) > 0 && signe(D2) > 0) continue;
-        if ((!field && cmpii(D1, D2) >= 0) || equalii(D1, D2)) continue;
-        D12 = mulii(D1, D2); D3 = coredisc(D12);
-        if (cmpii(D2, D3) < 0 && !equalii(D1, D3)
-            && absequalii(mulii(D12, D3), N))
-          gel(R, c++) = mkpoln(5, gen_1, gen_0, mulsi(-2, addii(D1, D2)),
-                                gen_0, sqri(subii(D1, D2)));
-      }
+      GEN D2 = gel(V2, i2), D3, D12;
+      if (s == 0 && signe(D2) < 0) continue;
+      if (s > 0 && signe(D1) > 0 && signe(D2) > 0) continue;
+      if ((!field && cmpii(D1, D2) >= 0) || equalii(D1, D2)) continue;
+      D12 = mulii(D1, D2); D3 = coredisc(D12);
+      if (cmpii(D2, D3) < 0 && !equalii(D1, D3)
+          && absequalii(mulii(D12, D3), N))
+        gel(R, c++) = mkpoln(5, gen_1, gen_0, mulsi(-2, addii(D1, D2)),
+                              gen_0, sqri(subii(D1, D2)));
     }
   }
   if (c == 1) return NULL;
@@ -1507,8 +1504,8 @@ GEN
 nflist_V4_worker(GEN D1, GEN X, GEN Xinf, GEN gs)
 {
   pari_sp av = avma;
-  GEN VP, VM;
-  long d2a, cp, cm, e1 = signe(D1), d1 = itos(D1), d1a = labs(d1);
+  GEN V, W;
+  long d2a, e1 = signe(D1), d1 = itos(D1), d1a = labs(d1);
   long s2 = -1, s = itos(gs);
   long limD2 = itos(sqrti(divis(X, d1a)));
   long limQ = floorsqrtdiv(X, sqru(d1a));
@@ -1516,8 +1513,8 @@ nflist_V4_worker(GEN D1, GEN X, GEN Xinf, GEN gs)
 
   if (s == 2 && e1 > 0) s2 = 1; /* forbid d2 > 0 */
   else if (!s) s2 = 0; /* forbid d2 < 0 */
-  VP = cgetg(2 * limD2, t_VEC); cp = 1;
-  VM = cgetg(2 * limD2, t_VEC); cm = 1;
+  W = vectrunc_init(2 * limD2);
+  V = e1 < 0? W: vectrunc_init(2 * limD2);
   for (d2a = d1a; d2a <= limD2; d2a++)
   {
     long v2 = vals(d2a), g, d2ag;
@@ -1534,10 +1531,7 @@ nflist_V4_worker(GEN D1, GEN X, GEN Xinf, GEN gs)
       setsigne(d3, e1);
       D3 = Mod4(d3) > 1? shifti(d3, 2): d3; /* now D3 = coredisc(D1*D2) */
       if (abscmpiu(D3, d2a) > 0 && ok_int(mulii(d1d2a, D3), X, Xinf))
-      {
-        GEN P = polV4(d1, d2a);
-        if (e1 > 0) gel(VP, cp++) = P; else gel(VM, cm++) = P;
-      }
+        vectrunc_append(V,  polV4(d1, d2a));
     }
     if (m)
     { /* D2 = - d2a is fundamental */
@@ -1546,17 +1540,26 @@ nflist_V4_worker(GEN D1, GEN X, GEN Xinf, GEN gs)
       D3 = Mod4(d3) > 1? shifti(d3, 2): d3; /* now D3 = coredisc(D1*D2) */
       fl = abscmpiu(D3, d2a);
       if (fl < 0 || (!fl && e1 > 0)) continue;
-      if (ok_int(mulii(d1d2a, D3), X, Xinf)) gel(VM, cm++) = polV4(d1, -d2a);
+      if (ok_int(mulii(d1d2a, D3), X, Xinf))
+        vectrunc_append(W, polV4(d1, -d2a));
     }
   }
-  setlg(VP, cp); setlg(VM, cm); return gerepilecopy(av, mkvec2(VP, VM));
+  return gerepilecopy(av, mkvec2(e1 < 0? cgetg(1, t_VEC): V, W));
 }
 
 static GEN
+Sextract(GEN v, long ind)
+{
+  long j, l;
+  GEN w = cgetg_copy(v, &l);
+  for (j = 1; j < l; j++) gel(w, j) = gmael(v, j, ind);
+  return myshallowconcat1(w);
+}
+static GEN
 makeV4vec(GEN X, GEN Xinf, GEN field, long s)
 {
-  GEN VP = NULL, VM = NULL, D, VPM, gs;
-  long s2, da, limd1inf, limd1sup, l, c, j;
+  long s2, d, dinf, dsup, l, c;
+  GEN v;
 
   if (s == 1) return NULL;
   if (field)
@@ -1564,41 +1567,26 @@ makeV4vec(GEN X, GEN Xinf, GEN field, long s)
     GEN D = checkfield(field, 2), DSQ = sqri(D);
     if (signe(D) < 0) pari_err_TYPE("makeV4 [real quadratic subfield]", field);
     if (cmpii(DSQ, X) > 0) return NULL;
-    limd1inf = itos(D); limd1sup = limd1inf; l = 2; s2 = 0;
+    dinf = itos(D); dsup = dinf; l = 2; s2 = 0;
   }
   else
-  {
-    long limD1 = floorsqrtn(X,3);
-    limd1inf = 3; limd1sup = limD1; l = limD1 << 1; s2 = s? -1: 0;
-  }
-  D = cgetg(l, t_VEC); c = 1;
-  for (da = limd1inf; da <= limd1sup; da++)
+  { dinf = 3; dsup = floorsqrtn(X,3); l = dsup << 1; s2 = s? -1: 0; }
+  v = cgetg(l, t_VEC); c = 1;
+  for (d = dinf; d <= dsup; d++)
   {
     int p, m;
-    uis_fundamental_pm(da, s2, &p, &m);
-    if (m) gel(D, c++) = utoineg(da);
-    if (p) gel(D, c++) = utoipos(da);
+    uis_fundamental_pm(d, s2, &p, &m);
+    if (m) gel(v, c++) = utoineg(d);
+    if (p) gel(v, c++) = utoipos(d);
   }
-  setlg(D, c); gs = stoi(s);
-  VPM = gen_parapply(closure("_nflist_V4_worker", mkvec3(X, Xinf, gs)), D);
-  if (s <= 0)
-  {
-    VP = cgetg(c, t_VEC);
-    for (j = 1; j < c; j++) gel(VP, j) = gmael(VPM, j, 1);
-    VP = myshallowconcat1(VP);
-  }
-  if (s < 0 || s == 2)
-  {
-    VM = cgetg(c, t_VEC);
-    for (j = 1; j < c; j++) gel(VM, j) = gmael(VPM, j, 2);
-    VM = myshallowconcat1(VM);
-  }
+  setlg(v, c);
+  v = gen_parapply(closure("_nflist_V4_worker", mkvec3(X, Xinf, stoi(s))), v);
   switch (s)
   {
-    case 0: return VP;
-    case 2: return VM;
-    case -1: return shallowconcat(VP, VM);
-    default: return mkvec3(VP, cgetg(1, t_VEC), VM);
+    case 0: return Sextract(v,1);
+    case 2: return Sextract(v,2);
+    case -1: return shallowconcat(Sextract(v,1), Sextract(v,2));
+    default: return mkvec3(Sextract(v,1), cgetg(1, t_VEC), Sextract(v,2));
   }
 }
 
@@ -1800,14 +1788,6 @@ nflist_D4_worker(GEN D, GEN X, GEN Xinf, GEN listarch)
 }
 
 static GEN
-Sextract(GEN v, long s)
-{
-  long j, l, ind = s + 1;
-  GEN w = cgetg_copy(v, &l);
-  for (j = 1; j < l; j++) gel(w, j) = gmael(v, j, ind);
-  return myshallowconcat1(w);
-}
-static GEN
 makeD4vec(GEN X, GEN Xinf, GEN field, long s)
 {
   long s2, limdinf, limdsup, c, da;
@@ -1835,10 +1815,10 @@ makeD4vec(GEN X, GEN Xinf, GEN field, long s)
   }
   setlg(D, c);
   v = gen_parapply(closure("_nflist_D4_worker", mkvec3(X, Xinf, getarchD4(s))), D);
-  if (s >= 0) v = Sextract(v,s);
+  if (s >= 0) v = Sextract(v,s+1);
   else
   {
-    v = mkvec3(Sextract(v,0), Sextract(v,1), Sextract(v,2));
+    v = mkvec3(Sextract(v,1), Sextract(v,2), Sextract(v,3));
     if (s == -1) v = shallowconcat1(v);
   }
   return v;
@@ -3329,9 +3309,9 @@ makeC6vec(GEN X, GEN Xinf, GEN field, long s)
   v = gen_parapply(closure("_nflist_C6_worker", mkvec4(X, Xinf, M, T)), v);
   switch (s)
   {
-    case -1: return shallowconcat(Sextract(v,0), Sextract(v,1));
-    case -2: return vecs14(Sextract(v,0), Sextract(v,1)); /* -2 */
-    default: return Sextract(v, s? 1: 0);
+    case -1: return shallowconcat(Sextract(v,1), Sextract(v,2));
+    case -2: return vecs14(Sextract(v,1), Sextract(v,2)); /* -2 */
+    default: return Sextract(v, s? 2: 1);
   }
 }
 
