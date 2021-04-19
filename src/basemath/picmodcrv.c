@@ -439,3 +439,133 @@ GEN GammaHmodN(ulong n, GEN H)
 	}
 	return gerepilecopy(av,G);
 }
+
+GEN XH_decomp(ulong N, GEN H)
+{ /* Returns list of [eps,S2(eps)], where H c Ker eps and dim S2(eps)>0 */
+	pari_sp av = avma;
+	GEN iN,N2chi,res,G,AllChi,chi,Gchi,VecChi,VecS,S;
+	ulong d,i,j,n,nH,nChi;
+	iN = utoi(N);
+	N2chi = cgetg(4,t_VEC);
+	gel(N2chi,1) = iN = utoi(N);
+	gel(N2chi,2) = gen_2;
+	res = cgetg(3,t_VEC);
+	G = znstar0(iN,1);
+	if(gequal0(H))
+	{ /* Gamma0 : only care about trivial character */
+		setlg(N2chi,3);
+		S = cgetg(2,t_VEC);
+		gel(S,1) = mfinit(N2chi,1);
+		d = MF_get_dim(gel(S,1));
+		if(DEBUGLEVEL>=3) printf("S2(Gamma0) has dim %lu\n",d);
+		if(d)
+		{
+			gel(res,1) = cgetg(2,t_VEC);
+			gmael(res,1,1) = mkvec2(G,gen_1);
+			gel(res,2) = S;
+		}
+		else gel(res,1) = gel(res,2) = cgetg(1,t_VEC);
+		return gerepileupto(av,res);
+	}
+	if(gequal1(H))
+	{ /* Gamma1 : consider all characters */
+		H = NULL; /* Nothing needed in Ker */
+    nH = 0;
+  }
+  else
+		nH = lg(H);
+	AllChi = chargalois(G,NULL);
+	nChi = lg(AllChi);
+	VecChi = cgetg(nChi,t_VEC);
+	VecS = cgetg(nChi,t_VEC);
+	n = 1;
+	for(i=1;i<nChi;i++)
+  { /* Loop over chi */
+		chi = gel(AllChi,i);
+    if(zncharisodd(G,chi)) continue;
+    for(j=1;j<nH;j++)
+    {
+      if(!gequal0(chareval(G,chi,stoi(H[j]),NULL)))
+      {
+        if(DEBUGLEVEL>=2) pari_printf("Dropping chi=%Ps because %lu not in Ker.\n",chi,H[j]);
+        chi = NULL;
+        break;
+      }
+    }
+    if(chi==NULL) continue;
+    gel(N2chi,3) = Gchi = mkvec2(G,chi);
+    /*d = mfcuspdim(N,2,Gchi); */
+    S = mfinit(N2chi,1);
+    d = MF_get_dim(S);
+		if(DEBUGLEVEL>=3) printf("dim %lu\n",d);
+    if(d==0)
+    {
+      if(DEBUGLEVEL>=2) pari_printf("Dropping chi=%Ps because dim S2(chi)=0.\n",chi);
+      continue;
+    }
+		gel(VecChi,n) = Gchi;
+		gel(VecS,n++) = S;
+	}
+	setlg(VecChi,n);
+	setlg(VecS,n);
+	gel(res,1) = VecChi;
+	gel(res,2) = VecS;
+	return gerepilecopy(av,res);
+}
+
+/* LMod */
+
+GEN LMod_worker(GEN S, GEN Gchi, GEN p, GEN Z, long t, GEN zo, GEN MZ)
+{
+	pari_sp av = avma;
+	GEN epsp,L1,Tp,Xp,res;
+	epsp = chareval(gel(Gchi,1),gel(Gchi,2),p,zo);
+	L1 = mkpoln(3,gen_1,gneg(pol_x(1)),gmul(p,epsp)); /* x²-yx+p*eps(p)(t) */
+	Tp = mfheckemat(S,p); /* coeffs in Q(t mod Z) */
+	Xp = charpoly(Tp,1); /* in Q(t mod Z)[y] */
+	Tp = matconcat(gsubst(liftpol(Tp),t,MZ));
+	L1 = polresultant0(Xp,L1,1,0); /* Res_y(Xp(y),L1(x,y)) in Q(t mod Z)[x] */
+	L1 = liftpol(L1); /* In Q[x,t] */
+	res = cgetg(3,t_VEC);
+	gel(res,1) = ZX_ZXY_resultant(Z,L1);
+	gel(res,2) = RgM_Frobenius(Tp,0,NULL,NULL); /* Canonical form ensures integer coeffs */
+	return gerepileupto(av,res);
+}
+
+GEN ModCrv_charpoly_multi(ulong N, GEN H, GEN Vecp)
+{
+	pari_sp av = avma;
+	GEN L,XH,VecChi,VecS,chi,S,o,Z,z,zo,MZ;
+	ulong np,nChi,i;
+	long t;
+	long j;
+	GEN res;
+	XH = XH_decomp(N,H);
+  VecChi = gel(XH,1);
+	VecS = gel(XH,2);
+	nChi = lg(VecChi);
+	np = lg(Vecp);
+	L = cgetg(np,t_VEC);
+	for(i=1;i<np;i++) gel(L,i) = mkvec2(pol_1(0),cgetg(nChi,t_VEC));
+	if(nChi==1) /* Genus 0 */
+		return gerepileupto(av,L);
+	/* TODO sort L */
+	for(i=1;i<nChi;i++)
+	{
+		chi = gel(VecChi,i);
+		S = gel(VecS,i);
+		t = variables_vecsmall(S)[2];
+		o = charorder0(gel(chi,1),gel(chi,2));
+		Z = polcyclo(itou(o),t);
+		z = pol_x(t);
+		zo = mkvec2(gmodulo(z,Z),o);
+		MZ = matcompanion(Z);
+		for(j=1;j<np;j++) /* TODO parallelise */
+		{
+			res = LMod_worker(S,chi,gel(Vecp,j),Z,t,zo,MZ);
+			gmael(L,j,1) = ZX_mul(gmael(L,j,1),gel(res,1));
+			gmael3(L,j,2,i) = gel(res,2);
+		}
+	}
+	return gerepilecopy(av,L);
+}
