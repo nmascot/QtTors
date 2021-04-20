@@ -583,3 +583,289 @@ GEN ModCrv_charpoly_multi(ulong N, GEN H, GEN Vecp)
 	}
 	return gerepilecopy(av,L);
 }
+
+/* Etors */
+
+GEN elladd_padic(GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
+{
+  pari_sp av = avma, av0;
+  GEN P0,xP,yP,xQ,yQ,dx,dy,l,m,xR,yR,R;
+
+  P0 = mkvec(gen_0); /* [0] */
+  av0 = avma;
+  if(gequal(P,P0))
+  {
+    avma = av;
+    return Q;
+  }
+  if(gequal(Q,P0))
+  {
+    avma = av;
+    return P;
+  }
+  xP = gel(P,1);
+  yP = gel(P,2);
+  xQ = gel(Q,1);
+  yQ = gel(Q,2);
+  if(gequal(FpX_red(xP,p),FpX_red(xQ,p)))
+  {
+    /* Dangerous case */
+    if(gequal(FpX_red(xP,pe),FpX_red(xQ,pe))==0)
+      pari_err(e_IMPL,"case P!=Q but P=Q mod p");
+    if(gequal0(FpX_red(ZX_add(yP,yQ),pe)))
+    {
+      avma = av0;
+      return P0;
+    }
+    dx = ZX_Z_mul(yP,gen_2);
+    dy = Fq_sqr(xP,T,pe);
+    dy = ZX_Z_mul(dy,utoi(3));
+    dy = gadd(dy,a4);
+  }
+  else
+  {
+    dx = ZX_sub(xQ,xP);
+    dy = ZX_sub(yQ,yP);
+  }
+  l = ZpXQ_div(dy,dx,T,pe,p,e);
+  m = Fq_mul(l,xP,T,pe);
+  m = ZX_sub(yP,m);
+  xR = ZX_add(xP,xQ);
+  xR = FpX_sub(Fq_sqr(l,T,pe),xR,pe);
+  yR = Fq_mul(l,xR,T,pe);
+  yR = ZX_add(yR,m);
+  yR = FpX_neg(yR,pe);
+  R = mkvec2(xR,yR);
+  return gerepilecopy(av,R);
+}
+
+ulong FpX_split_deg(GEN F, GEN p)
+{ /* Smallest d s.t. all roots in GF(p^d), i.e. x^p^d = x mod F */
+	pari_sp av = avma;
+	GEN x,y;
+	ulong i;
+	x = pol_x(varn(F));
+	y = FpX_Frobenius(F,p);
+	for(i=1;!gequal(y,x);i++)
+		y = Fq_pow(y,p,F,p);
+	avma = av;
+	return i;
+}
+
+ulong EllTorsIsSplit_lv(GEN E, ulong l, ulong v, GEN p, ulong d, GEN T, GEN q2)
+{ /* returns [Fp(E[l^v]/+-1):Fp] if E[l^v] defined over Fp^d, else returns 0 */
+	pari_sp av = avma;
+	GEN D,D1,X,a4,a6,x,y;
+	ulong r,nX,i;
+	if(DEBUGLEVEL)
+		printf("EllSplitTors: Using divpol to check whether E[%lu^%lu] defined in degree %lu.\n",l,v,d);
+	D = elldivpol(E,upowuu(l,v),0);
+	D1 = elldivpol(E,upowuu(l,v-1),0);
+	D = liftint(gdiv(D,D1));
+	r = FpX_split_deg(D,p);
+	if(d%r)
+	{
+		if(DEBUGLEVEL)
+			printf("EllSplitTors: E[%lu^%lu] not defined in degree %lu.\n",l,v,d);
+		avma = av;
+		return 0;
+	}
+	if(l!=2 || v>1)
+	{
+		X = FpXQX_roots(D,T,p);
+		nX = lg(X);
+		a4 = liftint(ell_get_a4(E));
+		a6 = liftint(ell_get_a6(E));
+		for(i=1;i<nX;i++)
+		{
+			x = gel(X,i);
+			y = Fq_powu(x,3,T,p);
+			y = ZX_add(y,ZX_Z_mul(x,a4));
+			y = ZX_Z_add(y,a6);
+			y = Fq_pow(y,q2,T,p);
+			if(!gequal1(y))
+			{
+				if(DEBUGLEVEL)
+      		printf("EllSplitTors: E[%lu^%lu] not split.\n",l,v);
+				avma = av;
+				return 0;
+			}
+		}
+	}
+	avma = av;
+	printf("%lu^%lu->deg %lu\n",l,v,r);
+	return r;
+}
+
+ulong EllTorsIsSplit(GEN E, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
+{ /* returns [Fp(E[N]/+-1):Fp] if E[N] defined over Fp^d, else returns 0 */
+	pari_sp av = avma;
+	GEN ap,chiE,nu,nud,NE,g,fa;
+	ulong M,l,v,pl,i,r,c,nfa;
+	ap = ellap(E,NULL);
+  chiE = mkpoln(3,gen_1,negi(ap),p); /* x²-ap*x+p */
+  nu = polsym(chiE,d);
+  nud = gel(nu,d+1); /* alpha^d+beta^d */
+  NE = subii(addiu(q,1),nud); /* #E(Fq) */
+  if(umodiu(NE,N*N))
+	{ /* Must have N² | #E(Fq) */
+		printf("N2\n");
+		avma = av;
+		return 0;
+	}
+  g = subii(sqri(ap),muliu(p,4)); /* ap²-4p */
+  fa = factoru(ugcdiu(g,N)); /* Primes l|N such that Frobp not ss on E[l] */
+  nfa = lg(gel(fa,1));
+  M = N;
+  for(i=1;i<nfa;i++)
+  {
+    l = gel(fa,1)[i];
+    gel(fa,2)[i] = v = u_lval(N,l); /* Set multiplicities of N */
+    M /= upowuu(l,v);
+		if(l==2) continue;
+    if(DEBUGLEVEL) printf("EllSplitTors: Checking whether Frob^%lu unipotent on E[%lu].\n",d,l);
+		if(Fl_powu(umodiu(ap,l),d,l) != Fl_powu(2,d,l))
+		{
+    	if(DEBUGLEVEL) printf("EllSplitTors: Frob^%lu unipotent on E[%lu].\n",d,l);
+			avma = av;
+			return 0;
+		}
+  }
+  /* M = Cofactor supported by primes l such that Frobp ss on E[l] */
+  if(M>1)
+  {
+    if(DEBUGLEVEL) printf("EllSplitTors: Checking whether Frob^%lu trivial on E[%lu].\n",d,M);
+    if(umodiu(nud,M)!=(2%M))
+    {
+      if(DEBUGLEVEL) printf("EllSplitTors: Frob^%lu nontrivial on E[%lu].\n",d,M);
+      avma = av;
+			return 0;
+    }
+  }
+	/* So now Frob^d trivial on E[l] but maybe not E[l^v] for l good,
+     and unipotent on E[l] but maybe not E[l^v] for l bad.
+     We now check for each l if Frob^d trivial on E[l^v],
+     and also determine the order of Frob on E[l^v]/-1. */
+	/* TODO check l=2 */
+	c = 1;
+	for(i=1;i<nfa;i++)
+	{
+		l = gel(fa,1)[i];
+		v = gel(fa,2)[i];
+		r = EllTorsIsSplit_lv(E,l,v,p,d,T,q2);
+		if(r==0)
+		{
+			avma = av;
+			return 0;
+		}
+	printf("%lu^%lu: Had %lu, got %lu -> %lu\n",l,v,c,r,ulcm(c,r));
+		c = ulcm(c,r);
+	}
+  fa = factoru(M);
+	nfa = lg(gel(fa,1));
+	for(i=1;i<nfa;i++)
+	{
+		l = gel(fa,1)[i];
+		v = gel(fa,2)[i];
+		if(v==1)
+		{ /* We already know E[l^v] defined over Fp^d, but still need deg of E[l]/-1 */
+			pl = umodiu(p,l);
+			for(r=1;r<=d;r++)
+			{
+				if(Fl_sqr(umodiu(gel(nu,r+1),l),l)==(4%l) && Fl_powu(pl,r,l)==1)
+				{
+	printf("%lu^%lu: Had %lu, got %lu -> %lu\n",l,v,c,r,ulcm(c,r));
+					c = ulcm(c,r);
+					break;
+				}
+			}
+		}
+		else
+		{
+			r = EllTorsIsSplit_lv(E,l,v,p,d,T,q2);
+   	 	if(r==0)
+    	{
+      	avma = av;
+        return 0;
+    	}
+	printf("%lu^%lu: Had %lu, got %lu -> %lu\n",l,v,c,r,ulcm(c,r));
+			c = ulcm(c,r);
+		}
+	}
+	avma = av;
+	return c;
+}
+
+GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
+{ /* Look for E/Fp such that E[N] def / Fp^d and j not in Badj */
+	pari_sp av = avma;
+	ulong d,nBad,i,r;
+	GEN q,q2,a,b,D,ab,E,j;
+	d = degpol(T);
+	if(Fl_powu(umodiu(p,N),d,N)!=1)
+		pari_err(e_MISC,"Impossible by Weil pairing");
+	nBad = lg(Badj);
+	q = powiu(p,d);
+	q2 = subiu(q,1);
+	q2 = shifti(q2,-1);
+	for(;;)
+	{
+		if(DEBUGLEVEL) printf("EllSplitTors: Trying new curve.\n");
+		a = genrand(p);
+		if(gequal0(a)) continue; /* Avoid j=0 */
+		b = genrand(p);
+		if(gequal0(b)) continue; /* Avoid j=1728 */
+		D = Fp_powu(a,3,p);
+		D = muliu(D,4);
+		D = Fp_add(D,muliu(Fp_sqr(b,p),27),p);
+		if(gequal0(D)) continue; /* Singular curve */
+		j = Fp_ellj(a,b,p);
+		ab = mkvec2(a,b);
+		pari_printf("ab=%Ps\n",ab);
+		E = ellinit(ab,p,0); /* y²=x³+ax+b / Fp */
+		j = ell_get_j(E);
+		for(i=1;i<nBad;i++)
+		{
+			if(gequal(gel(Badj,i),j))
+			{
+				E = NULL;
+				break;
+			}
+		}
+		if(E==NULL) continue;
+		r = EllTorsIsSplit(E,N,p,d,T,q,q2);
+		if(r==d)
+			return gerepilecopy(av,ab);
+		if(DEBUGLEVEL)
+		{
+			if(r==0) printf("EllSplitTors: Unsuitable curve.\n");
+			else printf("EllSplitTors: E[%lu]/-1 defined in degree %lu<%lu.\n",N,r,d);
+		}
+	}
+}
+
+GEN FqEll_y_from_x(GEN x, GEN ab, GEN T, GEN p)
+{
+	pari_sp av = avma;
+	GEN y;
+	y = Fq_sqr(x,T,p); // x²
+	y = ZX_Z_add(y,gel(ab,1)); // x²+a
+	y = Fq_mul(y,x,T,p); // x³+ax
+	y = ZX_Z_add(y,gel(ab,2)); // x³+ax+b
+	y = Fq_sqrt(y,T,p);
+	return gerepileupto(av,y);
+}
+
+GEN EllTorsBasis_lv(GEN E, GEN ab, ulong l, ulong v, GEN T, GEN p, GEN D)
+{ /* l,v -> Basis [P,Q] of E[l^v], plus its Weil pairing, and mat of Frob */
+	if(DEBUGLEVEL) printf("Getting basis of E[%lu^%lu]\n",l,v);
+	X = FpXQX_roots(D,T,p);
+	nX = lg(X)-1;
+	for(;;)
+	{
+		iP = random_Fl(nX);
+		do {iQ = random_Fl(nX);} while(iQ=iP);
+		P = FqEll_y_from_x(gel(X,iP+1),ab,T,p);
+		Q = FqEll_y_from_x(gel(X,iQ+1),ab,T,p);
+		FpXQE_weilpairing(P,Q,lv,a4,T,p);
+}
