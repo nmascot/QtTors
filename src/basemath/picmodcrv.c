@@ -515,7 +515,7 @@ GEN XH_decomp(ulong N, GEN H)
 
 /* LMod */
 
-GEN LMod_worker(GEN S, GEN Gchi, GEN p, GEN Z, long t, GEN zo, GEN MZ)
+GEN LMod_worker(GEN p, GEN Gchi, GEN S, long t, GEN Z, GEN zo, GEN MZ)
 {
 	pari_sp av = avma;
 	GEN epsp,L1,Tp,Xp,res;
@@ -528,18 +528,17 @@ GEN LMod_worker(GEN S, GEN Gchi, GEN p, GEN Z, long t, GEN zo, GEN MZ)
 	L1 = liftpol(L1); /* In Q[x,t] */
 	res = cgetg(3,t_VEC);
 	gel(res,1) = ZX_ZXY_resultant(Z,L1);
-	gel(res,2) = RgM_Frobenius(Tp,0,NULL,NULL); /* Canonical form ensures integer coeffs */
+	gel(res,2) = RgM_Frobenius(Tp,0,NULL,NULL); /* Canonical form ensures integer coeffs, TODO slow in large dim */
 	return gerepileupto(av,res);
 }
 
 GEN ModCrv_charpoly_multi(ulong N, GEN H, GEN Vecp)
 {
 	pari_sp av = avma;
-	GEN L,XH,VecChi,VecS,chi,S,o,Z,z,zo,MZ;
+	GEN L,XH,VecChi,VecS,chi,S,o,Z,z,worker,Params,done,Psort;
 	ulong np,nChi,i;
-	long t;
-	long j;
-	GEN res;
+	long t,j,pending,workid;
+	struct pari_mt pt;
 	XH = XH_decomp(N,H);
   VecChi = gel(XH,1);
 	VecS = gel(XH,2);
@@ -549,23 +548,38 @@ GEN ModCrv_charpoly_multi(ulong N, GEN H, GEN Vecp)
 	for(i=1;i<np;i++) gel(L,i) = mkvec2(pol_1(0),cgetg(nChi,t_VEC));
 	if(nChi==1) /* Genus 0 */
 		return gerepileupto(av,L);
-	/* TODO sort L */
+	Psort = indexsort(Vecp);
+	Params = cgetg(8,t_VEC);
 	for(i=1;i<nChi;i++)
 	{
-		chi = gel(VecChi,i);
-		S = gel(VecS,i);
+		gel(Params,2) = chi = gel(VecChi,i);
+		gel(Params,3) = S = gel(VecS,i);
 		t = variables_vecsmall(S)[2];
+		gel(Params,4) = stoi(t);
 		o = charorder0(gel(chi,1),gel(chi,2));
-		Z = polcyclo(itou(o),t);
+		gel(Params,5) = Z = polcyclo(itou(o),t);
 		z = pol_x(t);
-		zo = mkvec2(gmodulo(z,Z),o);
-		MZ = matcompanion(Z);
-		for(j=1;j<np;j++) /* TODO parallelise */
-		{
-			res = LMod_worker(S,chi,gel(Vecp,j),Z,t,zo,MZ);
-			gmael(L,j,1) = ZX_mul(gmael(L,j,1),gel(res,1));
-			gmael3(L,j,2,i) = gel(res,2);
-		}
+		gel(Params,6) = mkvec2(gmodulo(z,Z),o);
+		gel(Params,7) = matcompanion(Z);
+		worker = strtofunction("_LMod_worker");
+  	mt_queue_start_lim(&pt,worker,np-1);
+  	for(j=np-1;j>0||pending;j--)
+  	{
+			if(j>0)
+			{
+				gel(Params,1) = gel(Vecp,Psort[j]);
+    		mt_queue_submit(&pt,Psort[j],Params);
+			}
+			else
+    		mt_queue_submit(&pt,j,NULL);
+    	done = mt_queue_get(&pt,&workid,&pending);
+    	if(done)
+			{
+				gmael(L,workid,1) = ZX_mul(gmael(L,workid,1),gel(done,1));
+      	gmael3(L,workid,2,i) = gel(done,2);
+			}
+  	}
+  	mt_queue_end(&pt);
 	}
 	return gerepilecopy(av,L);
 }

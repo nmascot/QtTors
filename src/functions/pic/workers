@@ -46,3 +46,8 @@ C-Name: TorsSpaceFrob_worker
 Prototype: GGGGG
 Help:
 
+Function: _LMod_worker
+Section: programming/internals
+C-Name: LMod_worker
+Prototype: GGGLGGG
+Help:

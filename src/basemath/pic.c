@@ -13,8 +13,10 @@ long ZX_is0mod(GEN x, GEN p)
   long res;
   red = (typ(x)==t_POL?FpX_red(x,p):Fp_red(x,p));
   res = gequal0(red);
+	/* signe(red) */
   avma = av;
   return res;
+	/* return gc_bool(av,...); */
 }
 
 GEN FpXM_red(GEN A, GEN p)
@@ -432,8 +434,8 @@ GEN mateqnpadic(GEN A, GEN T, GEN pe, GEN p, long e)
 }
 
 GEN mat2col(GEN A)
-{
-  unsigned long n,m,i,j=1;
+{ /* shallowconcat1? */
+  ulong n,m,i,j=1;
   GEN C;
   n = lg(A)-1;
   if(n==0) return cgetg(1,t_COL);
@@ -449,10 +451,10 @@ GEN mat2col(GEN A)
   return C;
 }
 
-GEN col2mat(GEN C, unsigned long m, unsigned long n)
+GEN col2mat(GEN C, ulong m, ulong n)
 {
   GEN A,Aj;
-  unsigned long i=1,j=1;
+  ulong i=1,j=1;
   A = cgetg(n+1,t_MAT);
   for(j=1;j<=n;j++)
   {
@@ -4837,7 +4839,7 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Lp, GEN Chi)
 	for(iPhi=1;;)
 	{
 		if(DEBUGLEVEL) printf("PicTorsBasis: Generating new batch of %lu torsion points\n",nBatch);
-		mt_queue_start(&pt,worker);
+		mt_queue_start_lim(&pt,worker,nBatch);
 		for(iBatch=1;iBatch<=nBatch||pending;iBatch++)
 		{
 			if(iBatch<=nBatch)
@@ -4920,7 +4922,7 @@ GEN PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
 		 Returns [G,CG,M] where CG are the coordinates of G
 		 and M is the rational canonical form of MFrob. */
 	/* TODO use Auts? */
-	pari_sp av = avma;
+	pari_sp av = avma, av1;
 	GEN M,Q,piv,G,CG,res;
 	ulong n,d,k,i;
 	d = lg(B);
@@ -4930,8 +4932,10 @@ GEN PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
 	M = centerlift(M);
   if(DEBUGLEVEL)
   {
+		av1 = avma;
     printf("The matrix of Frob is\n");
-    printp(M);
+    printp(mkvec(M));
+		avma = av1;
   }
 	gel(res,3) = M;
 	n = lg(piv);
@@ -5058,6 +5062,7 @@ GEN ProjGalRep_aux(GEN f, GEN Z, ulong l, ulong d, ulong ld, GEN T, GEN p, long 
     for(i=1;i<ld;i++)
     { /* TODO could parallelise this, but is that really useful? */
       /* NB in general, f has coeffs in Q, and roots not all distinxt mod p! */
+			printf("Lifting root %ld\n",i);
       z = gel(Z,i);
       z = gadd(gmodulo(z,T),zeropadic(p,e));
       z = padicappr(f,z);
@@ -5167,4 +5172,3 @@ GEN SmoothGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
 	R = PicTorsGalRep(J,l,Lp,chi);
   return gerepileupto(av,R);
 }
-
