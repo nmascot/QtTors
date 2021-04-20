@@ -497,9 +497,9 @@ polreduce(GEN P, GEN M)
 }
 
 static GEN
-red_Cremona_Stoll(GEN Q, GEN *pM)
+red_Cremona_Stoll(GEN P, GEN *pM)
 {
-  GEN q1, q2, q3, M, R, den, P = Q_primitive_part(Q, &den);
+  GEN q1, q2, q3, M, R;
   long i, prec = nbits2prec(2*gexpo(P)) + 1;
   GEN dP = ZX_deriv(P), r = QX_complex_roots(P, prec);
   q1 = gen_0; q2 = gen_0; q3 = gen_0;
@@ -513,15 +513,15 @@ red_Cremona_Stoll(GEN Q, GEN *pM)
   }
   M = lllgram(mkmat22(q1,q2,q2,q3));
   if (lg(M) != 3) M = matid(2);
-  R = polreduce(P, M); if (den) R = gmul(R, den);
+  R = polreduce(P, M);
   *pM = M; return R;
 }
 
 static GEN
-hyperellreduce(GEN Q, GEN *pM)
+hyperellreduce(GEN P, GEN *pM)
 {
-  long d = degpol(Q);
-  GEN q1, q2, q3, D, vD, den, P = Q_primitive_part(Q, &den);
+  long d = degpol(P);
+  GEN q1, q2, q3, D, vD;
   GEN a = gel(P,d+2), b = gel(P,d+1), c = gel(P, d);
   GEN M, R, M2;
 
@@ -543,7 +543,6 @@ hyperellreduce(GEN Q, GEN *pM)
   else
     M = gel(qfbredsl2(mkqfb(q1,q2,q3,D), NULL), 2);
   R = red_Cremona_Stoll(polreduce(P, M), &M2);
-  if (den) R = gmul(R, den);
   *pM = gmul(M, M2); return R;
 }
 
@@ -1250,10 +1249,10 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2, GEN sqrtLS2, GEN factLS2,
     param = Q_primpart(qfparam(q2, qfsolve(q2), 0));
     param = RgM_to_RgXV_reverse(shallowtrans(param), 0);
     q1 = RgM_neg(tracematrix(QXQ_mul(zc, ttheta, pol), newb, pol));
-    Q = hyperellreduce(qfeval(q1, param), &R);
+    q1 = Q_remove_denom(qfeval(q1, param), &den);
+    if (den) q1 = ZX_Z_mul(q1, den);
+    Q = hyperellreduce(q1, &R);
     if (!equali1(K)) Q = RgX_Rg_mul(Q, K);
-    Q = Q_remove_denom(Q, &den);
-    if (den) Q = ZX_Z_mul(Q, den);
     if (DEBUGLEVEL>1) err_printf("  reduced quartic: Y^2 = %Ps\n", Q);
 
     xz = projratpointxz(Q, lim, &zz);
