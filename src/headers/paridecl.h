@@ -3193,6 +3193,7 @@ GEN     ellpadics2(GEN E, GEN p, long n);
 
 /* ellrank.c*/
 
+GEN     ell2cover(GEN ell, long prec);
 GEN     ellrank(GEN ell, long effort, GEN help, long prec);
 GEN     ellrankinit(GEN ell, long prec);
 long    hyperell_locally_soluble(GEN pol,GEN p);

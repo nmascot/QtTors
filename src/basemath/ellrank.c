@@ -1223,6 +1223,44 @@ liftselmerinit(GEN expo, GEN vnf, GEN sqrtLS2, GEN factLS2,
 }
 
 static GEN
+liftselmer_cover(GEN b, GEN expo, GEN vnf, GEN sbase, GEN LS2,
+                 GEN vcrt, GEN pol, GEN selmer, GEN K)
+{
+  GEN P, Q, Q4, R, den, q0, q1, q2, xz, x, y, y2m, U, param, newb;
+  GEN ttheta, tttheta, zc, polprime;
+  zc = RgXQV_factorback(LS2, expo, pol);
+  if (typ(zc)==t_INT) zc = scalarpol(zc, varn(pol));
+  ttheta = RgX_shift_shallow(pol,-2);
+  tttheta = RgX_shift_shallow(pol, -1);
+  polprime = ZX_deriv(pol);
+  q2 = Q_primpart(tracematrix(zc, b, pol));
+  U = redquadric(b, q2, pol, QXQ_div(zc, polprime, pol));
+  q2 = qf_apply_RgM(q2, U);
+  newb = RgV_RgM_mul(b, U);
+  param = Q_primpart(qfparam(q2, qfsolve(q2), 0));
+  param = RgM_to_RgXV_reverse(shallowtrans(param), 0);
+  q1 = RgM_neg(tracematrix(QXQ_mul(zc, ttheta, pol), newb, pol));
+  q1 = Q_remove_denom(qfeval(q1, param), &den);
+  if (den) q1 = ZX_Z_mul(q1, den);
+  Q = hyperellreduce(q1, &R);
+  if (!equali1(K)) Q = RgX_Rg_mul(Q, K);
+  if (DEBUGLEVEL>1) err_printf("  reduced quartic: Y^2 = %Ps\n", Q);
+  xz = mkcol2(pol_x(0),gen_1);
+  P = RgM_RgC_mul(R, xz); x = gel(P,1); y = gel(P,2);
+  param = RgXV_homogenous_evaldeg(param, x, gpowers(y, 2));
+  param = gmul(param, den? mulii(K, den): K);
+  q0 = tracematrix(QXQ_mul(zc, tttheta, pol), newb, pol);
+  x = gdiv(qfeval(q0, param), K);
+  Q4 = gpowers(Q,4);
+  y2m = gmul(RgX_homogenous_evaldeg(pol, x, Q4), Q);
+  if (!issquareall(gdiv(y2m, K), &y))
+    pari_err_BUG("liftselmer_cover");
+  y = gdiv(y, gel(Q4,2));
+  P = mkvec2(gdiv(gmul(K,x),pol_xn(2,1)),gdiv(gmul(gsqr(K),y),pol_xn(3,1)));
+  return mkvec2(Q,P);
+}
+
+static GEN
 liftselmer(GEN b, GEN expo, GEN vnf, GEN sbase, GEN LS2, GEN vcrt, GEN pol,
            GEN selmer, GEN K, long lim, long ntry)
 {
@@ -1433,6 +1471,18 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     for (i = 1; i < l; i++) gel(z,i) = RgXQV_factorback(LS2, gel(u,i), pol);
     return mkvec2(mkvec3(vnf,sbase,pol), z);
   }
+  else if (flag==2)
+  {
+    GEN u = nbpoints ? Flm_mul(selmer,Flm_suppl(newselmer,2), 2): selmer;
+    long l = lg(u);
+    GEN P = cgetg(l, t_VEC), b;
+    for (i = 1; i < l; i++)
+    {
+      b = liftselmerinit(gel(u,i), vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
+      gel(P,i) = liftselmer_cover(b, gel(u,i), vnf, sbase, LS2, vcrt, pol, selmer, K);
+    }
+    return P;
+  }
   listpoints = vec_lengthen(help, dim); /* points on ell */
   for (i=1; i <= dim; i++)
   {
@@ -1514,8 +1564,8 @@ ellrank_get_nudur(GEN E, GEN F, GEN *nu, GEN *du, GEN *r)
   *r  = diviuexact(subii(mulii(*nu,ea2t),mulii(*du,ea2)),3);
 }
 
-GEN
-ellrank(GEN e, long effort, GEN help, long prec)
+static GEN
+ellrank_flag(GEN e, long effort, GEN help, long flag, long prec)
 {
   pari_sp ltop = avma;
   GEN urst, v, vbnf, eK;
@@ -1556,10 +1606,34 @@ ellrank(GEN e, long effort, GEN help, long prec)
   /* help is a vector of rational points [x,y] satisfying K y^2 = pol(x) */
   /* [Kx, K^2y] is on eK: Y^2 = K^3 pol(X/K)  */
   if (help) check_oncurve(eK, help);
-  v = ell2selmer(e, eK, help, K, vbnf, effort, 0, prec);
-  if (et) gel(v,3) = ellchangepoint(gel(v,3), urstK);
-  if (urst) gel(v,3) = ellchangepointinv(gel(v,3), urst);
+  v = ell2selmer(e, eK, help, K, vbnf, effort, flag, prec);
+  if (flag==0)
+  {
+    if (et)   gel(v,3) = ellchangepoint(gel(v,3), urstK);
+    if (urst) gel(v,3) = ellchangepointinv(gel(v,3), urst);
+  }
+  else
+  {
+    long i, l = lg(v);
+    for (i = 1; i < l; i++)
+    {
+      if (et)   gmael(v,i,2) = ellchangepoint(gmael(v,i,2), urstK);
+      if (urst) gmael(v,i,2) = ellchangepointinv(gmael(v,i,2), urst);
+    }
+  }
   if (newell) obj_free(e);
   if (eK != e) obj_free(eK);
   return gerepilecopy(ltop, v);
+}
+
+GEN
+ellrank(GEN e, long effort, GEN help, long prec)
+{
+  return ellrank_flag(e, effort, help, 0, prec);
+}
+
+GEN
+ell2cover(GEN ell, long prec)
+{
+  return ellrank_flag(ell, 0, NULL, 2, prec);
 }
