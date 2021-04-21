@@ -26,6 +26,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - Z_smoothen now uses (and returns) t_VEC arguments. Use Z_lsmoothen to
     input small primes as a t_VECSMALL.
   - QXX_QXQ_eval: renamed to QXY_QXQ_evalx
+  - ZX_Zp_root(f,a,p,): assume 0 <= a < p
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.12 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   - the member function bnf.futu and .tufu (deprecated since 2.2) have been

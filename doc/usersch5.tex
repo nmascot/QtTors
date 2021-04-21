@@ -7393,7 +7393,7 @@ congruent to $a$ mod $p$.
 \fun{GEN}{ZX_Zp_root}{GEN f, GEN a, GEN p, long e} same as \tet{ZpX_liftroot}
 without the assumption $v_p(f'(a)) = 0$. Return a \typ{VEC} of \typ{INT}s,
 which are the $p$-adic roots of $f$ congruent to $a$ mod $p$ (given modulo
-$p^e$).
+$p^e$). Assume that $0 \leq a < p$.
 
 \fun{GEN}{ZpX_liftroots}{GEN f, GEN S, GEN p, long e} $f$ a \kbd{ZX} with
 leading term prime to $p$, and $S$ a vector of simple roots mod $p$. Return a

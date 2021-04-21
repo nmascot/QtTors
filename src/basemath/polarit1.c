@@ -313,19 +313,19 @@ QpXQX_to_ZXY(GEN f, GEN p)
 /*                                                                 */
 /*******************************************************************/
 
-/* f primitive ZX, squarefree, leading term prime to p; a in Z such that
+/* f primitive ZX, squarefree, leading term prime to p; 0 <= a < p such that
  * f(a) = 0 mod p. Return p-adic roots of f equal to a mod p, in
  * precision >= prec */
 GEN
 ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
 {
-  GEN z, R, a0 = modii(a, p);
+  GEN z, R;
   long i, j, k;
 
-  if (signe(FpX_eval(FpX_deriv(f, p), a0, p)))
+  if (signe(FpX_eval(FpX_deriv(f, p), a, p)))
   { /* simple zero mod p, go all the way to p^prec */
-    if (prec > 1) a0 = ZpX_liftroot(f, a0, p, prec);
-    return mkcol(a0);
+    if (prec > 1) a = ZpX_liftroot(f, a, p, prec);
+    return mkcol(a);
   }
 
   f = ZX_unscale_div(ZX_translate(f,a), p); /* f(pX + a) / p */
@@ -347,12 +347,13 @@ Zp_appr(GEN f, GEN a)
 {
   pari_sp av = avma;
   GEN z, p = gel(a,2);
-  long prec = gequal0(a)? valp(a): precp(a);
+  long v = valp(a), prec = gequal0(a)? v: precp(a);
 
   f = QpX_to_ZX(f, p);
   if (degpol(f) <= 0) pari_err_CONSTPOL("Zp_appr");
+  if (v < 0) pari_err_DOMAIN("padicappr", "v(a)", "<", gen_0, stoi(v));
   f = ZX_radical(f);
-  a = padic_to_Q(a);
+  a = padic_to_Fp(a, p);
   if (signe(FpX_eval(f,a,p))) { set_avma(av); return cgetg(1,t_COL); }
   z = ZX_Zp_root(f, a, p, prec);
   return gerepilecopy(av, ZV_to_ZpV(z, p, prec));
