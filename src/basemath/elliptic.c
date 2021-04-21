@@ -7309,7 +7309,7 @@ elldivpol(GEN e, long n0, long v)
     f = elldivpol4(e, N, n, v);
   else
   {
-    GEN d2 = ec_bmodel(e); /* (2y + a1x + 3)^2 mod E */
+    GEN d2 = ec_bmodel(e); /* (2y + a1x + a3)^2 mod E */
     setvarn(d2,v);
     if (N && !mod2(N)) { gel(d2,5) = modsi(4,N); d2 = normalizepol(d2); }
     if (n <= 4)
