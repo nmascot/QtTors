@@ -2,6 +2,7 @@ padicprec(1,2)
 padicappr(x,O(2))
 padicappr('x,Mod(0,'t)+O(7^10))
 padicappr(x^2+Mod(O(3^2),t^2+1),Mod(0,t^2+1)+O(3^2))
+padicappr(x^2+25,5+O(5^2))
 
 factorpadic(y^2+3^5,3,5)
 factor(x^2*(1+O(5^2)))

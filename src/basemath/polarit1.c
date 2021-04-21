@@ -347,8 +347,9 @@ Zp_appr(GEN f, GEN a)
 {
   pari_sp av = avma;
   GEN z, p = gel(a,2);
-  long v = valp(a), prec = gequal0(a)? v: precp(a);
+  long v = valp(a), prec = v;
 
+  if (signe(gel(a,4))) prec += precp(a);
   f = QpX_to_ZX(f, p);
   if (degpol(f) <= 0) pari_err_CONSTPOL("Zp_appr");
   if (v < 0) pari_err_DOMAIN("padicappr", "v(a)", "<", gen_0, stoi(v));
