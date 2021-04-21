@@ -1503,25 +1503,36 @@ polV4(long d1, long d2)
 GEN
 nflist_V4_worker(GEN D1, GEN X, GEN Xinf, GEN gs)
 {
-  pari_sp av = avma;
+  pari_sp av = avma, av2;
   GEN V, W;
   long d2a, e1 = signe(D1), d1 = itos(D1), d1a = labs(d1);
-  long s2 = -1, s = itos(gs);
+  long limg, limg2, s2 = -1, s = itos(gs);
   long limD2 = itos(sqrti(divis(X, d1a)));
   long limQ = floorsqrtdiv(X, sqru(d1a));
-  long limg = usqrt(mpodd(D1)? d1a: d1a << 2);
+
+  limg2 = limg = usqrt(d1a);
+  if (!odd(d1a))
+  { /* limg2 = sqrt(d1a * 4), to be used when d2 is also even */
+    long r = d1a - limg*limg;
+    limg2 *= 2; if (r >= limg) limg2++;
+  }
 
   if (s == 2 && e1 > 0) s2 = 1; /* forbid d2 > 0 */
   else if (!s) s2 = 0; /* forbid d2 < 0 */
   W = vectrunc_init(2 * limD2);
-  V = e1 < 0? W: vectrunc_init(2 * limD2);
-  for (d2a = d1a; d2a <= limD2; d2a++)
+  V = e1 < 0? W: vectrunc_init(2 * limD2); av2 = avma;
+  for (d2a = d1a; d2a <= limD2; d2a++, set_avma(av2))
   {
-    long v2 = vals(d2a), g, d2ag;
+    long g, d2ag, LIMg;
     GEN D3, d1d2a, d3;
     int p, m;
-    if (v2 == 1 || v2 >= 4) continue;
-    g = ugcd(d2a, d1a); if (g > limg) continue;
+    if (odd(d2a)) LIMg = limg;
+    else
+    {
+      if ((d2a & 3) == 2 || !(d2a & 15)) continue; /* v2(d2) = 1 or >= 4 */
+      LIMg = limg2;
+    }
+    g = ugcd(d2a, d1a); if (g > LIMg) continue;
     d2ag = d2a / g; if (d2ag > limQ) continue;
     uis_fundamental_pm(d2a, s2, &p, &m);
     if (!p && !m) continue;
@@ -1531,7 +1542,7 @@ nflist_V4_worker(GEN D1, GEN X, GEN Xinf, GEN gs)
       setsigne(d3, e1);
       D3 = Mod4(d3) > 1? shifti(d3, 2): d3; /* now D3 = coredisc(D1*D2) */
       if (abscmpiu(D3, d2a) > 0 && ok_int(mulii(d1d2a, D3), X, Xinf))
-        vectrunc_append(V,  polV4(d1, d2a));
+      { vectrunc_append(V,  polV4(d1, d2a)); av2 = avma; }
     }
     if (m)
     { /* D2 = - d2a is fundamental */
@@ -1541,7 +1552,7 @@ nflist_V4_worker(GEN D1, GEN X, GEN Xinf, GEN gs)
       fl = abscmpiu(D3, d2a);
       if (fl < 0 || (!fl && e1 > 0)) continue;
       if (ok_int(mulii(d1d2a, D3), X, Xinf))
-        vectrunc_append(W, polV4(d1, -d2a));
+      { set_avma(av2); vectrunc_append(W, polV4(d1, -d2a)); av2 = avma; }
     }
   }
   return gerepilecopy(av, mkvec2(e1 < 0? cgetg(1, t_VEC): V, W));
