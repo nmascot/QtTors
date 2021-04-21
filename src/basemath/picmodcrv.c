@@ -40,6 +40,16 @@ long zM_coef_mod(GEN A, GEN v)
   return gel(A,j?j:N)[i?i:N];
 }
 
+GEN RgM_coef_mod(GEN A, GEN v)
+{
+  long N,i,j;
+  N = lg(A)-1;
+  i = umodsu(v[1],N);
+  j = umodsu(v[2],N);
+  return gcoeff(A,i?i:N,j?j:N);
+}
+
+
 GEN ZNXspan(GEN S, ulong N)
 { /* Span of S in (Z/NZ)* */
   pari_sp av = avma;
@@ -639,6 +649,17 @@ GEN elladd_padic(GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
   return gerepilecopy(av,R);
 }
 
+GEN FpEll_y2_from_Fqx(GEN a4, GEN a6, GEN x, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  GEN y;
+  y = Fq_sqr(x,T,p); // x²
+  y = ZX_Z_add(y,a4); // x²+a4
+  y = Fq_mul(y,x,T,p); // x³+a4*x
+  y = ZX_Z_add(y,a6); // x³+a4*x+a6
+  return gerepileupto(av,y);
+}
+
 ulong FpX_split_deg(GEN F, GEN p)
 { /* Smallest d s.t. all roots in GF(p^d), i.e. x^p^d = x mod F */
 	pari_sp av = avma;
@@ -652,16 +673,30 @@ ulong FpX_split_deg(GEN F, GEN p)
 	return i;
 }
 
-ulong EllTorsIsSplit_lv(GEN E, ulong l, ulong v, GEN p, ulong d, GEN T, GEN q2)
+GEN Fp_elldivpol_lv(GEN a4, GEN a6, ulong l, ulong v, GEN p)
+{ /* pol whose roots are the x of the pts in E[l^v]-E[l^v-1] */
+	pari_sp av = avma;
+	GEN D,D1;
+	if(l==2 && v==1)
+	{
+		D = mkpoln(4,gen_1,gen_0,a4,a6);
+		return gerepilecopy(av,D);
+	}
+	D = Fp_elldivpol(a4,a6,upowuu(l,v),p);
+	if(v==1) return D;
+  D1 = Fp_elldivpol(a4,a6,upowuu(l,v-1),p);
+  D = FpX_div(D,D1,p);
+	return gerepileupto(av,D);
+}
+
+ulong EllTorsIsSplit_lv(GEN a4, GEN a6, ulong l, ulong v, GEN p, ulong d, GEN T, GEN q2)
 { /* returns [Fp(E[l^v]/+-1):Fp] if E[l^v] defined over Fp^d, else returns 0 */
 	pari_sp av = avma;
-	GEN D,D1,X,a4,a6,x,y;
+	GEN D,X,y;
 	ulong r,nX,i;
 	if(DEBUGLEVEL)
 		printf("EllSplitTors: Using divpol to check whether E[%lu^%lu] defined in degree %lu.\n",l,v,d);
-	D = elldivpol(E,upowuu(l,v),0);
-	D1 = elldivpol(E,upowuu(l,v-1),0);
-	D = liftint(gdiv(D,D1));
+	D = Fp_elldivpol_lv(a4,a6,l,v,p);
 	r = FpX_split_deg(D,p);
 	if(d%r)
 	{
@@ -674,14 +709,9 @@ ulong EllTorsIsSplit_lv(GEN E, ulong l, ulong v, GEN p, ulong d, GEN T, GEN q2)
 	{
 		X = FpXQX_roots(D,T,p);
 		nX = lg(X);
-		a4 = liftint(ell_get_a4(E));
-		a6 = liftint(ell_get_a6(E));
 		for(i=1;i<nX;i++)
 		{
-			x = gel(X,i);
-			y = Fq_powu(x,3,T,p);
-			y = ZX_add(y,ZX_Z_mul(x,a4));
-			y = ZX_Z_add(y,a6);
+			y = FpEll_y2_from_Fqx(a4,a6,gel(X,i),T,p);
 			y = Fq_pow(y,q2,T,p);
 			if(!gequal1(y))
 			{
@@ -697,12 +727,12 @@ ulong EllTorsIsSplit_lv(GEN E, ulong l, ulong v, GEN p, ulong d, GEN T, GEN q2)
 	return r;
 }
 
-ulong EllTorsIsSplit(GEN E, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
+ulong EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
 { /* returns [Fp(E[N]/+-1):Fp] if E[N] defined over Fp^d, else returns 0 */
 	pari_sp av = avma;
 	GEN ap,chiE,nu,nud,NE,g,fa;
 	ulong M,l,v,pl,i,r,c,nfa;
-	ap = ellap(E,NULL);
+	ap = subii(addiu(p,1),Fp_ellcard(a4,a6,p));
   chiE = mkpoln(3,gen_1,negi(ap),p); /* x²-ap*x+p */
   nu = polsym(chiE,d);
   nud = gel(nu,d+1); /* alpha^d+beta^d */
@@ -752,7 +782,7 @@ ulong EllTorsIsSplit(GEN E, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
 	{
 		l = gel(fa,1)[i];
 		v = gel(fa,2)[i];
-		r = EllTorsIsSplit_lv(E,l,v,p,d,T,q2);
+		r = EllTorsIsSplit_lv(a4,a6,l,v,p,d,T,q2);
 		if(r==0)
 		{
 			avma = av;
@@ -782,7 +812,7 @@ ulong EllTorsIsSplit(GEN E, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
 		}
 		else
 		{
-			r = EllTorsIsSplit_lv(E,l,v,p,d,T,q2);
+			r = EllTorsIsSplit_lv(a4,a6,l,v,p,d,T,q2);
    	 	if(r==0)
     	{
       	avma = av;
@@ -800,7 +830,7 @@ GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
 { /* Look for E/Fp such that E[N] def / Fp^d and j not in Badj */
 	pari_sp av = avma;
 	ulong d,nBad,i,r;
-	GEN q,q2,a,b,D,ab,E,j;
+	GEN q,q2,a4,a6,D,j;
 	d = degpol(T);
 	if(Fl_powu(umodiu(p,N),d,N)!=1)
 		pari_err(e_MISC,"Impossible by Weil pairing");
@@ -811,31 +841,27 @@ GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
 	for(;;)
 	{
 		if(DEBUGLEVEL) printf("EllSplitTors: Trying new curve.\n");
-		a = genrand(p);
-		if(gequal0(a)) continue; /* Avoid j=0 */
-		b = genrand(p);
-		if(gequal0(b)) continue; /* Avoid j=1728 */
-		D = Fp_powu(a,3,p);
+		a4 = genrand(p);
+		if(gequal0(a4)) continue; /* Avoid j=0 */
+		a6 = genrand(p);
+		if(gequal0(a6)) continue; /* Avoid j=1728 */
+		D = Fp_powu(a4,3,p);
 		D = muliu(D,4);
-		D = Fp_add(D,muliu(Fp_sqr(b,p),27),p);
+		D = Fp_add(D,muliu(Fp_sqr(a6,p),27),p);
 		if(gequal0(D)) continue; /* Singular curve */
-		j = Fp_ellj(a,b,p);
-		ab = mkvec2(a,b);
-		pari_printf("ab=%Ps\n",ab);
-		E = ellinit(ab,p,0); /* y²=x³+ax+b / Fp */
-		j = ell_get_j(E);
+		j = Fp_ellj(a4,a6,p);
 		for(i=1;i<nBad;i++)
 		{
 			if(gequal(gel(Badj,i),j))
 			{
-				E = NULL;
+				a4 = a6 = NULL;
 				break;
 			}
 		}
-		if(E==NULL) continue;
-		r = EllTorsIsSplit(E,N,p,d,T,q,q2);
+		if(a4==NULL) continue;
+		r = EllTorsIsSplit(a4,a6,N,p,d,T,q,q2);
 		if(r==d)
-			return gerepilecopy(av,ab);
+			return gerepilecopy(av,mkvec2(a4,a6));
 		if(DEBUGLEVEL)
 		{
 			if(r==0) printf("EllSplitTors: Unsuitable curve.\n");
@@ -844,28 +870,242 @@ GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
 	}
 }
 
-GEN FqEll_y_from_x(GEN x, GEN ab, GEN T, GEN p)
-{
+GEN EllTorsBasis_lv(GEN a4, GEN a6, GEN A4, ulong l, ulong v, GEN T, GEN p, GEN D)
+{ /* l,v -> Basis [P,Q] of E[l^v] over Fq, plus its Weil pairing, and mat of Frob */
 	pari_sp av = avma;
-	GEN y;
-	y = Fq_sqr(x,T,p); // x²
-	y = ZX_Z_add(y,gel(ab,1)); // x²+a
-	y = Fq_mul(y,x,T,p); // x³+ax
-	y = ZX_Z_add(y,gel(ab,2)); // x³+ax+b
-	y = Fq_sqrt(y,T,p);
-	return gerepileupto(av,y);
-}
-
-GEN EllTorsBasis_lv(GEN E, GEN ab, ulong l, ulong v, GEN T, GEN p, GEN D)
-{ /* l,v -> Basis [P,Q] of E[l^v], plus its Weil pairing, and mat of Frob */
+	GEN lv1,lv,X,P,Q,x,z,z1,FP,FQ,M;
+	ulong nX,iP,iQ;
 	if(DEBUGLEVEL) printf("Getting basis of E[%lu^%lu]\n",l,v);
+	lv1 = powuu(l,v-1);
+	lv = muliu(lv1,l);
 	X = FpXQX_roots(D,T,p);
 	nX = lg(X)-1;
+	P = cgetg(3,t_VEC);
+	Q = cgetg(3,t_VEC);
+	FP = cgetg(3,t_VEC);
+	FQ = cgetg(3,t_VEC);
 	for(;;)
 	{
 		iP = random_Fl(nX);
-		do {iQ = random_Fl(nX);} while(iQ=iP);
-		P = FqEll_y_from_x(gel(X,iP+1),ab,T,p);
-		Q = FqEll_y_from_x(gel(X,iQ+1),ab,T,p);
-		FpXQE_weilpairing(P,Q,lv,a4,T,p);
+		do {iQ = random_Fl(nX);} while(iQ==iP);
+		gel(P,1) = x = gel(X,iP+1);
+		gel(P,2) = Fq_sqrt(FpEll_y2_from_Fqx(a4,a6,x,T,p),T,p);
+		gel(Q,1) = x = gel(X,iQ+1);
+		gel(Q,2) = Fq_sqrt(FpEll_y2_from_Fqx(a4,a6,x,T,p),T,p);
+		z = FpXQE_weilpairing(P,Q,lv,A4,T,p);
+		if(!gequal1(Fq_pow(z,lv1,T,p))) break;
+	}
+	z1 = Fq_inv(z,T,p);
+	gel(FP,1) = Fq_pow(gel(P,1),p,T,p);
+	gel(FP,2) = Fq_pow(gel(P,2),p,T,p);
+	gel(FQ,1) = Fq_pow(gel(Q,1),p,T,p);
+	gel(FQ,2) = Fq_pow(gel(Q,2),p,T,p);
+	M = cgetg(3,t_MAT);
+	gel(M,1) = cgetg(3,t_COL);
+	gel(M,2) = cgetg(3,t_COL);
+	gcoeff(M,1,1) = Fq_log(FpXQE_weilpairing(FP,Q,lv,A4,T,p),z,lv,T,p);
+	gcoeff(M,2,1) = Fq_log(FpXQE_weilpairing(FP,P,lv,A4,T,p),z1,lv,T,p);
+	gcoeff(M,1,2) = Fq_log(FpXQE_weilpairing(FQ,Q,lv,A4,T,p),z,lv,T,p);
+	gcoeff(M,2,2) = Fq_log(FpXQE_weilpairing(FQ,P,lv,A4,T,p),z1,lv,T,p);
+	return gerepilecopy(av,mkvecn(4,P,Q,z1,gmodulo(M,lv)));
+}
+
+GEN ZqE_LiftTorsPt(GEN a4, GEN a6, GEN P, GEN D, GEN T, GEN pe, GEN p, long e)
+{
+	pari_sp av = avma;
+	GEN x,y,y2;
+	x = gel(P,1);
+	y = gel(P,2);
+	x = ZpX_ZpXQ_liftroot(D,x,T,p,e);
+	y2 = FpEll_y2_from_Fqx(a4,a6,x,T,pe);
+	y = ZpXQ_sqrtnlift(y2,gen_2,y,T,p,e);
+	return gerepilecopy(av,mkvec2(x,y));
+}
+
+GEN EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
+{ /* Find a4,a6 s.t. E[N] def/Fq and Fp(E[N]/-)=Fq. Returns a4,a6,P,Q,eN(P,Q),MFrob mod p^e. */
+	pari_sp av = avma;
+	GEN Fq1,a46,a4,a6,A4,P,Q,z,faN,M,D,B,Pi,Qi,zi;
+	ulong nfaN,i,l,v,lv1,lv;
+	a46 = EllSplitTors(N,p,T,Badj);
+	a4 = gel(a46,1);
+	a6 = gel(a46,2);
+	A4 = scalarpol(a4,varn(T));
+	P = Q = mkvec(gen_0);
+	z = Fq1 = pol_1(varn(T));
+	faN = factoru(N);
+	nfaN = lg(gel(faN,1));
+	M = cgetg(nfaN,t_VEC);
+	for(i=1;i<nfaN;i++)
+	{
+		l = gel(faN,1)[i];
+		v = gel(faN,2)[i];
+		lv1 = upowuu(l,v-1);
+		lv = lv1*l;
+		D = Fp_elldivpol_lv(a4,a6,l,v,pe);
+		B = EllTorsBasis_lv(a4,a6,A4,l,v,T,p,D);
+		Pi = ZqE_LiftTorsPt(a4,a6,gel(B,1),D,T,pe,p,e);
+		P = elladd_padic(a4,P,Pi,T,pe,p,e);
+		Qi = ZqE_LiftTorsPt(a4,a6,gel(B,2),D,T,pe,p,e);
+		Q = elladd_padic(a4,Q,Qi,T,pe,p,e);
+		zi = gel(B,3);
+		zi = Fq_powu(zi,N/lv,T,p);
+		zi = ZpXQ_sqrtnlift(Fq1,utoi(lv),zi,T,p,e);
+		z = Fq_mul(z,zi,T,pe);
+		gel(M,i) = gel(B,4);
+	}
+	M = liftint(chinese1(M));
+	return gerepilecopy(av,mkvecn(5,a46,P,Q,z,M));
+}
+
+GEN Ell_l2(GEN EN, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
+{
+  P = RgM_coef_mod(EN,P);
+  Q = RgM_coef_mod(EN,Q);
+  return ZpXQ_div(ZX_sub(gel(Q,2),gel(P,2)),ZX_sub(gel(Q,1),gel(P,1)),T,pe,p,e);
+}
+
+GEN Ell_l1(GEN EN, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
+{
+  pari_sp av = avma;
+  ulong N,n;
+  GEN S,nPQ;
+
+  /* TODO methode Kamal addchain */
+  N = lg(EN)-1;
+	nPQ = gcopy(Q);
+  S = Ell_l2(EN,P,nPQ,T,pe,p,e);
+  for(n=1;n<N;n++)
+  {
+		nPQ[1] += P[1];
+		nPQ[2] += P[2];
+    S = ZX_add(S,Ell_l2(EN,P,nPQ,T,pe,p,e));
+  }
+  return gerepileupto(av,S);
+}
+
+GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
+{
+	pari_sp av = avma;
+	GEN worker,done,E,EN,Ml1,params,v01,v10;
+	ulong i,j,x,y;
+	long pending,workid;
+  struct pari_mt pt;
+	E = stoi(e);
+	/* Write down all N-torsion: : this is a naive level structure alpha : (Z/NZ)² ~ E[N] */
+	EN = cgetg(N+1,t_MAT); /* [ m*i*P + j*Q ] */
+	Ml1 = cgetg(N+1,t_MAT);
+	for(j=1;j<=N;j++)
+	{
+		gel(EN,j) = cgetg(N+1,t_COL);
+		gel(Ml1,j) = cgetg(N+1,t_COL);
+	}
+	gcoeff(EN,m,N) = P;
+	gcoeff(EN,N,1) = Q;
+	/* Axes */
+	for(x=2;x<N;x++)
+	{
+		gcoeff(EN,ZNnorm(m*x,N),N) = elladd_padic(a4,gcoeff(EN,ZNnorm(m*(x-1),N),N),P,T,pe,p,e);
+		gcoeff(EN,N,x) = elladd_padic(a4,gcoeff(EN,N,x-1),Q,T,pe,p,e);
+	}
+	/* The rest */
+	params = cgetg(8,t_VEC);
+	gel(params,1) = a4;
+	gel(params,4) = T;
+	gel(params,5) = pe;
+	gel(params,6) = p;
+	gel(params,7) = E;
+	worker = strtofunction("_elladd_padic");
+  mt_queue_start_lim(&pt,worker,(N-1)*(N-1));
+	pending = 0;
+	for(x=1;x<N||pending;x++)
+	{
+		for(y=1;y<N;y++)
+		{
+			if(x<N)
+			{
+				gel(params,3) = gcoeff(EN,x,N);
+				gel(params,4) = gcoeff(EN,N,y);
+				mt_queue_submit(&pt,N*x+y,params);
+			}
+			else mt_queue_submit(&pt,N*x+y,NULL);
+			done = mt_queue_get(&pt,&workid,&pending);
+      if(done)
+			{
+				i = udivuu_rem(workid,N,&j);
+				gcoeff(EN,i,j) = done;
+			}
+		}
+	}
+	mt_queue_end(&pt);
+	/* Ml1 */
+	gel(params,1) = EN;
+	v01 = mkvecsmall2(0,1);
+	v10 = mkvecsmall2(1,0);
+	worker = strtofunction("_Ell_l1");
+  mt_queue_start_lim(&pt,worker,N*N-1);
+	for(x=1;x<=N||pending;x++)
+	{
+		for(y=1;y<=N;y++)
+		{
+			if(x==N && y==N) continue;
+			if(x<=N)
+			{
+				gel(params,3) = mkvecsmall2(x,y);
+				gel(params,4) = y==N ? v01 : v10;
+				mt_queue_submit(&pt,N*x+y,params);
+			}
+			else mt_queue_submit(&pt,N*x+y,NULL);
+			done = mt_queue_get(&pt,&workid,&pending);
+			if(done)
+      {
+        i = udivuu_rem(workid,N,&j);
+        gcoeff(Ml1,i,j) = done;
+      }
+		}
+	}
+	mt_queue_end(&pt);
+	return gerepilecopy(av,Ml1);
+}
+
+GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref, GEN Badj)
+{
+	pari_sp av = avma;
+	GEN pe,E,a4,a6,P,Q,zN,M,Ml1,FP,PtsFrob;
+	ulong m,nPts,i,a,b,c,d,x,y;
+	pe = powis(p,e);
+	E = EllWithTorsBasis(N,T,pe,p,e,Badj);
+	a4 = gmael(E,1,1);
+	a6 = gmael(E,1,2);
+	P = gel(E,2);
+	Q = gel(E,3);
+	zN = gel(E,4);
+	M = gel(E,5);
+	pari_printf("E:y²+x³+%Psx+%Ps with accuracy O(%Ps^%ld) and residual degree %lu",a4,a6,p,e,degpol(T));
+	/* Frob acts on E[N] by [a,c;b,d]
+	 * => on pts, Frob([x,y]) = [x,y]*[a,b;c,d] = [a*x + c*y, b*x + d*y] */
+	a = itou(gcoeff(M,1,1));
+	b = itou(gcoeff(M,2,1));
+	c = itou(gcoeff(M,1,2));
+	d = itou(gcoeff(M,2,2));
+	if(zNpref)
+	{
+		m = itou(Fq_log(zN,zNpref,utoi(N),T,p));
+		c = Fl_mul(c,m,N);
+		b = Fl_div(b,m,N);
+		zN = gen_0;
+	}
+	else m=1;
+	Ml1 = EllMl1(a4,N,P,Q,m,T,pe,p,e);
+	nPts = lg(Pts);
+	PtsFrob = cgetg(nPts,t_VECSMALL);
+	for(i=1;i<nPts;i++)
+	{
+		P = gel(Pts,i);
+		x = P[1];
+		y = P[2];
+		FP = mkvecsmall2(a*x + c*y, b*x + d*y);
+		PtsFrob[i] = zM_coef_mod(PtTags,FP);
+	}
+	return gerepilecopy(av,mkvecn(5,a4,a6,Ml1,PtsFrob,zN));
 }
