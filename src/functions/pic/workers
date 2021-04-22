@@ -51,3 +51,16 @@ Section: programming/internals
 C-Name: LMod_worker
 Prototype: GGGLGGG
 Help:
+
+Function: _elladd_padic
+Section: programming/internals
+C-Name: elladd_padic
+Prototype: GGGGGGL
+Help:
+
+Function: _Ell_l1
+Section: programming/internals
+C-Name: Ell_l1
+Prototype: GGGGGGL
+Help:
+

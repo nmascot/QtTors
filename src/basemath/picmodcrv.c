@@ -972,7 +972,8 @@ GEN Ell_l1(GEN EN, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
   GEN S,nPQ;
 
   /* TODO methode Kamal addchain */
-  N = lg(EN)-1;
+  printf("Into l1\n");
+	N = lg(EN)-1;
 	nPQ = gcopy(Q);
   S = Ell_l2(EN,P,nPQ,T,pe,p,e);
   for(n=1;n<N;n++)
@@ -981,6 +982,7 @@ GEN Ell_l1(GEN EN, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
 		nPQ[2] += P[2];
     S = ZX_add(S,Ell_l2(EN,P,nPQ,T,pe,p,e));
   }
+  printf("Out of l1\n");
   return gerepileupto(av,S);
 }
 
@@ -1000,6 +1002,7 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 		gel(EN,j) = cgetg(N+1,t_COL);
 		gel(Ml1,j) = cgetg(N+1,t_COL);
 	}
+	gcoeff(EN,N,N) = gcoeff(Ml1,N,N) = gen_0;
 	gcoeff(EN,m,N) = P;
 	gcoeff(EN,N,1) = Q;
 	/* Axes */
@@ -1024,8 +1027,9 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 		{
 			if(x<N)
 			{
-				gel(params,3) = gcoeff(EN,x,N);
-				gel(params,4) = gcoeff(EN,N,y);
+				gel(params,2) = gcoeff(EN,x,N);
+				gel(params,3) = gcoeff(EN,N,y);
+				printf("submitting add %lu %lu\n",x,y);
 				mt_queue_submit(&pt,N*x+y,params);
 			}
 			else mt_queue_submit(&pt,N*x+y,NULL);
@@ -1033,8 +1037,10 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
       if(done)
 			{
 				i = udivuu_rem(workid,N,&j);
+				printf("got add %lu %lu\n",i,j);
 				gcoeff(EN,i,j) = done;
 			}
+			if(x>=N) break;
 		}
 	}
 	mt_queue_end(&pt);
@@ -1051,17 +1057,20 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 			if(x==N && y==N) continue;
 			if(x<=N)
 			{
-				gel(params,3) = mkvecsmall2(x,y);
-				gel(params,4) = y==N ? v01 : v10;
+				printf("submitting l1 %lu %lu\n",x,y);
+				gel(params,2) = mkvecsmall2(x,y);
+				gel(params,3) = y==N ? v01 : v10;
 				mt_queue_submit(&pt,N*x+y,params);
 			}
 			else mt_queue_submit(&pt,N*x+y,NULL);
 			done = mt_queue_get(&pt,&workid,&pending);
 			if(done)
       {
-        i = udivuu_rem(workid,N,&j);
-        gcoeff(Ml1,i,j) = done;
+        i = udivuu_rem(workid-1,N,&j);
+				printf("got l1 %lu %lu\n",i,j+1);
+        gcoeff(Ml1,i,j+1) = done;
       }
+			if(x>N) break;
 		}
 	}
 	mt_queue_end(&pt);
