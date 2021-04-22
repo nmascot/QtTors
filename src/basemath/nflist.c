@@ -991,13 +991,13 @@ checkU(long a, long b, long c, long d, long P, long Q, long R, long D)
 GEN
 nflist_S3R_worker(GEN ga, GEN ALLCTS)
 {
-  long a = itos(ga), a3 = 3 * a, a9 = 9 * a, b, c, d;
+  long a = itos(ga), a3 = 3 * a, a9 = 9 * a, b, c, d, ct = 1;
   long x = itos(gel(ALLCTS, 1)), xinf = itos(gel(ALLCTS, 2));
   double xd = (double)x, sqx = rtodbl(gel(ALLCTS, 3));
   double cplus = rtodbl(gel(ALLCTS, 4));
   double cminus = rtodbl(gel(ALLCTS, 5)), cmin = rtodbl(gel(ALLCTS, 6));
   double dmin = rtodbl(gel(ALLCTS, 7)), dsup = rtodbl(gel(ALLCTS, 8));
-  long limbsup = itos(gel(ALLCTS, 9)), limbinf = itos(gel(ALLCTS, 10)), ct;
+  long limbsup = itos(gel(ALLCTS, 9)), limbinf = itos(gel(ALLCTS, 10));
   double limcsup0 = cbrt(cplus / a), limcinf0 = -cbrt(cminus / a);
   double dsupsura = dsup / a, dminsura = dmin / a;
   GEN RET = cgetg(x / 3, t_VEC); ct = 1;
@@ -1075,19 +1075,18 @@ cubicreal(long x, long xinf)
 GEN
 nflist_S3I_worker(GEN ga, GEN ALLCTS)
 {
-  long a = itos(ga), a9 = a * 9, b, c, d, ct;
+  long a = itos(ga), a9 = a * 9, b, c, d, ct = 1;
   long x = itos(gel(ALLCTS, 1)), xinf = itos(gel(ALLCTS, 2));
   double cplus = rtodbl(gel(ALLCTS, 3)), limad = rtodbl(gel(ALLCTS, 4));
   long limb = itos(gel(ALLCTS, 5));
-  double limd0 = limad / a, xd = (double)x;
-  GEN RET = cgetg(x, t_VEC); ct = 1;
+  double limc0 = cbrt(cplus / a), limd0 = limad / a, xd = (double)x;
+  GEN RET = cgetg(x, t_VEC);
+
   for (b = 0; b <= limb; b++)
   {
-    double limcdoub = cbrt(cplus / a), limd1;
     long limc, b3 = b * 3, bb = b * b, gcdab = cgcd(a, b);
-    if (b) limcdoub = min(limcdoub, 4 * limad / b);
-    limc = (long)floor(limcdoub);
-    limd1 = b ? min(limd0, cplus / bb / b) : limd0;
+    double limd1 = b ? min(limd0, cplus / bb / b) : limd0;
+    limc = (long)floor(b? min(limc0, 4 * limad / b): limc0);
     for (c = -limc; c <= limc; c++)
     {
       long gcdabc = cgcd(gcdab, c);
