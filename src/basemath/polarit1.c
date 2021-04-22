@@ -436,7 +436,7 @@ ZXY_ZpQ_root(GEN f, GEN a, GEN T, GEN p, long prec)
 GEN
 padicappr(GEN f, GEN a)
 {
-  GEN p, z, T;
+  GEN p, z, T, Tp;
   long prec;
   pari_sp av = avma;
 
@@ -459,8 +459,9 @@ padicappr(GEN f, GEN a)
   /* ensure that f /= (f,f') is separable */
   (void)nfgcd_all(f, RgX_deriv(f), T, NULL, &f);
 
-  if (!gequal0(FqX_eval(FqX_red(f,T,p), a, T,p))) /* check f(a) = 0 (mod p,T) */
-  { set_avma(av); return cgetg(1,t_COL); }
+  Tp = FpX_red(T, p); a = FqX_red(a, Tp, p);
+  if (!gequal0(FqX_eval(FqX_red(f,Tp,p), a, Tp,p)))
+  { set_avma(av); return cgetg(1,t_COL); } /* f(a) != 0 (mod p,T) */
   z = ZXY_ZpQ_root(f, a, T, p, prec);
   return gerepilecopy(av, ZXV_to_ZpXQV(z, T, p, prec));
 }
