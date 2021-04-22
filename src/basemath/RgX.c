@@ -2679,7 +2679,10 @@ RgXQ_powers(GEN x, long l, GEN T)
 
 GEN
 RgXQV_factorback(GEN L, GEN e, GEN T)
-{ return gen_factorback(L, e, (void*)T, &_mul, &_pow); }
+{
+  if (lg(L)==1) return pol_1(varn(T));
+  return gen_factorback(L, e, (void*)T, &_mul, &_pow);
+}
 
 /* a in K = Q[X]/(T), returns [a^0, ..., a^n] */
 GEN
