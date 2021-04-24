@@ -1027,13 +1027,13 @@ nflist_S3R_worker(GEN ga, GEN S)
   long a = itos(ga), a3 = 3 * a, a9 = 9 * a, b, c, d, ct = 1;
   long x = S[1], xinf = S[2], sqx = S[3], cplus = S[4], cminus = S[5];
   long cmin = S[6], Dmin = S[7], Dsup = S[8], bsup = S[9], binf = S[10];
-  long csup0 = usqrtn(cplus / a, 3), cinf0 = sceilsqrtn(sceildiv(cminus, a), 3);
+  long csupa = usqrtn(cplus / a, 3), cinfa = sceilsqrtn(sceildiv(cminus, a), 3);
   long dsupa = Dsup / a, dinfa = sceildiv(Dmin, a);
   GEN RET = cgetg(x / 3, t_VEC);
 
   for (b = binf; b <= bsup; b++)
   {
-    long cinf = cinf0, csup = csup0, dinfb = dinfa, dsupb = dsupa;
+    long cinf = cinfa, csup = csupa, dinfb = dinfa, dsupb = dsupa;
     long bb = b * b, b3 = 3 * b, gcdab = cgcd(a, b);
     if (b)
     {
@@ -1051,7 +1051,7 @@ nflist_S3R_worker(GEN ga, GEN S)
         m = sceildiv(cminus, bbb);
       }
       dsupb = minss(dsupb, M);
-      dinfb = maxss(dinfb, m); cinf = maxss(cinf0, cinf);
+      dinfb = maxss(dinfb, m); cinf = maxss(cinfa, cinf);
     }
     for (c = cinf; c <= csup; c++)
     {
@@ -1105,36 +1105,32 @@ cubicreal(long x, long xinf)
 }
 
 GEN
-nflist_S3I_worker(GEN ga, GEN ALLCTS)
+nflist_S3I_worker(GEN ga, GEN S)
 {
-  long a = itos(ga), a9 = a * 9, b, c, d, ct = 1;
-  long x = itos(gel(ALLCTS, 1)), xinf = itos(gel(ALLCTS, 2));
-  double cplus = rtodbl(gel(ALLCTS, 3)), limad = rtodbl(gel(ALLCTS, 4));
-  long limb = itos(gel(ALLCTS, 5));
-  double limc0 = cbrt(cplus / a), limd0 = limad / a, xd = (double)x;
+  long a = itos(ga), a3 = a * 3, a9 = a * 9, b, c, d, ct = 1;
+  long x = S[1], xinf = S[2], cplus = S[3], Dsup = S[4], limb = S[5];
+  long x4 = x * 4, csupa = usqrtn(cplus / a, 3), dsupa = Dsup / a;
   GEN RET = cgetg(x, t_VEC);
 
   for (b = 0; b <= limb; b++)
   {
-    long limc, b3 = b * 3, bb = b * b, gcdab = cgcd(a, b);
+    long b3 = b * 3, bb = b * b, gcdab = cgcd(a, b);
     long apb = a + b, amb = a - b;
-    double limd1 = b ? min(limd0, cplus / bb / b) : limd0;
-    limc = (long)floor(b? min(limc0, 4 * limad / b): limc0);
-    for (c = -limc; c <= limc; c++)
+    long dsupb = b? minuu(dsupa, cplus / (bb * b)): dsupa;
+    long csup = b? min(csupa, 4 * Dsup / b): csupa;
+    for (c = -csup; c <= csup; c++)
     {
-      long gcdabc = cgcd(gcdab, c), ac = a * c;
-      long limdsup, limdinf, bc = b * c, cc = c * c, P = bb - 3 * ac;
+      long dsup = dsupb, dinf = b? -dsupb: 1, gcdabc = cgcd(gcdab, c);
+      long bc = b * c, cc = c * c, P = bb - a3 * c;
       if (c)
-      {
-        double tmp1 = 4 * xd / cc;
-        limdsup = (long)floor(min((bc + tmp1) / a, limd1));
-        limdinf = (long)ceil(max((bc - tmp1) / a, -limd1));
+      { /* c^2|bc-9ad| <= 4x */
+        long t = x4 / cc;
+        dsup = minss(dsup, sfloordiv(bc + t, a));
+        dinf = maxss(dinf, sceildiv(bc - t, a));
       }
-      else { limdsup = (long)floor(limd1); limdinf = -limdsup; }
-      if (!b) limdinf = max(limdinf, 1);
-      limdinf = maxss(limdinf, sceildiv(-amb * (amb + c) + 1, a));
-      limdsup = minss(limdsup, (apb * (apb + c) - 1) / a);
-      for (d = limdinf; d <= limdsup; d++)
+      dinf = maxss(dinf, sceildiv(-amb * (amb + c) + 1, a));
+      dsup = minss(dsup, (apb * (apb + c) - 1) / a);
+      for (d = dinf; d <= dsup; d++)
       {
         GEN F;
         long Q, R, D, DF;
@@ -1153,17 +1149,18 @@ nflist_S3I_worker(GEN ga, GEN ALLCTS)
 static GEN
 cubicimag(long x, long xinf)
 {
-  double xd, sqx, sqx4, cplus;
-  long lima, limb, limad;
-  GEN V, ALL;
+  double sqx, sqx4;
+  long lima, limb, Dsup, cplus;
+  GEN V, S;
 
   if (x < 31) return NULL;
-  xd = (double)x; sqx = sqrt(xd / 27); sqx4 = sqrt(sqx);
-  cplus = (11 + 5 * sqrt(5.)) / 8 * xd; limad = 3 * sqx;
-  lima = (long)floor(2 * sqx4);
-  limb = (long)floor(sqrt(3.) * 2 * sqx4);
-  ALL= mkvecn(5, utoipos(x), utoipos(xinf), dbltor(cplus), dbltor(limad), utoipos(limb));
-  V = gen_parapply(closure("_nflist_S3I_worker", mkvec(ALL)), identity_ZV(lima));
+  sqx = sqrt((double)x / 27); sqx4 = sqrt(sqx);
+  cplus = (11 + 5 * sqrt(5.)) / 8 * x;
+  Dsup = 3 * sqx;
+  lima = 2 * sqx4;
+  limb = sqrt(3.) * 2 * sqx4;
+  S = mkvecsmall5(x, xinf, cplus, Dsup, limb);
+  V = gen_parapply(closure("_nflist_S3I_worker", mkvec(S)), identity_ZV(lima));
   V = myshallowconcat1(V); return lg(V) == 1? NULL: V;
 }
 
