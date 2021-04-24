@@ -163,6 +163,16 @@ gceilsqrtn(GEN X, long n)
   if (cmpii(powiu(x, n), X) < 0) x = addiu(x, 1);
   return x;
 }
+/* assume X >= 0 or n odd */
+static long
+sceilsqrtn(long X, long n)
+{
+  ulong x, Xa;
+  if (!X) return 0;
+  Xa = labs(X); x = usqrtn(Xa, n);
+  if (X > 0 && upowuu(x, n) != Xa) x++;
+  return X > 0? (long)x: -(long)x;
+}
 /* ceil((X/Y)^1/n)*/
 static long
 ceilsqrtndiv(GEN X, GEN Y, long n)
@@ -993,6 +1003,7 @@ static long
 sceildiv(long m, long d)
 {
   long q;
+  if (d == 1) return m;
   if (!m) return 0;
   if (d < 0) { d = -d; m = -m; }
   if (m < 0) return -((-m) / d);
@@ -1003,6 +1014,7 @@ static long
 sfloordiv(long m, long d)
 {
   long q;
+  if (d == 1) return m;
   if (!m) return 0;
   if (d < 0) { d = -d; m = -m; }
   if (m > 0) return m / d;
@@ -1015,8 +1027,8 @@ nflist_S3R_worker(GEN ga, GEN S)
   long a = itos(ga), a3 = 3 * a, a9 = 9 * a, b, c, d, ct = 1;
   long x = S[1], xinf = S[2], sqx = S[3], cplus = S[4], cminus = S[5];
   long cmin = S[6], Dmin = S[7], Dsup = S[8], bsup = S[9], binf = S[10];
-  long csup0 = cbrt(cplus / a), cinf0 = ceil(cbrt(sceildiv(cminus, a)));
-  long dsupa = floor(Dsup / a), dinfa = sceildiv(Dmin, a);
+  long csup0 = usqrtn(cplus / a, 3), cinf0 = sceilsqrtn(sceildiv(cminus, a), 3);
+  long dsupa = Dsup / a, dinfa = sceildiv(Dmin, a);
   GEN RET = cgetg(x / 3, t_VEC);
 
   for (b = binf; b <= bsup; b++)
@@ -1045,7 +1057,7 @@ nflist_S3R_worker(GEN ga, GEN S)
     {
       long dsup, dinf, gcdabc = cgcd(gcdab, c);
       long bc = b * c, cc = c * c, P = bb - a3 * c;
-      dsup = minss(dsupb, floor(((double)bc) / a9)); /* Q >= 0 */
+      dsup = minss(dsupb, sfloordiv(bc, a9)); /* Q >= 0 */
       /* bc-9ad <= 4x / 3c^2 */
       dinf = c? maxss(dinfb, sceildiv(bc - ((4 * x) / (cc * 3)), a9)): dinfb;
       for (d = dinf; d <= dsup; d++)
@@ -1071,24 +1083,24 @@ nflist_S3R_worker(GEN ga, GEN S)
 static GEN
 cubicreal(long x, long xinf)
 {
-  double sqx, sqx4, sq13;
-  long lima, bsup, binf, cmin, cplus, cminus, Dmin, Dsup;
+  double sqx, sqx4, sq13, sq3x;
+  long A, bsup, binf, cmin, cplus, cminus, Dmin, Dsup;
   GEN V, S;
 
   if (x < 148) return NULL;
-  sqx = sqrt((double)x); sqx4 = sqrt(sqx);
+  sqx = sqrt((double)x); sq3x = sqrt((double)(3 * x)); sqx4 = sqrt(sqx);
   sq13 = sqrt(13.);
   cplus = ((-35 + 13 * sq13) * x) / 216;
   cminus = ceil((-(35 + 13 * sq13) * x) / 216);
-  cmin = ceil(-(sqrt(3.) * sqx) / 4);
+  cmin = ceil(-sq3x / 4);
   Dmin = ceil(-4./27 * sqx);
-  Dsup = -cmin / 9 * sqx;
-  lima = floor(sqx4 * 2. / sqrt(27));
+  Dsup = sq3x / 36;
+  A = floor(sqx4 * 2. / sqrt(27));
   bsup = floor(sqx4 * 2. / sqrt(3));
   binf = ceil(-sqx4);
   S = mkvecsmalln(10, x, xinf, (long)sqx, cplus, cminus, cmin, Dmin, Dsup,
                   bsup, binf);
-  V = gen_parapply(closure("_nflist_S3R_worker", mkvec(S)), identity_ZV(lima));
+  V = gen_parapply(closure("_nflist_S3R_worker", mkvec(S)), identity_ZV(A));
   V = myshallowconcat1(V); return lg(V) == 1? NULL: V;
 }
 
