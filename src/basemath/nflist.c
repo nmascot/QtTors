@@ -988,57 +988,76 @@ checkU(long a, long b, long c, long d, long P, long Q, long R, long D)
   gel(F,5) = gen_1; return F;
 }
 
+/* ceil(m/d), assume d != 0 */
+static long
+sceildiv(long m, long d)
+{
+  long q;
+  if (!m) return 0;
+  if (d < 0) { d = -d; m = -m; }
+  if (m < 0) return -((-m) / d);
+  q = m / d; return m%d? q+1: q;
+}
+/* floor(m/d), assume d != 0 */
+static long
+sfloordiv(long m, long d)
+{
+  long q;
+  if (!m) return 0;
+  if (d < 0) { d = -d; m = -m; }
+  if (m > 0) return m / d;
+  q = -((-m) / d); return (-m)%d? q-1: q;
+}
+
 GEN
-nflist_S3R_worker(GEN ga, GEN ALLCTS)
+nflist_S3R_worker(GEN ga, GEN S)
 {
   long a = itos(ga), a3 = 3 * a, a9 = 9 * a, b, c, d, ct = 1;
-  long x = itos(gel(ALLCTS, 1)), xinf = itos(gel(ALLCTS, 2));
-  double xd = (double)x, sqx = rtodbl(gel(ALLCTS, 3));
-  double cplus = rtodbl(gel(ALLCTS, 4));
-  double cminus = rtodbl(gel(ALLCTS, 5)), cmin = rtodbl(gel(ALLCTS, 6));
-  double dmin = rtodbl(gel(ALLCTS, 7)), dsup = rtodbl(gel(ALLCTS, 8));
-  long limbsup = itos(gel(ALLCTS, 9)), limbinf = itos(gel(ALLCTS, 10));
-  double limcsup0 = cbrt(cplus / a), limcinf0 = -cbrt(cminus / a);
-  double dsupsura = dsup / a, dminsura = dmin / a;
-  GEN RET = cgetg(x / 3, t_VEC); ct = 1;
+  long x = S[1], xinf = S[2], sqx = S[3], cplus = S[4], cminus = S[5];
+  long cmin = S[6], Dmin = S[7], Dsup = S[8], bsup = S[9], binf = S[10];
+  long csup0 = cbrt(cplus / a), cinf0 = ceil(cbrt(sceildiv(cminus, a)));
+  long dsupa = floor(Dsup / a), dinfa = sceildiv(Dmin, a);
+  GEN RET = cgetg(x / 3, t_VEC);
 
-  for (b = limbinf; b <= limbsup; b++)
+  for (b = binf; b <= bsup; b++)
   {
-    double sqxb, limcsupdbl = limcsup0, limcinfdbl = limcinf0, cpb = 0, cpm = 0;
-    long bb = b * b, b3 = 3 * b, limcsup, gcdab = cgcd(a, b);
+    long cinf = cinf0, csup = csup0, dinfb = dinfa, dsupb = dsupa;
+    long bb = b * b, b3 = 3 * b, gcdab = cgcd(a, b);
     if (b)
-    { long bbb = bb * b; sqxb = sqx/b; cpb = cplus/bbb; cpm = -cminus/bbb; }
-    if (b < 0) limcsupdbl = -1;
-    else if (b) limcsupdbl = min(limcsup0, sqxb);
-    limcsup = (long)floor(limcsupdbl);
-    if (b) limcinfdbl = max(limcinf0, b < 0 ? sqxb : cmin * sqxb);
-    for (c = (long)ceil(limcinfdbl); c <= limcsup; c++)
     {
-      double limdsupdbl = dsupsura, limdinfdbl = dminsura;
-      long limdsup, gcdabc = cgcd(gcdab, c);
+      long bbb = bb * b, sqxb = sqx / labs(b), m, M;
+      if (b < 0)
+      {
+        cinf = -sqxb; csup = -1;
+        M = sfloordiv(cminus,bbb);
+        m = sceildiv(cplus, bbb);
+      }
+      else
+      {
+        cinf = cmin; csup = minss(csup, sqxb);
+        M = cplus / bbb;
+        m = sceildiv(cminus, bbb);
+      }
+      dsupb = minss(dsupb, M);
+      dinfb = maxss(dinfb, m); cinf = maxss(cinf0, cinf);
+    }
+    for (c = cinf; c <= csup; c++)
+    {
+      long dsup, dinf, gcdabc = cgcd(gcdab, c);
       long bc = b * c, cc = c * c, P = bb - a3 * c;
-      limdsupdbl = min(limdsupdbl, bc / a9);
-      if (c)
-      {
-        double tmp = (bc - (4 * xd / 3) / cc) / a9;
-        limdinfdbl = max(limdinfdbl, tmp);
-      }
-      if (b)
-      {
-        limdsupdbl = min(limdsupdbl, b > 0 ? cpb : cpm);
-        limdinfdbl = max(limdinfdbl, b > 0 ? cpm : cpb);
-      }
-      limdsup = (long)floor(limdsupdbl);
-      for (d = (long)ceil(limdinfdbl); d <= limdsup; d++)
+      dsup = minss(dsupb, floor(((double)bc) / a9)); /* Q >= 0 */
+      /* bc-9ad <= 4x / 3c^2 */
+      dinf = c? maxss(dinfb, sceildiv(bc - ((4 * x) / (cc * 3)), a9)): dinfb;
+      for (d = dinf; d <= dsup; d++)
       {
         long Q, R, D, DF;
         GEN F;
         if (cgcd(gcdabc, d) > 1) continue;
-        Q = bc - a9 * d;
-        R = cc - b3 * d; D = 4 * P * R - Q * Q; DF = D / 3;
-        if (R <= 0 || Q < 0 || Q > P || P > R || DF > x || DF < xinf || uissquare(DF)) continue;
-        if ((Q == 0 && b <= 0) || (P == Q && labs(b) >= labs(3 * a - b)))
-          continue;
+        Q = bc - a9 * d; if (Q < 0 || Q > P) continue;
+        if (Q == 0 && b <= 0) continue;
+        R = cc - b3 * d; if (P > R) continue;
+        D = 4 * P * R - Q * Q; DF = D / 3; if (DF > x || DF < xinf) continue;
+        if (P == Q && (Q == R || labs(b) >= labs(3 * a - b))) continue;
         if (P == R && (a > labs(d) || (a == labs(d) && labs(b) >= labs(c))))
           continue;
         if ((F = checkU(a, b, c, d, P, Q, R, D))) gel(RET, ct++) = F;
@@ -1052,25 +1071,26 @@ nflist_S3R_worker(GEN ga, GEN ALLCTS)
 static GEN
 cubicreal(long x, long xinf)
 {
-  double xd, sqx, sqx4, sq13, cplus, cminus, cmin, dmin, dsup;
-  long lima, limbsup, limbinf;
-  GEN V, ALL;
+  double sqx, sqx4, sq13;
+  long lima, bsup, binf, cmin, cplus, cminus, Dmin, Dsup;
+  GEN V, S;
 
   if (x < 148) return NULL;
-  xd = (double)x; sqx = sqrt(xd); sqx4 = sqrt(sqx);
-  sq13 = sqrt(13.); cplus = (-35 + 13 * sq13) * xd / 216;
-  cminus = (35 + 13 * sq13) * xd / 216;
-  cmin = -sqrt(3.) / 4 * xd; dmin = -4./27 * sqx;
-  dsup = -cmin / 9 * sqx;
-  lima = (long)floor(sqx4 * 2. / sqrt(27));
-  limbsup = (long)floor(sqx4 * 2. / sqrt(3));
-  limbinf = (long)ceil(-sqx4);
-  ALL= mkvecn(10, utoipos(x), utoipos(xinf), dbltor(sqx), dbltor(cplus), dbltor(cminus), dbltor(cmin), dbltor(dmin), dbltor(dsup), utoipos(limbsup), stoi(limbinf));
-  V = gen_parapply(closure("_nflist_S3R_worker", mkvec(ALL)), identity_ZV(lima));
+  sqx = sqrt((double)x); sqx4 = sqrt(sqx);
+  sq13 = sqrt(13.);
+  cplus = ((-35 + 13 * sq13) * x) / 216;
+  cminus = ceil((-(35 + 13 * sq13) * x) / 216);
+  cmin = ceil(-(sqrt(3.) * sqx) / 4);
+  Dmin = ceil(-4./27 * sqx);
+  Dsup = -cmin / 9 * sqx;
+  lima = floor(sqx4 * 2. / sqrt(27));
+  bsup = floor(sqx4 * 2. / sqrt(3));
+  binf = ceil(-sqx4);
+  S = mkvecsmalln(10, x, xinf, (long)sqx, cplus, cminus, cmin, Dmin, Dsup,
+                  bsup, binf);
+  V = gen_parapply(closure("_nflist_S3R_worker", mkvec(S)), identity_ZV(lima));
   V = myshallowconcat1(V); return lg(V) == 1? NULL: V;
 }
-
-/* x > 0 */
 
 GEN
 nflist_S3I_worker(GEN ga, GEN ALLCTS)
@@ -1085,12 +1105,13 @@ nflist_S3I_worker(GEN ga, GEN ALLCTS)
   for (b = 0; b <= limb; b++)
   {
     long limc, b3 = b * 3, bb = b * b, gcdab = cgcd(a, b);
+    long apb = a + b, amb = a - b;
     double limd1 = b ? min(limd0, cplus / bb / b) : limd0;
     limc = (long)floor(b? min(limc0, 4 * limad / b): limc0);
     for (c = -limc; c <= limc; c++)
     {
-      long gcdabc = cgcd(gcdab, c);
-      long limdsup, limdinf, bc = b * c, cc = c * c, P = bb - 3 * a * c;
+      long gcdabc = cgcd(gcdab, c), ac = a * c;
+      long limdsup, limdinf, bc = b * c, cc = c * c, P = bb - 3 * ac;
       if (c)
       {
         double tmp1 = 4 * xd / cc;
@@ -1099,16 +1120,14 @@ nflist_S3I_worker(GEN ga, GEN ALLCTS)
       }
       else { limdsup = (long)floor(limd1); limdinf = -limdsup; }
       if (!b) limdinf = max(limdinf, 1);
-      limdinf = max(limdinf, (-(a - b) * (a - b + c)) / a);
+      limdinf = maxss(limdinf, sceildiv(-amb * (amb + c) + 1, a));
+      limdsup = minss(limdsup, (apb * (apb + c) - 1) / a);
       for (d = limdinf; d <= limdsup; d++)
       {
         GEN F;
-        long Q, R, D, DF, e;
+        long Q, R, D, DF;
         if (!d || cgcd(gcdabc, d) > 1) continue;
         if (d * (d - b) + a * (c - a) <= 0) continue;
-        e = a * d - bc;
-        if (e >= (a + b) * (a + b) + a * c || e <= -(a - b) * (a - b) - a * c)
-          continue;
         Q = bc - a9 * d;
         R = cc - b3 * d; D = 4 * P * R - Q * Q; DF = D / 3;
         if (DF > -xinf || DF < -x) continue;
