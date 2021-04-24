@@ -837,7 +837,26 @@ polmodispower(GEN x, GEN K, GEN *pt)
   pari_err_IMPL("ispower for general t_POLMOD");
   return 0;
 }
-
+static long
+rfracispower(GEN x, GEN K, GEN *pt)
+{
+  pari_sp av = avma;
+  GEN n = gel(x,1), d = gel(x,2);
+  long v = -RgX_valrem(d, &d), vx = varn(d);
+  if (typ(n) == t_POL && varn(n) == vx) v += RgX_valrem(n, &n);
+  if (!dvdsi(v, K)) return gc_long(av, 0);
+  if (lg(d) >= 3)
+  {
+    GEN a = gel(d,2); /* constant term */
+    if (!gequal1(a)) { d = RgX_Rg_div(d, a); n = gdiv(n, a); }
+  }
+  if (!ispower(d, K, pt? &d: NULL) || !ispower(n, K, pt? &n: NULL))
+    return gc_long(av, 0);
+  if (!pt) return gc_long(av, 1);
+  x = gdiv(n, d);
+  if (v) x = gmul(x, monomial(gen_1, v / itos(K), vx));
+  *pt = gerepileupto(av, x); return 1;
+}
 long
 issquareall(GEN x, GEN *pt)
 {
@@ -858,11 +877,7 @@ issquareall(GEN x, GEN *pt)
     case t_POLMOD:
       return polmodispower(x, gen_2, pt);
     case t_POL: return polissquareall(x,pt);
-    case t_RFRAC: av = avma;
-      F = cgetg(3, t_RFRAC);
-      if (   !issquareall(gel(x,1), &gel(F,1))
-          || !polissquareall(gel(x,2), &gel(F,2))) return gc_long(av,0);
-      *pt = F; return 1;
+    case t_RFRAC: return rfracispower(x, gen_2, pt);
 
     case t_REAL: case t_COMPLEX: case t_PADIC: case t_SER:
       if (!issquare(x)) return 0;
@@ -881,7 +896,6 @@ issquareall(GEN x, GEN *pt)
 long
 issquare(GEN x)
 {
-  pari_sp av;
   GEN a, p;
   long v;
 
@@ -927,7 +941,7 @@ issquare(GEN x)
       return issquare(gel(x,2));
 
     case t_RFRAC:
-      av = avma; return gc_long(av, issquare(gmul(gel(x,1),gel(x,2))));
+      return rfracispower(x, gen_2, NULL);
   }
   pari_err_TYPE("issquare",x);
   return 0; /* LCOV_EXCL_LINE */
@@ -1273,17 +1287,8 @@ ispower(GEN x, GEN K, GEN *pt)
       return polmodispower(x, K, pt);
     case t_POL:
       return polispower(x, K, pt);
-    case t_RFRAC: {
-      GEN a = gel(x,1), b = gel(x,2);
-      if (pt) {
-        z = cgetg(3, t_RFRAC);
-        if (ispower(a, K, &a) && polispower(b, K, &b)) {
-          *pt = z; gel(z,1) = a; gel(z,2) = b; return 1;
-        }
-        set_avma((pari_sp)(z + 3)); return 0;
-      }
-      return (ispower(a, K, NULL) && polispower(b, K, NULL));
-    }
+    case t_RFRAC:
+      return rfracispower(x, K, pt);
     case t_REAL:
       if (signe(x) < 0 && !mpodd(K)) return 0;
     case t_COMPLEX:

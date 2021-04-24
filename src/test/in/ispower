@@ -165,3 +165,12 @@ ispower(p^101)
 
 \\#1915
 issquare(Mod(1,67)*x^4+Mod(14,67)*x^2+Mod(49,67))
+
+\\#2289
+if (issquare((-1+2*x-x^2)/(-4+4*x-x^2),&z), z)
+issquare((-1+2*x-x^2)/(-4+4*x-x^2))
+if (ispower(-(1+x)^20/-(2+x)^20,20,&z), z)
+ispower(-(1+x)^20/-(2+x)^20,20)
+
+
+
