@@ -1444,6 +1444,28 @@ subst_polmod(GEN x, long v, GEN y)
   for (i = 2; i < l; i++) gel(z,i) = gmodulo(gel(a,i),b);
   return normalizepol_lg(z, l);
 }
+/* Trunc to n terms; x + O(t^(n + v(x))). FIXME: export ? */
+static GEN
+sertrunc(GEN x, long n)
+{
+  long i, l = n + 2;
+  GEN y;
+  if (l >= lg(x)) return x;
+  if (n <= 0) return zeroser(varn(x), n + valp(x));
+  y = cgetg(l, t_SER);
+  for (i = 2; i < l; i++) gel(y,i) = gel(x,i);
+  y[1] = x[1]; return y;
+}
+/* FIXME: export ? */
+static GEN
+sertrunc_copy(GEN x, long n)
+{
+  long i, l = minss(n + 2, lg(x));
+  GEN y = cgetg(l, t_SER);
+  for (i = 2; i < l; i++) gel(y,i) = gcopy(gel(x,i));
+  y[1] = x[1]; return y;
+}
+
 GEN
 gsubst(GEN x, long v, GEN y)
 {
@@ -1542,27 +1564,28 @@ gsubst(GEN x, long v, GEN y)
                   if (++l >= lx || !gequal0(gel(x,i))) break;
               lx = l;
             }
-            z = cgetg(lx, t_SER); z[1] = x[1];
-            for (i = 2; i < lx; i++) gel(z,i) = gcopy(gel(x,i));
-            if (vx != vy) setvarn(z,vy);
+            z = sertrunc_copy(x, lx - 2); if (vx != vy) setvarn(z,vy);
             return z;
           }
           if (vy != vx)
           {
-            long n;
-            av = avma; z = gel(x,lx-1);
-            for (i=lx-2; i>=2; i--)
+            long nx = lx - 2, n = minss(ey * nx, ly - 2);
+            av = avma; z = gel(x, nx+1);
+            for (i = nx; i > 1; i--)
             {
               z = gadd(gmul(y,z), gel(x,i));
-              if (gc_needed(av,1))
+              if (gc_needed(av2,1))
               {
                 if(DEBUGMEM>1) pari_warn(warnmem,"gsubst (i = %ld)", i);
                 z = gerepileupto(av, z);
               }
             }
-            if (ex) z = gmul(z, gpowgs(y,ex));
-            n = (ex + lx - 2) * ey; /* + O(t^n) */
-            if (lg(z)-2 + valp(z) > n) z = gadd(z, zeroser(varn(z), n));
+            if (ex)
+            {
+              if (ex < 0) { y = ginv(y); ex = -ex; }
+              z = gmul(z, gpowgs(sertrunc(y, n), ex));
+            }
+            if (lg(z)-2 > n) z = sertrunc_copy(z, n);
             return gerepileupto(av,z);
           }
           l = (lx-2)*ey + 2;
@@ -1596,7 +1619,8 @@ gsubst(GEN x, long v, GEN y)
             }
           }
           if (!ex) return gerepilecopy(av,z);
-          return gerepileupto(av, gmul(z, gpowgs(y, ex)));
+          if (ex < 0) { ex = -ex; y = ginv(y); }
+          return gerepileupto(av, gmul(z, gpowgs(sertrunc(y, l-2), ex)));
 
         case t_POL: case t_RFRAC:
         {
