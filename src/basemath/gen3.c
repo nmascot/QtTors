@@ -1574,7 +1574,7 @@ gsubst(GEN x, long v, GEN y)
             for (i = nx; i > 1; i--)
             {
               z = gadd(gmul(y,z), gel(x,i));
-              if (gc_needed(av2,1))
+              if (gc_needed(av,1))
               {
                 if(DEBUGMEM>1) pari_warn(warnmem,"gsubst (i = %ld)", i);
                 z = gerepileupto(av, z);
