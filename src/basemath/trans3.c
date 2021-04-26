@@ -478,7 +478,7 @@ _kbessel1(long n, GEN z, long flag, long m, long prec)
     if (v < 0) pari_err_DOMAIN("_kbessel1","valuation", "<", gen_0, z);
     k = lg(Z)-2 - v;
     if (v == 0) pari_err_IMPL("Bessel K around a!=0");
-    if (k <= 0) return gadd(gen_1, zeroser(varn(z), 2*v));
+    if (k <= 0) return scalarser(gen_1, varn(z), 2*v);
     setlg(Z, k+2);
   }
   H = cgetg(m+n+2,t_VEC); gel(H,1) = gen_0;
