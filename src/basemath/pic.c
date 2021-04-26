@@ -809,11 +809,11 @@ GEN DivMul(GEN f, GEN W, GEN T, GEN pe)
   return fW;
 }
 
-GEN DivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN p, long e, GEN pe, ulong excess)
+GEN DivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN p, GEN pe, ulong excess)
 { /* Does products s*t, with s=sum n_i s_i, n_i = 0 50%, -1 25%, +1 25%; similarly for t */
   /* Fails from time to time but overall good speedup */
   pari_sp av=avma;
-  unsigned long nZ,j,P,r;
+  ulong nZ,j,P,r;
   GEN WAB,s,t,st;
   nZ = lg(gel(WA,1));
   while(1)
@@ -837,6 +837,54 @@ GEN DivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN p, long e, GEN pe, ulong excess)
     if(DEBUGLEVEL>=4) err_printf("divadd(%lu/%lu)",r,d);
     excess++;
     avma = av;
+  }
+}
+
+GEN DivAdd1(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, long flag)
+{ /* Mult RR spaces WA and WB.
+		 Takes d+excess products WA[u]*WB[v] for random u,v.
+		 If flag is set, also returns the list of [u,v]. */
+	pari_sp av = avma, av1;
+	GEN res,WAB,uv,s,t,st,J;
+	ulong nA,nB,nZ,j,P,u,v,r;
+	nA = lg(WA)-1;
+	nB = lg(WB)-1;
+	nZ = lg(gel(WA,1));
+  res = cgetg(3,t_VEC);
+	av1 = avma;
+	while(1)
+  {
+  	gel(res,1) = WAB = cgetg(d+excess+1,t_MAT);
+	  gel(res,2) = uv = cgetg(d+excess+1,t_VEC);
+    for(j=1;j<=d+excess;j++)
+    {
+			gel(uv,j) = cgetg(3,t_VEC);
+			gel(uv,j)[1] = u = random_Fl(nA)+1;
+			s = gel(WA,u);
+			gel(uv,j)[2] = v = random_Fl(nB)+1;
+			t = gel(WB,v);
+			gel(WB,j) = st = cgetg(nZ,t_VEC);
+      for(P=1;P<nZ;P++)
+        gel(st,P) = Fq_mul(gel(s,P),gel(t,P),T,pe);
+    }
+		J = gel(FqM_indexrank(WAB,T,p),2);
+    r = lg(J)-1;
+    if(r==d)
+		{
+			setlg(WAB,r+1);
+			setlg(uv,r+1);
+			for(j=1;j<=d;j++)
+			{
+				gel(WAB,j) = gel(WAB,J[j]);
+				gel(uv,j) = gel(uv,J[j]);
+			}
+			setlg(WAB,r+1);
+			setlg(uv,r+1);
+      return gerepilecopy(av,flag?res:WAB);
+		}
+    if(DEBUGLEVEL>=4) err_printf("divadd1(%lu/%lu)",r,d);
+    excess++;
+    avma = av1;
   }
 }
 
@@ -1134,7 +1182,7 @@ GEN PicChord(GEN J, GEN WA, GEN WB, long flag)
   d0 = Jgetd0(J);
 
   /* L(4D0-A-B) */
-  WAWB = DivAdd(WA,WB,2*d0+1-g,T,p,e,pe,0);
+  WAWB = DivAdd(WA,WB,2*d0+1-g,T,p,pe,0);
   /* L(3D0-A-B) */
   WAB = DivSub(V1,WAWB,KV3,d0+1-g,T,p,e,pe,2);
   if(gc_needed(av,1)) WAB = gerepileupto(av,WAB);
@@ -2017,7 +2065,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
   if(DEBUGLEVEL>=2) printf("PicInit: Evaluating rational functions\n");
   V1 = FnsEvalAt_Rescale(gel(L,1),Z,vars,T,p,e,pe);
   V2 = FnsEvalAt_Rescale(gel(L,2),Z,vars,T,p,e,pe);
-  V3 = DivAdd(V1,V2,3*d0+1-g,T,p,e,pe,0);
+  V3 = DivAdd(V1,V2,3*d0+1-g,T,p,pe,0);
   W0 = V1;
   V = mkvecn(3,V1,V2,V3);
   if(DEBUGLEVEL>=2) printf("PicInit: Computing equation matrices\n");
@@ -2126,7 +2174,7 @@ GEN JacLift(GEN J, ulong e2)
   printf("End RR\n"); */
   gel(V,1) = gel(RRspaceEval(gel(L,1),vars,Z2,T,p,e2,pe2),1);
   V2 = gel(V,2) = gel(RRspaceEval(gel(L,2),vars,Z2,T,p,e2,pe2),1);
-	gel(V,3) = DivAdd(gel(V,1),gel(V,2),3*d0+1-g,T,p,e2,pe2,0);
+	gel(V,3) = DivAdd(gel(V,1),gel(V,2),3*d0+1-g,T,p,pe2,0);
   W0 = gel(V,1); /* TODO can it happen that W0 != V1 even though all data is present? */
 	if(gequal0(gel(L,3)))
 	{
@@ -2204,7 +2252,7 @@ GEN PicEval(GEN J, GEN W)
   for(i1=1;i1<n1;i1++)
   {
     av1 = avma;
-    S1 = DivAdd(W,gmael(U,1,i1),2*d0+1,T,p,e,pe,0); /* L(4D0-D-E1) */
+    S1 = DivAdd(W,gmael(U,1,i1),2*d0+1,T,p,pe,0); /* L(4D0-D-E1) */
     S1 = DivSub(V,S1,KV,1,T,p,e,pe,2); /* L(2D0-D-E1), generically 1-dimensional */
     S1 = gerepileupto(av1,gel(S1,1));
     S1 = DivMul(S1,V,T,pe); /* L(4D0-D-E1-ED) */
@@ -2215,7 +2263,7 @@ GEN PicEval(GEN J, GEN W)
     for(i2=1;i2<n2;i2++)
     {
       av2 = avma;
-      S2 = DivAdd(S1,gmael(U,2,i2),2*d0+1,T,p,e,pe,0); /* L(4D0-E1-E2-ED) */
+      S2 = DivAdd(S1,gmael(U,2,i2),2*d0+1,T,p,pe,0); /* L(4D0-E1-E2-ED) */
       S2 = gerepileupto(av2,S2);
       S2 = DivSub(V,S2,KV,1,T,p,e,pe,2); /* L(2D0-E1-E2-ED), generically 1-dimensional */
       s2 = gel(S2,1); /* Generator */
@@ -3335,7 +3383,7 @@ GEN PicNorm(GEN J, GEN F1, GEN F2, GEN WE, ulong n)
 	nZ = lg(gel(V,1))-1;
 	Vn = JgetV(J,n);
 
-	WEVn = DivAdd(Vn,WE,nVn2-nS,T,p,e,pe,0); /* Vn*WE = V_{n+2}(-E) */
+	WEVn = DivAdd(Vn,WE,nVn2-nS,T,p,pe,0); /* Vn*WE = V_{n+2}(-E) */
 	S = FindSuppl(WE,nS,V,NULL,T,p,pe); /* V = V(-E) + S, dim S = nS */
 	SS = FindSuppl(WEVn,nS,V,Vn,T,p,pe); /* V_{n+2} = V_{n+2}(-E) + S, dim SS = nS */
 

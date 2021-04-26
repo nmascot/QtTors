@@ -861,7 +861,7 @@ GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
 		if(a4==NULL) continue;
 		r = EllTorsIsSplit(a4,a6,N,p,d,T,q,q2);
 		if(r==d)
-			return gerepilecopy(av,mkvec2(a4,a6));
+			return gerepilecopy(av,mkvec3(a4,a6,j));
 		if(DEBUGLEVEL)
 		{
 			if(r==0) printf("EllSplitTors: Unsuitable curve.\n");
@@ -925,9 +925,9 @@ GEN ZqE_LiftTorsPt(GEN a4, GEN a6, GEN P, GEN D, GEN T, GEN pe, GEN p, long e)
 GEN EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
 { /* Find a4,a6 s.t. E[N] def/Fq and Fp(E[N]/-)=Fq. Returns a4,a6,P,Q,eN(P,Q),MFrob mod p^e. */
 	pari_sp av = avma;
-	GEN Fq1,a46,a4,a6,A4,P,Q,z,faN,M,D,B,Pi,Qi,zi;
+	GEN Fq1,E,a4,a6,A4,P,Q,z,faN,M,D,B,Pi,Qi,zi;
 	ulong nfaN,i,l,v,lv1,lv;
-	a46 = EllSplitTors(N,p,T,Badj);
+	E = EllSplitTors(N,p,T,Badj);
 	a4 = gel(a46,1);
 	a6 = gel(a46,2);
 	A4 = scalarpol(a4,varn(T));
@@ -955,7 +955,7 @@ GEN EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
 		gel(M,i) = gel(B,4);
 	}
 	M = liftint(chinese1(M));
-	return gerepilecopy(av,mkvecn(5,a46,P,Q,z,M));
+	return gerepilecopy(av,mkvecn(5,E,P,Q,z,M));
 }
 
 GEN Ell_l2(GEN EN, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
@@ -1080,7 +1080,7 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref, GEN Badj)
 {
 	pari_sp av = avma;
-	GEN pe,E,a4,a6,P,Q,zN,M,Ml1,FP,PtsFrob;
+	GEN pe,E,a4,a6,jE,P,Q,zN,M,Ml1,FP,PtsFrob;
 	ulong m,nPts,i,a,b,c,d,x,y;
 	pe = powis(p,e);
 	E = EllWithTorsBasis(N,T,pe,p,e,Badj);
@@ -1116,5 +1116,385 @@ GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref, GEN B
 		FP = mkvecsmall2(a*x + c*y, b*x + d*y);
 		PtsFrob[i] = zM_coef_mod(PtTags,FP);
 	}
-	return gerepilecopy(av,mkvecn(5,a4,a6,Ml1,PtsFrob,zN));
+	return gerepilecopy(av,mkvecn(4,gel(E,1),Ml1,PtsFrob,zN));
+}
+
+/* Divisors */
+
+GEN BalancedDiv(ulong d, GEN degs)
+{ /* Let degs = [a1,..,an]. Find balanced b1,..,bn such that sum ai*bi = d. Loops forever if no solution! */
+	GEN D;
+	ulong n,i;
+	long s,q,r;
+	n = lg(degs);
+	D = cgetg(n,t_VECSMALL);
+	s = zv_sum(degs);
+	q = sdivss_rem(d,s,&r);
+	for(i=1;i<n;i++) D[i] = q;
+	while(r)
+	{
+		for(i=1;i<n;i++)
+		{
+			if(degs[i]>=r)
+			{
+				r -= degs[i];
+				D[i]++;
+			}
+		}
+	}
+	return D;
+}
+
+GEN BalancedDivInf(ulong d, GEN degs)
+{ /* TODO sort/improve Let degs = [a1,..,an]. Find balanced b1,..,bn such that sum ai*bi <= d, not too far. */
+  GEN D;
+  ulong n,i;
+  long s,q,r;
+  n = lg(degs);
+  D = cgetg(n,t_VECSMALL);
+  s = zv_sum(degs);
+  q = sdivss_rem(d,s,&r);
+  for(i=1;i<n;i++)
+	{
+		D[i] = q;
+    if(degs[i]>=r)
+    {
+      r -= degs[i];
+      D[i]++;
+    }
+  }
+  return D;
+}
+
+GEN DivPerturb(GEN D, GEN degs)
+{ /* TODO improve */
+	GEN D2;
+	ulong n,i,d;
+	n = lg(D);
+	d = 0;
+	for(i=1;i<n;i++)
+		d += D[i]*degs[i];
+	D2 = BalancedDiv(d-1,degs);
+	for(i=n-1;i&&degs[i]==1;i--)
+	{
+		if(D2[i]+1 != D[i])
+		{
+			D2[i]++;
+			return D2;
+		}
+	}
+	pari_err(e_MISC,"I do not know how to pertub this divisor (code needs to be improved)");
+	return NULL;
+}
+
+GEN Divo2Div(GEN Do, GEN Orbs, GEN tags, ulong n)
+{
+	GEN D,o;
+	ulong nO,no,i,j;
+	nO = lg(Orbs);
+	D = cgetg(n+1,t_VECSMALL);
+	for(i=1;i<nO;i++)
+	{
+		o = gel(Orbs,i);
+		no = lg(o);
+		for(j=1;j<no;j++)
+		{
+			D[zM_coef_mod(tags,gel(o,j))] = Do[i];
+		}
+	}
+	return D;
+}
+
+GEN MRRsubspace(GEN Mqexps, GEN D, GEN B, GEN T, GEN pe, GEN p, long e)
+{ /* Subspace of mf defined by vanishing orders at cusps */
+	pari_sp av=avma;
+	GEN K,Ms;
+	ulong nD,nCusps,nM,i,j,n,s;
+	nD = zv_sum(D)+1;
+	nCusps = lg(D);
+	nM = lg(gel(Mqexps,1));
+	K =	cgetg(nM,t_MAT);
+	for(j=1;j<nM;j++)
+		gel(K,j) = cgetg(nD,t_COL);
+	for(i=s=1;s<nCusps;s++)
+	{
+		Ms = gel(Mqexps,s);
+		for(n=1;n<=D[s];n++,i++)
+		{
+			for(j=1;j<nM;j++)
+				gcoeff(K,i,j) = gcoeff(Ms,B?n+B[s]:n,j);
+		}
+	}
+	K = matkerpadic(K,T,pe,p,e);
+	return gerepileupto(av,K);
+}
+
+/* qexp */
+
+GEN E1qexp(GEN v, ulong N, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
+{ /* v=[c,d] mod N, zpows = powers of primitive Nth root of 1: q-exp of E_1^[c,d] up to O(qN^B) */
+  /* TODO use t_SER ? */
+  pari_sp av = avma;
+  GEN E,Fq0,a0,zd;
+  ulong a,b,c,d,m,n;
+
+  if(B==0) return cgetg(1,t_VEC);
+
+  Fq0 = mkpoln(0);
+  setvarn(Fq0,varn(T));
+
+  c = umodiu(gel(v,1),N);
+  d = umodiu(gel(v,2),N);
+
+  E = cgetg(B+1,t_VEC);
+  for(m=1;m<=B;m++) gel(E,m) = Fq0;
+
+  if(c)
+  { /* a0 = 1/2 - c/N */
+    a0 = subii(Fp_inv(gen_2,pe),Fp_div(utoi(c),utoi(N),pe));
+    a0 = mkpoln(1,a0);
+    setvarn(a0,varn(T));
+  }
+  else
+  { /* a0 = 1/2 * (1+z^d)/(1-z^d) */
+    m = ZNnorm(d,N);
+    zd = gel(zpows,m);
+    a0 = ZpXQ_div(ZX_Z_add(zd,gen_1),ZX_Z_mul(Z_ZX_sub(gen_1,zd),gen_2),T,pe,p,e);
+  }
+  gel(E,1) = a0;
+
+  /* sum_{a>0,b>0} if(a==c mod N, z^(b*d) * q^(a*b)) - if(a==-c mod N, z^(-b*d) * q^(a*b)) */
+  for(a=(c==0?N:c);a<B;a+=N) /* Case a==c mod N */
+  {
+    for(b=1;(n=a*b+1)<=B;b++)
+    {
+      m = ZNnorm(b*d,N);
+      gel(E,n) = ZX_add(gel(E,n),gel(zpows,m));
+    }
+  }
+  for(a=N-c;a<B;a+=N) /* Case a==-c mod N */
+  {
+    for(b=1;(n=a*b+1)<=B;b++)
+    {
+      m = ZNneg(b*d,N);
+      gel(E,n) = ZX_sub(gel(E,n),gel(zpows,m));
+    }
+  }
+
+  return gerepilecopy(av,E);
+}
+
+GEN TrE2qexp(GEN vw, ulong N, GEN H, GEN M, ulong w, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
+{ /* vw=[v,w] -> qexp of Tr_H(E_1^v * E_1^w) | M in terms of qw up to O(qw^B) */
+  pari_sp av = avma;
+  ulong Nw,Nwi,BN,nH,h,i,j;
+  GEN Fq0,E,hM,fv,fw;
+
+  if(B==0) return cgetg(1,t_VEC);
+  Nw = N/w;
+  BN = (B-1)*N/w+1;
+
+  Fq0 = mkpoln(0);
+  setvarn(Fq0,varn(T));
+
+  E = cgetg(B+1,t_VEC);
+  for(i=1;i<=B;i++) gel(E,i) = Fq0;
+
+  nH = lg(H);
+  for(h=1;h<nH;h++)
+  {
+    hM = ZM_mul(gel(H,h),M);
+    fv = E1qexp(ZV_ZM_mul(gel(vw,1),hM),N,zpows,BN,T,pe,p,e);
+    fw = E1qexp(ZV_ZM_mul(gel(vw,2),hM),N,zpows,BN,T,pe,p,e);
+    /* TODO use fast series multiplication */
+    /* f[i] = sum_j fv[j]*fw[Nw*i-j] */
+    for(i=0;i<B;i++)
+    {
+      Nwi = Nw*i;
+      for(j=0;j<=Nwi;j++)
+        gel(E,i+1) = ZX_add(gel(E,i+1),Fq_mul(gel(fv,j+1),gel(fw,Nwi+1-j),T,pe));
+    }
+  }
+
+  return gerepilecopy(av,E);
+}
+
+/* ModJac */
+
+GEN M2_worker(GEN vw, GEN Ml1, GEN TH, GEN Mpts, GEN T, GEN pe)
+{
+  pari_sp avs;
+  ulong nZ, nTH;
+  GEN v,w,C,Cs,M,vM,wM;
+  ulong s,h;
+
+  nZ = lg(Mpts);
+  nTH = lg(TH);
+  v = gel(vw,1);
+  w = gel(vw,2);
+
+  C = cgetg(nZ,t_COL);
+  for(s=1;s<nZ;s++)
+  {
+    avs = avma;
+    Cs = pol_0(varn(T));
+    for(h=1;h<nTH;h++)
+    {
+      M = ZM_mul(gel(TH,h),gel(Mpts,s));
+      vM = ZV_ZM_mul(v,M);
+      wM = ZV_ZM_mul(w,M);
+      Cs = ZX_add(Cs,ZX_mul(GetCoef(Ml1,vM),GetCoef(Ml1,wM)));
+    }
+    Cs = Fq_red(Cs,T,pe);
+    gel(C,s) = gerepileupto(avs,Cs);
+  }
+  return C;
+}
+
+GEN M2mat(GEN M2gens, GEN Ml1, GEN TH, GEN MPts, GEN T, GEN pe)
+{
+  pari_sp av = avma;
+  GEN M2;
+  ulong d,j;
+  struct pari_mt pt;
+  GEN vFixedParams,worker,done;
+  long pending,workid;
+
+  d = lg(M2gens);
+  vFixedParams = mkvecn(5,Ml1,TH,MPts,T,pe);
+  worker = snm_closure(is_entry("_M2_worker"),vFixedParams);
+  pending = 0;
+  M2 = cgetg(d,t_MAT);
+  mt_queue_start_lim(&pt,worker,d-1);
+  for(j=1;j<d||pending;j++)
+  {
+    mt_queue_submit(&pt,j,j<d?mkvec(gel(M2gens,j)):NULL);
+    done = mt_queue_get(&pt,&workid,&pending);
+    if(done) gel(M2,workid) = done;
+  }
+  mt_queue_end(&pt);
+  return gerepilecopy(av,M2);
+}
+
+GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int UseTp, ulong nbE)
+{ /* J_H(N) over Zq/p^e, q=p^a */
+	pari_sp av = avma;
+	long t;
+	GEN T,H,H1;
+	ulong g;
+
+	/* Create unramified extension */
+	t = fetch_var();
+  name_var(t,"t");
+  T = liftint(ffinit(p,a,t));
+	/* Get <H> */
+	H = ZNX_Hlist(H,N);
+	H1 = gel(H,2); /* <H,-1>/-1 */
+	H = gel(H,1); /* <H,-1> */
+	if(dvdui(6*N*(lg(Hlist)-1),p))
+		pari_err(e_MISC,"Use a prime p that does not divide 6*N*<H>");
+	g = degpol(Lp)/2;
+	if(DEBUGLEVEL) printf("ModPicInit: genus %lu\n",g);
+	/* Get data about cusps */
+	Cusps = GammaHCusps(N,H);
+	CuspsGal = gel(Cusps,2);
+	CuspsQexp = gel(Cusps,3);
+	CuspsMats = gel(Cusps,4);
+	CuspsWidths = gel(Cusps,5);
+	CuspsTags = gel(Cusps,6);
+	Cusps = gel(Cusps,1);
+	nCusps = lg(Cusps);
+	if(DEBUGLEVEL) printf("ModPicInit: %lu cusps\n",nCusps);
+	if(UseTp)
+	{
+		CuspsGalDiamp = GammaHCusps_GalDiam_orbits(p,Cusps,CuspsGal,CuspTags);
+	}
+	// TODO CuspsQexps: list + vector of bits
+	/* Get data about fibre */
+	Pts = ZNZ2primH(N,H);
+	PtsTags = gel(Pts,2);
+	Pts = gel(Pts,1);
+	nPts = lg(Pts)-1;
+	if(DEBUGLEVEL) printf("ModPicInit: %lu points in fibre on X_H(%lu)->X(1)\n",nPts,N);
+	// TODO PtsDiamp
+	MPts = cgetg(nPts+1,t_VEC); /* Matrices having these bottom rows */
+	for(i=1;i<=nPts;i++) /* P_g = P_g' on X_H(N) <=> g,g' same bottom row mod H */
+		gel(MPts,i) = BotToSL2Z(gel(Pts,i),N);
+	/* Get first elliptic curve */
+	if(DEBUGLEVEL) pari_printf("ModPicInit: looking for an elliptic curve whose %lu torsion is defined over GF(%Ps,%lu)\n",N,p,a);
+	list_j = cgetg(nbE+1,t_VEC);
+	setlg(list_j,1);
+	E = GetMl1(N,Pts,PtTags,T,p,e,NULL,list_j); /* NULL: no preferred zeta_N for now */
+	if(DEBUGLEVEL) pari_printf("ModPicInit: working on y²=x³+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
+	Ml1 = gel(E,2);
+	PtsFrob = gel(E,3);
+	zN = gel(E,4);
+	setlg(list_j,2);
+	gel(list_j,1) = gmael(E,1,3);
+	zNpows = cgetg(N+1,t_VEC); // TODO pass to Ml1?
+	gel(zNpow,1) = zN;
+	for(i=1;i<N;i++)
+		gel(zNpows,i+1) = Fq_mul(gel(zNpows,i),zN,T,pe);
+	/* Find basis for M2(GammaH(N)) */
+	d = g+nCusps-1;
+	if(DEBUGLEVEL) printf("ModPicInit: M2(GammaH) (dim %lu)\n",d);
+	d1 = (4*d)/3; /* # gens */
+	if(d1>nPts)
+		d1 = nPts;
+	d1++;
+	TH = GammaHmodN(N,H1); /* reps in SL2(Z) of GammaH mod N,-1 */
+	for(;;)
+	{
+		M2gens = cgetg(d1,t_VEC);
+		for(i=1;i<d1;i++)
+		{
+			gel(M2gens,i) = geni = cgetg(3,t_VEC);
+			gel(geni,1) = gel(Pts,1+random_Fl(nPts-1));
+			gel(geni,2) = gel(Pts,1+random_Fl(nPts-1));
+		}
+		M2 = M2mat(M2gens,Ml1,TH,MPts,T,pe); /* d1 forms E_1^v*E_1^v' in M2(GammaH) */
+		/* Do we span? */
+		B = gel(FqM_indexrank(M2,T,p),2);
+		nB = lg(B)-1;
+		if(nB>d)
+			pari_err(e_BUG,"Excessive dimension in M2(GammaH)");
+		if(nB==d)
+			break;
+		d1 += d-nB;
+	}
+	/* Extract basis */
+	for(i=1;i<=d;i++)
+	{
+		gel(M2,i) = gel(M2,B[i]);
+		gel(M2gens,i) = gel(M2gens,B[i]);
+	}
+	setlg(M2,d+1);
+	setlg(M2gens,d+1);
+	/* Get extra ellitpic curves */
+	for(i=1;i<=nbE;i++)
+	{
+		if(DEBUGLEVEL) printf("ModPicInit: Getting extra elliptic curve %lu/%lu\n",i,nbE);
+		E = GetMl1(); //TODO
+	}
+	// TODO
+}
+
+GEN PicTp(GEN J, GEN W, GEN l)
+{ /* Assumes <p> is given by the 1st aut of J */
+  /* TODO check aut 1 is present? */
+  /* Use Eichler-Shimura Tp = Frob + p <p> Frob^-1 */
+  /* If l is present, assumes l*W = 0 */
+  pari_sp av = avma;
+  GEN p,W1,W2,W3;
+  p = Jgetp(J);
+  W1 = PicFrob(J,W);
+  W2 = PicAut(J,W,1);
+  W2 = PicFrobInv(J,W2);
+  if(l && !gequal0(l))
+  {
+    p = centermodii(p,l,shifti(l,-1));
+  }
+  W2 = PicMul(J,W2,p,2);
+  W3 = PicAdd(J,W1,W2);
+  return gerepileupto(av,W3);
 }

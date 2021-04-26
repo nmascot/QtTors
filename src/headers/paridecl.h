@@ -6669,6 +6669,7 @@ INLINE void    pari_err_VAR(const char *f, GEN x, GEN y);
 INLINE void    pari_err_ROOTS0(const char *f);
 
 /* pic.c */
+GEN matkerpadic(GEN A, GEN T, GEN pe, GEN p, long e);
 GEN mateqnpadic(GEN A, GEN T, GEN pe, GEN p, long e);
 GEN PicAdd(GEN J, GEN W1, GEN W2);
 GEN PicChord(GEN J, GEN W1, GEN W2, long flag);
