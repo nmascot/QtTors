@@ -277,6 +277,20 @@ blocksearch(GEN x, GEN bl)
   return NULL; /* Unknown address */
 }
 
+static int
+check_clone(GEN x)
+{
+  GEN bl = root_block;
+  if (isonstack(x) || is_universal_constant(x)) return 1;
+  while (bl)
+  {
+    if (x >= bl  && x < bl + bl_size(bl))
+      return 1;
+    bl = x < bl ? bl_left(bl): bl_right(bl);
+  }
+  return 0; /* Unknown address */
+}
+
 void
 clone_lock(GEN x)
 {
@@ -2470,6 +2484,11 @@ obj_insert_shallow(GEN S, long K, GEN O)
 {
   GEN o, v = gel(S, lg(S)-1);
   if (typ(v) != t_VEC) pari_err_TYPE("obj_insert", S);
+  if (!check_clone(v))
+  {
+    if (DEBUGLEVEL) pari_warn(warner,"trying to update parent object");
+    return O;
+  }
   o = gel(v,K);
   gel(v,K) = O; /*SIGINT: before unclone(o)*/
   if (isclone(o)) gunclone(o); return gel(v,K);
