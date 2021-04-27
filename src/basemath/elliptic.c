@@ -4717,7 +4717,7 @@ ellminimaldisc(GEN E)
 /* update Q_MINIMALMODEL entry in E, but don't update type-specific data on
  * ellminimalmodel(E) */
 static GEN
-ellminimalmodel_i(GEN E, GEN *ptv)
+ellminimalmodel_i(GEN E, GEN *ptv, GEN *pS)
 {
   GEN S, y, e, v, v0, u, DP;
   ellmin_t M;
@@ -4731,6 +4731,7 @@ ellminimalmodel_i(GEN E, GEN *ptv)
     else
       v = init_ch();
     if (ptv) *ptv = v;
+    if (pS) *pS = S;
     return gcopy(E);
   }
   e = ellintegralmodel_i(E, &v0);
@@ -4747,6 +4748,7 @@ ellminimalmodel_i(GEN E, GEN *ptv)
   else
     S = mkvec3(DP, v, y);
   obj_insert(E, Q_MINIMALMODEL, S);
+  if (pS) *pS = S;
   if (ptv) *ptv = v; return y;
 }
 
@@ -4754,9 +4756,8 @@ static GEN
 ellQminimalmodel(GEN E, GEN *ptv)
 {
   pari_sp av = avma;
-  GEN S, DP, v, y = ellminimalmodel_i(E, &v);
+  GEN S, DP, v, y = ellminimalmodel_i(E, &v, &S);
   if (!is_trivial_change(v)) ch_Q(y, E, v);
-  S = obj_check(E, Q_MINIMALMODEL);
   DP = gel(S,1);
   obj_insert_shallow(y, Q_MINIMALMODEL, mkvec(DP));
   if (!ptv)
@@ -4848,8 +4849,7 @@ ellQ_globalred(GEN e)
   long k, l, iN;
   GEN S, c, E, L, P, NP, NE, D;
 
-  E = ellminimalmodel_i(e, NULL);
-  S = obj_check(e, Q_MINIMALMODEL);
+  E = ellminimalmodel_i(e, NULL, &S);
   P = gel(S,1); l = lg(P); /* some known prime divisors of D */
   D  = ell_get_disc(E);
   for (k = 1; k < l; k++) (void)Z_pvalrem(D, gel(P,k), &D);
@@ -4964,8 +4964,7 @@ ellanal_globalred(GEN e, GEN *ch)
   checkell_Q(e);
   if (!(S = obj_check(e, Q_MINIMALMODEL)))
   {
-    E = ellminimalmodel_i(e, &v);
-    S = obj_check(e, Q_MINIMALMODEL);
+    E = ellminimalmodel_i(e, &v, &S);
     obj_insert_shallow(E, Q_MINIMALMODEL, mkvec(gel(S,1)));
   }
   else if (lg(S) == 2) /* trivial change */
@@ -6540,7 +6539,7 @@ ellQ_height(GEN e, GEN a, long prec)
   else
   {
     newell = 1;
-    e = ellminimalmodel_i(e, &v);
+    e = ellminimalmodel_i(e, &v, NULL);
     a = ellchangepoint(a, v);
   }
   if (!oncurve(e,a))
