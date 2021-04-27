@@ -19,24 +19,25 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  closure isomorphic to $G$ with $s$ complex places. This function supports
  the following groups:
 
- \item degree $2$: $C_2$;
+ \item degree $2$: $C_2=2T1$;
 
- \item degree $3$: $C_3$ and $S_3$;
+ \item degree $3$: $C_3=3T1$ and $S_3=3T2$;
 
- \item degree $4$: $V_4$, $C_4$, $D_4$, $A_4$ and $S_4$;
+ \item degree $4$: $C_4=4T1$, $V_4=4T2$, $D_4=4T3$, $A_4=4T4$, and $S_4=4T5$;
 
- \item degree $5$: $C_5$, $D_5$, $F_5 = M_{20}$, and $A_5$ (by table lookup);
+ \item degree $5$: $C_5=5T1$, $D_5=5T2$, $F_5 = M_{20}=5T3$, and $A_5=5T4$
+ (by table lookup);
 
- \item degree $6$: $C_6$, $S_3(6) = D_6(6)$, $D_6(12)$, $A_4(6)$,
- $S_3\times C_3$, $A_4(6)\times C_2$, $S_4(6)^+$, $S_4(6)^-$, $S_3^2$,
- $C_3^2:C_4$, $S_4(6)\times C_2$, $A_5(6) = PSL_2(5)$ (by table lookup),
- and $C_3^2:D_4$;
+ \item degree $6$: $C_6=6T1$, $S_3(6) = D_6(6)=6T2$, $D_6(12)=6T3$,
+ $A_4(6)=6T4$, $S_3\times C_3=6T5$, $A_4(6)\times C_2=6T6$, $S_4(6)^+=6T7$,
+ $S_4(6)^-=6T8$, $S_3^2=6T9$, $C_3^2:C_4=6T10$, $S_4(6)\times C_2=6T11$,
+ $A_5(6)=PSL_2(5)=6T12$ (by table lookup), and $C_3^2:D_4=6T13$;
 
- \item degree $7$: $C_7$, $D_7$, $M_{21}$, and $M_{42}$;
+ \item degree $7$: $C_7=7T1$, $D_7=7T2$, $M_{21}=7T3$, and $M_{42}=7T4$;
 
- \item degree $9$: $C_9$, $C_3\times C_3$, and $D_9$;
+ \item degree $9$: $C_9=9T1$, $C_3\times C_3=9T2$, and $D_9=9T3$;
 
- \item degree $\ell$ with $\ell$ prime: $C_\ell$ and $D_\ell$.
+ \item degree $\ell$ with $\ell$ prime: $C_\ell=\ell T1$ and $D_\ell=\ell T2$.
 
  The groups are coded as $[n,t]$ using the \kbd{nTt} format where $n$ is the
  degree and $t$ is the $T$-number (the index in the classification of
@@ -137,12 +138,12 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
   "C1"=[1,1];
   "C2"=[2,1];
   "C3"=[3,1], "S3"=[3,2];
-  "C4"=[4,1], "V4"=[4,2], "D4"=[4,3], "A4"=[4,4], "S4"=[]4,5];
+  "C4"=[4,1], "V4"=[4,2], "D4"=[4,3], "A4"=[4,4], "S4"=[4,5];
   "C5"=[5,1], "D5"=[5,2], "F5"="M20"=[5,3], "A5"=[5,4];
-  "C6"=[6,1], [6,2], [6,3], ..., [6,13];
+  "C6"=[6,1], "D6"=[6,2], [6,3], ..., [6,13];
   "C7"=[7,1], "D7"=[7,2], "M21"=[7,3], "M42"=[7,4];
   "C9"=[9,1], [9,2], "D9"=[9,3]."
-  Also supported are "Cp"=[p, 1] and "Dp"=[p, 2] for any odd prime p.
+  Also supported are "Cp"=[p,1] and "Dp"=[p,2] for any odd prime p.
  @eprog
 
 Function: _nflist_C3_worker
