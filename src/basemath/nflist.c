@@ -3712,7 +3712,7 @@ makeS46P(GEN N, GEN field, long s)
     for (j = c3 = 1; j < lv3; j++)
     {
       GEN T, P3 = gel(P,j);
-      long snew = s == 2 && ZX_disc(P3) < 0 ? 1 : s;
+      long snew = (s == 2 && signe(ZX_disc(P3)) == -1) ? 1 : s;
       if ((T = makeA4S4(P3, f, snew))) gel(P,c3++) = T;
     }
     if (c3 == 1) continue;
