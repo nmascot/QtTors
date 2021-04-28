@@ -20,7 +20,7 @@ ulong ZNneg(long x, ulong N)
   return y?N-y:N;
 }
 
-/*GEN RgM_Coef_mod(GEN A, GEN v)
+GEN RgM_Coef_mod(GEN A, GEN v)
 {
   long N;
   long i,j;
@@ -29,7 +29,7 @@ ulong ZNneg(long x, ulong N)
   i = smodis(gel(v,1),N);
   j = smodis(gel(v,2),N);
   return gcoeff(A,i?i:N,j?j:N);
-}*/
+}
 
 long zM_coef_mod(GEN A, GEN v)
 {
@@ -92,6 +92,7 @@ ulong VecSmallFind(GEN V, long x)
 	/* Index between a and A */
 	ulong a,A,c;
 	long y;
+	pari_printf("Looking for %ld in %Ps\n",x,V);
 	a=1;
 	A = lg(V)-1;
 	while(A-a>1)
@@ -103,6 +104,17 @@ ulong VecSmallFind(GEN V, long x)
 		if(y>x) A = c;
 	}
 	for(c=a;c<=A;c++)
+	{
+		if(V[c]==x) return c;
+	}
+	return 0;
+}
+
+ulong VecSmallFind_unsorted(GEN V, long x)
+{
+	ulong n,c;
+	n = lg(V);
+	for(c=1;c<n;c++)
 	{
 		if(V[c]==x) return c;
 	}
@@ -270,21 +282,22 @@ GEN GammaHCusps(ulong N, GEN H)
 {
 	/* * Reps (c,d) of all cusps of GammaH
      * Galois orbits
-     * Vector of indices of cusps such that there is M = [*,*;c,d] in SL(2,Z) such that f|M has rat coefs for all f def/Q
-     * Matrices [*,*;c,d] in SL(2,Z), satifying above condition if possible
+     * Vector of bits: whether such that there is M = [*,*;c,d] in SL(2,Z) such that f|M has rat coefs for all f def/Q
+		 * Vector of indices where above bits are 1
+     * Matrices [*,*;c,d] in SL(2,Z), satifying above condition whenever bit=1
      * Galois orbits
      * Widths
      * Tags: (c',d') -> index of equivalent representative
   */
 	pari_sp av = avma;
 	ulong c,d,i,x,h,g,g2,w,nCusp,nH,nGalOrb,nOrb,nQqexp,N2,acg2;
-	GEN Cusps,cd,CuspsGal,GalOrb,Qqexp,Mats,M,M1,Widths,tag;
-	int Q;
+	GEN Cusps,cd,CuspsGal,GalOrb,Qqexp_bool,Qqexp_list,Mats,M,Widths,tag;
 	printf("Init\n");
 	N2 = N*N;
 	Cusps = cgetg(N2+1,t_VEC);
 	CuspsGal = cgetg(N2+1,t_VEC);
-	Qqexp = cgetg(N2+1,t_VECSMALL);
+	Qqexp_bool = cgetg(N2+1,t_VECSMALL);
+	Qqexp_list = cgetg(N2+1,t_VECSMALL);
 	Mats = cgetg(N2+1,t_VEC);
 	Widths = cgetg(N2+1,t_VECSMALL);
 	tag = cgetg(N+1,t_VEC);
@@ -327,35 +340,33 @@ GEN GammaHCusps(ulong N, GEN H)
 			M = Bot2SL2Z(cd,N); /* [a,b;c,d], the other choices are [1,i;0,1]*M */
 			pari_printf("M=%Ps\n",M);
 			/* Qqexp iff can choose t so that for all invertible x, ad(x-1)+1 in H */
-			M1 = gcopy(M);
+			gel(Mats,nCusp) = gcopy(M);
 			for(i=0;i<N;i++)
 			{
-				Q = 1;
+				Qqexp_bool[nCusp] = 1;
 				for(x=2;x<N;x++)
 				{
 					if(ugcd(x,N)>1) continue;
 					if((2*umodiu(gcoeff(M,2,1),N)*umodiu(gcoeff(M,2,2),N))%N)
 					{
-						Q = 0;
+						Qqexp_bool[nCusp] = 0;
 						break;
 					}
 					if((VecSmallFind(H,umodiu(gcoeff(M,1,1),N)*umodiu(gcoeff(M,2,2),N)*(x-1)+1)%N)==0)
 					{
-						Q = 0;
+						Qqexp_bool[nCusp] = 0;
 						break;
 					}
 				}
-				if(Q) break;
+				if(Qqexp_bool[nCusp])
+				{
+					Qqexp_list[nQqexp++] = nCusp;
+					gel(Mats,nCusp) = M;
+					break;
+				}
 				gcoeff(M,1,2) = addii(gcoeff(M,1,1),gcoeff(M,1,2));
 				gcoeff(M,2,2) = addii(gcoeff(M,2,1),gcoeff(M,2,2));
 			}
-			if(Q)
-			{
-				printf("Q\n");
-				Qqexp[nQqexp++] = nCusp;
-				gel(Mats,nCusp) = M;
-			}
-			else gel(Mats,nCusp) = M1;
 			/* Compute width: g2 * min w such that 1+acg2w in H */
 			acg2 = umodiu(muliu(muliu(gcoeff(M,1,1),c),g2),N);
 			for(w=1;VecSmallFind(H,(1+acg2*w)%N)==0;w++) {}
@@ -371,12 +382,13 @@ GEN GammaHCusps(ulong N, GEN H)
 	}
 	nCusp++;
 	setlg(Cusps,nCusp);
+	setlg(Qqexp_bool,nCusp);
 	setlg(Mats,nCusp);
 	setlg(Widths,nCusp);
 	setlg(CuspsGal,nOrb);
-	setlg(Qqexp,nQqexp);
+	setlg(Qqexp_list,nQqexp);
 	CuspsGal = gen_sort_shallow(CuspsGal,NULL,&sort_lg_rev);
-	return gerepilecopy(av,mkvecn(6,Cusps,CuspsGal,Qqexp,Mats,Widths,tag));
+	return gerepilecopy(av,mkvecn(7,Cusps,CuspsGal,Qqexp_bool,Qqexp_list,Mats,Widths,tag));
 }
 
 GEN GammaHCusps_GalDiam_orbits(long y, GEN Cusps, GEN CuspsGal, GEN tags)
@@ -928,8 +940,8 @@ GEN EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
 	GEN Fq1,E,a4,a6,A4,P,Q,z,faN,M,D,B,Pi,Qi,zi;
 	ulong nfaN,i,l,v,lv1,lv;
 	E = EllSplitTors(N,p,T,Badj);
-	a4 = gel(a46,1);
-	a6 = gel(a46,2);
+	a4 = gel(E,1);
+	a6 = gel(E,2);
 	A4 = scalarpol(a4,varn(T));
 	P = Q = mkvec(gen_0);
 	z = Fq1 = pol_1(varn(T));
@@ -1080,7 +1092,7 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref, GEN Badj)
 {
 	pari_sp av = avma;
-	GEN pe,E,a4,a6,jE,P,Q,zN,M,Ml1,FP,PtsFrob;
+	GEN pe,E,a4,a6,P,Q,zN,M,Ml1,FP,PtsFrob;
 	ulong m,nPts,i,a,b,c,d,x,y;
 	pe = powis(p,e);
 	E = EllWithTorsBasis(N,T,pe,p,e,Badj);
@@ -1229,19 +1241,195 @@ GEN MRRsubspace(GEN Mqexps, GEN D, GEN B, GEN T, GEN pe, GEN p, long e)
 	return gerepileupto(av,K);
 }
 
+/* permutations */
+
+GEN PermConcat(GEN s, GEN t)
+{
+	GEN st;
+	ulong n,m,i;
+	n = lg(s)-1;
+	m = lg(t);
+	st = cgetg(n+m,t_VECSMALL);
+	for(i=1;i<n+m;i++)
+		st[i] = i<=n?s[i]:t[i-n]+n;
+	return st;
+}
+
+GEN SubPerms_inf(GEN S, ulong M)
+{ /* Perms S=[s[i]] acting on 1..N, M<=N -> [T,ST]
+   T subset (possibly reordered) of 1..N stable under S and with #T>=M but close, 
+  ST perms induced by S on T */
+	/* TODO complexity is probably terrible, better algo certainly possible */
+	pari_sp av = avma;
+	GEN Orbs,SOrbs,lOrbs,Orb,SOrb,Sub,SubS,SOrbi,I,seen;
+	ulong nS,N,nOrbs,nOrb,i,j,l,m,n,iseen,In,P,find;
+	nS = lg(S);
+	N = lg(gel(S,1))-1;
+	printf("N=%lu\n",N);
+	seen = cgetg(N+1,t_VECSMALL); /* Bits: visited points */
+	for(n=1;n<=N;n++)
+		seen[n] = 0;
+	Orbs = cgetg(N+1,t_VEC); /* Orbits */
+	SOrbs = cgetg(N+1,t_VEC); /* Perms induced on orbits */
+	lOrbs = cgetg(N+1,t_VECSMALL); /* Length of orbits */
+	nOrbs = 0; /* #Orbits */
+	for(iseen=0;iseen<=N;iseen++) /* Visit all points */
+	{
+		if(seen[iseen]) continue; /* Already visited? */
+		P = iseen; /* No. Begin new orbit. */
+		Orb = cgetg(N+1,t_VECSMALL);
+		Orb[1] = P; /* For now, */
+		nOrb = 1; /* It only contains this point. */
+		setlg(Orb,nOrb+1);
+		SOrb = cgetg(nS,t_VEC); /* Perms induced on this orbit */
+		for(i=1;i<nS;i++)
+		{
+			gel(SOrb,i) = SOrbi = cgetg(N+1,t_VECSMALL);
+			for(j=1;j<=N;j++) SOrbi[j] = 0; /* 0 marks unknown */
+		}
+		pari_printf("SOrb=%Ps\n",SOrb);
+		for(n=nOrb=1;n<=nOrb;n++) /* Move forward in orbit until we know what each perm does to each point */
+		{
+			printf("n=%lu, ",n);
+			pari_printf("now Orb=%Ps, SOrb=%Ps\n",Orb,SOrb);
+			for(i=1;i<nS;i++) /* for each perm */
+			{
+				SOrbi = gel(SOrb,i);
+				pari_printf("Perm %lu = %Ps\n",i,SOrbi);
+				if(SOrbi[n]==0) /* Do we know what this perm does to this point? */
+				{
+					printf("Dunno\n");
+					m = n; /* No, let us see */
+					P = Orb[n]; /* This point */
+					printf("Working on pt %lu\n",P);
+					for(;;)
+					{
+						P = gel(S,i)[P]; /* Image by this perm */
+						printf("Moved to %lu\n",P);
+						seen[P] = 1; /* Mark this point as visited */
+						find = VecSmallFind_unsorted(Orb,P); /* Is it already in Orb? */
+						if(find)
+						{ /* Yes, in this position */
+							printf("Found: %lu\n",find);
+							SOrbi[m] = find; /* Record this info in perm */
+							pari_printf("Now perm %lu = %Ps\n",i,SOrbi);
+							break;
+						}
+						/* It is not in Orb yet */
+						printf("Not found\n");
+						Orb[++nOrb] = P; /* Add it */
+						setlg(Orb,nOrb+1); /* Orb size increases */
+						SOrbi[m] = nOrb; /* Record info in perm */
+						pari_printf("Now perm %lu = %Ps, Orb=%Ps\n",i,SOrbi,Orb);
+						m = nOrb; /* Now explore what happens to this new point */
+					}
+				}
+			}
+		}
+		/* We have found a complete orbit */
+		for(i=1;i<nS;i++) /* Adjust lengths of induced perms */
+			setlg(gel(SOrb,i),nOrb+1);
+		/* Record this orbit */
+		gel(Orbs,++nOrbs) = Orb;
+		gel(SOrbs,nOrbs) = SOrb;
+		lOrbs[nOrbs] = nOrb;
+		pari_printf("Recorded orbit %lu: %Ps, %Ps, length %lu\n",nOrbs,Orb,SOrb,nOrb);
+	}
+	/* Now we have found the orbits. */
+	setlg(Orbs,nOrbs+1);
+	setlg(SOrbs,nOrbs+1);
+	setlg(lOrbs,nOrbs+1);
+	printf("Total %lu orbits\n",nOrbs);
+	pari_printf("%Ps, %Ps, %Ps\n",Orbs,SOrbs,lOrbs);
+	/* Shuffle them randomly */
+	for(n=1;n<=nOrbs;n++)
+	{
+		i = 1 + random_Fl(nOrbs);
+		j = 1 + random_Fl(nOrbs);
+		if(i==j) continue;
+		printf("Swap %lu %lu\n",i,j);
+		Orb = gel(Orbs,i);
+		gel(Orbs,i) = gel(Orbs,j);
+		gel(Orbs,j) = Orb;
+		SOrb = gel(SOrbs,i);
+    gel(SOrbs,i) = gel(SOrbs,j);
+    gel(SOrbs,j) = SOrb;
+		l = lOrbs[i];
+    lOrbs[i] = lOrbs[j];
+    lOrbs[j] = l;
+	}
+	pari_printf("After shuffle: %Ps, %Ps, %Ps\n",Orbs,SOrbs,lOrbs);
+	I = vecsmall_indexsort(lOrbs); /* Perm sorting Orbs by incr size */
+	pari_printf("Sorter: %Ps\n",I);
+	/* Select orbits forming subset of size >= M */
+	m = 0; /* Total size so far */
+	Sub = cgetg(N+1,t_VECSMALL); /* Subset */
+	SubS = cgetg(nS,t_VEC); /* Induced perms */
+	for(i=1;i<nS;i++)
+		gel(SubS,i) = cgetg(N+1,t_VECSMALL);
+	/* First, form largest to smallest */
+	printf("Down\n");
+	for(n=nOrbs;n;n--)
+	{
+		In = I[n];
+		Orb = gel(Orbs,In);
+		SOrb = gel(SOrbs,In);
+		l = lOrbs[In];
+		pari_printf("m=%lu, checking Orb %Ps\n",m,Orb);
+		if(m+l>M) continue; /* Does it fit? */
+		for(j=1;j<=l;j++)
+		{
+			Sub[m+j] = Orb[j];
+			for(i=1;i<nS;i++)
+			{
+				gel(SubS,i)[m+j] = gel(SOrb,i)[j]+m;
+			}
+		}
+		m += l;
+		pari_printf("Included; now m=%lu, Sub=%Ps, SubS=%Ps\n",m,Sub,SubS);
+		gel(Orbs,In) = NULL; /* Mark this Orb as used */
+	}
+	/* Next, from smallest to largest, as we could still have m<M */
+	printf("Up\n");
+	for(n=1;m<M;n++)
+  {
+    In = I[n];
+    Orb = gel(Orbs,In);
+		if(Orb==NULL) continue; /* Already used? */
+		pari_printf("m=%lu, checking Orb %Ps\n",m,Orb);
+    SOrb = gel(SOrbs,In);
+    l = lOrbs[In];
+    for(j=1;j<=l;j++)
+    {
+      Sub[m+j] = Orb[j];
+      for(i=1;i<nS;i++)
+      {
+        gel(SubS,i)[m+j] = gel(SOrb,i)[j]+m;
+      }
+    }
+		m += l;
+		pari_printf("Included; now m=%lu, Sub=%Ps, SubS=%Ps\n",m,Sub,SubS);
+  }
+	/* Adjust sizes */
+	setlg(Sub,m+1);
+	for(i=1;i<nS;i++)
+		setlg(gel(SubS,i),m+1);
+	return gerepilecopy(av,mkvec2(Sub,SubS));
+}
+
 /* qexp */
 
 GEN E1qexp(GEN v, ulong N, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
 { /* v=[c,d] mod N, zpows = powers of primitive Nth root of 1: q-exp of E_1^[c,d] up to O(qN^B) */
   /* TODO use t_SER ? */
+	/* TODO used? */
   pari_sp av = avma;
   GEN E,Fq0,a0,zd;
   ulong a,b,c,d,m,n;
 
   if(B==0) return cgetg(1,t_VEC);
 
-  Fq0 = mkpoln(0);
-  setvarn(Fq0,varn(T));
+  Fq0 = pol_0(varn(T));
 
   c = umodiu(gel(v,1),N);
   d = umodiu(gel(v,2),N);
@@ -1294,8 +1482,7 @@ GEN TrE2qexp(GEN vw, ulong N, GEN H, GEN M, ulong w, GEN zpows, ulong B, GEN T, 
   Nw = N/w;
   BN = (B-1)*N/w+1;
 
-  Fq0 = mkpoln(0);
-  setvarn(Fq0,varn(T));
+  Fq0 = pol_0(varn(T));
 
   E = cgetg(B+1,t_VEC);
   for(i=1;i<=B;i++) gel(E,i) = Fq0;
@@ -1343,7 +1530,7 @@ GEN M2_worker(GEN vw, GEN Ml1, GEN TH, GEN Mpts, GEN T, GEN pe)
       M = ZM_mul(gel(TH,h),gel(Mpts,s));
       vM = ZV_ZM_mul(v,M);
       wM = ZV_ZM_mul(w,M);
-      Cs = ZX_add(Cs,ZX_mul(GetCoef(Ml1,vM),GetCoef(Ml1,wM)));
+      Cs = ZX_add(Cs,ZX_mul(RgM_Coef_mod(Ml1,vM),RgM_Coef_mod(Ml1,wM)));
     }
     Cs = Fq_red(Cs,T,pe);
     gel(C,s) = gerepileupto(avs,Cs);
@@ -1376,55 +1563,106 @@ GEN M2mat(GEN M2gens, GEN Ml1, GEN TH, GEN MPts, GEN T, GEN pe)
   return gerepilecopy(av,M2);
 }
 
+GEN FqCSer_mul(GEN A, GEN B, ulong n, GEN T, GEN p)
+{ /* Multiplies t_COLS A,B of same length n+1 viewed as series A[1]*1+A[2]*x+..+A[n]*x^{n-1}+O(x^n) */
+	/* TODO for now quadratic */
+	pari_sp av;
+	GEN C,Ck;
+	ulong k,i;
+	C = cgetg(n+1,t_COL);
+	for(k=0;k<n;k++)
+	{
+		av = avma;
+		Ck = ZX_mul(gel(A,k+1),gel(B,1));
+		for(i=0;i<k;i++)
+			Ck = ZX_add(Ck,ZX_mul(gel(A,i+1),gel(B,k+1-i)));
+		Ck = Fq_red(Ck,T,p);
+		gel(C,k+1) = gerepileupto(av,Ck);
+	}
+	return C;
+}
+
 GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int UseTp, ulong nbE)
 { /* J_H(N) over Zq/p^e, q=p^a */
+	/* TODO Qqexp_bool used, Qqexp_list useless? */
 	pari_sp av = avma;
 	long t;
-	GEN T,H,H1;
-	ulong g;
+	GEN J,T,pe,H1;
+	GEN Cusps,CuspsGal,CuspsQexp_bool,CuspsQexp,CuspsMats,CuspsWidths,CuspsTags,CuspsGalDegs,CuspsGalDiamp,CuspsGalDiampDegs;
+	GEN Pts,PtsTags,MPts,PtsFrob,PtsDiamp,PtsDiamp0;
+	GEN list_j,E,Ml1,zN,zNpows,TH,M2gens,geni,M2,B,M2qexps;
+	GEN C0o,C0,C02,E1o,E1,E2o,E2,M,U0,V1,V2,V3,V,KV,EvalData,I,M4Q,V2qexps,V2gens,pageV1,pageV2;
+	ulong up,g,d0,nCusps,nCuspsGal,nCuspsGalDiamp,nCuspsQ,mQ,nPts,d,d1,nB,i,j,k,s,sprec,w;
+	struct pari_mt pt;
+	GEN worker,params,done;
+	long pending,workid;
 
+	up = itou(p);
+	J = cgetg(17,t_VEC);
+	gel(J,1) = gen_0; /* No plane equation for curve */
+	gel(J,4) = gel(J,14) = cgetg(1,t_VEC); /* No formula for RR spaces */
+	gel(J,6) = p;
 	/* Create unramified extension */
 	t = fetch_var();
   name_var(t,"t");
-  T = liftint(ffinit(p,a,t));
+  gel(J,5) = T = liftint(ffinit(p,a,t));
+	gel(J,8) = pe = powis(p,e);
+	gel(J,9) = ZpXQ_FrobMat(T,p,e,pe);
 	/* Get <H> */
 	H = ZNX_Hlist(H,N);
 	H1 = gel(H,2); /* <H,-1>/-1 */
 	H = gel(H,1); /* <H,-1> */
-	if(dvdui(6*N*(lg(Hlist)-1),p))
+	if(dvdui(6*N*(lg(H1)-1),p))
 		pari_err(e_MISC,"Use a prime p that does not divide 6*N*<H>");
 	g = degpol(Lp)/2;
 	if(DEBUGLEVEL) printf("ModPicInit: genus %lu\n",g);
+	gel(J,2) = utoi(g);
 	/* Get data about cusps */
 	Cusps = GammaHCusps(N,H);
 	CuspsGal = gel(Cusps,2);
-	CuspsQexp = gel(Cusps,3);
-	CuspsMats = gel(Cusps,4);
-	CuspsWidths = gel(Cusps,5);
-	CuspsTags = gel(Cusps,6);
+	CuspsQexp_bool = gel(Cusps,3);
+	CuspsQexp = gel(Cusps,4);
+	CuspsMats = gel(Cusps,5);
+	CuspsWidths = gel(Cusps,6);
+	CuspsTags = gel(Cusps,7);
 	Cusps = gel(Cusps,1);
-	nCusps = lg(Cusps);
+	nCusps = lg(Cusps)-1;
+	nCuspsQ = lg(CuspsQexp);
+	nCuspsGal = lg(CuspsGal);
+	CuspsGalDegs = cgetg(nCuspsGal,t_VECSMALL);
+	for(i=1;i<nCuspsGal;i++)
+		CuspsGalDegs[i] = lg(gel(CuspsGal,i))-1;
 	if(DEBUGLEVEL) printf("ModPicInit: %lu cusps\n",nCusps);
 	if(UseTp)
 	{
-		CuspsGalDiamp = GammaHCusps_GalDiam_orbits(p,Cusps,CuspsGal,CuspTags);
+		CuspsGalDiamp = GammaHCusps_GalDiam_orbits(up,Cusps,CuspsGal,CuspsTags);
+		nCuspsGalDiamp = lg(CuspsGalDiamp);
+		CuspsGalDiampDegs = cgetg(nCuspsGalDiamp,t_VECSMALL);
+		for(i=1;i<nCuspsGalDiamp;i++)
+    	CuspsGalDiampDegs[i] = lg(gel(CuspsGalDiamp,i))-1;
 	}
-	// TODO CuspsQexps: list + vector of bits
+	else CuspsGalDiamp = CuspsGalDiampDegs = NULL;
 	/* Get data about fibre */
 	Pts = ZNZ2primH(N,H);
 	PtsTags = gel(Pts,2);
 	Pts = gel(Pts,1);
 	nPts = lg(Pts)-1;
 	if(DEBUGLEVEL) printf("ModPicInit: %lu points in fibre on X_H(%lu)->X(1)\n",nPts,N);
-	// TODO PtsDiamp
+	if(UseTp)
+	{
+		PtsDiamp = PtsDiamp0 = cgetg(nPts+1,t_VECSMALL); /* Perm induced by <p> */
+		for(i=1;i<=nPts;i++)
+			PtsDiamp[i] = zM_coef_mod(PtsTags,zv_z_mul(gel(Pts,i),up));
+	}
+	else PtsDiamp = PtsDiamp0 = NULL;
 	MPts = cgetg(nPts+1,t_VEC); /* Matrices having these bottom rows */
 	for(i=1;i<=nPts;i++) /* P_g = P_g' on X_H(N) <=> g,g' same bottom row mod H */
-		gel(MPts,i) = BotToSL2Z(gel(Pts,i),N);
+		gel(MPts,i) = Bot2SL2Z(gel(Pts,i),N);
 	/* Get first elliptic curve */
 	if(DEBUGLEVEL) pari_printf("ModPicInit: looking for an elliptic curve whose %lu torsion is defined over GF(%Ps,%lu)\n",N,p,a);
 	list_j = cgetg(nbE+1,t_VEC);
 	setlg(list_j,1);
-	E = GetMl1(N,Pts,PtTags,T,p,e,NULL,list_j); /* NULL: no preferred zeta_N for now */
+	E = GetMl1(N,Pts,PtsTags,T,p,e,NULL,list_j); /* NULL: no preferred zeta_N for now */
 	if(DEBUGLEVEL) pari_printf("ModPicInit: working on y²=x³+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
 	Ml1 = gel(E,2);
 	PtsFrob = gel(E,3);
@@ -1432,7 +1670,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int 
 	setlg(list_j,2);
 	gel(list_j,1) = gmael(E,1,3);
 	zNpows = cgetg(N+1,t_VEC); // TODO pass to Ml1?
-	gel(zNpow,1) = zN;
+	gel(zNpows,1) = zN;
 	for(i=1;i<N;i++)
 		gel(zNpows,i+1) = Fq_mul(gel(zNpows,i),zN,T,pe);
 	/* Find basis for M2(GammaH(N)) */
@@ -1449,8 +1687,8 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int 
 		for(i=1;i<d1;i++)
 		{
 			gel(M2gens,i) = geni = cgetg(3,t_VEC);
-			gel(geni,1) = gel(Pts,1+random_Fl(nPts-1));
-			gel(geni,2) = gel(Pts,1+random_Fl(nPts-1));
+			gel(geni,1) = gel(Pts,1+random_Fl(nPts));
+			gel(geni,2) = gel(Pts,1+random_Fl(nPts));
 		}
 		M2 = M2mat(M2gens,Ml1,TH,MPts,T,pe); /* d1 forms E_1^v*E_1^v' in M2(GammaH) */
 		/* Do we span? */
@@ -1471,12 +1709,164 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int 
 	setlg(M2,d+1);
 	setlg(M2gens,d+1);
 	/* Get extra ellitpic curves */
-	for(i=1;i<=nbE;i++)
+	for(i=2;i<=nbE;i++)
 	{
 		if(DEBUGLEVEL) printf("ModPicInit: Getting extra elliptic curve %lu/%lu\n",i,nbE);
-		E = GetMl1(); //TODO
+		E = GetMl1(N,Pts,PtsTags,T,p,e,zN,list_j);
+		if(DEBUGLEVEL) pari_printf("ModPicInit: working on y²=x³+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
+		setlg(list_j,i+1);
+		gel(list_j,i) = gmael(E,1,3);
+		M2 = vconcat(M2,M2mat(M2gens,gel(E,2),TH,MPts,T,pe));
+		PtsFrob = PermConcat(PtsFrob,gel(E,3));
+		PtsDiamp = PermConcat(PtsDiamp,PtsDiamp0);
 	}
-	// TODO
+	/* Prepare divisors to know min qprec
+	 * then prune: M2 -> S2(>=3cusps) = M2(-C0) */
+	if(UseTp)
+	{
+		C0o = BalancedDivInf(nCusps-3,CuspsGalDiampDegs);
+		C0 = Divo2Div(C0o,CuspsGalDiamp,CuspsTags,nCusps);
+	}
+	else
+	{
+		C0o = BalancedDiv(nCusps-3,CuspsGalDegs);
+		C0 = Divo2Div(C0o,CuspsGal,CuspsTags,nCusps);
+	}
+	d0 = 2*g+nCusps-(2+zv_sum(C0));
+	if(DEBUGLEVEL) printf("ModPicInit: d0=%lu\n",d0);
+	gel(J,3) = utoi(d0);
+	/* Evaluation J_H(N) -> A1 */
+	E1o = BalancedDiv(d0-g,CuspsGalDegs);
+  E1 = Divo2Div(E1o,CuspsGal,CuspsTags,nCusps);
+	E2o = BalancedDiv(d0-g,CuspsGalDegs);
+  E2 = Divo2Div(E2o,CuspsGal,CuspsTags,nCusps);
+	M2qexps = cgetg(nCusps+1,t_VEC);
+	if(DEBUGLEVEL) printf("ModPicInit: q-exp of forms of weight 2 at cusp");
+	for(s=1;s<=nCusps;s++)
+	{
+		if(DEBUGLEVEL) printf(" %lu",s);
+		sprec = 2*C0[s]+(E1[s]>E2[s]?E1[s]:E2[s]);
+		if(CuspsQexp_bool[s] && sprec<qprec)
+			sprec = qprec;
+		M = gel(CuspsMats,s);
+		w = CuspsWidths[s];
+		// TODO parallelise
+		gel(M2qexps,s) = cgetg(d+1,t_MAT);
+		for(i=1;i<=d;i++)
+			gmael(M2qexps,s,i) = TrE2qexp(gel(M2gens,i),N,TH,M,w,zNpows,sprec,T,pe,p,e);
+
+	}
+	if(DEBUGLEVEL) printf("\n ModPicInit: pruning, dim %lu, eval on >= %lu pts\n",d-zv_sum(C0),5*d0+1);
+	/* Reduce # pts at which we evaluate */
+	if(UseTp)
+  {
+    Pts = SubPerms_inf(mkvec2(PtsFrob,PtsDiamp),5*d0+1);
+    PtsFrob = gmael(Pts,2,1); /* Induced perm */
+    PtsDiamp = gmael(Pts,2,2); /* Induced perm */
+    Pts = gel(Pts,1); /* Selected indices */
+  }
+  else
+	{
+		Pts = SubPerms_inf(mkvec(PtsFrob),5*d0+1);
+		PtsFrob = gmael(Pts,2,1); /* Induced perm */
+		Pts = gel(Pts,1); /* Selected indices */
+	}
+	nPts = lg(Pts);
+	if(DEBUGLEVEL) printf("ModPicInit: Wanted to reduce nZ to %lu, actually got %lu\n",5*d0+1,nPts-1);
+	V1 = cgetg(d+1,t_MAT);
+	for(j=1;j<=d;j++)
+	{
+		gel(V1,j) = cgetg(nPts,t_COL);
+		for(i=1;i<nPts;i++)
+			gcoeff(V1,i,j) = gcoeff(M2,Pts[i],j);
+	}
+	/* M2 -> S2(>=3cusps) = M2(-C0) */
+  U0 = MRRsubspace(M2qexps,C0,NULL,T,pe,p,e);
+	V1 = FqM_mul(V1,U0,T,pe);
+	/* Forms of weight 4 */
+	d = 2*d0+1-g;
+	if(DEBUGLEVEL) printf("ModPicInit: M4(GammaH)(-2C0), dim %lu\n",d);
+	V2 = DivAdd1(V1,V1,d,T,pe,p,d0,1); // TODO tune excess=d0
+	V2gens = gel(V2,2);
+	V2 = gel(V2,1);
+	if(DEBUGLEVEL) printf("ModPicInit: M4(GammaH)(-2C0), dim %lu\n",d);
+	// TODO parallelise
+	V2qexps = cgetg(d+1,t_MAT);
+	for(s=1;s<=nCusps;s++)
+	{
+		pageV1 = FqM_mul(gel(M2qexps,s),U0,T,pe);
+		sprec = lg(gel(pageV1,1))-1;
+		pageV2 = gel(V2qexps,s) = cgetg(d+1,t_MAT);
+		for(j=1;j<=d;j++)
+			gel(pageV2,j) = FqCSer_mul(gel(pageV1,gel(V2gens,j)[1]),gel(pageV1,gel(V2gens,j)[2]),sprec,T,pe);
+	}
+	if(DEBUGLEVEL) printf("ModPicInit: Eval data\n");
+	gel(J,13) = EvalData = cgetg(5,t_VEC);
+	C02 = zv_z_mul(C0,2);
+	// TODO parallel
+	gel(EvalData,1) = FqM_mul(V2,MRRsubspace(V2qexps,E1,C02,T,pe,p,e),T,pe);
+	gel(EvalData,2) = FqM_mul(V2,MRRsubspace(V2qexps,E2,C02,T,pe,p,e),T,pe);
+	gel(EvalData,3) = I = gel(FqM_indexrank(V2,T,p),1); /* Rows of V2 forming invertible block */
+	M = cgetg(d+1,t_MAT);
+  for(j=1;j<=d;j++)
+  {
+    gel(M,j) = cgetg(d+1,t_COL);
+    for(i=1;i<=d;i++)
+      gcoeff(M,i,j) = gcoeff(V2,I[i],j);
+  }
+	mQ = 1; /* 1 + Total number of coefs at Q cusps */
+	for(s=1;s<=nCusps;s++)
+	{
+		if(CuspsQexp_bool[s])
+			mQ += lg(gmael(V2qexps,s,1))-1;
+	}
+	M4Q = cgetg(d+1,t_MAT);
+	for(j=1;j<=d;j++)
+	{
+		gel(M4Q,j) = cgetg(mQ,t_COL);
+		i = 1;
+		for(s=1;s<=nCusps;s++)
+		{
+			if(CuspsQexp_bool[s]==0) continue;
+			pageV2 = gel(V2qexps,s);
+			sprec = lg(gel(pageV2,1));
+			for(k=1;k<sprec;k++)
+				gcoeff(M4Q,i++,j) = gcoeff(pageV2,k,j);
+		}
+	}
+  gel(EvalData,4) = FqM_mul(M4Q,ZpXQMinv(M,T,pe,p,e),T,pe);
+	/* Forms of weight 6 */
+	d = 3*d0+1-g;
+	if(DEBUGLEVEL) printf("ModPicInit: M6(GammaH)(-3C0), dim %lu\n",d);
+	V3 = DivAdd1(V2,V1,d,T,pe,p,d0,0); // TODO tune excess=d0
+	/* Finish constructing J */
+	gel(J,10) = V = mkvec3(V1,V2,V3);
+	gel(J,7) = E = stoi(e);
+	if(DEBUGLEVEL) printf("ModPicInit: Computing equation matrices\n");
+  gel(J,11) = KV = cgetg(4,t_VEC);
+  worker = strtofunction("_mateqnpadic");
+	params = cgetg(6,t_VEC);
+	gel(params,2) = T;
+	gel(params,3) = pe;
+	gel(params,4) = p;
+	gel(params,5) = E;
+  mt_queue_start_lim(&pt,worker,3);
+  for(i=1;i<=3||pending;i++)
+  {
+		if(i<=3)
+		{
+			gel(params,1) = gel(V,i);
+    	mt_queue_submit(&pt,i,params);
+		}
+		else mt_queue_submit(&pt,i,NULL);
+    done = mt_queue_get(&pt,&workid,&pending);
+    if(done) gel(KV,workid) = done;
+  }
+  mt_queue_end(&pt);
+	gel(J,12) = DivMul(gel(V1,1),V1,T,pe);
+	gel(J,15) = PtsFrob;
+	gel(J,16) = UseTp ? mkvec(mkvec2(PtsDiamp,gen_0)) : cgetg(1,t_VEC);
+	return gerepilecopy(av,J);
 }
 
 GEN PicTp(GEN J, GEN W, GEN l)
