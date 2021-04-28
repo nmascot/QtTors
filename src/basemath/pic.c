@@ -743,7 +743,13 @@ GEN JgetEvalData(GEN J) {return gel(J,13);}
 GEN JgetZ(GEN J) {return gel(J,14);}
 GEN JgetFrobCyc(GEN J) {return gel(J,15);}
 GEN JgetAutData(GEN J) {return gel(J,16);}
-GEN JgetAutCyc(GEN J, ulong n) {return gmael3(J,16,n,1);}
+GEN JgetAutCyc(GEN J, ulong n)
+{
+	GEN A = gel(J,16);
+	if(n>=lg(A))
+		pari_err(e_MISC,"This automorphism is not present");
+	return gmael(A,n,1);
+}
 GEN JgetAutKnown(GEN J, ulong n) {return gmael3(J,16,n,2);}
 
 void JgetTpe(GEN J, GEN* T, GEN* pe, GEN* p, long* e)

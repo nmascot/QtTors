@@ -6724,4 +6724,6 @@ GEN LMod_worker(GEN p, GEN Gchi, GEN S, long t, GEN Z, GEN zo, GEN MZ);
 GEN elladd_padic(GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e);
 GEN Ell_l1(GEN EN, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e);
 GEN M2_worker(GEN vw, GEN Ml1, GEN TH, GEN Mpts, GEN T, GEN pe);
+GEN TrE2qexp(GEN vw, ulong N, GEN H, GEN M, ulong w, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e);
+GEN M4qexp_worker(GEN pageV1, GEN V2gens, GEN U0, GEN T, GEN pe);
 GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec);

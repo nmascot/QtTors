@@ -69,3 +69,15 @@ Section: programming/internals
 C-Name: M2_worker
 Prototype: GGGGGG
 Help:
+
+Function: _TrE2qexp
+Section: programming/internals
+C-Name: TrE2qexp
+Prototype: GUGGUGUGGGL
+Help:
+
+Function: _M4qexp_worker
+Section: programming/internals
+C-Name: M4qexp_worker
+Prototype: GGGGG
+Help:

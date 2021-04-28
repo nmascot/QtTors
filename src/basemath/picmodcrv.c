@@ -1545,18 +1545,33 @@ GEN FqCSer_mul(GEN A, GEN B, ulong n, GEN T, GEN p)
 	return C;
 }
 
+GEN M4qexp_worker(GEN pageV1, GEN V2gens, GEN U0, GEN T, GEN pe)
+{
+	pari_sp av = avma;
+	GEN pageV2;
+	ulong sprec,j,d;
+	d = lg(V2gens);
+	pageV1 = FqM_mul(pageV1,U0,T,pe);
+  sprec = lg(gel(pageV1,1))-1;
+  pageV2  = cgetg(d,t_MAT);
+  for(j=1;j<d;j++)
+    gel(pageV2,j) = FqCSer_mul(gel(pageV1,gel(V2gens,j)[1]),gel(pageV1,gel(V2gens,j)[2]),sprec,T,pe);
+	return gerepileupto(av,pageV2);
+}
+
 GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec)
 { /* J_H(N) over Zq/p^e, q=p^a */
+	/* TODO sort cusps? */
 	pari_sp av = avma;
 	long t;
 	GEN J,T,pe,H1;
 	GEN Cusps,CuspsGal,CuspsQexp,CuspsMats,CuspsWidths,CuspsTags,CuspsGalDegs,CuspsGalDiamp,CuspsGalDiampDegs;
 	GEN Pts,PtsTags,MPts,PtsFrob,PtsDiamp,PtsDiamp0;
 	GEN list_j,E,Ml1,zN,zNpows,TH,M2gens,geni,M2,B,M2qexps;
-	GEN C0o,C0,C02,E1o,E1,E2o,E2,M,U0,V1,V2,V3,V,KV,EvalData,I,M4Q,V2qexps,V2gens,pageV1,pageV2;
-	ulong up,g,d0,nCusps,nCuspsGal,nCuspsGalDiamp,mQ,nPts,d,d1,nB,i,j,k,s,sprec,w;
+	GEN C0o,C0,C02,E1o,E1,E2o,E2,M,U0,V1,V2,V3,V,KV,EvalData,I,M4Q,V2qexps,V2gens,pageV2;
+	ulong up,g,d0,nCusps,nCuspsGal,nCuspsGalDiamp,mQ,nPts,d,d1,nB,i,j,k,s,sprec;
 	struct pari_mt pt;
-	GEN worker,params,done;
+	GEN worker,params,ie,done;
 	long pending,workid;
 
 	up = itou(p);
@@ -1684,7 +1699,6 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	 * then prune: M2 -> S2(>=3cusps) = M2(-C0) */
 	if(UseTp)
 	{
-		pari_printf("GalDiamDegs: %Ps\n",CuspsGalDiampDegs);
 		C0o = BalancedDivInf(nCusps-3,CuspsGalDiampDegs);
 		C0 = Divo2Div(C0o,CuspsGalDiamp,CuspsTags,nCusps);
 		if(DEBUGLEVEL) printf("ModPicInit: Wanted C0 of degree %lu, got %lu\n",nCusps-3,zv_sum(C0));
@@ -1703,21 +1717,49 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	E2o = BalancedDiv(d0-g,CuspsGalDegs);
   E2 = Divo2Div(E2o,CuspsGal,CuspsTags,nCusps);
 	M2qexps = cgetg(nCusps+1,t_VEC);
-	if(DEBUGLEVEL) printf("ModPicInit: q-exp of forms of weight 2 at cusp");
-	for(s=1;s<=nCusps;s++)
+	if(DEBUGLEVEL) printf("ModPicInit: q-exp of forms of weight 2, cusp");
+	params = cgetg(12,t_VEC);
+	gel(params,2) = utoi(N);
+	gel(params,3) = TH;
+	gel(params,6) = zNpows;
+	gel(params,8) = T;
+	gel(params,9) = pe;
+	gel(params,10) = p;
+	gel(params,11) = ie = stoi(e);
+	worker = strtofunction("_TrE2qexp");
+  mt_queue_start_lim(&pt,worker,nCusps*d);
+  pending = 0;
+	for(s=1;s<=nCusps||pending;s++)
 	{
-		if(DEBUGLEVEL) printf(" %lu",s);
-		sprec = 2*C0[s]+(E1[s]>E2[s]?E1[s]:E2[s]);
-		if(CuspsQexp[s] && sprec<qprec)
-			sprec = qprec;
-		M = gel(CuspsMats,s);
-		w = CuspsWidths[s];
-		// TODO parallelise
-		gel(M2qexps,s) = cgetg(d+1,t_MAT);
+		if(s<=nCusps)
+		{
+			if(DEBUGLEVEL) printf(" %lu",s);
+			gel(M2qexps,s) = cgetg(d+1,t_MAT);
+			gel(params,4) = gel(CuspsMats,s);
+			gel(params,5) = stoi(CuspsWidths[s]);
+			sprec = 2*C0[s]+(E1[s]>E2[s]?E1[s]:E2[s]);
+			if(CuspsQexp[s] && sprec<qprec)
+				sprec = qprec;
+			gel(params,7) = stoi(sprec);
+		}
 		for(i=1;i<=d;i++)
-			gmael(M2qexps,s,i) = TrE2qexp(gel(M2gens,i),N,TH,M,w,zNpows,sprec,T,pe,p,e);
-
+		{
+			if(s<=nCusps)
+			{
+				gel(params,1) = gel(M2gens,i);
+				mt_queue_submit(&pt,s*d+i,params);
+			}
+			else mt_queue_submit(&pt,0,NULL);
+			done = mt_queue_get(&pt,&workid,&pending);
+			if(done)
+			{
+				j = udivuu_rem(workid-1,d,&k);
+        gmael(M2qexps,j,k+1) = done;
+			}
+			if(s>nCusps) break;
+		}
 	}
+  mt_queue_end(&pt);
 	if(DEBUGLEVEL) printf("\nModPicInit: pruning, dim %lu, eval on >= %lu pts\n",d-zv_sum(C0),5*d0+1);
 	/* Reduce # pts at which we evaluate */
 	if(UseTp)
@@ -1751,16 +1793,29 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	V2 = DivAdd1(V1,V1,d,T,pe,p,d0,1); // TODO tune excess=d0
 	V2gens = gel(V2,2);
 	V2 = gel(V2,1);
-	// TODO parallelise
-	V2qexps = cgetg(nCusps+1,t_MAT);
-	for(s=1;s<=nCusps;s++)
+	if(DEBUGLEVEL) printf("ModPicInit: q-exp of forms of weight 4\n");
+	params = cgetg(6,t_VEC);
+	gel(params,2) = V2gens;
+	gel(params,3) = U0;
+  gel(params,4) = T;
+  gel(params,5) = pe;
+  worker = strtofunction("_M4qexp_worker");
+  mt_queue_start_lim(&pt,worker,nCusps);
+  pending = 0;
+	V2qexps = cgetg(nCusps+1,t_VEC);
+	for(s=1;s<=nCusps||pending;s++)
 	{
-		pageV1 = FqM_mul(gel(M2qexps,s),U0,T,pe);
-		sprec = lg(gel(pageV1,1))-1;
-		pageV2 = gel(V2qexps,s) = cgetg(d+1,t_MAT);
-		for(j=1;j<=d;j++)
-			gel(pageV2,j) = FqCSer_mul(gel(pageV1,gel(V2gens,j)[1]),gel(pageV1,gel(V2gens,j)[2]),sprec,T,pe);
+		if(s<=nCusps)
+		{
+			gel(params,1) = gel(M2qexps,s);
+			mt_queue_submit(&pt,s,params);
+		}
+		else mt_queue_submit(&pt,0,NULL);
+		done = mt_queue_get(&pt,&workid,&pending);
+		if(done)
+			gel(V2qexps,workid) = done;
 	}
+  mt_queue_end(&pt);
 	if(DEBUGLEVEL) printf("ModPicInit: Eval data\n");
 	gel(J,13) = EvalData = cgetg(5,t_VEC);
 	C02 = zv_z_mul(C0,2);
@@ -1802,7 +1857,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	V3 = DivAdd1(V2,V1,d,T,pe,p,d0,0); // TODO tune excess=d0
 	/* Finish constructing J */
 	gel(J,10) = V = mkvec3(V1,V2,V3);
-	gel(J,7) = E = stoi(e);
+	gel(J,7) = ie;
 	if(DEBUGLEVEL) printf("ModPicInit: Computing equation matrices\n");
   gel(J,11) = KV = cgetg(4,t_VEC);
   worker = strtofunction("_mateqnpadic");
@@ -1810,7 +1865,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	gel(params,2) = T;
 	gel(params,3) = pe;
 	gel(params,4) = p;
-	gel(params,5) = E;
+	gel(params,5) = ie;
   mt_queue_start_lim(&pt,worker,3);
   for(i=1;i<=3||pending;i++)
   {
