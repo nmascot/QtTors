@@ -858,7 +858,7 @@ GEN DivAdd1(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, long fl
 	  gel(res,2) = uv = cgetg(d+excess+1,t_VEC);
     for(j=1;j<=d+excess;j++)
     {
-			gel(uv,j) = cgetg(3,t_VEC);
+			gel(uv,j) = cgetg(3,t_VECSMALL);
 			gel(uv,j)[1] = u = random_Fl(nA)+1;
 			s = gel(WA,u);
 			gel(uv,j)[2] = v = random_Fl(nB)+1;
@@ -1158,12 +1158,12 @@ int PicIsZero(GEN J, GEN W)
 
 ulong PicIsTors_val(GEN J, GEN W, GEN F)
 {
-	return PicIsZero_val(J, PicFrobPoly(J,W,F));
+	return PicIsZero_val(J,PicFrobPoly(J,W,F));
 }
 
 int PicIsTors(GEN J, GEN W, GEN F)
 {
-  return PicIsZero(J, PicFrobPoly(J,W,F));
+  return PicIsZero(J,PicFrobPoly(J,W,F));
 }
 
 GEN PicChord(GEN J, GEN WA, GEN WB, long flag)
@@ -1856,9 +1856,7 @@ GEN PicEvalInit(GEN L12, GEN vars, GEN Z, GEN V2, GEN T, GEN p, long e, GEN pe)
   for(i=1;i<=2;i++) /* TODO parallelise */
     gel(res,i) = RRspaceEval(gel(L12,i),vars,Z,T,p,e,pe);
   nV2 = lg(V2);
-  I = FqM_indexrank(V2,T,p);
-  I = gel(I,1); /* Rows of V2 forming invertible block */
-  gel(res,3) = I;
+  gel(res,3) = I = gel(FqM_indexrank(V2,T,p),1); /* Rows of V2 forming invertible block */
   /* That invertible block */
   M = cgetg(nV2,t_MAT);
   for(j=1;j<nV2;j++)
@@ -2082,7 +2080,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
   mt_queue_end(&pt);
   if(DEBUGLEVEL>=2) printf("PicInit: Constructing evaluation maps\n");
   U = PicEvalInit(gel(L,3),vars,Z,V2,T,p,e,pe);
-  J = mkvecn(lgJ,f,stoi(g),stoi(d0),L,T,p,stoi(e),pe,FrobMat,V,KV,W0,U,Z,FrobCyc,AutData);
+  J = mkvecn(lgJ,f,stoi(g),stoi(d0),L,T,p,E,pe,FrobMat,V,KV,W0,U,Z,FrobCyc,AutData);
   return gerepilecopy(av,J);
 }
 

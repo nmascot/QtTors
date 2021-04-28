@@ -1242,6 +1242,7 @@ GEN MRRsubspace(GEN Mqexps, GEN D, GEN B, GEN T, GEN pe, GEN p, long e)
 }
 
 /* permutations */
+/* TODO some functions probably have terrible complexity, better algos certainly possible */
 
 GEN PermConcat(GEN s, GEN t)
 {
@@ -1255,17 +1256,13 @@ GEN PermConcat(GEN s, GEN t)
 	return st;
 }
 
-GEN SubPerms_inf(GEN S, ulong M)
-{ /* Perms S=[s[i]] acting on 1..N, M<=N -> [T,ST]
-   T subset (possibly reordered) of 1..N stable under S and with #T>=M but close, 
-  ST perms induced by S on T */
-	/* TODO complexity is probably terrible, better algo certainly possible */
+GEN Perms_orbits_ind(GEN S)
+{ /* Perms S=[s[i]] acting on 1..N -> orbits, perms induced on these orbits, and size of thse orbits */
 	pari_sp av = avma;
-	GEN Orbs,SOrbs,lOrbs,Orb,SOrb,Sub,SubS,SOrbi,I,seen;
-	ulong nS,N,nOrbs,nOrb,i,j,l,m,n,iseen,In,P,find;
+	GEN Orbs,SOrbs,lOrbs,Orb,SOrb,SOrbi,seen;
+	ulong nS,N,nOrbs,nOrb,i,j,m,n,iseen,P,find;
 	nS = lg(S);
 	N = lg(gel(S,1))-1;
-	printf("N=%lu\n",N);
 	seen = cgetg(N+1,t_VECSMALL); /* Bits: visited points */
 	for(n=1;n<=N;n++)
 		seen[n] = 0;
@@ -1287,40 +1284,29 @@ GEN SubPerms_inf(GEN S, ulong M)
 			gel(SOrb,i) = SOrbi = cgetg(N+1,t_VECSMALL);
 			for(j=1;j<=N;j++) SOrbi[j] = 0; /* 0 marks unknown */
 		}
-		pari_printf("SOrb=%Ps\n",SOrb);
 		for(n=nOrb=1;n<=nOrb;n++) /* Move forward in orbit until we know what each perm does to each point */
 		{
-			printf("n=%lu, ",n);
-			pari_printf("now Orb=%Ps, SOrb=%Ps\n",Orb,SOrb);
 			for(i=1;i<nS;i++) /* for each perm */
 			{
 				SOrbi = gel(SOrb,i);
-				pari_printf("Perm %lu = %Ps\n",i,SOrbi);
 				if(SOrbi[n]==0) /* Do we know what this perm does to this point? */
 				{
-					printf("Dunno\n");
 					m = n; /* No, let us see */
 					P = Orb[n]; /* This point */
-					printf("Working on pt %lu\n",P);
 					for(;;)
 					{
 						P = gel(S,i)[P]; /* Image by this perm */
-						printf("Moved to %lu\n",P);
 						seen[P] = 1; /* Mark this point as visited */
 						find = VecSmallFind_unsorted(Orb,P); /* Is it already in Orb? */
 						if(find)
 						{ /* Yes, in this position */
-							printf("Found: %lu\n",find);
 							SOrbi[m] = find; /* Record this info in perm */
-							pari_printf("Now perm %lu = %Ps\n",i,SOrbi);
 							break;
 						}
 						/* It is not in Orb yet */
-						printf("Not found\n");
 						Orb[++nOrb] = P; /* Add it */
 						setlg(Orb,nOrb+1); /* Orb size increases */
 						SOrbi[m] = nOrb; /* Record info in perm */
-						pari_printf("Now perm %lu = %Ps, Orb=%Ps\n",i,SOrbi,Orb);
 						m = nOrb; /* Now explore what happens to this new point */
 					}
 				}
@@ -1333,21 +1319,74 @@ GEN SubPerms_inf(GEN S, ulong M)
 		gel(Orbs,++nOrbs) = Orb;
 		gel(SOrbs,nOrbs) = SOrb;
 		lOrbs[nOrbs] = nOrb;
-		pari_printf("Recorded orbit %lu: %Ps, %Ps, length %lu\n",nOrbs,Orb,SOrb,nOrb);
 	}
 	/* Now we have found the orbits. */
 	setlg(Orbs,nOrbs+1);
 	setlg(SOrbs,nOrbs+1);
 	setlg(lOrbs,nOrbs+1);
-	printf("Total %lu orbits\n",nOrbs);
-	pari_printf("%Ps, %Ps, %Ps\n",Orbs,SOrbs,lOrbs);
+	return gerepilecopy(av,mkvec3(Orbs,SOrbs,lOrbs));
+}
+
+GEN SubPerms_from_orbits_sup(ulong N, GEN Orbs, GEN SOrbs, GEN lOrbs, GEN I, ulong M)
+{
+	/* Perms of 1..N split into orbits -> -> [T,ST]
+   T subset (possibly reordered) of 1..N stable under S and with #T<=M but close,
+  ST perms induced by S on T */
+	pari_sp av = avma;
+	GEN Sub,SubS,Orb,SOrb;
+	ulong nOrbs,nS,In,i,j,l,m,n;
+	nOrbs = lg(Orbs)-1;
+	nS = lg(gel(SOrbs,1));
+  m = 0; /* Total size so far */
+  Sub = cgetg(N+1,t_VECSMALL); /* Subset */
+  SubS = cgetg(nS,t_VEC); /* Induced perms */
+  for(i=1;i<nS;i++)
+    gel(SubS,i) = cgetg(N+1,t_VECSMALL);
+  /* From largest to smallest */
+  for(n=nOrbs;n;n--)
+  {
+    In = I[n];
+    Orb = gel(Orbs,In);
+    SOrb = gel(SOrbs,In);
+    l = lOrbs[In];
+    if(m+l>M) continue; /* Does it fit? */
+    for(j=1;j<=l;j++)
+    {
+      Sub[m+j] = Orb[j];
+      for(i=1;i<nS;i++)
+      {
+        gel(SubS,i)[m+j] = gel(SOrb,i)[j]+m;
+      }
+    }
+    m += l;
+  }
+	/* Adjust sizes */
+  setlg(Sub,m+1);
+  for(i=1;i<nS;i++)
+    setlg(gel(SubS,i),m+1);
+	return gerepilecopy(av,mkvec2(Sub,SubS));
+}
+	
+GEN SubPerms_inf(GEN S, ulong M)
+{ /* Perms S=[s[i]] acting on 1..N, M<=N -> [T,ST]
+   T subset (possibly reordered) of 1..N stable under S and with #T>=M but close,
+  ST perms induced by S on T */
+  pari_sp av = avma;
+	GEN Orbs,SOrbs,lOrbs,Orb,SOrb,Sub,I;
+	ulong N,nOrbs,i,j,l,m,n;
+	N = lg(gel(S,1))-1;
+	/* Get orbits */
+	Orbs = Perms_orbits_ind(S);
+	SOrbs = gel(Orbs,2);
+	lOrbs = gel(Orbs,3);
+	Orbs = gel(Orbs,1);
+	nOrbs = lg(Orbs)-1;
 	/* Shuffle them randomly */
 	for(n=1;n<=nOrbs;n++)
 	{
 		i = 1 + random_Fl(nOrbs);
 		j = 1 + random_Fl(nOrbs);
 		if(i==j) continue;
-		printf("Swap %lu %lu\n",i,j);
 		Orb = gel(Orbs,i);
 		gel(Orbs,i) = gel(Orbs,j);
 		gel(Orbs,j) = Orb;
@@ -1358,63 +1397,14 @@ GEN SubPerms_inf(GEN S, ulong M)
     lOrbs[i] = lOrbs[j];
     lOrbs[j] = l;
 	}
-	pari_printf("After shuffle: %Ps, %Ps, %Ps\n",Orbs,SOrbs,lOrbs);
-	I = vecsmall_indexsort(lOrbs); /* Perm sorting Orbs by incr size */
-	pari_printf("Sorter: %Ps\n",I);
-	/* Select orbits forming subset of size >= M */
-	m = 0; /* Total size so far */
-	Sub = cgetg(N+1,t_VECSMALL); /* Subset */
-	SubS = cgetg(nS,t_VEC); /* Induced perms */
-	for(i=1;i<nS;i++)
-		gel(SubS,i) = cgetg(N+1,t_VECSMALL);
-	/* First, form largest to smallest */
-	printf("Down\n");
-	for(n=nOrbs;n;n--)
+	I = vecsmall_indexsort(lOrbs);
+	/* Attempt extracts */
+	for(m=M;;m++)
 	{
-		In = I[n];
-		Orb = gel(Orbs,In);
-		SOrb = gel(SOrbs,In);
-		l = lOrbs[In];
-		pari_printf("m=%lu, checking Orb %Ps\n",m,Orb);
-		if(m+l>M) continue; /* Does it fit? */
-		for(j=1;j<=l;j++)
-		{
-			Sub[m+j] = Orb[j];
-			for(i=1;i<nS;i++)
-			{
-				gel(SubS,i)[m+j] = gel(SOrb,i)[j]+m;
-			}
-		}
-		m += l;
-		pari_printf("Included; now m=%lu, Sub=%Ps, SubS=%Ps\n",m,Sub,SubS);
-		gel(Orbs,In) = NULL; /* Mark this Orb as used */
+		Sub = SubPerms_from_orbits_sup(N,Orbs,SOrbs,lOrbs,I,m);
+		if(lg(gel(Sub,1))>M) break;
 	}
-	/* Next, from smallest to largest, as we could still have m<M */
-	printf("Up\n");
-	for(n=1;m<M;n++)
-  {
-    In = I[n];
-    Orb = gel(Orbs,In);
-		if(Orb==NULL) continue; /* Already used? */
-		pari_printf("m=%lu, checking Orb %Ps\n",m,Orb);
-    SOrb = gel(SOrbs,In);
-    l = lOrbs[In];
-    for(j=1;j<=l;j++)
-    {
-      Sub[m+j] = Orb[j];
-      for(i=1;i<nS;i++)
-      {
-        gel(SubS,i)[m+j] = gel(SOrb,i)[j]+m;
-      }
-    }
-		m += l;
-		pari_printf("Included; now m=%lu, Sub=%Ps, SubS=%Ps\n",m,Sub,SubS);
-  }
-	/* Adjust sizes */
-	setlg(Sub,m+1);
-	for(i=1;i<nS;i++)
-		setlg(gel(SubS,i),m+1);
-	return gerepilecopy(av,mkvec2(Sub,SubS));
+	return gerepileupto(av,Sub);
 }
 
 /* qexp */

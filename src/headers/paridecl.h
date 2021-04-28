@@ -6678,6 +6678,7 @@ GEN PicNeg(GEN J, GEN W, long flag);
 GEN PicSub(GEN J, GEN W1, GEN W2);
 GEN PicAut(GEN J, GEN W, ulong nAut);
 GEN PicFrob(GEN J, GEN W);
+GEN PicFrobInv(GEN J, GEN W);
 GEN PicFrobPoly(GEN J, GEN W, GEN F);
 ulong PicMember_val(GEN J, GEN W);
 ulong PicIsZero_val(GEN J, GEN W);
