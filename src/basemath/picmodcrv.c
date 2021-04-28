@@ -20,7 +20,7 @@ ulong ZNneg(long x, ulong N)
   return y?N-y:N;
 }
 
-GEN RgM_Coef_mod(GEN A, GEN v)
+GEN RgM_Coef_Mod(GEN A, GEN v)
 {
   long N;
   long i,j;
@@ -92,7 +92,6 @@ ulong VecSmallFind(GEN V, long x)
 	/* Index between a and A */
 	ulong a,A,c;
 	long y;
-	pari_printf("Looking for %ld in %Ps\n",x,V);
 	a=1;
 	A = lg(V)-1;
 	while(A-a>1)
@@ -237,12 +236,12 @@ GEN ZNZ2primH(ulong N, GEN H)
 	pari_sp av = avma;
 	GEN A,tag;
 	ulong nH,n,u,v,i,h;
-	A = cgetg(N*N,t_VEC);
+	A = cgetg(N*N+1,t_VEC);
 	n = 0;
-	tag = cgetg(N,t_VEC);
+	tag = cgetg(N+1,t_VEC);
 	for(v=1;v<=N;v++)
 	{
-		gel(tag,v) = cgetg(N,t_VECSMALL);
+		gel(tag,v) = cgetg(N+1,t_VECSMALL);
 		for(u=1;u<=N;u++)
 			gel(tag,v)[u] = 0;
 	}
@@ -283,21 +282,18 @@ GEN GammaHCusps(ulong N, GEN H)
 	/* * Reps (c,d) of all cusps of GammaH
      * Galois orbits
      * Vector of bits: whether such that there is M = [*,*;c,d] in SL(2,Z) such that f|M has rat coefs for all f def/Q
-		 * Vector of indices where above bits are 1
      * Matrices [*,*;c,d] in SL(2,Z), satifying above condition whenever bit=1
      * Galois orbits
      * Widths
      * Tags: (c',d') -> index of equivalent representative
   */
 	pari_sp av = avma;
-	ulong c,d,i,x,h,g,g2,w,nCusp,nH,nGalOrb,nOrb,nQqexp,N2,acg2;
-	GEN Cusps,cd,CuspsGal,GalOrb,Qqexp_bool,Qqexp_list,Mats,M,Widths,tag;
-	printf("Init\n");
+	ulong c,d,i,x,h,g,g2,w,nCusp,nH,nGalOrb,nOrb,N2,acg2;
+	GEN Cusps,cd,CuspsGal,GalOrb,Qqexp,Mats,M,Widths,tag;
 	N2 = N*N;
 	Cusps = cgetg(N2+1,t_VEC);
 	CuspsGal = cgetg(N2+1,t_VEC);
-	Qqexp_bool = cgetg(N2+1,t_VECSMALL);
-	Qqexp_list = cgetg(N2+1,t_VECSMALL);
+	Qqexp = cgetg(N2+1,t_VECSMALL);
 	Mats = cgetg(N2+1,t_VEC);
 	Widths = cgetg(N2+1,t_VECSMALL);
 	tag = cgetg(N+1,t_VEC);
@@ -309,23 +305,19 @@ GEN GammaHCusps(ulong N, GEN H)
   }
 	nH = lg(H);
 	nCusp = 0;
-	nOrb = nQqexp = 1;
+	nOrb = 1;
 	for(c=0;c<N;c++) /* c in Z/NZ */
 	{
-		printf("c=%lu\n",c);
 		g = ugcd(c,N);
 		g2 = N/ugcd(c*c,N);
-		printf("g=%lu, g2=%lu\n",g,g2);
 		GalOrb = cgetg(N+1,t_VEC); /* Two cusps are Galois-conj iff. they have the same c mod H */
 		nGalOrb = 1;
 		for(d=0;d<g;d++)
 		{ /*d in (Z/cZ)* */
-			printf("d=%lu\n",d);
 			if(ugcd(d,g)>1) continue;
 			if(gel(tag,d?d:N)[c?c:N]) continue;
 			/* Record cusp */
 			gel(Cusps,++nCusp) = cd = mkvecsmall2(c,d);
-			pari_printf("Cusp %lu: %Ps\n",nCusp,cd);
 			gel(GalOrb,nGalOrb++) = gcopy(cd);
 			/* Mark equivalent cusps */
 			for(x=0;x<N/g;x++)
@@ -336,31 +328,28 @@ GEN GammaHCusps(ulong N, GEN H)
 					gel(tag,ZNnorm(h*d+x*g,N))[ZNnorm(h*c,N)] = nCusp;
 				}
 			}
-			pari_printf("tags: %Ps\n",tag);
 			M = Bot2SL2Z(cd,N); /* [a,b;c,d], the other choices are [1,i;0,1]*M */
-			pari_printf("M=%Ps\n",M);
 			/* Qqexp iff can choose t so that for all invertible x, ad(x-1)+1 in H */
 			gel(Mats,nCusp) = gcopy(M);
 			for(i=0;i<N;i++)
 			{
-				Qqexp_bool[nCusp] = 1;
+				Qqexp[nCusp] = 1;
 				for(x=2;x<N;x++)
 				{
 					if(ugcd(x,N)>1) continue;
 					if((2*umodiu(gcoeff(M,2,1),N)*umodiu(gcoeff(M,2,2),N))%N)
 					{
-						Qqexp_bool[nCusp] = 0;
+						Qqexp[nCusp] = 0;
 						break;
 					}
 					if((VecSmallFind(H,umodiu(gcoeff(M,1,1),N)*umodiu(gcoeff(M,2,2),N)*(x-1)+1)%N)==0)
 					{
-						Qqexp_bool[nCusp] = 0;
+						Qqexp[nCusp] = 0;
 						break;
 					}
 				}
-				if(Qqexp_bool[nCusp])
+				if(Qqexp[nCusp])
 				{
-					Qqexp_list[nQqexp++] = nCusp;
 					gel(Mats,nCusp) = M;
 					break;
 				}
@@ -371,24 +360,21 @@ GEN GammaHCusps(ulong N, GEN H)
 			acg2 = umodiu(muliu(muliu(gcoeff(M,1,1),c),g2),N);
 			for(w=1;VecSmallFind(H,(1+acg2*w)%N)==0;w++) {}
 			Widths[nCusp] = g2*w;
-			printf("Width %lu\n",g2*w);
 		}
 		if(nGalOrb>1)
 		{ /* Record GalOrb if non-empty */
 			setlg(GalOrb,nGalOrb);
-			pari_printf("Orb %lu: %Ps\n",nOrb,GalOrb);
 			gel(CuspsGal,nOrb++) = GalOrb;
 		}
 	}
 	nCusp++;
 	setlg(Cusps,nCusp);
-	setlg(Qqexp_bool,nCusp);
+	setlg(Qqexp,nCusp);
 	setlg(Mats,nCusp);
 	setlg(Widths,nCusp);
 	setlg(CuspsGal,nOrb);
-	setlg(Qqexp_list,nQqexp);
 	CuspsGal = gen_sort_shallow(CuspsGal,NULL,&sort_lg_rev);
-	return gerepilecopy(av,mkvecn(7,Cusps,CuspsGal,Qqexp_bool,Qqexp_list,Mats,Widths,tag));
+	return gerepilecopy(av,mkvecn(6,Cusps,CuspsGal,Qqexp,Mats,Widths,tag));
 }
 
 GEN GammaHCusps_GalDiam_orbits(long y, GEN Cusps, GEN CuspsGal, GEN tags)
@@ -735,7 +721,6 @@ ulong EllTorsIsSplit_lv(GEN a4, GEN a6, ulong l, ulong v, GEN p, ulong d, GEN T,
 		}
 	}
 	avma = av;
-	printf("%lu^%lu->deg %lu\n",l,v,r);
 	return r;
 }
 
@@ -751,7 +736,6 @@ ulong EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN 
   NE = subii(addiu(q,1),nud); /* #E(Fq) */
   if(umodiu(NE,N*N))
 	{ /* Must have N² | #E(Fq) */
-		printf("N2\n");
 		avma = av;
 		return 0;
 	}
@@ -800,7 +784,6 @@ ulong EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN 
 			avma = av;
 			return 0;
 		}
-	printf("%lu^%lu: Had %lu, got %lu -> %lu\n",l,v,c,r,ulcm(c,r));
 		c = ulcm(c,r);
 	}
   fa = factoru(M);
@@ -816,7 +799,6 @@ ulong EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN 
 			{
 				if(Fl_sqr(umodiu(gel(nu,r+1),l),l)==(4%l) && Fl_powu(pl,r,l)==1)
 				{
-	printf("%lu^%lu: Had %lu, got %lu -> %lu\n",l,v,c,r,ulcm(c,r));
 					c = ulcm(c,r);
 					break;
 				}
@@ -830,7 +812,6 @@ ulong EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN 
       	avma = av;
         return 0;
     	}
-	printf("%lu^%lu: Had %lu, got %lu -> %lu\n",l,v,c,r,ulcm(c,r));
 			c = ulcm(c,r);
 		}
 	}
@@ -930,7 +911,7 @@ GEN ZqE_LiftTorsPt(GEN a4, GEN a6, GEN P, GEN D, GEN T, GEN pe, GEN p, long e)
 	y = gel(P,2);
 	x = ZpX_ZpXQ_liftroot(D,x,T,p,e);
 	y2 = FpEll_y2_from_Fqx(a4,a6,x,T,pe);
-	y = ZpXQ_sqrtnlift(y2,gen_2,y,T,p,e);
+	y = gequal0(FpX_red(y2,pe)) ? gen_0 : ZpXQ_sqrtnlift(y2,gen_2,y,T,p,e);
 	return gerepilecopy(av,mkvec2(x,y));
 }
 
@@ -984,7 +965,6 @@ GEN Ell_l1(GEN EN, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
   GEN S,nPQ;
 
   /* TODO methode Kamal addchain */
-  printf("Into l1\n");
 	N = lg(EN)-1;
 	nPQ = gcopy(Q);
   S = Ell_l2(EN,P,nPQ,T,pe,p,e);
@@ -994,7 +974,6 @@ GEN Ell_l1(GEN EN, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
 		nPQ[2] += P[2];
     S = ZX_add(S,Ell_l2(EN,P,nPQ,T,pe,p,e));
   }
-  printf("Out of l1\n");
   return gerepileupto(av,S);
 }
 
@@ -1041,7 +1020,6 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 			{
 				gel(params,2) = gcoeff(EN,x,N);
 				gel(params,3) = gcoeff(EN,N,y);
-				printf("submitting add %lu %lu\n",x,y);
 				mt_queue_submit(&pt,N*x+y,params);
 			}
 			else mt_queue_submit(&pt,N*x+y,NULL);
@@ -1049,7 +1027,6 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
       if(done)
 			{
 				i = udivuu_rem(workid,N,&j);
-				printf("got add %lu %lu\n",i,j);
 				gcoeff(EN,i,j) = done;
 			}
 			if(x>=N) break;
@@ -1069,7 +1046,6 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 			if(x==N && y==N) continue;
 			if(x<=N)
 			{
-				printf("submitting l1 %lu %lu\n",x,y);
 				gel(params,2) = mkvecsmall2(x,y);
 				gel(params,3) = y==N ? v01 : v10;
 				mt_queue_submit(&pt,N*x+y,params);
@@ -1079,7 +1055,6 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 			if(done)
       {
         i = udivuu_rem(workid-1,N,&j);
-				printf("got l1 %lu %lu\n",i,j+1);
         gcoeff(Ml1,i,j+1) = done;
       }
 			if(x>N) break;
@@ -1092,17 +1067,15 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref, GEN Badj)
 {
 	pari_sp av = avma;
-	GEN pe,E,a4,a6,P,Q,zN,M,Ml1,FP,PtsFrob;
+	GEN pe,E,a4,P,Q,zN,M,Ml1,FP,PtsFrob;
 	ulong m,nPts,i,a,b,c,d,x,y;
 	pe = powis(p,e);
 	E = EllWithTorsBasis(N,T,pe,p,e,Badj);
 	a4 = gmael(E,1,1);
-	a6 = gmael(E,1,2);
 	P = gel(E,2);
 	Q = gel(E,3);
 	zN = gel(E,4);
 	M = gel(E,5);
-	pari_printf("E:y²+x³+%Psx+%Ps with accuracy O(%Ps^%ld) and residual degree %lu",a4,a6,p,e,degpol(T));
 	/* Frob acts on E[N] by [a,c;b,d]
 	 * => on pts, Frob([x,y]) = [x,y]*[a,b;c,d] = [a*x + c*y, b*x + d*y] */
 	a = itou(gcoeff(M,1,1));
@@ -1145,9 +1118,9 @@ GEN BalancedDiv(ulong d, GEN degs)
 	for(i=1;i<n;i++) D[i] = q;
 	while(r)
 	{
-		for(i=1;i<n;i++)
+		for(i=1;i<n && r;i++)
 		{
-			if(degs[i]>=r)
+			if(degs[i]<=r)
 			{
 				r -= degs[i];
 				D[i]++;
@@ -1480,9 +1453,9 @@ GEN TrE2qexp(GEN vw, ulong N, GEN H, GEN M, ulong w, GEN zpows, ulong B, GEN T, 
   nH = lg(H);
   for(h=1;h<nH;h++)
   {
-    hM = ZM_mul(gel(H,h),M);
-    fv = E1qexp(ZV_ZM_mul(gel(vw,1),hM),N,zpows,BN,T,pe,p,e);
-    fw = E1qexp(ZV_ZM_mul(gel(vw,2),hM),N,zpows,BN,T,pe,p,e);
+    hM = ZM_mul(gel(H,h),M); // TODO hM will reduce that mod N
+    fv = E1qexp(zv_ZM_mul(gel(vw,1),hM),N,zpows,BN,T,pe,p,e);
+    fw = E1qexp(zv_ZM_mul(gel(vw,2),hM),N,zpows,BN,T,pe,p,e);
     /* TODO use fast series multiplication */
     /* f[i] = sum_j fv[j]*fw[Nw*i-j] */
     for(i=0;i<B;i++)
@@ -1518,9 +1491,9 @@ GEN M2_worker(GEN vw, GEN Ml1, GEN TH, GEN Mpts, GEN T, GEN pe)
     for(h=1;h<nTH;h++)
     {
       M = ZM_mul(gel(TH,h),gel(Mpts,s));
-      vM = ZV_ZM_mul(v,M);
-      wM = ZV_ZM_mul(w,M);
-      Cs = ZX_add(Cs,ZX_mul(RgM_Coef_mod(Ml1,vM),RgM_Coef_mod(Ml1,wM)));
+      vM = zv_ZM_mul(v,M);
+      wM = zv_ZM_mul(w,M); // TODO all this coudl be mod N
+      Cs = ZX_add(Cs,ZX_mul(RgM_Coef_Mod(Ml1,vM),RgM_Coef_Mod(Ml1,wM)));
     }
     Cs = Fq_red(Cs,T,pe);
     gel(C,s) = gerepileupto(avs,Cs);
@@ -1572,17 +1545,16 @@ GEN FqCSer_mul(GEN A, GEN B, ulong n, GEN T, GEN p)
 	return C;
 }
 
-GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int UseTp, ulong nbE)
+GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec)
 { /* J_H(N) over Zq/p^e, q=p^a */
-	/* TODO Qqexp_bool used, Qqexp_list useless? */
 	pari_sp av = avma;
 	long t;
 	GEN J,T,pe,H1;
-	GEN Cusps,CuspsGal,CuspsQexp_bool,CuspsQexp,CuspsMats,CuspsWidths,CuspsTags,CuspsGalDegs,CuspsGalDiamp,CuspsGalDiampDegs;
+	GEN Cusps,CuspsGal,CuspsQexp,CuspsMats,CuspsWidths,CuspsTags,CuspsGalDegs,CuspsGalDiamp,CuspsGalDiampDegs;
 	GEN Pts,PtsTags,MPts,PtsFrob,PtsDiamp,PtsDiamp0;
 	GEN list_j,E,Ml1,zN,zNpows,TH,M2gens,geni,M2,B,M2qexps;
 	GEN C0o,C0,C02,E1o,E1,E2o,E2,M,U0,V1,V2,V3,V,KV,EvalData,I,M4Q,V2qexps,V2gens,pageV1,pageV2;
-	ulong up,g,d0,nCusps,nCuspsGal,nCuspsGalDiamp,nCuspsQ,mQ,nPts,d,d1,nB,i,j,k,s,sprec,w;
+	ulong up,g,d0,nCusps,nCuspsGal,nCuspsGalDiamp,mQ,nPts,d,d1,nB,i,j,k,s,sprec,w;
 	struct pari_mt pt;
 	GEN worker,params,done;
 	long pending,workid;
@@ -1610,14 +1582,12 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int 
 	/* Get data about cusps */
 	Cusps = GammaHCusps(N,H);
 	CuspsGal = gel(Cusps,2);
-	CuspsQexp_bool = gel(Cusps,3);
-	CuspsQexp = gel(Cusps,4);
-	CuspsMats = gel(Cusps,5);
-	CuspsWidths = gel(Cusps,6);
-	CuspsTags = gel(Cusps,7);
+	CuspsQexp = gel(Cusps,3);
+	CuspsMats = gel(Cusps,4);
+	CuspsWidths = gel(Cusps,5);
+	CuspsTags = gel(Cusps,6);
 	Cusps = gel(Cusps,1);
 	nCusps = lg(Cusps)-1;
-	nCuspsQ = lg(CuspsQexp);
 	nCuspsGal = lg(CuspsGal);
 	CuspsGalDegs = cgetg(nCuspsGal,t_VECSMALL);
 	for(i=1;i<nCuspsGal;i++)
@@ -1649,7 +1619,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int 
 	for(i=1;i<=nPts;i++) /* P_g = P_g' on X_H(N) <=> g,g' same bottom row mod H */
 		gel(MPts,i) = Bot2SL2Z(gel(Pts,i),N);
 	/* Get first elliptic curve */
-	if(DEBUGLEVEL) pari_printf("ModPicInit: looking for an elliptic curve whose %lu torsion is defined over GF(%Ps,%lu)\n",N,p,a);
+	if(DEBUGLEVEL) pari_printf("ModPicInit: looking for an elliptic curve whose %lu-torsion is defined over GF(%Ps,%lu)\n",N,p,a);
 	list_j = cgetg(nbE+1,t_VEC);
 	setlg(list_j,1);
 	E = GetMl1(N,Pts,PtsTags,T,p,e,NULL,list_j); /* NULL: no preferred zeta_N for now */
@@ -1736,7 +1706,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int 
 	{
 		if(DEBUGLEVEL) printf(" %lu",s);
 		sprec = 2*C0[s]+(E1[s]>E2[s]?E1[s]:E2[s]);
-		if(CuspsQexp_bool[s] && sprec<qprec)
+		if(CuspsQexp[s] && sprec<qprec)
 			sprec = qprec;
 		M = gel(CuspsMats,s);
 		w = CuspsWidths[s];
@@ -1746,7 +1716,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int 
 			gmael(M2qexps,s,i) = TrE2qexp(gel(M2gens,i),N,TH,M,w,zNpows,sprec,T,pe,p,e);
 
 	}
-	if(DEBUGLEVEL) printf("\n ModPicInit: pruning, dim %lu, eval on >= %lu pts\n",d-zv_sum(C0),5*d0+1);
+	if(DEBUGLEVEL) printf("\nModPicInit: pruning, dim %lu, eval on >= %lu pts\n",d-zv_sum(C0),5*d0+1);
 	/* Reduce # pts at which we evaluate */
 	if(UseTp)
   {
@@ -1779,9 +1749,8 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int 
 	V2 = DivAdd1(V1,V1,d,T,pe,p,d0,1); // TODO tune excess=d0
 	V2gens = gel(V2,2);
 	V2 = gel(V2,1);
-	if(DEBUGLEVEL) printf("ModPicInit: M4(GammaH)(-2C0), dim %lu\n",d);
 	// TODO parallelise
-	V2qexps = cgetg(d+1,t_MAT);
+	V2qexps = cgetg(nCusps+1,t_MAT);
 	for(s=1;s<=nCusps;s++)
 	{
 		pageV1 = FqM_mul(gel(M2qexps,s),U0,T,pe);
@@ -1794,8 +1763,8 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int 
 	gel(J,13) = EvalData = cgetg(5,t_VEC);
 	C02 = zv_z_mul(C0,2);
 	// TODO parallel
-	gel(EvalData,1) = FqM_mul(V2,MRRsubspace(V2qexps,E1,C02,T,pe,p,e),T,pe);
-	gel(EvalData,2) = FqM_mul(V2,MRRsubspace(V2qexps,E2,C02,T,pe,p,e),T,pe);
+	gel(EvalData,1) = mkvec(FqM_mul(V2,MRRsubspace(V2qexps,E1,C02,T,pe,p,e),T,pe));
+	gel(EvalData,2) = mkvec(FqM_mul(V2,MRRsubspace(V2qexps,E2,C02,T,pe,p,e),T,pe));
 	gel(EvalData,3) = I = gel(FqM_indexrank(V2,T,p),1); /* Rows of V2 forming invertible block */
 	M = cgetg(d+1,t_MAT);
   for(j=1;j<=d;j++)
@@ -1807,7 +1776,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int 
 	mQ = 1; /* 1 + Total number of coefs at Q cusps */
 	for(s=1;s<=nCusps;s++)
 	{
-		if(CuspsQexp_bool[s])
+		if(CuspsQexp[s])
 			mQ += lg(gmael(V2qexps,s,1))-1;
 	}
 	M4Q = cgetg(d+1,t_MAT);
@@ -1817,7 +1786,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, ulong qprec, GEN Lp, int 
 		i = 1;
 		for(s=1;s<=nCusps;s++)
 		{
-			if(CuspsQexp_bool[s]==0) continue;
+			if(CuspsQexp[s]==0) continue;
 			pageV2 = gel(V2qexps,s);
 			sprec = lg(gel(pageV2,1));
 			for(k=1;k<sprec;k++)

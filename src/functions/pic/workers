@@ -64,3 +64,8 @@ C-Name: Ell_l1
 Prototype: GGGGGGL
 Help:
 
+Function: _M2_worker
+Section: programming/internals
+C-Name: M2_worker
+Prototype: GGGGGG
+Help:

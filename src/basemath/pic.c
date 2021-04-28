@@ -863,7 +863,7 @@ GEN DivAdd1(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, long fl
 			s = gel(WA,u);
 			gel(uv,j)[2] = v = random_Fl(nB)+1;
 			t = gel(WB,v);
-			gel(WB,j) = st = cgetg(nZ,t_VEC);
+			gel(WAB,j) = st = cgetg(nZ,t_VEC);
       for(P=1;P<nZ;P++)
         gel(st,P) = Fq_mul(gel(s,P),gel(t,P),T,pe);
     }
