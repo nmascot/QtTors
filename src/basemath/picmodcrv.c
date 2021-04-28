@@ -1142,7 +1142,7 @@ GEN BalancedDivInf(ulong d, GEN degs)
   for(i=1;i<n;i++)
 	{
 		D[i] = q;
-    if(degs[i]>=r)
+    if(degs[i]<=r)
     {
       r -= degs[i];
       D[i]++;
@@ -1678,14 +1678,16 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 		gel(list_j,i) = gmael(E,1,3);
 		M2 = vconcat(M2,M2mat(M2gens,gel(E,2),TH,MPts,T,pe));
 		PtsFrob = PermConcat(PtsFrob,gel(E,3));
-		PtsDiamp = PermConcat(PtsDiamp,PtsDiamp0);
+		if(UseTp) PtsDiamp = PermConcat(PtsDiamp,PtsDiamp0);
 	}
 	/* Prepare divisors to know min qprec
 	 * then prune: M2 -> S2(>=3cusps) = M2(-C0) */
 	if(UseTp)
 	{
+		pari_printf("GalDiamDegs: %Ps\n",CuspsGalDiampDegs);
 		C0o = BalancedDivInf(nCusps-3,CuspsGalDiampDegs);
 		C0 = Divo2Div(C0o,CuspsGalDiamp,CuspsTags,nCusps);
+		if(DEBUGLEVEL) printf("ModPicInit: Wanted C0 of degree %lu, got %lu\n",nCusps-3,zv_sum(C0));
 	}
 	else
 	{
