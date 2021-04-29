@@ -2756,7 +2756,11 @@ elleta(GEN om, long prec)
   GEN y1, y2, E2, pi;
   ellred_t T;
 
-  if (!check_periods(om, &T)) pari_err_TYPE("elleta",om);
+  if (!check_periods(om, &T))
+  {
+    pari_err_TYPE("elleta",om);
+    return NULL;/*LCOV_EXCL_LINE*/
+  }
   if (T.type == t_PER_ELL) return ellR_eta(om, prec);
 
   compute_periods(&T, NULL, prec);
