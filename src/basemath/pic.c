@@ -3297,7 +3297,7 @@ GEN AllPols(GEN J, GEN Z, ulong l, GEN JFrobMat)
 	if(DEBUGLEVEL)
 		printf("Out of %lu polynomials, %lu had repeated roots, %lu could not be identified, and %lu were identified.\n",npols,nmult,nfail,m-1);
 	if(nmult==npols)
-		pari_err(e_MISC,"No squarefree polynomial, Try again with another evaluation map.");
+		pari_err(e_MISC,"No squarefree polynomial, try again with another evaluation map");
 	setlg(pols,m);
   return gerepilecopy(av,pols);
 }

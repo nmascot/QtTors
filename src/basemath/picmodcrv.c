@@ -1713,8 +1713,8 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	gel(J,3) = utoi(d0);
 	/* Evaluation J_H(N) -> A1 */
 	E1o = BalancedDiv(d0-g,CuspsGalDegs);
+	E2o = DivPerturb(E1o,CuspsGalDegs);
   E1 = Divo2Div(E1o,CuspsGal,CuspsTags,nCusps);
-	E2o = BalancedDiv(d0-g,CuspsGalDegs);
   E2 = Divo2Div(E2o,CuspsGal,CuspsTags,nCusps);
 	M2qexps = cgetg(nCusps+1,t_VEC);
 	if(DEBUGLEVEL) printf("ModPicInit: q-exp of forms of weight 2, cusp");
@@ -1834,7 +1834,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	for(s=1;s<=nCusps;s++)
 	{
 		if(CuspsQexp[s])
-			mQ += lg(gmael(V2qexps,s,1))-1;
+			mQ += lg(gmael(V2qexps,s,1))-1-C02[s];
 	}
 	M4Q = cgetg(d+1,t_MAT);
 	for(j=1;j<=d;j++)
@@ -1846,7 +1846,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 			if(CuspsQexp[s]==0) continue;
 			pageV2 = gel(V2qexps,s);
 			sprec = lg(gel(pageV2,1));
-			for(k=1;k<sprec;k++)
+			for(k=1+C02[s];k<sprec;k++)
 				gcoeff(M4Q,i++,j) = gcoeff(pageV2,k,j);
 		}
 	}
