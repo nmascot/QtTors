@@ -50,8 +50,8 @@ GEN RgM_coef_mod(GEN A, GEN v)
 }
 
 
-GEN ZNXspan(GEN S, ulong N)
-{ /* Span of S in (Z/NZ)* */
+GEN znx_span(GEN S, ulong N)
+{ /* Span of vecsmall S in (Z/NZ)* */
   pari_sp av = avma;
   GEN S1,H1,charf,H;
   ulong nS,s,n1,n,i,j,h;
@@ -59,10 +59,10 @@ GEN ZNXspan(GEN S, ulong N)
   if(lg(S)==1)
     return mkvecsmall(1);
   nS = lg(S)-1;
-  s = umodiu(gel(S,nS),N);
+  s = umodsu(S[nS],N);
   S1 = gcopy(S);
   setlg(S1,nS); /* Drop last */
-  H1 = ZNXspan(S1,N); /* Recurse */
+  H1 = znx_span(S1,N); /* Recurse */
   n1 = lg(H1);
   charf = cgetg(N+1,t_VECSMALL);
   for(i=1;i<=N;i++) charf[i]=0;
@@ -120,7 +120,7 @@ ulong VecSmallFind_unsorted(GEN V, long x)
 	return 0;
 }
 
-GEN ZNX_Hlist(GEN S, ulong N)
+GEN znx_Hlist(GEN S, ulong N)
 { /* H = <S,-1> and H/+-1 */
 	/* S=0: (Z/NZ)*. S=1: +-1. */
 	pari_sp av = avma;
@@ -155,11 +155,11 @@ GEN ZNX_Hlist(GEN S, ulong N)
 	else
 	{
 		nS = lg(S);
-		S1 = cgetg(nS+1,t_VEC); /* S and -1 */
+		S1 = cgetg(nS+1,t_VECSMALL); /* S and -1 */
 		for(i=1;i<nS;i++)
-			gel(S1,i) = gel(S,i);
-		gel(S1,nS) = gen_m1;
-		H = ZNXspan(S1,N);
+			S1[i] = S[i];
+		S1[nS] = -1;
+		H = znx_span(S1,N);
 		nH = lg(H);
 	}
 	H1 = cgetg(nH,t_VECSMALL);
@@ -1586,7 +1586,8 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	gel(J,8) = pe = powis(p,e);
 	gel(J,9) = ZpXQ_FrobMat(T,p,e,pe);
 	/* Get <H> */
-	H = ZNX_Hlist(H,N);
+	if(typ(H)==t_VEC) H = ZV_to_zv(H);
+	H = znx_Hlist(H,N);
 	H1 = gel(H,2); /* <H,-1>/-1 */
 	H = gel(H,1); /* <H,-1> */
 	if(dvdui(6*N*(lg(H1)-1),p))
@@ -1913,7 +1914,7 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN prange, long UseTp)
 	/* TODO useTp */
 	pari_sp av = avma;
 	GEN ilN,pf,H,pmin,pmax,gen_5,p,qf,listp,Lp,best,ap,chi,psi,rem,a1,a2,a,xa1,NJ;
-	ulong ul,N,lN,k,h,nH,np,i;
+	ulong ul,N,lN,philN,k,h,nH,np,i;
 	forprime_t piter;
 	ul = itou(l);
 	pf = mfparams(f);
@@ -1922,6 +1923,7 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN prange, long UseTp)
 	//eps = gel(pf,3);
 	lN = k==2 ? N : ul*N; /* Level of mod crv */
 	ilN = utoi(lN);
+	philN = eulerphiu(lN);
   H = cgetg(lN+1,t_VECSMALL); /* Ker eps(f2), subgroup of (Z/lNZ)* */
   nH = 0;
 	if(k==1) k = ul; /* TODO test */
@@ -1957,11 +1959,13 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN prange, long UseTp)
 	forprime_init(&piter,pmin,pmax);
 	while((p = forprime_next(&piter)))
 	{
-		if(dvdiu(p,lN*nH)) continue;
+		if(dvdui(lN*nH,p)) continue;
 		gel(listp,np++) = gcopy(p);
 	}
 	setlg(listp,np);
 	Lp = ModCrv_charpoly_multi(lN,H,listp);
+	if(degpol(gmael(Lp,1,1))==0)
+		pari_err(e_MISC,"This Galois representation is a power of the cyclotomic character");
 	best = NULL;
 	for(i=1;i<np;i++)
 	{
@@ -1977,7 +1981,7 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN prange, long UseTp)
 			continue;
 		}
 		a1 = FpX_root_order_bound(chi,l);
-		a2 = Fp_order(p,0,ilN);
+		a2 = utoi(Fl_order(itou(p),philN,lN));
 		a = lcmii(a1,a2);
 		if(DEBUGLEVEL)
 		{
@@ -2017,7 +2021,7 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 	log10 = logr_abs(utor(10,38));
 	logp = logr_abs(itor(p,38));
 	e = itos(gceil(divrr(addrr(log2,mulur(2*D,log10)),logp)));
-	pari_printf("mfgalrep: Computing over unramified extension of Q_%Ps of degree %lu with accuracy O(%Ps^%ld)\n",p,a,p,e);
+	if(DEBUGLEVEL) pari_printf("mfgalrep: Computing with X_H(%lu), where H=%Ps (genus %ld), over unramified extension of Q_%Ps of degree %lu with accuracy O(%Ps^%ld)\n",N,H,degpol(Lp)/2,p,a,p,e);
 	J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
 	R = PicTorsGalRep(J,l,Lp,chi);
 	return gerepileupto(av,R);
