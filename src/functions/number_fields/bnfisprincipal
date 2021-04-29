@@ -7,7 +7,7 @@ Help: bnfisprincipal(bnf,x,{flag=1}): bnf being output by bnfinit, gives
  t is the generator of the resulting principal ideal. In particular x is
  principal if and only if e is the zero vector. flag is optional, whose
  binary digits mean 1: output [e,t] (only e if unset); 2: increase precision
- until alpha can be computed (do not insist if unset); 4: return alpha in
+ until t can be computed (do not insist if unset); 4: return t in
  factored form (compact representation).
 Doc: $\var{bnf}$ being the \sidx{principal ideal}
  number field data output by \kbd{bnfinit}, and $x$ being an ideal, this
@@ -46,7 +46,7 @@ Doc: $\var{bnf}$ being the \sidx{principal ideal}
  \noindent The binary digits of \fl mean:
 
  \item $1$: If set, outputs $[e,t]$ as explained above, otherwise returns
- only $e$, which is much easier to compute. The following idiom only tests
+ only $e$, which is easier to compute. The following idiom only tests
  whether an ideal is principal:
  \bprog
    is_principal(bnf, x) = !bnfisprincipal(bnf,x,0);
@@ -56,16 +56,17 @@ Doc: $\var{bnf}$ being the \sidx{principal ideal}
  to which the \kbd{bnf} structure was computed. In that case, a warning is
  printed and $t$ is set equal to the empty vector \kbd{[]\til}. If this bit is
  set, increase the precision and recompute needed quantities until $t$ can be
- computed. Warning: setting this may induce \emph{lengthy} computations
- and you should consider using flag $4$ instead.
+ computed. Warning: setting this may induce \emph{lengthy} computations, and
+ the result may be too large to be physically representable in any case.
+ You should consider using flag $4$ instead.
 
  \item $4$: Return $t$ in factored form (compact representation),
  as a small product of $S$-units for a small set of finite places $S$,
  possibly with huge exponents. This kind of result can be cheaply mapped to
  $K^*/(K^*)^\ell$ or to $\C$ or $\Q_p$ to bounded accuracy and this is usually
  enough for applications. Explicitly expanding such a compact representation
- is possible using \kbd{nffactorback} but may be very costly. The algorithm
- is guaranteed to succeed if the \kbd{bnf} was computed using
+ is possible using \kbd{nffactorback} but may be \emph{very} costly.
+ The algorithm is guaranteed to succeed if the \kbd{bnf} was computed using
  \kbd{bnfinit(,1)}. If not, the algorithm may fail to compute a huge
  generator in this case (and replace it by \kbd{[]\til}). This is orders of
  magnitude faster than flag $2$ when the generators are indeed large.
