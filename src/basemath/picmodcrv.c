@@ -528,7 +528,7 @@ GEN LMod_worker(GEN p, GEN Gchi, GEN S, long t, GEN Z, GEN zo, GEN MZ)
 	pari_sp av = avma;
 	GEN epsp,L1,Tp,Xp,res;
 	epsp = chareval(gel(Gchi,1),gel(Gchi,2),p,zo);
-	L1 = mkpoln(3,gen_1,gneg(pol_x(1)),gmul(p,epsp)); /* x²-yx+p*eps(p)(t) */
+	L1 = deg2pol_shallow(gen_1,gneg(pol_x(1)),gmul(p,epsp),0); /* x²-yx+p*eps(p)(t) */
 	Tp = mfheckemat(S,p); /* coeffs in Q(t mod Z) */
 	Xp = charpoly(Tp,1); /* in Q(t mod Z)[y] */
 	Tp = matconcat(gsubst(liftpol(Tp),t,MZ));
@@ -730,7 +730,7 @@ ulong EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN 
 	GEN ap,chiE,nu,nud,NE,g,fa;
 	ulong M,l,v,pl,i,r,c,nfa;
 	ap = subii(addiu(p,1),Fp_ellcard(a4,a6,p));
-  chiE = mkpoln(3,gen_1,negi(ap),p); /* x²-ap*x+p */
+  chiE = deg2pol_shallow(gen_1,negi(ap),p,0); /* x²-ap*x+p */
   nu = polsym(chiE,d);
   nud = gel(nu,d+1); /* alpha^d+beta^d */
   NE = subii(addiu(q,1),nud); /* #E(Fq) */
@@ -1403,8 +1403,7 @@ GEN E1qexp(GEN v, ulong N, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
   if(c)
   { /* a0 = 1/2 - c/N */
     a0 = subii(Fp_inv(gen_2,pe),Fp_div(utoi(c),utoi(N),pe));
-    a0 = mkpoln(1,a0);
-    setvarn(a0,varn(T));
+    a0 = scalarpol(a0,varn(T));
   }
   else
   { /* a0 = 1/2 * (1+z^d)/(1-z^d) */
@@ -1971,7 +1970,7 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN prange, long UseTp)
 	{
 		p = gel(listp,i);
 		ap = gel(qf,itou(p)+1);
-		chi = mkpoln(3,gen_1,negi(ap),Fp_powu(p,k-1,l));
+		chi = deg2pol_shallow(gen_1,negi(ap),Fp_powu(p,k-1,l),0);
 		psi = FpX_divrem(gmael(Lp,i,1),chi,l,&rem);
 		if(!gequal0(rem))
 			pari_err(e_BUG,"charpoly in mfgalrep_bestp");
@@ -2012,14 +2011,10 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 	a = itou(gel(best,4));
 	Lp = gel(best,5);
 	chi = gel(best,6);
-	/* e = log(2)+2Dlog(10)
-	 * e = e / log(p)
-	 * e = log(e)/log(2)
-	 * e = ceil(e)
-	 * e = 2^e */
-	log2 = logr_abs(utor(2,38));
-	log10 = logr_abs(utor(10,38));
-	logp = logr_abs(itor(p,38));
+	/* Smallest e such that sqrt(1/2*p^e)>10^D */
+	log2 = logr_abs(utor(2,DEFAULTPREC));
+	log10 = logr_abs(utor(10,DEFAULTPREC));
+	logp = logr_abs(itor(p,DEFAULTPREC));
 	e = itos(gceil(divrr(addrr(log2,mulur(2*D,log10)),logp)));
 	if(DEBUGLEVEL) pari_printf("mfgalrep: Computing with X_H(%lu), where H=%Ps (genus %ld), over unramified extension of Q_%Ps of degree %lu with accuracy O(%Ps^%ld)\n",N,H,degpol(Lp)/2,p,a,p,e);
 	J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
