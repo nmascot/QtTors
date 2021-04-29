@@ -1904,3 +1904,121 @@ GEN PicTp(GEN J, GEN W, GEN l)
   W3 = PicAdd(J,W1,W2);
   return gerepileupto(av,W3);
 }
+
+/* mfgalrep */
+
+GEN mfgalrep_bestp(GEN f, GEN l, GEN prange, long UseTp)
+{
+	/* TODO for now we ignore nebentypus */
+	/* TODO useTp */
+	pari_sp av = avma;
+	GEN ilN,pf,H,pmin,pmax,gen_5,p,qf,listp,Lp,best,ap,chi,psi,rem,a1,a2,a,xa1,NJ;
+	ulong ul,N,lN,k,h,nH,np,i;
+	forprime_t piter;
+	ul = itou(l);
+	pf = mfparams(f);
+	N = itou(gel(pf,1));
+	k = itos(gel(pf,2));
+	//eps = gel(pf,3);
+	lN = k==2 ? N : ul*N; /* Level of mod crv */
+	ilN = utoi(lN);
+  H = cgetg(lN+1,t_VECSMALL); /* Ker eps(f2), subgroup of (Z/lNZ)* */
+  nH = 0;
+	if(k==1) k = ul; /* TODO test */
+  for(h=0;h<lN;h++)
+  {
+    if(ugcd(h,lN)>1) continue;
+    if(Fl_powu(h,k-2,ul)!=1) continue;
+    H[++nH] = h;
+  }
+  setlg(H,nH+1);
+	pmin = pmax = gen_0; /* Range of p */
+	gen_5 = utoi(5);
+	switch(typ(prange))
+	{
+		case t_INT:
+			pmax = prange;
+			break;
+		case t_VEC:
+			pmin = gel(prange,1);
+			pmax = gel(prange,2);
+			break;
+		case t_VECSMALL:
+			pmin = utoi(prange[1]);
+			pmax = utoi(prange[2]);
+			break;
+		default:
+			pari_err_TYPE("pmax",prange);
+	}
+	if(cmpii(pmin,gen_5)==-1) pmin = gen_5;
+	qf = mfcoefs(f,itou(pmax),1); /* q-exp */
+	listp = cgetg(itou(pmax)-4,t_VEC);
+	np = 1;
+	forprime_init(&piter,pmin,pmax);
+	while((p = forprime_next(&piter)))
+	{
+		if(dvdiu(p,lN*nH)) continue;
+		gel(listp,np++) = gcopy(p);
+	}
+	setlg(listp,np);
+	Lp = ModCrv_charpoly_multi(lN,H,listp);
+	best = NULL;
+	for(i=1;i<np;i++)
+	{
+		p = gel(listp,i);
+		ap = gel(qf,itou(p)+1);
+		chi = mkpoln(3,gen_1,negi(ap),Fp_powu(p,k-1,l));
+		psi = FpX_divrem(gmael(Lp,i,1),chi,l,&rem);
+		if(!gequal0(rem))
+			pari_err(e_BUG,"charpoly in mfgalrep_bestp");
+		if(degpol(FpX_gcd(chi,psi,l)))
+		{
+			pari_printf("p=%Ps has multiplicity\n",p);
+			continue;
+		}
+		a1 = FpX_root_order_bound(chi,l);
+		a2 = Fp_order(p,0,ilN);
+		a = lcmii(a1,a2);
+		if(DEBUGLEVEL)
+		{
+			xa1 = pol_x(0);
+			xa1 = powgi(xa1,a);
+			xa1 = ZX_Z_add(xa1,gen_m1);
+			NJ = ZX_resultant(gmael(Lp,i,1),xa1);
+			pari_printf("p=%Ps: needs deg %Ps (%Ps to split rep, %Ps for roots of 1) -> lg #J = %ld\n",p,a,a1,a2,logint(NJ,gen_2));
+		}
+		if(best==NULL || cmpii(gel(best,4),a)==1)
+			best = mkvecn(6,ilN,H,p,a,gmael(Lp,i,1),chi);
+	}
+	if(best==NULL)
+		pari_err(e_MISC,"No suitable prime, please enlarge prime range");
+	return gerepilecopy(av,best);
+}
+
+GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qprec)
+{ /* TODO UseTp */
+	pari_sp av = avma;
+	GEN best,H,p,Lp,chi,log2,log10,logp,J,R;
+	ulong N,a;
+	long e;
+	best = mfgalrep_bestp(f,l,prange,UseTp);
+	N = itou(gel(best,1));
+	H = gel(best,2);
+	p = gel(best,3);
+	a = itou(gel(best,4));
+	Lp = gel(best,5);
+	chi = gel(best,6);
+	/* e = log(2)+2Dlog(10)
+	 * e = e / log(p)
+	 * e = log(e)/log(2)
+	 * e = ceil(e)
+	 * e = 2^e */
+	log2 = logr_abs(utor(2,38));
+	log10 = logr_abs(utor(10,38));
+	logp = logr_abs(itor(p,38));
+	e = itos(gceil(divrr(addrr(log2,mulur(2*D,log10)),logp)));
+	pari_printf("mfgalrep: Computing over unramified extension of Q_%Ps of degree %lu with accuracy O(%Ps^%ld)\n",p,a,p,e);
+	J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
+	R = PicTorsGalRep(J,l,Lp,chi);
+	return gerepileupto(av,R);
+}
