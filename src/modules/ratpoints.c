@@ -1597,6 +1597,31 @@ process(long a, long b, GEN y, void *info0, int *quit)
   return 1;
 }
 
+static int
+args_h(ratpoints_args *args, GEN D)
+{
+  long H, h, l = 1;
+  GEN L;
+  switch(typ(D))
+  {
+    case t_INT: if (signe(D) <= 0) return 0;
+      H = h = itos(D); break;
+    case t_VEC: if (lg(D) != 3) return 0;
+      H = gtos(gel(D,1));
+      L = gel(D,2);
+      if (typ(L)==t_INT) { h = itos(L); break; }
+      if (typ(L)==t_VEC && lg(L)==3)
+      {
+        l = gtos(gel(L,1));
+        h = gtos(gel(L,2)); break;
+      }
+    default: return 0;
+  }
+  args->height = H;
+  args->b_low  = l;
+  args->b_high = h; return 1;
+}
+
 static GEN
 ZX_hyperellratpoints(GEN P, GEN h, long flag)
 {
@@ -1607,26 +1632,7 @@ ZX_hyperellratpoints(GEN P, GEN h, long flag)
 
   if (!ZX_is_squarefree(P))
     pari_err_DOMAIN("hyperellratpoints","issquarefree(pol)","=",gen_0, P);
-  if (typ(h)==t_INT && signe(h)>0)
-  {
-    long H = itos(h);
-    args.height        = H;
-    args.b_low         = 1;
-    args.b_high        = H;
-  } else if (typ(h)==t_VEC && lg(h)==3)
-  {
-    args.height        = gtos(gel(h,1));
-    if (typ(gel(h,2))==t_INT)
-    {
-      args.b_low         = 1;
-      args.b_high        = itos(gel(h,2));
-    } else if (typ(gel(h,2))==t_VEC && lg(gel(h,2))==3)
-    {
-      args.b_low         = gtos(gmael(h,2,1));
-      args.b_high        = gtos(gmael(h,2,2));
-    } else pari_err_TYPE("hyperellratpoints",h);
-  } else pari_err_TYPE("hyperellratpoints",h);
-
+  if (!args_h(&args, h)) pari_err_TYPE("hyperellratpoints", h);
   find_points_init(&args, RATPOINTS_DEFAULT_BIT_PRIMES);
 
   args.cof           = shallowcopy(P);
