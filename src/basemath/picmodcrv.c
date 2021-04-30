@@ -1937,21 +1937,20 @@ GEN mfyt(GEN pf, GEN qf, GEN l, GEN coefs)
 		gel(Y,i) = Fp_sub(gel(Z,i),mulii(k,gel(T,i)),l);
 		V[i] = 1;
 	}
-	if(DEBUGLEVEL >= 3) pari_printf("%lu choices of reductions mod %Ps.\nY=%Ps, T=%Ps\n",nZ-1,l,Y,T);
+	if(DEBUGLEVEL >= 3) pari_printf("mfyt: %lu choices of reductions mod %Ps.\nY=%Ps, T=%Ps\n",nZ-1,l,Y,T);
 	ncoefs = coefs ? lg(coefs) : 0;
 	for(j=1;j<ncoefs;j++)
 	{
-		pari_printf("Reading cond %Ps\n",gel(coefs,j));
 		n = itou(gmael(coefs,j,1));
 		bn = gmael(coefs,j,2);
 		an = liftpol(gel(qf,n+1));
 		if(DEBUGLEVEL>=3)
-			pari_printf("Want a%lu = %Ps to reduce to %Ps\n",n,an,bn);
+			pari_printf("mfyt: Want a%lu = %Ps to reduce to %Ps\n",n,an,bn);
 		for(i=1;i<nZ;i++)
 		{
 			ani = gsubst(gsubst(an,vy,gel(Y,i)),vt,gel(T,i));
 			if(DEBUGLEVEL>=3)
-				pari_printf("Choice %lu: a%lu reduces to %Ps\n",i,n,Fp_red(ani,l));
+				pari_printf("mfyt: with choice %lu, a%lu reduces to %Ps\n",i,n,Fp_red(ani,l));
 			if(!gequal0(Fp_red(gsub(ani,bn),l)))
 				V[i] = 0;
 		}	
@@ -1983,7 +1982,6 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 	N = itou(gel(pf,1));
 	k = itos(gel(pf,2));
 	eps = znchar(f);
-	pari_printf("eps=%Ps\n",eps);
 	o = charorder0(gel(eps,1),gel(eps,2));
 	vy = varn(gel(pf,4));
 	vt = varn(gel(pf,5));
@@ -2061,7 +2059,8 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 			pari_printf("p=%Ps has multiplicity\n",p);
 			continue;
 		}
-		a1 = FpX_root_order_bound(chi,l);
+		pari_printf("%Ps %Ps %Ps %Ps\n",p,chi,l,FpX_root_order_bound(chi,l));
+		a1 = gel(FpX_root_order_bound(chi,l),2);
 		a2 = utoi(Fl_order(itou(p),philN,lN));
 		a = lcmii(a1,a2);
 		if(DEBUGLEVEL)

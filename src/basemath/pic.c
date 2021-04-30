@@ -4923,11 +4923,10 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Lp, GEN Chi)
 /* GalRep */
 
 GEN FpX_root_order_bound(GEN f, GEN p)
-{ /* Upper bound on order of FpM whose charpoly is f */
+{ /* Bounds on order of FpM whose charpoly is f */
 	pari_sp av = avma;
 	GEN fa,x,g,fad,a,pu,b;
 	ulong n,e,d,dg,i;
-	int nil = 0;
 	fa = FpX_factor(f,p);
 	n = lg(gel(fa,1)); /* Number of factors */
 	x = pol_x(varn(f));
@@ -4947,14 +4946,10 @@ GEN FpX_root_order_bound(GEN f, GEN p)
 		}
 		a = lcmii(a,FpXQ_order(x,fad,g,p));
 		while(cmpiu(pu,e)==-1)
-		{
-			nil = 1;
 			pu = mulii(pu,p);
-		}
 	}
-	b = nil? mulii(a,pu) : a;
-	if(nil && DEBUGLEVEL) pari_printf("FpX_root_order_bound returning upper bound %Ps, but order may be as low as %Ps\n",b,a);
-	return gerepilecopy(av,b);
+	b = mulii(a,pu);
+	return gerepilecopy(av,mkvec2(a,b));
 }
 
 GEN PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
@@ -5164,7 +5159,7 @@ GEN HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
 	GEN Lp, J, R;
 	ulong a;
 	Lp = hyperellcharpoly(gmodulo(f,p));
-	a = force_a ? force_a : itou(FpX_root_order_bound(Lp,l));
+	a = force_a ? force_a : itou(gel(FpX_root_order_bound(Lp,l),2));
 	J = HyperPicInit(f,p,a,e,P);
 	R = PicTorsGalRep(J,l,Lp,chi);
 	return gerepileupto(av,R);
@@ -5186,7 +5181,7 @@ GEN SuperGalRep(GEN f, ulong m, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong for
   GEN Lp, J, R;
   ulong a;
   Lp = SuperZeta(f,m,itou(p));
-  a = force_a ? force_a : itou(FpX_root_order_bound(Lp,l));
+  a = force_a ? force_a : itou(gel(FpX_root_order_bound(Lp,l),2));
   J = SuperPicInit(f,m,p,a,e,P);
   R = PicTorsGalRep(J,l,Lp,chi);
   return gerepileupto(av,R);
@@ -5209,7 +5204,7 @@ GEN SmoothGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
   ulong a;
 	RRdata = SmoothRRdata(f,p,P);
 	Lp = PlaneZeta(gel(RRdata,1),itou(p));
-  a = force_a ? force_a : itou(FpX_root_order_bound(Lp,l));
+  a = force_a ? force_a : itou(gel(FpX_root_order_bound(Lp,l),2));
   J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,a,e);
 	R = PicTorsGalRep(J,l,Lp,chi);
   return gerepileupto(av,R);
