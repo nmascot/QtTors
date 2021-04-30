@@ -1907,32 +1907,86 @@ GEN PicTp(GEN J, GEN W, GEN l)
 
 /* mfgalrep */
 
-GEN mfgalrep_bestp(GEN f, GEN l, GEN prange, long UseTp)
+GEN mfyt(GEN pf, GEN qf, GEN l, GEN coefs)
+{
+	/* pf: mfparams(f)
+	 * qf: mfcoefs(f), at least up to max coefs
+	 * l: prime
+	 * coefs: vector of [n,bn]
+	 * look for prime L|l such that an(f) mod L = bn for all n in coefs */
+	pari_sp av = avma;
+	GEN P,Phi,rnf,F,t,k,Z,T,Y,V,bn,an,ani;
+	ulong nZ,ncoefs,nV,n,i,j;
+	long vt,vy;
+	P = liftpol(gel(pf,4)); /* P(y,t): Hecke field */
+	vy = varn(P);
+	Phi = gel(pf,5); /* Phi(t): nebentypus */
+	vt = varn(Phi);
+	rnf = rnfequation2(Phi,P);
+	F = gel(rnf,1); /* Absolute equation */
+	t = liftpol(gel(rnf,2)); /* Root of Phi in absolute model */
+	k = gel(rnf,3); /* y+k*t is gen of absolute model */
+	Z = FpX_roots(F,l); /* Possible values of y+k*t mod l */
+	nZ = lg(Z);
+	T = cgetg(nZ,t_VEC); /* Corresponding values of t */
+	Y = cgetg(nZ,t_VEC); /* Corresponding values of y */
+	V = cgetg(nZ,t_VECSMALL); /* Booleans: acceptable values */
+	for(i=1;i<nZ;i++)
+	{
+		gel(T,i) = Fp_red(poleval(t,gel(Z,i)),l);
+		gel(Y,i) = Fp_sub(gel(Z,i),mulii(k,gel(T,i)),l);
+		V[i] = 1;
+	}
+	if(DEBUGLEVEL >= 3) pari_printf("%lu choices of reductions mod %Ps.\nY=%Ps, T=%Ps\n",nZ-1,l,Y,T);
+	ncoefs = coefs ? lg(coefs) : 0;
+	for(j=1;j<ncoefs;j++)
+	{
+		pari_printf("Reading cond %Ps\n",gel(coefs,j));
+		n = itou(gmael(coefs,j,1));
+		bn = gmael(coefs,j,2);
+		an = liftpol(gel(qf,n+1));
+		if(DEBUGLEVEL>=3)
+			pari_printf("Want a%lu = %Ps to reduce to %Ps\n",n,an,bn);
+		for(i=1;i<nZ;i++)
+		{
+			ani = gsubst(gsubst(an,vy,gel(Y,i)),vt,gel(T,i));
+			if(DEBUGLEVEL>=3)
+				pari_printf("Choice %lu: a%lu reduces to %Ps\n",i,n,Fp_red(ani,l));
+			if(!gequal0(Fp_red(gsub(ani,bn),l)))
+				V[i] = 0;
+		}	
+	}
+	nV = zv_sum(V);
+	if(nV==0)
+		pari_err(e_MISC,"Inconsistent data about prime above l");
+	if(nV>1)
+		pari_warn(warner,"Insufficient data to specify prime above l; defaulting to first one");
+	for(i=1;i<nZ;i++)
+	{
+		if(V[i]==0) continue;
+		break;
+	}
+	return gerepilecopy(av,mkvec2(gel(Y,i),gel(T,i)));
+}
+
+GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 {
 	/* TODO for now we ignore nebentypus */
 	/* TODO useTp */
 	pari_sp av = avma;
-	GEN ilN,pf,H,pmin,pmax,gen_5,p,qf,listp,Lp,best,ap,chi,psi,rem,a1,a2,a,xa1,NJ;
-	ulong ul,N,lN,philN,k,h,nH,np,i;
+	GEN ilN,pf,H,eps,o,to,pmin,pmax,gen_5,p,qf,listp,Lp,yt,best,ap,epsp,chi,psi,rem,a1,a2,a,xa1,NJ;
+	ulong ul,N,lN,philN,k,h,epsh,nH,np,i,qprec,ncoefs,n;
+	long vt,vy;
 	forprime_t piter;
 	ul = itou(l);
 	pf = mfparams(f);
 	N = itou(gel(pf,1));
 	k = itos(gel(pf,2));
-	//eps = gel(pf,3);
-	lN = k==2 ? N : ul*N; /* Level of mod crv */
-	ilN = utoi(lN);
-	philN = eulerphiu(lN);
-  H = cgetg(lN+1,t_VECSMALL); /* Ker eps(f2), subgroup of (Z/lNZ)* */
-  nH = 0;
-	if(k==1) k = ul; /* TODO test */
-  for(h=0;h<lN;h++)
-  {
-    if(ugcd(h,lN)>1) continue;
-    if(Fl_powu(h,k-2,ul)!=1) continue;
-    H[++nH] = h;
-  }
-  setlg(H,nH+1);
+	eps = znchar(f);
+	pari_printf("eps=%Ps\n",eps);
+	o = charorder0(gel(eps,1),gel(eps,2));
+	vy = varn(gel(pf,4));
+	vt = varn(gel(pf,5));
 	pmin = pmax = gen_0; /* Range of p */
 	gen_5 = utoi(5);
 	switch(typ(prange))
@@ -1952,7 +2006,33 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN prange, long UseTp)
 			pari_err_TYPE("pmax",prange);
 	}
 	if(cmpii(pmin,gen_5)==-1) pmin = gen_5;
-	qf = mfcoefs(f,itou(pmax),1); /* q-exp */
+	qprec = itou(pmax);
+	if(coefs)
+	{
+		ncoefs = lg(coefs);
+		for(i=1;i<ncoefs;i++)
+		{
+			n = itou(gmael(coefs,i,1));
+			if(n>qprec) qprec = n;
+		}
+	}
+	qf = liftpol(mfcoefs(f,itou(pmax),1)); /* q-exp */
+	yt = mfyt(pf,qf,l,coefs);
+  to = mkvec2(gel(yt,2),o);
+	lN = k==2 ? N : ul*N; /* Level of mod crv */
+  ilN = utoi(lN);
+  philN = eulerphiu(lN);
+  H = cgetg(lN+1,t_VECSMALL); /* Ker eps(f2), subgroup of (Z/lNZ)* */
+  nH = 0;
+  if(k==1) k = ul; /* TODO test */
+  for(h=0;h<lN;h++)
+  {
+    if(ugcd(h,lN)>1) continue;
+		epsh = umodiu(chareval(gel(eps,1),gel(eps,2),utoi(h),to),ul);
+    if(Fl_mul(Fl_powu(h,k-2,ul),epsh,ul)!=1) continue;
+    H[++nH] = h;
+  }
+  setlg(H,nH+1);
 	listp = cgetg(itou(pmax)-4,t_VEC);
 	np = 1;
 	forprime_init(&piter,pmin,pmax);
@@ -1970,7 +2050,9 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN prange, long UseTp)
 	{
 		p = gel(listp,i);
 		ap = gel(qf,itou(p)+1);
-		chi = deg2pol_shallow(gen_1,negi(ap),Fp_powu(p,k-1,l),0);
+		ap = Fp_red(gsubst(gsubst(ap,vy,gel(yt,1)),vt,gel(yt,2)),l);
+		epsp = chareval(gel(eps,1),gel(eps,2),p,to);
+		chi = deg2pol_shallow(gen_1,negi(ap),Fp_mul(Fp_powu(p,k-1,l),epsp,l),0);
 		psi = FpX_divrem(gmael(Lp,i,1),chi,l,&rem);
 		if(!gequal0(rem))
 			pari_err(e_BUG,"charpoly in mfgalrep_bestp");
@@ -2001,10 +2083,16 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN prange, long UseTp)
 GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qprec)
 { /* TODO UseTp */
 	pari_sp av = avma;
-	GEN best,H,p,Lp,chi,log2,log10,logp,J,R;
+	GEN coefs,best,H,p,Lp,chi,log2,log10,logp,J,R;
 	ulong N,a;
 	long e;
-	best = mfgalrep_bestp(f,l,prange,UseTp);
+	if(typ(l)==t_VEC)
+	{
+		coefs = gel(l,2);
+		l = gel(l,1);
+	}
+	else coefs = NULL;
+	best = mfgalrep_bestp(f,l,coefs,prange,UseTp);
 	N = itou(gel(best,1));
 	H = gel(best,2);
 	p = gel(best,3);
