@@ -698,11 +698,11 @@ kpmodsquares(GEN vnf, GEN z, GEN PP)
   pari_sp av = avma;
   long i, j, l = lg(vnf);
   GEN dz, vchar = cgetg(l, t_VEC);
-  z = Q_remove_denom(z, &dz); if (dz) z = gmul(z, dz);
+  z = Q_remove_denom(z, &dz); if (dz) z = ZX_Z_mul(z, dz);
   for (i = 1; i < l; i++)
   {
     GEN nf = gel(vnf, i), pp = gel(PP, i);
-    GEN kp, delta = RgX_rem(z, nf_get_pol(nf));
+    GEN kp, delta = ZX_rem(z, nf_get_pol(nf));
     long lp = lg(pp);
     kp = cgetg(lp, t_VEC);
     for (j = 1; j < lp; j++) gel(kp, j) = kpmodsquares1(nf, delta, gel(pp,j));
@@ -1008,10 +1008,10 @@ RgVV_nb(GEN v)
   return n;
 }
 
+/* return an Fp basis */
 static GEN
 elllocalimage(GEN pol, GEN K, GEN vnf, GEN p, GEN pp, GEN pts)
 {
-  pari_sp av = avma;
   long n, p2 = RgVV_nb(pp), prank = equaliu(p, 2)? p2: p2 - 1;
   GEN R = polrootsmodpn(pol, p), bound = addiu(p, 6);
 
@@ -1033,7 +1033,7 @@ elllocalimage(GEN pol, GEN K, GEN vnf, GEN p, GEN pp, GEN pts)
     d = deg1pol_shallow(negi(K), gmul(K, x), 0);
     pts = vec_append(pts, kpmodsquares(vnf, d, pp));
   }
-  return gerepilecopy(av, pts);
+  return pts;
 }
 
 static GEN
@@ -1279,15 +1279,56 @@ static void
 gtoset_inplace(GEN x)
 { gen_sort_inplace(x, (void*)&cmp_universal, cmp_nodata, NULL); }
 
+/* FIXME: export */
+static void
+setlgall(GEN x, long L)
+{
+  long i, l = lg(x);
+  for(i = 1; i < l; i++) setlg(gel(x,i), L);
+}
+
+static long
+dim_selmer(GEN p, GEN pol, GEN K, GEN vnf, GEN LS2, GEN helpLS2,
+           GEN *selmer, GEN *LS2chars, GEN *helpchars)
+{
+  pari_sp av;
+  long dim, k, lvnf = lg(vnf);
+  GEN X, L, LS2image, helpimage, pp = cgetg(lvnf, t_VEC);
+  int pis2 = equaliu(p, 2);
+
+  for (k = 1; k < lvnf; k++)
+  {
+    GEN v, nf = gel(vnf,k), PR = idealprimedec(nf, p);
+    long j, l = lg(PR);
+    gel(pp, k) = v = cgetg(l, t_VEC);
+    for (j = 1; j < l; j++)
+    {
+      GEN pr = gel(PR,j);
+      gel(v,j) = pis2? log_prk_init(nf, pr, 1 + 2 * pr_get_e(pr), NULL)
+                     : zkmodprinit(nf, pr);
+    }
+  }
+  LS2image = veckpmodsquares(LS2, vnf, pp);
+  *LS2chars = vconcat(*LS2chars, LS2image);
+  helpimage = veckpmodsquares(helpLS2, vnf, pp);
+  *helpchars = vconcat(*helpchars, helpimage);
+  av = avma;
+  L = elllocalimage(pol, K, vnf, p, pp, helpimage);
+  X = Flm_ker(shallowconcat(LS2image, L), 2); setlgall(X, lg(LS2image));
+  /* intersect(LS2image, locim) = LS2image.X */
+  *selmer = Flm_intersect(*selmer, shallowconcat(Flm_ker(LS2image,2), X), 2);
+  *selmer = gerepileupto(av, *selmer); dim = lg(*selmer)-1;
+  return (dim == Flm_rank(helpimage,2))? dim: -1;
+}
 static GEN
 ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
            long effort, long flag, long prec)
 {
-  pari_sp av;
   GEN KP, pol, vnf, vpol, vroots, vr1, vcrt, sbase, LS2, factLS2, sqrtLS2;
   GEN selmer, helpLS2, LS2chars, helpchars, newselmer, factdisc, badprimes;
-  GEN helplist, listpoints, etors2;
-  long i, j, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u;
+  GEN helplist, listpoints, etors2, p;
+  long i, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u;
+  forprime_t T;
 
   pol = ell2pol(ell);
   help = ellsearchtrivialpoints(ell_K, flag ? NULL:muluu(LIMTRIV,effort+1), help);
@@ -1367,49 +1408,15 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     /* the signs of LS2 for this embedding */
     selmer = Flm_intersect(selmer, Flm_ker(signs, 2), 2);
   }
-  av = avma; lfactdisc = lg(factdisc);
-  for (i = 1; i < lfactdisc; i++)
+  forprime_init(&T, gen_2, NULL); lfactdisc = lg(factdisc); dim = -1;
+  for (i = 1; dim < 0 && i < lfactdisc; i++)
+    dim = dim_selmer(gel(factdisc,i), pol, K, vnf, LS2, helpLS2,
+                     &selmer,&LS2chars,&helpchars);
+  while (dim < 0 && Flm_rank(Flm_mul(LS2chars, selmer, 2), 2) < lg(selmer)-1)
   {
-    GEN LS2image, helpimage, locimage;
-    GEN p = gel(factdisc, i), pp = cgetg(n+1, t_VEC);
-    int pis2 = equaliu(p, 2);
-
-    for (k = 1; k <= n; k++)
-    {
-      GEN v, nf = gel(vnf,k), PR = idealprimedec(nf, p);
-      long l = lg(PR);
-      gel(pp, k) = v = cgetg(l, t_VEC);
-      for (j = 1; j < l; j++)
-      {
-        GEN pr = gel(PR,j);
-        gel(v,j) = pis2? log_prk_init(nf, pr, 1 + 2 * pr_get_e(pr), NULL)
-                       : zkmodprinit(nf, pr);
-      }
-    }
-    LS2image = veckpmodsquares(LS2, vnf, pp);
-    LS2chars = vconcat(LS2chars, LS2image);
-    helpimage = veckpmodsquares(helpLS2, vnf, pp);
-    helpchars = vconcat(helpchars, helpimage);
-    locimage = elllocalimage(pol, K, vnf, p, pp, helpimage);
-    locimage = Flm_intersect(LS2image, locimage, 2);
-    selmer = Flm_intersect(selmer, shallowconcat(Flm_ker(LS2image,2),
-                                                 Flm_invimage(LS2image, locimage,2)), 2);
-    dim = lg(selmer)-1;
-    if (dim == Flm_rank(helpimage,2)) break;
-    if (i==lfactdisc-1 && Flm_rank(Flm_mul(LS2chars, selmer, 2), 2) < dim)
-    {
-      long B = 10;
-      GEN sp;
-      do
-      {
-        sp = setminus(primes(B), gtoset(factdisc));
-        B *= 2;
-      } while (lg(sp)==1);
-      factdisc = shallowconcat(factdisc, gel(sp, 1));
-      lfactdisc++;
-    }
-    if (gc_needed(av, 1))
-      gerepileall(av, 4, &factdisc, &selmer, &LS2chars, &helpchars);
+    while ((p = forprime_next(&T)) && ZV_search(factdisc, p));
+    dim = dim_selmer(p, pol, K, vnf, LS2, helpLS2,
+                     &selmer,&LS2chars,&helpchars);
   }
   helplist = gel(Flm_indexrank(helpchars,2), 2);
   help = shallowextract(help, helplist);
@@ -1418,17 +1425,16 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   dim = lg(selmer)-1;
   if (DEBUGLEVEL) err_printf("Selmer rank: %ld\n", dim);
   newselmer = Flm_invimage(Flm_mul(LS2chars, selmer, 2), helpchars, 2);
-  listpoints = vec_lengthen(help, dim); /* points on ell */
   nbpoints = lg(help) - 1;
   if (flag==1)
   {
-    GEN u = nbpoints ? Flm_mul(selmer,Flm_suppl(newselmer,2), 2): selmer;
+    GEN u = nbpoints? Flm_mul(selmer,Flm_suppl(newselmer,2), 2): selmer;
     long l = lg(u);
     GEN z = cgetg(l, t_VEC);
-    for (i = 1; i < l; i++)
-      gel(z,i) = RgXQV_factorback(LS2, gel(u,i), pol);
-    return mkvec2(mkvec3(vnf,sbase,pol),z);
+    for (i = 1; i < l; i++) gel(z,i) = RgXQV_factorback(LS2, gel(u,i), pol);
+    return mkvec2(mkvec3(vnf,sbase,pol), z);
   }
+  listpoints = vec_lengthen(help, dim); /* points on ell */
   for (i=1; i <= dim; i++)
   {
     pari_sp btop = avma;
@@ -1475,8 +1481,7 @@ ell2selmer_basis(GEN ell, GEN *cb, long prec)
   GEN E = ellintegralbmodel(ell, cb);
   GEN vbnf = makevbnf(E, prec);
   GEN sel = ell2selmer(E, E, NULL, gen_1, vbnf, 0, 1, prec);
-  obj_free(E);
-  return sel;
+  obj_free(E); return sel;
 }
 
 static void
