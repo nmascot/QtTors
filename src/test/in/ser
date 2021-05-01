@@ -126,8 +126,8 @@ laurentseries(x->(cos(x)-1)/x)
 f=1+4*t^2+36*t^4+O(t^6);
 g=q-4*q^3+14*q^5+O(q^7); subst(f,t,g)
 
-f=t^50000+O(t^50001); g=q*Ser(vector(50000,i,1),q); h=subst(f,t,g)
-f=q^50000+O(q^50001); h=subst(f,q,g)
+f=t^32000+O(t^32001); g=q*Ser(vector(32000,i,1),q); h=subst(f,t,g)
+f=q^32000+O(q^32001); h=subst(f,q,g)
 
 
 \\ Errors. Keep at end of file
