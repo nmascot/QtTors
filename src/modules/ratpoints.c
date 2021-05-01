@@ -1632,7 +1632,11 @@ ZX_hyperellratpoints(GEN P, GEN h, long flag)
 
   if (!ZX_is_squarefree(P))
     pari_err_DOMAIN("hyperellratpoints","issquarefree(pol)","=",gen_0, P);
-  if (!args_h(&args, h)) pari_err_TYPE("hyperellratpoints", h);
+  if (!args_h(&args, h))
+  {
+    pari_err_TYPE("hyperellratpoints", h);
+    return NULL;/*LCOV_EXCL_LINE*/
+  }
   find_points_init(&args, RATPOINTS_DEFAULT_BIT_PRIMES);
 
   args.cof           = shallowcopy(P);
