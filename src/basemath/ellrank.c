@@ -972,7 +972,7 @@ makevbnf(GEN ell, long prec)
   for (k = 1; k < l; k++)
   {
     GEN t = gel(P,k);
-    gel(vbnf,k) = degpol(t) == 2 ? nfinit(t, prec): Buchall(t, nf_FORCE, prec);
+    gel(vbnf,k) = degpol(t) == 2? nfinit(t, prec): Buchall(t, nf_FORCE, prec);
   }
   return vbnf;
 }
@@ -1479,9 +1479,8 @@ GEN
 ell2selmer_basis(GEN ell, GEN *cb, long prec)
 {
   GEN E = ellintegralbmodel(ell, cb);
-  GEN vbnf = makevbnf(E, prec);
-  GEN sel = ell2selmer(E, E, NULL, gen_1, vbnf, 0, 1, prec);
-  obj_free(E); return sel;
+  GEN S = ell2selmer(E, E, NULL, gen_1, makevbnf(E, prec), 0, 1, prec);
+  obj_free(E); return S;
 }
 
 static void
