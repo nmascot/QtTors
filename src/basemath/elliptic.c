@@ -5394,33 +5394,30 @@ ellQ_genreduce(GEN E, GEN G, GEN M, long prec)
     if (expo(h) > -prec2nbits(prec)/2)
       gel(V,j++) = ellQ_factorback(E, G, Li, 1, h, prec);
   }
-  setlg(V, j);
-  return gerepilecopy(av, V);
+  setlg(V, j); return gerepilecopy(av, V);
 }
 
 static long
-ellQ_isdivisible_test(forprime_t *S,GEN E, long CM, GEN P, ulong l, long nb)
+ellQ_isdivisible_test(forprime_t *S, GEN E, long CM, GEN P, ulong l, long nb)
 {
-  long m;
   GEN D = ell_get_disc(E);
-  P = QE_to_ZJ(P);
-  for (m = 1; m <= nb;)
+  pari_sp av = avma;
+  long m;
+  for (m = 1; m <= nb; set_avma(av))
   {
-    pari_sp av = avma;
-    ulong a4, a6, p = u_forprime_next(S), pi = get_Fl_red(p);
-    ulong o;
+    ulong o, a4, a6, p = u_forprime_next(S);
     if (dvdiu(D, p)) continue;
     Fl_ell_to_a4a6(E, p, &a4, &a6);
     o = p+1 - Fl_elltrace_CM(CM, a4, a6, p);
     if (o % l == 0)
     {
+      ulong pi = get_Fl_red(p);
       GEN a4a6 = a4a6_ch_Fl(E,p);
       GEN Q = Flj_changepointinv_pre(ZV_to_Flv(P, p), a4a6, p, pi);
       GEN R = Flj_mulu_pre(Q, o/l, a4, p, pi);
-      if (uel(R, 3) != 0)  return 0;
+      if (uel(R, 3) != 0) return 0;
       m++;
     }
-    set_avma(av);
   }
   return 1;
 }
@@ -5430,16 +5427,16 @@ GEN
 ellQ_isdivisible(GEN E, GEN P, ulong l)
 {
   pari_sp av = avma;
-  GEN worker, mod = gen_1, H = NULL, D = ell_get_disc(E);
+  GEN worker, mod = gen_1, H = NULL, D = ell_get_disc(E), PJ = QE_to_ZJ(P);
   forprime_t S, U;
   long CM = ellQ_get_CM(E);
   ulong bound;
 
-  worker = snm_closure(is_entry("_ellQ_factorback_worker"),
-                       mkvec4(E, mkvec(QE_to_ZJ(P)), mkvecs(1), utoi(l)));
   u_forprime_init(&U, l+1, ULONG_MAX);
+  if (!ellQ_isdivisible_test(&U, E, CM, PJ, l, 10)) return gc_NULL(av);
+  worker = snm_closure(is_entry("_ellQ_factorback_worker"),
+                       mkvec4(E, mkvec(PJ), mkvecs(1), utoi(l)));
   init_modular_small(&S);
-  if (!ellQ_isdivisible_test(&U, E, CM, P, l, 10)) return gc_NULL(av);
   for (bound = 1;; bound <<= 1)
   {
     GEN amax, r;
@@ -5451,7 +5448,7 @@ ellQ_isdivisible(GEN E, GEN P, ulong l)
     {
       settyp(r,t_VEC);
       if (gequal(ellmul(E,r,utoi(l)), P)) return gerepileupto(av, r);
-      if (!ellQ_isdivisible_test(&U, E, CM, P, l, 10)) return gc_NULL(av);
+      if (!ellQ_isdivisible_test(&U, E, CM, PJ, l, 10)) return gc_NULL(av);
     }
   }
 }
