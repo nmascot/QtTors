@@ -1324,7 +1324,7 @@ static GEN
 ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
            long effort, long flag, long prec)
 {
-  GEN KP, pol, vnf, vpol, vroots, vr1, vcrt, sbase, LS2, factLS2, sqrtLS2;
+  GEN KP, pol, vnf, vpol, vr1, vcrt, sbase, LS2, factLS2, sqrtLS2;
   GEN selmer, helpLS2, LS2chars, helpchars, newselmer, factdisc, badprimes;
   GEN helplist, listpoints, etors2, p;
   long i, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u;
@@ -1342,7 +1342,6 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   badprimes = cgetg(n+1, t_VEC);
   vnf = cgetg(n+1, t_VEC);
   vpol = cgetg(n+1, t_VEC);
-  vroots = cgetg(n+1, t_VEC);
   vcrt = cgetg(n+1, t_VEC);
   vr1 = cgetg(n+1, t_VECSMALL);
   LS2 = cgetg(n+1, t_VEC);
@@ -1356,7 +1355,6 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     gel(vpol, k) = T = nf_get_pol(nf);
     Tinv = RgX_div(pol, gel(vpol, k));
     gel(vcrt, k) = QX_mul(QXQ_inv(T, Tinv), T); /* 0 mod T, 1 mod pol/T */
-    gel(vroots, k) = nf_get_roots(gel(vnf, k));
     uel(vr1, k) = nf_get_r1(gel(vnf, k));
 
     id = idealadd(nf, nf_get_index(nf), ZX_deriv(T));
@@ -1390,20 +1388,15 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   helpchars = vecselmersign(vnf, vpol, helpLS2);
   if (zv_sum(vr1) == 3)
   {
-    GEN signs;
-    long row, m = 1;
-    if (signe(K) > 0)
+    GEN signs, R = cgetg(n + 1, t_VEC);
+    long row, sK = signe(K);
+    for (k = 1; k <= n; k++)
     {
-      for (k = 2; k <= n; ++k)
-        if (cmprr(gmael(vroots,k,1), gmael(vroots,m,1)) < 0) m = k;
-      row = 1; for (k = 1; k < m; k++) row += vr1[k];
+      GEN r = nf_get_roots(gel(vnf, k));
+      gel(R, k) = gel(r, sK > 0? 1: vr1[k]);
     }
-    else
-    {
-      for (k = 2; k <= n; ++k)
-        if (cmprr(gmael(vroots,k,vr1[k]), gmael(vroots,m,vr1[k])) > 0) m = k;
-      row = 0; for (k = 1; k <= m; k++) row += vr1[k];
-    }
+    row = sK > 0? 1 + zv_sumpart(vr1, vecindexmin(R)-1)
+                : zv_sumpart(vr1, vecindexmax(R));
     signs = Flm_transpose(mkmat(Flm_row(LS2chars, row)));
     /* the signs of LS2 for this embedding */
     selmer = Flm_intersect(selmer, Flm_ker(signs, 2), 2);
