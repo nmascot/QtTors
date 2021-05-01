@@ -167,8 +167,9 @@ q=randomprime(2^200,7); bnf=bnfinit(a^2+a+2);
 M=matconcat([idealfactor(bnf,p),idealfactor(bnf,q)]~);
 bnr=bnrinit(bnf,M,,7); bnrclassfield(bnr)
 
-print("vector of subgroups");
-filter(v)=[if (cmp(a,b=-subst(a,x,-x)) < 0,b,a)| a<-v][^1]; \\ avoid 32-bit differences
+print("vector of subgroups"); \\ avoid 32-bit differences
+deg(a)=poldegree(if (type(a)=="t_POL", a, a[1]));
+filter(v)=[if (cmp(a,b=(-1)^deg(a)*subst(a,x,-x)) < 0,b,a)| a<-v][^1];
 pol=y^2+3299;
 setrand(1);bnr=bnrinit(bnfinit(pol), 3,, 3);
 L=subgrouplist(bnr, [3], 1);
