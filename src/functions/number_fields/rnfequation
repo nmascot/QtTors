@@ -9,11 +9,11 @@ Help: rnfequation(nf,pol,{flag=0}): given a pol with coefficients in nf,
  al expresses as an element of L a root of the polynomial
  defining the base field nf, and k is a small integer such that
  t = b + k al is a root of z, for b a root of pol.
-Doc: given a number field
- $\var{nf}$ as output by \kbd{nfinit} (or simply a polynomial) and a
- polynomial \var{pol} with coefficients in $\var{nf}$ defining a relative
- extension $L$ of $\var{nf}$, computes an absolute equation of $L$ over
- $\Q$.
+Doc: given a number field $\var{nf}$ as output by \kbd{nfinit}
+ (or simply a monic irreducible integral polynomial defining the field)
+ and a polynomial \var{pol} with coefficients in $\var{nf}$ defining a
+ relative extension $L$ of $\var{nf}$, computes an absolute equation of $L$
+ over $\Q$.
 
  The main variable of $\var{nf}$ \emph{must} be of lower priority than that
  of \var{pol} (see \secref{se:priority}). Note that for efficiency, this does
