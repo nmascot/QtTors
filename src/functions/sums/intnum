@@ -87,7 +87,7 @@ Doc: numerical integration
  $O(x^{-2})$ but not exponentially fast.
 
  \item $\alpha>0$ assumes that the function tends to zero exponentially fast
- approximately as $\exp(-\alpha x)$. This includes oscillating but quickly
+ approximately as $\exp(-\alpha|x|)$. This includes oscillating but quickly
  decreasing functions such as $\exp(-x)\sin(x)$.
  \bprog
  ? intnum(x=0, +oo, exp(-2*x))
