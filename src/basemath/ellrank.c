@@ -978,22 +978,19 @@ makevbnf(GEN ell, long prec)
 }
 
 static GEN
-kernorm(GEN gen, GEN S, ulong p, GEN pol)
+kernorm(GEN G, GEN S, GEN pol, GEN signs)
 {
-  long i, j, lS, lG = lg(gen);
+  long i, j, lS = lg(S), lG = lg(G), lv = signs? lS+2: lS+1;
   GEN M = cgetg(lG, t_MAT);
-  if (p == 2) S = vec_prepend(S, gen_m1);
-  lS = lg(S);
   for (j = 1; j < lG; j++)
   {
-    GEN N = QXQ_norm(gel(gen,j), pol);
-    GEN v = cgetg(lS, t_VECSMALL);
-    for (i = 1; i < lS; i++)
-      v[i] = (i == 1 && p==2)? gsigne(N) < 0
-                             : smodss(Q_pvalrem(N, gel(S, i), &N), p);
-    gel(M, j) = v;
+    GEN v, N = QXQ_norm(gel(G,j), pol);
+    gel(M, j) = v = cgetg(lv, t_VECSMALL);
+    v[1] = gsigne(N) < 0;
+    for (i = 1; i < lS; i++) v[i+1] = odd(Q_pvalrem(N, gel(S,i), &N));
+    if (signs) v[i+1] = signs[j];
   }
-  return Flm_ker(M, p);
+  return Flm_ker(M, 2);
 }
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
@@ -1320,11 +1317,29 @@ dim_selmer(GEN p, GEN pol, GEN K, GEN vnf, GEN LS2, GEN helpLS2,
   *selmer = gerepileupto(av, *selmer); dim = lg(*selmer)-1;
   return (dim == Flm_rank(helpimage,2))? dim: -1;
 }
+static long
+get_row(GEN vnf, GEN K)
+{
+  long k, sK = signe(K), n = lg(vnf)-1;
+  GEN R;
+  if (n == 1) return sK > 0? 1: 3;
+  if (n == 2)
+  {
+    GEN a = gel(nf_get_roots(gel(vnf,1)), 1);
+    GEN b = gel(nf_get_roots(gel(vnf,2)), sK > 0? 1: 2);
+    if (cmprr(a, b) < 0) return sK > 0? 1: 3;
+    return sK > 0? 2: 1;
+  }
+  R = cgetg(4, t_VEC);
+  for (k = 1; k <= 3; k++) gel(R, k) = gel(nf_get_roots(gel(vnf,k)), 1);
+  return sK > 0? vecindexmin(R): vecindexmax(R);
+}
+
 static GEN
 ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
            long effort, long flag, long prec)
 {
-  GEN KP, pol, vnf, vpol, vr1, vcrt, sbase, LS2, factLS2, sqrtLS2;
+  GEN KP, pol, vnf, vpol, vcrt, sbase, LS2, factLS2, sqrtLS2, signs;
   GEN selmer, helpLS2, LS2chars, helpchars, newselmer, factdisc, badprimes;
   GEN helplist, listpoints, etors2, p;
   long i, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u;
@@ -1343,7 +1358,6 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   vnf = cgetg(n+1, t_VEC);
   vpol = cgetg(n+1, t_VEC);
   vcrt = cgetg(n+1, t_VEC);
-  vr1 = cgetg(n+1, t_VECSMALL);
   LS2 = cgetg(n+1, t_VEC);
   factLS2 = cgetg(n+1, t_VEC);
   sqrtLS2 = cgetg(n+1, t_VEC);
@@ -1355,7 +1369,6 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     gel(vpol, k) = T = nf_get_pol(nf);
     Tinv = RgX_div(pol, gel(vpol, k));
     gel(vcrt, k) = QX_mul(QXQ_inv(T, Tinv), T); /* 0 mod T, 1 mod pol/T */
-    uel(vr1, k) = nf_get_r1(gel(vnf, k));
 
     id = idealadd(nf, nf_get_index(nf), ZX_deriv(T));
     f = nf_pV_to_prV(nf, KP); settyp(f, t_COL);
@@ -1383,24 +1396,11 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   if (DEBUGLEVEL>2) err_printf("   local badprimes = %Ps\n", badprimes);
   LS2 = shallowconcat1(LS2);
   helpLS2 = ellLS2image(pol, help, K, vpol, vcrt);
-  selmer = kernorm(LS2, factdisc, 2, pol);
   LS2chars = vecselmersign(vnf, vpol, LS2);
   helpchars = vecselmersign(vnf, vpol, helpLS2);
-  if (zv_sum(vr1) == 3)
-  {
-    GEN signs, R = cgetg(n + 1, t_VEC);
-    long row, sK = signe(K);
-    for (k = 1; k <= n; k++)
-    {
-      GEN r = nf_get_roots(gel(vnf, k));
-      gel(R, k) = gel(r, sK > 0? 1: vr1[k]);
-    }
-    row = sK > 0? 1 + zv_sumpart(vr1, vecindexmin(R)-1)
-                : zv_sumpart(vr1, vecindexmax(R));
-    signs = Flm_transpose(mkmat(Flm_row(LS2chars, row)));
-    /* the signs of LS2 for this embedding */
-    selmer = Flm_intersect(selmer, Flm_ker(signs, 2), 2);
-  }
+  signs = NULL;
+  if (signe(ell_get_disc(ell)) > 0) signs = Flm_row(LS2chars, get_row(vnf,K));
+  selmer = kernorm(LS2, factdisc, pol, signs);
   forprime_init(&T, gen_2, NULL); lfactdisc = lg(factdisc); dim = -1;
   for (i = 1; dim < 0 && i < lfactdisc; i++)
     dim = dim_selmer(gel(factdisc,i), pol, K, vnf, LS2, helpLS2,
