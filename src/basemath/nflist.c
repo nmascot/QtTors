@@ -2591,7 +2591,7 @@ static GEN
 getpol(GEN nf, GEN T)
 {
   GEN G = galoisinit(rnfequation(nf, T), NULL);
-  return polredabs(galoisfixedfield(G, vecsplice(gal_get_gen(G), 1), 1, 0));
+  return galoisfixedfield(G, vecsplice(gal_get_gen(G), 1), 1, 0);
 }
 
 static GEN
@@ -2634,7 +2634,7 @@ makeDL(long ell, GEN N, GEN field, long s)
       R = mybnrclassfield_X(bnf, P, ell, NULL, NULL, G);
       lR = lg(R); if (lR == 1) continue;
       /* L/Q degree ell subfield of R; d(L) = F^pow, F = D f^2 */
-      for (k = 1; k < lR; k++) gel(R,k) = getpol(bnf, gel(R,k));
+      for (k = 1; k < lR; k++) gel(R,k) = polredabs(getpol(bnf, gel(R,k)));
       gel(v, c++) = R;
     }
   }
@@ -2681,7 +2681,7 @@ nflist_DL_worker(GEN P2, GEN X1pow, GEN X0pow, GEN X2, GEN Xinf2, GEN gell)
     P = Pell2prfa(nf, P, ell, F);
     R = mybnrclassfield_X(bnf, P, ell, X, Xinf, G);
     lR = lg(R); if (lR == 1) { set_avma(av2); continue; }
-    for (k = 1; k < lR; k++) gel(R,k) = getpol(bnf, gel(R,k));
+    for (k = 1; k < lR; k++) gel(R,k) = polredabs(getpol(bnf, gel(R,k)));
     gel(V, c++) = R;
   }
   setlg(V,c); return gerepilecopy(av, myshallowconcat1(V));
