@@ -185,3 +185,9 @@ ideallog(,3,zQ)
 idealmul(Kerror,[2,1;0,1],[2,1;0,1])
 idealmul(Kerror,matid(4),matid(4))
 idealred(nf,[2,Mat(1)])
+
+K=nfinit(y^3+8*y^2-128*y-512);
+idealstar(K,[4,Vecsmall([1,1,1])])
+idealstar(K,[4,Vecsmall([1,4,2])])
+idealstar(K,[4,Vecsmall([-1,2,3])])
+idealstar(K,[4,Vecsmall([1,1])])

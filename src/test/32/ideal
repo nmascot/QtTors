@@ -308,4 +308,19 @@ matrix(0,2)
   ***   at top-level: idealred(nf,[2,Mat(1)])
   ***                 ^-----------------------
   *** idealred: incorrect type in idealtyp [extended ideal] (t_VEC).
-Total time spent: 117
+  ***   at top-level: K=nfinit(y^3+8*y^2-128*y-512)
+  ***                           ^-------------------
+  *** _^s: forbidden multiplication t_COL (3 elts) * t_COL (3 elts).
+  ***   at top-level: idealstar(K,[4,Vecsmall([1,1,1])])
+  ***                 ^----------------------------------
+  *** idealstar: incorrect type in Idealstar [incorrect archimedean component] (t_VECSMALL).
+  ***   at top-level: idealstar(K,[4,Vecsmall([1,4,2])])
+  ***                 ^----------------------------------
+  *** idealstar: incorrect type in Idealstar [incorrect archimedean component] (t_VECSMALL).
+  ***   at top-level: idealstar(K,[4,Vecsmall([-1,2,3])])
+  ***                 ^-----------------------------------
+  *** idealstar: incorrect type in Idealstar [incorrect archimedean component] (t_VECSMALL).
+  ***   at top-level: idealstar(K,[4,Vecsmall([1,1])])
+  ***                 ^--------------------------------
+  *** idealstar: incorrect type in Idealstar [incorrect archimedean component] (t_VECSMALL).
+Total time spent: 100

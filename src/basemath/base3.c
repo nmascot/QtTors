@@ -3029,13 +3029,30 @@ famat_strip2(GEN fa)
   setlg(Q,j);
   setlg(F,j); return mkmat2(Q,F);
 }
+static int
+checkarchp(GEN v, long r1)
+{
+  long i, l = lg(v);
+  pari_sp av = avma;
+  GEN p;
+  if (l == 1) return 1;
+  if (l == 2) return v[1] > 0 && v[1] <= r1;
+  p = zero_zv(r1);
+  for (i = 1; i < l; i++)
+  {
+    long j = v[i];
+    if (j <= 0 || j > r1 || p[j]) return gc_long(av, 0);
+    p[j] = 1;
+  }
+  return gc_long(av, 1);
+}
 
 /* Compute [[ideal,arch], [h,[cyc],[gen]], idealfact, [liste], U]
    flag may include nf_GEN | nf_INIT */
 static GEN
 Idealstarmod_i(GEN nf, GEN ideal, long flag, GEN MOD)
 {
-  long i, k, nbp, R1;
+  long i, nbp, R1;
   GEN y, cyc, U, u1 = NULL, fa, fa2, sprk, x, arch, archp, E, P, sarch, gen;
 
   nf = checknf(nf);
@@ -3052,10 +3069,9 @@ Idealstarmod_i(GEN nf, GEN ideal, long flag, GEN MOD)
         archp = vec01_to_indices(arch);
         break;
       case t_VECSMALL:
-        archp = arch;
-        k = lg(archp)-1;
-        if (k && archp[k] > R1)
+        if (!checkarchp(arch, R1))
           pari_err_TYPE("Idealstar [incorrect archimedean component]",arch);
+        archp = arch;
         arch = indices_to_vec01(archp, R1);
         break;
       default:
