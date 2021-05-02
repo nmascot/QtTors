@@ -2897,7 +2897,6 @@ rnfpolred_i(GEN nf, GEN R, long flag, long best)
     {
       GEN a = eltabstorel_lift(rnfeq, gel(A,i));
       GEN p = lift_if_rational( RgXQ_charpoly(a, R, v) );
-      p = lift_if_rational(p);
       if (i == 1 || cmp_universal(p, P) < 0) { P = p; besta = a; }
     }
     A = besta;
