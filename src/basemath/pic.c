@@ -2555,7 +2555,7 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
     if(e2>efin) e2 = efin;
 		e21 = e2-e1;
 		pe21 = e21==e1 ? pe1 : powiu(p,e21);
-    if(DEBUGLEVEL) pari_printf("PicLiftTors: from prec O(%Ps^%lu) to O(%Ps^%lu)\n",p,e1,p,e2);
+    if(DEBUGLEVEL) pari_printf("piclifttors: Lifting %Ps-torsion point from prec O(%Ps^%lu) to O(%Ps^%lu)\n",l,p,e1,p,e2);
     J2 = e2<efin ? JacRed(J,e2) : J;
 		pe2 = Jgetpe(J2);
 		/* START LIFTING */
@@ -2619,11 +2619,11 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
   	/* Find a random solution to the inhomogeneous system */
   	KM = matkerpadic(K,T,pe21,p,e21);
 		KM = gerepileupto(avrho,KM);
-		if(DEBUGLEVEL>=3||(lg(KM)==1)) printf("PicLiftTors: dim ker lift: %ld\n",lg(KM)-1);
+		if(DEBUGLEVEL>=3||(lg(KM)==1)) printf("picliftors: dim ker lift: %ld\n",lg(KM)-1);
 		if(cmpii(pe21,powiu(l,g+1))<=0)
   	{
 			av2 = avma;
-    	if(DEBUGLEVEL>=2) printf("PicLiftTors by mul\n");
+    	if(DEBUGLEVEL>=2) printf("piclifttors by mul\n");
 			U = PicLift_RandLift_U(U,U0,KM,T,p,pe1,pe21,e21);
 			W = PicInflate_U(J2,U,NULL);
 			W = gerepileupto(av2,W);
@@ -2635,7 +2635,7 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
 		}
 		else
 		{
-			if(DEBUGLEVEL>=2) printf("PicLiftTors by chart\n");
+			if(DEBUGLEVEL>=2) printf("piclifttors by chart\n");
 			Clifts = cgetg(g+2,t_MAT);
 			Ulifts = cgetg(g+2,t_VEC);
 			vFixedParams = cgetg(13,t_VEC);
@@ -2649,12 +2649,12 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
       		/* Find coords of 0 */
 					for(;;)
 					{
-						if(DEBUGLEVEL>=2) printf("PicLiftTors: Computing coords of 0, P0=%lu\n",P0);
+						if(DEBUGLEVEL>=2) printf("piclifttors: Computing coords of 0, P0=%lu\n",P0);
 						c0 = PicChart(J,JgetW0(J),P0,NULL);
 						if(c0) break;
 						P0++;
 						if(P0>nZ+g-d0)
-							pari_err(e_MISC,"PicLiftTors: Run out of charts while computing coords of 0");
+							pari_err(e_MISC,"piclifttors: Run out of charts while computing coords of 0");
 					}
 					c0 = gerepileupto(av3,c0);
       		nc = lg(c0)-1;
@@ -2697,7 +2697,7 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
       		{
 						if(done==gen_0)
 						{
-							if(DEBUGLEVEL>=3) printf("PicLiftTors: Lift %ld had a chart issue\n",workid);
+							if(DEBUGLEVEL>=3) printf("piclifttors: Lift %ld had a chart issue\n",workid);
 							liftsOK = 0;
 						}
 						else
@@ -2710,11 +2710,11 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
     		mt_queue_end(&pt);
 				if(liftsOK==0)
         { /* This chart does not work. Take the next one, reset data, and restart */
-         	if(DEBUGLEVEL>=3) printf("PicLiftTors: Changing chart\n");
+         	if(DEBUGLEVEL>=3) printf("piclifttors: Changing chart\n");
 					P0++; /* New chart */
           printf("P0=%lu\n",P0);
           if(P0>nZ+g-d0)
-            pari_err(e_MISC,"PicLiftTors: run out of charts while computing coords of 0");
+            pari_err(e_MISC,"piclifttors: run out of charts while computing coords of 0");
           P0_tested = 0;
           c0 = NULL; /* Coords of 0 must be recomputed */
           av3 = av2;
@@ -2727,13 +2727,13 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
 					P0++; /* New chart */
       		if(DEBUGLEVEL>=3)
 					{
-						printf("PicLiftTors: Dim ker tors = %ld (expected 1), changing charts\n",n);
+						printf("piclifttors: Dim ker tors = %ld (expected 1), changing charts\n",n);
       			if(DEBUGLEVEL>=5)
 							printf("nZ=%lu, g=%lu, d0=%lu\nP0=%lu\n",nZ,g,d0,P0);
 					}
 					P0++; /* New chart */
 					if(P0>nZ+g-d0)
-            pari_err(e_MISC,"PicLiftTors: run out of charts while computing coords of 0");
+            pari_err(e_MISC,"piclifttors: run out of charts while computing coords of 0");
 					P0_tested = 0;
 					c0 = NULL; /* Coords of 0 must be recomputed */
 					av3 = av2;
@@ -2747,7 +2747,7 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
     		}
     		if(ZX_is0mod(red,p)) /* TODO can this happen ? why, or why not ? */
 				{
-					if(DEBUGLEVEL>=3) printf("PicLiftTors: Sum of Ktors is zero!\n");
+					if(DEBUGLEVEL>=3) printf("piclifttors: Sum of Ktors is zero!\n");
 					continue;
 				}
     		Ktors = FqC_Fq_mul(Ktors,ZpXQ_inv(red,T,p,e2),T,pe2); /* Normalise so that sum = 1 */
@@ -2759,7 +2759,7 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
 				/* But first check if really l-tors, as the chart might not be injective ! */
     		if(P0_tested == 0)
 				{
-					if(DEBUGLEVEL>=3) pari_printf("PicLiftTors: Checking %Ps-tors\n",l);
+					if(DEBUGLEVEL>=3) pari_printf("piclifttors: Checking %Ps-tors\n",l);
 					W = PicInflate_U(J2,U2,NULL);
 					avtesttors = avma;
 					testtors = PicIsZero_val(J2,PicMul(J2,W,l,0));
@@ -2957,7 +2957,7 @@ GEN PicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN m
 	todo = cgetg(ld,t_VEC); // list of operations to be executed in parallel; used later
 	while(ndone<ld)
 	{
-		if(DEBUGLEVEL) printf("TorsSpaceFrob: main loop, touched %lu/%lu\n",ndone,ld);
+		if(DEBUGLEVEL) printf("TorsSpaceFrob: Main loop, touched %lu/%lu\n",ndone,ld);
 		// Use Auts as much as possible
 		do
 		{
@@ -4982,7 +4982,7 @@ GEN PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
   if(DEBUGLEVEL)
   {
 		av1 = avma;
-    printf("The matrix of Frob is\n");
+    pari_printf("The matrix of Frob_%Ps is\n",Jgetp(J));
     printp(mkvec(M));
 		avma = av1;
   }
@@ -5010,7 +5010,7 @@ GEN PicTorsGalRep(GEN J, GEN l, GEN Lp, GEN chi)
 	int comp;
 
 	ul = itou(l);
-	if(DEBUGLEVEL) printf("PicTorsGalRep: Getting basis of rep space mod p\n");
+	if(DEBUGLEVEL) pari_printf("pictorsgalrep: Getting basis of rep space over F_%Ps^%lu\n",Jgetp(J),degpol(JgetT(J)));
 	J1 = PicSetPrec(J,1);
 	B = PicTorsBasis(J1,l,Lp,chi);
 	MFrob = gel(B,2);
@@ -5026,17 +5026,17 @@ GEN PicTorsGalRep(GEN J, GEN l, GEN Lp, GEN chi)
 	e2 = Jgete(J);
 	for(;;)
 	{ /* Loop until accuracy high enough to get result */
-		if(DEBUGLEVEL) printf("PicTorsGalRep: Hensel-lifting %lu points\n",n-1);
+		if(DEBUGLEVEL) pari_printf("pictorsgalrep: Hensel-lifting %lu %Ps-torsion points\n",n-1,l);
 		/* TODO parallel version */
 		for(i=1;i<n;i++)
 			gel(B,i) = PicLiftTors(J,gel(B,i),l,e1);
 		e1 = e2;
-		if(DEBUGLEVEL) printf("PicTorsGalRep: Evaluating all points\n");
+		if(DEBUGLEVEL) printf("pictorsgalrep: Evaluating all points\n");
 		Z = PicTorsSpaceFrobEval(J,B,C,ul,MFrob,MAuts);
-		if(DEBUGLEVEL) printf("PicTorsGalRep: Getting polynomials\n");
+		if(DEBUGLEVEL) printf("pictorsgalrep: Getting polynomials\n");
 		AF = AllPols(J,Z,ul,MFrob);
 		if(lg(AF)>1) break; /* Success! */
-		if(DEBUGLEVEL) pari_printf("PicTorsGalRep: unable to determine representation at accuracy O(%Ps^%ld); doubling accuracy and retrying\n",Jgetp(J),Jgete(J));
+		if(DEBUGLEVEL) pari_printf("pictorsgalrep: unable to determine representation at accuracy O(%Ps^%ld); doubling accuracy and retrying\n",Jgetp(J),Jgete(J));
 		e2 *= 2;
 		J = PicSetPrec(J,e2);
 	}

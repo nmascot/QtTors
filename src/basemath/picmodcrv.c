@@ -833,7 +833,7 @@ GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
 	q2 = shifti(q2,-1);
 	for(;;)
 	{
-		if(DEBUGLEVEL) printf("EllSplitTors: Trying new curve.\n");
+		if(DEBUGLEVEL>=2) printf("EllSplitTors: Trying new curve.\n");
 		a4 = genrand(p);
 		if(gequal0(a4)) continue; /* Avoid j=0 */
 		a6 = genrand(p);
@@ -855,7 +855,7 @@ GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
 		r = EllTorsIsSplit(a4,a6,N,p,d,T,q,q2);
 		if(r==d)
 			return gerepilecopy(av,mkvec3(a4,a6,j));
-		if(DEBUGLEVEL)
+		if(DEBUGLEVEL>=2)
 		{
 			if(r==0) printf("EllSplitTors: Unsuitable curve.\n");
 			else printf("EllSplitTors: E[%lu]/-1 defined in degree %lu<%lu.\n",N,r,d);
@@ -1621,7 +1621,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	if(dvdui(6*N*(lg(H1)-1),p))
 		pari_err(e_MISC,"Use a prime p that does not divide 6*N*<H>");
 	g = degpol(Lp)/2;
-	if(DEBUGLEVEL) printf("ModPicInit: genus %lu\n",g);
+	if(DEBUGLEVEL) printf("modpicinit: genus %lu\n",g);
 	gel(J,2) = utoi(g);
 	/* Get data about cusps */
 	Cusps = GammaHCusps(N,H);
@@ -1636,7 +1636,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	CuspsGalDegs = cgetg(nCuspsGal,t_VECSMALL);
 	for(i=1;i<nCuspsGal;i++)
 		CuspsGalDegs[i] = lg(gel(CuspsGal,i))-1;
-	if(DEBUGLEVEL) printf("ModPicInit: %lu cusps\n",nCusps);
+	if(DEBUGLEVEL) printf("modpicinit: %lu cusps\n",nCusps);
 	if(UseTp)
 	{
 		CuspsGalDiamp = GammaHCusps_GalDiam_orbits(up,Cusps,CuspsGal,CuspsTags);
@@ -1651,7 +1651,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	PtsTags = gel(Pts,2);
 	Pts = gel(Pts,1);
 	nPts = lg(Pts)-1;
-	if(DEBUGLEVEL) printf("ModPicInit: %lu points in fibre on X_H(%lu)->X(1)\n",nPts,N);
+	if(DEBUGLEVEL) printf("modpicinit: %lu points on fibre of X_H(%lu) -> X(1)\n",nPts,N);
 	if(UseTp)
 	{
 		PtsDiamp = PtsDiamp0 = cgetg(nPts+1,t_VECSMALL); /* Perm induced by <p> */
@@ -1663,11 +1663,11 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	for(i=1;i<=nPts;i++) /* P_g = P_g' on X_H(N) <=> g,g' same bottom row mod H */
 		gel(MPts,i) = Bot2SL2Z(gel(Pts,i),N);
 	/* Get first elliptic curve */
-	if(DEBUGLEVEL) pari_printf("ModPicInit: looking for an elliptic curve whose %lu-torsion is defined over GF(%Ps,%lu)\n",N,p,a);
+	if(DEBUGLEVEL) pari_printf("modpicinit: Looking for an elliptic curve whose %lu-torsion is defined over F_%Ps^%lu\n",N,p,a);
 	list_j = cgetg(nbE+1,t_VEC);
 	setlg(list_j,1);
 	E = GetMl1(N,Pts,PtsTags,T,p,e,NULL,list_j); /* NULL: no preferred zeta_N for now */
-	if(DEBUGLEVEL) pari_printf("ModPicInit: working on y²=x³+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
+	if(DEBUGLEVEL) pari_printf("modpicinit: Working on y²=x³+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
 	Ml1 = gel(E,2);
 	PtsFrob = gel(E,3);
 	zN = gel(E,4);
@@ -1679,7 +1679,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 		gel(zNpows,i+1) = Fq_mul(gel(zNpows,i),zN,T,pe);
 	/* Find basis for M2(GammaH(N)) */
 	d = g+nCusps-1;
-	if(DEBUGLEVEL) printf("ModPicInit: M2(GammaH) (dim %lu)\n",d);
+	if(DEBUGLEVEL) printf("modpicinit: M2(GammaH) (dim %lu)\n",d);
 	d1 = (4*d)/3; /* # gens */
 	if(d1>nPts)
 		d1 = nPts;
@@ -1698,7 +1698,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 		/* Do we span? */
 		B = gel(FqM_indexrank(M2,T,p),2);
 		nB = lg(B)-1;
-		if(DEBUGLEVEL>=2) printf("ModPicInit: span %lu our of %lu\n",nB,d);
+		if(DEBUGLEVEL>=2) printf("modpicinit: span %lu our of %lu\n",nB,d);
 		if(nB>d)
 			pari_err(e_BUG,"Excessive dimension in M2(GammaH)");
 		if(nB==d)
@@ -1716,9 +1716,9 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	/* Get extra ellitpic curves */
 	for(i=2;i<=nbE;i++)
 	{
-		if(DEBUGLEVEL) printf("ModPicInit: Getting extra elliptic curve %lu/%lu\n",i,nbE);
+		if(DEBUGLEVEL) printf("modpicinit: Getting extra elliptic curve %lu/%lu\n",i,nbE);
 		E = GetMl1(N,Pts,PtsTags,T,p,e,zN,list_j);
-		if(DEBUGLEVEL) pari_printf("ModPicInit: working on y²=x³+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
+		if(DEBUGLEVEL) pari_printf("modpicinit: working on y²=x³+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
 		setlg(list_j,i+1);
 		gel(list_j,i) = gmael(E,1,3);
 		M2 = vconcat(M2,M2mat(M2gens,gel(E,2),TH,MPts,T,pe));
@@ -1731,7 +1731,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	{
 		C0o = BalancedDivInf(nCusps-3,CuspsGalDiampDegs);
 		C0 = Divo2Div(C0o,CuspsGalDiamp,CuspsTags,nCusps);
-		if(DEBUGLEVEL) printf("ModPicInit: Wanted C0 of degree %lu, got %lu\n",nCusps-3,zv_sum(C0));
+		if(DEBUGLEVEL) printf("modpicinit: Wanted C0 of degree %lu, got %lu\n",nCusps-3,zv_sum(C0));
 	}
 	else
 	{
@@ -1739,7 +1739,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 		C0 = Divo2Div(C0o,CuspsGal,CuspsTags,nCusps);
 	}
 	d0 = 2*g+nCusps-(2+zv_sum(C0));
-	if(DEBUGLEVEL) printf("ModPicInit: d0=%lu\n",d0);
+	if(DEBUGLEVEL) printf("modpicinit: d0=%lu\n",d0);
 	gel(J,3) = utoi(d0);
 	/* Evaluation J_H(N) -> A1 */
 	E1o = BalancedDiv(d0-g,CuspsGalDegs);
@@ -1747,7 +1747,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
   E1 = Divo2Div(E1o,CuspsGal,CuspsTags,nCusps);
   E2 = Divo2Div(E2o,CuspsGal,CuspsTags,nCusps);
 	M2qexps = cgetg(nCusps+1,t_VEC);
-	if(DEBUGLEVEL) printf("ModPicInit: q-exp of forms of weight 2, cusp");
+	if(DEBUGLEVEL) printf("modpicinit: q-exp of forms of weight 2, cusp");
 	params = cgetg(12,t_VEC);
 	gel(params,2) = utoi(N);
 	gel(params,3) = TH;
@@ -1790,7 +1790,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 		}
 	}
   mt_queue_end(&pt);
-	if(DEBUGLEVEL) printf("\nModPicInit: pruning, dim %lu, eval on >= %lu pts\n",d-zv_sum(C0),5*d0+1);
+	if(DEBUGLEVEL) printf("\nmodpicinit: Pruning, dim %lu, eval on >= %lu pts\n",d-zv_sum(C0),5*d0+1);
 	/* Reduce # pts at which we evaluate */
 	if(UseTp)
   {
@@ -1806,7 +1806,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 		Pts = gel(Pts,1); /* Selected indices */
 	}
 	nPts = lg(Pts);
-	if(DEBUGLEVEL) printf("ModPicInit: Wanted to reduce nZ to %lu, actually got %lu\n",5*d0+1,nPts-1);
+	if(DEBUGLEVEL) printf("modpicinit: Wanted to reduce nZ to %lu, actually got %lu\n",5*d0+1,nPts-1);
 	V1 = cgetg(d+1,t_MAT);
 	for(j=1;j<=d;j++)
 	{
@@ -1819,11 +1819,11 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	V1 = FqM_mul(V1,U0,T,pe);
 	/* Forms of weight 4 */
 	d = 2*d0+1-g;
-	if(DEBUGLEVEL) printf("ModPicInit: M4(GammaH)(-2C0), dim %lu\n",d);
+	if(DEBUGLEVEL) printf("modpicinit: M4(GammaH)(-2C0), dim %lu\n",d);
 	V2 = DivAdd1(V1,V1,d,T,pe,p,d0,1); // TODO tune excess=d0
 	V2gens = gel(V2,2);
 	V2 = gel(V2,1);
-	if(DEBUGLEVEL) printf("ModPicInit: q-exp of forms of weight 4\n");
+	if(DEBUGLEVEL) printf("modpicinit: q-exp of forms of weight 4\n");
 	params = cgetg(6,t_VEC);
 	gel(params,2) = V2gens;
 	gel(params,3) = U0;
@@ -1846,7 +1846,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 			gel(V2qexps,workid) = done;
 	}
   mt_queue_end(&pt);
-	if(DEBUGLEVEL) printf("ModPicInit: Eval data\n");
+	if(DEBUGLEVEL) printf("modpicinit: Eval data\n");
 	gel(J,13) = EvalData = cgetg(5,t_VEC);
 	C02 = zv_z_mul(C0,2);
 	// TODO parallel
@@ -1883,12 +1883,12 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
   gel(EvalData,4) = FqM_mul(M4Q,ZpXQMinv(M,T,pe,p,e),T,pe);
 	/* Forms of weight 6 */
 	d = 3*d0+1-g;
-	if(DEBUGLEVEL) printf("ModPicInit: M6(GammaH)(-3C0), dim %lu\n",d);
+	if(DEBUGLEVEL) printf("modpicinit: M6(GammaH)(-3C0), dim %lu\n",d);
 	V3 = DivAdd1(V2,V1,d,T,pe,p,d0,0); // TODO tune excess=d0
 	/* Finish constructing J */
 	gel(J,10) = V = mkvec3(V1,V2,V3);
 	gel(J,7) = ie;
-	if(DEBUGLEVEL) printf("ModPicInit: Computing equation matrices\n");
+	if(DEBUGLEVEL) printf("modpicinit: Computing equation matrices\n");
   gel(J,11) = KV = cgetg(4,t_VEC);
   worker = strtofunction("_mateqnpadic");
 	params = cgetg(6,t_VEC);
@@ -2086,10 +2086,9 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 			pari_err(e_BUG,"charpoly in mfgalrep_bestp");
 		if(degpol(FpX_gcd(chi,psi,l)))
 		{
-			pari_printf("p=%Ps has multiplicity\n",p);
+			pari_printf("mfgalrep_best: p=%Ps has multiplicity\n",p);
 			continue;
 		}
-		pari_printf("%Ps %Ps %Ps %Ps\n",p,chi,l,FpX_root_order_bound(chi,l));
 		a1 = gel(FpX_root_order_bound(chi,l),2);
 		a2 = utoi(Fl_order(itou(p),philN,lN));
 		a = lcmii(a1,a2);
@@ -2099,13 +2098,13 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 			xa1 = powgi(xa1,a);
 			xa1 = ZX_Z_add(xa1,gen_m1);
 			NJ = ZX_resultant(gmael(Lp,i,1),xa1);
-			pari_printf("p=%Ps: needs deg %Ps (%Ps to split rep, %Ps for roots of 1) -> lg #J = %ld\n",p,a,a1,a2,logint(NJ,gen_2));
+			pari_printf("mfgalrep_bestp: p=%Ps needs deg %Ps (%Ps to split rep, %Ps for roots of 1) -> lg #J = %ld\n",p,a,a1,a2,logint(NJ,gen_2));
 		}
 		if(best==NULL || cmpii(gel(best,4),a)==1)
 			best = mkvecn(6,ilN,H,p,a,gmael(Lp,i,1),chi);
 	}
 	if(best==NULL)
-		pari_err(e_MISC,"No suitable prime, please enlarge prime range");
+		pari_err(e_MISC,"mfgalrep_bestp: No suitable prime, please enlarge prime range");
 	return gerepilecopy(av,best);
 }
 
@@ -2133,7 +2132,7 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 	log10 = logr_abs(utor(10,DEFAULTPREC));
 	logp = logr_abs(itor(p,DEFAULTPREC));
 	e = itos(gceil(divrr(addrr(log2,mulur(2*D,log10)),logp)));
-	if(DEBUGLEVEL) pari_printf("mfgalrep: Computing with X_H(%lu), where H=%Ps (genus %ld), over unramified extension of Q_%Ps of degree %lu with accuracy O(%Ps^%ld)\n",N,H,degpol(Lp)/2,p,a,p,e);
+	if(DEBUGLEVEL) pari_printf("mfgalrep: X_H(%lu) (H=%Ps), genus %ld, over Q_%Ps^%lu with accuracy O(%Ps^%ld)\n",N,H,degpol(Lp)/2,p,a,p,e);
 	J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
 	R = PicTorsGalRep(J,l,Lp,chi);
 	return gerepileupto(av,R);
