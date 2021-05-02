@@ -868,7 +868,7 @@ GEN EllTorsBasis_lv(GEN a4, GEN a6, GEN A4, ulong l, ulong v, GEN T, GEN p, GEN 
 	pari_sp av = avma;
 	GEN lv1,lv,X,P,Q,x,z,z1,FP,FQ,M;
 	ulong nX,iP,iQ;
-	if(DEBUGLEVEL) printf("Getting basis of E[%lu^%lu]\n",l,v);
+	if(DEBUGLEVEL) printf("EllTorsBasis_lv: Getting basis of E[%lu^%lu]\n",l,v);
 	lv1 = powuu(l,v-1);
 	lv = muliu(lv1,l);
 	X = FpXQX_roots(D,T,p);
@@ -977,91 +977,120 @@ GEN Ell_l1(GEN EN, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
   return gerepileupto(av,S);
 }
 
+GEN Ell_FillTors_worker(GEN Axes, ulong y, GEN T, GEN pe, GEN p, long e, GEN a4)
+{
+	GEN ENy;
+	ulong N,x;
+	N = lg(gel(Axes,1))-1;
+	ENy =cgetg(N+1,t_COL);
+	for(x=1;x<N;x++)
+	{
+		gel(ENy,x) = elladd_padic(a4,gmael(Axes,1,x),gmael(Axes,2,y),T,pe,p,e);
+	}
+	gel(ENy,N) = gcopy(gen_0);
+	return ENy;
+}
+
+GEN Ell_l1_worker(GEN EN, ulong y, GEN T, GEN pe, GEN p, long e)
+{ /* t_COL l1(x,y) for x in Z/NZ */
+	pari_sp av = avma;
+	GEN P,Q,L1y;
+	ulong N,xmax,x;
+	N = lg(EN)-1;
+	P = mkvecsmall2(0,y);
+	Q = cgetg(3,t_VECSMALL);
+	L1y = cgetg(N+1,t_COL);
+	if(y==N)
+	{
+		Q[1] = 0; Q[2] = 1;
+		xmax = N-1;
+		gel(L1y,N) = gcopy(gen_0);
+	}
+	else
+	{
+		Q[1] = 1; Q[2] = 0;
+		xmax = N;
+	}
+	for(x=1;x<=xmax;x++)
+	{
+		P[1] = x;
+		gel(L1y,x) = Ell_l1(EN,P,Q,T,pe,p,e);
+	}
+	return gerepileupto(av,L1y);
+}
+
 GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 {
 	pari_sp av = avma;
-	GEN worker,done,E,EN,Ml1,params,v01,v10;
-	ulong i,j,x,y;
+	GEN worker,done,E,Axes,ENx0,EN0y,EN,Ml1,params,INTs;
+	ulong x,y;
 	long pending,workid;
   struct pari_mt pt;
 	E = stoi(e);
 	/* Write down all N-torsion: : this is a naive level structure alpha : (Z/NZ)² ~ E[N] */
 	EN = cgetg(N+1,t_MAT); /* [ m*i*P + j*Q ] */
-	Ml1 = cgetg(N+1,t_MAT);
-	for(j=1;j<=N;j++)
-	{
-		gel(EN,j) = cgetg(N+1,t_COL);
-		gel(Ml1,j) = cgetg(N+1,t_COL);
-	}
-	gcoeff(EN,N,N) = gcoeff(Ml1,N,N) = gen_0;
-	gcoeff(EN,m,N) = P;
-	gcoeff(EN,N,1) = Q;
+	Axes = cgetg(3,t_VEC);
+	gel(Axes,1) = ENx0 = cgetg(N+1,t_COL);
+	gel(Axes,2) = EN0y = cgetg(N+1,t_VEC);
+	gel(ENx0,N) = gel(EN0y,N) = gen_0;
+	gel(ENx0,m) = P;
+	gel(EN0y,1) = Q;
 	/* Axes */
 	for(x=2;x<N;x++)
 	{
-		gcoeff(EN,ZNnorm(m*x,N),N) = elladd_padic(a4,gcoeff(EN,ZNnorm(m*(x-1),N),N),P,T,pe,p,e);
-		gcoeff(EN,N,x) = elladd_padic(a4,gcoeff(EN,N,x-1),Q,T,pe,p,e);
+		gel(ENx0,ZNnorm(m*x,N)) = elladd_padic(a4,gel(ENx0,ZNnorm(m*(x-1),N)),P,T,pe,p,e);
+		gel(EN0y,x) = elladd_padic(a4,gel(EN0y,x-1),Q,T,pe,p,e);
 	}
 	/* The rest */
 	params = cgetg(8,t_VEC);
-	gel(params,1) = a4;
-	gel(params,4) = T;
-	gel(params,5) = pe;
-	gel(params,6) = p;
-	gel(params,7) = E;
-	worker = strtofunction("_elladd_padic");
-  mt_queue_start_lim(&pt,worker,(N-1)*(N-1));
+	gel(params,1) = Axes;
+	gel(params,3) = T;
+	gel(params,4) = pe;
+	gel(params,5) = p;
+	gel(params,6) = E;
+	gel(params,7) = a4;
+	INTs = cgetg(N+1,t_VEC);
+	worker = strtofunction("_Ell_FillTors_worker");
+  mt_queue_start_lim(&pt,worker,N-1);
 	pending = 0;
-	for(x=1;x<N||pending;x++)
+	for(y=1;y<N||pending;y++)
 	{
-		for(y=1;y<N;y++)
+		if(y<N)
 		{
-			if(x<N)
-			{
-				gel(params,2) = gcoeff(EN,x,N);
-				gel(params,3) = gcoeff(EN,N,y);
-				mt_queue_submit(&pt,N*x+y,params);
-			}
-			else mt_queue_submit(&pt,N*x+y,NULL);
-			done = mt_queue_get(&pt,&workid,&pending);
-      if(done)
-			{
-				i = udivuu_rem(workid,N,&j);
-				gcoeff(EN,i,j) = done;
-			}
-			if(x>=N) break;
+			gel(params,2) = gel(INTs,y) = utoi(y);
+			mt_queue_submit(&pt,y,params);
+		}
+		else mt_queue_submit(&pt,0,NULL);
+		done = mt_queue_get(&pt,&workid,&pending);
+		if(done)
+		{
+			gel(EN,workid) = done;
+			gcoeff(EN,N,workid) = gel(EN0y,workid);
 		}
 	}
 	mt_queue_end(&pt);
+	gel(EN,N) = ENx0;
+	gel(INTs,N) = utoi(N);
 	/* Ml1 */
+	setlg(params,7); /* Hide a4 */
 	gel(params,1) = EN;
-	v01 = mkvecsmall2(0,1);
-	v10 = mkvecsmall2(1,0);
-	worker = strtofunction("_Ell_l1");
-  mt_queue_start_lim(&pt,worker,N*N-1);
-	for(x=1;x<=N||pending;x++)
+	worker = strtofunction("_Ell_l1_worker");
+  mt_queue_start_lim(&pt,worker,N);
+	Ml1 = cgetg(N+1,t_MAT);
+	for(y=1;y<=N||pending;y++)
 	{
-		for(y=1;y<=N;y++)
+		if(y<=N)
 		{
-			if(x==N && y==N) continue;
-			if(x<=N)
-			{
-				gel(params,2) = mkvecsmall2(x,y);
-				gel(params,3) = y==N ? v01 : v10;
-				mt_queue_submit(&pt,N*x+y,params);
-			}
-			else mt_queue_submit(&pt,N*x+y,NULL);
-			done = mt_queue_get(&pt,&workid,&pending);
-			if(done)
-      {
-        i = udivuu_rem(workid-1,N,&j);
-        gcoeff(Ml1,i,j+1) = done;
-      }
-			if(x>N) break;
+				gel(params,2) = gel(INTs,y);
+				mt_queue_submit(&pt,y,params);
 		}
+		else mt_queue_submit(&pt,0,NULL);
+		done = mt_queue_get(&pt,&workid,&pending);
+		if(done)
+			gel(Ml1,workid) = done;
 	}
 	mt_queue_end(&pt);
-	return gerepilecopy(av,Ml1);
+	return gerepileupto(av,Ml1);
 }
 
 GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref, GEN Badj)
@@ -1669,6 +1698,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 		/* Do we span? */
 		B = gel(FqM_indexrank(M2,T,p),2);
 		nB = lg(B)-1;
+		if(DEBUGLEVEL>=2) printf("ModPicInit: span %lu our of %lu\n",nB,d);
 		if(nB>d)
 			pari_err(e_BUG,"Excessive dimension in M2(GammaH)");
 		if(nB==d)

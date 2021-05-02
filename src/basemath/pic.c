@@ -1043,31 +1043,43 @@ GEN rand_subset(ulong n, ulong r)
 GEN PicRand(GEN J, GEN randseed)
 {
   pari_sp av = avma;
-  ulong d0,nZ,nV;
+  ulong nS,nZ,nV;
   ulong i,j;
   long e;
   GEN T,p,pe,V;
-  GEN S,col,K;
+  GEN S,K;
 
   if(randseed && !gequal0(randseed))
     setrand(randseed);
-
-  d0 = Jgetd0(J);
+	
+	switch(random_Fl(3))
+	{
+		case 1:
+			nS = Jgetg(J);
+			V = gmael(JgetEvalData(J),1,1);
+			break;
+		case 2:
+      nS = Jgetg(J);
+      V = gmael(JgetEvalData(J),1,1);
+			break;
+		default:
+			nS = Jgetd0(J);
+			V = JgetV(J,2);
+			break;
+	}
+  nS = Jgetd0(J);
   JgetTpe(J,&T,&pe,&p,&e);
   V = JgetV(J,2);
   nV = lg(V);
   nZ = lg(gel(V,1));
 
   K = cgetg(nV,t_MAT);
-  S = rand_subset(nZ-1,d0);
+  S = rand_subset(nZ-1,nS);
   for(j=1;j<nV;j++)
   {
-    col = cgetg(d0+1,t_COL);
-    for(i=1;i<=d0;i++)
-    {
-      gel(col,i) = gcoeff(V,S[i],j);
-    }
-    gel(K,j) = col;
+    gel(K,j) = cgetg(nS+1,t_COL);
+    for(i=1;i<=nS;i++)
+      gcoeff(K,i,j) = gcoeff(V,S[i],j);
   }
   K = matkerpadic(K,T,pe,p,e);
   K = FqM_mul(V,K,T,pe);
