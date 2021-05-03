@@ -1,6 +1,11 @@
 p; q;
 subst(Y/X,X,x)
 substvec(x+y,[x,y],[1,x])
+substvec([x,y],[x,y],[[1,2],3])
+substvec([x,y],[x,y],[[1,2],[3]])
+substvec([x,y],[x,y],[[1,2],[3,4]])
+substvec([x,y,z],[x,y,z],[[1,2],[3,4],[5,6]])
+substvec([x,y],[x,y],[[x+y,x],[y,x+y]])
 
 \\ #1321
 v = [p + w*q, w*p + q] * Mod(1, w + 1);

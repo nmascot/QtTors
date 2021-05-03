@@ -88,6 +88,7 @@ BA  21- [libpari] elltors_psylow
         and its factorization (which comes for free)
 HC  25- New GP functions nflist, nfresolvent
 BA  26- [libpari] Hermite_bound
+    27- substvec: support t_VEC replacement values
 
   Changed
 HC   1- faster implementation of eulervec + cache result

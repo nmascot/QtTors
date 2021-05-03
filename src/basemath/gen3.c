@@ -1711,32 +1711,38 @@ GEN
 gsubstvec(GEN e, GEN v, GEN r)
 {
   pari_sp av = avma;
-  long i, j, l = lg(v);
+  long i, j, k, l = lg(v);
   GEN w, z, R;
   if ( !is_vec_t(typ(v)) ) pari_err_TYPE("substvec",v);
   if ( !is_vec_t(typ(r)) ) pari_err_TYPE("substvec",r);
   if (lg(r)!=l) pari_err_DIM("substvec");
-  w = cgetg(l,t_VECSMALL);
-  z = cgetg(l,t_VECSMALL);
-  R = cgetg(l,t_VEC);
-  for(i=j=1;i<l;i++)
+  w = cgetg(l, t_VECSMALL);
+  z = cgetg(l, t_VECSMALL);
+  R = cgetg(l, t_VEC); k = 0;
+  for(i = j = 1; i < l; i++)
   {
     GEN T = gel(v,i), ri = gel(r,i);
     if (!gequalX(T)) pari_err_TYPE("substvec [not a variable]", T);
     if (gvar(ri) == NO_VARIABLE) /* no need to take precautions */
+    {
       e = gsubst(e, varn(T), ri);
+      if (is_vec_t(typ(ri)) && k++) e = shallowconcat1(e);
+    }
     else
     {
       w[j] = varn(T);
       z[j] = fetch_var();
-      gel(R,j) = ri;
-      j++;
+      gel(R,j) = ri; j++;
     }
   }
   for(i = 1; i < j; i++) e = gsubst(e,w[i],pol_x(z[i]));
-  for(i = 1; i < j; i++) e = gsubst(e,z[i],gel(R,i));
+  for(i = 1; i < j; i++)
+  {
+    e = gsubst(e,z[i],gel(R,i));
+    if (is_vec_t(typ(gel(R,i))) && k++) e = shallowconcat1(e);
+  }
   for(i = 1; i < j; i++) (void)delete_var();
-  return gerepileupto(av, e);
+  return k > 1? gerepilecopy(av, e): gerepileupto(av, e);
 }
 
 /*******************************************************************/
