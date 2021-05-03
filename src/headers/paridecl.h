@@ -2301,6 +2301,7 @@ GEN     famat_nfvalrem(GEN nf, GEN x, GEN pr, GEN *py);
 GEN     gpnfvalrem(GEN nf, GEN x, GEN pr, GEN *py);
 GEN     ideallist(GEN nf,long bound);
 GEN     ideallist0(GEN nf,long bound, long flag);
+GEN     gideallist(GEN nf, GEN bound, long flag);
 GEN     ideallistarch(GEN nf, GEN list, GEN arch);
 GEN     ideallog(GEN nf,GEN x,GEN bid);
 GEN     ideallogmod(GEN nf,GEN x,GEN bid, GEN mod);

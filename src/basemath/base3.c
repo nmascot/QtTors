@@ -3404,25 +3404,26 @@ log_prk_units_init(GEN bnf)
 static GEN
 Ideallist(GEN bnf, ulong bound, long flag)
 {
-  const long cond = flag & 8;
-  const long do_units = flag & 2, big_id = !(flag & 4);
+  const long do_units = flag & 2, big_id = !(flag & 4), cond = flag & 8;
   const long istar_flag = (flag & nf_GEN) | nf_INIT;
-  pari_sp av, av0 = avma;
+  pari_sp av;
   long i, j;
   GEN nf, z, p, fa, id, BOUND, U, empty = cgetg(1,t_VEC);
   forprime_t S;
   ideal_data ID;
-  GEN (*join_z)(ideal_data*, GEN) =
-    do_units? &join_unit
-              : (big_id? &join_idealinit: &join_ideal);
+  GEN (*join_z)(ideal_data*, GEN);
 
   if (do_units)
   {
     bnf = checkbnf(bnf);
     nf = bnf_get_nf(bnf);
+    join_z = &join_unit;
   }
   else
+  {
     nf = checknf(bnf);
+    join_z = big_id? &join_idealinit: &join_ideal;
+  }
   if ((long)bound <= 0) return empty;
   id = matid(nf_get_degree(nf));
   if (big_id) id = Idealstar(nf,id, istar_flag);
@@ -3434,7 +3435,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
   BOUND = utoipos(bound);
   z = const_vec(bound, empty);
   U = do_units? log_prk_units_init(bnf): NULL;
-  gel(z,1) = mkvec(U? mkvec2(id, cgetg(1,t_VEC)): id);
+  gel(z,1) = mkvec(U? mkvec2(id, empty): id);
   ID.nf = nf;
 
   p = cgetipos(3);
@@ -3458,7 +3459,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
         if (big_id) {
           ID.prL = Idealstarprk(nf, pr, l, istar_flag);
           if (U)
-            ID.emb = Q == 2? cgetg(1,t_VEC)
+            ID.emb = Q == 2? empty
                            : log_prk_units(nf, U, gel(bid_get_sprk(ID.prL),1));
         }
         for (iQ = Q,i = 1; iQ <= bound; iQ += Q,i++)
@@ -3471,18 +3472,32 @@ Ideallist(GEN bnf, ulong bound, long flag)
       z = gerepilecopy(av, z);
     }
   }
-  return gerepilecopy(av0, z);
+  return z;
 }
 GEN
-ideallist0(GEN bnf,long bound, long flag) {
-  if (flag<0 || flag>15) pari_err_FLAG("ideallist");
-  if (bound < 0)
+gideallist(GEN bnf, GEN B, long flag)
+{
+  pari_sp av = avma;
+  if (typ(B) != t_INT)
   {
-    pari_sp av = avma;
-    if (flag != 4) pari_err_IMPL("ideallist with bid for single norm");
-    return gerepilecopy(av, ideals_by_norm(bnf, stoi(-bound)));
+    B = gfloor(B);
+    if (typ(B) != t_INT) pari_err_TYPE("ideallist", B);
+    if (signe(B) < 0) B = gen_0;
   }
-  return Ideallist(bnf,bound,flag);
+  if (signe(B) < 0)
+  {
+    if (flag != 4) pari_err_IMPL("ideallist with bid for single norm");
+    return gerepilecopy(av, ideals_by_norm(bnf, absi(B)));
+  }
+  if (flag < 0 || flag > 15) pari_err_FLAG("ideallist");
+  return gerepilecopy(av, Ideallist(bnf, itou(B), flag));
+}
+GEN
+ideallist0(GEN bnf, long bound, long flag)
+{
+  pari_sp av = avma;
+  if (flag < 0 || flag > 15) pari_err_FLAG("ideallist");
+  return gerepilecopy(av, Ideallist(bnf, bound, flag));
 }
 GEN
 ideallist(GEN bnf,long bound) { return ideallist0(bnf,bound,4); }
