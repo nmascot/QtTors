@@ -1206,14 +1206,11 @@ randS(GEN b)
 }
 
 static GEN
-liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2, GEN sqrtLS2, GEN factLS2,
-           GEN badprimes, GEN vcrt, GEN pol, GEN selmer, GEN K, long lim, long ntry)
+liftselmerinit(GEN expo, GEN vnf, GEN sqrtLS2, GEN factLS2,
+               GEN badprimes, GEN vcrt, GEN pol)
 {
-  pari_sp av = avma, av2;
   long n = lg(vnf)-1, k, t;
-  GEN ttheta, tttheta, z, b, polprime, expo = Flm_Flc_mul(selmer, vec, 2);
-
-  b = cgetg(n+1, t_VEC);
+  GEN b = cgetg(n+1, t_VEC);
   for (k = t = 1; k <= n; k++)
   {
     GEN fak = gel(factLS2,k), ek;
@@ -1222,7 +1219,16 @@ liftselmer(GEN vec, GEN vnf, GEN sbase, GEN LS2, GEN sqrtLS2, GEN factLS2,
     gel(b,k) = selmerbasis(gel(vnf,k), ek, gel(sqrtLS2,k),
                            fak, gel(badprimes,k), gel(vcrt,k), pol);
   }
-  b = shallowconcat1(b);
+  return shallowconcat1(b);
+}
+
+static GEN
+liftselmer(GEN b, GEN expo, GEN vnf, GEN sbase, GEN LS2, GEN vcrt, GEN pol,
+           GEN selmer, GEN K, long lim, long ntry)
+{
+  pari_sp av = avma, av2;
+  long t;
+  GEN ttheta, tttheta, z, polprime;
   z = RgXQV_factorback(LS2, expo, pol);
   ttheta = RgX_shift_shallow(pol,-2);
   tttheta = RgX_shift_shallow(pol, -1);
@@ -1431,10 +1437,11 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   for (i=1; i <= dim; i++)
   {
     pari_sp btop = avma;
-    GEN P, vec = vecsmall_ei(dim, i);
+    GEN b, P, expo, vec = vecsmall_ei(dim, i);
     if (Flm_Flc_invimage(newselmer, vec, 2)) continue;
-    P = liftselmer(vec, vnf, sbase, LS2, sqrtLS2, factLS2, badprimes,
-        vcrt, pol, selmer, K, LIM1, 1);
+    expo = Flm_Flc_mul(selmer, vec, 2);
+    b = liftselmerinit(expo, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
+    P = liftselmer(b, expo, vnf, sbase, LS2, vcrt, pol, selmer, K, LIM1, 1);
     if (P)
     {
       gel(listpoints, ++nbpoints) = P; /* new point on ell */
@@ -1445,11 +1452,12 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   for (t=1, u=1; nbpoints < dim && effort > 0; t++)
   {
     pari_sp btop = avma;
-    GEN P, vec;
+    GEN expo, b, P, vec;
     do vec = random_Flv(dim, 2);
     while (zv_equal0(vec) || Flm_Flc_invimage(newselmer, vec, 2));
-    P = liftselmer(vec, vnf, sbase, LS2, sqrtLS2, factLS2, badprimes,
-        vcrt, pol, selmer, K, u*LIM1, u);
+    expo = Flm_Flc_mul(selmer, vec, 2);
+    b = liftselmerinit(expo, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
+    P = liftselmer(b, expo, vnf, sbase, LS2, vcrt, pol, selmer, K, u*LIM1, u);
     if (P)
     {
       gel(listpoints, ++nbpoints) = P;
