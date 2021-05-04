@@ -2043,7 +2043,9 @@ goes through the same subgroups as \tet{forsubgroup(H = G, B,)}, calling
 \tet{fun(E, H)} for each subgroup $H$, stopping if \kbd{fun} returns a
 nonzero value.
 
-\item \tet{forprime}, for which we refer you to the next subsection.
+\item \tet{forprime} and \tet{forprimestep}, iterators over primes and
+primes in arithmetic progressions, for which we refer you to the
+next subsection.
 
 \item \tet{forcomposite}, we provide an iterator over composite integers:
 
@@ -2139,24 +2141,32 @@ The iterator has two flavors, one providing the successive primes as
 \kbd{ulong}s, the other as \kbd{GEN}. They are initialized as follows,
 where we expect to run over primes $\geq a$ and $\leq b$:
 
-\fun{int}{forprime_init}{forprime_t *T, GEN a, GEN b} for the \kbd{GEN}
-variant, where $b = \kbd{NULL}$ means $+\infty$.
-
 \fun{int}{u_forprime_init}{forprime_t *T, ulong a, ulong b} for the
 \kbd{ulong} variant, where $b = \kbd{ULONG\_MAX}$ means we will run through
 all primes representable in a \kbd{ulong} type.
 
-Both variant return $1$ on success, and $0$ if the iterator would run over an
+\fun{int}{forprime_init}{forprime_t *T, GEN a, GEN b} for the \kbd{GEN}
+variant, where $b = \kbd{NULL}$ means $+\infty$.
+
+\fun{int}{forprimestep_init}{forprime_t *T, GEN a, GEN b, GEN q} initialize
+an iterator $T$ over primes in an arithmetic progression, $p \geq a$ and $p
+\leq b$ (where $b = \kbd{NULL}$ means $+\infty$). The argument $q$ is
+either a \typ{INT} ($p \equiv a \pmod{q}$) or a \typ{INTMOD} \kbd{Mod(c,N)}
+and we restrict to that congruence class.
+
+All variants return $1$ on success, and $0$ if the iterator would run over an
 empty interval (if $a > b$, for instance). They allocate the \tet{forprime_t}
 data structure on the PARI stack.
 
 \noindent The successive primes are then obtained using
 
 \fun{GEN}{forprime_next}{forprime_t *T}, returns \kbd{NULL} if no more primes
-are available in the interval.
+are available in the interval and the next suitable prime as a \typ{INT}
+otherwise.
 
 \fun{ulong}{u_forprime_next}{forprime_t *T}, returns $0$ if no more primes
-are available in the interval.
+are available in the interval and fitting in an \kbd{ulong} and the next
+suitable prime otherwise.
 
 These two functions leave alone the PARI stack, and write their state
 information in the preallocated \tet{forprime_t} struct. The typical usage is
