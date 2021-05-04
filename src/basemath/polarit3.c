@@ -2743,7 +2743,7 @@ ZX_ZXY_rnfequation(GEN A, GEN B, long *lambda)
   if (lambda)
   {
     *lambda = ZX_ZXY_rnfequation_lambda(A, B, *lambda);
-    B = RgX_translate(B, monomial(stoi(*lambda), 1, varn(A)));
+    if (*lambda) B = RgX_translate(B, monomial(stoi(*lambda), 1, varn(A)));
   }
   return ZX_ZXY_resultant(A,B);
 }
