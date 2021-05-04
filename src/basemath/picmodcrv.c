@@ -2086,7 +2086,7 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 			pari_err(e_BUG,"charpoly in mfgalrep_bestp");
 		if(degpol(FpX_gcd(chi,psi,l)))
 		{
-			pari_printf("mfgalrep_best: p=%Ps has multiplicity\n",p);
+			if(DEBUGLEVEL) pari_printf("mfgalrep_best: p=%Ps has multiplicity\n",p);
 			continue;
 		}
 		a1 = gel(FpX_root_order_bound(chi,l),2);

@@ -763,8 +763,8 @@ void JgetTpe(GEN J, GEN* T, GEN* pe, GEN* p, long* e)
 GEN JacRed(GEN J, ulong e)
 {
   pari_sp av = avma;
-  GEN Je,p,pe;
-  ulong i;
+  GEN Je,p,pe,Ui,Uei;
+  ulong i,j,n;
   if(Jgete(J)<e) pari_err(e_MISC,"Cannot perform this reduction");
   Je = cgetg(lgJ+1,t_VEC);
   gel(Je,1) = gcopy(Jgetf(J));
@@ -788,8 +788,14 @@ GEN JacRed(GEN J, ulong e)
 	else
 	{
   	gel(Je,13) = cgetg(5,t_VEC);
-  	gmael(Je,13,1) = FpXM_red(gmael(J,13,1),pe);
-  	gmael(Je,13,2) = FpXM_red(gmael(J,13,2),pe);
+		for(i=1;i<=2;i++)
+		{
+			Ui = gmael(J,13,i);
+			n = lg(Ui);
+			gmael(Je,13,i) = Uei = cgetg(n,t_VEC);
+			for(j=1;j<n;j++)
+				gel(Uei,j) = FpXM_red(gel(Ui,j),pe);
+		}
   	gmael(Je,13,3) = gcopy(gmael(J,13,3));
   	gmael(Je,13,4) = FpXM_red(gmael(J,13,4),pe);
 	}
@@ -1046,30 +1052,24 @@ GEN PicRand(GEN J, GEN randseed)
   ulong nS,nZ,nV;
   ulong i,j;
   long e;
-  GEN T,p,pe,V;
+  GEN T,p,pe,U,V;
   GEN S,K;
 
   if(randseed && !gequal0(randseed))
     setrand(randseed);
-	
-	switch(random_Fl(3))
-	{
-		case 1:
-			nS = Jgetg(J);
-			V = gmael(JgetEvalData(J),1,1);
-			break;
-		case 2:
-      nS = Jgetg(J);
-      V = gmael(JgetEvalData(J),1,1);
-			break;
-		default:
-			nS = Jgetd0(J);
-			V = JgetV(J,2);
-			break;
+
+	if(random_Fl(2)==0 && !gequal0(U=JgetEvalData(J)))
+	{ /* In 1/2 cases, use EvalData, if present */
+		U = gel(U,1+random_Fl(2));
+		V = gel(U,1+random_Fl(lg(U)-1));
+		nS = Jgetg(J);
 	}
-  nS = Jgetd0(J);
+	else
+	{
+		V = JgetV(J,2);
+		nS = Jgetd0(J);
+	}
   JgetTpe(J,&T,&pe,&p,&e);
-  V = JgetV(J,2);
   nV = lg(V);
   nZ = lg(gel(V,1));
 
@@ -2491,7 +2491,7 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
 {
   pari_sp av=avma,av1,av2,av3,avrho,avtesttors;
 	GEN T,p,V;
-  long efin,e1,e2,e21,efin2;
+  long efin,e1,e2,e21,efin2,mask;
   GEN pefin,pe1,pe21,pe2,pefin2;
   GEN J1,J2;
   GEN sW,Vs,U0,V0;
@@ -2519,6 +2519,19 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
 	}
 	JgetTpe(J,&T,&pefin,&p,&efin);
 	if(eini >= efin) return gcopy(W);
+	
+	mask = quadratic_prec_mask(efin); /* Best scheme to reach prec efin */
+  e1 = e2 = 1;
+  for(;;) /* Determine where to start */
+  {
+    e2<<=1;
+    if(mask&1) e2--;
+    mask>>=1;
+    if(e2>eini) break;
+    e1 = e2;
+  }
+	e1 = eini;
+
 	g = Jgetg(J);
   d0 = Jgetd0(J);
   V = JgetV(J,2);
@@ -2540,19 +2553,16 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
 	for(i=1;i<=d0;i++) gel(V0,i) = DivMul(FqM_FqC_mul(V,gel(U0,i),T,pefin2),V,T,pefin2); /* s*V for s in subspace of V whose rows in sW are 0 */
 	/* TODO parallel? */
 
-	e1 = eini;
-	pe1 = powiu(p,e1);
 	av1 = avma; /* Use to collect garbage at each iteration */
 	J1 = JacRed(J,e1);
 	U = PicDeflate_U(J1,W,nGW); /* IGS of W1 // basis of V */
 	U = gerepileupto(av1,U);
+	pe1 = e1==1? p : powiu(p,e1);
 
 	r = 3*d0+1-g; /* Wanted rank of GWV */
 	/* Main loop */
-  while(1)
+  for(;;)
   {
-    e2 = 2*e1;
-    if(e2>efin) e2 = efin;
 		e21 = e2-e1;
 		pe21 = e21==e1 ? pe1 : powiu(p,e21);
     if(DEBUGLEVEL) pari_printf("piclifttors: Lifting %Ps-torsion point from prec O(%Ps^%lu) to O(%Ps^%lu)\n",l,p,e1,p,e2);
@@ -2791,11 +2801,16 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
 		/* END LIFTING */
     e1 = e2;
 		pe1 = pe2;
+		e2<<=1;
+		if(mask&1) e2--;
+		mask>>=1;
 		if(c0)
 			gerepileall(av1,4,&U,&pe1,&c0,&P1);
 		else
 			gerepileall(av1,2,&U,&pe1);
   }
+	printf("Out!!!\n");
+	return NULL; /* TODO prevent compiler from freaking out */
 }
 
 /* TorsSpace */
