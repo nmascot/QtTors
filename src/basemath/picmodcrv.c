@@ -2134,6 +2134,6 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 	e = itos(gceil(divrr(addrr(log2,mulur(2*D,log10)),logp)));
 	if(DEBUGLEVEL) pari_printf("mfgalrep: X_H(%lu) (H=%Ps), genus %ld, over Q_%Ps^%lu with accuracy O(%Ps^%ld)\n",N,H,degpol(Lp)/2,p,a,p,e);
 	J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
-	R = PicTorsGalRep(J,l,Lp,chi);
+	R = PicTorsGalRep(J,l,chi);
 	return gerepileupto(av,R);
 }

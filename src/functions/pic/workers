@@ -31,7 +31,7 @@ Help:
 Function: _PicTorsBasis_worker
 Section: programming/internals
 C-Name: PicTorsBasis_worker
-Prototype: GGGGGGGGG
+Prototype: GGGGGGGG
 Help:
 
 Function: _PicTorsPairing
