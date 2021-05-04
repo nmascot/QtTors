@@ -517,6 +517,13 @@ cmp_universal(GEN x, GEN y)
       return 0;
 
     case t_POL:
+    {
+      long X = x[1] & (VARNBITS|SIGNBITS);
+      long Y = y[1] & (VARNBITS|SIGNBITS);
+      if (X < Y) return -1;
+      if (X > Y) return 1;
+      return cmp_universal_rec(x, y, 2);
+    }
     case t_SER:
     case t_FFELT:
     case t_CLOSURE:
