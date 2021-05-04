@@ -1603,9 +1603,9 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	long pending,workid;
 
 	up = itou(p);
-	J = cgetg(17,t_VEC);
+	J = cgetg(18,t_VEC);
 	gel(J,1) = gen_0; /* No plane equation for curve */
-	gel(J,4) = gel(J,14) = cgetg(1,t_VEC); /* No formula for RR spaces */
+	gel(J,4) = gel(J,15) = cgetg(1,t_VEC); /* No formula for RR spaces */
 	gel(J,6) = p;
 	/* Create unramified extension */
 	t = fetch_var();
@@ -1620,6 +1620,9 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	H = gel(H,1); /* <H,-1> */
 	if(dvdui(6*N*(lg(H1)-1),p))
 		pari_err(e_MISC,"Use a prime p that does not divide 6*N*<H>");
+	if(Lp==NULL || gequal0(Lp))
+		Lp = gmael(ModCrv_charpoly_multi(N,H,mkvec(p)),1,1);
+	gel(J,10) = Lp;
 	g = degpol(Lp)/2;
 	if(DEBUGLEVEL) printf("modpicinit: genus %lu\n",g);
 	gel(J,2) = utoi(g);
@@ -1847,7 +1850,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	}
   mt_queue_end(&pt);
 	if(DEBUGLEVEL) printf("modpicinit: Eval data\n");
-	gel(J,13) = EvalData = cgetg(5,t_VEC);
+	gel(J,14) = EvalData = cgetg(5,t_VEC);
 	C02 = zv_z_mul(C0,2);
 	// TODO parallel
 	gel(EvalData,1) = mkvec(FqM_mul(V2,MRRsubspace(V2qexps,E1,C02,T,pe,p,e),T,pe));
@@ -1886,10 +1889,10 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	if(DEBUGLEVEL) printf("modpicinit: M6(GammaH)(-3C0), dim %lu\n",d);
 	V3 = DivAdd1(V2,V1,d,T,pe,p,d0,0); // TODO tune excess=d0
 	/* Finish constructing J */
-	gel(J,10) = V = mkvec3(V1,V2,V3);
+	gel(J,11) = V = mkvec3(V1,V2,V3);
 	gel(J,7) = ie;
 	if(DEBUGLEVEL) printf("modpicinit: Computing equation matrices\n");
-  gel(J,11) = KV = cgetg(4,t_VEC);
+  gel(J,12) = KV = cgetg(4,t_VEC);
   worker = strtofunction("_mateqnpadic");
 	params = cgetg(6,t_VEC);
 	gel(params,2) = T;
@@ -1909,9 +1912,9 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
     if(done) gel(KV,workid) = done;
   }
   mt_queue_end(&pt);
-	gel(J,12) = DivMul(gel(V1,1),V1,T,pe);
-	gel(J,15) = PtsFrob;
-	gel(J,16) = UseTp ? mkvec(mkvec2(PtsDiamp,gen_0)) : cgetg(1,t_VEC);
+	gel(J,13) = DivMul(gel(V1,1),V1,T,pe);
+	gel(J,16) = PtsFrob;
+	gel(J,17) = UseTp ? mkvec(mkvec2(PtsDiamp,gen_0)) : cgetg(1,t_VEC);
 	return gerepilecopy(av,J);
 }
 
