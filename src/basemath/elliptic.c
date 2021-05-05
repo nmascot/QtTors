@@ -4265,22 +4265,20 @@ ellintegralbmodel(GEN e, GEN *pv)
 {
   pari_sp av = avma;
   GEN f, a1, a3;
-  checkell(e);
-  f = ellintegralmodel_i(e, pv);
+
+  checkell(e); f = ellintegralmodel_i(e, pv);
   a1 = ell_get_a1(f);
   a3 = ell_get_a3(f);
   if (!signe(a1) && !signe(a3))
   { if (!*pv) *pv = init_ch(); }
   else
   {
-    GEN v = mkvec4(mpodd(a1) || mpodd(a3) ? ghalf: gen_1,
+    GEN v = mkvec4(mpodd(a1) || mpodd(a3) ? ghalf : gen_1,
                    gen_0, gdivgs(a1,-2), gdivgs(a3,-2));
-    gcomposev(pv, v);
-    f = leafcopy(f); ell_reset(f);
-    f = coordch(f, v);
+    gcomposev(pv, v); f = coordch(f, v);
   }
-  gerepileall(av, 2, &f, pv);
-  return f;
+  if (f != e) ell_reset(f);
+  gerepileall(av, 2, &f, pv); return f;
 }
 
 static long
