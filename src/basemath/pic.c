@@ -1782,7 +1782,7 @@ GEN RRspace_FieldOfDef(GEN L, GEN vars)
   return W;
 }
 
-GEN RRspaceEval(GEN L, GEN vars, GEN pts, GEN T, GEN p, long e, GEN pe)
+GEN RRspaceEval(GEN L, GEN vars, GEN pts, GEN T, GEN pe, GEN p, long e)
 {
   pari_sp av = avma;
   long w,dW;
@@ -1821,7 +1821,9 @@ GEN RRspaceEval(GEN L, GEN vars, GEN pts, GEN T, GEN p, long e, GEN pe)
   else /* Rational case */
   {
     avma = av;
-    return mkvec(FnsEvalAt_Rescale(L,pts,vars,T,p,e,pe));
+		res = cgetg(2,t_VEC);
+		gel(res,1) = FnsEvalAt_Rescale(L,pts,vars,T,p,e,pe);
+    return res;
   }
 }
 
@@ -1869,13 +1871,34 @@ GEN CurveRandPt(GEN f, GEN T, GEN p, long e, GEN bad)
 GEN PicEvalInit(GEN L12, GEN vars, GEN Z, GEN V2, GEN T, GEN p, long e, GEN pe)
 {
   pari_sp av = avma;
-  GEN res,I,M;
+  GEN params,worker,done,res,I,M;
   ulong i,j,nV2;
+	long workid,pending;
+	struct pari_mt pt;
 	if(gequal0(L12))
 		return gen_0;
+	params = cgetg(8,t_VEC);
+	gel(params,2) = vars;
+	gel(params,3) = Z;
+	gel(params,4) = T;
+	gel(params,5) = pe;
+	gel(params,6) = p;
+	gel(params,7) = stoi(e);
   res = cgetg(5,t_VEC);
-  for(i=1;i<=2;i++) /* TODO parallelise */
-    gel(res,i) = RRspaceEval(gel(L12,i),vars,Z,T,p,e,pe);
+	worker = strtofunction("_RRspace_eval");
+  mt_queue_start_lim(&pt,worker,2);
+  for(i=1;i<=2||pending;i++)
+  {
+		if(i<=2)
+		{
+			gel(params,1) = gel(L12,i);
+			mt_queue_submit(&pt,i,params);
+		}
+		else mt_queue_submit(&pt,0,NULL);
+    done = mt_queue_get(&pt,&workid,&pending);
+    if(done) gel(res,workid) = done;
+  }
+  mt_queue_end(&pt);
   nV2 = lg(V2);
   gel(res,3) = I = gel(FqM_indexrank(V2,T,p),1); /* Rows of V2 forming invertible block */
   /* That invertible block */
@@ -2193,8 +2216,8 @@ GEN JacLift(GEN J, ulong e2)
   }
   mt_queue_end(&pt);
   printf("End RR\n"); */
-  gel(V,1) = gel(RRspaceEval(gel(L,1),vars,Z2,T,p,e2,pe2),1);
-  V2 = gel(V,2) = gel(RRspaceEval(gel(L,2),vars,Z2,T,p,e2,pe2),1);
+  gel(V,1) = gel(RRspaceEval(gel(L,1),vars,Z2,T,pe2,p,e2),1);
+  V2 = gel(V,2) = gel(RRspaceEval(gel(L,2),vars,Z2,T,pe2,p,e2),1);
 	gel(V,3) = DivAdd(gel(V,1),gel(V,2),3*d0+1-g,T,p,pe2,0);
   W0 = gel(V,1); /* TODO can it happen that W0 != V1 even though all data is present? */
 	if(gequal0(gel(L,3)))
@@ -2204,8 +2227,8 @@ GEN JacLift(GEN J, ulong e2)
 	else
 	{
 		U = cgetg(5,t_VEC);
-  	gel(U,1) = RRspaceEval(gmael(L,3,1),vars,Z2,T,p,e2,pe2);
-  	gel(U,2) = RRspaceEval(gmael(L,3,2),vars,Z2,T,p,e2,pe2);
+  	gel(U,1) = RRspaceEval(gmael(L,3,1),vars,Z2,T,pe2,p,e2);
+  	gel(U,2) = RRspaceEval(gmael(L,3,2),vars,Z2,T,pe2,p,e2);
   	I = gel(U,3) = gmael(J,14,3);
   	nV2 = lg(V2);
   	M = cgetg(nV2,t_MAT);

@@ -4,6 +4,12 @@ C-Name: mateqnpadic
 Prototype: GGGGL
 Help:
 
+Function: _RRspace_eval
+Section: programming/internals
+C-Name: RRspaceEval
+Prototype: GGGGGGL
+Help:
+
 Function: _OnePol
 Section: programming/internals
 C-Name: OnePol

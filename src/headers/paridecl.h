@@ -6688,6 +6688,7 @@ int PicMember(GEN J, GEN W);
 int PicIsZero(GEN J, GEN W);
 int PicIsTors(GEN J, GEN W, GEN F);
 int PicEq(GEN J, GEN W1, GEN W2);
+GEN RRspaceEval(GEN L, GEN vars, GEN pts, GEN T, GEN pe, GEN p, long e);
 GEN PicTorsOrd(GEN J, GEN W, GEN l, long flag);
 GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, long e, GEN Lp);
 GEN PicRand(GEN J, GEN randseed);
