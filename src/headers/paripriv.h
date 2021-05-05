@@ -927,6 +927,10 @@ ulong   ZX_ZXY_ResBound(GEN A, GEN B, GEN dB);
 GEN     ffinit_Artin_Schreier(ulong p, long l);
 GEN     ffinit_rand(GEN p, long n);
 
+/* nflistQT.c */
+
+GEN nflistQT(long g, long v);
+
 /* ramanujantau.c */
 GEN     ramanujantau_worker(GEN gt, GEN p2_7, GEN p_9, GEN p);
 GEN     taugen_n_worker(GEN t, GEN pol, GEN p4);

@@ -1,0 +1,26 @@
+default(new_galois_format,1);
+
+tst(n,k)=
+{
+  P=nflist([n,k],'t);V=List();
+  for(a=1,20,
+    Q=subst(P,t,a);
+    if(polisirreducible(Q),
+      G=polgalois(Q);
+      if(G[3]==k, listput(~V,polredabs(Q)))));
+  if (!#V, error(k));
+  #Set(V);
+}
+
+L=[1,1,2,5,5,16,7,50,34];
+S8=setminus(vector(L[8],i,i), [25,36]);
+S9=setminus(vector(L[9],i,i), [3,5,6,7,9,14,15,16,19,23,26,27,32]);
+for(n=1,7,print1(n,": ");for(k=1,L[n],print1(tst(n,k)," "));print(" "));
+print1("8: ");foreach(S8, k, print1(tst(8,k)," "));
+print1("9: ");foreach(S9, k, print1(tst(9,k)," "));
+
+nflist("S25",'t)
+nflist("A25",'t)
+nflist("A24",'t)
+nflist("A23",'t)
+nflist("A22",'t)

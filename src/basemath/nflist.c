@@ -1,4 +1,4 @@
-/* Copyright (C) 2018  The PARI group.
+/* Copyright (C) 2020  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -4922,11 +4922,18 @@ makeC32D4(GEN N, GEN field, long s)
 /*                         Global Programs                              */
 /************************************************************************/
 static long
-grouptranslate(const char *g)
+grouptranslate(const char *g, int QT)
 {
   long ell;
   char r;
 
+  if (QT)
+  {
+    r = *g; ell = itos( strtoi(g + 1) );
+    if (ell < 3) return 0;
+    if (r == 'A') return 1000 * ell + 4;
+    if (r == 'S') return 1000 * ell + 5;
+  }
   if (!strcmp(g, "C1")) return 101;
   if (!strcmp(g, "C2")) return 201;
   if (!strcmp(g, "D2")) return 201;
@@ -4950,6 +4957,11 @@ grouptranslate(const char *g)
   if (!strcmp(g, "D7")) return 702;
   if (!strcmp(g, "M21")) return 703;
   if (!strcmp(g, "M42")) return 704;
+  if (QT)
+  {
+    if (!strcmp(g, "C8")) return 801;
+    if (!strcmp(g, "D8")) return 802;
+  }
   if (!strcmp(g, "C9")) return 901;
   if (!strcmp(g, "D9")) return 903;
   r = *g; ell = itos( strtoi(g + 1) );
@@ -4961,15 +4973,24 @@ grouptranslate(const char *g)
   return 0;
 }
 static long
-group_nTk(GEN g)
+group_nTk(GEN g, int QT)
 {
+  long van[] = { 0, 1, 1, 1, 4, 4, 15, 6, 49, 33 };
   long v[] = { 0, 1, 1, 2, 5, 4, 13, 4, 0, 3 };
   long n, k;
   if (lg(g) != 3 || !RgV_is_ZV(g)) return 0;
   n = itos(gel(g,1)); k = itos(gel(g,2));
   if (n <= 0 || k <= 0 || k >= 100) return 0;
   if (n >= LONG_MAX / 101) return 0;
-  if (n <= 9) return (k <= v[n])? n * 100 + k: 0;
+  if (n <= 9)
+  {
+    if (QT)
+    {
+      if (k == van[n]) return 1000 * n + 4; /* An */
+      if (k == van[n]+1) return 1000 * n + 5; /* Sn */
+    }
+    return (QT || k <= v[n])? n * 100 + k: 0;
+  }
   return (uisprime(n) && k <= 2)? n * 1000 + k: 0;
 }
 
@@ -5208,11 +5229,11 @@ nfmakesome(long g, long deg, long s)
     case 604: v = mkvecsmall4(125238481, 0, 4439449, 0); break;
     case 605: v = mkvecsmall4(7442000, 0, 0, 143883); break;
     case 606: v = mkvecsmall4(2115281, 419904, 373977, 0); break;
-    case 607: v = mkvecsmall4(LONG_MAX, 0, 118336, 0); break;
-    case 608: v = mkvecsmall4(LONG_MAX, 0, 440711081, 13144256); break;
+    case 607: v = mkvecsmall4(12730624, 0, 118336, 0); break;
+    case 608: v = mkvecsmall4(183250432, 0, 440711081, 13144256); break;
     case 609: v = mkvecsmall4(LONG_MAX, 0, 1382400, 1494108); break;
-    case 610: v = mkvecsmall4(LONG_MAX, 0, 4950625, 0); break;
-    case 611: v = mkvecsmall4(LONG_MAX, 941872, 57661, 37479); break;
+    case 610: v = mkvecsmall4(765905625, 0, 4950625, 0); break;
+    case 611: v = mkvecsmall4(5695040, 941872, 57661, 37479); break;
     case 612: v = mkvecsmall4(185313769, 0, 1907161, 0); break;
     case 613: v = mkvecsmall4(LONG_MAX, 221875, 87625, 44496); break;
     case 701: v = mkvecsmall4(LONG_MAX, 0, 0, 0); break;
@@ -5257,14 +5278,15 @@ nflist(GEN GP, GEN N, long s, GEN field)
 {
   pari_sp av = avma;
   GEN v, X, Xinf;
-  long g = 0, deg;
+  long g = 0, deg, tp = typ(GP);
+  long QT = N && typ(N) == t_POL;
 
   if (s < -2) pari_err_DOMAIN("nflist", "s", "<", gen_m2, stoi(s));
   if (field && !okfield(field)) pari_err_TYPE("nflist", field);
-  switch(typ(GP))
+  switch(tp)
   {
-    case t_STR: g = grouptranslate(GSTR(GP)); break;
-    case t_VEC: g = group_nTk(GP); break;
+    case t_STR: g = grouptranslate(GSTR(GP), QT); break;
+    case t_VEC: g = group_nTk(GP, QT); break;
   }
   if (!g)
   {
@@ -5281,6 +5303,7 @@ nflist(GEN GP, GEN N, long s, GEN field)
   Also supported are \"Cp\"=[p,1] and \"Dp\"=[p,2] for any odd prime p";
     pari_err(e_MISC, s, GP);
   }
+  if (QT) return gerepilecopy(av, nflistQT(g, varn(N)));
   deg = g / (g > 1000? 1000: 100);
   if (s > (deg >> 1)) return cgetg(1, t_VEC);
   if (!N) return gerepilecopy(av, nfmakesome(g, deg, s));

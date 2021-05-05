@@ -12,9 +12,10 @@ Help: nflist(G, {N}, {s = -1}, {F}): find all number fields (up to
  (or a resolvent field in the case of S3, Dl, A4, S4, F5, M21 and M42).
 
  The parameter N can be the following: a positive integer (absolute
- value of discriminant is N); a vector [a,b] find fields with absolute
- discriminant between a and b. Finally, N can be omitted (default), in which
- case a few fields are given and F is ignored.
+ value of discriminant is N); a vector [a,b] (find fields with absolute
+ discriminant between a and b); a polynomial, in variable t say (regular
+ extension of Q(t) with specified Galois group). Finally, N can be omitted
+ (default), in which case a few fields are given and F is ignored.
 Doc: find all number fields (up to isomorphism) with Galois group of Galois
  closure isomorphic to $G$ with $s$ complex places. This function supports
  the following groups:
@@ -25,19 +26,23 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
 
  \item degree $4$: $C_4=4T1$, $V_4=4T2$, $D_4=4T3$, $A_4=4T4$, and $S_4=4T5$;
 
- \item degree $5$: $C_5=5T1$, $D_5=5T2$, $F_5 = M_{20}=5T3$, and $A_5=5T4$
- (by table lookup);
+ \item degree $5$: $C_5=5T1$, $D_5=5T2$, $F_5 = M_{20}=5T3$, and $A_5=5T4$;
 
  \item degree $6$: $C_6=6T1$, $S_3(6) = D_6(6)=6T2$, $D_6(12)=6T3$,
  $A_4(6)=6T4$, $S_3\times C_3=6T5$, $A_4(6)\times C_2=6T6$, $S_4(6)^+=6T7$,
  $S_4(6)^-=6T8$, $S_3^2=6T9$, $C_3^2:C_4=6T10$, $S_4(6)\times C_2=6T11$,
- $A_5(6)=PSL_2(5)=6T12$ (by table lookup), and $C_3^2:D_4=6T13$;
+ $A_5(6)=PSL_2(5)=6T12$, and $C_3^2:D_4=6T13$;
 
  \item degree $7$: $C_7=7T1$, $D_7=7T2$, $M_{21}=7T3$, and $M_{42}=7T4$;
 
  \item degree $9$: $C_9=9T1$, $C_3\times C_3=9T2$, and $D_9=9T3$;
 
  \item degree $\ell$ with $\ell$ prime: $C_\ell=\ell T1$ and $D_\ell=\ell T2$.
+
+ In addition, if $N$ is a polynomial, all transitive subgroups of $S_n$
+ with $n\le 8$ (with 2 exceptions for $n=8$), and most for $n=9$, as well as
+ alternating groups $A_n$ and the full symmetric group $S_n$ for all $n$
+ (see below for details and explanations).
 
  The groups are coded as $[n,t]$ using the \kbd{nTt} format where $n$ is the
  degree and $t$ is the $T$-number (the index in the classification of
@@ -48,7 +53,8 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  unsupported the function raises an exception.
 
  The fields are computed on the fly (and not from a preexisting table) using
- a variety of algorithms, with the exception of $A_5$ and $A_5(6)$.
+ a variety of algorithms, with the exception of $A_5$ and $A_5(6)$ which are
+ obtained by table lookup.
  The algorithms are recursive and use the following ingredients: build
  distinguished subfields (or resolvent fields in Galois closures) of smaller
  degrees, use class field theory to build abelian extensions over a known
@@ -85,6 +91,19 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  those with smallest absolute discriminant) are output with given $G$
  and $s$; usually about 10, less if too difficult to find. The parameter
  $F$ is ignored.
+
+ \item a polynomial with main variable, say $t$, of priority lower than $x$.
+ The program outputs a regular polynomial in $\Q(t)[x]$ (in fact in
+ $\Z[x,t]$) with the given Galois group. By Hilbert irreducibility, almost all
+ specializations of $t$ will give suitable polynomials. The parameters $s$ and
+ $F$ are ignored. This is implemented for almost all transitive subgroups of
+ $S_n$ with $n\le8$ (for now all except $8T25$ and $8T36$), for a number of
+ transitive subgroups of $S_9$ (for now all except $9T3$, $9T5$, $9T6$, $9T7$,
+ $9T9$, $9T14$, $9T15$, $9T16$, $9T19$, $9T23$, $9T26$, $9T27$, and $9T32$),
+ as well as for the alternating and symmetric groups $A_n$ and $S_n$ for all
+ $n$. With the exception of $S_n$ and $A_n$ (inspired by J.-F.~Mestre), all
+ polynomials come from G.~W.~Smith, ``Some polynomials over $\Q(t)$ and their
+ Galois groups'', \emph{Math. Comp.}, {\bf 69} (230), 1999, pp.~775--796.
 
  \misctitle{Complexity} : For a positive integer $N$, the complexity is
  subexponential in $\log N$ (and involves factoring $N$). For an interval
@@ -131,6 +150,10 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  %9 = [x^3 - 21*x + 28, x^3 - 21*x - 35]
  ? nflist([3,1], 3969) \\ C3 fields, using nTt label
  %10 = [x^3 - 21*x + 28, x^3 - 21*x - 35]
+ ? P = nflist([8,12],t) \\ geometric 8T12 polynomial
+ %11 = x^8 - 22*t*x^6 + 135*t^2*x^4 - 150*t^3*x^2 + t^4
+ ? polgalois(subst(P, t, 11))
+ %12 = [24, 1, 12, "2A_4(8)=[2]A(4)=SL(2,3)"]
  ? nflist("S11")
   ***   at top-level: nflist("S11")
   ***                 ^-------------
@@ -144,6 +167,9 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
   "C7"=[7,1], "D7"=[7,2], "M21"=[7,3], "M42"=[7,4];
   "C9"=[9,1], [9,2], "D9"=[9,3]."
   Also supported are "Cp"=[p,1] and "Dp"=[p,2] for any odd prime p.
+
+ ? nflist("S25", 't)
+ %13 = x^25 + x*t + 1
  @eprog
 
 Function: _nflist_C3_worker
