@@ -1596,7 +1596,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	GEN Cusps,CuspsGal,CuspsQexp,CuspsMats,CuspsWidths,CuspsTags,CuspsGalDegs,CuspsGalDiamp,CuspsGalDiampDegs;
 	GEN Pts,PtsTags,MPts,PtsFrob,PtsDiamp,PtsDiamp0;
 	GEN list_j,E,Ml1,zN,zNpows,TH,M2gens,geni,M2,B,M2qexps;
-	GEN C0o,C0,C02,E1o,E1,E2o,E2,M,U0,V1,V2,V3,V,KV,EvalData,I,M4Q,V2qexps,V2gens,pageV2;
+	GEN C0o,C0,C02,E1o,E1,E2o,E2,M,U0,V1,V2,V,KV,EvalData,I,M4Q,V2qexps,V2gens,pageV2;
 	ulong up,g,d0,nCusps,nCuspsGal,nCuspsGalDiamp,mQ,nPts,d,d1,nB,i,j,k,s,sprec;
 	struct pari_mt pt;
 	GEN worker,params,ie,done;
@@ -1613,6 +1613,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
   gel(J,5) = T = liftint(ffinit(p,a,t));
 	gel(J,8) = pe = powis(p,e);
 	gel(J,9) = ZpXQ_FrobMat(T,p,e,pe);
+	gel(J,11) = V = cgetg(6,t_VEC);
 	/* Get <H> */
 	if(typ(H)==t_VEC) H = ZV_to_zv(H);
 	H = znx_Hlist(H,N);
@@ -1819,13 +1820,22 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	}
 	/* M2 -> S2(>=3cusps) = M2(-C0) */
   U0 = MRRsubspace(M2qexps,C0,NULL,T,pe,p,e);
-	V1 = FqM_mul(V1,U0,T,pe);
+	gel(V,1) = V1 = FqM_mul(V1,U0,T,pe);
 	/* Forms of weight 4 */
 	d = 2*d0+1-g;
 	if(DEBUGLEVEL) printf("modpicinit: M4(GammaH)(-2C0), dim %lu\n",d);
 	V2 = DivAdd1(V1,V1,d,T,pe,p,d0,1); // TODO tune excess=d0
 	V2gens = gel(V2,2);
-	V2 = gel(V2,1);
+	gel(V,2) = V2 = gel(V2,1);
+	gel(V,5) = I = gel(FqM_indexrank(V2,T,p),1); /* Rows of V2 forming invertible block */
+  M = cgetg(d+1,t_MAT);
+  for(j=1;j<=d;j++)
+  {
+    gel(M,j) = cgetg(d+1,t_COL);
+    for(i=1;i<=d;i++)
+      gcoeff(M,i,j) = gcoeff(V2,I[i],j);
+  }
+	gel(V,4) = ZpXQMinv(M,T,pe,p,e); /* Matrix to ID forms of weight 4 from their I coords */
 	if(DEBUGLEVEL) printf("modpicinit: q-exp of forms of weight 4\n");
 	params = cgetg(6,t_VEC);
 	gel(params,2) = V2gens;
@@ -1850,19 +1860,11 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	}
   mt_queue_end(&pt);
 	if(DEBUGLEVEL) printf("modpicinit: Eval data\n");
-	gel(J,14) = EvalData = cgetg(5,t_VEC);
 	C02 = zv_z_mul(C0,2);
+	gel(J,14) = EvalData = cgetg(4,t_VEC);
 	// TODO parallel
 	gel(EvalData,1) = mkvec(FqM_mul(V2,MRRsubspace(V2qexps,E1,C02,T,pe,p,e),T,pe));
 	gel(EvalData,2) = mkvec(FqM_mul(V2,MRRsubspace(V2qexps,E2,C02,T,pe,p,e),T,pe));
-	gel(EvalData,3) = I = gel(FqM_indexrank(V2,T,p),1); /* Rows of V2 forming invertible block */
-	M = cgetg(d+1,t_MAT);
-  for(j=1;j<=d;j++)
-  {
-    gel(M,j) = cgetg(d+1,t_COL);
-    for(i=1;i<=d;i++)
-      gcoeff(M,i,j) = gcoeff(V2,I[i],j);
-  }
 	mQ = 1; /* 1 + Total number of coefs at Q cusps */
 	for(s=1;s<=nCusps;s++)
 	{
@@ -1883,13 +1885,12 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 				gcoeff(M4Q,i++,j) = gcoeff(pageV2,k,j);
 		}
 	}
-  gel(EvalData,4) = FqM_mul(M4Q,ZpXQMinv(M,T,pe,p,e),T,pe);
+  gel(EvalData,3) = FqM_mul(M4Q,gel(V,4),T,pe);
 	/* Forms of weight 6 */
 	d = 3*d0+1-g;
 	if(DEBUGLEVEL) printf("modpicinit: M6(GammaH)(-3C0), dim %lu\n",d);
-	V3 = DivAdd1(V2,V1,d,T,pe,p,d0,0); // TODO tune excess=d0
+	gel(V,3) = DivAdd1(V2,V1,d,T,pe,p,d0,0); // TODO tune excess=d0
 	/* Finish constructing J */
-	gel(J,11) = V = mkvec3(V1,V2,V3);
 	gel(J,7) = ie;
 	if(DEBUGLEVEL) printf("modpicinit: Computing equation matrices\n");
   gel(J,12) = KV = cgetg(4,t_VEC);

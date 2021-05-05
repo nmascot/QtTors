@@ -712,10 +712,10 @@ Structure of a Jacobian:
 8: p^e
 9: FrobMat, gives matrix of Frob on the power basis 1,t,t²,... of Qq
 10: Lp, charpoly of Frob_p on J; 0 if unkown
-11: V = [V1,V2,V3] where Vn = H0(n*B). (Having a nice basis of V2 improves the evaluaton map.)
+11: V = [V1,V2,V3,M,I] where Vn = H0(n*B) (Having a nice basis of V2 improves the evaluation map), vecsmall I of row indices, and matrix M translation the I-rows into coords on basis of V2
 12: KV = [KV1,KV2,KV3], where KVn = equation matrix for Vn
 13: W0 = f*V1 for some f in V1, subspace of V2 representing the origin
-14: EvalData [U1,U2,I,M]: pair of subspaces Ui of the form V2(-E) with E effective of degree d0-g, used for construction of eval map, then vecsmall I of row indices, and matrix M such that v in V should be taken to M*(v_I) for evaluation
+14: EvalData [U1,U2,MU]: pair of subspaces Ui of the form V2(-E) with E effective of degree d0-g, used for construction of eval map, then matrix MU such that v in V should be taken to M*(v_I) for evaluation, where I is as in 11; if MU==gen_0, use M from 11 instead.
 15: If B=O_X(D0), vector Z of points at which the sections are evaluated; else []
 16: FrobCyc, permutation describing the action of Frob on Z
 17: Auts, vector of pairs [P,n], P permutation describing the action of Aut on Z, n nonzero if this Auts acts a [n] on J, n=0 else
@@ -765,7 +765,7 @@ void JgetTpe(GEN J, GEN* T, GEN* pe, GEN* p, long* e)
 GEN JacRed(GEN J, ulong e)
 {
   pari_sp av = avma;
-  GEN Je,p,pe,Ui,Uei;
+  GEN Je,p,pe,Ui,Uei,MU;
   ulong i,j,n;
   if(Jgete(J)<e) pari_err(e_MISC,"Cannot perform this reduction");
   Je = cgetg(lgJ+1,t_VEC);
@@ -779,8 +779,9 @@ GEN JacRed(GEN J, ulong e)
   gel(Je,8) = pe = powiu(p,e);
   gel(Je,9) = FpXM_red(JgetFrobMat(J),pe);
 	gel(Je,10) = gcopy(gel(J,10));
-  gel(Je,11) = cgetg(4,t_VEC);
-  for(i=1;i<=3;i++) gmael(Je,11,i) = FpXM_red(gmael(J,11,i),pe);
+  gel(Je,11) = cgetg(6,t_VEC);
+  for(i=1;i<=4;i++) gmael(Je,11,i) = FpXM_red(gmael(J,11,i),pe);
+	gmael(Je,11,5) = gcopy(gmael(J,11,5));
   gel(Je,12) = cgetg(4,t_VEC);
   for(i=1;i<=3;i++) gmael(Je,12,i) = FpXM_red(gmael(J,12,i),pe);
   gel(Je,13) = FpXM_red(JgetW0(J),pe);
@@ -790,7 +791,7 @@ GEN JacRed(GEN J, ulong e)
 	}
 	else
 	{
-  	gel(Je,14) = cgetg(5,t_VEC);
+  	gel(Je,14) = cgetg(4,t_VEC);
 		for(i=1;i<=2;i++)
 		{
 			Ui = gmael(J,14,i);
@@ -799,8 +800,8 @@ GEN JacRed(GEN J, ulong e)
 			for(j=1;j<n;j++)
 				gel(Uei,j) = FpXM_red(gel(Ui,j),pe);
 		}
-  	gmael(Je,14,3) = gcopy(gmael(J,14,3));
-  	gmael(Je,14,4) = FpXM_red(gmael(J,14,4),pe);
+		MU = gmael(J,14,3);
+		gmael(Je,14,3) = typ(MU)==t_INT ? gen_0 : FpXM_red(MU,pe);
 	}
   gel(Je,15) = FpXT_red(JgetZ(J),pe);
   gel(Je,16) = gcopy(JgetFrobCyc(J));
@@ -1868,51 +1869,6 @@ GEN CurveRandPt(GEN f, GEN T, GEN p, long e, GEN bad)
   }
 }
 
-GEN PicEvalInit(GEN L12, GEN vars, GEN Z, GEN V2, GEN T, GEN p, long e, GEN pe)
-{
-  pari_sp av = avma;
-  GEN params,worker,done,res,I,M;
-  ulong i,j,nV2;
-	long workid,pending;
-	struct pari_mt pt;
-	if(gequal0(L12))
-		return gen_0;
-	params = cgetg(8,t_VEC);
-	gel(params,2) = vars;
-	gel(params,3) = Z;
-	gel(params,4) = T;
-	gel(params,5) = pe;
-	gel(params,6) = p;
-	gel(params,7) = stoi(e);
-  res = cgetg(5,t_VEC);
-	worker = strtofunction("_RRspace_eval");
-  mt_queue_start_lim(&pt,worker,2);
-  for(i=1;i<=2||pending;i++)
-  {
-		if(i<=2)
-		{
-			gel(params,1) = gel(L12,i);
-			mt_queue_submit(&pt,i,params);
-		}
-		else mt_queue_submit(&pt,0,NULL);
-    done = mt_queue_get(&pt,&workid,&pending);
-    if(done) gel(res,workid) = done;
-  }
-  mt_queue_end(&pt);
-  nV2 = lg(V2);
-  gel(res,3) = I = gel(FqM_indexrank(V2,T,p),1); /* Rows of V2 forming invertible block */
-  /* That invertible block */
-  M = cgetg(nV2,t_MAT);
-  for(j=1;j<nV2;j++)
-  {
-    gel(M,j) = cgetg(nV2,t_COL);
-    for(i=1;i<nV2;i++)
-      gcoeff(M,i,j) = gcoeff(V2,I[i],j);
-  }
-  gel(res,4) = ZpXQMinv(M,T,pe,p,e);
-  return gerepilecopy(av,res);
-}
-
 ulong FindMod(GEN P, GEN Z, ulong n, GEN p, int check)
 { /* Finds 1<=i<=n such that P = Z[i] mod p, else returns 0 */
   pari_sp av = avma;
@@ -2047,8 +2003,8 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
 {
   pari_sp av = avma;
   long t;
-  ulong nZ,nAuts,n,nOP,m,i;
-  GEN vars,pe,T,FrobMat,Z,P,FrobCyc,AutData,OP,V1,V2,V3,W0,V,KV,U,J;
+  ulong nZ,nV2,nAuts,n,nOP,m,i,j;
+  GEN vars,pe,T,FrobMat,Z,P,FrobCyc,AutData,OP,V1,V2,W0,V,M,I,KV,U,params,L12,J;
   struct pari_mt pt;
   GEN worker,done,E;
   long workid,pending,k;
@@ -2105,12 +2061,23 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
   }
 
   if(DEBUGLEVEL>=2) printf("PicInit: Evaluating rational functions\n");
-  V1 = FnsEvalAt_Rescale(gel(L,1),Z,vars,T,p,e,pe);
-  V2 = FnsEvalAt_Rescale(gel(L,2),Z,vars,T,p,e,pe);
-  V3 = DivAdd(V1,V2,3*d0+1-g,T,p,pe,0);
+	V = cgetg(6,t_VEC);
+  gel(V,1) = V1 = FnsEvalAt_Rescale(gel(L,1),Z,vars,T,p,e,pe);
+  gel(V,2) = V2 = FnsEvalAt_Rescale(gel(L,2),Z,vars,T,p,e,pe);
+  gel(V,3) = DivAdd(V1,V2,3*d0+1-g,T,p,pe,0);
+	gel(V,5) = I = gel(FqM_indexrank(V2,T,p),1); /* Rows of V2 forming invertible block */
+  /* That invertible block */
+	nV2 = ((d0+1)<<1)-g;
+  M = cgetg(nV2,t_MAT);
+  for(j=1;j<nV2;j++)
+  {
+    gel(M,j) = cgetg(nV2,t_COL);
+    for(i=1;i<nV2;i++)
+      gcoeff(M,i,j) = gcoeff(V2,I[i],j);
+  }
+  gel(V,4) = ZpXQMinv(M,T,pe,p,e);
   W0 = V1;
-  V = mkvecn(3,V1,V2,V3);
-  if(DEBUGLEVEL>=2) printf("PicInit: Computing equation matrices\n");
+	if(DEBUGLEVEL>=2) printf("PicInit: Computing equation matrices\n");
   KV = cgetg(4,t_VEC);
   E = stoi(e);
   worker = strtofunction("_mateqnpadic");
@@ -2122,8 +2089,35 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
     if(done) gel(KV,workid) = done;
   }
   mt_queue_end(&pt);
-  if(DEBUGLEVEL>=2) printf("PicInit: Constructing evaluation maps\n");
-  U = PicEvalInit(gel(L,3),vars,Z,V2,T,p,e,pe);
+	if(DEBUGLEVEL>=2) printf("PicInit: Constructing evaluation maps\n");
+	L12 = gel(L,3);
+	if(gequal0(L12)) U = gen_0;
+	else
+	{
+  	params = cgetg(8,t_VEC);
+  	gel(params,2) = vars;
+  	gel(params,3) = Z;
+  	gel(params,4) = T;
+  	gel(params,5) = pe;
+  	gel(params,6) = p;
+  	gel(params,7) = E;
+  	U = cgetg(4,t_VEC);
+  	worker = strtofunction("_RRspace_eval");
+  	mt_queue_start_lim(&pt,worker,2);
+  	for(i=1;i<=2||pending;i++)
+  	{
+    	if(i<=2)
+    	{
+      	gel(params,1) = gel(L12,i);
+      	mt_queue_submit(&pt,i,params);
+    	}
+    	else mt_queue_submit(&pt,0,NULL);
+    	done = mt_queue_get(&pt,&workid,&pending);
+    	if(done) gel(U,workid) = done;
+		}
+  	mt_queue_end(&pt);
+		gel(U,3) = gen_0;
+  }
 	if(Lp==NULL) Lp = gen_0;
   J = mkvecn(lgJ,f,stoi(g),stoi(d0),L,T,p,E,pe,FrobMat,Lp,V,KV,W0,U,Z,FrobCyc,AutData);
   return gerepilecopy(av,J);
@@ -2153,6 +2147,8 @@ GEN JacLift(GEN J, ulong e2)
   Z = JgetZ(J);
   if(lg(Z)==1)
     pari_err(e_MISC,"Cannot increase accuracy for this Jacobian (missing points)");
+	if(typ(gel(J,14))==t_VEC && typ(gmael(J,14,3))!=t_INT)
+    pari_err(e_MISC,"Cannot increase accuracy for this Jacobian (missing information about evaluation map)");
   T = JgetT(J);
   p = Jgetp(J);
   vars = variables_vecsmall(f);
@@ -2197,7 +2193,7 @@ GEN JacLift(GEN J, ulong e2)
     }
   }
   Z2 = gerepilecopy(avZ,Z2);
-  V = cgetg(4,t_VEC);
+  V = cgetg(6,t_VEC);
   KV = cgetg(4,t_VEC);
 	params = cgetg(8,t_VEC);
 	gel(params,2) = vars;
@@ -2211,27 +2207,23 @@ GEN JacLift(GEN J, ulong e2)
 	{
 		U = gen_0;
 		mt_queue_start_lim(&pt,worker,2);
-		printf("Start q 2\n");
     for(k=1;k<=2||pending;k++)
     {
       if(k<=2)
       {
         gel(params,1) = gel(L,k);
-				printf("Sub %ld\n",k);
         mt_queue_submit(&pt,k,params);
       }
       else mt_queue_submit(&pt,0,NULL);
       done = mt_queue_get(&pt,&workid,&pending);
-			printf("Got %ld\n",workid);
       if(done)
 				gel(V,workid) = gel(done,1);
     }
   	mt_queue_end(&pt);
-		printf("End q\n");
 	}
 	else
 	{
-  	U = cgetg(5,t_VEC);
+  	U = cgetg(4,t_VEC);
 		mt_queue_start_lim(&pt,worker,4);
   	for(k=1;k<=4||pending;k++)
   	{
@@ -2249,24 +2241,35 @@ GEN JacLift(GEN J, ulong e2)
     	}
   	}
  		mt_queue_end(&pt);
-		I = gel(U,3) = gmael(J,14,3);
-    nV2 = lg(V2=gel(V,2));
-    M = cgetg(nV2,t_MAT);
-    for(j=1;j<nV2;j++)
-    {
-      gel(M,j) = cgetg(nV2,t_COL);
-      for(i=1;i<nV2;i++)
-        gcoeff(M,i,j) = gcoeff(V2,I[i],j);
-    }
-    gel(U,4) = ZpXQMinv(M,T,pe2,p,e2);
+		gel(U,3) = gen_0;
 	}
+	I = gel(V,5) = gmael(J,11,5);
+  nV2 = lg(V2=gel(V,2));
+  M = cgetg(nV2,t_MAT);
+  for(j=1;j<nV2;j++)
+  {
+    gel(M,j) = cgetg(nV2,t_COL);
+    for(i=1;i<nV2;i++)
+      gcoeff(M,i,j) = gcoeff(V2,I[i],j);
+  }
+  gel(V,4) = ZpXQMinv(M,T,pe2,p,e2);
 	gel(V,3) = DivAdd(gel(V,1),gel(V,2),3*d0+1-g,T,p,pe2,0);
   W0 = gel(V,1); /* TODO can it happen that W0 != V1 even though all data is present? */
+	setlg(params,6);
+	gel(params,2) = T;
+	gel(params,3) = pe2;
+	gel(params,4) = p;
+	gel(params,5) = E2;
   worker = strtofunction("_mateqnpadic");
   mt_queue_start_lim(&pt,worker,3);
   for(k=1;k<=3||pending;k++)
   {
-    mt_queue_submit(&pt,k,k<=3?mkvecn(5,gel(V,k),T,pe2,p,E2):NULL);
+		if(k<=3)
+		{
+			gel(params,1) = gel(V,k);
+			mt_queue_submit(&pt,k,params);
+		}
+		else mt_queue_submit(&pt,0,NULL);
     done = mt_queue_get(&pt,&workid,&pending);
     if(done) gel(KV,workid) = done;
   }
@@ -2294,7 +2297,7 @@ GEN PicSetPrec(GEN J, long e2)
 GEN PicEval(GEN J, GEN W)
 {
   pari_sp av = avma, av1, av2;
-  GEN T,p,pe,V,KV,U,res,resi1;
+  GEN T,p,pe,V,KV,U,U1,U2,res,resi1;
   long e;
   ulong n1,n2,i1,i2;
   GEN S1,S2,I,M,s2,s2I,K;
@@ -2303,22 +2306,26 @@ GEN PicEval(GEN J, GEN W)
   U = JgetEvalData(J); /* L(2D0-Ei), deg Ei = d0-g (i=1,2), repeated for each embedding into Qq */
   if(gequal0(U))
 		pari_err(e_MISC,"this Jacobian does not contain the data required to evaluate points");
+	U1 = gel(U,1);
+  n1 = lg(U1); /* Deg of E1 / Q */
+	U2 = gel(U,2);
+  n2 = lg(U2); /* Deg of E2 / Q */
+	M = gel(U,3); /* Matrix to apply to the I-entries */
 	JgetTpe(J,&T,&pe,&p,&e);
   d0 = Jgetd0(J);
   g = Jgetg(J);
-  V = JgetV(J,2);
+  V = JgetV_all(J);
+	I = gel(V,5); /* Row indices to look at to ID an elt of V */
+	if(typ(M)==t_INT) M = gel(V,4);
+	V = gel(V,2);
   nV = lg(V);
   KV = JgetKV(J,2);
-  n1 = lg(gel(U,1)); /* Deg of E1 / Q */
-  n2 = lg(gel(U,2)); /* Deg of E2 / Q */
-  I = gel(U,3); /* Row indices to look at to ID an elt of V */
-  M = gel(U,4); /* Matrix to apply to the I-entries */
 
   res = cgetg(n1,t_MAT);
   for(i1=1;i1<n1;i1++)
   {
     av1 = avma;
-    S1 = DivAdd(W,gmael(U,1,i1),2*d0+1,T,p,pe,0); /* L(4D0-D-E1) */
+    S1 = DivAdd(W,gel(U1,i1),2*d0+1,T,p,pe,0); /* L(4D0-D-E1) */
     S1 = DivSub(V,S1,KV,1,T,p,e,pe,2); /* L(2D0-D-E1), generically 1-dimensional */
     S1 = gerepileupto(av1,gel(S1,1));
     S1 = DivMul(S1,V,T,pe); /* L(4D0-D-E1-ED) */
@@ -2329,7 +2336,7 @@ GEN PicEval(GEN J, GEN W)
     for(i2=1;i2<n2;i2++)
     {
       av2 = avma;
-      S2 = DivAdd(S1,gmael(U,2,i2),2*d0+1,T,p,pe,0); /* L(4D0-E1-E2-ED) */
+      S2 = DivAdd(S1,gel(U2,i2),2*d0+1,T,p,pe,0); /* L(4D0-E1-E2-ED) */
       S2 = gerepileupto(av2,S2);
       S2 = DivSub(V,S2,KV,1,T,p,e,pe,2); /* L(2D0-E1-E2-ED), generically 1-dimensional */
       s2 = gel(S2,1); /* Generator */
@@ -2397,23 +2404,27 @@ GEN PicDeflate(GEN J, GEN W, ulong nIGS)
 GEN PicDeflate_U(GEN J, GEN W, ulong nIGS)
 {
 	pari_sp av = avma;
-	GEN V,T,pe,p;
+	GEN T,pe,p;
 	long e;
-	ulong nV;
-	GEN GW,K,U;
-	ulong j;
+	GEN GW,K,U,X,I,M;
+	ulong i,j,m;
 
 	JgetTpe(J,&T,&pe,&p,&e);
-	V = JgetV(J,2);
-	nV = lg(V);
-
 	GW = PicDeflate(J,W,nIGS); /* IGS of W */
-  K = cgetg(nV+nIGS,t_MAT);
-  for(j=1;j<nV;j++) gel(K,j) = gel(V,j);
-  for(j=1;j<=nIGS;j++) gel(K,nV-1+j) = gel(GW,j);
-  U = matkerpadic(K,T,pe,p,e); /* Coords of IGS of W // basis of V */ /* TODO use M from eval data */
-  for(j=1;j<=nIGS;j++) setlg(gel(U,j),nV);
-  return gerepilecopy(av,U);
+	/* Get coords // basis of V */
+	X = JgetV_all(J);
+	M = gel(X,4);
+	I = gel(X,5);
+	m = lg(I);
+	K = cgetg(nIGS+1,t_MAT);
+	for(j=1;j<=nIGS;j++)
+	{
+		gel(K,j) = cgetg(m,t_COL);
+		for(i=1;i<m;i++)
+			gcoeff(K,i,j) = gcoeff(GW,I[i],j);
+	}
+	U = FqM_mul(M,K,T,pe);
+	return gerepileupto(av,U);
 }
 
 GEN PicInflate_U(GEN J, GEN U, GEN I) /* Takes IGS given by coords // V */
