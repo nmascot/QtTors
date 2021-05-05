@@ -61,13 +61,13 @@ Help:
 Function: _Ell_FillTors_worker
 Section: programming/internals
 C-Name: Ell_FillTors_worker
-Prototype: GUGGGLG
+Prototype: GGUGGGL
 Help:
 
 Function: _Ell_l1_worker
 Section: programming/internals
 C-Name: Ell_l1_worker
-Prototype: GUGGGL
+Prototype: GGUGGGL
 Help:
 
 Function: _M2_worker

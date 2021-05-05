@@ -4941,6 +4941,7 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
         gel(Phi,++j) = phi;
     }
     nPhi = j;
+		if(nPhi==0) Phi=NULL;
   }
   else Phi=NULL;
 	

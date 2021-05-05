@@ -951,33 +951,51 @@ GEN EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
 	return gerepilecopy(av,mkvecn(5,E,P,Q,z,M));
 }
 
-GEN Ell_l2(GEN EN, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
+GEN Ell_l2(GEN EN, GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
 {
   P = RgM_coef_mod(EN,P);
   Q = RgM_coef_mod(EN,Q);
+	if(P==Q) /* Tangent? */
+		return ZpXQ_div(ZX_Z_add(ZX_Z_mul(ZX_sqr(gel(P,1)),utoi(3)),a4),ZX_Z_mul(gel(P,2),gen_2),T,pe,p,e);
   return ZpXQ_div(ZX_sub(gel(Q,2),gel(P,2)),ZX_sub(gel(Q,1),gel(P,1)),T,pe,p,e);
 }
 
-GEN Ell_l1(GEN EN, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
+GEN Ell_l1_c(GEN EN, GEN a4, GEN P, ulong m, GEN T, GEN pe, GEN p, long e)
 {
-  pari_sp av = avma;
-  ulong N,n;
-  GEN S,nPQ;
-
-  /* TODO methode Kamal addchain */
-	N = lg(EN)-1;
-	nPQ = gcopy(Q);
-  S = Ell_l2(EN,P,nPQ,T,pe,p,e);
-  for(n=1;n<N;n++)
-  {
-		nPQ[1] += P[1];
-		nPQ[2] += P[2];
-    S = ZX_add(S,Ell_l2(EN,P,nPQ,T,pe,p,e));
-  }
-  return gerepileupto(av,S);
+	GEN c,mP;
+	if(m==1) return gen_0;
+	if(m&1)
+	{
+		m--;
+		c = Ell_l1_c(EN,a4,P,m,T,pe,p,e);
+		mP = zv_z_mul(P,m);
+		c = ZX_add(c,Ell_l2(EN,a4,mP,P,T,pe,p,e));
+	}
+	else
+	{
+		m>>=1;
+		c = Ell_l1_c(EN,a4,P,m,T,pe,p,e);
+		mP = zv_z_mul(P,m);
+		c = ZX_add(ZX_Z_mul(c,gen_2),Ell_l2(EN,a4,mP,mP,T,pe,p,e));
+	}
+	return c;
 }
 
-GEN Ell_FillTors_worker(GEN Axes, ulong y, GEN T, GEN pe, GEN p, long e, GEN a4)
+GEN Ell_l1(GEN EN, GEN a4, GEN P, GEN T, GEN pe, GEN p, long e)
+{
+  pari_sp av = avma;
+  ulong N,g,o;
+	GEN c;
+	N = lg(EN)-1;
+	g = ugcd(ugcd(N,P[1]),P[2]);
+	o = N/g;
+	c = Ell_l1_c(EN,a4,P,o-1,T,pe,p,e);
+	c = ZX_Z_mul(c,utoi(g));
+	c = FpX_red(c,pe);
+	return gerepileupto(av,c);
+}
+
+GEN Ell_FillTors_worker(GEN Axes, GEN a4, ulong y, GEN T, GEN pe, GEN p, long e)
 {
 	GEN ENy;
 	ulong N,x;
@@ -991,30 +1009,25 @@ GEN Ell_FillTors_worker(GEN Axes, ulong y, GEN T, GEN pe, GEN p, long e, GEN a4)
 	return ENy;
 }
 
-GEN Ell_l1_worker(GEN EN, ulong y, GEN T, GEN pe, GEN p, long e)
+GEN Ell_l1_worker(GEN EN, GEN a4, ulong y, GEN T, GEN pe, GEN p, long e)
 { /* t_COL l1(x,y) for x in Z/NZ */
 	pari_sp av = avma;
-	GEN P,Q,L1y;
+	GEN P,L1y;
 	ulong N,xmax,x;
 	N = lg(EN)-1;
 	P = mkvecsmall2(0,y);
-	Q = cgetg(3,t_VECSMALL);
 	L1y = cgetg(N+1,t_COL);
 	if(y==N)
 	{
-		Q[1] = 0; Q[2] = 1;
 		xmax = N-1;
 		gel(L1y,N) = gcopy(gen_0);
 	}
 	else
-	{
-		Q[1] = 1; Q[2] = 0;
 		xmax = N;
-	}
 	for(x=1;x<=xmax;x++)
 	{
 		P[1] = x;
-		gel(L1y,x) = Ell_l1(EN,P,Q,T,pe,p,e);
+		gel(L1y,x) = Ell_l1(EN,a4,P,T,pe,p,e);
 	}
 	return gerepileupto(av,L1y);
 }
@@ -1044,11 +1057,11 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 	/* The rest */
 	params = cgetg(8,t_VEC);
 	gel(params,1) = Axes;
-	gel(params,3) = T;
-	gel(params,4) = pe;
-	gel(params,5) = p;
-	gel(params,6) = E;
-	gel(params,7) = a4;
+	gel(params,2) = a4;
+	gel(params,4) = T;
+	gel(params,5) = pe;
+	gel(params,6) = p;
+	gel(params,7) = E;
 	INTs = cgetg(N+1,t_VEC);
 	worker = strtofunction("_Ell_FillTors_worker");
   mt_queue_start_lim(&pt,worker,N-1);
@@ -1057,7 +1070,7 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 	{
 		if(y<N)
 		{
-			gel(params,2) = gel(INTs,y) = utoi(y);
+			gel(params,3) = gel(INTs,y) = utoi(y);
 			mt_queue_submit(&pt,y,params);
 		}
 		else mt_queue_submit(&pt,0,NULL);
@@ -1072,7 +1085,6 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 	gel(EN,N) = ENx0;
 	gel(INTs,N) = utoi(N);
 	/* Ml1 */
-	setlg(params,7); /* Hide a4 */
 	gel(params,1) = EN;
 	worker = strtofunction("_Ell_l1_worker");
   mt_queue_start_lim(&pt,worker,N);
@@ -1081,7 +1093,7 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 	{
 		if(y<=N)
 		{
-				gel(params,2) = gel(INTs,y);
+				gel(params,3) = gel(INTs,y);
 				mt_queue_submit(&pt,y,params);
 		}
 		else mt_queue_submit(&pt,0,NULL);
