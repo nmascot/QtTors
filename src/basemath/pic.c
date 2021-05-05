@@ -2870,8 +2870,6 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
 		else
 			gerepileall(av1,2,&U,&pe1);
   }
-	printf("Out!!!\n");
-	return NULL; /* TODO prevent compiler from freaking out */
 }
 
 /* TorsSpace */
