@@ -2134,7 +2134,7 @@ GEN JacLift(GEN J, ulong e2)
   pari_sp av = avma, avZ;
   GEN J2,T,p,pe2,f,vars,L,FrobCyc,FrobMat2;
   long g,d0;
-  GEN Z,Z2,V,W0,KV,P,x,y,fx,U,V2,I,M;
+  GEN Z,Z2,V,W0,KV,P,x,y,fx,U,V2,I,M,params;
   ulong nZ,i,j,nV2;
   struct pari_mt pt;
   GEN worker,done,E2;
@@ -2199,47 +2199,69 @@ GEN JacLift(GEN J, ulong e2)
   Z2 = gerepilecopy(avZ,Z2);
   V = cgetg(4,t_VEC);
   KV = cgetg(4,t_VEC);
-  U = cgetg(5,t_VEC);
-  /* TODO why does that parallel version not work?
-  printf("RR\n");
-  worker = strtofunction("RRspaceEval");
-  mt_queue_start(&pt,worker);
-  for(k=1;k<=4||pending;k++)
-  {
-    mt_queue_submit(&pt,k,k<=4?mkvecn(7,gel(L,k),vars,Z2,T,p,E2,pe2):NULL);
-    done = mt_queue_get(&pt,&workid,&pending);
-    if(done)
-    {
-      if(workid<=2) gel(V,workid) = gel(done,1);
-      else gel(U,workid-2) = done;
-    }
-  }
-  mt_queue_end(&pt);
-  printf("End RR\n"); */
-  gel(V,1) = gel(RRspaceEval(gel(L,1),vars,Z2,T,pe2,p,e2),1);
-  V2 = gel(V,2) = gel(RRspaceEval(gel(L,2),vars,Z2,T,pe2,p,e2),1);
-	gel(V,3) = DivAdd(gel(V,1),gel(V,2),3*d0+1-g,T,p,pe2,0);
-  W0 = gel(V,1); /* TODO can it happen that W0 != V1 even though all data is present? */
-	if(gequal0(gel(L,3)))
+	params = cgetg(8,t_VEC);
+	gel(params,2) = vars;
+	gel(params,3) = Z2;
+	gel(params,4) = T;
+	gel(params,5) = pe2;
+	gel(params,6) = p;
+	gel(params,7) = E2;
+  worker = strtofunction("_RRspace_eval");
+  if(gequal0(gel(L,3)))
 	{
 		U = gen_0;
+		mt_queue_start_lim(&pt,worker,2);
+		printf("Start q 2\n");
+    for(k=1;k<=2||pending;k++)
+    {
+      if(k<=2)
+      {
+        gel(params,1) = gel(L,k);
+				printf("Sub %ld\n",k);
+        mt_queue_submit(&pt,k,params);
+      }
+      else mt_queue_submit(&pt,0,NULL);
+      done = mt_queue_get(&pt,&workid,&pending);
+			printf("Got %ld\n",workid);
+      if(done)
+				gel(V,workid) = gel(done,1);
+    }
+  	mt_queue_end(&pt);
+		printf("End q\n");
 	}
 	else
 	{
-		U = cgetg(5,t_VEC);
-  	gel(U,1) = RRspaceEval(gmael(L,3,1),vars,Z2,T,pe2,p,e2);
-  	gel(U,2) = RRspaceEval(gmael(L,3,2),vars,Z2,T,pe2,p,e2);
-  	I = gel(U,3) = gmael(J,14,3);
-  	nV2 = lg(V2);
-  	M = cgetg(nV2,t_MAT);
-  	for(j=1;j<nV2;j++)
+  	U = cgetg(5,t_VEC);
+		mt_queue_start_lim(&pt,worker,4);
+  	for(k=1;k<=4||pending;k++)
   	{
-    	gel(M,j) = cgetg(nV2,t_COL);
-    	for(i=1;i<nV2;i++)
-      	gcoeff(M,i,j) = gcoeff(V2,I[i],j);
+			if(k<=4)
+			{
+				gel(params,1) = k<=2 ? gmael(L,3,k) : gel(L,k-2);
+				mt_queue_submit(&pt,k,params);
+			}
+			else mt_queue_submit(&pt,0,NULL);
+    	done = mt_queue_get(&pt,&workid,&pending);
+    	if(done)
+    	{
+      	if(workid<=2) gel(U,workid) = done;
+      	else gel(V,workid-2) = gel(done,1);
+    	}
   	}
-  	gel(U,4) = ZpXQMinv(M,T,pe2,p,e2);
+ 		mt_queue_end(&pt);
+		I = gel(U,3) = gmael(J,14,3);
+    nV2 = lg(V2=gel(V,2));
+    M = cgetg(nV2,t_MAT);
+    for(j=1;j<nV2;j++)
+    {
+      gel(M,j) = cgetg(nV2,t_COL);
+      for(i=1;i<nV2;i++)
+        gcoeff(M,i,j) = gcoeff(V2,I[i],j);
+    }
+    gel(U,4) = ZpXQMinv(M,T,pe2,p,e2);
 	}
+	gel(V,3) = DivAdd(gel(V,1),gel(V,2),3*d0+1-g,T,p,pe2,0);
+  W0 = gel(V,1); /* TODO can it happen that W0 != V1 even though all data is present? */
   worker = strtofunction("_mateqnpadic");
   mt_queue_start_lim(&pt,worker,3);
   for(k=1;k<=3||pending;k++)
