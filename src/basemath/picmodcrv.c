@@ -20,29 +20,18 @@ ulong ZNneg(long x, ulong N)
   return y?N-y:N;
 }
 
-GEN RgM_Coef_Mod(GEN A, GEN v)
-{
-  long N;
-  long i,j;
-
-  N = lg(A)-1;
-  i = smodis(gel(v,1),N);
-  j = smodis(gel(v,2),N);
-  return gcoeff(A,i?i:N,j?j:N);
-}
-
 long zM_coef_mod(GEN A, GEN v)
 {
-  long N,i,j;
+  ulong N,i,j;
   N = lg(A)-1;
   i = umodsu(v[1],N);
   j = umodsu(v[2],N);
   return gel(A,j?j:N)[i?i:N];
 }
 
-GEN RgM_coef_mod(GEN A, GEN v)
+GEN RgM_Coef_mod(GEN A, GEN v)
 {
-  long N,i,j;
+  ulong N,i,j;
   N = lg(A)-1;
   i = umodsu(v[1],N);
   j = umodsu(v[2],N);
@@ -171,65 +160,51 @@ GEN znx_Hlist(GEN S, ulong N)
 
 /* GammaH(N) */
 
-GEN SL2Zlift(GEN M)
-{ /* Finds M' in SL2(Z), M'=M mod det(M)-1 */
-	pari_sp av = avma;
-	GEN SNF,U,V,D,a,b,ab,M2;
-	SNF = matsnf0(M,1); /* U*M*V = D = diag(a,b), so det M = ab */
-	U = gel(SNF,1);
-	V = gel(SNF,2);
-	D = gel(SNF,3);
-	a = gcoeff(D,1,1);
-	b = gcoeff(D,2,2);
-	/* [a, ab-1; 1-ab, b+(1-ab)b] = [1,-1;1-b,b]*[1,0;1-a,1]*[1,b;0,1] in SL2(Z) */
-	ab = mulii(a,b);
-	M2 = cgetg(3,t_MAT);
-	gel(M2,1) = cgetg(3,t_COL);
-	gel(M2,2) = cgetg(3,t_COL);
-	gcoeff(M2,1,1) = a;
-	gcoeff(M2,1,2) = subiu(ab,1);
-	gcoeff(M2,2,1) = negi(gcoeff(M2,1,2));
-	gcoeff(M2,2,2) = mulii(b,addiu(gcoeff(M2,2,1),1));
-	U = SL2_inv_shallow(U);
-	V = SL2_inv_shallow(V);
-	M2 = ZM_mul(U,M2);
-	M2 = ZM_mul(M2,V);
-	return gerepileupto(av,M2);
+GEN Flm2_Flm2_mul(GEN A, GEN B, ulong N)
+{
+  GEN A1,A2,B1,B2,C,C1,C2;
+  A1 = gel(A,1);
+  A2 = gel(A,2);
+  B1 = gel(B,1);
+  B2 = gel(B,2);
+  C = cgetg(3,t_MAT);
+  gel(C,1) = C1 = cgetg(3,t_VECSMALL);
+  gel(C,2) = C2 = cgetg(3,t_VECSMALL);
+  C1[1] = (A1[1]*B1[1]+A2[1]*B1[2])%N;
+  C1[2] = (A1[2]*B1[1]+A2[2]*B1[2])%N;
+  C2[1] = (A1[1]*B2[1]+A2[1]*B2[2])%N;
+  C2[2] = (A1[2]*B2[1]+A2[2]*B2[2])%N;
+  return C;
 }
 
-GEN Bot2SL2Z(GEN Bot, ulong n)
-{ /* Finds [*,*;c';d'] in SL2(Z) with c~c', d~d' mod N */
-	pari_sp av = avma;
-	GEN N,c,d,u,v,g,M;
-	N = utoi(n);
-	c = stoi(Bot[1]);
-	d = stoi(Bot[2]);
-	g = bezout(c,d,&u,&v);
-	M = cgetg(3,t_MAT); /* [vg^-1, -ug^-1; c,d ] */
-  gel(M,1) = cgetg(3,t_COL);
-  gel(M,2) = cgetg(3,t_COL);
-	g = Fp_inv(g,N);
-	gcoeff(M,1,1) = Fp_mul(v,g,N);
-	gcoeff(M,1,2) = negi(Fp_mul(u,g,N));
-	gcoeff(M,2,1) = c;
-	gcoeff(M,2,2) = d;
-	M = SL2Zlift(M);
-	return gerepileupto(av,M);
+GEN Flv2_Flm2_mul(GEN v, GEN A, ulong N)
+{
+  GEN A1,A2,w;
+  A1 = gel(A,1);
+  A2 = gel(A,2);
+  w = cgetg(3,t_VECSMALL);
+  w[1] = (v[1]*A1[1]+v[2]*A1[2])%N;
+  w[2] = (v[1]*A2[1]+v[2]*A2[2])%N;
+  return w;
 }
 
-/*GEN GammaHCuspData(GEN s, ulong N, GEN H, ulong* pwidth)
-{  (c,d) -> [a,b;c,d],width 
-	ulong c,g,a,w;
-	GEN M;
-	c = umodiu(,N);
-	g = ugcd((c*c),N);
-	g = N/g;
-	M = Bot2SL2Z(s,N);
-	a = umodiu(gcoeff(M,1,1),N);
-	for(w=g;VecSmallFind(H,(1+a*c*w)%N)==0;w+=g) {}
-	*pwidth = w;
+GEN Bot2SL2(GEN Bot, ulong N)
+{ /* Finds Flm [*,*;c';d'] in SL2(Z/NZ) where Bot=[c,d] */
+	GEN M,M1,M2;
+	long c,d,g,u,v;
+	M = cgetg(3,t_MAT);
+	M1 = gel(M,1) = cgetg(3,t_VECSMALL);
+	M2 = gel(M,2) = cgetg(3,t_VECSMALL);
+	c = Bot[1];
+	d = Bot[2];
+	g = cbezout(c,d,&u,&v);
+	g = Fl_inv(g,N);
+	M1[1] = umodsu(v*g,N);
+	M1[2] = umodsu(c,N);
+	M2[1] = umodsu(-u*g,N);
+	M2[2] = umodsu(d,N);
 	return M;
-}*/
+}
 
 GEN ZNZ2primH(ulong N, GEN H)
 { /* Find all (u,v) s.t. gcd(u,v,N)=1 / H. Also returns maps for representatives */
@@ -281,14 +256,14 @@ GEN GammaHCusps(ulong N, GEN H)
 {
 	/* * Reps (c,d) of all cusps of GammaH
      * Galois orbits
-     * Vector of bits: whether such that there is M = [*,*;c,d] in SL(2,Z) such that f|M has rat coefs for all f def/Q
-     * Matrices [*,*;c,d] in SL(2,Z), satifying above condition whenever bit=1
+     * Vector of bits: whether such that there is M = [*,*;c,d] in SL(2,Z/NZ) such that f|M has rat coefs for all f def/Q
+     * Vector of Flm [*,*;c,d] in SL(2,Z/NZ), satifying above condition whenever bit=1
      * Galois orbits
      * Widths
      * Tags: (c',d') -> index of equivalent representative
   */
 	pari_sp av = avma;
-	ulong c,d,i,x,h,g,g2,w,nCusp,nH,nGalOrb,nOrb,N2,acg2;
+	ulong a,b,c,d,i,x,h,g,g2,w,nCusp,nH,nGalOrb,nOrb,N2,acg2;
 	GEN Cusps,cd,CuspsGal,GalOrb,Qqexp,Mats,M,Widths,tag;
 	N2 = N*N;
 	Cusps = cgetg(N2+1,t_VEC);
@@ -313,7 +288,7 @@ GEN GammaHCusps(ulong N, GEN H)
 		GalOrb = cgetg(N+1,t_VEC); /* Two cusps are Galois-conj iff. they have the same c mod H */
 		nGalOrb = 1;
 		for(d=0;d<g;d++)
-		{ /*d in (Z/cZ)* */
+		{ /*d in (Z/gZ)* */
 			if(ugcd(d,g)>1) continue;
 			if(gel(tag,d?d:N)[c?c:N]) continue;
 			/* Record cusp */
@@ -328,21 +303,18 @@ GEN GammaHCusps(ulong N, GEN H)
 					gel(tag,ZNnorm(h*d+x*g,N))[ZNnorm(h*c,N)] = nCusp;
 				}
 			}
-			M = Bot2SL2Z(cd,N); /* [a,b;c,d], the other choices are [1,i;0,1]*M */
+			M = Bot2SL2(cd,N); /* [a,b;c,d] in SL2(Z/NZ), the other choices are M*[1,i;0,1]=[a,b+i*a;c,d+i*c] */
 			/* Qqexp iff can choose t so that for all invertible x, ad(x-1)+1 in H */
-			gel(Mats,nCusp) = gcopy(M);
+			gel(Mats,nCusp) = M;
+			a = gel(M,1)[1];
+			b = gel(M,2)[1];
 			for(i=0;i<N;i++)
 			{
 				Qqexp[nCusp] = 1;
 				for(x=2;x<N;x++)
 				{
 					if(ugcd(x,N)>1) continue;
-					if((2*umodiu(gcoeff(M,2,1),N)*umodiu(gcoeff(M,2,2),N))%N)
-					{
-						Qqexp[nCusp] = 0;
-						break;
-					}
-					if((VecSmallFind(H,umodiu(gcoeff(M,1,1),N)*umodiu(gcoeff(M,2,2),N)*(x-1)+1)%N)==0)
+					if(VecSmallFind(H,(a*d*(x-1)+1)%N)==0)
 					{
 						Qqexp[nCusp] = 0;
 						break;
@@ -350,14 +322,17 @@ GEN GammaHCusps(ulong N, GEN H)
 				}
 				if(Qqexp[nCusp])
 				{
-					gel(Mats,nCusp) = M;
 					break;
 				}
-				gcoeff(M,1,2) = addii(gcoeff(M,1,1),gcoeff(M,1,2));
-				gcoeff(M,2,2) = addii(gcoeff(M,2,1),gcoeff(M,2,2));
+				b += a;
+				if(b>=N) b-=N;
+				gel(M,2)[1] = b;
+				d += c;
+				if(d>=N) d-=N;
+				gel(M,2)[2] = d;
 			}
 			/* Compute width: g2 * min w such that 1+acg2w in H */
-			acg2 = umodiu(muliu(muliu(gcoeff(M,1,1),c),g2),N);
+			acg2 = (a*c*g2)%N;
 			for(w=1;VecSmallFind(H,(1+acg2*w)%N)==0;w++) {}
 			Widths[nCusp] = g2*w;
 		}
@@ -419,33 +394,29 @@ GEN GammaHCusps_GalDiam_orbits(long y, GEN Cusps, GEN CuspsGal, GEN tags)
 	return gerepilecopy(av,Diam);
 }
 
-GEN GammaHmodN(ulong n, GEN H)
-{ /* reps of GammaH(N) / Gamma(N) in SL2(Z) */
-	pari_sp av = avma;
-	ulong nH,h,x,j;
-	GEN N,G,Mh;
-	nH = lg(H)-1;
-	G = cgetg(nH*n+1,t_VEC);
-	N = utoi(n);
-	j = 1;
-	Mh = cgetg(3,t_MAT);
-	gel(Mh,1) = cgetg(3,t_COL);
-	gel(Mh,2) = cgetg(3,t_COL);
-	for(h=1;h<=nH;h++)
-	{
-		gcoeff(Mh,1,1) = utoi(H[h]);
-		gcoeff(Mh,2,2) = Fp_inv(gcoeff(Mh,1,1),N);
-		gcoeff(Mh,1,2) = gcoeff(Mh,2,1) = gen_0;
-		Mh = SL2Zlift(Mh);
-		gel(G,j++) = gcopy(Mh);
-		for(x=1;x<n;x++)
-		{
-			gcoeff(Mh,1,1) = addii(gcoeff(Mh,1,1),gcoeff(Mh,2,1));
-      gcoeff(Mh,1,2) = addii(gcoeff(Mh,1,2),gcoeff(Mh,2,2));
-			gel(G,j++) = gcopy(Mh);
-		}
-	}
-	return gerepilecopy(av,G);
+GEN GammaHmodN(ulong N, GEN H)
+{ /* FlM reps of GammaH(N) / +-Gamma(N) */
+  pari_sp av = avma;
+  ulong nH,h,x,j;
+  GEN G,Mh;
+  nH = lg(H)-1;
+  G = cgetg(nH*N+1,t_VEC);
+  j = 1;
+  Mh = cgetg(3,t_MAT);
+  gel(Mh,1) = cgetg(3,t_VECSMALL);
+  gel(Mh,2) = cgetg(3,t_VECSMALL);
+  gel(Mh,1)[2] = 0;
+  for(h=1;h<=nH;h++)
+  {
+    gel(Mh,1)[1] = H[h];
+    gel(Mh,2)[2] = Fl_inv(H[h],N);
+    for(x=0;x<N;x++)
+    {
+      gel(Mh,2)[1] = x;
+      gel(G,j++) = gcopy(Mh);
+    }
+  }
+  return gerepilecopy(av,G);
 }
 
 GEN XH_decomp(ulong N, GEN H)
@@ -953,8 +924,8 @@ GEN EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
 
 GEN Ell_l2(GEN EN, GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
 {
-  P = RgM_coef_mod(EN,P);
-  Q = RgM_coef_mod(EN,Q);
+  P = RgM_Coef_mod(EN,P);
+  Q = RgM_Coef_mod(EN,Q);
 	if(P==Q) /* Tangent? */
 		return ZpXQ_div(ZX_Z_add(ZX_Z_mul(ZX_sqr(gel(P,1)),utoi(3)),a4),ZX_Z_mul(gel(P,2),gen_2),T,pe,p,e);
   return ZpXQ_div(ZX_sub(gel(Q,2),gel(P,2)),ZX_sub(gel(Q,1),gel(P,1)),T,pe,p,e);
@@ -1424,20 +1395,16 @@ GEN SubPerms_inf(GEN S, ulong M)
 /* qexp */
 
 GEN E1qexp(GEN v, ulong N, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
-{ /* v=[c,d] mod N, zpows = powers of primitive Nth root of 1: q-exp of E_1^[c,d] up to O(qN^B) */
+{ /* v=[c,d] reduced mod N, zpows = powers of primitive Nth root of 1: q-exp of E_1^[c,d] up to O(qN^B) */
   /* TODO use t_SER ? */
-	/* TODO used? */
   pari_sp av = avma;
   GEN E,Fq0,a0,zd;
   ulong a,b,c,d,m,n;
 
   if(B==0) return cgetg(1,t_VEC);
-
+  c = v[1];
+  d = v[2];
   Fq0 = pol_0(varn(T));
-
-  c = umodiu(gel(v,1),N);
-  d = umodiu(gel(v,2),N);
-
   E = cgetg(B+1,t_VEC);
   for(m=1;m<=B;m++) gel(E,m) = Fq0;
 
@@ -1475,10 +1442,10 @@ GEN E1qexp(GEN v, ulong N, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
   return gerepilecopy(av,E);
 }
 
-GEN TrE2qexp(GEN vw, ulong N, GEN H, GEN M, ulong w, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
+GEN TrE2qexp(GEN vw, ulong N, GEN TH, GEN M, ulong w, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
 { /* vw=[v,w] -> qexp of Tr_H(E_1^v * E_1^w) | M in terms of qw up to O(qw^B) */
   pari_sp av = avma;
-  ulong Nw,Nwi,BN,nH,h,i,j;
+  ulong Nw,Nwi,BN,nTH,h,i,j;
   GEN Fq0,E,hM,fv,fw;
 
   if(B==0) return cgetg(1,t_VEC);
@@ -1486,16 +1453,15 @@ GEN TrE2qexp(GEN vw, ulong N, GEN H, GEN M, ulong w, GEN zpows, ulong B, GEN T, 
   BN = (B-1)*N/w+1;
 
   Fq0 = pol_0(varn(T));
-
   E = cgetg(B+1,t_VEC);
   for(i=1;i<=B;i++) gel(E,i) = Fq0;
 
-  nH = lg(H);
-  for(h=1;h<nH;h++)
+  nTH = lg(TH);
+  for(h=1;h<nTH;h++)
   {
-    hM = ZM_mul(gel(H,h),M); // TODO hM will reduce that mod N
-    fv = E1qexp(zv_ZM_mul(gel(vw,1),hM),N,zpows,BN,T,pe,p,e);
-    fw = E1qexp(zv_ZM_mul(gel(vw,2),hM),N,zpows,BN,T,pe,p,e);
+    hM = Flm2_Flm2_mul(gel(TH,h),M,N);
+    fv = E1qexp(Flv2_Flm2_mul(gel(vw,1),hM,N),N,zpows,BN,T,pe,p,e);
+    fw = E1qexp(Flv2_Flm2_mul(gel(vw,2),hM,N),N,zpows,BN,T,pe,p,e);
     /* TODO use fast series multiplication */
     /* f[i] = sum_j fv[j]*fw[Nw*i-j] */
     for(i=0;i<B;i++)
@@ -1514,10 +1480,11 @@ GEN TrE2qexp(GEN vw, ulong N, GEN H, GEN M, ulong w, GEN zpows, ulong B, GEN T, 
 GEN M2_worker(GEN vw, GEN Ml1, GEN TH, GEN Mpts, GEN T, GEN pe)
 {
   pari_sp avs;
-  ulong nZ, nTH;
+  ulong N, nZ, nTH;
   GEN v,w,C,Cs,M,vM,wM;
   ulong s,h;
 
+	N = lg(Ml1)-1;
   nZ = lg(Mpts);
   nTH = lg(TH);
   v = gel(vw,1);
@@ -1530,10 +1497,10 @@ GEN M2_worker(GEN vw, GEN Ml1, GEN TH, GEN Mpts, GEN T, GEN pe)
     Cs = pol_0(varn(T));
     for(h=1;h<nTH;h++)
     {
-      M = ZM_mul(gel(TH,h),gel(Mpts,s));
-      vM = zv_ZM_mul(v,M);
-      wM = zv_ZM_mul(w,M); // TODO all this coudl be mod N
-      Cs = ZX_add(Cs,ZX_mul(RgM_Coef_Mod(Ml1,vM),RgM_Coef_Mod(Ml1,wM)));
+      M = Flm2_Flm2_mul(gel(TH,h),gel(Mpts,s),N);
+      vM = Flv2_Flm2_mul(v,M,N);
+      wM = Flv2_Flm2_mul(w,M,N);
+      Cs = ZX_add(Cs,ZX_mul(RgM_Coef_mod(Ml1,vM),RgM_Coef_mod(Ml1,wM)));
     }
     Cs = Fq_red(Cs,T,pe);
     gel(C,s) = gerepileupto(avs,Cs);
@@ -1677,7 +1644,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	else PtsDiamp = PtsDiamp0 = NULL;
 	MPts = cgetg(nPts+1,t_VEC); /* Matrices having these bottom rows */
 	for(i=1;i<=nPts;i++) /* P_g = P_g' on X_H(N) <=> g,g' same bottom row mod H */
-		gel(MPts,i) = Bot2SL2Z(gel(Pts,i),N);
+		gel(MPts,i) = Bot2SL2(gel(Pts,i),N);
 	/* Get first elliptic curve */
 	if(DEBUGLEVEL) pari_printf("modpicinit: Looking for an elliptic curve whose %lu-torsion is defined over F_%Ps^%lu\n",N,p,a);
 	list_j = cgetg(nbE+1,t_VEC);
