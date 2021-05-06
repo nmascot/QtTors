@@ -1076,7 +1076,7 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 	return gerepileupto(av,Ml1);
 }
 
-GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref, GEN Badj)
+GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref_pows, GEN Badj)
 {
 	pari_sp av = avma;
 	GEN pe,E,a4,P,Q,zN,M,Ml1,FP,PtsFrob;
@@ -1094,9 +1094,10 @@ GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref, GEN B
 	b = itou(gcoeff(M,2,1));
 	c = itou(gcoeff(M,1,2));
 	d = itou(gcoeff(M,2,2));
-	if(zNpref)
+	if(zNpref_pows)
 	{
-		m = itou(Fq_log(zN,zNpref,utoi(N),T,p));
+		for(m=1;;m++)
+			if(gequal(zN,gel(zNpref_pows,m))) break;
 		c = Fl_mul(c,m,N);
 		b = Fl_div(b,m,N);
 		zN = gen_0;
@@ -1656,7 +1657,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	zN = gel(E,4);
 	setlg(list_j,2);
 	gel(list_j,1) = gmael(E,1,3);
-	zNpows = cgetg(N+1,t_VEC); // TODO pass to Ml1?
+	zNpows = cgetg(N+1,t_VEC);
 	gel(zNpows,1) = zN;
 	for(i=1;i<N;i++)
 		gel(zNpows,i+1) = Fq_mul(gel(zNpows,i),zN,T,pe);
@@ -1681,12 +1682,12 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 		/* Do we span? */
 		B = gel(FqM_indexrank(M2,T,p),2);
 		nB = lg(B)-1;
-		if(DEBUGLEVEL>=2) printf("modpicinit: span %lu our of %lu\n",nB,d);
+		if(DEBUGLEVEL>=2) printf("modpicinit: span %lu out of %lu\n",nB,d);
 		if(nB>d)
 			pari_err(e_BUG,"Excessive dimension in M2(GammaH)");
 		if(nB==d)
 			break;
-		d1 += d-nB;
+		d1 += 2*(d-nB);
 	}
 	/* Extract basis */
 	for(i=1;i<=d;i++)
@@ -1700,7 +1701,7 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	for(i=2;i<=nbE;i++)
 	{
 		if(DEBUGLEVEL) printf("modpicinit: Getting extra elliptic curve %lu/%lu\n",i,nbE);
-		E = GetMl1(N,Pts,PtsTags,T,p,e,zN,list_j);
+		E = GetMl1(N,Pts,PtsTags,T,p,e,zNpows,list_j);
 		if(DEBUGLEVEL) pari_printf("modpicinit: working on y²=x³+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
 		setlg(list_j,i+1);
 		gel(list_j,i) = gmael(E,1,3);
