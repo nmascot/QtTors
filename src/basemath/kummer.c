@@ -85,16 +85,12 @@ reducebeta(GEN bnfz, GEN b, GEN gell)
     long prec = nf_get_prec(nf);
     for (;;)
     {
-      GEN z = nflogembed(nf, b, NULL, prec);
-      if (z)
+      GEN ex, y, z = nflogembed(nf, b, NULL, prec);
+      if (z && (ex = RgM_Babai(elllogfu, z)))
       {
-        GEN y, ex = RgM_Babai(elllogfu, z);
-        if (ex)
-        {
-          if (ZV_equal0(ex)) break;
-          y = nffactorback(nf, fu, RgC_Rg_mul(ex,gell));
-          b = nfdiv(nf, b, y); break;
-        }
+        if (ZV_equal0(ex)) break;
+        y = nffactorback(nf, fu, RgC_Rg_mul(ex,gell));
+        b = nfdiv(nf, b, y); break;
       }
       prec = precdbl(prec);
       if (DEBUGLEVEL) pari_warn(warnprec,"reducebeta",prec);
