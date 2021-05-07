@@ -1238,8 +1238,7 @@ liftselmerinit(GEN expo, GEN vnf, GEN sqrtLS2, GEN factLS2,
 }
 
 static GEN
-liftselmer_cover(GEN b, GEN expo, GEN vnf, GEN sbase, GEN LS2,
-                 GEN vcrt, GEN pol, GEN selmer, GEN K)
+liftselmer_cover(GEN b, GEN expo, GEN LS2, GEN pol, GEN K)
 {
   GEN P, Q, Q4, R, den, q0, q1, q2, xz, x, y, y2m, U, param, newb;
   GEN ttheta, tttheta, zc, polprime;
@@ -1276,7 +1275,7 @@ liftselmer_cover(GEN b, GEN expo, GEN vnf, GEN sbase, GEN LS2,
 }
 
 static GEN
-liftselmer(GEN b, GEN expo, GEN vnf, GEN sbase, GEN LS2, GEN vcrt, GEN pol,
+liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol,
            GEN selmer, GEN K, long lim, long ntry)
 {
   pari_sp av = avma, av2;
@@ -1494,7 +1493,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     for (i = 1; i < l; i++)
     {
       b = liftselmerinit(gel(u,i), vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
-      gel(P,i) = liftselmer_cover(b, gel(u,i), vnf, sbase, LS2, vcrt, pol, selmer, K);
+      gel(P,i) = liftselmer_cover(b, gel(u,i), LS2, pol, K);
     }
     return P;
   }
@@ -1506,7 +1505,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     if (Flm_Flc_invimage(newselmer, vec, 2)) continue;
     expo = Flm_Flc_mul(selmer, vec, 2);
     b = liftselmerinit(expo, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
-    P = liftselmer(b, expo, vnf, sbase, LS2, vcrt, pol, selmer, K, LIM1, 1);
+    P = liftselmer(b, expo, sbase, LS2, pol, selmer, K, LIM1, 1);
     if (P)
     {
       gel(listpoints, ++nbpoints) = P; /* new point on ell */
@@ -1522,7 +1521,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     while (zv_equal0(vec) || Flm_Flc_invimage(newselmer, vec, 2));
     expo = Flm_Flc_mul(selmer, vec, 2);
     b = liftselmerinit(expo, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
-    P = liftselmer(b, expo, vnf, sbase, LS2, vcrt, pol, selmer, K, u*LIM1, u);
+    P = liftselmer(b, expo, sbase, LS2, pol, selmer, K, u*LIM1, u);
     if (P)
     {
       gel(listpoints, ++nbpoints) = P;
