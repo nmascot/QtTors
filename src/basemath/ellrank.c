@@ -835,7 +835,12 @@ _factorbackmod(GEN nf, GEN g, GEN e, ulong p)
   GEN y = nffactorback(nf, g, e), den;
   GEN z = nfmul(nf, y, nfsqr(nf, idealredmodpower(nf, y, p, 0)));
   z = Q_remove_denom(z, &den);
-  return den ? gmul(z, den): z;
+  if (den)
+  {
+    if (p != 2) den = powiu(den, p-1);
+    z = gmul(z, den);
+  }
+  return z;
 }
 static GEN
 nfV_factorbackmod(GEN nf, GEN x, ulong p)
