@@ -766,40 +766,50 @@ elltwistpoints(GEN x, GEN K)
 /*    FUNCTIONS FOR NUMBER FIELDS              \\ */
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
 
+/* return a set S2 of prime ideals disjoint from S such that
+ * Cl_{S \cup S2}(K) has no p-torsion */
 static GEN
 bestS(GEN bnf,GEN S, ulong p)
 {
-  pari_sp av = avma;
-  long i, lS = S ? lg(S): 1, lS2 = 1;
+  GEN v, S2, h = bnf_get_no(bnf), cyc = bnf_get_cyc(bnf);
+  long i, lS2;
   ulong l, vD;
   forprime_t P;
-  GEN v, w, S2;
 
-  if (!dvdiu(bnf_get_no(bnf), p)) return cgetg(1,t_VEC);
-  w = cgetg(lS+1,t_VEC);
-  gel(w,1) = diagonal(bnf_get_cyc(bnf));
-  for (i = 1; i < lS; i++) gel(w,i+1) = bnfisprincipal0(bnf,gel(S,i),0);
-  v = ZM_hnf(shallowconcat1(w));
-  vD = Z_lval(ZM_det(v), p);
-  if (!vD) { set_avma(av); return cgetg(1, t_VEC); }
-  S2 = cgetg(vD+2, t_VEC);
+  if (!dvdiu(h, p)) return cgetg(1,t_VEC);
+  if (!S)
+  {
+    v = diagonal_shallow(cyc);
+    vD = Z_lval(h, 2);
+  }
+  else
+  {
+    long lS = lg(S);
+    v = cgetg(lS,t_MAT);
+    for (i = 1; i < lS; i++) gel(v,i) = isprincipal(bnf, gel(S,i));
+    v = ZM_hnfmodid(v, cyc);
+    vD = Z_lval(ZM_det(v), p); if (!vD) return cgetg(1, t_VEC);
+  }
+  S2 = cgetg(vD+2, t_VEC); lS2 = 1;
   u_forprime_init(&P,2,ULONG_MAX);
   while ((l = u_forprime_next(&P)))
   {
+    pari_sp av = avma;
     GEN w, Sl = idealprimedec(bnf, utoi(l));
-    long lSl = lg(Sl);
+    long nSl = lg(Sl)-1;
     ulong vDl;
-    for (i = 1; i < lSl; i++)
+    for (i = 1; i < nSl; i++) /* remove one prime ideal */
     {
-      w = ZM_hnf(shallowconcat(v, bnfisprincipal0(bnf,gel(Sl,i),0)));
+      w = ZM_hnf(shallowconcat(v, isprincipal(bnf, gel(Sl,i))));
       vDl = Z_lval(ZM_det(w), p);
       if (vDl < vD)
       {
         gel(S2,lS2++) = gel(Sl,i);
-        vD = vDl; v = w;
-        if (!vD) { setlg(S2, lS2); return gerepilecopy(av,S2); }
+        vD = vDl; v = w; av = avma;
+        if (!vD) { setlg(S2, lS2); return S2; }
       }
     }
+    set_avma(av);
   }
   return NULL;/*LCOV_EXCL_LINE*/
 }
