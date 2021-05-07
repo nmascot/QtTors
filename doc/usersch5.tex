@@ -12469,8 +12469,8 @@ is a (presumably optimized) shortcut for \kbd{mul(D, $x$, $x$)}; \kbd{one}
 returns the monoid unit. The flag \kbd{usesqr} should be set to $1$ if
 squaring are faster than multiplication by $x$.
 
-\fun{GEN}{gen_factorback}{GEN L, GEN e, void *D, F2 mul, F2 pow} generic form
-of \tet{factorback}. The pair $[L,e]$ is of the form
+\fun{GEN}{gen_factorback}{GEN L, GEN e, void *D, F2 mul, F2 pow, GEN (*one)(void *)D}
+generic form of \tet{factorback}. The pair $[L,e]$ is of the form
 
 \item \kbd{[fa, NULL]}, \kbd{fa} a two-column factorization matrix: expand it.
 
@@ -12481,6 +12481,9 @@ exponents (a \kbd{ZV} or \kbd{zv}): return the product of the $v[i]^{e[i]}$.
 
 \noindent \kbd{mul(D, $x$, $y$)} and \kbd{pow(D, $x$, $n$)}
 return $xy$ and $x^n$ respectively.
+
+\noindent \kbd{one(D)} returns the neutral element. If \kbd{one} is \kbd{NULL},
+\kbd{gen\_1} is used instead.
 
 \section{Matrix and polynomial norms} This section concerns only standard norms
 of $\R$ and $\C$ vector spaces, not algebraic norms given by the determinant of

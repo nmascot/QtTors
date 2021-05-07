@@ -212,13 +212,16 @@ _Flj_mul(void *E, GEN P, GEN n)
   Q = Flj_mulu_pre(P, itou(n), ell->a4, ell->p, ell->pi);
   return s>0 ? Q : Flj_neg(Q, ell->p);
 }
+static GEN
+_Flj_one(void *E)
+{ (void) E; return mkvecsmall3(1, 1, 0); }
 
 GEN
 FljV_factorback_pre(GEN P, GEN L, ulong a4, ulong p, ulong pi)
 {
   struct _Flj E;
   E.a4 = a4; E.p = p; E.pi = pi;
-  return gen_factorback(P, L, (void*)&E, &_Flj_add, &_Flj_mul);
+  return gen_factorback(P, L, (void*)&E, &_Flj_add, &_Flj_mul, &_Flj_one);
 }
 
 ulong

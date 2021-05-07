@@ -122,6 +122,7 @@ BA  14- [libpari] gp_read_stream now return NULL when EOF is reached (was gnil)
     19- polsubcyclo: faster algorithm for large conductor and small degree
 BA  20- [libpari] QXX_QXQ_eval renamed to QXY_QXQ_evalx
     21- [libpari] ZX_Zp_root(f,a,p,): assume 0 <= a < p
+BA  22- [libpari] gen_factorback now take an extra parameter one.
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

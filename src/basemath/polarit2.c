@@ -1139,7 +1139,7 @@ Fppow(void *a, GEN x, GEN n) { return Fp_pow(x,n,(GEN)a); }
 /* [L,e] = [fa, NULL] or [elts, NULL] or [elts, exponents] */
 GEN
 gen_factorback(GEN L, GEN e, void *data, GEN (*_mul)(void*,GEN,GEN),
-               GEN (*_pow)(void*,GEN,GEN))
+               GEN (*_pow)(void*,GEN,GEN), GEN (*_one)(void*))
 {
   pari_sp av = avma;
   long k, l, lx;
@@ -1152,6 +1152,7 @@ gen_factorback(GEN L, GEN e, void *data, GEN (*_mul)(void*,GEN,GEN),
     switch(typ(L)) {
       case t_VEC:
       case t_COL: /* product of the L[i] */
+        if (lg(L)==1) return _one? _one(data): gen_1;
         return gerepileupto(av, gen_product(L, data, _mul));
       case t_MAT: /* genuine factorization */
         l = lg(L);
@@ -1171,7 +1172,7 @@ gen_factorback(GEN L, GEN e, void *data, GEN (*_mul)(void*,GEN,GEN),
     case t_VECSMALL:
       if (lx != lg(e))
         pari_err_TYPE("factorback [not an exponent vector]", e);
-      if (lx == 1) return gen_1;
+      if (lx == 1) return _one? _one(data): gen_1;
       x = cgetg(lx,t_VEC);
       for (l=1,k=1; k<lx; k++)
         if (e[k]) gel(x,l++) = _pow(data, gel(p,k), stoi(e[k]));
@@ -1179,7 +1180,7 @@ gen_factorback(GEN L, GEN e, void *data, GEN (*_mul)(void*,GEN,GEN),
     case t_VEC: case t_COL:
       if (lx != lg(e) || !RgV_is_ZV(e))
         pari_err_TYPE("factorback [not an exponent vector]", e);
-      if (lx == 1) return gen_1;
+      if (lx == 1) return _one? _one(data): gen_1;
       x = cgetg(lx,t_VEC);
       for (l=1,k=1; k<lx; k++)
         if (signe(gel(e,k))) gel(x,l++) = _pow(data, gel(p,k), gel(e,k));
@@ -1188,6 +1189,7 @@ gen_factorback(GEN L, GEN e, void *data, GEN (*_mul)(void*,GEN,GEN),
       pari_err_TYPE("factorback [not an exponent vector]", e);
       return NULL;/*LCOV_EXCL_LINE*/
   }
+  if (l==1) return gerepileupto(av, _one? _one(data): gen_1);
   x[0] = evaltyp(t_VEC) | _evallg(l);
   return gerepileupto(av, gen_product(x, data, _mul));
 }
@@ -1196,17 +1198,17 @@ GEN
 idealfactorback(GEN nf, GEN L, GEN e, int red)
 {
   nf = checknf(nf);
-  if (red) return gen_factorback(L, e, (void*)nf, &idmulred, &idpowred);
-  else     return gen_factorback(L, e, (void*)nf, &idmul, &idpow);
+  if (red) return gen_factorback(L, e, (void*)nf, &idmulred, &idpowred, NULL);
+  else     return gen_factorback(L, e, (void*)nf, &idmul, &idpow, NULL);
 }
 
 GEN
 nffactorback(GEN nf, GEN L, GEN e)
-{ return gen_factorback(L, e, (void*)checknf(nf), &eltmul, &eltpow); }
+{ return gen_factorback(L, e, (void*)checknf(nf), &eltmul, &eltpow, NULL); }
 
 GEN
 FpV_factorback(GEN L, GEN e, GEN p)
-{ return gen_factorback(L, e, (void*)p, &Fpmul, &Fppow); }
+{ return gen_factorback(L, e, (void*)p, &Fpmul, &Fppow, NULL); }
 
 ulong
 Flv_factorback(GEN L, GEN e, ulong p)
@@ -1286,7 +1288,7 @@ FqV_factorback(GEN L, GEN e, GEN Tp, GEN p)
 }
 
 GEN
-factorback2(GEN L, GEN e) { return gen_factorback(L, e, NULL, &mul, &powi); }
+factorback2(GEN L, GEN e) { return gen_factorback(L, e, NULL, &mul, &powi, NULL); }
 GEN
 factorback(GEN fa) { return factorback2(fa, NULL); }
 

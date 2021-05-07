@@ -27,6 +27,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     input small primes as a t_VECSMALL.
   - QXX_QXQ_eval: renamed to QXY_QXQ_evalx
   - ZX_Zp_root(f,a,p,): assume 0 <= a < p
+  - gen_factorback: require extra parameter 'one'. Use NULL for old behavior.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.12 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   - the member function bnf.futu and .tufu (deprecated since 2.2) have been
