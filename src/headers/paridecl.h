@@ -748,6 +748,7 @@ GEN     FpXQM_autsum(GEN x, ulong n, GEN T, GEN p);
 GEN     FpXT_red(GEN z, GEN p);
 GEN     FpXV_FpX_fromdigits(GEN x, GEN T, GEN p);
 GEN     FpXV_chinese(GEN A, GEN P, GEN p, GEN *pt_mod);
+GEN     FpXV_factorback(GEN fa, GEN e, GEN p, long v);
 GEN     FpXV_prod(GEN V, GEN p);
 GEN     FpXV_red(GEN z, GEN p);
 GEN     FpXn_exp(GEN x, long n, GEN p);

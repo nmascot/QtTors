@@ -363,26 +363,49 @@ struct _FpXQ {
   GEN T, p, aut;
 };
 
-static GEN
-_FpX_sqr(void *data, GEN x)
+struct _FpX
 {
-  struct _FpXQ *D = (struct _FpXQ*)data;
-  return FpX_sqr(x, D->p);
-}
+  GEN p;
+  long v;
+};
+
 static GEN
-_FpX_mul(void *data, GEN x, GEN y)
-{
-  struct _FpXQ *D = (struct _FpXQ*)data;
-  return FpX_mul(x,y, D->p);
-}
+_FpX_mul(void* E, GEN x, GEN y)
+{ struct _FpX *D = (struct _FpX *)E; return FpX_mul(x, y, D->p); }
+static GEN
+_FpX_sqr(void *E, GEN x)
+{ struct _FpX *D = (struct _FpX *)E; return FpX_sqr(x, D->p); }
 
 GEN
 FpX_powu(GEN x, ulong n, GEN p)
 {
-  struct _FpXQ D;
+  struct _FpX D;
   if (n==0) return pol_1(varn(x));
   D.p = p;
   return gen_powu(x, n, (void *)&D, _FpX_sqr, _FpX_mul);
+}
+
+GEN
+FpXV_prod(GEN V, GEN p)
+{
+  struct _FpX D;
+  D.p = p;
+  return gen_product(V, (void *)&D, &_FpX_mul);
+}
+
+static GEN
+_FpX_pow(void* E, GEN x, GEN y)
+{ struct _FpX *D = (struct _FpX *)E; return FpX_powu(x, itou(y), D->p); }
+static GEN
+_FpX_one(void *E)
+{ struct _FpX *D = (struct _FpX *)E; return pol_1(D->v); }
+
+GEN
+FpXV_factorback(GEN f, GEN e, GEN p, long v)
+{
+  struct _FpX D;
+  D.p = p; D.v = v;
+  return gen_factorback(f, e, (void *)&D, &_FpX_mul, &_FpX_pow, &_FpX_one);
 }
 
 GEN
@@ -518,12 +541,12 @@ FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r)
 static GEN
 _FpX_divrem(void * E, GEN x, GEN y, GEN *r)
 {
-  struct _FpXQ *D = (struct _FpXQ*) E;
+  struct _FpX *D = (struct _FpX*) E;
   return FpX_divrem(x, y, D->p, r);
 }
 static GEN
 _FpX_add(void * E, GEN x, GEN y) {
-  struct _FpXQ *D = (struct _FpXQ*) E;
+  struct _FpX *D = (struct _FpX*) E;
   return FpX_add(x, y, D->p);
 }
 
@@ -533,7 +556,7 @@ GEN
 FpX_digits(GEN x, GEN T, GEN p)
 {
   pari_sp av = avma;
-  struct _FpXQ D;
+  struct _FpX D;
   long d = degpol(T), n = (lgpol(x)+d-1)/d;
   GEN z;
   D.p = p;
@@ -545,7 +568,7 @@ GEN
 FpXV_FpX_fromdigits(GEN x, GEN T, GEN p)
 {
   pari_sp av = avma;
-  struct _FpXQ D;
+  struct _FpX D;
   GEN z;
   D.p = p;
   z = gen_fromdigits(x,T,(void *)&D, &FpX_ring);
@@ -1124,14 +1147,6 @@ FpX_disc(GEN P, GEN p)
     D = (dd == -1)? Fp_div(D,L,p): Fp_mul(D, Fp_powu(L, dd, p), p);
   if (degpol(P) & 2) D = Fp_neg(D ,p);
   return gerepileuptoint(av, D);
-}
-
-GEN
-FpXV_prod(GEN V, GEN p)
-{
-  struct _FpXQ D;
-  D.p = p;
-  return gen_product(V, (void *)&D, &_FpX_mul);
 }
 
 GEN
@@ -1863,16 +1878,24 @@ get_FpXQ_algebra(void **E, GEN T, GEN p)
   return &FpXQ_algebra;
 }
 
-static struct bb_algebra FpX_algebra = { _FpXQ_red, _FpXQ_add, _FpXQ_sub,
-       _FpX_mul, _FpX_sqr, _FpXQ_one, _FpXQ_zero };
+static GEN
+_FpX_red(void *E, GEN x)
+{ struct _FpX *D = (struct _FpX*)E; return FpX_red(x,D->p); }
+
+static GEN
+_FpX_zero(void *E)
+{ struct _FpX *D = (struct _FpX *)E; return pol_0(D->v); }
+
+
+static struct bb_algebra FpX_algebra = { _FpX_red, _FpXQ_add, _FpXQ_sub,
+       _FpX_mul, _FpX_sqr, _FpX_one, _FpX_zero };
 
 const struct bb_algebra *
 get_FpX_algebra(void **E, GEN p, long v)
 {
-  GEN z = new_chunk(sizeof(struct _FpXQ));
-  struct _FpXQ *e = (struct _FpXQ *) z;
-  e->T = pol_x(v);
-  e->p  = p; *E = (void*)e;
+  GEN z = new_chunk(sizeof(struct _FpX));
+  struct _FpX *e = (struct _FpX *) z;
+  e->p  = p; e->v = v; *E = (void*)e;
   return &FpX_algebra;
 }
 

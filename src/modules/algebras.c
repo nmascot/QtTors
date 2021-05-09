@@ -745,18 +745,6 @@ algprimesubalg(GEN al)
 }
 
 static GEN
-_FpX_mul(void* D, GEN x, GEN y) { return FpX_mul(x,y,(GEN)D); }
-static GEN
-_FpX_pow(void* D, GEN x, GEN n) { return FpX_powu(x,itos(n),(GEN)D); }
-static GEN
-_one(void *D) { (void)D; return pol_1(0); }
-static GEN
-FpX_factorback(GEN fa, GEN p)
-{
-  return gen_factorback(gel(fa,1), zv_to_ZV(gel(fa,2)), (void *)p, &_FpX_mul, &_FpX_pow, &_one);
-}
-
-static GEN
 out_decompose(GEN t, GEN Z, GEN P, GEN p)
 {
   GEN ali = gel(t,1), projm = gel(t,2), liftm = gel(t,3), pZ;
@@ -774,8 +762,8 @@ alg_decompose_from_facto(GEN al, GEN x, GEN fa, GEN Z, long mini)
   GEN alq, P, Q, p = alg_get_char(al);
   dbg_printf(3)("  alg_decompose_from_facto\n");
   if (signe(p)) {
-    P = FpX_factorback(v1, p);
-    Q = FpX_factorback(v2, p);
+    P = FpXV_factorback(gel(v1,1), gel(v1,2), p, 0);
+    Q = FpXV_factorback(gel(v2,1), gel(v2,2), p, 0);
     P = FpX_mul(P, FpXQ_inv(P,Q,p), p);
   }
   else {
@@ -1083,7 +1071,7 @@ try_split(GEN al, GEN x, long n, long d)
     if (exp[i]%d) pari_err(e_MISC, "the algebra must be simple (try_split 1)");
     exp[i] /= d;
   }
-  cp = FpX_factorback(fa,p);
+  cp = FpXV_factorback(gel(fa,1), gel(fa,2), p, 0);
 
   /* find smallest Fp-dimension of a characteristic space */
   for (i=1; i<lg(pol); i++) {
