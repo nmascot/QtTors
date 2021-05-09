@@ -90,6 +90,7 @@ BA  21- [libpari] elltors_psylow
 HC  25- New GP functions nflist, nfresolvent
 BA  26- [libpari] Hermite_bound
     27- substvec: support t_VEC replacement values
+BA  28- New GP functions ell2cover
 
   Changed
 HC   1- faster implementation of eulervec + cache result
