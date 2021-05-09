@@ -172,9 +172,9 @@ deg(a)=poldegree(if (type(a)=="t_POL", a, a[1]));
 filter(v)=[if (cmp(a,b=(-1)^deg(a)*subst(a,x,-x)) < 0,b,a)| a<-v];
 setrand(1);bnr=bnrinit(bnfinit(y^2+3299), 3,, 3);
 L=subgrouplist(bnr, [3], 1);
-filter(bnrclassfield(bnr, L, 0))
-filter(bnrclassfield(bnr, L, 1))
-filter(bnrclassfield(bnr, L, 2))
+setrand(1);filter(bnrclassfield(bnr, L, 0))
+setrand(1);filter(bnrclassfield(bnr, L, 1))
+setrand(1);filter(bnrclassfield(bnr, L, 2))
 bnrclassfield(bnr,[])
 filter(bnrclassfield(bnfinit(y^2+31),[Mat(3)]))
 
