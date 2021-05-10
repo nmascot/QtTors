@@ -36,6 +36,5 @@ Doc: for positive integer $N$ and complex number $x$, return the sum
  @eprog\noindent The \kbd{dirpowerssum} commands work with default stack size,
  the \kbd{dirpowers} one requires a stacksize of at least 5GB.
 
- \synt{dirpowerssumfun}{ulong N, GEN x, void *E, GEN (*f)(void*, ulong, long),
-                long prec}. When $f = \kbd{NULL}$, one may use
+ \synt{dirpowerssumfun}{ulong N, GEN x, void *E, GEN (*f)(void*, ulong, long), long prec}. When $f = \kbd{NULL}$, one may use
  \fun{GEN}{dirpowerssum}{ulong N, GEN x, long prec}.
