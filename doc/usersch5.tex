@@ -4489,9 +4489,10 @@ if no such matrix exist.
 
 \fun{GEN}{Flm_intersect}{GEN x, GEN y, ulong p}
 
-\fun{GEN}{FlM_intersect_i}{GEN x, GEN y, GEN p} internal variant of
-\kbd{FlM\_intersect} but the result is only a generating set, not
-necessarily an $\F_p$-basis. It is not \kbd{gerepile}-clean either, but
+\fun{GEN}{Flm_intersect_i}{GEN x, GEN y, GEN p} internal variant of
+\kbd{Flm\_intersect} but the result is only a generating set, not
+necessarily an $\F_p$-basis. It \emph{is} a basis if both $x$ and $y$
+have independent columns. It is not \kbd{gerepile}-clean either, but
 suitable for \kbd{gerepileupto}.
 
 \fun{GEN}{Flm_transpose}{GEN x}

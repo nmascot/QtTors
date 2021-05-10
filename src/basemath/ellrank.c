@@ -1370,9 +1370,9 @@ dim_selmer(GEN p, GEN pol, GEN K, GEN vnf, GEN LS2, GEN helpLS2,
   L = elllocalimage(pol, K, vnf, p, pp, helpimage);
   X = Flm_ker(shallowconcat(LS2image, L), 2); setlgall(X, lg(LS2image));
   /* intersect(LS2image, locim) = LS2image.X */
-  *selmer = Flm_intersect(*selmer, shallowconcat(Flm_ker(LS2image,2), X), 2);
-  *selmer = gerepileupto(av, *selmer); dim = lg(*selmer)-1;
-  return (dim == Flm_rank(helpimage,2))? dim: -1;
+  *selmer = Flm_intersect_i(*selmer, shallowconcat(Flm_ker(LS2image,2), X), 2);
+  *selmer = gerepileupto(av, Flm_image(*selmer, 2));
+  dim = lg(*selmer)-1; return (dim == Flm_rank(helpimage,2))? dim: -1;
 }
 static long
 get_row(GEN vnf, GEN K)
