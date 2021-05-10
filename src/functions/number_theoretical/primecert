@@ -129,3 +129,6 @@ Doc:
  too large), and \kbd{factor} warns us that the cofactor hasn't been tested.
  It may or may not be tested later, and may or may not be prime. This does
  not affect the validity of the whole Primality Certificate.
+
+Variant: Also available is
+ \fun{GEN}{ecpp0}{GEN N, long partial} ($\fl = 0$).
