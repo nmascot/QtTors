@@ -1535,9 +1535,11 @@ GEN
 groupelts_to_group(GEN G)
 {
   pari_sp av = avma;
-  GEN L = groupelts_cyclic_subgroups(G);
-  GEN cyc = gel(L,1), ord = gel(L,2);
-  long i, l = lg(cyc), n = lg(G)-1;
+  GEN L, cyc, ord;
+  long i, l, n = lg(G)-1;
+  if (n==1) return trivialgroup();
+  L = groupelts_cyclic_subgroups(G); cyc = gel(L,1); ord = gel(L,2);
+  l = lg(cyc);
   for (i = l-1; i >= 2; i--)
   {
     GEN p = gel(G,cyc[i]);
