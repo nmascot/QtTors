@@ -1545,7 +1545,7 @@ groupelts_to_group(GEN G)
     GEN p = gel(G,cyc[i]);
     long o = ord[i];
     GEN H;
-    if (o == n) { set_avma(av); return cyclicgroup(p, o); }
+    if (o == n) return gerepileupto(av, cyclicgroup(p, o));
     H = cyclicgroup(p, o);
     if (groupelts_subgroup_isnormal(G, H))
     {
