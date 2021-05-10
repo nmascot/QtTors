@@ -8395,6 +8395,11 @@ would be exhibited in this way, though.) This should be slower than
 \fun{GEN}{ecpp}{GEN N} returns an ECPP certificate for \typ{INT} $N$;
 underlies \kbd{primecert}.
 
+\fun{GEN}{ecpp0}{GEN N, long t} returns a (potentially)
+partial ECPP certificate for \typ{INT} $N$ where strong pseudo-primes $< 2^t$
+are included as primes in the certificate. Underlies \kbd{primecert} with
+$t$ set to the \kbd{partial} argument.
+
 \fun{GEN}{ecppexport}{GEN cert, long flag} export a PARI ECPP certificate to
 MAGMA or Primo format; underlies \kbd{primecertexport}.
 
