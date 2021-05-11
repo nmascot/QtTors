@@ -4590,7 +4590,7 @@ GEN PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN Tne
 		 and return coeffs of a lin dep relation between Tnew on BT.
 		 If Tnew is indep of BT, let R2 = [BT,Tnew|LinTests2] of rank d+1,
 		 and LinTests2 is either exactly equal to LinTests,
-		 in which case replace is set to 0 and we retrun R2,
+		 in which case replace is set to 0 and we return R2,
 		 or differs from LinTests at exactly one place,
 		 in which case replace is set to this index and we return [R2,NewTest].
   */

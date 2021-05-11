@@ -436,7 +436,7 @@ GEN XH_decomp(ulong N, GEN H)
 		S = cgetg(2,t_VEC);
 		gel(S,1) = mfinit(N2chi,1);
 		d = MF_get_dim(gel(S,1));
-		if(DEBUGLEVEL>=3) printf("S2(Gamma0) has dim %lu\n",d);
+		if(DEBUGLEVEL>=3) printf("XH_decomp: S2(Gamma0) has dim %lu\n",d);
 		if(d)
 		{
 			gel(res,1) = cgetg(2,t_VEC);
@@ -466,7 +466,7 @@ GEN XH_decomp(ulong N, GEN H)
     {
       if(!gequal0(chareval(G,chi,stoi(H[j]),NULL)))
       {
-        if(DEBUGLEVEL>=2) pari_printf("Dropping chi=%Ps because %lu not in Ker.\n",chi,H[j]);
+        if(DEBUGLEVEL>=2) pari_printf("XH_decomp: Dropping chi=%Ps because %lu not in Ker\n",chi,H[j]);
         chi = NULL;
         break;
       }
@@ -476,10 +476,10 @@ GEN XH_decomp(ulong N, GEN H)
     /*d = mfcuspdim(N,2,Gchi); */
     S = mfinit(N2chi,1);
     d = MF_get_dim(S);
-		if(DEBUGLEVEL>=3) printf("dim %lu\n",d);
+		if(DEBUGLEVEL>=3) pari_printf("XH_decomp: For chi=%Ps, dim S2(chi)=%lu\n",chi,d);
     if(d==0)
     {
-      if(DEBUGLEVEL>=2) pari_printf("Dropping chi=%Ps because dim S2(chi)=0.\n",chi);
+      if(DEBUGLEVEL>=2) pari_printf("XH_decomp: Dropping chi=%Ps because dim S2(chi)=0\n",chi);
       continue;
     }
 		gel(VecChi,n) = Gchi;
@@ -1951,7 +1951,7 @@ GEN mfyt(GEN pf, GEN qf, GEN l, GEN coefs)
 		gel(Y,i) = Fp_sub(gel(Z,i),mulii(k,gel(T,i)),l);
 		V[i] = 1;
 	}
-	if(DEBUGLEVEL >= 3) pari_printf("mfyt: %lu choices of reductions mod %Ps.\nY=%Ps, T=%Ps\n",nZ-1,l,Y,T);
+	if(DEBUGLEVEL >= 3) pari_printf("mfyt: %lu choices of reductions mod %Ps; Y=%Ps, T=%Ps\n",nZ-1,l,Y,T);
 	ncoefs = coefs ? lg(coefs) : 0;
 	for(j=1;j<ncoefs;j++)
 	{
@@ -1987,8 +1987,8 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 	/* TODO for now we ignore nebentypus */
 	/* TODO useTp */
 	pari_sp av = avma;
-	GEN ilN,pf,H,eps,o,to,pmin,pmax,gen_5,p,qf,listp,Lp,yt,best,ap,epsp,chi,psi,rem,a1,a2,a,xa1,NJ;
-	ulong ul,N,lN,philN,k,h,epsh,nH,np,i,qprec,ncoefs,n;
+	GEN ilN,pf,H,eps,o,to,pmin,pmax,gen_5,p,qf,listp,Lp,yt,best,ap,epsp,chi,psi,rem,a1,a2,a,xa1,NJ,M,A;
+	ulong ul,N,lN,philN,k,h,epsh,nH,np,i,qprec,ncoefs,n,S,nM,nA,j;
 	long vt,vy;
 	forprime_t piter;
 	ul = itou(l);
@@ -2070,8 +2070,32 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 			pari_err(e_BUG,"charpoly in mfgalrep_bestp");
 		if(degpol(FpX_gcd(chi,psi,l)))
 		{
-			if(DEBUGLEVEL) pari_printf("mfgalrep_best: p=%Ps has multiplicity\n",p);
-			continue;
+			if(UseTp)
+			{
+				S = 0;
+				M = gmael(Lp,i,2); /* Matrices of Tp of S2(chi) */
+				nM = lg(M);
+				for(n=1;n<nM;n++)
+				{
+					A = gel(M,n);
+					nA = lg(A);
+					for(j=1;j<nA;j++)
+						gcoeff(A,j,j) = subii(gcoeff(A,j,j),ap);
+					S += (lg(FpM_ker(A,l))-1);
+				}
+				if(S<1) pari_err(e_BUG,"mfgalrep_bestp_S");
+				if(S>1)
+				{
+        	if(DEBUGLEVEL) pari_printf("mfgalrep_bestp: p=%Ps has multiplicity and cannot be used, even with Tp\n",p);
+        	continue;
+      	}
+        if(DEBUGLEVEL) pari_printf("mfgalrep_bestp: p=%Ps has multiplicity, but can be used thanks to Tp\n",p);
+			}
+			else
+			{
+				if(DEBUGLEVEL) pari_printf("mfgalrep_bestp: p=%Ps has multiplicity\n",p);
+				continue;
+			}
 		}
 		a1 = gel(FpX_root_order_bound(chi,l),2);
 		a2 = utoi(Fl_order(itou(p),philN,lN));
@@ -2090,6 +2114,203 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 	if(best==NULL)
 		pari_err(e_MISC,"mfgalrep_bestp: No suitable prime, please enlarge prime range");
 	return gerepilecopy(av,best);
+}
+
+ulong PicTors_TpClosure(GEN J, GEN* pBT, GEN* pmatTp, GEN T, GEN PT, GEN FRparams, GEN LinTests, GEN LinTestsNames, GEN* pR, ulong* pNewTestName)
+{ /* Shallow */
+	GEN l,X,matTp2,u;
+	ulong i,j,d,d2;
+	int replace;
+	d = lg(*pBT);
+	d2 = 0;
+	l = gel(FRparams,1);
+	for(;;)
+	{
+		X = PicTors_UpdatePairings(J,FRparams,*pBT,*pR,T,PT,&replace);
+		if(replace==-1) /* T in span BT */
+		{
+			/* Update mat Tp */
+			if(d2)
+			{
+				matTp2 = cgetg(d+d2,t_MAT);
+				for(j=1;j<d;j++)
+				{
+					gel(matTp2,j) = cgetg(d+d2,t_COL);
+					for(i=1;i<d+d2;i++)
+						gcoeff(matTp2,i,j) = i<d?gcoeff(*pmatTp,i,j):gen_0;
+				}
+				for(j=d;j<d+d2-1;j++)
+				{
+					gel(matTp2,j) = cgetg(d+d2,t_COL);
+					for(i=1;i<d+d2;i++)
+						gcoeff(matTp2,i,j) = i==j+1?gen_1:gen_0;
+				}
+				gel(matTp2,d+d2-1) = cgetg(d+d2,t_COL);
+				u = Fp_neg(Fp_inv(gel(X,d+d2),l),l);
+				for(i=1;i<d+d2;i++)
+					gcoeff(matTp2,i,d+d2-1) = Fp_mul(gel(X,i),u,l);
+				*pmatTp = matTp2;
+			}
+			return d2;
+		}
+		/* T not in span BT */
+		*pR = gel(X,1);
+		d2++;
+		*pBT = VecExtend1_shallow(*pBT,T);
+		if(replace)
+		{
+			*pR = gel(X,1);
+			gel(LinTests,replace) = gel(X,2);
+			LinTestsNames[replace] = ++(*pNewTestName);
+		}
+		else *pR = X;
+		T = PicTp(J,T,l);
+		PT = PicTorsPairing(J,FRparams,T,LinTests);
+	}
+}
+
+GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN chi)
+{ /* TODO try to use l-power tors */
+	/* TODO reuse code from pic.c */
+	pari_sp av = avma;
+	GEN Lp,Diva,Chi,gcdchi,Lp1,Phi,phi,Batch,BT,matTp,LinTests,LinTestsNames,FRparams,R,T,B,PT,UsedTestsNames,K,EBT,FEBT,I,Etests,FrobMat;
+	ulong i,j,iBatch,iFrob,iPhi,a,nPhi,nBatch,d2,dB,d,r,NewTestName;
+	long workid,pending;
+	GEN worker,done;
+	struct pari_mt pt;
+	Lp = JgetLp(J);
+	a = degree(JgetT(J)); /* Residual degree */
+  if(a%itou(l))
+  {
+    Diva = divisorsu(a);
+    Diva = vecsort0(Diva,NULL,4); /* Divisors of a sorted in reverse */
+    nPhi = lg(Diva);
+    Phi = cgetg(nPhi,t_VEC);
+    j = 0;
+    for(i=1;i<lg(Phi);i++)
+    {
+      phi = polcyclo(Diva[i],0);
+      if(degree(FpX_gcd(phi,chi,l)))
+        gel(Phi,++j) = phi;
+    }
+    nPhi = j;
+    if(nPhi==0) Phi=NULL;
+  }
+  else
+	{
+		Phi = NULL;
+		nPhi = 0;
+	}
+	Chi = pol_1(varn(Lp)); /* gcd(Lp,chi^oo) */
+	gcdchi = chi;
+	Lp1 = Lp;
+	while(degpol(gcdchi))
+	{
+		Lp1 = FpX_div(Lp1,gcdchi,l);
+		Chi = FpX_mul(Chi,gcdchi,l);
+		gcdchi = FpX_gcd(Lp1,chi,l);
+	}
+	Chi = FpX_normalize(Chi,l);
+	
+	BT = cgetg(1,t_VEC);
+	matTp = cgetg(1,t_MAT);
+	FRparams = PicTorsPairingInit(J,l);
+	d = degpol(Chi);
+  LinTests = cgetg(d+1,t_VEC); /* pts to take pairings with */
+  LinTestsNames = cgetg(d+1,t_VECSMALL);
+	for(i=1;i<=d;i++)
+	{
+    gel(LinTests,i) = PicChord(J,PicRand(J,NULL),PicRand(J,NULL),1); /* Random pt, well-mixed so as not throw off Pairings */
+		LinTestsNames[i] = i;
+	}
+	NewTestName = d+1;
+	R = cgetg(1,t_MAT);
+	nBatch = (mt_nbthreads()+1)/2;//TODO
+  worker = strtofunction("_PicTorsBasis_worker");
+  Batch = cgetg(nBatch+1,t_VEC);
+  for(iPhi=1;;)
+  {
+    if(DEBUGLEVEL) printf("PicTors_TpEigen: Generating new batch of %lu torsion points\n",nBatch);
+    mt_queue_start_lim(&pt,worker,nBatch);
+    for(iBatch=1;iBatch<=nBatch||pending;iBatch++)
+    {
+      if(iBatch<=nBatch)
+      {
+        if(Phi)
+        {
+          if(iPhi>nPhi) iPhi -= nPhi;
+          phi = gel(Phi,iPhi++);
+        }
+        else phi = gen_0;
+        mt_queue_submit(&pt,iBatch,mkvecn(8,J,l,Chi,phi,FRparams,LinTests,LinTestsNames,genrand(NULL)));
+      }
+      else mt_queue_submit(&pt,iBatch,NULL);
+      done = mt_queue_get(&pt,&workid,&pending);
+      if(done)
+        gel(Batch,workid) = done;
+    }
+    mt_queue_end(&pt);
+		for(iBatch=1;iBatch<=nBatch;iBatch++)
+		{
+			T = gel(Batch,iBatch);
+			if(gequal0(T))
+      {
+        if(DEBUGLEVEL>=2) printf("PicTors_TpEigen: This point is zero, moving on to the next one\n");
+        continue;
+      }
+			B = gel(T,4);
+			dB = degpol(B);
+			PT = gel(T,5);
+			UsedTestsNames = gel(T,6);
+			T = gel(T,3);
+			/* Make sure pairings are current */
+  		if(DEBUGLEVEL>=2) printf("PicTors_TpEigen: Refreshing pairings\n");
+  		PT = PicRefreshPairings(J,FRparams,T,PT,UsedTestsNames,LinTests,LinTestsNames);
+			for(iFrob=0;;iFrob++)
+			{
+        if(DEBUGLEVEL>=2)
+					pari_printf("PicTors_TpEigen: Throwing in Frob-iterate %lu of point %lu (B = %Ps)\n",iFrob,iBatch,B);
+				d2 = PicTors_TpClosure(J,&BT,&matTp,T,PT,FRparams,LinTests,LinTestsNames,&R,&NewTestName);
+       	printf("Now matTp=\n");
+				printp(mkvec(matTp));
+				if(DEBUGLEVEL>=2) printf("PicTors_TpEigen: taking Tp closure increases dim by %lu\n",d2);
+				if(d2==0) break;
+				K = gcopy(matTp); /* Tp - ap */
+				for(i=1;i<lg(K);i++)
+					gcoeff(K,i,i) = subii(gcoeff(K,i,i),ap);
+				K = FpM_ker(K,l); /* Ker(Tp-ap)*/
+				r = lg(K)-1;
+        if(DEBUGLEVEL>=2) pari_printf("PicTors_TpEigen: Now the dim of the Tp=%Ps eigenspace is %lu\n",ap,r);
+				if(r==2) /* Finished? */
+				{
+					K = FpM_center(K,l,shifti(l,-1));
+					EBT = cgetg(3,t_VEC);
+					gel(EBT,1) = PicLC(J,gel(K,1),BT);
+					gel(EBT,2) = PicLC(J,gel(K,2),BT);
+					R = FpM_mul(R,K,l);
+					I = gel(FpM_indexrank(R,l),1); /* Indices of LinTests which are indep on Eigenspace */
+					Etests = cgetg(3,t_VEC);
+					gel(Etests,1) = gel(LinTests,I[1]);
+					gel(Etests,2) = gel(LinTests,I[2]);
+					gcoeff(R,1,1) = gcoeff(R,I[1],1);
+					gcoeff(R,2,1) = gcoeff(R,I[2],1);
+					setlg(gel(R,1),3);
+					gcoeff(R,1,2) = gcoeff(R,I[1],2);
+					gcoeff(R,2,2) = gcoeff(R,I[2],2);
+					setlg(gel(R,2),3);
+					FEBT = cgetg(3,t_VEC);
+					gel(FEBT,1) = PicFrob(J,gel(EBT,1));
+					gel(FEBT,2) = PicFrob(J,gel(EBT,2));
+					FrobMat = FpM_mul(FpM_inv(R,l),PicTorsPairing(J,FRparams,FEBT,Etests),l);
+					/* TODO mat <p> */
+					gel(FEBT,1) = EBT;
+					gel(FEBT,2) = FrobMat;
+					return gerepilecopy(av,FEBT);
+				}
+				if(++iFrob==dB) break;
+			}
+		}
+	}
 }
 
 GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qprec)

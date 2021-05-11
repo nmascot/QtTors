@@ -988,8 +988,13 @@ GEN enum_roots(ulong j, norm_eqn_t ne, GEN fdb, GEN G, GEN vshape);
 /* pic.c */
 GEN ZpXQMinv(GEN A, GEN T, GEN pe, GEN p, long e);
 GEN ZpXQ_FrobMat(GEN T, GEN p, long e, GEN pe);
+GEN JgetT(GEN J);
 GEN Jgetp(GEN J);
+GEN JgetLp(GEN J);
 GEN DivMul(GEN f, GEN W, GEN T, GEN p);
 GEN DivAdd1(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, long flag);
+GEN PicRefreshPairings(GEN J, GEN FRparams, GEN T, GEN Pairings, GEN UsedNames, GEN Want, GEN WantNames);
+GEN PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN TnewPairings, int* replace);
+GEN VecExtend1_shallow(GEN V, GEN X);
 
 ENDEXTERN
