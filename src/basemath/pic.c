@@ -4757,7 +4757,7 @@ GEN PicRefreshPairings(GEN J, GEN FRparams, GEN T, GEN Pairings, GEN UsedNames, 
 		}
 	}
 	/* OK, do we need to compute any new pairings? */
-	if(DEBUGLEVEL>=2) printf("Refreshing %lu pairings\n",k-1);
+	if(DEBUGLEVEL>=2) printf("PicRefreshPairings: %lu pairings need to be refreshed\n",k-1);
 	if(k>1)
 	{
 		setlg(todo,k);
@@ -5083,19 +5083,16 @@ GEN PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
 	return gerepileupto(av,res);
 }
 
-GEN PicTorsGalRep(GEN J, GEN l, GEN chi)
+GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B)
 {
 	pari_sp av = avma;
-	GEN J1,B,C,MFrob,MAuts,Z,AF,best,c,cbest;
+	GEN C,MFrob,MAuts,Z,AF,best,c,cbest;
 	long e1,e2; /* Prec before and after lift */
 	ulong ul,n,i,d;
 	long sbest,s;
 	int comp;
 	
 	ul = itou(l);
-	if(DEBUGLEVEL) pari_printf("pictorsgalrep: Getting basis of rep space over F_%Ps^%lu\n",Jgetp(J),degpol(JgetT(J)));
-	J1 = PicSetPrec(J,1);
-	B = PicTorsBasis(J1,l,chi);
 	MFrob = gel(B,2);
 	MAuts = gel(B,3);
 	B = gel(B,1);
@@ -5140,6 +5137,17 @@ GEN PicTorsGalRep(GEN J, GEN l, GEN chi)
 		}
 	}
 	return gerepilecopy(av,mkvecn(7,gel(best,1),l,utoi(d),gel(best,2),JgetT(J),Jgetp(J),JgetE(J)));
+}
+
+GEN PicTorsGalRep(GEN J, GEN l, GEN chi)
+{
+	pari_sp av = avma;
+  GEN J1,B,R;
+  if(DEBUGLEVEL) pari_printf("pictorsgalrep: Getting basis of rep space over F_%Ps^%lu\n",Jgetp(J),degpol(JgetT(J)));
+  J1 = PicSetPrec(J,1);
+  B = PicTorsBasis(J1,l,chi);
+	R = PicTorsGalRep_from_basis(J,J1,l,B);
+	return gerepileupto(av,R);
 }
 
 GEN ProjGalRep_aux(GEN f, GEN Z, ulong l, ulong d, ulong ld, GEN T, GEN p, long e, GEN pe, ulong m)

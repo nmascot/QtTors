@@ -996,5 +996,6 @@ GEN DivAdd1(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, long fl
 GEN PicRefreshPairings(GEN J, GEN FRparams, GEN T, GEN Pairings, GEN UsedNames, GEN Want, GEN WantNames);
 GEN PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN TnewPairings, int* replace);
 GEN VecExtend1_shallow(GEN V, GEN X);
+GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B);
 
 ENDEXTERN

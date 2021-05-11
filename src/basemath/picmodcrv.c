@@ -2109,7 +2109,7 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 			pari_printf("mfgalrep_bestp: p=%Ps needs deg %Ps (%Ps to split rep, %Ps for roots of 1) -> lg #J = %ld\n",p,a,a1,a2,logint(NJ,gen_2));
 		}
 		if(best==NULL || cmpii(gel(best,4),a)==1)
-			best = mkvecn(6,ilN,H,p,a,gmael(Lp,i,1),chi);
+			best = mkvecn(8,ilN,H,p,a,gmael(Lp,i,1),ap,epsp,chi);
 	}
 	if(best==NULL)
 		pari_err(e_MISC,"mfgalrep_bestp: No suitable prime, please enlarge prime range");
@@ -2169,11 +2169,11 @@ ulong PicTors_TpClosure(GEN J, GEN* pBT, GEN* pmatTp, GEN T, GEN PT, GEN FRparam
 	}
 }
 
-GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN chi)
+GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
 { /* TODO try to use l-power tors */
 	/* TODO reuse code from pic.c */
 	pari_sp av = avma;
-	GEN Lp,Diva,Chi,gcdchi,Lp1,Phi,phi,Batch,BT,matTp,LinTests,LinTestsNames,FRparams,R,T,B,PT,UsedTestsNames,K,EBT,FEBT,I,Etests,FrobMat;
+	GEN Lp,Diva,Chi,gcdchi,Lp1,Phi,phi,Batch,BT,matTp,LinTests,LinTestsNames,FRparams,R,T,B,PT,UsedTestsNames,K,EBT,FEBT,I,Etests,FrobMat,DiamMat;
 	ulong i,j,iBatch,iFrob,iPhi,a,nPhi,nBatch,d2,dB,d,r,NewTestName;
 	long workid,pending;
 	GEN worker,done;
@@ -2252,6 +2252,8 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN chi)
     mt_queue_end(&pt);
 		for(iBatch=1;iBatch<=nBatch;iBatch++)
 		{
+			if(DEBUGLEVEL>=2)
+				printf("PicTors_TpEigen: Moving on to point %lu of batch\n",iBatch);
 			T = gel(Batch,iBatch);
 			if(gequal0(T))
       {
@@ -2271,8 +2273,6 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN chi)
         if(DEBUGLEVEL>=2)
 					pari_printf("PicTors_TpEigen: Throwing in Frob-iterate %lu of point %lu (B = %Ps)\n",iFrob,iBatch,B);
 				d2 = PicTors_TpClosure(J,&BT,&matTp,T,PT,FRparams,LinTests,LinTestsNames,&R,&NewTestName);
-       	printf("Now matTp=\n");
-				printp(mkvec(matTp));
 				if(DEBUGLEVEL>=2) printf("PicTors_TpEigen: taking Tp closure increases dim by %lu\n",d2);
 				if(d2==0) break;
 				K = gcopy(matTp); /* Tp - ap */
@@ -2280,7 +2280,12 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN chi)
 					gcoeff(K,i,i) = subii(gcoeff(K,i,i),ap);
 				K = FpM_ker(K,l); /* Ker(Tp-ap)*/
 				r = lg(K)-1;
-        if(DEBUGLEVEL>=2) pari_printf("PicTors_TpEigen: Now the dim of the Tp=%Ps eigenspace is %lu\n",ap,r);
+        if(DEBUGLEVEL>=2)
+				{
+					printf("PicTors_TpEigen: Now matTp=\n");
+        	printp(mkvec(matTp));
+					pari_printf("and the dim of the Tp=%Ps eigenspace is %lu\n",ap,r);
+				}
 				if(r==2) /* Finished? */
 				{
 					K = FpM_center(K,l,shifti(l,-1));
@@ -2302,10 +2307,16 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN chi)
 					gel(FEBT,1) = PicFrob(J,gel(EBT,1));
 					gel(FEBT,2) = PicFrob(J,gel(EBT,2));
 					FrobMat = FpM_mul(FpM_inv(R,l),PicTorsPairing(J,FRparams,FEBT,Etests),l);
-					/* TODO mat <p> */
-					gel(FEBT,1) = EBT;
-					gel(FEBT,2) = FrobMat;
-					return gerepilecopy(av,FEBT);
+					DiamMat = cgetg(3,t_MAT);
+					gel(DiamMat,1) = cgetg(3,t_COL);
+					gel(DiamMat,2) = cgetg(3,t_COL);
+					gcoeff(DiamMat,1,1) = gcoeff(DiamMat,2,2) = epsp;
+					gcoeff(DiamMat,1,2) = gcoeff(DiamMat,2,1) = gen_0;
+					B = cgetg(4,t_VEC);
+					gel(B,1) = EBT;
+					gel(B,2) = FrobMat;
+					gel(B,3) = mkvec(DiamMat);
+					return gerepilecopy(av,B);
 				}
 				if(++iFrob==dB) break;
 			}
@@ -2314,9 +2325,9 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN chi)
 }
 
 GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qprec)
-{ /* TODO UseTp */
+{
 	pari_sp av = avma;
-	GEN coefs,best,H,p,Lp,chi,log2,log10,logp,J,R;
+	GEN coefs,best,H,p,Lp,ap,epsp,chi,log2,log10,logp,J,J1,B,R;
 	ulong N,a;
 	long e;
 	if(typ(l)==t_VEC)
@@ -2331,7 +2342,9 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 	p = gel(best,3);
 	a = itou(gel(best,4));
 	Lp = gel(best,5);
-	chi = gel(best,6);
+	ap = gel(best,6);
+	epsp = gel(best,7);
+	chi = gel(best,8);
 	/* Smallest e such that sqrt(1/2*p^e)>10^D */
 	log2 = logr_abs(utor(2,DEFAULTPREC));
 	log10 = logr_abs(utor(10,DEFAULTPREC));
@@ -2339,6 +2352,12 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 	e = itos(gceil(divrr(addrr(log2,mulur(2*D,log10)),logp)));
 	if(DEBUGLEVEL) pari_printf("mfgalrep: X_H(%lu) (H=%Ps), genus %ld, over Q_%Ps^%lu with accuracy O(%Ps^%ld)\n",N,H,degpol(Lp)/2,p,a,p,e);
 	J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
-	R = PicTorsGalRep(J,l,chi);
+	if(UseTp)
+	{
+		J1 = PicSetPrec(J,1);
+		B = PicTors_TpEigen(J1,l,ap,epsp,chi);
+		R = PicTorsGalRep_from_basis(J,J1,l,B);
+	}
+	else R = PicTorsGalRep(J,l,chi);
 	return gerepileupto(av,R);
 }
