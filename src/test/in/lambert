@@ -1,41 +1,41 @@
 default(realprecision,38);
-do(y)=my(x = lambertw(y)); exponent(exp(x)*x / y-1);
+do(y,k)=my(x = lambertw(y,k)); exponent(exp(x)*x / y-1);
 do(-1)
 do(I)
 do(2)
 default(realprecision,211);
 do(1e14) <= -700
-do(y)=
+DO(y)=
 { my(x = lambertw(y), e = normlp(Vec(exp(x)*x - y)));
   if (e > 2e-37, error([e, y]));
 }
 default(realprecision,38);
-do(O(x^10))
-do(O(x^30))
-do(3+O(x^10))
-do(3+O(x^30))
-do(x)
-do(x+O(x^10))
-do(x+O(x^30))
-do(3+O(x))
-do(3+x)
-do(3+x+O(x^10))
-do(3+x+O(x^30))
-do(x^2-2*x^3)
-do(x^2-2*x^3+O(x^10))
-do(x^2-2*x^3+O(x^30))
-do(3+x^2-2*x^3)
-do(3+x^2-2*x^3+O(x^10))
-do(3+x^2-2*x^3+O(x^30))
+DO(O(x^10))
+DO(O(x^30))
+DO(3+O(x^10))
+DO(3+O(x^30))
+DO(x)
+DO(x+O(x^10))
+DO(x+O(x^30))
+DO(3+O(x))
+DO(3+x)
+DO(3+x+O(x^10))
+DO(3+x+O(x^30))
+DO(x^2-2*x^3)
+DO(x^2-2*x^3+O(x^10))
+DO(x^2-2*x^3+O(x^30))
+DO(3+x^2-2*x^3)
+DO(3+x^2-2*x^3+O(x^10))
+DO(3+x^2-2*x^3+O(x^30))
 serlaplace(sin(lambertw(x + O(x^5))))
 \p115
-lambertw(-2^(-600),-1)
+do(-2^(-600),-1)
 for(b=-4,4,print(lambertw(-0.1,b)));
-lambertw(-0.3678,0)
-lambertw(-0.3678,-1)
+do(-0.3678,0) <= -383
+do(-0.3678,-1) <= -383
 lambertw(-10^(-100),0)
 lambertw(-10^(-100),-1)
-lambertw(precision(-0.1,38),-1)
+do(lambertw(precision(-0.1,38),-1))
 \p38
 vector(10,mul,round(10^4*log(2)/log(abs(lambertw(-exp(-1),mul)))))
 vector(10,mul,round(10^4*log(2)/log(abs(lambertw(-exp(-1),10*mul)))))
