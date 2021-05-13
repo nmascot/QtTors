@@ -39,11 +39,11 @@ do(lambertw(precision(-0.1,38),-1))
 \p38
 vector(10,mul,round(10^4*log(2)/log(abs(lambertw(-exp(-1),mul)))))
 vector(10,mul,round(10^4*log(2)/log(abs(lambertw(-exp(-1),10*mul)))))
-bra(y,k)=if(k!=-1||imag(y)||y>0||y<-exp(-1),return(k),return(0));
+bra(y,k)=if(k!=-1||imag(y)||y>0||y<-exp(-1), k, 0);
 doc(y,k)=my(x=lambertw(y,k));exponent(x+log(x)-log(y)-2*Pi*I*bra(y,k));
 for(k=-1,1,m=-1000;for(a=-100,100,for(b=-100,100,z=(a+I*b)/100;if(z,m=max(m,doc(z,k)))));print(m));
 lambertw(-0.1+x,0)
-lambertw(-0.1+x,-1)
+lambertw(-0.1+x + O(x^3),-1)
 lambertw(-1+x,0)
 lambertw(-1+x,-1)
 
