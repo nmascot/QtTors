@@ -175,13 +175,14 @@ lambertW(GEN z, long k, long bit)
     GEN t = sqrtr(shiftr(addrs(mulrr(z, gexp(gen_1, prec)), 1), 1));
     if (gequal0(t)) { set_avma(av); return real_m1(prec); }
     w = gprec_w(k == -1? subsr(-1, t) : subrs(t, 1), prec);
-    vp = NULL;
+    p = prec - 2; vp = NULL;
   }
   else
   { /* away from -1/e: can reduce accuracy and self-correct */
     w = wd == 0.? z: dbltor(wd);
     vp = cgetg(30, t_VECSMALL); ct = 0; pb = bit;
-    while (pb > 48) { vp[++ct] = (pb + 63) >> 6; pb = (pb + 2) / 3; }
+    while (pb > BITS_IN_LONG * 3/4)
+    { vp[++ct] = (pb + BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG; pb = (pb + 2) / 3; }
     p = vp[ct]; w = gprec_w(w, p + 2);
   }
   if ((k == -1 && (bit < 192 || bit > 640)) || (k == 0 && bit > 1024))
@@ -192,7 +193,7 @@ lambertW(GEN z, long k, long bit)
       ew = mplog(divrr(w, z)); n = addrr(w, ew); d = addrs(w, 1);
       t = divrr(n, shiftr(d, 1));
       w = mulrr(w, subsr(1, divrr(n, addrr(d, t))));
-      if (expo(n) - expo(d) - expo(w) <= L) break;
+      if (p >= prec-2 && expo(n) - expo(d) - expo(w) <= L) break;
       if (vp) { if (--ct) p = vp[ct]; w = gprec_w(w, ct? p + 2: prec); }
     }
   }
@@ -204,7 +205,7 @@ lambertW(GEN z, long k, long bit)
       ew = mpexp(w); wew = mulrr(w, ew); n = subrr(wew, z); d = addrr(ew, wew);
       t = divrr(mulrr(addrs(w, 2), n), shiftr(addrs(w, 1), 1));
       w = subrr(w, divrr(n, subrr(d, t)));
-      if (expo(n) - expo(d) - expo(w) <= L) break;
+      if (p >= prec-2 && expo(n) - expo(d) - expo(w) <= L) break;
       if (vp) { if (--ct) p = vp[ct]; w = gprec_w(w, ct? p + 2: prec); }
     }
   }

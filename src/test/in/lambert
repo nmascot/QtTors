@@ -1,10 +1,10 @@
 default(realprecision,38);
-do(y)=my(x = lambertw(y)); exp(x)*x / y;
+do(y)=my(x = lambertw(y)); exponent(exp(x)*x / y-1);
 do(-1)
 do(I)
 do(2)
 default(realprecision,211);
-do(1e14)
+do(1e14) <= -700
 do(y)=
 { my(x = lambertw(y), e = normlp(Vec(exp(x)*x - y)));
   if (e > 2e-37, error([e, y]));
