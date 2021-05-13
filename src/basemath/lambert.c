@@ -299,31 +299,26 @@ reverse(GEN y)
 static GEN
 serlambertW(GEN y, long branch, long prec)
 {
-  long n, l, vy, val, v;
-  GEN t;
+  long n, vy, val, v;
+  GEN t = NULL;
 
   if (!signe(y)) return gcopy(y);
   v = valp(y);
   if (v < 0) pari_err_DOMAIN("lambertw","valuation", "<", gen_0, y);
   if (v > 0 && branch)
     pari_err_DOMAIN("lambertw [k != 0]", "x", "~", gen_0, y);
-  vy = varn(y);
-  n = lg(y)-3;
+  vy = varn(y); n = lg(y)-3;
   for (val = 1; val < n; val++)
     if (!gequal0(polcoef_i(y, val, vy))) break;
-  l = 3 + n/val;
-  if (v)
-  {
-    t = serexp0(vy, maxss(2,l-3)); setvalp(t, 1); /* t exp(t) */
-    t = reverse(t);
-  }
+  if (v || val < n) t = serexp0(vy, n / val);
+  if (v) { setvalp(t, 1); t = reverse(t); } /* rev(x exp(x)) */
   else
   {
     GEN y0 = gel(y,2), x = glambertW(y0, branch, prec);
     if (val >= n) return scalarser(x, vy, n+1);
     y = serchop0(y);
     /* (x + t) exp(x + t) = (y0 + t y0/x) * exp(t) */
-    t = gmul(deg1pol_shallow(gdiv(y0,x), y0, vy), serexp0(vy, l-3));
+    t = gmul(deg1pol_shallow(gdiv(y0,x), y0, vy), t);
     t = gadd(x, reverse(serchop0(t)));
   }
   return normalize(gsubst(t, vy, y));
