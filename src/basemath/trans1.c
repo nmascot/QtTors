@@ -2525,30 +2525,34 @@ serchop(GEN s, long n)
 static GEN
 serexp(GEN x, long prec)
 {
+  long i, j, lx, ly, mi, e = valp(x);
+  GEN y, xd, yd;
   pari_sp av;
-  long i,j,lx,ly,ex,mi;
-  GEN p1,y,xd,yd;
 
-  ex = valp(x);
-  if (ex < 0) pari_err_DOMAIN("exp","valuation", "<", gen_0, x);
+  if (e < 0) pari_err_DOMAIN("exp","valuation", "<", gen_0, x);
   if (gequal0(x)) return gaddsg(1,x);
   lx = lg(x);
-  if (ex)
+  if (e)
   {
-    ly = lx+ex; y = cgetg(ly,t_SER);
+    GEN X;
+    ly = lx+e; y = cgetg(ly,t_SER);
     mi = lx-1; while (mi>=3 && isrationalzero(gel(x,mi))) mi--;
-    mi += ex-2;
+    mi += e-2;
     y[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(x));
     /* zd[i] = coefficient of X^i in z */
-    xd = x+2-ex; yd = y+2; ly -= 2;
+    xd = x+2-e; yd = y+2; ly -= 2;
+    X = gel(xd,e); if (e != 1) X = gmulgs(X, e); /* left on stack */
+    X = gequal1(X)? NULL: X;
     gel(yd,0) = gen_1;
-    for (i=1; i<ex; i++) gel(yd,i) = gen_0;
-    for (   ; i<ly; i++)
+    for (i = 1; i < e; i++) gel(yd,i) = gen_0;
+    for (     ; i < ly; i++)
     {
-      av = avma; p1 = gen_0;
-      for (j=ex; j<=minss(i,mi); j++)
-        p1 = gadd(p1, gmulgs(gmul(gel(xd,j),gel(yd,i-j)),j));
-      gel(yd,i) = gerepileupto(av, gdivgs(p1,i));
+      GEN t = gel(yd,i-e);
+      long J = minss(i, mi);
+      av = avma; if (X) t = gmul(t, X);
+      for (j = e + 1; j <= J; j++)
+        t = gadd(t, gmulgs(gmul(gel(xd,j),gel(yd,i-j)), j));
+      gel(yd,i) = gerepileupto(av, gdivgs(t, i));
     }
     return y;
   }
