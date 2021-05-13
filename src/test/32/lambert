@@ -116,10 +116,13 @@ O(x^16)
 734 + 6.8541325989233120421465180303974100232*I)*x^14 + (-0.0403920297091715
 56525032384691785928830 + 9.6828191677170351499970157871737049292*I)*x^15 + 
 O(x^16)
+x^3 + O(x^4)
+x^2 + O(x^4)
+x^2 - x^4 + O(x^5)
   ***   at top-level: lambertw(1/x)
   ***                 ^-------------
   *** lambertw: domain error in lambertw: valuation < 0
   ***   at top-level: lambertw(0,-1)
   ***                 ^--------------
   *** lambertw: domain error in glambertW: argument out of range
-Total time spent: 15575
+Total time spent: 14679

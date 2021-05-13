@@ -1,7 +1,7 @@
+default(realprecision,38);
 do(y)=my(x = lambertw(y)); exp(x)*x / y;
 do(-1)
 do(I)
-default(realprecision,38);
 do(2)
 default(realprecision,211);
 do(1e14)
@@ -45,6 +45,11 @@ lambertw(-0.1+x,0)
 lambertw(-0.1+x,-1)
 lambertw(-1+x,0)
 lambertw(-1+x,-1)
+
+lambertw(x^3+O(x^4))
+lambertw(x^2+O(x^4))
+lambertw(x^2+O(x^5))
+
 /* Errors at the end */
 lambertw(1/x)
 lambertw(0,-1)

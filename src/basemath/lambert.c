@@ -275,15 +275,16 @@ lambertWC(GEN z, long branch, long bit)
   return gerepilecopy(av, gprec_w(w, nbits2prec(bit)));
 }
 
-/* exp(t (1 + O(t^n))), n >= 1 */
+/* exp(t (1 + O(t^n))), n >= 0 */
 static GEN
 serexp0(long v, long n)
 {
   GEN y = cgetg(n+3, t_SER), t;
   long i;
   y[1] = evalsigne(1) | evalvarn(v) | evalvalp(0);
-  gel(y,2) = gel(y,3) = gen_1; t = gen_2;
-  for (i = 2; i < n; i++, t = muliu(t,i)) gel(y,i+2) = mkfrac(gen_1,t);
+  gel(y,2) = gen_1; if (!n) return y;
+  gel(y,3) = gen_1; if (n == 1) return y;
+  for (i=2, t = gen_2; i < n; i++, t = muliu(t,i)) gel(y,i+2) = mkfrac(gen_1,t);
   gel(y,i+2) = mkfrac(gen_1,t); return y;
 }
 
@@ -292,42 +293,34 @@ reverse(GEN y)
 {
   GEN z = ser2rfrac_i(y);
   long l = lg(z);
-  return RgX_to_ser(RgXn_reverse(z, l-2), l);
+  return RgX_to_ser(RgXn_reverse(z, l-2), l-1);
 }
-
 static GEN
 serlambertW(GEN y, long branch, long prec)
 {
-  GEN x, t, y0;
   long n, l, vy, val, v;
+  GEN t;
 
   if (!signe(y)) return gcopy(y);
   v = valp(y);
-  vy = varn(y);
-  n = lg(y)-3;
-  y0 = gel(y,2);
-  for (val = 1; val < n; val++)
-    if (!gequal0(polcoef(y, val, vy))) break;
   if (v < 0) pari_err_DOMAIN("lambertw","valuation", "<", gen_0, y);
   if (v > 0 && branch)
-    pari_err_DOMAIN("lambertw [k != 0]", "t", "~", gen_0, y);
-  if (val >= n)
-  {
-    if (v) return zeroser(vy, n);
-    x = glambertW(y0, branch, prec);
-    return scalarser(x, vy, n+1);
-  }
+    pari_err_DOMAIN("lambertw [k != 0]", "x", "~", gen_0, y);
+  vy = varn(y);
+  n = lg(y)-3;
+  for (val = 1; val < n; val++)
+    if (!gequal0(polcoef_i(y, val, vy))) break;
   l = 3 + n/val;
   if (v)
   {
-    t = serexp0(vy, l-3);
-    setvalp(t, 1); /* t exp(t) */
+    t = serexp0(vy, maxss(2,l-3)); setvalp(t, 1); /* t exp(t) */
     t = reverse(t);
   }
   else
   {
+    GEN y0 = gel(y,2), x = glambertW(y0, branch, prec);
+    if (val >= n) return scalarser(x, vy, n+1);
     y = serchop0(y);
-    x = glambertW(y0, branch, prec);
     /* (x + t) exp(x + t) = (y0 + t y0/x) * exp(t) */
     t = gmul(deg1pol_shallow(gdiv(y0,x), y0, vy), serexp0(vy, l-3));
     t = gadd(x, reverse(serchop0(t)));
