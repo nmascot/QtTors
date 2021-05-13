@@ -35,6 +35,7 @@ lambertw(-0.3678,0)
 lambertw(-0.3678,-1)
 lambertw(-10^(-100),0)
 lambertw(-10^(-100),-1)
+lambertw(precision(-0.1,38),-1)
 \p38
 vector(10,mul,round(10^4*log(2)/log(abs(lambertw(-exp(-1),mul)))))
 vector(10,mul,round(10^4*log(2)/log(abs(lambertw(-exp(-1),10*mul)))))
