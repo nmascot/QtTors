@@ -340,22 +340,24 @@ static GEN
 glambertW_i(void *E, GEN y, long prec)
 {
   pari_sp av;
-  long k = (long)E, bit;
+  long k = (long)E, b;
   GEN z;
   if (gequal0(y))
   {
     if (k) pari_err_DOMAIN("glambertW","argument","",gen_0,y);
     return gcopy(y);
   }
-  bit = prec2nbits(prec);
   switch(typ(y))
   {
     case t_REAL:
-      return useC(y, k)? lambertWC(y, k, bit): lambertW(y, k, bit);
+      b = prec2nbits(minss(prec, realprec(y)));
+      return useC(y, k)? lambertWC(y, k, b): lambertW(y, k, b);
     case t_PADIC: z = lambertp(y);
       if (!z) pari_err_DOMAIN("glambertW(t_PADIC)","argument","",gen_0,y);
       return z;
-    case t_COMPLEX: return lambertWC(y, k, bit);
+    case t_COMPLEX:
+      b = precision(y);
+      return lambertWC(y, k, prec2nbits(b? b: prec));
     default:
       av = avma; if (!(z = toser_i(y))) break;
       return gerepileupto(av, serlambertW(z, k, prec));
@@ -381,6 +383,8 @@ checklam(GEN y, GEN w, long k, long prec)
   pari_sp av = avma;
   GEN t = gsub(gadd(w, glog(w, prec)), glog(y, prec));
   long e = gexpo(gsub(t, gmulsg(findbranch(y, k, prec), PiI2(prec))));
+  long p = precision(y);
+  if (p) prec = minss(prec, p);
   return gc_bool(av, e < 30 - prec2nbits(prec));
 }
 GEN
