@@ -324,6 +324,23 @@ serlambertW(GEN y, long branch, long prec)
   return normalize(gsubst(t, vy, y));
 }
 
+static GEN
+lambertp(GEN x)
+{
+  pari_sp av = avma;
+  GEN y = gcopy(x);
+  long k;
+
+  if (gequal0(x)) return y;
+  if (!valp(x)) { setvalp(y, 1); x = y; }
+  k = Qp_exp_prec(x);
+  if (k < 0) return NULL;
+  y = gpowgs(cvstop2(k, x), k - 1);
+  for (k--; k; k--)
+    y = gsub(gpowgs(cvstop2(k, x), k - 1), gdivgs(gmul(x, y), k + 1));
+  return gerepileupto(av, gmul(x, y));
+}
+
 /* y a t_REAL */
 static int
 useC(GEN y, long k)

@@ -4623,8 +4623,9 @@ void forsubset_init(forsubset_t *T, GEN nk);
 /* lambert.c */
 
 GEN     glambertW(GEN y, long branch, long prec);
-GEN     mplambertx_logx(GEN a, GEN b, long bit);
+GEN     mplambertW(GEN y, long prec);
 GEN     mplambertX(GEN y, long bit);
+GEN     mplambertx_logx(GEN a, GEN b, long bit);
 GEN     mplambertxlogx_x(GEN a, GEN b, long bit);
 
 /* perm.c */
@@ -5187,6 +5188,7 @@ GEN     Pi2n(long n, long prec);
 GEN     PiI2(long prec);
 GEN     PiI2n(long n, long prec);
 GEN     Qp_exp(GEN x);
+long    Qp_exp_prec(GEN x);
 GEN     Qp_log(GEN x);
 GEN     Qp_sqrt(GEN x);
 GEN     Qp_sqrtn(GEN x, GEN n, GEN *zetan);
@@ -5223,7 +5225,6 @@ GEN     gsqrpowers(GEN q, long n);
 GEN     gsqrt(GEN x, long prec);
 GEN     gsqrtn(GEN x, GEN n, GEN *zetan, long prec);
 GEN     gtan(GEN x, long prec);
-GEN     lambertp(GEN x);
 GEN     logr_abs(GEN x);
 GEN     mpcos(GEN x);
 GEN     mpeuler(long prec);

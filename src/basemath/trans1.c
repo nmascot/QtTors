@@ -2363,7 +2363,7 @@ mpexp(GEN x)
   return gc_const((pari_sp)z, z);
 }
 
-static long
+long
 Qp_exp_prec(GEN x)
 {
   long k, e = valp(x), n = e + precp(x);
@@ -2443,24 +2443,6 @@ sin_p(GEN x)
     GEN t = gdiv(gmul(y,x2), muluu(k, k+1));
     y = gsubsg(1, t);
   }
-  return gerepileupto(av, gmul(y, x));
-}
-
-GEN
-lambertp(GEN x)
-{
-  long k, n;
-  pari_sp av;
-  GEN y = gcopy(x), zer;
-
-  if (gequal0(x)) return y;
-  if(!valp(x)) { setvalp(y, 1); x = y; }
-  k = Qp_exp_prec(x);
-  if (k < 0) return NULL;
-  n = precp(x);
-  av = avma; zer = zeropadic(gel(x, 2), n);
-  for (y=gen_0; k; k--)
-    y = gsub(gpowgs(gaddsg(k, zer), k - 1), gdivgs(gmul(x, y), k + 1));
   return gerepileupto(av, gmul(y, x));
 }
 
