@@ -82,14 +82,11 @@ static GEN QT6(long k, long v)
   return mkpoln(7, gen_1,gen_0,stoi(-3),gen_0,gen_0,gen_0,a0);
   case 12:
   a5 = deg2pol_shallow(stoi(10), gen_0, stoi(-50), v);
-  a4 = mkvecsmall5(55,0,-550L,0,1375); a4 = gtopoly(a4, v);
-  a3 = mkvecsmalln(7, 140,0,-2100L,0,10500,0,-17500L); a3 = gtopoly(a3, v);
-  a2 = mkvecsmalln(9, 175,0,-3500L,0,26250,0,-87500L,0,109375);
-  a2 = gtopoly(a2,v);
-  a1 = mkvecsmalln(11, 106,0,-1370L,0,900,0,59500,0,-308750L,0,468750);
-  a1 = gtopoly(a1,v);
-  a0 = mkvecsmalln(13, 25,0,-750L,0,9375,0,-62500L,0,234375,0,-468750L,0,390625);
-  a0 = gtopoly(a0,v);
+  a4 = gtopoly(mkvecsmall5(55,0,-550L,0,1375), v);
+  a3 = gtopoly(mkvecsmalln(7, 140,0,-2100L,0,10500,0,-17500L), v);
+  a2 = gtopoly(mkvecsmalln(9, 175,0,-3500L,0,26250,0,-87500L,0,109375), v);
+  a1 = gtopoly(mkvecsmalln(11, 106,0,-1370L,0,900,0,59500,0,-308750L,0,468750), v);
+  a0 = gtopoly(mkvecsmalln(13, 25,0,-750L,0,9375,0,-62500L,0,234375,0,-468750L,0,390625), v);
   return mkpoln(7, gen_1,a5,a4,a3,a2,a1,a0);
   case 13:
   return mkpoln(7, gen_1,gen_m2,gen_1,gen_0,gen_0,gen_0,pol_mx(v));
@@ -100,39 +97,36 @@ static GEN QT7(long k, long v)
 { GEN a6, a5, a4, a3, a2, a1, a0;
   switch(k) {
   case 1:
-  a6 = mkvecsmall4(1,2,-1L,13);
-  a5 = mkvecsmalln(6, 3,-3L,9,24,-21L,54);
-  a4 = mkvecsmalln(8, 3,-9L,27,-22L,6,84,-121L,75);
-  a3 = mkvecsmalln(10, 1,-6L,22,-57L,82,-70L,-87L,140,-225L,-2L);
-  a2 = mkvecsmalln(11, -1L,5,-25L,61,-126L,117,-58L,-155L,168,-80L,-44L);
-  a1 = mkvecsmalln(11, -1L,8,-30L,75,-102L,89,34,-56L,113,42,-17L);
-  a0 = mkvecsmalln(10, 1,-7L,23,-42L,28,19,-60L,-2L,16,-1L);
-  return mkpoln(8, gen_1,gtopoly(a6,v),gtopoly(a5,v),gtopoly(a4,v),
-                gtopoly(a3,v),gtopoly(a2,v),gtopoly(a1,v),gtopoly(a0,v));
+  a6 = gtopoly(mkvecsmall4(1,2,-1L,13), v);
+  a5 = gtopoly(mkvecsmalln(6, 3,-3L,9,24,-21L,54), v);
+  a4 = gtopoly(mkvecsmalln(8, 3,-9L,27,-22L,6,84,-121L,75), v);
+  a3 = gtopoly(mkvecsmalln(10, 1,-6L,22,-57L,82,-70L,-87L,140,-225L,-2L), v);
+  a2 = gtopoly(mkvecsmalln(11, -1L,5,-25L,61,-126L,117,-58L,-155L,168,-80L,-44L), v);
+  a1 = gtopoly(mkvecsmalln(11, -1L,8,-30L,75,-102L,89,34,-56L,113,42,-17L), v);
+  a0 = gtopoly(mkvecsmalln(10, 1,-7L,23,-42L,28,19,-60L,-2L,16,-1L), v);
+  return mkpoln(8, gen_1,a6,a5,a4,a3,a2,a1,a0);
   case 2:
-  a5 = mkvecsmall4(-147L,-735L,-441L,-21L);
-  a4 = mkvecsmall5(-686L,-3920L,-4508L,-1568L,-70L);
-  a3 = mkvecsmalln(7, 7203,67914,183505,107996,8085,-1862L,-105L);
-  a2 = mkvecsmalln(8, 67228,547428,1373372,1227940,416500,38220,-588L,-84L);
-  a1 = mkvecsmalln(10, -117649L,-1563051L,-6809236L,-10708460L,-4050830L,788214,402780,37828,343,-35L);
-  a0 = mkvecsmalln(11, -1647086L,-16893436L,-56197806L,-69977488L,-44893212L,-13304872L,-624652L,103152,11466,196,-6L);
-  return mkpoln(8, gen_1,gen_0,gtopoly(a5,v),gtopoly(a4,v),
-                gtopoly(a3,v),gtopoly(a2,v),gtopoly(a1,v),gtopoly(a0,v));
+  a5 = gtopoly(mkvecsmall4(-147L,-735L,-441L,-21L), v);
+  a4 = gtopoly(mkvecsmall5(-686L,-3920L,-4508L,-1568L,-70L), v);
+  a3 = gtopoly(mkvecsmalln(7, 7203,67914,183505,107996,8085,-1862L,-105L), v);
+  a2 = gtopoly(mkvecsmalln(8, 67228,547428,1373372,1227940,416500,38220,-588L,-84L), v);
+  a1 = gtopoly(mkvecsmalln(10, -117649L,-1563051L,-6809236L,-10708460L,-4050830L,788214,402780,37828,343,-35L), v);
+  a0 = gtopoly(mkvecsmalln(11, -1647086L,-16893436L,-56197806L,-69977488L,-44893212L,-13304872L,-624652L,103152,11466,196,-6L), v);
+  return mkpoln(8, gen_1,gen_0,a5,a4,a3,a2,a1,a0);
   case 3:
-  a5 = readseq("[-21,0,-1176,147,-20580,3969,-107163]");
-  a4 = readseq("[-21,49,-1715,4214,-51107,129850,-653905,1648458,-3000564,6751269]");
-  a3 = readseq("[91,98,9849,8673,427133,291354,9385460,4618152,108334149,35173278,608864445,114771573,1275989841]");
-  a2 = readseq("[112,-49,14651,-10682,800513,-821730,23571744,-30983190,401636536,-628991685,3929562693,-6832117530,20190045015,-35916751080,40831674912,-68903451414]");
-  a1 = readseq("[-84,-98,-14896,-16709,-1127098,-1228626,-47347279,-51034970,-1201635330,-1316073164,-18735012261,-21705143929,-173551408569,-224605199322,-861876002232,-1329675932088,-1728966234555,-3376269119286,0]");
-  a0 = readseq("[-97,-14,-19803,-903,-1765232,84609,-89982172,11950757,-2882068329,588528171,-59885187418,15296374002,-801314604769,222442927665,-6560078164731,1705024373220,-28577589326937,5543939564730,-38647180304208,4961048501808,74415727527120,25115308040403]");
-  return mkpoln(8, gen_1,gen_0,gtopoly(a5,v),gtopoly(a4,v),
-                gtopoly(a3,v),gtopoly(a2,v),gtopoly(a1,v),gtopoly(a0,v));
+  a5 = gtopoly(readseq((char*)"[-21,0,-1176,147,-20580,3969,-107163]"), v);
+  a4 = gtopoly(readseq((char*)"[-21,49,-1715,4214,-51107,129850,-653905,1648458,-3000564,6751269]"), v);
+  a3 = gtopoly(readseq((char*)"[91,98,9849,8673,427133,291354,9385460,4618152,108334149,35173278,608864445,114771573,1275989841]"), v);
+  a2 = gtopoly(readseq((char*)"[112,-49,14651,-10682,800513,-821730,23571744,-30983190,401636536,-628991685,3929562693,-6832117530,20190045015,-35916751080,40831674912,-68903451414]"), v);
+  a1 = gtopoly(readseq((char*)"[-84,-98,-14896,-16709,-1127098,-1228626,-47347279,-51034970,-1201635330,-1316073164,-18735012261,-21705143929,-173551408569,-224605199322,-861876002232,-1329675932088,-1728966234555,-3376269119286,0]"), v);
+  a0 = gtopoly(readseq((char*)"[-97,-14,-19803,-903,-1765232,84609,-89982172,11950757,-2882068329,588528171,-59885187418,15296374002,-801314604769,222442927665,-6560078164731,1705024373220,-28577589326937,5543939564730,-38647180304208,4961048501808,74415727527120,25115308040403]"), v);
+  return mkpoln(8, gen_1,gen_0,a5,a4,a3,a2,a1,a0);
   case 4:
   a4 = deg2pol_shallow(stoi(-7), gen_0, stoi(98), v);
   a3 = deg1pol_shallow(stoi(28), stoi(441), v);
-  a2 = mkvecsmall4(-35L,-112L,-196L,343); a2 = gtopoly(a2,v);
+  a2 = gtopoly(mkvecsmall4(-35L,-112L,-196L,343), v);
   a1 = deg2pol_shallow(stoi(7), stoi(196), stoi(1372), v);
-  a0 = mkvecsmalln(6, -1L,-30L,-259L,-588L,-1372L,0); a0 = gtopoly(a0,v);
+  a0 = gtopoly(mkvecsmalln(6, -1L,-30L,-259L,-588L,-1372L,0), v);
   return mkpoln(8, gen_1,stoi(7),stoi(42),a4,a3,a2,a1,a0);
   case 5:
   a3 = deg1pol_shallow(stoi(12), stoi(7203), v);
@@ -146,107 +140,92 @@ static GEN QT8(long k, long v)
 { GEN a7, a6, a5, a4, a3, a2, a1, a0;
   switch(k) {
   case 1:
-  a6 = mkvecsmall5(-1L,0,-12L,0,-4L); a6 = gtopoly(a6,v);
-  a4 = mkvecsmalln(7, 3,0,37,0,24,0,4); a4 = gtopoly(a4,v);
-  a2 = mkvecsmalln(9, -3L,0,-38L,0,-36L,0,-8L,0,0); a2 = gtopoly(a2,v);
-  a0 = mkvecsmalln(11, 1,0,12,0,4,0,0,0,0,0,0); a0 = gtopoly(a0,v);
+  a6 = gtopoly(mkvecsmall5(-1L,0,-12L,0,-4L), v);
+  a4 = gtopoly(mkvecsmalln(7, 3,0,37,0,24,0,4), v);
+  a2 = gtopoly(mkvecsmalln(9, -3L,0,-38L,0,-36L,0,-8L,0,0), v);
+  a0 = gtopoly(mkvecsmalln(11, 1,0,12,0,4,0,0,0,0,0,0), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 2:
   a7 = deg2pol_shallow(gen_m1, gen_0, gen_0, v);
   a6 = deg2pol_shallow(stoi(-7), gen_0, stoi(-12), v);
-  a5 = mkvecsmall5(1L,0,-3L,0,0); a5 = gtopoly(a5,v);
-  a4 = mkvecsmall5(2,0,6,0,38); a4 = gtopoly(a4,v);
+  a5 = gtopoly(mkvecsmall5(1L,0,-3L,0,0), v);
+  a4 = gtopoly(mkvecsmall5(2,0,6,0,38), v);
   return mkpoln(9, gen_1,a7,a6,a5,a4,a5,a6,a7,gen_1);
   case 3:
   a6 = deg1pol_shallow(stoi(-12), gen_0, v);
   a4 = deg2pol_shallow(stoi(30), gen_0, stoi(8), v);
-  a2 = mkvecsmall4(-28L,0,16,0); a2 = gtopoly(a2,v);
-  a0 = mkvecsmall5(9,0,-24L,0,16); a0 = gtopoly(a0,v);
+  a2 = gtopoly(mkvecsmall4(-28L,0,16,0), v);
+  a0 = gtopoly(mkvecsmall5(9,0,-24L,0,16), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 4:
   a6 = deg2pol_shallow(stoi(-10), gen_0, stoi(40), v);
-  a4 = mkvecsmall5(33,0,-208L,0,472); a4 = gtopoly(a4,v);
-  a2 = mkvecsmalln(7, -40L,0,200,0,-520L,0,1440); a2 = gtopoly(a2,v);
-  a0 = mkvecsmalln(9, 16,0,544,0,4336,0,-4896L,0,1296); a0 = gtopoly(a0,v);
+  a4 = gtopoly(mkvecsmall5(33,0,-208L,0,472), v);
+  a2 = gtopoly(mkvecsmalln(7, -40L,0,200,0,-520L,0,1440), v);
+  a0 = gtopoly(mkvecsmalln(9, 16,0,544,0,4336,0,-4896L,0,1296), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 5:
-  a6 = mkvecsmall5(-4L,0,-12L,0,-8L); a6 = gtopoly(a6,v);
-  a4 = mkvecsmalln(9, 6,0,32,0,58,0,40,0,8); a4 = gtopoly(a4,v);
-  a2 = mkvecsmalln(13, -4L,0,-28L,0,-76L,0,-100L,0,-64L,0,-16L,0,0);
-  a2 = gtopoly(a2,v);
-  a0 = mkvecsmalln(17, 1,0,8,0,26,0,44,0,41,0,20,0,4,0,0,0,0);
-  a0 = gtopoly(a0,v);
+  a6 = gtopoly(mkvecsmall5(-4L,0,-12L,0,-8L), v);
+  a4 = gtopoly(mkvecsmalln(9, 6,0,32,0,58,0,40,0,8), v);
+  a2 = gtopoly(mkvecsmalln(13, -4L,0,-28L,0,-76L,0,-100L,0,-64L,0,-16L,0,0), v);
+  a0 = gtopoly(mkvecsmalln(17, 1,0,8,0,26,0,44,0,41,0,20,0,4,0,0,0,0), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 6:
   a6 = deg2pol_shallow(gen_m1,stoi(-12),stoi(-4), v);
-  a4 = mkvecsmall4(3,37,24,4); a4 = gtopoly(a4,v);
-  a2 = mkvecsmall5(-3L,-38L,-36L,-8L,0); a2 = gtopoly(a2,v);
-  a0 = mkvecsmalln(6, 1,12,4,0,0,0); a0 = gtopoly(a0,v);
+  a4 = gtopoly(mkvecsmall4(3,37,24,4), v);
+  a2 = gtopoly(mkvecsmall5(-3L,-38L,-36L,-8L,0), v);
+  a0 = gtopoly(mkvecsmalln(6, 1,12,4,0,0,0), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 7:
-  a6 = mkvecsmall5(-60L, 432, -1056L, 864, -240L);
-  a6 = gtopoly(a6, v);
-  a4 = mkvecsmalln(9, 690, -9168L, 51384, -155376L, 271944, -278496L, 166560, -54528L, 7680);
-  a4 = gtopoly(a4, v);
-  a2 = mkvecsmalln(13, -1620L, 28944, -232848L, 1114560, -3542400L, 7900416, -12707712L, 14853888, -12502080L, 7361280, -2868480L, 663552, -69120L);
-  a2 = gtopoly(a2, v);
-  a0 = mkvecsmalln(17, 45, -1584L, 24984, -234288L, 1463256, -6468768L, 21014784, -51401664L, 96087888, -138220416L, 152857728, -128756736L, 81006336, -36790272L, 11372544, -2138112L, 184320);
-  a0 = gtopoly(a0, v);
+  a6 = gtopoly(mkvecsmall5(-60L, 432, -1056L, 864, -240L), v);
+  a4 = gtopoly(mkvecsmalln(9, 690, -9168L, 51384, -155376L, 271944, -278496L, 166560, -54528L, 7680), v);
+  a2 = gtopoly(mkvecsmalln(13, -1620L, 28944, -232848L, 1114560, -3542400L, 7900416, -12707712L, 14853888, -12502080L, 7361280, -2868480L, 663552, -69120L), v);
+  a0 = gtopoly(mkvecsmalln(17, 45, -1584L, 24984, -234288L, 1463256, -6468768L, 21014784, -51401664L, 96087888, -138220416L, 152857728, -128756736L, 81006336, -36790272L, 11372544, -2138112L, 184320), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 8:
-  a6 = mkvecsmalln(9, -16L, 0, -64L, 0, -96L, 0, -80L, 0, -36L);
-  a6 = gtopoly(a6, v);
-  a4 = mkvecsmalln(17, 64, 0, 576, 0, 2304, 0, 5296, 0, 7568, 0, 6896, 0, 3920, 0, 1116, 0, 0);
-  a4 = gtopoly(a4, v);
-  a2 = mkvecsmalln(23, -512L, 0, -5888L, 0, -29696L, 0, -86912L, 0, -164736L, 0, -213184L, 0, -191616L, 0, -116960L, 0, -44416L, 0, -8064L, 0, 0, 0, 0);
-  a2 = gtopoly(a2, v);
-  a0 = mkvecsmalln(25, -256L, 0, -3328L, 0, -18944L, 0, -62208L, 0, -130880L, 0, -185408L, 0, -180224L, 0, -118272L, 0, -48128L, 0, -9216L, 0, 0, 0, 0, 0, 0);
-  a0 = gtopoly(a0, v);
+  a6 = gtopoly(mkvecsmalln(9, -16L, 0, -64L, 0, -96L, 0, -80L, 0, -36L), v);
+  a4 = gtopoly(mkvecsmalln(17, 64, 0, 576, 0, 2304, 0, 5296, 0, 7568, 0, 6896, 0, 3920, 0, 1116, 0, 0), v);
+  a2 = gtopoly(mkvecsmalln(23, -512L, 0, -5888L, 0, -29696L, 0, -86912L, 0, -164736L, 0, -213184L, 0, -191616L, 0, -116960L, 0, -44416L, 0, -8064L, 0, 0, 0, 0), v);
+  a0 = gtopoly(mkvecsmalln(25, -256L, 0, -3328L, 0, -18944L, 0, -62208L, 0, -130880L, 0, -185408L, 0, -180224L, 0, -118272L, 0, -48128L, 0, -9216L, 0, 0, 0, 0, 0, 0), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 9:
   a4 = deg1pol_shallow(gen_2, gen_m1, v);
   return mkpoln(9, gen_1,gen_0,pol_x(v),gen_0,a4,gen_0,pol_x(v),gen_0,gen_1);
   case 10:
-  a6 = mkvecsmall5(2, 0, 20, 0, 18); a6 = gtopoly(a6,v);
-  a4 = mkvecsmalln(9, 2, 0, 48, 0, 316, 0, 432, 0, 162); a4 = gtopoly(a4,v);
-  a2 = mkvecsmalln(13, 2, 0, 52, 0, 494, 0, 2136, 0, 4446, 0, 4212, 0, 1458);
-  a2 = gtopoly(a2,v);
-  a0 = mkvecsmalln(17, 1, 0, 32, 0, 412, 0, 2784, 0, 10854, 0, 25056, 0, 33372, 0, 23328, 0, 6561);
-  a0 = gtopoly(a0,v);
+  a6 = gtopoly(mkvecsmall5(2, 0, 20, 0, 18), v);
+  a4 = gtopoly(mkvecsmalln(9, 2, 0, 48, 0, 316, 0, 432, 0, 162), v);
+  a2 = gtopoly(mkvecsmalln(13, 2, 0, 52, 0, 494, 0, 2136, 0, 4446, 0, 4212, 0, 1458), v);
+  a0 = gtopoly(mkvecsmalln(17, 1, 0, 32, 0, 412, 0, 2784, 0, 10854, 0, 25056, 0, 33372, 0, 23328, 0, 6561), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 11:
   a6 = deg2pol_shallow(stoi(-4), stoi(-4), gen_0, v);
-  a4 = mkvecsmall5(6, 8, -2L, -4L, 0); a4 = gtopoly(a4, v);
-  a2 = mkvecsmalln(7, -4L, -4L, 4, 4, 0, 0, 0); a2 = gtopoly(a2, v);
-  a0 = mkvecsmalln(9, 1, 0, -2L, 0, 1, 0, 0, 0, 0); a0 = gtopoly(a0, v);
+  a4 = gtopoly(mkvecsmall5(6, 8, -2L, -4L, 0), v);
+  a2 = gtopoly(mkvecsmalln(7, -4L, -4L, 4, 4, 0, 0, 0), v);
+  a0 = gtopoly(mkvecsmalln(9, 1, 0, -2L, 0, 1, 0, 0, 0, 0), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 12:
   a6 = deg1pol_shallow(stoi(-22), gen_0, v);
   a4 = deg2pol_shallow(stoi(135), gen_0, gen_0, v);
-  a2 = mkvecsmall4(-150L,0,0,0); a2 = gtopoly(a2, v);
+  a2 = gtopoly(mkvecsmall4(-150L,0,0,0), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,pol_xn(4, v));
   case 13:
   a6 = deg1pol_shallow(stoi(18), gen_0, v);
   a4 = deg2pol_shallow(stoi(81), gen_0, gen_2, v);
-  a2 = mkvecsmall4(108,0,2,0); a2 = gtopoly(a2, v);
+  a2 = gtopoly(mkvecsmall4(108,0,2,0), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,gen_1);
   case 14:
   a2 = deg2pol_shallow(stoi(3), gen_0, stoi(3996), v);
   return mkpoln(9, gen_1,gen_0,stoi(-36),gen_0,stoi(486),gen_0,a2,gen_0,stoi(6561));
   case 15:
   a6 = deg2pol_shallow(stoi(-36), gen_0, stoi(4032), v);
-  a4 = mkvecsmall5(-108L, -9504L, -76464L, 1064448, 9918720);
-  a4 = gtopoly(a4,v);
-  a2 = readseq("[-15552,-979776,-13747968,37200384,1734856704,8123867136]");
-  a2 = gtopoly(a2,v);
-  a0 = readseq("[-746496,-46282752,-901767168,-3668281344,81547969536,991418351616,3227167899648]");
-  a0 = gtopoly(a0,v);
+  a4 = gtopoly(mkvecsmall5(-108L, -9504L, -76464L, 1064448, 9918720), v);
+  a2 = gtopoly(readseq((char*)"[-15552,-979776,-13747968,37200384,1734856704,8123867136]"), v);
+  a0 = gtopoly(readseq((char*)"[-746496,-46282752,-901767168,-3668281344,81547969536,991418351616,3227167899648]"), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 16:
- a6 = readseq("[125000,440000,1055200,1615680,1916848,1615680,1055200,440000,125000]");a6=gtopoly(a6,v);
-  a4 = readseq("[3417968750,24062500000,100056250000,291483500000,659412565000,1203229412000,1824667311600,2328010349280,2524483075604,2328010349280,1824667311600,1203229412000,659412565000,291483500000,100056250000,24062500000,3417968750]"); a4 = gtopoly(a4,v);
-  a2 = readseq("[-30517578125000,-322265625000000,-1907226562500000,-7955234375000000,-25834835156250000,-68673141075000000,-154181222744500000,-298298955827400000,-504345671463075000,-752341599010320000,-996841268804232000,-1178233981100077440,-1245440198211816928,-1178233981100077440,-996841268804232000,-752341599010320000,-504345671463075000,-298298955827400000,-154181222744500000,-68673141075000000,-25834835156250000,-7955234375000000,-1907226562500000,-322265625000000,-30517578125000]"); a2 = gtopoly(a2,v);
-  a0 = readseq("[11920928955078125,251770019531250000,2545471191406250000,16804138183593750000,82445189208984375000,321786153691406250000,1041616867161718750000,2874233402764968750000,6892420996982392187500,14565280370828646250000,27407846138390438250000,46284659039985795550000,70562412987814377665000,97544397064032903138000,122663738515024252122800,140623996743085724979440,147156926076038985514446,140623996743085724979440,122663738515024252122800,97544397064032903138000,70562412987814377665000,46284659039985795550000,27407846138390438250000,14565280370828646250000,6892420996982392187500,2874233402764968750000,1041616867161718750000,321786153691406250000,82445189208984375000,16804138183593750000,2545471191406250000,251770019531250000,11920928955078125]"); a0 = gtopoly(a0,v);
+ a6 = gtopoly(readseq((char*)"[125000,440000,1055200,1615680,1916848,1615680,1055200,440000,125000]"), v);
+  a4 = gtopoly(readseq((char*)"[3417968750,24062500000,100056250000,291483500000,659412565000,1203229412000,1824667311600,2328010349280,2524483075604,2328010349280,1824667311600,1203229412000,659412565000,291483500000,100056250000,24062500000,3417968750]"), v);
+  a2 = gtopoly(readseq((char*)"[-30517578125000,-322265625000000,-1907226562500000,-7955234375000000,-25834835156250000,-68673141075000000,-154181222744500000,-298298955827400000,-504345671463075000,-752341599010320000,-996841268804232000,-1178233981100077440,-1245440198211816928,-1178233981100077440,-996841268804232000,-752341599010320000,-504345671463075000,-298298955827400000,-154181222744500000,-68673141075000000,-25834835156250000,-7955234375000000,-1907226562500000,-322265625000000,-30517578125000]"), v);
+  a0 = gtopoly(readseq((char*)"[11920928955078125,251770019531250000,2545471191406250000,16804138183593750000,82445189208984375000,321786153691406250000,1041616867161718750000,2874233402764968750000,6892420996982392187500,14565280370828646250000,27407846138390438250000,46284659039985795550000,70562412987814377665000,97544397064032903138000,122663738515024252122800,140623996743085724979440,147156926076038985514446,140623996743085724979440,122663738515024252122800,97544397064032903138000,70562412987814377665000,46284659039985795550000,27407846138390438250000,14565280370828646250000,6892420996982392187500,2874233402764968750000,1041616867161718750000,321786153691406250000,82445189208984375000,16804138183593750000,2545471191406250000,251770019531250000,11920928955078125]"), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 17:
   a5 = deg1pol_shallow(stoi(7), gen_0, v);
@@ -255,82 +234,78 @@ static GEN QT8(long k, long v)
   case 18:
   return mkpoln(9, gen_1,gen_0,pol_x(v),gen_0,gen_0,gen_0,pol_x(v),gen_0,gen_1);
   case 19:
-  a6 = mkvecsmall5(-1L, 0, -2, 0, -1L); a6 = gtopoly(a6, v);
-  a4 = mkvecsmalln(7, 2, 0, 4, 0, 4, 0, 2); a4 = gtopoly(a4, v);
-  a2 = mkvecsmalln(9, -1L, 0, -3L, 0, -3L, 0, -1L, 0, 0); a2 = gtopoly(a2, v);
-  a0 = mkvecsmalln(9, 1, 0, 2, 0, 1, 0, 0, 0, 0); a0 = gtopoly(a0, v);
+  a6 = gtopoly(mkvecsmall5(-1L, 0, -2, 0, -1L), v);
+  a4 = gtopoly(mkvecsmalln(7, 2, 0, 4, 0, 4, 0, 2), v);
+  a2 = gtopoly(mkvecsmalln(9, -1L, 0, -3L, 0, -3L, 0, -1L, 0, 0), v);
+  a0 = gtopoly(mkvecsmalln(9, 1, 0, 2, 0, 1, 0, 0, 0, 0), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 20:
   a6 = deg2pol_shallow(stoi(-4), gen_0, stoi(-4), v);
-  a4 = mkvecsmall5(10, 0, 18, 0, 8); a4 = gtopoly(a4, v);
-  a2 = mkvecsmalln(7, -12L, 0, -40L, 0, -44L, 0, -16L); a2 = gtopoly(a2, v);
-  a0 = mkvecsmalln(9, 9, 0, 42, 0, 73, 0, 56, 0, 16); a0 = gtopoly(a0, v);
+  a4 = gtopoly(mkvecsmall5(10, 0, 18, 0, 8), v);
+  a2 = gtopoly(mkvecsmalln(7, -12L, 0, -40L, 0, -44L, 0, -16L), v);
+  a0 = gtopoly(mkvecsmalln(9, 9, 0, 42, 0, 73, 0, 56, 0, 16), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 21:
-  a4 = mkvecsmalln(7, -16L, 0, -64L, 0, -80L, 0, -16L); a4 = gtopoly(a4,v);
-  a2 = mkvecsmalln(7, -64L, 0, -256L, 0, -320L, 0, -128L); a2 = gtopoly(a2,v);
-  a0 = mkvecsmalln(9, 64, 0, 192, 0, 192, 0, 64, 0, 0); a0 = gtopoly(a0,v);
+  a4 = gtopoly(mkvecsmalln(7, -16L, 0, -64L, 0, -80L, 0, -16L), v);
+  a2 = gtopoly(mkvecsmalln(7, -64L, 0, -256L, 0, -320L, 0, -128L), v);
+  a0 = gtopoly(mkvecsmalln(9, 64, 0, 192, 0, 192, 0, 64, 0, 0), v);
   return mkpoln(9, gen_1,gen_0,stoi(8),gen_0,a4,gen_0,a2,gen_0,a0);
   case 22:
   a6 = deg2pol_shallow(stoi(-4), gen_0, stoi(4), v);
-  a4 = mkvecsmall5(6, -4L, -14L, 4, 8); a4 = gtopoly(a4,v);
-  a2 = mkvecsmalln(7, -4L, 8, 8, -16L, -4L, 8, 0); a2 = gtopoly(a2,v);
-  a0 = mkvecsmalln(9, 1, -4L, 2, 8, -7L, -4L, 4, 0, 0); a0 = gtopoly(a0,v);
+  a4 = gtopoly(mkvecsmall5(6, -4L, -14L, 4, 8), v);
+  a2 = gtopoly(mkvecsmalln(7, -4L, 8, 8, -16L, -4L, 8, 0), v);
+  a0 = gtopoly(mkvecsmalln(9, 1, -4L, 2, 8, -7L, -4L, 4, 0, 0), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 23:
-  a4 = mkvecsmall5(-2L, -8L, 0, 0, -54L); a4 = gtopoly(a4,v);
-  a2 = mkvecsmall5(8, 32, 0, 0, 216); a2 = gtopoly(a2,v);
-  a0 = mkvecsmall5(-9L, -36L, 0, 0, -243L); a0 = gtopoly(a0,v);
+  a4 = gtopoly(mkvecsmall5(-2L, -8L, 0, 0, -54L), v);
+  a2 = gtopoly(mkvecsmall5(8, 32, 0, 0, 216), v);
+  a0 = gtopoly(mkvecsmall5(-9L, -36L, 0, 0, -243L), v);
   return mkpoln(9, gen_1,gen_0,gen_0,gen_0,a4,gen_0,a2,gen_0,a0);
   case 24:
   a2 = deg1pol_shallow(gen_1, stoi(-4), v);
   return mkpoln(9, gen_1,gen_0,stoi(-4),gen_0,stoi(6),gen_0,a2,gen_0,gen_1);
   /* case 25: */
   case 26:
-  a6 = mkvecsmall5(8, 0, -16L, 0, 8); a6 = gtopoly(a6,v);
-  a4 = mkvecsmalln(9, 14, 0, -56L, 0, 84, 0, -56L, 0, 14); a4 = gtopoly(a4,v);
-  a2 = mkvecsmalln(13, -8L, 0, 48, 0, -120L, 0, 160, 0, -120L, 0, 48, 0, -8L);
-  a2 = gtopoly(a2,v);
-  a0 = mkvecsmalln(17, 3, 18, 6, -126L, -126L, 378, 462, -630L, -840L, 630, 882, -378L, -546L, 126, 186, -18L, -27L);
-  a0 = gtopoly(a0,v);
+  a6 = gtopoly(mkvecsmall5(8, 0, -16L, 0, 8), v);
+  a4 = gtopoly(mkvecsmalln(9, 14, 0, -56L, 0, 84, 0, -56L, 0, 14), v);
+  a2 = gtopoly(mkvecsmalln(13, -8L, 0, 48, 0, -120L, 0, 160, 0, -120L, 0, 48, 0, -8L), v);
+  a0 = gtopoly(mkvecsmalln(17, 3, 18, 6, -126L, -126L, 378, 462, -630L, -840L, 630, 882, -378L, -546L, 126, 186, -18L, -27L), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 27:
   a1 = pol_x(v); a3 = deg1pol_shallow(gen_2, gen_0, v);
   return mkpoln(9, gen_1,a1,gen_m2,a3,stoi(-5),a3,gen_m2,a1,gen_1);
   case 28:
   a6 = deg2pol_shallow(gen_2,gen_0,gen_2, v);
-  a4 = mkvecsmall5(1, 0, 4, 0, 3); a4 = gtopoly(a4,v);
-  a2 = mkvecsmall5(2, 0, 4, 0, 2); a2 = gtopoly(a2,v);
-  a0 = mkvecsmall5(1, 0, 1, 0, 0); a0 = gtopoly(a0,v);
+  a4 = gtopoly(mkvecsmall5(1, 0, 4, 0, 3), v);
+  a2 = gtopoly(mkvecsmall5(2, 0, 4, 0, 2), v);
+  a0 = gtopoly(mkvecsmall5(1, 0, 1, 0, 0), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 29:
   a6 = deg1pol_shallow(stoi(-4), gen_0, v);
   a4 = deg2pol_shallow(stoi(6), gen_m1, gen_m2, v);
-  a2 = mkvecsmall4(-4L, 0, 4, 0); a2 = gtopoly(a2, v);
-  a0 = mkvecsmall5(1, 0, -2L, 0, 1); a0 = gtopoly(a0, v);
+  a2 = gtopoly(mkvecsmall4(-4L, 0, 4, 0), v);
+  a0 = gtopoly(mkvecsmall5(1, 0, -2L, 0, 1), v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
   case 30:
   a4 = deg2pol_shallow(stoi(-4),gen_0,stoi(8), v);
   a2 = deg2pol_shallow(stoi(16),gen_0,stoi(32), v);
-  a0 = mkvecsmall5(4, 0, 12, 0, 0); a0 = gtopoly(a0, v);
+  a0 = gtopoly(mkvecsmall5(4, 0, 12, 0, 0), v);
   return mkpoln(9, gen_1,gen_0,stoi(-8),gen_0,a4,gen_0,a2,gen_0,a0);
   case 31:
-  a4 = mkvecsmall4(-16L, -64L, -80L, -16L); a4 = gtopoly(a4,v);
-  a2 = mkvecsmall4(-64L, -256L, -320L, -128L); a2 = gtopoly(a2,v);
-  a0 = mkvecsmall5(64, 192, 192, 64, 0); a0 = gtopoly(a0,v);
+  a4 = gtopoly(mkvecsmall4(-16L, -64L, -80L, -16L), v);
+  a2 = gtopoly(mkvecsmall4(-64L, -256L, -320L, -128L), v);
+  a0 = gtopoly(mkvecsmall5(64, 192, 192, 64, 0), v);
   return mkpoln(9, gen_1,gen_0,stoi(8),gen_0,a4,gen_0,a2,gen_0,a0);
   case 32:
   return mkpoln(9, gen_1,gen_0,stoi(-8),gen_0,stoi(18),gen_0,gen_0,gen_0,pol_xn(2,v));
   case 33:
   a6 = deg2pol_shallow(stoi(-4), gen_0, stoi(-108), v);
   a5 = deg2pol_shallow(stoi(-48), gen_0, stoi(-1296), v);
-  a4 = mkvecsmall5(6, 0, -4L, 0, -4482L); a4 = gtopoly(a4,v);
-  a3 = mkvecsmall5(96, 0, 4416, 0, 49248); a3 = gtopoly(a3,v);
-  a2 = mkvecsmalln(7, -4L, 0, 140, 0, 15284, 0, 231876); a2 = gtopoly(a2,v);
-  a1 = mkvecsmalln(7, -48L, 0, -2928L, 0, -53136L, 0, -244944L);
-  a1 = gtopoly(a1,v);
-  a0 = mkvecsmalln(9, 1, 0, 36, 0, -162L, 0, -8748L, 0, 59049);
-  a0 = gtopoly(a0,v);
+  a4 = gtopoly(mkvecsmall5(6, 0, -4L, 0, -4482L), v);
+  a3 = gtopoly(mkvecsmall5(96, 0, 4416, 0, 49248), v);
+  a2 = gtopoly(mkvecsmalln(7, -4L, 0, 140, 0, 15284, 0, 231876), v);
+  a1 = gtopoly(mkvecsmalln(7, -48L, 0, -2928L, 0, -53136L, 0, -244944L), v);
+  a0 = gtopoly(mkvecsmalln(9, 1, 0, 36, 0, -162L, 0, -8748L, 0, 59049), v);
   return mkpoln(9, gen_1,gen_0,a6,a5,a4,a3,a2,a1,a0);
   case 34:
   a2 = deg2pol_shallow(stoi(12), gen_0, stoi(-30240), v);
@@ -346,9 +321,9 @@ static GEN QT8(long k, long v)
   /* case 36: */
   case 37:
   a7 = deg2pol_shallow(gen_m1,gen_0,stoi(-7), v);
-  a6 = mkvecsmall5(7, 0, 98, 0, 343); a6 = gtopoly(a6, v);
-  a1 = mkvecsmalln(13, -756L, 0, -31752L, 0, -555660L, 0, -5186160L, 0, -27227340L, 0, -76236552L, 0, -88942644L); a1 = gtopoly(a1, v);
-  a0 = mkvecsmalln(15, 756, 0, 37044, 0, 777924, 0, 9075780, 0, 63530460, 0, 266827932, 0, 622598508, 0, 622598508); a0 = gtopoly(a0, v);
+  a6 = gtopoly(mkvecsmall5(7, 0, 98, 0, 343), v);
+  a1 = gtopoly(mkvecsmalln(13, -756L, 0, -31752L, 0, -555660L, 0, -5186160L, 0, -27227340L, 0, -76236552L, 0, -88942644L), v);
+  a0 = gtopoly(mkvecsmalln(15, 756, 0, 37044, 0, 777924, 0, 9075780, 0, 63530460, 0, 266827932, 0, 622598508, 0, 622598508), v);
   return mkpoln(9, gen_1,a7,a6,gen_0,gen_0,gen_0,gen_0,a1,a0);
   case 38:
   a0 = deg2pol_shallow(gen_1, gen_0, stoi(27), v);
@@ -395,7 +370,7 @@ static GEN QT9(long k, long v)
   switch(k) {
   case 1:
   a7 = deg2pol_shallow(stoi(-9), gen_0, stoi(-27), v);
-  a5 = mkvecsmall5(27, 0, 162, 0, 243); a5 = gtopoly(a5,v);
+  a5 = gtopoly(mkvecsmall5(27, 0, 162, 0, 243), v);
   a3 = gtopoly(mkvecsmalln(7, -30L, 0, -270L, 0, -810L, 0, -810L), v);
   a1 = gtopoly(mkvecsmalln(9, 9, 0, 108, 0, 486, 0, 972, 0, 729), v);
   a0 = gtopoly(mkvecsmalln(10, -1L,-9L,0,-72L,54,-162L,216,0,243,243), v);
