@@ -792,8 +792,7 @@ void
 setalldebug(long lvl)
 {
   long i, l = sizeof(pari_DEBUGLEVEL_ptr)/sizeof(*pari_DEBUGLEVEL_ptr);
-  for (i = 0; i < l; i++)
-    *pari_DEBUGLEVEL_ptr[i] =lvl;
+  for (i = 0; i < l; i++) *pari_DEBUGLEVEL_ptr[i] = lvl;
 }
 
 /*********************************************************************/
