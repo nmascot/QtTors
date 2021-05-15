@@ -512,25 +512,35 @@ nfmakeQT(long g, long v)
   return P;
 }
 
-/****************** Specific A_n / S_n over Q(T) **********************/
 static GEN
 nfmakeAnQT(long n, long v)
 {
-  GEN P, Q,  X = pol_x(0);
+  GEN A, P = vec_ei(n + 1, 1);
+  long s;
   if (odd(n))
   {
-    long S = (n - 2) * (n - 2), s = (n & 3L) == 1 ? 1 : -1;
-    P = gadd(pol_xn(n, 0), gmulsg(s, X));
-    Q = gaddgs(monomial(sqru(n), n-1, 0), s == 1? S: -S);
-    return gadd(P, gmul(pol_x(v), Q));
+    s = (n & 3L) == 1? 1: -1;
+    A = sqru(n-2); setsigne(A, s);
+    gel(P,2) = monomial(sqru(n), 1, v);
+    gel(P,n) = s > 0? gen_1: gen_m1;
+    gel(P,n+1) = monomial(A, 1, v);
   }
-  P = gadd(gmul(gsubgs(X, n), pol_xn(n-1, 0)), powuu(n-1, n-1));
-  Q = pol_xn(2, v); return (n & 3L) == 0 ? gadd(P, Q) : gsub(P, Q);
+  else
+  {
+    s = (n & 3L)? -1 : 1;
+    gel(P,2) = utoineg(n);
+    gel(P,n+1) = deg2pol_shallow(stoi(s), gen_0, powuu(n-1,n-1), v);
+  }
+  return RgV_to_RgX_reverse(P, 0);
 }
 
 static GEN
 nfmakeSnQT(long n, long v)
-{ return gadd(pol_xn(n, 0), deg1pol_shallow(pol_x(v), gen_1, 0)); }
+{
+  GEN P = vec_ei(n + 1, 1);
+  gel(P,n) = pol_x(v);
+  gel(P,n+1) = gen_1; return RgV_to_RgX_reverse(P, 0);
+}
 
 GEN
 nflistQT(long g, long v)
