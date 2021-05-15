@@ -409,7 +409,13 @@ static GEN QT9(long k, long v)
   a3 = deg2pol_shallow(stoi(-3), stoi(12), stoi(3), v);
   a0 = monomial(stoi(-8), 3, v);
   return mkpoln(10, gen_1, gen_0, gen_0, a6, gen_0, gen_0, a3, gen_0, gen_0, a0);
-  /*case 6:*/
+  case 6:
+  a7 = deg2pol_shallow(stoi(-9), gen_0, stoi(-27), v);
+  a5 = gtopoly(mkvecsmall5(27, 0, 162, 0, 243), v);
+  a3 = gtopoly(mkvecsmalln(7, -30L, 0, -270L, 0, -810L, 0, -810L), v);
+  a1 = gtopoly(mkvecsmalln(9, 9, 0, 108, 0, 486, 0, 972, 0, 729), v);
+  a0 = gtopoly(mkvecsmalln(10, -2L,0, -24L,0, -108L,0, -216L,0, -162L,0), v);
+  return mkpoln(10, gen_1, gen_0, a7, gen_0, a5, gen_0, a3, gen_0, a1, a0);
   /*case 7:*/
   case 8:
   a7 = deg1pol_shallow(stoi(3), stoi(-9), v);
