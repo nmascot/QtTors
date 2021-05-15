@@ -923,16 +923,26 @@ GEN EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
 }
 
 GEN Ell_l2(GEN EN, GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
-{
+{ /* Not mem clean */
+	ulong N;
+	if(P==Q) /* Tangent? */
+	{
+		N = lg(EN)-1;
+		if(umodsu(3*P[1],N)==0 && umodsu(3*P[2],N)==0) /* Flex? */
+		{
+  		P = RgM_Coef_mod(EN,P);
+			return ZpXQ_div(ZX_Z_add(ZX_Z_mul(ZX_sqr(gel(P,1)),utoi(3)),a4),ZX_Z_mul(gel(P,2),gen_2),T,pe,p,e);
+		}
+		Q = mkvecsmall2(-P[1]-Q[1],-P[2]-Q[2]);
+	}
   P = RgM_Coef_mod(EN,P);
   Q = RgM_Coef_mod(EN,Q);
-	if(P==Q) /* Tangent? */
-		return ZpXQ_div(ZX_Z_add(ZX_Z_mul(ZX_sqr(gel(P,1)),utoi(3)),a4),ZX_Z_mul(gel(P,2),gen_2),T,pe,p,e);
   return ZpXQ_div(ZX_sub(gel(Q,2),gel(P,2)),ZX_sub(gel(Q,1),gel(P,1)),T,pe,p,e);
 }
 
 GEN Ell_l1_c(GEN EN, GEN a4, GEN P, ulong m, GEN T, GEN pe, GEN p, long e)
 {
+	/* Not mem clean */
 	GEN c,mP;
 	if(m==1) return gen_0;
 	if(m&1)
