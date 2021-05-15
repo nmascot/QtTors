@@ -537,8 +537,8 @@ x^3 + 8*x^2 - x - 10, x^5 + 2*x^3 - 4*x^2 - x - 4, x^5 - x^4 + 2*x^3 - 4*x^2
   *** nflist: incorrect type in makeMgenvec [field] (t_POL).
   ***   at top-level: nflist("C3",x)
   ***                 ^--------------
-  *** nflist: incorrect variable in nfmakeQT.
+  *** nflist: incorrect variable in nflist / Q(T).
   ***   at top-level: nflist("C3",[x])
   ***                 ^----------------
   *** nflist: incorrect type in nflist (t_VEC).
-Total time spent: 51516
+Total time spent: 39848
