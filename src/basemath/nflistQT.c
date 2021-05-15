@@ -470,7 +470,8 @@ static GEN QT9(long k, long v)
   a3 = deg1pol_shallow(stoi(19), stoi(-786), v);
   a2 = deg1pol_shallow(gen_m1, stoi(246), v);
   return mkpoln(10, gen_1,stoi(-3),a7,a6,a5,a4,a3,a2,stoi(-27),gen_1);
-  /*case 26:*/
+  case 26:
+  return mkpoln(10, gen_1, stoi(-3), gen_0, pol_x(v), stoi(6), stoi(6), pol_mx(v), gen_0, stoi(-3), gen_1);
   /*case 27:*/
   case 28:
   a2 = monomial(stoi(9), 1, v);
@@ -491,7 +492,9 @@ static GEN QT9(long k, long v)
   case 31:
   a3 = deg1pol_shallow(gen_1, gen_m1, v);
   return mkpoln(10, gen_1,gen_0,stoi(-3),gen_0,stoi(3),gen_0,a3,gen_0,pol_mx(v),gen_1);
-  /*case 32:*/
+  case 32:
+  a2 = monomial(gen_2, 1, v);
+  return mkpoln(10, gen_1, stoi(-3), stoi(4), gen_0, gen_0, gen_0, gen_0, a2, pol_x(v), pol_x(v));
   default: return NULL;}}
 
 static GEN
