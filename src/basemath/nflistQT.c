@@ -447,7 +447,11 @@ static GEN QT9(long k, long v)
   case 18:
   return mkpoln(10, gen_1,gen_0,gen_0,gen_0,gen_0,gen_0,pol_x(v),gen_0,gen_0,gen_1);
 
-  /*case 19:*/
+  case 19:
+  a5 = monomial(stoi(6), 1, v);
+  a1 = monomial(stoi(-3), 2, v);
+  a0 = gsqr(pol_x(v));
+  return mkpoln(10, gen_1, stoi(-3), gen_0, gen_0, a5, a5, gen_0, gen_0, a1, a0);
   case 20:
   a7 = deg1pol_shallow(stoi(81), stoi(-3), v);
   a5 = deg1pol_shallow(stoi(-99), stoi(3), v);
