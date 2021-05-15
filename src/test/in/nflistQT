@@ -1,3 +1,4 @@
+\\package:galdata
 default(new_galois_format,1);
 
 tst(n,k)=
