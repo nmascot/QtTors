@@ -40,7 +40,7 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  \item degree $\ell$ with $\ell$ prime: $C_\ell=\ell T1$ and $D_\ell=\ell T2$.
 
  In addition, if $N$ is a polynomial, all transitive subgroups of $S_n$
- with $n\le 8$ (with 2 exceptions for $n=8$), and most for $n=9$, as well as
+ with $n\le 8$ (with one exception for $n=8$), and most for $n=9$, as well as
  alternating groups $A_n$ and the full symmetric group $S_n$ for all $n$
  (see below for details and explanations).
 
@@ -97,8 +97,8 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  $\Z[x,t]$) with the given Galois group. By Hilbert irreducibility, almost all
  specializations of $t$ will give suitable polynomials. The parameters $s$ and
  $F$ are ignored. This is implemented for almost all transitive subgroups of
- $S_n$ with $n\le8$ (for now all except $8T25$ and $8T36$), for a number of
- transitive subgroups of $S_9$ (for now all except $9T6$, $9T7$, $9T9$,
+ $S_n$ with $n\le8$ (for now all except $8T36$), for a number of
+ transitive subgroups of $S_9$ (for now all except $9T7$, $9T9$,
  $9T14$, $9T15$, $9T16$, $9T23$, and $9T27$),
  as well as for the alternating and symmetric groups $A_n$ and $S_n$ for all
  $n$. With the exception of $S_n$ and $A_n$ (inspired by J.-F.~Mestre), all
