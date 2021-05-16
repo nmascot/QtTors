@@ -191,9 +191,6 @@ static GEN
 jbesselhvec(GEN n, GEN x, long prec)
 { pari_APPLY_same(jbesselh(n,gel(x,i),prec)) }
 static GEN
-polylogvec(long m, GEN x, long prec)
-{ pari_APPLY_same(gpolylog(m,gel(x,i),prec)) }
-static GEN
 kbesselvec(GEN n, GEN x, long fl, long prec)
 { pari_APPLY_same(kbesselintern(n,gel(x,i),fl,prec)) }
 
@@ -2732,10 +2729,10 @@ polylogP(long m, GEN x, long prec)
 }
 
 GEN
-gpolylog(long m, GEN x, long prec)
+gpolylog_i(void *E, GEN x, long prec)
 {
   pari_sp av = avma;
-  long i, n, v;
+  long i, n, v, m = (long)E;
   GEN a, y;
 
   if (m <= 0)
@@ -2745,13 +2742,8 @@ gpolylog(long m, GEN x, long prec)
   }
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
-      return polylog(m,x,prec);
-    case t_POLMOD:
-      return gerepileupto(av, polylogvec(m, polmod_to_embed(x, prec), prec));
+    case t_REAL: case t_COMPLEX: return polylog(m,x,prec);
     case t_INTMOD: case t_PADIC: pari_err_IMPL( "padic polylogarithm");
-    case t_VEC: case t_COL: case t_MAT:
-      return polylogvec(m, x, prec);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (!m) { set_avma(av); return mkfrac(gen_m1,gen_2); }
@@ -2773,9 +2765,10 @@ gpolylog(long m, GEN x, long prec)
       }
       return gerepileupto(av, a);
   }
-  pari_err_TYPE("gpolylog",x);
-  return NULL; /* LCOV_EXCL_LINE */
+  return trans_evalgen("polylog", E, gpolylog_i, x, prec);
 }
+GEN
+gpolylog(long m, GEN x, long prec) { return gpolylog_i((void*)m, x, prec); }
 
 GEN
 polylog0(long m, GEN x, long flag, long prec)

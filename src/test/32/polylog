@@ -26,5 +26,5 @@ O(x^5)
   *** polylog: sorry, padic polylogarithm is not yet implemented.
   ***   at top-level: polylog(3,"",0)
   ***                 ^---------------
-  *** polylog: incorrect type in gpolylog (t_STR).
-Total time spent: 3
+  *** polylog: incorrect type in polylog (t_STR).
+Total time spent: 1
