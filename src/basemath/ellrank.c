@@ -1107,8 +1107,8 @@ selmersign(GEN x, GEN vpol, GEN L)
 { pari_APPLY_same(ZV_isneg(nfeltsign(gel(x, i), RgX_rem(L, gel(vpol, i)), NULL))) }
 
 static GEN
-vecselmersign(GEN vnf, GEN vpol, GEN x)
-{ pari_APPLY_type(t_VEC, shallowconcat1(selmersign(vnf, vpol, gel(x, i)))) }
+matselmersign(GEN vnf, GEN vpol, GEN x)
+{ pari_APPLY_type(t_MAT, shallowconcat1(selmersign(vnf, vpol, gel(x, i)))) }
 
 static GEN
 _trace(GEN z, GEN T)
@@ -1453,8 +1453,8 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   if (DEBUGLEVEL>2) err_printf("   local badprimes = %Ps\n", badprimes);
   LS2 = shallowconcat1(LS2);
   helpLS2 = ellLS2image(pol, help, K, vpol, vcrt);
-  LS2chars = vecselmersign(vnf, vpol, LS2);
-  helpchars = vecselmersign(vnf, vpol, helpLS2);
+  LS2chars = matselmersign(vnf, vpol, LS2);
+  helpchars = matselmersign(vnf, vpol, helpLS2);
   signs = NULL;
   if (signe(ell_get_disc(ell)) > 0) signs = Flm_row(LS2chars, get_row(vnf,K));
   selmer = kernorm(LS2, factdisc, pol, signs);
