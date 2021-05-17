@@ -101,9 +101,10 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  transitive subgroups of $S_9$ (for now all except $9T9$,
  $9T14$, $9T15$, $9T16$, $9T23$, and $9T27$),
  as well as for the alternating and symmetric groups $A_n$ and $S_n$ for all
- $n$. With the exception of $S_n$ and $A_n$ (inspired by J.-F.~Mestre), all
+ $n$. With the exception of $S_n$ and $A_n$ (inspired by J.-F.~Mestre), most
  polynomials come from G.~W.~Smith, ``Some polynomials over $\Q(t)$ and their
- Galois groups'', \emph{Math. Comp.}, {\bf 69} (230), 1999, pp.~775--796.
+ Galois groups'', \emph{Math. Comp.}, {\bf 69} (230), 1999, pp.~775--796
+ and the rest were kindly provided by J. Kl\"uners.
 
  \misctitle{Complexity} : For a positive integer $N$, the complexity is
  subexponential in $\log N$ (and involves factoring $N$). For an interval
