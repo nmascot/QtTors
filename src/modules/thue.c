@@ -1521,7 +1521,7 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN nf, GEN fact, GEN *ptPR)
   T->f = new_chunk(max+1);
   T->n = new_chunk(max+1);
   T->next = new_chunk(max+1);
-  *ptPR = PR = cgetg(max+1, t_VEC); /* length to be fixed later */
+  *ptPR = PR = cgetg(max+1, t_COL); /* length to be fixed later */
 
   nPR = 0;
   for (i = 1; i <= nP; i++)
