@@ -337,7 +337,15 @@ static GEN QT8(long k, long v)
   a2 = deg2pol_shallow(gen_2,gen_0,gen_0, v);
   a0 = deg2pol_shallow(gen_2,gen_m1,gen_0, v);
   return mkpoln(9, gen_1,gen_0,a6,gen_0,a4,gen_0,a2,gen_0,a0);
-  /* case 36: */
+  case 36:
+  a6 = deg2pol_shallow(gen_1,gen_0,stoi(108), v);
+  a5 = gtopoly(mkvecsmall4(1, 0, 108, 216), v);
+  a4 = gtopoly(mkvecsmall5(1, 0, 108, 216, 4374), v);
+  a3 = gtopoly(mkvecsmalln(6, 1, 0, 108, 216, 4374, 13608), v);
+  a2 = gtopoly(mkvecsmalln(7, 1, 0, 108, 216, 4374, 13608, 99468), v);
+  a1 = gtopoly(mkvecsmalln(8, 1, 0, 108, 216, 4374, 13608, 99468, 215784), v);
+  a0 = gtopoly(mkvecsmalln(9, 1, 0, 108, 216, 4374, 13608, 99468, 215784, 998001), v);
+  return mkpoln(9, gen_1,pol_x(v),a6,a5,a4,a3,a2,a1,a0);
   case 37:
   a7 = deg2pol_shallow(gen_m1,gen_0,stoi(-7), v);
   a6 = gtopoly(mkvecsmall5(7, 0, 98, 0, 343), v);
