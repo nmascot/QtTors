@@ -175,6 +175,8 @@ rnfbasis(bnfinit(y^2-1105),x^2-y)
 \\#1508
 K=nfinit(y); L=rnfinit(K,x^3-2); rnfeltdown(L,Mod(Mod(1,K.pol),L.polabs))
 
+rnf=rnfinit(nfinit(y^2+1),x^2-2); rnfidealup(rnf, matid(2)/2)
+
 k1=bnfinit(y^3+y^2-2*y-1);
 u=x^3+y*x^2+(y-2)*x+(y^2-y-1);
 rnfconductor(k1,u)
