@@ -3029,12 +3029,12 @@ GEN
 ZXX_nv_mod_tree(GEN P, GEN xa, GEN T, long w)
 {
   pari_sp av = avma;
-  long i, j, l = lg(P), n = lg(xa)-1, vP = varn(P);
+  long i, j, l = lg(P), n = lg(xa)-1;
   GEN V = cgetg(n+1, t_VEC);
   for (j=1; j <= n; j++)
   {
     gel(V, j) = cgetg(l, t_POL);
-    mael(V, j, 1) = vP;
+    mael(V, j, 1) = P[1]&VARNBITS;
   }
   for (i=2; i < l; i++)
   {
