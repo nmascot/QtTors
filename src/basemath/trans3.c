@@ -2728,7 +2728,7 @@ polylogP(long m, GEN x, long prec)
   return gerepileupto(av, y);
 }
 
-GEN
+static GEN
 gpolylog_i(void *E, GEN x, long prec)
 {
   pari_sp av = avma;
