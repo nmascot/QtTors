@@ -3478,7 +3478,7 @@ clean_tail(GEN phi, long c, GEN q)
   long a, l = lg(phi);
   for (a = 1; a < l; a++)
   {
-    GEN P = FpV_red(gel(phi,a), q); /* phi(G_a) = vector of moments */
+    GEN P = FpC_red(gel(phi,a), q); /* phi(G_a) = vector of moments */
     long j, lP = lg(P);
     for (j = c; j < lP; j++) gel(P,j) = gen_0; /* reset garbage to 0 */
     gel(phi,a) = P;
