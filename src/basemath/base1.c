@@ -1233,10 +1233,10 @@ partmap_reverse_frac(GEN a, GEN b, GEN t, GEN la, GEN lb, long v)
 }
 
 static GEN
-nfisincl_from_fact(GEN a, GEN b, GEN la, GEN lb, long vb, GEN y, long flag)
+nfisincl_from_fact(GEN a, long da, GEN b, GEN la, GEN lb, long vb, GEN y, long flag)
 {
   long i, k, lx = lg(y);
-  long da = degpol(a), db = degpol(b), d = db/da;
+  long db = degpol(b), d = db/da;
   GEN x = cgetg(lx, t_VEC);
   for (i=1, k=1; i<lx; i++)
   {
@@ -1301,7 +1301,7 @@ nfisincl0(GEN fa, GEN fb, long flag)
   if (flag>=2)
     x = nfisincl_from_fact_frac(a, b, la, lb, vb, y);
   else
-    x = nfisincl_from_fact(a, b, la, lb, vb, y, flag);
+    x = nfisincl_from_fact(nfa, degpol(a), b, la, lb, vb, y, flag);
   if (newvar) (void)delete_var();
   return gerepilecopy(av,x);
 }
@@ -1369,7 +1369,7 @@ GEN
 nfsplitting0(GEN T0, GEN D, long flag)
 {
   pari_sp av = avma;
-  long d, v;
+  long d, Ds, v;
   GEN T, F, K, N = NULL;
   T = T0 = get_nfpol(T0, &K);
   if (!K)
@@ -1398,7 +1398,7 @@ nfsplitting0(GEN T0, GEN D, long flag)
     long dmax = pari_is_dir(data)? 11: 7;
     D = (d <= dmax)? gel(polgalois(T,DEFAULTPREC), 1): mpfact(d);
   }
-  d = itos_or_0(D);
+  Ds = itos_or_0(D);
   T = leafcopy(T); setvarn(T, fetch_var_higher());
   for(F = T;;)
   {
@@ -1406,13 +1406,13 @@ nfsplitting0(GEN T0, GEN D, long flag)
     if (degpol(gel(P,1)) == degpol(Q))
     {
       if (flag==1 && ZX_equal(T, T0))
-        N = nfisincl_from_fact(K, F, gen_1, gen_1, v, liftall(P), flag);
+        N = nfisincl_from_fact(K, d, F, gen_1, gen_1, v, liftall(P), flag);
       else if (flag>1 && ZX_equal(T, T0))
-        N = nfisincl_from_fact_frac(K, F, gen_1, gen_1, v, liftall(P));
+        N = nfisincl_from_fact_frac(T0, F, gen_1, gen_1, v, liftall(P));
       break;
     }
     F = rnfequation(K,Q);
-    if (degpol(F) == d && flag==0)
+    if (degpol(F) == Ds && flag==0)
       break;
   }
   if (umodiu(D,degpol(F)))
