@@ -2337,9 +2337,15 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
 GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qprec)
 {
 	pari_sp av = avma;
+	pari_timer WT,CPUT;
 	GEN coefs,best,H,p,Lp,ap,epsp,chi,log2,log10,logp,J,J1,B,R;
 	ulong N,a;
 	long e;
+	if(DEBUGLEVEL)
+	{
+		walltimer_start(&WT);
+  	timer_start(&CPUT);
+	}
 	if(typ(l)==t_VEC)
 	{
 		coefs = gel(l,2);
@@ -2347,6 +2353,7 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 	}
 	else coefs = NULL;
 	best = mfgalrep_bestp(f,l,coefs,prange,UseTp);
+	if(DEBUGLEVEL) timers_printf("mfgalrep","choice p",&CPUT,&WT);
 	N = itou(gel(best,1));
 	H = gel(best,2);
 	p = gel(best,3);
@@ -2362,10 +2369,12 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 	e = itos(gceil(divrr(addrr(log2,mulur(2*D,log10)),logp)));
 	if(DEBUGLEVEL) pari_printf("mfgalrep: X_H(%lu) (H=%Ps), genus %ld, over Q_%Ps^%lu with accuracy O(%Ps^%ld)\n",N,H,degpol(Lp)/2,p,a,p,e);
 	J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
+	if(DEBUGLEVEL) timers_printf("mfgalrep","modpicinit",&CPUT,&WT);
 	if(UseTp)
 	{
 		J1 = PicSetPrec(J,1);
 		B = PicTors_TpEigen(J1,l,ap,epsp,chi);
+		if(DEBUGLEVEL) timers_printf("mfgalrep","Tp eigenspace",&CPUT,&WT);
 		R = PicTorsGalRep_from_basis(J,J1,l,B);
 	}
 	else R = PicTorsGalRep(J,l,chi);

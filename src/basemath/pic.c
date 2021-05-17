@@ -4,6 +4,9 @@
 #define DEBUGLEVEL DEBUGLEVEL_pic
 #define lgJ 17
 
+void timers_printf(const char* msg1, const char* msg2, pari_timer* pCPU, pari_timer* pW)
+{ printf("%s: Time %s: CPU %s, real %s\n",msg1,msg2,gp_format_time(timer_delay(pCPU)),gp_format_time(walltimer_delay(pW))); }
+
 /* Linear algebra */
 
 long ZX_is0mod(GEN x, GEN p)
@@ -5086,12 +5089,17 @@ GEN PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
 GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B)
 {
 	pari_sp av = avma;
+	pari_timer WT,CPUT;
 	GEN C,MFrob,MAuts,Z,AF,best,c,cbest;
 	long e1,e2; /* Prec before and after lift */
 	ulong ul,n,i,d;
 	long sbest,s;
 	int comp;
-	
+  if(DEBUGLEVEL)
+  {
+    walltimer_start(&WT);
+    timer_start(&CPUT);
+  }
 	ul = itou(l);
 	MFrob = gel(B,2);
 	MAuts = gel(B,3);
@@ -5111,14 +5119,24 @@ GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B)
 		for(i=1;i<n;i++)
 			gel(B,i) = PicLiftTors(J,gel(B,i),l,e1);
 		e1 = e2;
-		if(DEBUGLEVEL) printf("pictorsgalrep: Evaluating all points\n");
+		if(DEBUGLEVEL)
+		{
+			timers_printf("pictorsgalrep","lift",&CPUT,&WT);
+			printf("pictorsgalrep: Evaluating all points\n");
+		}
 		Z = PicTorsSpaceFrobEval(J,B,C,ul,MFrob,MAuts);
-		if(DEBUGLEVEL) printf("pictorsgalrep: Getting polynomials\n");
+		if(DEBUGLEVEL)
+		{
+			timers_printf("pictorsgalrep","TorsSpaceEval",&CPUT,&WT);
+			printf("pictorsgalrep: Getting polynomials\n");
+		}
 		AF = AllPols(J,Z,ul,MFrob);
+		if(DEBUGLEVEL) timers_printf("pictorsgalrep","polynomials",&CPUT,&WT);
 		if(lg(AF)>1) break; /* Success! */
 		if(DEBUGLEVEL) pari_printf("pictorsgalrep: unable to determine representation at accuracy O(%Ps^%ld); doubling accuracy and retrying\n",Jgetp(J),Jgete(J));
 		e2 *= 2;
 		J = PicSetPrec(J,e2);
+		if(DEBUGLEVEL) timers_printf("pictorsgalrep","JacLift",&CPUT,&WT);
 	}
 	n = lg(AF);
 	best = gel(AF,1);
@@ -5142,10 +5160,17 @@ GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B)
 GEN PicTorsGalRep(GEN J, GEN l, GEN chi)
 {
 	pari_sp av = avma;
-  GEN J1,B,R;
-  if(DEBUGLEVEL) pari_printf("pictorsgalrep: Getting basis of rep space over F_%Ps^%lu\n",Jgetp(J),degpol(JgetT(J)));
-  J1 = PicSetPrec(J,1);
-  B = PicTorsBasis(J1,l,chi);
+  pari_timer WT,CPUT;
+	GEN J1,B,R;
+	if(DEBUGLEVEL)
+  {
+    walltimer_start(&WT);
+    timer_start(&CPUT);
+  	pari_printf("pictorsgalrep: Getting basis of rep space over F_%Ps^%lu\n",Jgetp(J),degpol(JgetT(J)));
+	}
+	J1 = PicSetPrec(J,1);
+	B = PicTorsBasis(J1,l,chi);
+	if(DEBUGLEVEL) timers_printf("pictorsgalrep","basis",&CPUT,&WT);
 	R = PicTorsGalRep_from_basis(J,J1,l,B);
 	return gerepileupto(av,R);
 }
