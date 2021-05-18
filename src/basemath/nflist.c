@@ -4392,7 +4392,7 @@ ideallistsquare(GEN bnf, long lim)
       for (i = 1; i < lv; i++) { v[i] = n % Z[i]; n /= Z[i]; S += v[i] * F[i]; }
       if (!odd(S) && S <= llp)
       {
-        GEN id = famat_remove_trivial(mkmat2(P, zv_to_ZV(v)));
+        GEN id = famat_remove_trivial(mkvec2(P, zc_to_ZC(v)));
         long j, pS = upowuu(p, S >> 1);
         for (j = 1; j <= lim / pS; j++)
         {
