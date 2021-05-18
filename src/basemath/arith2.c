@@ -71,8 +71,8 @@ Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pE)
      if (is_pm1(N)) { N = NULL; break; }
     }
   }
-  P[0] = evaltyp(t_VEC) | evallg(j); if (pP) *pP = P;
-  E[0] = evaltyp(t_VEC) | evallg(j); if (pE) *pE = E; return N;
+  P[0] = evaltyp(t_COL) | evallg(j); if (pP) *pP = P;
+  E[0] = evaltyp(t_COL) | evallg(j); if (pE) *pE = E; return N;
 }
 /***********************************************************************/
 /**                                                                   **/
