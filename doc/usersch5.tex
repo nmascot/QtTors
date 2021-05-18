@@ -7732,20 +7732,6 @@ to be \typ{INT}.
 
 \fun{GEN}{ZM_to_zm}{GEN z}, converts coefficients using \kbd{itos}
 
-\fun{GEN}{FqC_to_FlxC}{GEN x, GEN T, ulong p}, converts \kbd{Fq} coefficients
-to \kbd{Flx}, result being a column vector. $T$ is the \kbd{FpX}
-modulo which the \kbd{Fq} are defined and $p$ is the characteristic (which
-must fit in an \kbd{ulong} for the conversion to make sense and is given as
-such).
-
-\fun{GEN}{FqV_to_FlxV}{GEN x, GEN T, ulong p}, converts \kbd{Fq} coefficients
-to \kbd{Flx}, result being a row vector. $T$ is the \kbd{FpX}
-modulo which the \kbd{Fq} are defined and $p$ is the characteristic.
-
-\fun{GEN}{FqM_to_FlxM}{GEN x, GEN T, ulong p}, converts \kbd{Fq} coefficients
-to \kbd{Flx}. $T$ is the \kbd{FpX} modulo which the \kbd{Fq} are defined
-and $p$ is the characteristic.
-
 \subsubsec{From single precision}
 
 \fun{GEN}{Flx_to_ZX}{GEN z}, converts to \kbd{ZX} (\typ{POL} of nonnegative

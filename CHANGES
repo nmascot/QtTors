@@ -102,8 +102,8 @@ BA  33- [libpari] ZXC_to_FlxC, ZXM_to_FlxM
 HC   1- faster implementation of eulervec + cache result
      2- sumnummonieninit(,1): faster algorithm (complex step)
      3- atanh(rational) now uses binary splitting
-     4- prototype of FqV_to_FlxV, FqC_to_FlxC, FqM_to_FlxM: argument 'p' is
-        an ulong, no longer a GEN
+BA   4- FqV_to_FlxV, FqC_to_FlxC, FqM_to_FlxM: replaced by
+        ZXC_to_FlxC, ZXM_to_FlxM
      5- FpM_intersect and Flm_intersect now guaranteed to return an
         Fp-basis; use FpM_intersect_i if you only need a generating set
      6- ZXX_to_Kronecker -> RgXX_to_Kronecker, ZXX_to_Kronecker_spec

@@ -8,8 +8,7 @@ This file lists the incompatible changes between Version 2.x and older versions
 ===============================
   - dirpowerssum0 now requires an extra argument f to allow a completely
     multiplicative function (can be set to NULL, i.e. constant function = 1)
-  - change prototype of FqV_to_FlxV, FqC_to_FlxC, FqM_to_FlxM: argument 'p' is
-    an ulong, no longer a GEN
+  - FqV_to_FlxV, FqC_to_FlxC, FqM_to_FlxM: replaced by ZXC_to_FlxC, ZXM_to_FlxM
   - ZXX_to_Kronecker -> RgXX_to_Kronecker, ZXX_to_Kronecker_spec
     -> RgXX_to_Kronecker_spec
   - nbessel -> ybessel (according to the new GP name bessely)
