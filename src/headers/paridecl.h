@@ -1466,6 +1466,8 @@ GEN     ZX_sqrspec(GEN a, long na);
 GEN     ZX_sub(GEN x, GEN y);
 long    ZX_val(GEN x);
 long    ZX_valrem(GEN x, GEN *Z);
+GEN     ZXC_to_FlxC(GEN x, ulong p, long vs);
+GEN     ZXM_to_FlxM(GEN x, ulong p, long vs);
 GEN     ZXQM_mul(GEN x, GEN y, GEN T);
 GEN     ZXQM_sqr(GEN x, GEN T);
 GEN     ZXQX_ZXQ_mul(GEN P, GEN U, GEN T);

@@ -1636,7 +1636,7 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, long *rr)
     pari_sp av = avma;
     ulong pp = uel(p,2);
     GEN Tp = ZXT_to_FlxT(T, pp);
-    GEN d = FlxqM_gauss_pivot(FqM_to_FlxM(x, T, pp), Tp, pp, rr);
+    GEN d = FlxqM_gauss_pivot(ZXM_to_FlxM(x, pp, get_Flx_var(Tp)), Tp, pp, rr);
     return d ? gerepileuptoleaf(av, d): d;
   }
   return FqM_gauss_pivot_gen(x, T, p, rr);
@@ -1913,8 +1913,8 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
   {
     pari_sp ltop=avma;
     ulong l= p[2];
-    GEN Ml = FqM_to_FlxM(x, T, l);
     GEN Tl = ZXT_to_FlxT(T,l);
+    GEN Ml = ZXM_to_FlxM(x, l, get_Flx_var(Tl));
     GEN p1 = FlxM_to_ZXM(FlxqM_ker(Ml,Tl,l));
     return gerepileupto(ltop,p1);
   }
@@ -4554,8 +4554,8 @@ ZabM_inv_slice(GEN A, GEN Q, GEN P, GEN *mod)
   if (n == 1)
   {
     ulong p = uel(P,1);
-    GEN Ap = FqM_to_FlxM(A, Q, p);
     GEN Qp = ZX_to_Flx(Q, p);
+    GEN Ap = ZXM_to_FlxM(A, p, get_Flx_var(Qp));
     GEN Hp = FlkM_adjoint(Ap, Qp, p);
     Hp = gerepileupto(av, FlxM_to_ZXM(Hp));
     *mod = utoipos(p); return Hp;
@@ -4657,7 +4657,7 @@ ZabM_inv_ratlift(GEN M, GEN P, long n, GEN *pden)
     GEN Hp, Pp, Mp, Hr;
     do p += n; while(!uisprime(p));
     Pp = ZX_to_Flx(P, p);
-    Mp = FqM_to_FlxM(M, P, p);
+    Mp = ZXM_to_FlxM(M, p, get_Flx_var(Pp));
     Hp = FlkM_inv(Mp, Pp, p);
     if (!Hp) continue;
     if (!H)
@@ -4722,8 +4722,8 @@ ZabM_ker_check(GEN M, GEN H, ulong p, GEN P, long n)
   P = ZX_to_Flx(P, p);
   r = Flx_oneroot(P, p);
   pow = Fl_powers_pre(r, degpol(P),p,pi);
-  M = FqM_to_FlxM(M, P, p); M = FlxM_eval_powers_pre(M, pow, p, pi);
-  H = FqM_to_FlxM(H, P, p); H = FlxM_eval_powers_pre(H, pow, p, pi);
+  M = ZXM_to_FlxM(M, p, P[1]); M = FlxM_eval_powers_pre(M, pow, p, pi);
+  H = ZXM_to_FlxM(H, p, P[1]); H = FlxM_eval_powers_pre(H, pow, p, pi);
   for (j = 1; j < l; j++)
     if (!zv_equal0(Flm_Flc_mul_pre(M, gel(H,j), p, pi))) return 0;
   return 1;
@@ -4744,7 +4744,7 @@ ZabM_ker(GEN M, GEN P, long n)
     GEN Kp, Hp, Dp, Pp, Mp, Hr;
     do p += n; while(!uisprime(p));
     Pp = ZX_to_Flx(P, p);
-    Mp = FqM_to_FlxM(M, P, p);
+    Mp = ZXM_to_FlxM(M, p, get_Flx_var(Pp));
     Kp = FlkM_ker(Mp, Pp, p);
     if (!Kp) continue;
     Hp = gel(Kp,1); Dp = gel(Kp,2);
@@ -4782,13 +4782,14 @@ ZabM_indexrank(GEN M, GEN P, long n)
   GEN v;
   for(;;)
   {
-    GEN R, Mp, K;
+    GEN R, Pp, Mp, K;
     ulong pi;
     long l;
     do p += n; while (!uisprime(p));
     pi = get_Fl_red(p);
-    R = Flx_roots(ZX_to_Flx(P, p), p);
-    Mp = FqM_to_FlxM(M, P, p);
+    Pp = ZX_to_Flx(P, p);
+    R = Flx_roots(Pp, p);
+    Mp = ZXM_to_FlxM(M, p, get_Flx_var(Pp));
     K = FlxM_eval_powers_pre(Mp, Fl_powers_pre(uel(R,1), D,p,pi), p,pi);
     v = Flm_indexrank(K, p);
     l = lg(gel(v,2));

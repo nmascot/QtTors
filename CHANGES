@@ -96,6 +96,7 @@ BA  30- New GP function galoissplittinginit
 HC  31- lambertw(y): support all values y > -1/e [#1472]
 HC  32- lambertw: add optional 'branch' argument; support and complex, p-adic
         and power series inputs
+BA  33- [libpari] ZXC_to_FlxC, ZXM_to_FlxM
 
   Changed
 HC   1- faster implementation of eulervec + cache result
