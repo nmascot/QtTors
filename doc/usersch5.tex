@@ -7722,14 +7722,19 @@ $x$ modulo $p$, yielding a \typ{VECSMALL}.
 
 \fun{GEN}{ZM_to_zm}{GEN z}, converts coefficients using \kbd{itos}
 
-\fun{GEN}{FqC_to_FlxC}{GEN x, GEN T, ulong p}, converts coefficients in \kbd{Fq}
-to coefficient in Flx, result being a column vector.
+\fun{GEN}{FqC_to_FlxC}{GEN x, GEN T, ulong p}, converts \kbd{Fq} coefficients
+to \kbd{Flx}, result being a column vector. $T$ is the \kbd{FpX}
+modulo which the \kbd{Fq} are defined and $p$ is the characteristic (which
+must fit in an \kbd{ulong} for the conversion to make sense and is given as
+such).
 
-\fun{GEN}{FqV_to_FlxV}{GEN x, GEN T, ulong p}, converts coefficients in \kbd{Fq}
-to coefficient in Flx, result being a row vector.
+\fun{GEN}{FqV_to_FlxV}{GEN x, GEN T, ulong p}, converts \kbd{Fq} coefficients
+to \kbd{Flx}, result being a row vector. $T$ is the \kbd{FpX}
+modulo which the \kbd{Fq} are defined and $p$ is the characteristic.
 
-\fun{GEN}{FqM_to_FlxM}{GEN x, GEN T, ulong p}, converts coefficients in \kbd{Fq}
-to coefficient in Flx.
+\fun{GEN}{FqM_to_FlxM}{GEN x, GEN T, ulong p}, converts \kbd{Fq} coefficients
+to \kbd{Flx}. $T$ is the \kbd{FpX} modulo which the \kbd{Fq} are defined
+and $p$ is the characteristic.
 
 \subsubsec{From single precision}
 
