@@ -946,7 +946,7 @@ C3vec_F(long sX, long sXinf, GEN *pF)
   F = cgetg(l, t_VECSMALL);
   for (i = 1; i < l; i++) F[i] = uC3pol_f(gel(v,i));
   perm = vecsmall_indexsort(F);
-  if (pF) *pF = vecpermute(F, perm);
+  if (pF) *pF = vecsmallpermute(F, perm);
   return vecpermute(v, perm);
 }
 static GEN
