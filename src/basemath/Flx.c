@@ -3623,7 +3623,7 @@ init_invlaplace(long d, ulong p, GEN *pt_P, GEN *pt_V)
  * val large enough to compensate for the power of p in the factorials */
 
 static GEN
-ZpX_invLaplace_init(long n, GEN q, ulong p, long v, long var)
+ZpX_invLaplace_init(long n, GEN q, ulong p, long v, long sv)
 {
   pari_sp av = avma;
   long i, d = n-1, w;
@@ -3633,7 +3633,7 @@ ZpX_invLaplace_init(long n, GEN q, ulong p, long v, long var)
   w = zv_sum(W);
   if (v > w) t = Fp_mul(t, powuu(p, v-w), q);
   y = cgetg(d+3,t_POL);
-  y[1] = evalsigne(1) | evalvarn(var);
+  y[1] = evalsigne(1) | sv;
   for (i=d; i>=1; i--)
   {
     gel(y,i+2) = t;
@@ -3663,7 +3663,7 @@ Flx_composedsum(GEN P, GEN Q, ulong p)
     long w = 1 + newtonlogint(n-1, p);
     GEN pv = powuu(p, v);
     GEN qf = powuu(p, w), q = mulii(pv, qf), q2 = mulii(q, pv);
-    GEN iL = ZpX_invLaplace_init(n, q, p, v, varn(P));
+    GEN iL = ZpX_invLaplace_init(n, q, p, v, P[1]);
     GEN Pl = FpX_convol(iL, FpX_Newton(Flx_to_ZX(P), n, qf), q);
     GEN Ql = FpX_convol(iL, FpX_Newton(Flx_to_ZX(Q), n, qf), q);
     GEN Ln = ZX_Z_divexact(FpXn_mul(Pl, Ql, n, q2), pv);
