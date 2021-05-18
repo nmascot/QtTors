@@ -55,6 +55,7 @@ ZX_to_ZiX(GEN Pr, GEN Pi)
 {
   long i, lr = lg(Pr), li = lg(Pi), l = maxss(lr, li), m = minss(lr, li);
   GEN P = cgetg(l, t_POL);
+  P[1] = Pr[1];
   for(i = 2; i < m; i++)
     gel(P,i) = signe(gel(Pi,i)) ? mkcomplex(gel(Pr,i), gel(Pi,i))
                                 : gel(Pr,i);
@@ -62,7 +63,7 @@ ZX_to_ZiX(GEN Pr, GEN Pi)
     gel(P,i) = gel(Pr, i);
   for(     ; i < li; i++)
     gel(P,i) = mkcomplex(gen_0, gel(Pi, i));
-  return P;
+  return normalizepol_lg(P, l);
 }
 
 static GEN
