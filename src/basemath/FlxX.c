@@ -246,7 +246,7 @@ zxX_to_Kronecker_spec(GEN P, long lp, long n)
     for (   ; j < N; j++) y[k++] = 0;
   }
   y -= 2;
-  y[1] = P[1]; setlg(y, k+2); return y;
+  y[1] = 0; setlg(y, k+2); return y;
 }
 
 GEN
