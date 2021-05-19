@@ -156,14 +156,14 @@ possible(GEN F, GEN Ftr, GEN V, GEN W, GEN per, long I, long J)
     /* check vector length */
     for (k = 1; k <= f && i > I && Wj[k] == mael3(F,k,J,J); k++)
       for (i = 1; i <= I; i++) /* check scalar products with basis vectors */
-        if (zv_dotproduct(Vj,gmael(Ftr,k,per[i])) != coeff(gel(F,k),J,per[i]))
+        if (zv_dotproduct(Vj,gmael(Ftr,k,per[i])) != mael(gel(F,k),J,per[i]))
           break;
     if (k == f+1 && i > I) ++count;
     /* same for the negative vector */
     i = I+1;
     for (k = 1; k <= f && i > I && Wj[k] == mael3(F,k,J,J); k++)
       for (i = 1; i <= I ; i++)
-        if (zv_dotproduct(Vj,gmael(Ftr,k,per[i])) != -coeff(gel(F,k),J,per[i]))
+        if (zv_dotproduct(Vj,gmael(Ftr,k,per[i])) != -mael(gel(F,k),J,per[i]))
           break;
     if (k == f+1 && i > I) ++count;
   }
