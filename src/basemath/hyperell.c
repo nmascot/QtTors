@@ -629,7 +629,7 @@ F2x_genus2charpoly_naive(GEN P, GEN Q)
   b += q0 + q1;
   if (lgpol(QT))
     c = (F2xq_trace(F2xq_div(PT, F2xq_sqr(QT, T), T), T)==0 ? 1: -1);
-  return mkvecsmalln(6, 0UL, 4, 2*a, (b+2*c+a*a)>>1, a, 1UL);
+  return mkvecsmalln(6, 0UL, 4UL, 2*a, (b+2*c+a*a)>>1, a, 1UL);
 }
 
 static GEN
