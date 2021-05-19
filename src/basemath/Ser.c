@@ -196,7 +196,7 @@ toser_i(GEN x)
   switch(typ(x))
   {
     case t_SER: return x;
-    case t_POL: return RgX_to_ser(x, precdl+2);
+    case t_POL: return RgX_to_ser_inexact(x, precdl+2);
     case t_RFRAC: return rfrac_to_ser(x, precdl+2);
   }
   return NULL;
