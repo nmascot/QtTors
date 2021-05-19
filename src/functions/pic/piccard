@@ -1,0 +1,11 @@
+Function: piccard
+Section: modular_forms
+C-Name: PicCard
+Prototype: G
+Help: piccard(J): Cardinality of the Jacobian J.
+Doc: TODO 
+ \bprog
+ ? TODO
+ %2 = 
+ TODO
+ @eprog

@@ -1029,6 +1029,26 @@ GEN PicNeg(GEN J, GEN W, long flag)
   }
 }
 
+GEN PicCard(GEN J)
+{
+	pari_sp av = avma;
+	GEN T,p,Lp,N;
+	ulong a,g;
+	long e;
+	Lp = JgetLp(J);
+  if(gequal0(Lp))
+    pari_err(e_MISC,"this Jacobian does not contain its local L factor which is required for point counting");
+	T = JgetT(J);
+	a = degpol(T);
+	p = Jgetp(J);
+	e = Jgete(J);
+	g = Jgetg(J);
+	N = ZX_resultant(Lp,ZX_Z_add(pol_xn(a,0),gen_m1));
+	if(e>1)
+		N = mulii(N,powiu(p,(e-1)*g));
+	return gerepileupto(av,N);
+}
+
 GEN rand_subset(ulong n, ulong r)
 {
   pari_sp av;
