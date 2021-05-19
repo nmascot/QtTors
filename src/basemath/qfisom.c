@@ -809,13 +809,13 @@ aut(long step, GEN x, GEN C, struct group *G, struct qfauto *qf,
   long dim = qf->dim;
   GEN orb;
   /* found new automorphism */
-  if (step == dim && mael(C,dim,1)) { gel(x,dim) = gmael(C,dim,1); return 1; }
+  if (step == dim && mael(C,dim,1)) { x[dim] = mael(C,dim,1); return 1; }
   orb = cgetg(2,t_VECSMALL);
   while (mael(C,step,1))
   {
     long nbc;
     /* choose the image of the base-vector nr. step */
-    gel(x,step) = gmael(C,step,1);
+    x[step] = mael(C,step,1);
     /* check, whether x[0..step] is a partial automorphism and compute
        the candidates for x[step+1] */
     nbc = qfisom_candidates(gel(C,step+1), step+1, x, qf, qf, fp, cand);
