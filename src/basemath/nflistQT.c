@@ -465,7 +465,7 @@ static GEN QT9(long k, long v)
   a6 = gtopoly(mkvecsmall5(2241, 0L,-59796L, 0L,-98292L),v);
   a5 = gtopoly(mkvecsmall5(788292, 0L, 2434536L, 0L, 1943055L),v);
   a4 = gtopoly(mkvecsmalln(7, -2221020L, 0L,-11276658L, 0L,-18068184L, 0L,-9662454L),v);
-  a3 = gtopoly(mkvecsmalln(9, 1245375L, 0L, 4562892L, 0L,-1829628L, 0L,-17170236L, 0L,-12229791),v);
+  a3 = gtopoly(mkvecsmalln(9, 1245375L, 0L, 4562892L, 0L,-1829628L, 0L,-17170236L, 0L,-12229791L),v);
   a2 = gtopoly(mkvecsmalln(9, 34007850L, 0L, 84141180L, 0L, 21112569L, 0L,-76385268L, 0L,-47416320L),v);
   a1 = gtopoly(mkvecsmalln(11, -10935000L, 0L,-67290345L, 0L,-165190428L, 0L,-202198032L, 0L,-123391296L, 0L,-30030336L),v);
   a0 = gtopoly(mkvecsmalln(13, -11390625L, 0L,-84564000L, 0L,-260954784L, 0L,-428398848L, 0L,-394557696L, 0L,-193277952L, 0L,-39337984L),v);
