@@ -16,11 +16,12 @@ for file in `find . -type f -name "*.[chy]"` ; do
     mkdir -p `dirname $outfile`
     echo "converting file: $file -> $outfile"
     # Add LL to the end of any constant with 10 or more numbers
-    sed 's/\([-+({ ][0-9]\{10,\}\)\([,;:)} ]\)/\1LL\2/g' < $file > TMP
+    ## disabled, should not be necessary, overgreedy
+    # sed 's/\([-+({ ][0-9]\{10,\}\)\([,;:)} ]\)/\1LL\2/g' < $file > TMP
 
     # Convert all decimal constants ending in L or UL.
     # Note: replacing strings with lower case l breaks a couple things, namely strings like "%+1ld"
-    sed -e 's/\([-+* ,()=~&|%][0-9][0-9]*\)[L]\{1,2\}/\1LL/g' -e 's/\([-+* ,()=~&|%][0-9][0-9]*\)[uU][lL]\{1,2\}/\1ULL/g' < TMP > TMP2
+    sed -e 's/\([-+* ,()=~&|%][0-9][0-9]*\)[L]\{1,2\}/\1LL/g' -e 's/\([-+* ,()=~&|%][0-9][0-9]*\)[uU][lL]\{1,2\}/\1ULL/g' < $file > TMP2
 
     # Convert all hexadecimal constants ending in L or UL.
     sed -e 's/\(0x[0-9a-fA-F][0-9a-fA-F]*\)[lL]\{1,2\}/\1LL/g' -e 's/\(0x[0-9a-fA-F][0-9a-fA-F]*\)[uU][lL]\{1,2\}/\1ULL/g' < TMP2 > TMP
