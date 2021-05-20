@@ -5,7 +5,7 @@ Cohen till 1995. Karim Belabas took over the maintainance between 1995 and
 2001,  the project has been jointly maintained by Bill Allombert and Karim
 Belabas since 2002.
 
-A great  number  of people  have contributed  code through  the successive
+A great number of people have contributed code  or data through  the  many
 stages which eventually resulted in the present version  of PARI/GP.  Even
 more people, too numerous to list, contributed by testing,  reporting bugs
 or suggesting improvements, Igor Schein foremost among them.
@@ -21,28 +21,28 @@ Major contributors (large modules written or rewritten from scratch):
 
   Bill ALLOMBERT: GP2C, the GP parser, extension of the GP language
     (my, closures), GMP kernel, modular kernel, ffinit, galois* routines,
-    subcyclo, black-box groups, elliptic curves, the elldata and galdata
-    package, multithread model, PARI description system, FLTK support,
-    Bug tracking system, administration of pari.math.u-bordeaux.fr, the
-    http://pari.math.u-bordeaux.fr website, Lfun package
+    subcyclo, black-box groups, elliptic curves, multithread model,
+    PARI description system, FLTK support, Bug tracking system, administration
+    of pari.math.u-bordeaux.fr, the http://pari.math.u-bordeaux.fr website,
+    Lfun module
   Jared ASUNCION: ECPP
   Christian BATUT: 68k multiprecision kernel, Linear algebra, lattices
   Karim BELABAS: current project leader, native multiprecision kernel, modular
     kernel, polynomial arithmetic, polynomial factorization (finite fields,
     number fields), LLL, primality and compositeness tests, number fields,
-    polgalois and the galdata package, elliptic curves, qfsolve, transcendental
+    polgalois, elliptic curves, qfsolve, transcendental
     functions, install(), extension of the GP language (next/break/return,
     local, op=, default()), gphelp, gphtml fork, Configure, readline, man pages,
     documentation layout, reference card and user's manuals, the FAQ, the
-    http://pari.math.u-bordeaux.fr website, Lfun package, ModularForms
-    package, nflist
+    http://pari.math.u-bordeaux.fr website, Lfun module, ModularForms module,
+    nflist
   Dominique BERNARDI: the original gp interpreter, ECM, original
     elliptic curves implementation
   Peter BRUIN: asymptotically fast linear algebra over finite fields
   Henri COHEN: original designer and project leader, native multiprecision
     kernel, arithmetic functions, LLL, transcendental functions, number fields,
     original elliptic curves implementation, numerical integration and
-    summation, Lfun package, ModularForms package, nflist
+    summation, Lfun module, ModularForms module, nflist
   Vincent DELECROIX: combinatorial algorithms (forperm, forsubset)
   Jeroen DEMEYER: SVG support
   Francisco DIAZ Y DIAZ: number fields (class groups, units)
@@ -59,13 +59,13 @@ Major contributors (large modules written or rewritten from scratch):
   Flj_ functions family.
   Pascal LETARD: basic number fields (round2, initial round4)
   Jean-Francois MESTRE: original elliptic curves implementation
-  Pascal MOLIN: Lfun package, numerical integration
+  Pascal MOLIN: Lfun module, numerical integration
   Gerhard NIKLASCH: binary powering, integer extended gcd and rational
     reconstruction, primality and compositeness test, integer factorization,
     documentation layout, AIX and Solaris support, first PARI web site.
   Michel OLIVIER: 68k multiprecision kernel, number fields, original polgalois
     and nfsubfields implementation
-  Aurel PAGE: Associative and central simple algebras package, linear algebra
+  Aurel PAGE: Associative and central simple algebras module, linear algebra
   over Z/NZ
   Thomas PAPANIKOlAOU: MPQS integration, Pari-Lidia project
   Xavier ROBLOT: MPQS integration, Stark, original nffactor, padicfields
@@ -77,6 +77,15 @@ Major contributors (large modules written or rewritten from scratch):
   Ilya ZAKHAREVITCH: prime sieves, gphelp, tex2mail, rewrite of the
     graphic engine (incl. splines and clipping), GP parser codes,
     gnuplot support, readline support, OS/2 support, DOS/EMX support
+
+All packages built by Bill ALLOMBERT and Karim BELABAS.
+Package contributors:
+  John CREMONA: elldata (https://johncremona.github.io/ecdata/)
+  David KOHEL: seadata (https://www.i2m.univ-amu.fr/perso/david.kohel/dbs/)
+  Bill ALLOMBERT and Igor SCHEIN built the galpol contents
+  Yves EICHENLAUB contributed the galdata contents
+  John JONES and David ROBERTS: nflistdata (A5 fields,
+    https://hobbes.la.asu.edu/NFDB/)
 
 Other contributors: the 2 or 3 letter code refer to the CHANGES file. Please,
 kindly remind us if you have been forgotten!
