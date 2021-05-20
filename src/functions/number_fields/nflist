@@ -100,8 +100,8 @@ Doc: find number fields (up to isomorphism) with Galois group of Galois
  transitive subgroups of $S_9$ (for now all except $9T9$,
  $9T14$, $9T15$, $9T16$, $9T23$, and $9T27$),
  as well as for the alternating and symmetric groups $A_n$ and $S_n$ for all
- $n$. With the exception of $S_n$ and $A_n$ (inspired by J.-F.~Mestre),
- polynomials in degree $\leq 8$ come from G.~W.~Smith,
+ $n$. Polynomials for $S_n$ and $A_n$ were inspired by J.-F.~Mestre,
+ other polynomials in degree $\leq 8$ except $8T36$ come from G.~W.~Smith,
  ``Some polynomials over $\Q(t)$ and their
  Galois groups'', \emph{Math. Comp.}, {\bf 69} (230), 1999, pp.~775--796
  and all others were kindly provided by J.~Kl\"uners and G.~Malle
