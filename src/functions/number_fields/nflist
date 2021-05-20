@@ -2,9 +2,8 @@ Function: nflist
 Section: number_fields
 C-Name: nflist
 Prototype: GDGD-1,L,DG
-Help: nflist(G, {N}, {s = -1}, {F}): find all number fields (up to
- isomorphism) with Galois group of Galois closure isomorphic to G, and s
- complex places.
+Help: nflist(G, {N}, {s = -1}, {F}): find number fields (up to isomorphism)
+ with Galois group of Galois closure isomorphic to G, and s complex places.
 
  If s = -1 (default) all signatures, s = -2 is identical to s = -1 except
  signatures are separated by increasing number of complex places. If field F is
@@ -16,7 +15,7 @@ Help: nflist(G, {N}, {s = -1}, {F}): find all number fields (up to
  discriminant between a and b); a polynomial, in variable t say (regular
  extension of Q(t) with specified Galois group). Finally, N can be omitted
  (default), in which case a few fields are given and F is ignored.
-Doc: find all number fields (up to isomorphism) with Galois group of Galois
+Doc: find number fields (up to isomorphism) with Galois group of Galois
  closure isomorphic to $G$ with $s$ complex places. This function supports
  the following groups:
 
@@ -40,7 +39,7 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
  \item degree $\ell$ with $\ell$ prime: $C_\ell=\ell T1$ and $D_\ell=\ell T2$.
 
  In addition, if $N$ is a polynomial, all transitive subgroups of $S_n$
- with $n\le 8$ (with one exception for $n=8$), and most for $n=9$, as well as
+ with $n\le 8$, and most for $n=9$, as well as
  alternating groups $A_n$ and the full symmetric group $S_n$ for all $n$
  (see below for details and explanations).
 
@@ -80,11 +79,11 @@ Doc: find all number fields (up to isomorphism) with Galois group of Galois
 
  The parameter $N$ can be the following:
 
- \item a positive integer: find fields with absolute discriminant $N$ (recall
- that the discriminant over $\Q$ is $(-1)^s N$).
+ \item a positive integer: find all fields with absolute discriminant $N$
+ (recall that the discriminant over $\Q$ is $(-1)^s N$).
 
  \item a pair of non-negative real numbers $[a,b]$ specifying a real interval:
- find fields with absolute value of discriminant between $a$ and $b$.
+ find all fields with absolute value of discriminant between $a$ and $b$.
  For most Galois groups, this is faster than iterating on individual $N$.
 
  \item omitted (default): a few fields of small discriminant (not always
