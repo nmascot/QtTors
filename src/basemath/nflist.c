@@ -2297,12 +2297,9 @@ makeS4(GEN N, GEN field, long s)
 }
 
 static GEN
-galoissplitting(GEN T, GEN d) { return galoisinit(nfsplitting(T, d), NULL); }
-
-static GEN
 makeA4S4resolvent(long card, GEN pol, long flag)
 {
-  GEN R, D = nfdisc(pol), G = galoissplitting(pol, utoipos(card));
+  GEN R, D = nfdisc(pol), G = galoissplittinginit(pol, utoipos(card));
   if (typ(G) == t_INT) pari_err_BUG("nfresolvent [Galois group]");
   R = polredabs(galoisfixedfield(G, vecsplice(gal_get_gen(G), 3), 1, 0));
   return flag? mkvec2(R, sqrti(divii(D, nfdisc(R)))): R;
@@ -2899,7 +2896,7 @@ makeMgenresolvent(long ell, long a, GEN pol, long flag)
 {
   GEN Dpow = checkfield(pol, ell), G, R, DR, F2, nf, pell, F;
 
-  G = galoissplitting(pol, utoipos(a*ell));
+  G = galoissplittinginit(pol, utoipos(a*ell));
   if (typ(G) == t_INT) pari_err_BUG("nfresolvent [Galois group]");
   R = polredabs(galoisfixedfield(G, vecsplice(gal_get_gen(G), 2), 1, 0));
   if (!flag) return R;
@@ -3634,7 +3631,7 @@ makeS46Ppols(long card, GEN v)
   GEN d = utoipos(card);
   for (i = 1; i < l; i++)
   {
-    GEN G = galoissplitting(gel(v,i), d), g = gal_get_gen(G);
+    GEN G = galoissplittinginit(gel(v,i), d), g = gal_get_gen(G);
     GEN p = (card == 12)? gel(g, 1): mkvec2(gel(g, 1), gel(g, 4));
     gel(v,i) = polredabs(galoisfixedfield(G, p, 1, 0));
   }
@@ -3648,7 +3645,7 @@ makeS46Mpols(GEN v, GEN X, GEN Xinf)
   GEN d = utoipos(24);
   for (i = c = 1; i < l; i++)
   {
-    GEN G = galoissplitting(gel(v,i), d), g = gal_get_gen(G);
+    GEN G = galoissplittinginit(gel(v,i), d), g = gal_get_gen(G);
     GEN p = perm_mul(gel(g, 4), gel(g, 2));
     p = galoisfixedfield(G, p, 1, 0);
     p = Xinf? ZX_red_disc2(p, Xinf, X): ZX_red_disc(p, X);
@@ -4654,7 +4651,7 @@ makeC3C3vec(GEN X, GEN Xinf, GEN field, long s)
 static GEN
 makepolS32(GEN P1, GEN P2)
 {
-  GEN G = galoissplitting(polcompositum0(P1, P2, 2), utoipos(36));
+  GEN G = galoissplittinginit(polcompositum0(P1, P2, 2), utoipos(36));
   GEN vH = galoissubgroups(G), g = mkvec2(gal_get_gen(G), gal_get_orders(G));
   long i, l = lg(vH);
   for (i = 1; i < l; i++)
