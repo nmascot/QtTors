@@ -1566,8 +1566,9 @@ groupelts_to_group(GEN G)
   {
     GEN t21 = perm_sqr(gel(G,cyc[15]));
     GEN t22 = perm_sqr(gel(G,cyc[16]));
+    GEN s = perm_mul(t22, gel(G,cyc[15]));
     return gerepilecopy(av,
-      mkvec2(mkvec4(t21,t22, gel(G,cyc[11]), gel(G,cyc[15])), mkvecsmall4(2,2,3,2)));
+      mkvec2(mkvec4(t21,t22, gel(G,cyc[11]), s), mkvecsmall4(2,2,3,2)));
   }
   if (n==36 && l==24 && ord[11]==3 && ord[15]==4)
   {
