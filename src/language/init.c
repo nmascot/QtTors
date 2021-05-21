@@ -2472,25 +2472,31 @@ obj_init(long d, long n)
   gel(S, d+1) = zerovec(n);
   return S;
 }
-/* insert O in S [last position] at position K, return it */
-GEN
-obj_insert(GEN S, long K, GEN O)
-{ return obj_insert_shallow(S, K, gclone(O)); }
+
 /* as obj_insert. WITHOUT cloning (for libpari, when creating a *new* obj
  * from an existing one) */
 GEN
-obj_insert_shallow(GEN S, long K, GEN O)
+obj_insert(GEN S, long K, GEN O)
 {
   GEN o, v = gel(S, lg(S)-1);
   if (typ(v) != t_VEC) pari_err_TYPE("obj_insert", S);
   if (!check_clone(v))
   {
     if (DEBUGLEVEL) pari_warn(warner,"trying to update parent object");
-    return O;
+    return gclone(O);
   }
   o = gel(v,K);
-  gel(v,K) = O; /*SIGINT: before unclone(o)*/
+  gel(v,K) = gclone(O); /*SIGINT: before unclone(o)*/
   if (isclone(o)) gunclone(o); return gel(v,K);
+}
+
+GEN
+obj_insert_shallow(GEN S, long K, GEN O)
+{
+  GEN v = gel(S, lg(S)-1);
+  if (typ(v) != t_VEC) pari_err_TYPE("obj_insert", S);
+  gel(v,K) = O;
+  return gel(v,K);
 }
 
 /* Does S [last position] contain data at position K ? Return it, or NULL */
