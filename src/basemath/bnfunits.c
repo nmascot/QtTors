@@ -204,35 +204,33 @@ bnfsunit(GEN bnf,GEN S,long prec)
 {
   pari_sp av = avma;
   long i, l = lg(S);
-  GEN v, R, h, nf, A, den, U, H = NULL;
+  GEN v, R, nf, A, den, U, cl, H = NULL;
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   v = cgetg(7, t_VEC);
   gel(v,1) = U = bnfsunit_i(bnf, S, &H, &A, &den);
   gel(v,2) = mkvec2(A, den);
   gel(v,3) = cgetg(1,t_VEC); /* dummy */
-  h = gen_1;
-  if (l == 1)
-    gel(v,5) = bnf_get_clgp(bnf);
-  else
-  { /* non trivial S-class group */
-    GEN A, u, gen = bnf_get_gen(bnf), D = ZM_snf_group(H, NULL, &u);
-    long lD = lg(D);
-    A = cgetg(lD, t_VEC); h = ZV_prod(D);
-    for(i = 1; i < lD; i++) gel(A,i) = idealfactorback(nf, gen, gel(u,i), 1);
-    gel(v,5) = mkvec3(h, D, A);
-  }
   R = bnf_get_reg(bnf);
-  if (l > 1)
-  { /* S-regulator and S-units*/
+  cl = bnf_get_clgp(bnf);
+  if (l != 1)
+  {
+    GEN u,A, G = bnf_get_gen(bnf), D = ZM_snf_group(H,NULL,&u), h = ZV_prod(D);
+    long lD = lg(D);
+    A = cgetg(lD, t_VEC);
+    for(i = 1; i < lD; i++) gel(A,i) = idealfactorback(nf, G, gel(u,i), 1);
+    cl = mkvec3(h, D, A);
     R = mpmul(R, h);
     for (i = 1; i < l; i++)
     {
-      GEN p = pr_get_p( gel(S,i) );
+      GEN pr = gel(S,i), p = pr_get_p(pr);
+      long f = pr_get_f(pr);
       R = mpmul(R, logr_abs(itor(p,prec)));
+      if (f != 1) R = mulru(R, f);
       gel(U,i) = nf_to_scalar_or_alg(nf, gel(U,i));
     }
   }
   gel(v,4) = R;
+  gel(v,5) = cl;
   gel(v,6) = S; return gerepilecopy(av, v);
 }
 GEN

@@ -8,8 +8,7 @@ Done for version 2.14.0 (released ??/??/2020):
      5- zetahurwitz(s, huge x) => overflow or very slow
      6- matsolve([1,1,1/2; 1,0,1/2; 2,1,0], [-1;1;-1]) -> SEGV [#2261]
      7- qfminim(Mat(1),,,2) -> precision error [#2262]
-     8- subst(p, v, t_SER) very slow if p contains many variables [#2264]
-     9- mfsymboleval for trivial path returned 0 instead of a vector of 0s
+     8- subst(p, v, t_SER) very slow if p contains many variables [#2264] 9- mfsymboleval for trivial path returned 0 instead of a vector of 0s
         when f has multiple embeddings [#2260]
     10- 2^(1 + O(3^4)) -> type error
     11- Zn_quad_roots(8,0,-1) to compute roots of x^2-1 mod 8 -> [4,[1,3]]
@@ -57,6 +56,9 @@ HC  39- mfisetaquo(mffrometaquo([1,12;193,12])) -> 0
     47- 1+O(x)==O(x)
     48- cmp() would use possibly uninitialized bits in t_POL codewords
 BA  49- qfauto([[1,0;0,1],[0,0;1,0]]) -> SEGV
+    50- bnfsunit(...)[4] (the S-regulator) did not correspond to its
+        definition in the documentation [ was using log(p) instead of
+        log(Norm P)) for P in S above p ]
 
   Added
 HC   1- new GP function eulerreal

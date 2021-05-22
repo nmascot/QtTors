@@ -15,15 +15,14 @@ Doc: computes the fundamental $S$-units of the
 
  $v[2]$ contains technical data needed by \kbd{bnfissunit}.
 
- $v[3]$ is an empty vector (used to give the logarithmic embeddings of the
- generators in $v[1]$ in version 2.0.16).
+ $v[3]$ is an obsoleted component, now the empty vector.
 
  $v[4]$ is the $S$-regulator (this is the product of the regulator, the
- determinant of $v[2]$ and the natural logarithms of the norms of the ideals
+ $S$-class number and the natural logarithms of the norms of the ideals
  in $S$).
 
- $v[5]$ gives the $S$-class group structure, in the usual format
- (a row vector whose three components give in order the $S$-class number,
- the cyclic components and the generators).
+ $v[5]$ gives the $S$-class group structure, in the usual abelian group
+ format: a vector whose three components give in order the $S$-class number,
+ the cyclic components and the generators.
 
  $v[6]$ is a copy of $S$.
