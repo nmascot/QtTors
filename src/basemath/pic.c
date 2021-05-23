@@ -2627,7 +2627,6 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
 
 	if(multiple_allowed==0)
 	{
-		printf("Mult fix: e1=%ld, e2=%ld, mask=%lu\n",e1,e2,mask);
 		lg1 = powiu(l,g+1);
 		mask2 = mask;
 		e2ini = e2;
@@ -2650,12 +2649,10 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
 		pe = Fp_inv(pe,l);
 		pe = centermodii(pe,l,shifti(l,-1));
 		if(J1==NULL) J1 = JacRed(J,eini);
-		pari_printf("Mult fix by %Ps\n",pe);
 		W = PicMul(J1,W,pe,2);
 		e1 = eini;
 		e2 = e2ini;
 		mask = mask2;
-		printf("Mult fix restore: e1=%ld, e2=%ld, mask=%lu\n",e1,e2,mask);
 		W = gerepileupto(av,W);
 	}
 	else avma = av;
