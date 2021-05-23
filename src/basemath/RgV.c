@@ -594,8 +594,13 @@ RgM_mul_FpM(GEN x, GEN y, GEN p)
   if (lgefint(p) == 3)
   {
     ulong pp = uel(p, 2);
-    r = Flm_to_ZM_inplace(Flm_mul(RgM_to_Flm(x, pp),
-                                  RgM_to_Flm(y, pp), pp));
+    if (pp==2)
+      r = F2m_to_ZM(F2m_mul(RgM_to_F2m(x), RgM_to_F2m(y)));
+    else if (pp==3)
+      r = F3m_to_ZM(F3m_mul(RgM_to_F3m(x), RgM_to_F3m(y)));
+    else
+      r = Flm_to_ZM_inplace(Flm_mul(RgM_to_Flm(x, pp),
+                                    RgM_to_Flm(y, pp), pp));
   }
   else
     r = FpM_mul(RgM_to_FpM(x, p), RgM_to_FpM(y, p), p);
