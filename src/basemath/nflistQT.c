@@ -180,17 +180,17 @@ nfmakeQT(long deg, long k, long v)
   case 6: P = QT6(k, v); break;
   case 7: P = QT7(k, v); break;
   default: P = nflistQTfile(deg, k);
-    if (!P)
-      pari_err_IMPL(stack_sprintf("group %ldT%ld in nflist / Q(T)", deg,k));
-    l = lg(P);
-    for (i = 1; i < l; i++)
-    {
-      GEN p = gel(P,i);
-      if (typ(p) != t_INT) gel(P,i) = gtopoly(p, v);
-    }
-    P = gtopoly(P, 0);
   }
-  return P;
+  if (!P)
+    pari_err_IMPL(stack_sprintf("group %ldT%ld in nflist / Q(T)", deg,k));
+  if (deg <= 7) return P;
+  l = lg(P);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(P,i);
+    if (typ(p) != t_INT) gel(P,i) = gtopoly(p, v);
+  }
+  return gtopoly(P, 0);
 }
 
 static GEN

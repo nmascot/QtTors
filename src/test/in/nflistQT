@@ -20,3 +20,5 @@ nflist("A25",'t)
 nflist("A24",'t)
 nflist("A23",'t)
 nflist("A22",'t)
+
+nflist([7,8])
