@@ -2571,13 +2571,15 @@ GEN PicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, G
 	return res;
 }
 
-GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
+GEN PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
 {
   pari_sp av=avma,av1,av2,av3,avrho,avtesttors;
 	GEN T,p,V;
-  long efin,e1,e2,e21,efin2,mask;
-  GEN pefin,pe1,pe21,pe2,pefin2;
+  long efin,e1,e2,e21,e2ini,efin2,mask,mask2;
+  GEN pefin,pe1,pe21,pe2,pefin2,pe,lg1;
   GEN J1,J2;
+	int s;
+	GEN C;
   GEN sW,Vs,U0,V0;
   GEN K,U,U2;
 	GEN GWV,wV;
@@ -2594,12 +2596,12 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
   ulong r,i,j,k,n;
 	ulong testtors;
 
+	J1 = NULL;
 	if(eini==0)
 	{
 		eini = PicMember_val(J,W);
 		J1 = JacRed(J,eini);
 		eini = PicIsTors_val(J1,W,l);
-		avma = av;
 	}
 	JgetTpe(J,&T,&pefin,&p,&efin);
 	if(eini >= efin) return gcopy(W);
@@ -2622,6 +2624,41 @@ GEN PicLiftTors(GEN J, GEN W, GEN l, long eini)
   nV = lg(V)-1;
   nZ = lg(gel(V,1))-1;
   nW = lg(W)-1;
+
+	if(multiple_allowed==0)
+	{
+		printf("Mult fix: e1=%ld, e2=%ld, mask=%lu\n",e1,e2,mask);
+		lg1 = powiu(l,g+1);
+		mask2 = mask;
+		e2ini = e2;
+		pe = gen_1;
+		s = 1;
+		while(e2<=efin) /* Simulate main loop, to see what power of p needs to be compensated */
+		{
+			e21 = e2-e1;
+			pe21 = powis(p,e21);
+			if(cmpii(pe21,lg1)>0) break;
+			C = AddFlipChain(pe21,0);
+			if(signe(gmael(C,lg(C)-1,1))<0) s = -s;
+			pe = Fp_mul(pe,pe21,l);
+			e1 = e2;
+    	e2<<=1;
+    	if(mask&1) e2--;
+    	mask>>=1;
+		}
+		if(s==-1) pe = negi(pe);
+		pe = Fp_inv(pe,l);
+		pe = centermodii(pe,l,shifti(l,-1));
+		if(J1==NULL) J1 = JacRed(J,eini);
+		pari_printf("Mult fix by %Ps\n",pe);
+		W = PicMul(J1,W,pe,2);
+		e1 = eini;
+		e2 = e2ini;
+		mask = mask2;
+		printf("Mult fix restore: e1=%ld, e2=%ld, mask=%lu\n",e1,e2,mask);
+		W = gerepileupto(av,W);
+	}
+	else avma = av;
 
   sW = gel(FqM_indexrank(W,T,p),1); /* rows s.t. this block is invertible, # = nW, we won't change them */
   Vs = cgetg(nV+1,t_MAT); /* V with only the rows in sW */
@@ -4494,7 +4531,7 @@ GEN PicRandTors(GEN J, GEN l, GEN Chi, GEN Phi, GEN seed, long returnlpow)
 	{
 		J1 = JacRed(J,1);
 		T = PicRandTors(J1,l,Chi,Phi,seed,0);
-		T = PicLiftTors(J,T,l,1);
+		T = PicLiftTors(J,T,l,1,1);
 		return gerepileupto(av,T);
 	}
 	Lp = JgetLp(J);
@@ -4543,15 +4580,23 @@ GEN PicRandTors(GEN J, GEN l, GEN Chi, GEN Phi, GEN seed, long returnlpow)
 			W = PicFrobPoly(J,W,Psi); /* Project onto J[Chi] */
 		}
 	}
-	res = PicTorsOrd(J,W,l,2); /*[T,o], W of order l^o, T=[l^(o-1)]W */
-	o = gel(res,2);
-	if(gequal0(o))
+	if(v>1)
 	{
-		if(DEBUGLEVEL>=2)
-			pari_printf("PicRandTorsPt got zero (Phi=%Ps)\n",Phi?Phi:gen_0);
-		return gen_0;
+		res = PicTorsOrd(J,W,l,2); /*[T,o], W of order l^o, T=[l^(o-1)]W */
+		T = gel(res,1);
+		o = gel(res,2);
 	}
-	T = gel(res,1);
+	else
+	{
+		T = W;
+		o = PicIsZero(J,W) ? gen_0 : gen_1;
+	}
+	if(gequal0(o))
+  {
+    if(DEBUGLEVEL>=2)
+      pari_printf("PicRandTorsPt got zero (Phi=%Ps)\n",Phi?Phi:gen_0);
+    return gen_0;
+  }
 	if(returnlpow==0)
 	{
 		return gerepileupto(av,T);
@@ -5137,7 +5182,7 @@ GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B)
 		if(DEBUGLEVEL) pari_printf("pictorsgalrep: Hensel-lifting %lu %Ps-torsion points\n",n-1,l);
 		/* TODO parallel version */
 		for(i=1;i<n;i++)
-			gel(B,i) = PicLiftTors(J,gel(B,i),l,e1);
+			gel(B,i) = PicLiftTors(J,gel(B,i),l,e1,1);
 		e1 = e2;
 		if(DEBUGLEVEL)
 		{

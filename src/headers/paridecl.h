@@ -6694,7 +6694,7 @@ GEN RRspaceEval(GEN L, GEN vars, GEN pts, GEN T, GEN pe, GEN p, long e);
 GEN PicTorsOrd(GEN J, GEN W, GEN l, long flag);
 GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, long e, GEN Lp);
 GEN PicRand(GEN J, GEN randseed);
-GEN PicLiftTors(GEN J, GEN W, GEN l, long eini);
+GEN PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed);
 GEN PicSetPrec(GEN J, long e);
 GEN OnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T, GEN pe);
 GEN PicLift_worker(GEN V0j, ulong shift, GEN uv, GEN AinvB, GEN CAinv, GEN T, GEN pe21);
