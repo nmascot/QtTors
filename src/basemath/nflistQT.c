@@ -162,9 +162,11 @@ nflistQTfile(long n, long t)
 {
   char *f = stack_malloc(strlen(pari_datadir) + 1+10+1+3+1+3+1+2 + 1);
   pariFILE *F;
+  GEN z;
   sprintf(f, "%s/nflistdata/%ld/%ld/QT", pari_datadir, n, t);
-  F = pari_fopengz(f);
-  return F? gp_read_stream(F->file): NULL;
+  F = pari_fopengz(f); if (!F) return NULL;
+  z = gp_read_stream(F->file); pari_fclose(F);
+  return z;
 }
 
 static GEN

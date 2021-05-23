@@ -3018,10 +3018,11 @@ nflistfile(const char *suf, long n, long t, long s)
   char *f = stack_malloc(strlen(pari_datadir) + strlen(suf)
                          + 1+10+1+1+1+3 + 5/*n/t*/ + 1);
   pariFILE *F;
+  GEN z;
   sprintf(f, "%s/nflistdata/%ld/%ld/%ld%s.gp", pari_datadir, n, t,s, suf?suf:"");
   F = pari_fopengz(f);
   if (!F) pari_err_FILE("nflistdata file",f);
-  return gp_readvec_stream(F->file);
+  z = gp_readvec_stream(F->file); pari_fclose(F); return z;
 }
 
 static GEN
@@ -5270,7 +5271,7 @@ nflist(GEN GP, GEN N, long s, GEN field)
 {
   pari_sp av = avma;
   GEN v, X, Xinf;
-  long n = 0, t, tp = typ(GP);
+  long n = 0, t = 0, tp = typ(GP);
   long QT = N && typ(N) == t_POL;
 
   if (s < -2) pari_err_DOMAIN("nflist", "s", "<", gen_m2, stoi(s));
