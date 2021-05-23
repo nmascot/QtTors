@@ -1,22 +1,19 @@
-\\package:galdata
 default(new_galois_format,1);
 
 tst(n,k)=
 {
-  P=nflist([n,k],'t);V=List();
+  P = nflist([n,k],'t); V = List();
   for(a=1,20,
-    Q=subst(P,t,a);
-    if(polisirreducible(Q),
-      G=polgalois(Q);
-      if(G[3]==k, listput(~V,polredabs(Q)))));
+    Q = subst(P,t,a);
+    if (polisirreducible(Q),
+      if (n > 11 || polgalois(Q)[3] == k, listput(~V,Q))));
   if (!#V, error(k));
-  #Set(V);
+  #V;
 }
 
-L=[1,1,2,5,5,16,7,50,34];
-S9=setminus(vector(L[9],i,i), [9,14,15,16,23,27]);
-for(n=1,8,print1(n,": ");for(k=1,L[n],print1(tst(n,k)," "));print(" "));
-print1("9: ");foreach(S9, k, print1(tst(9,k)," "));
+L=[1,1,2,5,5,16,7];
+S = vector(#L,i,[1..L[i]]);
+for(n=1,#S,print1(n,": ");print([tst(n,k) | k<-S[n]]))
 
 nflist("S25",'t)
 nflist("A25",'t)

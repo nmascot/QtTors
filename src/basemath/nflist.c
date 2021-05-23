@@ -229,13 +229,6 @@ bnfY(GEN T)
 static GEN
 bnf_get_disc(GEN b) { return nf_get_disc(bnf_get_nf(b)); }
 
-static int
-isCLDL(long n, long *pell)
-{
-  long t = n % 1000;
-  *pell = n / 1000; return ((t != 1 && t != 2) || !uisprime(*pell))? 0: t;
-}
-
 /* Compute n s.t. d | n <=> d^k | N. Return [n, factor(n)] */
 static GEN
 cored(GEN N, long k)
@@ -2795,8 +2788,8 @@ makeD9vec(GEN X, GEN Xinf, GEN field, long s)
 /*                includes F5 = M20, M21, and M42                     */
 /**********************************************************************/
 /* C_a resolvent field. */
-static GEN nfmakenum(long g, GEN N, GEN field, long s);
-static GEN nfmakevecnum(long g, GEN X, GEN Xinf, GEN field, long s);
+static GEN nfmakenum(long n, long t, GEN N, GEN field, long s);
+static GEN nfmakevecnum(long n, long t, GEN X, GEN Xinf, GEN field, long s);
 
 static GEN
 MgenF(long ell, GEN d, GEN Fn, long *vell)
@@ -2846,13 +2839,13 @@ makeMgen(long ell, long a, GEN N, GEN field, long s)
   }
   else
   {
-    long s2 = maxss(s, -1), Ca = 100 * a + 1;
+    long s2 = maxss(s, -1);
     v = divisors(cored(N, drel)); lv = lg(v);
     for (i = c = 1; i < lv; i++)
     {
       GEN R, d = gel(v, i); Fn = diviiexact(N, powiu(d, drel));
       if ((F = MgenF(ell, d, Fn, &vell))
-           && (R = nfmakenum(Ca, d, NULL, s2))) /* C_a, disc d */
+           && (R = nfmakenum(a, 1, d, NULL, s2))) /* C_a, disc d */
         gel(v, c++) = mkvec3(R, F, utoi(vell));
     }
     setlg(v, c);
@@ -2978,7 +2971,7 @@ static GEN
 makeMgenvec(long ell, long a, GEN X, GEN Xinf, GEN field, long s)
 {
   GEN L, v, T;
-  long drel = (ell - 1) / a, Ca = 100 * a + 1;
+  long drel = (ell - 1) / a;
 
   if (field)
   {
@@ -2986,7 +2979,7 @@ makeMgenvec(long ell, long a, GEN X, GEN Xinf, GEN field, long s)
       pari_err_TYPE("makeMgenvec [field]", field);
     L = mkvec(field);
   }
-  else L = nfmakevecnum(Ca, drel == 1? X: sqrti(X), gen_1, NULL, maxss(s, -1));
+  else L = nfmakevecnum(a, 1, drel == 1? X: sqrti(X), gen_1, NULL, maxss(s,-1));
   if (!L) return NULL;
   T = mkvecsmall3(ell, drel, ell * a);
   v = gen_parapply(closure("_nflist_Mgen_worker", mkvec3(X, Xinf, T)), L);
@@ -3018,12 +3011,12 @@ vectrunc(GEN V, GEN Xinf, GEN X, long fl)
   setlg(W, c); return W;
 }
 
-/* assume 1 <= t < 100, 1 <= 2s <= n < 100 */
+/* assume 1 <= t < 1000, 1 <= 2s <= n < 100 */
 static GEN
 nflistfile(const char *suf, long n, long t, long s)
 {
   char *f = stack_malloc(strlen(pari_datadir) + strlen(suf)
-                         + 1+10+1+1+1+3 + 4/*n/t*/ + 1);
+                         + 1+10+1+1+1+3 + 5/*n/t*/ + 1);
   pariFILE *F;
   sprintf(f, "%s/nflistdata/%ld/%ld/%ld%s.gp", pari_datadir, n, t,s, suf?suf:"");
   F = pari_fopengz(f);
@@ -4919,7 +4912,7 @@ makeC32D4(GEN N, GEN field, long s)
 /*                         Global Programs                              */
 /************************************************************************/
 static long
-grouptranslate(const char *g, int QT)
+grouptranslate(const char *g, long *t, int QT)
 {
   long ell;
   char r;
@@ -4928,77 +4921,81 @@ grouptranslate(const char *g, int QT)
   {
     r = *g; ell = itos( strtoi(g + 1) );
     if (ell < 3) return 0;
-    if (r == 'A') return 1000 * ell + 4;
-    if (r == 'S') return 1000 * ell + 5;
+    if (r == 'A') { *t = -2; return ell; }
+    if (r == 'S') { *t = -1; return ell; }
   }
-  if (!strcmp(g, "C1")) return 101;
-  if (!strcmp(g, "C2")) return 201;
-  if (!strcmp(g, "D2")) return 201;
-  if (!strcmp(g, "C3")) return 301;
-  if (!strcmp(g, "S3")) return 302;
-  if (!strcmp(g, "D3")) return 302;
-  if (!strcmp(g, "C4")) return 401;
-  if (!strcmp(g, "V4")) return 402;
-  if (!strcmp(g, "D4")) return 403;
-  if (!strcmp(g, "A4")) return 404;
-  if (!strcmp(g, "S4")) return 405;
-  if (!strcmp(g, "C5")) return 501;
-  if (!strcmp(g, "D5")) return 502;
-  if (!strcmp(g, "F5")) return 503;
-  if (!strcmp(g, "M20")) return 503;
-  if (!strcmp(g, "A5")) return 504;
-  if (!strcmp(g, "A5cond")) return 509;
-  if (!strcmp(g, "C6")) return 601;
-  if (!strcmp(g, "D6")) return 602;
-  if (!strcmp(g, "C7")) return 701;
-  if (!strcmp(g, "D7")) return 702;
-  if (!strcmp(g, "M21")) return 703;
-  if (!strcmp(g, "M42")) return 704;
+  if (!strcmp(g, "C1")) { *t = 1; return 1; }
+  if (!strcmp(g, "C2") || !strcmp(g, "D2")) { *t = 1; return 2; }
+  if (!strcmp(g, "C3")) { *t = 1; return 3; }
+  if (!strcmp(g, "S3") || !strcmp(g,"D3")) { *t = 2; return 3; }
+  if (!strcmp(g, "C4")) { *t = 1; return 4; }
+  if (!strcmp(g, "V4")) { *t = 2; return 4; }
+  if (!strcmp(g, "D4")) { *t = 3; return 4; }
+  if (!strcmp(g, "A4")) { *t = 4; return 4; }
+  if (!strcmp(g, "S4")) { *t = 5; return 4; }
+  if (!strcmp(g, "C5")) { *t = 1; return 5; }
+  if (!strcmp(g, "D5"))  { *t = 2; return 5; }
+  if (!strcmp(g, "F5") || !strcmp(g, "M20"))  { *t = 3; return 5; }
+  if (!strcmp(g, "A5")) { *t = 4; return 5; }
+  if (!strcmp(g, "A5cond")) { *t = 9; return 5; }
+  if (!strcmp(g, "C6")) { *t = 1; return 6; }
+  if (!strcmp(g, "D6")) { *t = 2; return 6; }
+  if (!strcmp(g, "C7")) { *t = 1; return 7; }
+  if (!strcmp(g, "D7")) { *t = 2; return 7; }
+  if (!strcmp(g, "M21")) { *t = 3; return 7; }
+  if (!strcmp(g, "M42")) { *t = 4; return 7; }
+  if (!strcmp(g, "C9")) { *t = 1; return 9; }
+  if (!strcmp(g, "D9")) { *t = 3; return 9; }
   if (QT)
   {
-    if (!strcmp(g, "C8")) return 801;
-    if (!strcmp(g, "D8")) return 802;
+    if (!strcmp(g, "C8")) { *t = 1; return 8; }
+    if (!strcmp(g, "D8")) { *t = 2; return 8; }
+    if (!strcmp(g, "C10")) { *t = 1; return 10; }
+    if (!strcmp(g, "D10")) { *t = 3; return 10; }
+    if (!strcmp(g, "C11")) { *t = 1; return 11; }
+    if (!strcmp(g, "D11")) { *t = 2; return 11; }
   }
-  if (!strcmp(g, "C9")) return 901;
-  if (!strcmp(g, "D9")) return 903;
   r = *g; ell = itos( strtoi(g + 1) );
   if (ell >= 8 && uisprime(ell))
   {
-    if (r == 'C') return 1000 * ell + 1;
-    if (r == 'D') return 1000 * ell + 2;
+    if (r == 'C') { *t = 1; return ell; }
+    if (r == 'D') { *t = 2; return ell; }
   }
-  return 0;
+  *t = 0; return 0;
 }
 static long
-group_nTk(GEN g, int QT)
+group_nTk(GEN g, long *t, int QT)
 {
-  long van[] = { 0, 1, 1, 1, 4, 4, 15, 6, 49, 33 };
-  long v[] = { 0, 1, 1, 2, 5, 4, 13, 4, 0, 3 };
   long n, k;
-  if (lg(g) != 3 || !RgV_is_ZV(g)) return 0;
-  n = itos(gel(g,1)); k = itos(gel(g,2));
-  if (n <= 0 || k <= 0 || k >= 100) return 0;
-  if (n >= LONG_MAX / 101) return 0;
-  if (n <= 9)
+  if (lg(g) != 3 || !RgV_is_ZV(g)) { *t = 0; return 0; }
+  n = itos(gel(g,1)); *t = k = itos(gel(g,2));
+  if (n <= 0 || k <= 0 || k >= 400) return 0;
+  if (!QT)
   {
-    if (QT)
+    if (n <= 9)
     {
-      if (k == van[n]) return 1000 * n + 4; /* An */
-      if (k == van[n]+1) return 1000 * n + 5; /* Sn */
+      long v[] = { 0, 1, 1, 2, 5, 4, 13, 4, 0, 3 };
+      return k <= v[n]? n: 0;
     }
-    return (QT || k <= v[n])? n * 100 + k: 0;
+    return (uisprime(n) && k <= 2)? n: 0;
   }
-  return (uisprime(n) && k <= 2)? n * 1000 + k: 0;
+  if (n <= 15)
+  {
+    long van[] = { 0, 1, 1, 1, 4, 4, 15, 6, 49, 33, 44, 7, 300, 8, 62, 103 };
+    if (k == van[n]) *t = -2; /* An */
+    if (k == van[n]+1) *t = -1; /* Sn */
+    return n;
+  }
+  return 0;
 }
 
 static int
 okfield(GEN F) { return typ(F) == t_POL && RgX_is_ZX(F) && ZX_is_irred(F); }
 static GEN
-nfmakenum(long g, GEN N, GEN field, long s)
+nfmakenum(long n, long t, GEN N, GEN field, long s)
 {
   GEN v = NULL;
-  long ell;
-  switch(g)
+  switch(100 * n + t)
   {
     case 101: return makeC1(N, field, s);
     case 201: return makeC2(N, field, s);
@@ -5035,11 +5032,10 @@ nfmakenum(long g, GEN N, GEN field, long s)
     case 902: return makeC3C3(N, field, s);
     case 903: return makeD9(N, field, s);
   }
-  ell = g / 1000;
-  if (!v) switch(isCLDL(g, &ell))
+  if (!v && uisprime(n)) switch(t)
   {
-    case 1: return makeCL(ell, N, field, s);
-    case 2: return makeDL(ell, N, field, s);
+    case 1: return makeCL(n, N, field, s);
+    case 2: return makeDL(n, N, field, s);
   }
   return NULL;/*LCOV_EXCL_LINE*/
 }
@@ -5131,10 +5127,9 @@ nfresolvent(GEN pol, long flag)
 
 /* 1 <= Xinf <= X */
 static GEN
-nfmakevecnum(long g, GEN X, GEN Xinf, GEN field, long s)
+nfmakevecnum(long n, long t, GEN X, GEN Xinf, GEN field, long s)
 {
-  long ell;
-  switch(g)
+  switch(n * 100 + t)
   {
     case 101: return makeC1vec(Xinf, field, s);
     case 201: return makeC2vec(X, Xinf, field, s);
@@ -5171,23 +5166,23 @@ nfmakevecnum(long g, GEN X, GEN Xinf, GEN field, long s)
     case 902: return makeC3C3vec(X, Xinf, field, s);
     case 903: return makeD9vec(X, Xinf, field, s);
   }
-  switch(isCLDL(g, &ell))
+  if (uisprime(n)) switch(t)
   {
-    case 1: return makeCLvec(ell, X, Xinf, field, s);
-    case 2: return makeDLvec(ell, X, Xinf, field, s);
+    case 1: return makeCLvec(n, X, Xinf, field, s);
+    case 2: return makeDLvec(n, X, Xinf, field, s);
   }
   return NULL;/*LCOV_EXCL_LINE*/
 }
 
 /* s > -2 */
 static GEN
-nfmakesomehard(long g, long s)
+nfmakesomehard(long n, long t, long s)
 {
   pari_sp av = avma;
   long i;
   for (i = 1;; i++, set_avma(av))
   {
-    GEN v = nfmakevecnum(g, int2n(18 + 2*i), gen_1, NULL, s);
+    GEN v = nfmakevecnum(n, t, int2n(18 + 2*i), gen_1, NULL, s);
     if (v && lg(v) > 2) return v;
   }
 }
@@ -5200,11 +5195,11 @@ minlim(GEN v)
   return m;
 }
 static GEN
-nfmakesome(long g, long deg, long s)
+nfmakesome(long n, long t, long s)
 {
   GEN v = NULL;
   long lim, flag = 0;
-  switch(g)
+  switch(n * 100 + t)
   {
     case 101: v = mkvecsmall(1); break;
     case 201: v = mkvecsmall2(33, 24); break;
@@ -5241,21 +5236,21 @@ nfmakesome(long g, long deg, long s)
     case 902: v = mkvecsmall5(LONG_MAX, 0, 0, 0, 0); break;
     case 903: v = mkvecsmall5(LONG_MAX, 0, 0, 0, LONG_MAX); break;
   }
-  if (!v) { long ell; flag = isCLDL(g, &ell); }
+  if (!v) flag = uisprime(n) && t <= 2? t: 0;
   if (s == -2)
   {
-    long t, l = (deg >> 1) + 2;
+    long i, l = (n >> 1) + 2;
     GEN W = cgetg(l, t_VEC);
-    for (t = 1; t < l; t++)
+    for (i = 1; i < l; i++)
     {
       GEN w = NULL;
       if (!v)
-      { if (t == 1 || (t == l-1 && flag == 2)) w = nfmakesomehard(g, t - 1); }
-      else if (v[t] == LONG_MAX)
-        w = nfmakesomehard(g, t - 1);
-      else if (v[t])
-        w = nfmakevecnum(g, utoipos(v[t]), gen_1, NULL, t - 1);
-      gel(W, t) = w? w: cgetg(1, t_VEC);
+      { if (i == 1 || (i == l-1 && flag == 2)) w = nfmakesomehard(n, t, i-1); }
+      else if (v[i] == LONG_MAX)
+        w = nfmakesomehard(n, t, i-1);
+      else if (v[i])
+        w = nfmakevecnum(n, t, utoipos(v[i]), gen_1, NULL, i-1);
+      gel(W, i) = w? w: cgetg(1, t_VEC);
     }
     return W;
   }
@@ -5266,8 +5261,8 @@ nfmakesome(long g, long deg, long s)
     lim = v[s + 1];
     if (!lim) return cgetg(1, t_VEC);
   }
-  if (lim == LONG_MAX) return nfmakesomehard(g, s);
-  return nfmakevecnum(g, utoipos(lim), gen_1, NULL, s);
+  if (lim == LONG_MAX) return nfmakesomehard(n, t, s);
+  return nfmakevecnum(n, t, utoipos(lim), gen_1, NULL, s);
 }
 
 GEN
@@ -5275,17 +5270,17 @@ nflist(GEN GP, GEN N, long s, GEN field)
 {
   pari_sp av = avma;
   GEN v, X, Xinf;
-  long g = 0, deg, tp = typ(GP);
+  long n = 0, t, tp = typ(GP);
   long QT = N && typ(N) == t_POL;
 
   if (s < -2) pari_err_DOMAIN("nflist", "s", "<", gen_m2, stoi(s));
   if (field && !okfield(field)) pari_err_TYPE("nflist", field);
   switch(tp)
   {
-    case t_STR: g = grouptranslate(GSTR(GP), QT); break;
-    case t_VEC: g = group_nTk(GP, QT); break;
+    case t_STR: n = grouptranslate(GSTR(GP), &t, QT); break;
+    case t_VEC: n = group_nTk(GP, &t, QT); break;
   }
-  if (!g)
+  if (!n)
   {
     const char *s =
     "unsupported group (%Ps). Use one of\n\
@@ -5300,10 +5295,9 @@ nflist(GEN GP, GEN N, long s, GEN field)
   Also supported are \"Cp\"=[p,1] and \"Dp\"=[p,2] for any odd prime p";
     pari_err(e_MISC, s, GP);
   }
-  if (QT) return gerepilecopy(av, nflistQT(g, varn(N)));
-  deg = g / (g > 1000? 1000: 100);
-  if (s > (deg >> 1)) return cgetg(1, t_VEC);
-  if (!N) return gerepilecopy(av, nfmakesome(g, deg, s));
+  if (QT) return gerepilecopy(av, nflistQT(n, t, varn(N)));
+  if (s > (n >> 1)) return cgetg(1, t_VEC);
+  if (!N) return gerepilecopy(av, nfmakesome(n, t, s));
   switch(typ(N))
   {
     case t_INT: X = Xinf = N; break;
@@ -5331,13 +5325,13 @@ nflist(GEN GP, GEN N, long s, GEN field)
   switch(cmpii(Xinf, X))
   {
     case 1: v = NULL; break;
-    case 0: v = nfmakenum(g, X, field, s); break;
-    default: v = nfmakevecnum(g, X, Xinf, field, s);
+    case 0: v = nfmakenum(n, t, X, field, s); break;
+    default: v = nfmakevecnum(n, t, X, Xinf, field, s);
   }
   if (!v)
   {
     set_avma(av); if (s != -2) return cgetg(1,t_VEC);
-    retconst_vec((deg>>1) + 1, cgetg(1,t_VEC));
+    retconst_vec((n>>1) + 1, cgetg(1,t_VEC));
   }
   return gerepilecopy(av, v);
 }

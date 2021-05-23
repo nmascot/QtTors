@@ -38,8 +38,10 @@ Doc: find number fields (up to isomorphism) with Galois group of Galois
 
  \item degree $\ell$ with $\ell$ prime: $C_\ell=\ell T1$ and $D_\ell=\ell T2$.
 
- In addition, if $N$ is a polynomial, all transitive subgroups of $S_n$
- with $n\le 8$, and most for $n=9$, as well as
+ The groups $A_5$ and $A5(6)$ require the optional package \kbd{nflistdata}.
+
+ In addition, if $N$ is a polynomial, most transitive subgroups of $S_n$
+ with $n\le 15$ (all of them for $n\le 8$ and $n = 10$), as well as
  alternating groups $A_n$ and the full symmetric group $S_n$ for all $n$
  (see below for details and explanations).
 
@@ -96,17 +98,17 @@ Doc: find number fields (up to isomorphism) with Galois group of Galois
  $\Z[x,t]$) with the given Galois group. By Hilbert irreducibility, almost all
  specializations of $t$ will give suitable polynomials. The parameters $s$ and
  $F$ are ignored. This is implemented for almost all transitive subgroups of
- $S_n$ with $n\le8$ (for now all except $8T36$), for a number of
- transitive subgroups of $S_9$ (for now all except $9T9$,
- $9T14$, $9T15$, $9T16$, $9T23$, and $9T27$),
- as well as for the alternating and symmetric groups $A_n$ and $S_n$ for all
- $n$. Polynomials for $S_n$ and $A_n$ were inspired by J.-F.~Mestre,
- other polynomials in degree $\leq 8$ except $8T36$ come from G.~W.~Smith,
+ $S_n$ with $n\le11$ (for now all except $9T14$, $9T15$, $11T2$, $11T3$,
+ $11T4$), and for a number of transitive subgroups of $S_n$ for $11 < n \leq
+ 15$), as well as for the alternating and symmetric groups $A_n$ and $S_n$ for
+ all $n$. Polynomials for $A_n$ were inspired by J.-F.~Mestre,
+ a few polynomials in degree $\leq 8$ come from G.~W.~Smith,
  ``Some polynomials over $\Q(t)$ and their
  Galois groups'', \emph{Math. Comp.}, {\bf 69} (230), 1999, pp.~775--796
  and all others were kindly provided by J.~Kl\"uners and G.~Malle
  (see G.~Malle and B.~H.~Matzat, \emph{Inverse Galois Theory}, Springer,
- 1999).
+ 1999). Subgroups of $S_n$ for $n > 7$ require the optional
+ \kbd{nflistdata} package (except $A_n$ and $S_n$).
 
  \misctitle{Complexity} : For a positive integer $N$, the complexity is
  subexponential in $\log N$ (and involves factoring $N$). For an interval

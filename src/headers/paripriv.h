@@ -929,7 +929,7 @@ GEN     ffinit_rand(GEN p, long n);
 
 /* nflistQT.c */
 
-GEN nflistQT(long g, long v);
+GEN nflistQT(long n, long k, long v);
 
 /* ramanujantau.c */
 GEN     ramanujantau_worker(GEN gt, GEN p2_7, GEN p_9, GEN p);
