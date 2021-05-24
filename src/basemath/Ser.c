@@ -40,12 +40,14 @@ RgX_to_ser_i(GEN x, long l, long v, int copy)
     if (w)
     { /* keep type information, e.g. Mod(0,3) + x */
       GEN z = gel(x,2); /* = 0 */
-      x += w; gel(y,2) = gadd(gel(x,2), z); i++;
+      if (lx <= 2) gel(y,2) = copy? gcopy(z): z;
+      else { x += w; gel(y,2) = gadd(gel(x,2), z); }
+      i++;
     }
   }
   y[1] = evalvarn(vx) | evalvalp(v); /* must come here because of LONG_MAX */
   if (lx > l) lx = l;
-  /* 3 <= lx <= l */
+  /* 2 <= lx <= l */
   if (copy)
     for (; i <lx; i++) gel(y,i) = gcopy(gel(x,i));
   else

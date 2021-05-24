@@ -130,6 +130,7 @@ f=t^32000+O(t^32001); g=q*Ser(vector(32000,i,1),q); h=subst(f,t,g)
 f=q^32000+O(q^32001); h=subst(f,q,g)
 
 exp(1.*x + O(x^2))
+exp(.*x)
 
 \\ Errors. Keep at end of file
 subst(x^-1+O(x),x,Mod(0,3))

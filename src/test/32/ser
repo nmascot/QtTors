@@ -141,6 +141,8 @@ O(x^18)
 q^32000 + O(q^32001)
 q^32000 + O(q^32001)
 1 + 1.0000000000000000000000000000000000000*x + O(x^2)
+  *** exp: Warning: normalizing a series with 0 leading term.
+1 + 0.E-38*x^2 + O(x^18)
   ***   at top-level: subst(x^-1+O(x),x,Mod(0,3))
   ***                 ^---------------------------
   *** subst: impossible inverse in gsubst: Mod(0, 3).
@@ -187,4 +189,4 @@ q^32000 + O(q^32001)
   ***   at top-level: O(y)/O(x)
   ***                     ^-----
   *** _/_: impossible inverse in RgXn_inv: 0.
-Total time spent: 8
+Total time spent: 11
