@@ -99,7 +99,7 @@ vecgroup_idxlist(GEN L, long order)
 static long
 group_ident_i(GEN G, GEN S)
 {
-  long n = group_order(G);
+  long n = S? lg(S)-1: group_order(G);
   long s;
   GEN F,p,e;
   if (n==1) return 1;

@@ -3438,7 +3438,7 @@ galoisidentify(GEN gal)
 {
   pari_sp av = avma;
   GEN S, G = checkgroup(gal,&S);
-  long idx = group_ident(G,S), card = group_order(G);
+  long idx = group_ident(G,S), card = S ? lg(S)-1: group_order(G);
   set_avma(av); return mkvec2s(card, idx);
 }
 
