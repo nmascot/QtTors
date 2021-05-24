@@ -3,12 +3,11 @@ Section: elliptic_curves
 C-Name: ell2cover
 Prototype: Gp
 Help: ell2cover(E): if E is an elliptic curve over Q, return a basis of the set
- of 2-covers of the curve E. For each cover a pair [R,P] is returned where
- y^2-R(x) is a quartic curve and P belongs to E(k), where
+ of everywhere locally soluble 2-covers of the curve E. For each cover a pair
+ [R,P] is returned where y^2-R(x) is a quartic curve and P belongs to E(k), where
  k = Q(x)[y] / (y^2-R(x)).
-
 Doc: if $E$ is an elliptic curve over $\Q$, return a basis of the set of
- $2$-covers of the curve $E$.
+ everywhere locally soluble $2$-covers of the curve $E$.
  For each cover a pair $[R,P]$ is returned where $y^2-R(x)$ is a quartic curve
  and $P$ is a point on $E(k)$, where $k = \Q(x)[y] / (y^2-R(x))$.
  $E$ can also be given as the output of \kbd{ellrankinit(E)},
