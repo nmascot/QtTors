@@ -2524,7 +2524,7 @@ serexp(GEN x, long prec)
     /* zd[i] = coefficient of X^i in z */
     xd = x+2-e; yd = y+2; ly -= 2;
     X = gel(xd,e); if (e != 1) X = gmulgs(X, e); /* left on stack */
-    X = gequal1(X)? NULL: X;
+    X = isint1(X)? NULL: X;
     gel(yd,0) = gen_1;
     for (i = 1; i < e; i++) gel(yd,i) = gen_0;
     for (     ; i < ly; i++)

@@ -140,6 +140,7 @@ O(x^18)
 1 + 4*q^2 + 4*q^4 + O(q^6)
 q^32000 + O(q^32001)
 q^32000 + O(q^32001)
+1 + 1.0000000000000000000000000000000000000*x + O(x^2)
   ***   at top-level: subst(x^-1+O(x),x,Mod(0,3))
   ***                 ^---------------------------
   *** subst: impossible inverse in gsubst: Mod(0, 3).
@@ -186,4 +187,4 @@ q^32000 + O(q^32001)
   ***   at top-level: O(y)/O(x)
   ***                     ^-----
   *** _/_: impossible inverse in RgXn_inv: 0.
-Total time spent: 21
+Total time spent: 8
