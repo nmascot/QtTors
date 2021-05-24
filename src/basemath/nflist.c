@@ -4967,10 +4967,24 @@ grouptranslate(const char *g, long *t, int QT)
 static long
 group_nTk(GEN g, long *t, int QT)
 {
-  long n, k;
+  long L[] = { 0, /* https://oeis.org/A002106 */
+  1,1,2,5,5,16,7,50,34,45,8,301,9,63,104,1954,10,
+  983,8,1117,164,59,7,25000,211,96,2392,1854,8,5712,
+  12,2801324,162,115,407,121279,11,76,306,315842,10,
+  9491,10,2113,10923,56,6 };
+  long N = numberof(L), n, k;
+
   if (lg(g) != 3 || !RgV_is_ZV(g)) { *t = 0; return 0; }
-  n = itos(gel(g,1)); *t = k = itos(gel(g,2));
-  if (n <= 0 || k <= 0 || k >= 400) return 0;
+  n = itos(gel(g,1)); if (n <= 0) return 0;
+  if (n >= N) pari_err_IMPL(pari_sprintf("group nTk with n > %ld", N-1));
+  *t = k = itos(gel(g,2));
+  if (k <= 0 || k > L[n])
+  {
+    char *s;
+    s = pari_sprintf("incorrect group %ldTk with k = %ld not in [1,%ld]",
+                     n, k, L[n]);
+    pari_err(e_MISC, s);
+  }
   if (!QT)
   {
     if (n <= 9)
@@ -4980,14 +4994,10 @@ group_nTk(GEN g, long *t, int QT)
     }
     return (uisprime(n) && k <= 2)? n: 0;
   }
-  if (n <= 15)
-  {
-    long van[] = { 0, 1, 1, 1, 4, 4, 15, 6, 49, 33, 44, 7, 300, 8, 62, 103 };
-    if (k == van[n]) *t = -2; /* An */
-    if (k == van[n]+1) *t = -1; /* Sn */
-    return n;
-  }
-  return 0;
+  if (n <= 2) *t = -2; /* An */
+  else if (k == L[n]) *t = -1; /* Sn */
+  else if (k == L[n]-1) *t = -2; /* An */
+  return n;
 }
 
 static int

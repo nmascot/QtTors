@@ -45,9 +45,11 @@ Doc: find number fields (up to isomorphism) with Galois group of Galois
  alternating groups $A_n$ and the full symmetric group $S_n$ for all $n$
  (see below for details and explanations).
 
- The groups are coded as $[n,t]$ using the \kbd{nTt} format where $n$ is the
- degree and $t$ is the $T$-number (the index in the classification of
- transitive subgroups of $S_n$). Alternatively, the groups $C_n$, $D_n$,
+ The groups are coded as $[n,k]$ using the \kbd{nTk} format where $n$ is the
+ degree and $k$ is the $T$-number, the index in the classification of
+ transitive subgroups of $S_n$.
+
+ Alternatively, the groups $C_n$, $D_n$,
  $A_n$, $S_n$, $V_4$, $F_5 = M_{20}$, $M_{21}$ and $M_{42}$ can be input as
  character strings exactly as written, lifting subscripts; for instance
  \kbd{"S4"} or \kbd{"M21"}. If the group is not recognized or is

@@ -21,4 +21,9 @@ nflist("A24",'t)
 nflist("A23",'t)
 nflist("A22",'t)
 
-nflist([7,8])
+nflist([47,6],'t)
+nflist([47,5],'t)
+
+\\ ERRORS
+nflist([4,6])
+nflist([18,100000])
