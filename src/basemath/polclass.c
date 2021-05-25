@@ -649,62 +649,49 @@ torsion_constraint(struct torctab_rec *torctab, long ltorc, double tormod[], lon
   return b;
 }
 
+/* p > 3 prime */
 static void
-best_torsion_constraint(ulong p, long t, int *ptwist, ulong *ptor, int *ps2, int *pt3)
+best_torsion_constraint(ulong p, long t, int *ptwist, ulong *ptor)
 {
   struct torctab_rec *torctab;
   double tormod[32];
-  long ltorc;
-  long n1, n2;
-  long b, b1, b2, b12;
-  long i;
+  long ltorc, n1, n2, b, b1, b2, b12, i;
 
-  if ( (p%3)==2 ) {
-    if ( (p&3)==3 ) {
-      torctab = torctab1;
-      ltorc = sizeof(torctab1)/sizeof(*torctab1);
-    } else {
-      torctab = torctab2;
-      ltorc = sizeof(torctab2)/sizeof(*torctab2);
-    }
-  } else {
-    if ( (p&3)==3 ) {
-      torctab = torctab3;
-      ltorc = sizeof(torctab3)/sizeof(*torctab3);
-    } else {
-      torctab = torctab4;
-      ltorc = sizeof(torctab4)/sizeof(*torctab4);
-    }
+  switch(p % 12)
+  {
+    case 11:torctab = torctab1; ltorc = numberof(torctab1); break;
+    case 5: torctab = torctab2; ltorc = numberof(torctab2); break;
+    case 7: torctab = torctab3; ltorc = numberof(torctab3); break;
+    default/*1*/: torctab = torctab4; ltorc = numberof(torctab4); break;
   }
   for ( i = 0 ; i < 32 ; i++ ) tormod[i] = 1.0;
-  if ( (p%5)==1 ) tormod[5] = tormod[10] = tormod[15] = 6.0/5.0;
-  if ( (p%7)==1 ) tormod[7] = tormod[14] = 8.0/7.0;
-  if ( (p%11)== 1 ) tormod[11] = 12.0/11.0;
-  if ( (p%13)==1 ) tormod[13] = 14.0/13.0;
-  if ( (p%17)==1 ) tormod[17] = 18.0/17.0;
-  if ( (p%19)==1 ) tormod[19] = 20.0/19.0;
-  if ( (p%23)==1 ) tormod[23] = 24.0/23.0;
-  if ( (p%29)==1 ) tormod[29] = 30.0/29.0;
-  if ( (p%31)==1 ) tormod[31] = 32.0/31.0;
+  if (p%5  == 1) tormod[5] = tormod[10] = tormod[15] = 6.0/5.0;
+  if (p%7  == 1) tormod[7] = tormod[14] = 8.0/7.0;
+  if (p%11 == 1) tormod[11] = 12.0/11.0;
+  if (p%13 == 1) tormod[13] = 14.0/13.0;
+  if (p%17 == 1) tormod[17] = 18.0/17.0;
+  if (p%19 == 1) tormod[19] = 20.0/19.0;
+  if (p%23 == 1) tormod[23] = 24.0/23.0;
+  if (p%29 == 1) tormod[29] = 30.0/29.0;
+  if (p%31 == 1) tormod[31] = 32.0/31.0;
 
   n1 = p+1-t;
   n2 = p+1+t;
-  b12 = -1;
   b1  = torsion_constraint(torctab, ltorc, tormod, n1, n1);
   b2  = torsion_constraint(torctab, ltorc, tormod, n2, n2);
   b12 = torsion_constraint(torctab, ltorc, tormod, n1, n2);
-  if ( b1 > b2 ) {
-    if ( torctab[b2].rating / TWIST_DOUBLE_RATIO > torctab[b12].rating )
+  if (b1 > b2) {
+    if (torctab[b2].rating / TWIST_DOUBLE_RATIO > torctab[b12].rating)
       *ptwist = 3;
     else
       *ptwist = 2;
   } else
-    if ( torctab[b1].rating / TWIST_DOUBLE_RATIO > torctab[b12].rating )
+    if (torctab[b1].rating / TWIST_DOUBLE_RATIO > torctab[b12].rating)
       *ptwist = 3;
     else
       *ptwist = 1;
   b = *ptwist ==1 ? b1: *ptwist ==2 ? b2: b12;
-  *ptor = torctab[b].N; *ps2 = torctab[b].s2_flag; *pt3 = torctab[b].t3_flag;
+  *ptor = torctab[b].N;
 }
 
 /* This is Sutherland 2009 Algorithm 1.1 */
@@ -721,7 +708,7 @@ find_j_inv_with_given_trace(
   long t = ne->t;
   ulong p1 = p + 1, a4, a6, m, N;
   GEN A4, A6, tx, ty;
-  int s2_flag, t3_flag, twist;
+  int twist;
 
   if (p == 2 || p == 3) {
     if (t == 0) pari_err_BUG("find_j_inv_with_given_trace");
@@ -731,7 +718,7 @@ find_j_inv_with_given_trace(
   N0 = (long)p1 - t; n0 = factoru(N0);
   N1 = (long)p1 + t; n1 = factoru(N1);
 
-  best_torsion_constraint(p, t, &twist, &m, &s2_flag, &t3_flag);
+  best_torsion_constraint(p, t, &twist, &m);
   N = p1 - (twist<3 ? (twist==1 ? t: -t): 0);
 
   /* Select batch size so that we have roughly a 50% chance of finding
