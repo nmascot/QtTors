@@ -401,7 +401,7 @@ dirpowers(long n, GEN x, long prec)
 }
 
 /* P = prime divisors of (squarefree) n, V[i] = i^s for i <= sq.
- * Return NULL if n is not sq-smooth, else n^s */
+ * Return NULL if n is not sq-smooth, else f(n)n^s */
 static GEN
 smallfact(ulong n, GEN P, ulong sq, GEN V)
 {
@@ -418,7 +418,7 @@ smallfact(ulong n, GEN P, ulong sq, GEN V)
 static GEN
 Qtor(GEN x, long prec)
 { return typ(x) == t_FRAC? fractor(x, prec): x; }
-/* sum_{n <= N} n^s. */
+/* sum_{n <= N} f(n)n^s. */
 GEN
 dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
                 long prec)
