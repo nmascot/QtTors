@@ -793,6 +793,12 @@ for dir in basemath modules language gp graph systems mt; do
   ratpoints)
     cflags="$cflags \$(DLCFLAGS) \$(KERNELCFLAGS)"
     ;;
+  F2v)
+    cflags="$cflags \$(DLCFLAGS) \$(KERNELCFLAGS)"
+    ;;
+  F3v)
+    cflags="$cflags \$(DLCFLAGS) \$(KERNELCFLAGS)"
+    ;;
   *)
     cflags="$cflags \$(DLCFLAGS)"
     ;;
