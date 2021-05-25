@@ -1766,7 +1766,7 @@ all_roots(GEN p, long bit)
   pari_sp av;
 
   if (fb < 0) fb = 0;
-  bit2 = bit + (long)ceil(log2(n / h) + 2 * fb);
+  bit2 = bit + maxss(gexpo(p), 0) + (long)ceil(log2(n / h) + 2 * fb);
   for (av = avma, i = 1, e = 0;; i++, set_avma(av))
   {
     R = vectrunc_init(n+1);
