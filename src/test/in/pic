@@ -1,21 +1,26 @@
+default(threadsize,"64M");
 default(parisize,"128M");
-f = x^5+x^4; h = x^3+x+1; \\ X1(13): y²+h(x)*y=f(x)
-l = 7; p = 17; e = 32; chi = 'x^2-'x-2;
+f = 'x^5+'x^4; h = 'x^3+'x+1; \\ X1(13): y²+h(x)*y=f(x)
+l = 7; p = 17; e = 30; chi = 'x^2-'x-2;
 P1 = [-1,1]; P2 = [0,0];
 R = hyperellgalrep([f,h],l,p,e,[P1,P2],chi);
 PR = projgalrep(R);
 polredabs(PR[1])
 
-f = x^3*y+y^3+x;
+f = 'x^3*'y+'y^3+'x; \\ Klein quartic
 P1 = [0,0,1]; P2 = [1,0,0];
-l = 2; p = 5; e = 64;
-[F,ZF] = smoothplanegalrep(f,l,p,e,[[P1],[P2]]);
-apply(poldegree,factor(F)[,1])
+l = 2; p = 5; e = 20;
+R = smoothplanegalrep(f,l,p,e,[[P1],[P2]]); \\ J[2], prec too low
+apply(poldegree,factor(R[1])[,1])
 
-f = x^3+x+1; m=4; \\ Superell curve y^m=f(x). Its Jacobian contains the elliptic curve y^2=f(x).
-l = 5; p = 13; e = 16;
+f = 'x^3-2*'x+4; m=4; \\ Superell curve y^m=f(x). Its Jacobian contains the elliptic curve y^2=f(x).
+l = 5; p = 31; e = 12;
 chi = x^2+4*x+p; \\ Char.poly. of the Frobenius at p, used here to pick the piece of the 5-torsion coming from the elliptic curve quotient y^2=f(x) of this curve
-P = [Mod(w,w^2+1),1]; \\ Test: can also use algebraic points, although this is much less efficient
-[F,ZF] = superellgalrep(f,m,l,p,e,P,chi);
-nfisisom(F,'x^24 - 250*'x^20 - 7720*'x^18 + 209035*'x^16 - 1337504*'x^14 + 874180*'x^12 + 10432720*'x^10 - 25758425*'x^8 + 95896800*'x^6 + 30090262*'x^4 + 132925720*'x^2 + 48081005)!=0
+P = Mod([0,w],w^2+2); \\ Test: can also use algebraic points, although this is much less efficient
+R = superellgalrep(f,m,l,p,e,P,chi);
+nfisisom(R[1],'x^24+40*'x^20-360*'x^18+880*'x^16-3456*'x^14+13620*'x^12-41280*'x^10+174000*'x^8-360000*'x^6+161600*'x^4+48000*'x^2+500)!=0
 
+S = mfinit([16,2,0],1);
+f = mfeigenbasis(S[1])[1];
+R = mfgalrep(f,[5,[[2,2]]],[30,50],5);
+apply(poldegree,factor(R[1])[,1])

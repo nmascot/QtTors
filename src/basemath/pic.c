@@ -4522,7 +4522,7 @@ GEN PicRandTors(GEN J, GEN l, GEN Chi, GEN Phi, GEN seed, long returnlpow)
 		 If seed, set randseed.
 		 If return lpow, return [W,o,T,B] where W has order l^o, T=l^(o-1)*W in J[l], B in Ann_Z[x] T. */
 	pari_sp av = avma;
-	GEN Lp,J1,A,B,W,N,M,Psi,fa,lv,res,T,o;
+	GEN Lp,J1,A,B,R,W,N,M,Psi,fa,lv,res,T,o;
 	ulong a,v,d;
 	if(Jgete(J)>1)
 	{
@@ -4537,29 +4537,27 @@ GEN PicRandTors(GEN J, GEN l, GEN Chi, GEN Phi, GEN seed, long returnlpow)
 	if(Chi && gequal0(Chi)) Chi = NULL;
 	if(Phi && gequal0(Phi)) Phi = NULL;
 	a = degree(JgetT(J));
-	A = cgetg(a+3,t_POL); /* x^a-1 */
-	A[1] = 0;
-	setsigne(A,1);
-	setvarn(A,0);
-	gel(A,2) = gen_m1;
-	gel(A,a+2) = gen_1;
-	for(v=1;v<a;v++)
-		gel(A,v+2) = gen_0;
-	B = A;
+	A = ZX_Z_add(pol_xn(a,0),gen_m1); /* x^a-1 */
 	W = PicRand(J,seed);
 	if(Phi)
 	{ /* Project onto J[Phi] */
-		W = PicFrobPoly(J,W,RgX_div(B,Phi));
-		A = B = Phi;
+		W = PicFrobPoly(J,W,RgX_div(A,Phi));
+		A = Phi;
 	}
-	N = ZX_resultant(Lp,B); /* Order of submodule we work in */
-	v = Z_pvalrem(N,l,&M);
+	B = A;
+	N = ZX_resultant(Lp,A); /* Order of submodule we work in */
+	v = Z_pvalrem(N,l,&M); /* l^v*M */
 	if(v==0)
 		pari_err(e_MISC,"No %Ps-torsion",l);
 	W = PicMul(J,W,M,0); /* Project onto l^oo part, main bottleneck! */
 	B = FpX_gcd(Lp,B,l); /* [l^...]W in J[l,B] */
 	if(Chi)
 	{
+		Psi = FpX_divrem(Lp,Chi,l,&R);
+		if(!gequal0(R))
+			pari_err(e_MISC,"Chi does not divide Lp");
+		if(degpol(FpX_gcd(Chi,Psi,l)))
+			pari_err(e_MISC,"Chi is not coprime with its cofactor in Lp");
 		Chi = FpX_gcd(Chi,B,l);
 		Psi = FpX_div(B,Chi,l);
 		d = degree(Psi);
@@ -4569,6 +4567,7 @@ GEN PicRandTors(GEN J, GEN l, GEN Chi, GEN Phi, GEN seed, long returnlpow)
 			if(v>1)
 			{ /* Lift Psi mod l^v as a factor of A */
 				fa = mkvec2(Psi,FpX_div(A,Psi,l));
+				// TODO ZpXQX_lift_fact
 				fa = polhensellift(A,fa,l,v);
 				Psi = gel(fa,1);
 			}
@@ -5350,7 +5349,7 @@ GEN HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
 	ulong a;
 	RRdata = HyperRRdata(f,P);
 	Lp = hyperellcharpoly(gmodulo(f,p));
-	a = force_a ? force_a : itou(gel(FpX_root_order_bound(Lp,l),2));
+  a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
   J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),pol_x(1),p,a,e,Lp);
 	R = PicTorsGalRep(J,l,chi);
 	return gerepileupto(av,R);
@@ -5373,7 +5372,7 @@ GEN SuperGalRep(GEN f, ulong m, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong for
   ulong a;
 	RRdata = SuperRRdata(f,m,P);
   Lp = SuperZeta(f,m,itou(p));
-  a = force_a ? force_a : itou(gel(FpX_root_order_bound(Lp,l),2));
+  a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
   J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),pol_x(1),p,a,e,Lp);
   R = PicTorsGalRep(J,l,chi);
   return gerepileupto(av,R);
@@ -5396,7 +5395,7 @@ GEN SmoothGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
   ulong a;
 	RRdata = SmoothRRdata(f,p,P);
 	Lp = PlaneZeta(gel(RRdata,1),itou(p));
-  a = force_a ? force_a : itou(gel(FpX_root_order_bound(Lp,l),2));
+  a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
   J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,a,e,Lp);
 	R = PicTorsGalRep(J,l,chi);
   return gerepileupto(av,R);
