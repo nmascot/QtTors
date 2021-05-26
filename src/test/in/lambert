@@ -28,6 +28,7 @@ DO(3+x^2-2*x^3)
 DO(3+x^2-2*x^3+O(x^10))
 DO(3+x^2-2*x^3+O(x^30))
 serlaplace(sin(lambertw(x + O(x^5))))
+lambertw(-exp(-1) + x^2 + O(x^10))
 \p115
 do(-2^(-600),-1)
 for(b=-4,4,print(lambertw(-0.1,b)));
@@ -59,3 +60,4 @@ w+log(w)-log(a)
 /* Errors at the end */
 lambertw(1/x)
 lambertw(0,-1)
+lambertw(-exp(-1) + x + O(x^2))

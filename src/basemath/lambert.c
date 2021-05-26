@@ -289,6 +289,25 @@ serexp0(long v, long n)
   gel(y,i+2) = mkfrac(gen_1,t); return y;
 }
 
+/* series expansion of W at -1/e */
+static GEN
+Wbra(long N)
+{
+  GEN v = cgetg(N + 2, t_VEC);
+  long n;
+  gel(v, 1) = gen_m1;
+  gel(v, 2) = gen_1;
+  for (n = 2; n <= N; n++)
+  {
+    GEN t = gel(v,n), a = gen_0;
+    long k, K = (n - 1) >> 1;
+    for (k = 1; k <= K; k++) t = gadd(t, gmul2n(gel(v,n-2*k), -k));
+    for (k = 2; k < n; k++) a = gadd(a, gmul(gel(v,k+1), gel(v,n+2-k)));
+    gel(v,n+1) = gsub(gdivgs(t, -n-1), gmul2n(a, -1));
+  }
+  return RgV_to_RgX(v, 0);
+}
+
 static GEN
 reverse(GEN y)
 {
@@ -310,13 +329,26 @@ serlambertW(GEN y, long branch, long prec)
   vy = varn(y); n = lg(y)-3;
   for (val = 1; val < n; val++)
     if (!gequal0(polcoef_i(y, val, vy))) break;
-  if (v || val < n) t = serexp0(vy, n / val);
-  if (v) { setvalp(t, 1); t = reverse(t); } /* rev(x exp(x)) */
+  if (v)
+  {
+    t = serexp0(vy, n / val);
+    setvalp(t, 1); t = reverse(t); /* rev(x exp(x)) */
+  }
   else
   {
     GEN y0 = gel(y,2), x = glambertW(y0, branch, prec);
-    if (val >= n) return scalarser(x, vy, n+1);
+    if (val > n) return scalarser(x, vy, n+1);
     y = serchop0(y);
+    if (gequalm1(x))
+    { /* y0 ~ -1/e, branch = 0 or -1 */
+      GEN p = gmul(shiftr(gexp(gen_1,prec), 1), y);
+      if (odd(val)) pari_err(e_MISC, "odd valuation at branch point");
+      p = gsqrt(p, prec); if (odd(branch)) p = gneg(p);
+      n -= val >> 1;
+      t = RgXn_eval(Wbra(n), ser2rfrac_i(p), n);
+      return gtoser(t, varn(t), lg(p));
+    }
+    t = serexp0(vy, n / val);
     /* (x + t) exp(x + t) = (y0 + t y0/x) * exp(t) */
     t = gmul(deg1pol_shallow(gdiv(y0,x), y0, vy), t);
     t = gadd(x, reverse(serchop0(t)));
