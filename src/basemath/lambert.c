@@ -174,10 +174,18 @@ lambertW(GEN z, long k, long bit)
   }
   else
     wd = dbllambertWfritsch(rtodbl(z), 0);
-  if (wd == -1.)
+  if (fabs(wd + 1) < 1e-5)
   {
-    GEN t = addrs(mulrr(z, gexp(gen_1, prec)), 1);
+    long prec2 = prec + EXTRAPRECWORD;
+    GEN Z = rtor(z, prec2);
+    GEN t = addrs(mulrr(Z, gexp(gen_1, prec2)), 1);
     if (signe(t) <= 0) { set_avma(av); return real_m1(prec); }
+    if (realprec(t) < prec)
+    {
+      prec2 += prec - realprec(t);
+      Z = rtor(z, prec2);
+      t = addrs(mulrr(Z, gexp(gen_1, prec2)), 1);
+    }
     t = sqrtr(shiftr(t, 1));
     w = gprec_w(k == -1? subsr(-1, t) : subrs(t, 1), prec);
     p = prec - 2; vp = NULL;
