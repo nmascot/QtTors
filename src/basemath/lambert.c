@@ -58,7 +58,9 @@ dbllambertW0init(double a)
     const double c2 = 1./3., c3 = 11./72., c4 = 43./540., c5 = 769./17280.;
     const double c6 = 221./8505., c7 = 680863./43545600.;
     const double c8 = 1963./204120., c9 = 226287557./37623398400.;
-    double p = -sqrt(2 * (M_E * a + 1));
+    double p = M_E * a + 1;
+    if (p <= 0) return -1;
+    p = -sqrt(2 * p);
     return -(1.+p*(1.+p*(c2+p*(c3+p*(c4+p*(c5+p*(c6+p*(c7+p*(c8+p*c9)))))))));
   }
   if (a < 0.145469)
@@ -114,7 +116,9 @@ dbllambertW_1init(double a)
     const double c2 = 1./3., c3 = 11./72., c4 = 43./540., c5 = 769./17280.;
     const double c6 = 221./8505., c7 = 680863./43545600.;
     const double c8 = 1963./204120., c9 = 226287557./37623398400.;
-    double p = sqrt(2 * (M_E * a + 1));
+    double p = M_E * a + 1;
+    if (p <= 0) return -1;
+    p = sqrt(2 * p);
     return -(1.+p*(1.+p*(c2+p*(c3+p*(c4+p*(c5+p*(c6+p*(c7+p*(c8+p*c9)))))))));
   }
   if (a <= -0.051012)
@@ -172,8 +176,9 @@ lambertW(GEN z, long k, long bit)
     wd = dbllambertWfritsch(rtodbl(z), 0);
   if (wd == -1.)
   {
-    GEN t = sqrtr(shiftr(addrs(mulrr(z, gexp(gen_1, prec)), 1), 1));
-    if (gequal0(t)) { set_avma(av); return real_m1(prec); }
+    GEN t = addrs(mulrr(z, gexp(gen_1, prec)), 1);
+    if (signe(t) <= 0) { set_avma(av); return real_m1(prec); }
+    t = sqrtr(shiftr(t, 1));
     w = gprec_w(k == -1? subsr(-1, t) : subrs(t, 1), prec);
     p = prec - 2; vp = NULL;
   }
