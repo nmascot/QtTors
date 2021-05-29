@@ -156,10 +156,10 @@ dbllambertWhalleyspec(double loga)
 }
 /* k = 0 or -1. */
 static GEN
-lambertW(GEN z, long k, long bit)
+lambertW(GEN z, long k, long prec)
 {
   pari_sp av = avma;
-  long prec = nbits2prec(bit), L = -(bit / 3 + 10), ct = 0, p, pb;
+  long bit = prec2nbits(prec), L = -(bit / 3 + 10), ct = 0, p, pb;
   double wd;
   GEN w, vp;
 
@@ -240,18 +240,18 @@ lamaux(GEN x, GEN L, long *pe, long prec)
 
 /* Complex branches, experimental. */
 static GEN
-lambertWC(GEN z, long branch, long bit)
+lambertWC(GEN z, long branch, long prec)
 {
   pari_sp av = avma;
-  GEN w, pii2k, zl, lzl, L;
-  long bit0, si, j, fl = 0, lim = 6, lp = DEFAULTPREC;
+  GEN w, pii2k, zl, lzl, L, Lz;
+  long bit0, si, j, fl = 0, lim = 6, lp = DEFAULTPREC, bit = prec2nbits(prec);
 
   pii2k = gmulsg(branch, PiI2(lp));
   zl = gtofp(z, lp); lzl = glog(zl, lp);
-  si = gsigne(imag_i(z)); fl = 0;
+  si = gsigne(imag_i(z)); if (!si) z = real_i(z);
   /* From here */
   if (branch == 0 || branch * si < 0
-      || (si == 0 && gsigne(real_i(z)) < 0 && branch == -1))
+      || (si == 0 && gsigne(z) < 0 && branch == -1))
   {
     GEN lnzl1 = gaddsg(1, glog(gneg(zl), lp));
     if (si == 0) si = gsigne(lnzl1);
@@ -279,8 +279,19 @@ lambertWC(GEN z, long branch, long bit)
   /* to here: heuristic */
   L = gadd(lzl, pii2k);
   for (j = 1; j < lim; j++) w = lamaux(w, L, NULL, lp);
+  Lz = NULL;
+  if (branch == 0 || branch == -1)
+  {
+    Lz = glog(z, prec);
+    if (branch == -1)
+    {
+      long flag = 1;
+      if (!si && signe(z) <= 0 && signe(addrs(Lz, 1))) flag = 0;
+      if (flag) Lz = gsub(Lz, PiI2(prec));
+    }
+  }
   w = lamaux(w, L, &bit0, lp);
-  while (bit0 < bit)
+  while (bit0 < bit || (Lz && gexpo(gsub(gadd(w, glog(w, prec)), Lz)) > 16-bit))
   {
     long p = nbits2prec(bit0 <<= 1);
     L = gadd(gmulsg(branch, PiI2(p)), glog(gprec_w(z, p), p));
@@ -397,7 +408,7 @@ static GEN
 glambertW_i(void *E, GEN y, long prec)
 {
   pari_sp av;
-  long k = (long)E, b;
+  long k = (long)E, p;
   GEN z;
   if (gequal0(y))
   {
@@ -407,14 +418,14 @@ glambertW_i(void *E, GEN y, long prec)
   switch(typ(y))
   {
     case t_REAL:
-      b = prec2nbits(minss(prec, realprec(y)));
-      return useC(y, k)? lambertWC(y, k, b): lambertW(y, k, b);
+      p = minss(prec, realprec(y));
+      return useC(y, k)? lambertWC(y, k, p): lambertW(y, k, p);
     case t_PADIC: z = lambertp(y);
       if (!z) pari_err_DOMAIN("glambertW(t_PADIC)","argument","",gen_0,y);
       return z;
     case t_COMPLEX:
-      b = precision(y);
-      return lambertWC(y, k, prec2nbits(b? b: prec));
+      p = precision(y);
+      return lambertWC(y, k, p? p: prec);
     default:
       av = avma; if (!(z = toser_i(y))) break;
       return gerepileupto(av, serlambertW(z, k, prec));
@@ -422,37 +433,10 @@ glambertW_i(void *E, GEN y, long prec)
   return trans_evalgen("lambert", E, glambertW_i, y, prec);
 }
 
-/* k = 0 or -1 */
-static long
-findbranch(GEN y, long k, long prec)
-{
-  if (k == -1 && gequal0(imag_i(y)))
-  {
-    y = real_i(y);
-    if (gsigne(y) <= 0 && gsigne(gadd(y, gexp(gen_m1, prec))) >= 0) return 0;
-  }
-  return k;
-}
-/* k = 0 or -1 */
-static int
-checklam(GEN y, GEN w, long k, long prec)
-{
-  pari_sp av = avma;
-  GEN t = gsub(gadd(w, glog(w, prec)), glog(y, prec));
-  long e = gexpo(gsub(t, gmulsg(findbranch(y, k, prec), PiI2(prec))));
-  long p = precision(y);
-  if (p) prec = minss(prec, p);
-  return gc_bool(av, e < 30 - prec2nbits(prec));
-}
 GEN
 glambertW(GEN y, long k, long prec)
 {
-  GEN w = glambertW_i((void*)k, y, prec);
-  long ty = typ(y);
-  if ((k == 0 || k == -1) && (is_real_t(ty) || ty == t_COMPLEX)
-      && (k || ty == t_COMPLEX || gsigne(y) < 0) && !checklam(y, w, k, prec))
-    pari_err_IMPL("complex lambertw for 0 and -1 branch");
-  return w;
+  return glambertW_i((void*)k, y, prec);
 }
 GEN
 mplambertW(GEN y, long prec) { return lambertW(y, 0, prec); }

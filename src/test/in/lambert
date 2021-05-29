@@ -3,6 +3,8 @@ do(y,k)=my(x = lambertw(y,k)); exponent(exp(x)*x / y-1);
 do(-1)
 do(I)
 do(2)
+mie = -exp(-1);
+vecmax(vector(64, k, do(mie - 2^-k)))
 default(realprecision,211);
 do(1e14) <= -700
 DO(y)=
@@ -28,7 +30,7 @@ DO(3+x^2-2*x^3)
 DO(3+x^2-2*x^3+O(x^10))
 DO(3+x^2-2*x^3+O(x^30))
 serlaplace(sin(lambertw(x + O(x^5))))
-lambertw(-exp(-1) + x^2 + O(x^10))
+lambertw(mie + x^2 + O(x^10))
 \p115
 do(-2^(-600),-1)
 for(b=-4,4,print(lambertw(-0.1,b)));
@@ -38,9 +40,9 @@ lambertw(-10^(-100),0)
 lambertw(-10^(-100),-1)
 do(lambertw(precision(-0.1,38),-1))
 \p38
-vector(10,mul,round(10^4*log(2)/log(abs(lambertw(-exp(-1),mul)))))
-vector(10,mul,round(10^4*log(2)/log(abs(lambertw(-exp(-1),10*mul)))))
-bra(y,k)=if(k!=-1||imag(y)||y>0||y<-exp(-1), k, 0);
+vector(10,mul,round(10^4*log(2)/log(abs(lambertw(mie,mul)))))
+vector(10,mul,round(10^4*log(2)/log(abs(lambertw(mie,10*mul)))))
+bra(y,k)=if(k!=-1||imag(y)||y>0||y<mie, k, 0);
 doc(y,k)=my(x=lambertw(y,k));exponent(x+log(x)-log(y)-2*Pi*I*bra(y,k));
 for(k=-1,1,m=-1000;for(a=-100,100,for(b=-100,100,z=(a+I*b)/100;if(z,m=max(m,doc(z,k)))));print(m));
 lambertw(-0.1+x,0)
@@ -60,4 +62,4 @@ w+log(w)-log(a)
 /* Errors at the end */
 lambertw(1/x)
 lambertw(0,-1)
-lambertw(-exp(-1) + x + O(x^2))
+lambertw(mie + x + O(x^2))
