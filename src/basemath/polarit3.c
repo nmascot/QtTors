@@ -2187,8 +2187,8 @@ ZXQX_resultant_bound(GEN nf, GEN A, GEN B)
   return gc_ulong(av, (ulong) dbllog2(gmul(M,RgC_fpnorml2(a, DEFAULTPREC))));
 }
 
-/* Compute Res(A, B/dB) in Z, assuming A,B in Z[X], dB in Z or NULL (= 1)
- * If B=NULL, take B = A' and assume deg A > 1 and 'bound' is set */
+/* Compute Res(A, B/dB) in Z[X]/T, assuming A,B in Z[X,Y], dB in Z or NULL (= 1)
+ * If B=NULL, take B = A' and assume deg A > 1 */
 static GEN
 ZXQX_resultant_all(GEN A, GEN B, GEN T, GEN dB, ulong bound)
 {
@@ -2201,9 +2201,9 @@ ZXQX_resultant_all(GEN A, GEN B, GEN T, GEN dB, ulong bound)
     if (a < 0 || b < 0) return gen_0;
     if (!a) return gpowgs(gel(A,2), b);
     if (!b) return gpowgs(gel(B,2), a);
-    if (!bound) bound = ZXQX_resultant_bound(nfinit(T, DEFAULTPREC), A, B);
   } else
-    if (!bound) bound = ZXQX_resultant_bound(nfinit(T, DEFAULTPREC), A, RgX_deriv(A));
+    if (!bound) B = RgX_deriv(A);
+  if (!bound) bound = ZXQX_resultant_bound(nfinit(T, DEFAULTPREC), A, B);
   worker = snm_closure(is_entry("_ZXQX_resultant_worker"),
                        mkvec4(A, B? B: gen_0, T, dB? dB: gen_0));
   init_modular_big(&S);
