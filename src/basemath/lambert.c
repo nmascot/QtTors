@@ -244,7 +244,7 @@ lambertWC(GEN z, long branch, long bit)
 {
   pari_sp av = avma;
   GEN w, pii2k, zl, lzl, L;
-  long bit0, si, j, fl = 0, lim = 6, lp = LOWDEFAULTPREC;
+  long bit0, si, j, fl = 0, lim = 6, lp = DEFAULTPREC;
 
   pii2k = gmulsg(branch, PiI2(lp));
   zl = gtofp(z, lp); lzl = glog(zl, lp);
