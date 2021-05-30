@@ -1,7 +1,7 @@
 -127
 -127
 -127
--114
+1
 1
 x - 2*x^2 + 8*x^3 - 52*x^4 + O(x^5)
 -1 + 2.3316439815971242033635360621684008764*x - 1.8121878856393634902401916
@@ -126,4 +126,4 @@ O(3^10)
   ***   at top-level: lambertw(mie+x+O(x^2))
   ***                 ^----------------------
   *** lambertw: odd valuation at branch point.
-Total time spent: 17288
+Total time spent: 24048

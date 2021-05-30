@@ -4,7 +4,7 @@ do(-1)
 do(I)
 do(2)
 mie = -exp(-1);
-vecmax(vector(64, k, do(mie - 2^-k)))
+vecmax(vector(64, k, do(mie - 2^-k))) <= -112
 default(realprecision,211);
 do(1e14) <= -700
 DO(y)=

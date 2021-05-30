@@ -235,10 +235,11 @@ lamaux(GEN x, GEN L, long *pe, long prec)
 {
   GEN n = gsub(gadd(x, glog(x, prec)), L);
   if (pe) *pe = maxss(4, -gexpo(n));
+  if (gequal0(imag_i(n))) n = real_i(n);
   return gmul(x, gsubsg(1, gdiv(n, gaddsg(1, x))));
 }
 
-/* Complex branches, experimental. */
+/* Complex branches, experimental */
 static GEN
 lambertWC(GEN z, long branch, long prec)
 {
@@ -246,9 +247,9 @@ lambertWC(GEN z, long branch, long prec)
   GEN w, pii2k, zl, lzl, L, Lz;
   long bit0, si, j, fl = 0, lim = 6, lp = DEFAULTPREC, bit = prec2nbits(prec);
 
+  si = gsigne(imag_i(z)); if (!si) z = real_i(z);
   pii2k = gmulsg(branch, PiI2(lp));
   zl = gtofp(z, lp); lzl = glog(zl, lp);
-  si = gsigne(imag_i(z)); if (!si) z = real_i(z);
   /* From here */
   if (branch == 0 || branch * si < 0
       || (si == 0 && gsigne(z) < 0 && branch == -1))
@@ -256,8 +257,10 @@ lambertWC(GEN z, long branch, long prec)
     GEN lnzl1 = gaddsg(1, glog(gneg(zl), lp));
     if (si == 0) si = gsigne(lnzl1);
     if ((branch == 0 || branch * si < 0) && gexpo(lnzl1) < -1)
-    {
-      w = gsqrt(gmul2n(gaddsg(1, gmul(zl, gexp(gen_1, lp))), 1), lp);
+    { /* close to -1/e */
+      w = gaddsg(1, gmul(z, gexp(gen_1, prec)));
+      w = gprec_wtrunc(w, lp);
+      w = gsqrt(gmul2n(w, 1), lp);
       w = branch * si < 0? gsubsg(-1, w): gaddsg(-1, w);
       lim = 10; fl = 1;
     }
@@ -272,7 +275,7 @@ lambertWC(GEN z, long branch, long prec)
     }
     else
     {
-      GEN p = gaddsg(1, gmul(zl, gexp(gen_1, lp)));
+      GEN p = gaddsg(1, gmul(z, gexp(gen_1, lp)));
       w = gexpo(p) > 0? lzl: gaddgs(gsqrt(p, lp), -1);
     }
   }
