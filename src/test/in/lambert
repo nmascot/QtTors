@@ -40,8 +40,8 @@ lambertw(-10^(-100),0)
 lambertw(-10^(-100),-1)
 do(lambertw(precision(-0.1,38),-1))
 \p38
-vector(10,mul,round(10^4*log(2)/log(abs(lambertw(mie,mul)))))
-vector(10,mul,round(10^4*log(2)/log(abs(lambertw(mie,10*mul)))))
+vector(10,mul,round(10^4*abs(lambertw(mie,mul))))
+vector(10,mul,round(10^4*abs(lambertw(mie,10*mul))))
 bra(y,k)=if(k!=-1||imag(y)||y>0||y<mie, k, 0);
 doc(y,k)=my(x=lambertw(y,k));exponent(x+log(x)-log(y)-2*Pi*I*bra(y,k));
 N = 30;
