@@ -2137,7 +2137,7 @@ ZXQX_resultant_slice(GEN A, GEN B, GEN U, GEN dB, GEN P, GEN *mod)
     GEN u = ZX_to_Flx(U, p);
     GEN Hp = ZXQX_resultant_prime(a, b, dB, degA, degB, u, p);
     if (!Hp) { set_avma(av); *mod = gen_1; return pol_0(v); }
-    set_avma(av); *mod = utoipos(p); return Flx_to_ZX(Hp);
+    Hp = gerepileupto(av, Flx_to_ZX(Hp)); *mod = utoipos(p); return Hp;
   }
   T = ZV_producttree(P);
   A = ZXX_nv_mod_tree(A, P, T, v);
