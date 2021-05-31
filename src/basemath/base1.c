@@ -1254,8 +1254,7 @@ nfisincl_from_fact(GEN a, long da, GEN b, GEN la, GEN lb, long vb, GEN y, long f
 static GEN
 nfisincl_from_fact_frac(GEN a, GEN b, GEN la, GEN lb, long vb, GEN y)
 {
-  long i, k, lx = lg(y);
-  long da = degpol(a), db = degpol(b), d = db/da;
+  long i, k, lx = lg(y), da = degpol(a), db = degpol(b), d = db/da;
   GEN x = cgetg(lx, t_VEC);
   for (i=1, k=1; i<lx; i++)
   {
@@ -1264,8 +1263,7 @@ nfisincl_from_fact_frac(GEN a, GEN b, GEN la, GEN lb, long vb, GEN y)
     gel(x, k++) = partmap_reverse_frac(a, b, t, la, lb, vb);
   }
   if (k==1) return gen_0;
-  setlg(x, k);
-  return x;
+  setlg(x, k); return x;
 }
 
 GEN
@@ -1389,15 +1387,12 @@ nfsplitting0(GEN T0, GEN D, long flag)
   if (flag==1 && !ZX_equal(T, T0))
     pari_err_FLAG("nfsplitting");
   if (D)
-  {
-    if (typ(D) != t_INT || signe(D) < 1) pari_err_TYPE("nfsplitting",D);
-  }
+  { if (typ(D) != t_INT || signe(D) < 1) pari_err_TYPE("nfsplitting",D); }
+  else if (d <= 7 ||
+           (d <= 11 && pari_is_dir(stack_strcat(pari_datadir, "/galdata"))))
+    D = gel(polgalois(T,DEFAULTPREC), 1);
   else
-  {
-    char *data = stack_strcat(pari_datadir, "/galdata");
-    long dmax = pari_is_dir(data)? 11: 7;
-    D = (d <= dmax)? gel(polgalois(T,DEFAULTPREC), 1): mpfact(d);
-  }
+    D = mpfact(d);
   Ds = itos_or_0(D);
   T = leafcopy(T); setvarn(T, fetch_var_higher());
   for(F = T;;)
@@ -1405,15 +1400,15 @@ nfsplitting0(GEN T0, GEN D, long flag)
     GEN P = gel(nffactor(K, F), 1), Q = gel(P,lg(P)-1);
     if (degpol(gel(P,1)) == degpol(Q))
     {
+      P = liftall_shallow(P);
       if (flag==1 && ZX_equal(T, T0))
-        N = nfisincl_from_fact(K, d, F, gen_1, gen_1, v, liftall(P), flag);
+        N = nfisincl_from_fact(K, d, F, gen_1, gen_1, v, P, flag);
       else if (flag>1 && ZX_equal(T, T0))
-        N = nfisincl_from_fact_frac(T0, F, gen_1, gen_1, v, liftall(P));
+        N = nfisincl_from_fact_frac(T0, F, gen_1, gen_1, v, P);
       break;
     }
     F = rnfequation(K,Q);
-    if (degpol(F) == Ds && flag==0)
-      break;
+    if (degpol(F) == Ds && flag==0) break;
   }
   if (umodiu(D,degpol(F)))
   {
