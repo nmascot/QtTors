@@ -1220,13 +1220,11 @@ partmap_reverse_frac(GEN a, GEN b, GEN t, GEN la, GEN lb, long v)
   GEN C = ZX_ZXY_resultant_all(a, Q_remove_denom(t,&de), &k, &L);
   if (k || degpol(b) != degpol(C))
     { setvarn(b,v); pari_err_IRREDPOL("nfisincl", b); }
-  N = RgX_neg(gel(L,1)); D = gel(L,2);
-  setvarn(N, v); setvarn(D, v);
+  N = gel(L,1); if (!signe(N)) { set_avma(av); return pol_0(v); }
+  D = gel(L,2);
+  N = RgX_neg(N); setvarn(N, v); setvarn(D, v);
   G = QX_gcd(N,D);
-  if (degpol(G))
-  {
-    N = RgX_div(N,G); D = RgX_div(D,G);
-  }
+  if (degpol(G)) { N = RgX_div(N,G); D = RgX_div(D,G); }
   if (!isint1(lb)) { N = RgX_unscale(N, lb); D = RgX_unscale(D, lb); }
   if (!isint1(la)) D = RgX_Rg_mul(D, la);
   return gerepilecopy(av, mkrfrac(N,D));
@@ -1254,7 +1252,7 @@ nfisincl_from_fact(GEN a, long da, GEN b, GEN la, GEN lb, long vb, GEN y, long f
 static GEN
 nfisincl_from_fact_frac(GEN a, GEN b, GEN la, GEN lb, long vb, GEN y)
 {
-  long i, k, lx = lg(y), da = degpol(a), db = degpol(b), d = db/da;
+  long i, k, lx = lg(y), d = degpol(b) / degpol(a);
   GEN x = cgetg(lx, t_VEC);
   for (i=1, k=1; i<lx; i++)
   {
