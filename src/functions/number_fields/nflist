@@ -55,13 +55,15 @@ Doc: find number fields (up to isomorphism) with Galois group of Galois
  \kbd{"S4"} or \kbd{"M21"}. If the group is not recognized or is
  unsupported the function raises an exception.
 
- The fields are computed on the fly (and not from a preexisting table) using
- a variety of algorithms, with the exception of $A_5$ and $A_5(6)$ which are
- obtained by table lookup.
+ The number fields are computed on the fly (and not from a preexisting table)
+ using a variety of algorithms, with the exception of $A_5$ and $A_5(6)$ which
+ are obtained by table lookup.
  The algorithms are recursive and use the following ingredients: build
  distinguished subfields (or resolvent fields in Galois closures) of smaller
  degrees, use class field theory to build abelian extensions over a known
- base, select subfields using Galois theory.
+ base, select subfields using Galois theory. Because of our use of class
+ field theory, and ultimately \kbd{bnfinit}, all results depend on the GRH in
+ degree $n > 3$.
 
  To avoid wasting time, the output polynomials defining the number fields are
  usually not the simplest possible, use \kbd{polredbest} or \kbd{polredabs}
