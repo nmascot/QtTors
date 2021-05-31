@@ -234,6 +234,12 @@ nfsubfields(y^4-2,2,1)
 nfsubfields(y^4-2,,1)
 nfsubfields(y^4-2,3,1)
 
+\\Bill's variable priority bug
+P=x^6+108;
+t = varhigher("t");  F = nffactor(P,subst(P,x,t)); nfsubfields([P,F])
+F = nffactor(subst(P,x,a),P); nfsubfields([subst(P,x,a),F])
+F=nffactor(subst(P,x,a),P);  nfsubfields([P,F])
+
 \\bad inputs
 nfsubfieldscm(1)
 nfsubfieldscm(x^2+1/2)
@@ -244,4 +250,6 @@ nfsubfieldscm([x^2+1,1])
 nfsubfieldscm([nfinit(x^2+1),1])
 nfsubfieldscm(4*x^2+1);
 nfsubfieldscm(x^0);
+nfsubfields([x^2-5,[z,1;z,1]]);
+nfsubfields([x^2-5,[z-x,1;z+x,1]]);
 

@@ -1024,6 +1024,7 @@ RgXY_to_RgC(GEN P, long dx, long dy)
 {
   GEN res, c;
   long i, j, k, d = degpol(P);
+  if (d > dy) pari_err_BUG("RgXY_to_RgC [incorrect degree]");
   res = cgetg((dx+1)*(dy+1)+1, t_COL);
   k = 1;
   for (i=0; i<=d; i++)
@@ -1032,6 +1033,7 @@ RgXY_to_RgC(GEN P, long dx, long dy)
     if (typ(c)==t_POL)
     {
       long dc = degpol(c);
+      if (dc > dx) pari_err_BUG("RgXY_to_RgC [incorrect degree]");
       for (j=0; j<=dc; j++)
         gel(res,k++) = gel(c,j+2);
     } else
@@ -1054,6 +1056,8 @@ twoembequation(GEN pol, GEN fa, GEN lambda)
   GEN m, vpolx, poly;
   long i,j, lfa = lg(fa), dx = degpol(pol);
   long vx = varn(pol), vy = varn(gel(fa,1)); /* vx < vy ! */
+
+  if (varncmp(vx,vy) <= 0) pari_err_BUG("twoembequation [incorrect variable priorities]");
 
   lambda = shallowcopy(lambda);
   fa = shallowcopy(fa);
@@ -1112,6 +1116,12 @@ subfields_cleanup(GEN* nf, GEN* pol, long* n, GEN* fa)
     *nf = checknf(*nf);
     *pol = nf_get_pol(*nf);
     *n = degpol(*pol);
+  }
+  if(*fa)
+  {
+    long v = varn(*pol);
+    GEN o = gcoeff(*fa,1,1);
+    if (varncmp(varn(o),v) >= 0) pari_err_PRIORITY("nfsubfields_fa", o, "<=", v);
   }
 }
 

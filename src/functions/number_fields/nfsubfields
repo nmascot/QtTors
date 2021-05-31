@@ -24,8 +24,9 @@ Doc: finds all subfields of degree
  has few irreducible factors modulo $p$.
 
  An input of the form~\kbd{[nf, fa]} is also allowed, where~\kbd{fa} is the
- factorisation of~\var{nf.pol} over~\var{nf}, in which case the
- van Hoeij--Kl\"uners--Novocin algorithm is used.
+ factorisation of~\var{nf.pol} over~\var{nf}, expressed as a famat of
+ polynomials with coefficients in the variable of~\kbd{nf}, in which case the van
+ Hoeij--Kl\"uners--Novocin algorithm is used.
 
  \bprog
  ? pol = x^4 - x^3 - x^2 + x + 1;
