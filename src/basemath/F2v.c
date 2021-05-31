@@ -83,29 +83,7 @@ F2v_slice(GEN x, long a, long b)
 /* x[a..b,], a <= b */
 GEN
 F2m_rowslice(GEN x, long a, long b)
-{
-  long i, l;
-  GEN y = cgetg_copy(x, &l);
-  for (i = 1; i < l; i++) gel(y,i) = F2v_slice(gel(x,i),a,b);
-  return y;
-}
-
-GEN
-F2m_to_ZM(GEN z)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) gel(x,i) = F2c_to_ZC(gel(z,i));
-  return x;
-}
-GEN
-F2m_to_mod(GEN z)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) gel(x,i) = F2c_to_mod(gel(z,i));
-  return x;
-}
+{ pari_APPLY_same(F2v_slice(gel(x,i),a,b)) }
 
 GEN
 F2v_to_Flv(GEN x)
@@ -120,13 +98,11 @@ F2v_to_Flv(GEN x)
 }
 
 GEN
-F2m_to_Flm(GEN z)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) gel(x,i) = F2v_to_Flv(gel(z,i));
-  return x;
-}
+F2m_to_ZM(GEN x) { pari_APPLY_same(F2c_to_ZC(gel(x,i))) }
+GEN
+F2m_to_mod(GEN x) { pari_APPLY_same(F2c_to_mod(gel(x,i))) }
+GEN
+F2m_to_Flm(GEN x) { pari_APPLY_same(F2v_to_Flv(gel(x,i))) }
 
 GEN
 ZV_to_F2v(GEN x)
