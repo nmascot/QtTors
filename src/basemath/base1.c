@@ -1336,6 +1336,7 @@ nfsplitting_auto(GEN g, GEN R)
   }
   P = Flx_roots(Gp, p);
   Rp = RgFV_to_FlxqV(R, Gp, p);
+  if (d == 1) return mkvec3(g, mkcol(gel(Rp,1)), utoi(p));
   K = Flm_Flc_invimage(FlxV_to_Flm(Rp, d), vecsmall_ei(d, 2), p);
   N = Flm_transpose(FlxV_Flv_multieval(Rp, P, p));
   q = perm_inv(vecsmall_indexsort(gel(N,1)));
