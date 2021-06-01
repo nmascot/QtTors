@@ -66,8 +66,11 @@ x^42 + 48020*x^28 + 96001584*x^14 + 52706752
 x^42 + 48020*x^28 + 96001584*x^14 + 52706752
   ***   at top-level: nfsplitting(x^6-8,,1)
   ***                 ^---------------------
-  *** nfsplitting: invalid flag in nfsplitting.
+  *** nfsplitting: not an irreducible polynomial in nfsplitting: x^6 - 8.
   ***   at top-level: nfsplitting(x^5+5/4*x+1,,1)
   ***                 ^---------------------------
-  *** nfsplitting: invalid flag in nfsplitting.
-Total time spent: 262
+  *** nfsplitting: incorrect type in nfsplitting (t_POL).
+  ***   at top-level: galoissplittinginit(x^2)
+  ***                 ^------------------------
+  *** galoissplittinginit: not an irreducible polynomial in nfsplitting: x^2.
+Total time spent: 172

@@ -1367,24 +1367,25 @@ nfsplitting0(GEN T0, GEN D, long flag)
 {
   pari_sp av = avma;
   long d, Ds, v;
-  GEN T, F, K, N = NULL;
+  GEN T, F, K, N = NULL, lT = NULL;
   T = T0 = get_nfpol(T0, &K);
   if (!K)
   {
+    GEN c;
     if (typ(T) != t_POL) pari_err_TYPE("nfsplitting",T);
-    T = Q_primpart(T);
+    T = Q_primitive_part(T, &c);
+    lT = leading_coeff(T); if (isint1(lT)) lT = NULL;
+    if (flag && (c || lT)) pari_err_TYPE("nfsplitting", T0);
     RgX_check_ZX(T,"nfsplitting");
   }
   T = nfsplitting_composite(T);
+  if (flag && !ZX_equal(T, T0)) pari_err_IRREDPOL("nfsplitting", T0);
   d = degpol(T); v = varn(T);
-  if (d <= 1  && flag==0)
-    { set_avma(av); return pol_x(v); }
+  if (d <= 1 && !flag) { set_avma(av); return pol_x(v); }
   if (!K) {
-    if (!isint1(leading_coeff(T))) K = T = polredbest(T,0);
+    if (lT) T = polredbest(T,0);
     K = T;
   }
-  if (flag==1 && !ZX_equal(T, T0))
-    pari_err_FLAG("nfsplitting");
   if (D)
   { if (typ(D) != t_INT || signe(D) < 1) pari_err_TYPE("nfsplitting",D); }
   else if (d <= 7 ||
@@ -1399,25 +1400,25 @@ nfsplitting0(GEN T0, GEN D, long flag)
     GEN P = gel(nffactor(K, F), 1), Q = gel(P,lg(P)-1);
     if (degpol(gel(P,1)) == degpol(Q))
     {
+      if (!flag) break;
       P = liftall_shallow(P);
-      if (flag==1 && ZX_equal(T, T0))
+      if (flag==1)
         N = nfisincl_from_fact(K, d, F, gen_1, gen_1, v, P, flag);
-      else if (flag>1 && ZX_equal(T, T0))
+      else
         N = nfisincl_from_fact_frac(T0, F, gen_1, gen_1, v, P);
       break;
     }
     F = rnfequation(K,Q);
-    if (degpol(F) == Ds && flag==0) break;
+    if (degpol(F) == Ds && !flag) break;
   }
   if (umodiu(D,degpol(F)))
   {
     char *sD = itostr(D);
     pari_warn(warner,stack_strcat("ignoring incorrect degree bound ",sD));
   }
-  setvarn(F, v);
-  (void)delete_var();
-  if (flag==2) return gerepilecopy(av, nfsplitting_auto(F, N));
-  return gerepilecopy(av, odd(flag) ? mkvec2(F,N): F);
+  setvarn(F, v); (void)delete_var();
+  if (flag) F = odd(flag)? mkvec2(F, N): nfsplitting_auto(F, N);
+  return gerepilecopy(av, F);
 }
 
 GEN

@@ -23,3 +23,6 @@ nfsplitting(x^6-8,,1)
 nfsplitting(x^5+5/4*x+1,,1)
 
 galoissplittinginit(x);
+
+\\ ERROR
+galoissplittinginit(x^2);
