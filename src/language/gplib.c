@@ -1791,13 +1791,14 @@ escape(const char *tch, int ismain)
         default :
           if (isdigit(*s))
           {
-            long d = atol(s);
-            s++; while (isdigit(*s)) s++;
-            s = get_name(s);
-            if (*s)
+            const char *t = s;
+            do t++; while (isdigit(*t));
+            t = get_name(t);
+            if (*t)
             {
-              pari_printf("   setdebug(\"%s\", %ld)\n", s, d);
-              setdebug(s, d); break;
+              long d = atol(s);
+              pari_printf("   setdebug(\"%s\", %ld)\n", t, d);
+              setdebug(t, d); break;
             }
           }
           (void)sd_debug(*s? s: NULL,d_ACKNOWLEDGE); break;
