@@ -789,10 +789,10 @@ pari_init_errcatch(void)
 }
 
 void
-setalldebug(long lvl)
+setalldebug(long n)
 {
-  long i, l = sizeof(pari_DEBUGLEVEL_ptr)/sizeof(*pari_DEBUGLEVEL_ptr);
-  for (i = 0; i < l; i++) *pari_DEBUGLEVEL_ptr[i] = lvl;
+  long i, l = numberof(pari_DEBUGLEVEL_ptr);
+  for (i = 0; i < l; i++) *pari_DEBUGLEVEL_ptr[i] = n;
 }
 
 /*********************************************************************/
@@ -2932,37 +2932,31 @@ getwalltime(void)
 /*******************************************************************/
 
 GEN
-setdebug(const char *s, long lvl)
+setdebug(const char *s, long n)
 {
-  long i, l = sizeof(pari_DEBUGLEVEL_str)/sizeof(*pari_DEBUGLEVEL_str);
+  long i, l = numberof(pari_DEBUGLEVEL_str);
+  GEN V, V1, V2;
   if (s)
   {
-    if (lvl > 20) pari_err_DOMAIN("setdebug", "lvl", ">", utoipos(20), stoi(lvl));
-    for (i=0; i<l; i++)
-      if (!strcmp(s,pari_DEBUGLEVEL_str[i]))
-        break;
-    if (i == l)
-      pari_err_DOMAIN("setdebug", "dmn", "not a valid", strtoGENstr("debug domain"), strtoGENstr(s));
-    if (lvl >= 0)
-    {
-      *pari_DEBUGLEVEL_ptr[i] = lvl;
-      return gnil;
-    }
-    else
-      return stoi(*pari_DEBUGLEVEL_ptr[i]);
-  }
-  else
-  {
-    GEN V = cgetg(3,t_MAT), V1, V2;
-    V1 = gel(V,1) = cgetg(l+1, t_COL);
-    V2 = gel(V,2) = cgetg(l+1, t_COL);
+    if (n > 20)
+      pari_err_DOMAIN("setdebug", "n", ">", utoipos(20), stoi(n));
     for (i = 0; i < l; i++)
-    {
-      gel(V1, i+1) = strtoGENstr(pari_DEBUGLEVEL_str[i]);
-      gel(V2, i+1) = stoi(*pari_DEBUGLEVEL_ptr[i]);
-    }
-    return V;
+      if (!strcmp(s, pari_DEBUGLEVEL_str[i])) break;
+    if (i == l)
+      pari_err_DOMAIN("setdebug", "D", "not a valid",
+                      strtoGENstr("debug domain"), strtoGENstr(s));
+    if (n >= 0) { *pari_DEBUGLEVEL_ptr[i] = n; return gnil; }
+    return stoi(*pari_DEBUGLEVEL_ptr[i]);
   }
+  V = cgetg(3,t_MAT);
+  V1 = gel(V,1) = cgetg(l+1, t_COL);
+  V2 = gel(V,2) = cgetg(l+1, t_COL);
+  for (i = 0; i < l; i++)
+  {
+    gel(V1, i+1) = strtoGENstr(pari_DEBUGLEVEL_str[i]);
+    gel(V2, i+1) = stoi(*pari_DEBUGLEVEL_ptr[i]);
+  }
+  return V;
 }
 
 GEN
