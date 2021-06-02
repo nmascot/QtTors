@@ -1788,7 +1788,19 @@ escape(const char *tch, int ismain)
       {
         case 'm': s++; (void)sd_debugmem(*s? s: NULL,d_ACKNOWLEDGE); break;
         case 'f': s++; (void)sd_debugfiles(*s? s: NULL,d_ACKNOWLEDGE); break;
-        default : (void)sd_debug(*s? s: NULL,d_ACKNOWLEDGE); break;
+        default :
+          if (isdigit(*s))
+          {
+            long d = atol(s);
+            s++; while (isdigit(*s)) s++;
+            s = get_name(s);
+            if (*s)
+            {
+              pari_printf("   setdebug(\"%s\", %ld)\n", s, d);
+              setdebug(s, d); break;
+            }
+          }
+          (void)sd_debug(*s? s: NULL,d_ACKNOWLEDGE); break;
       }
       break;
     case 'h': print_functions_hash(s); break;

@@ -103,6 +103,7 @@ HC  32- lambertw: add optional 'branch' argument; support and complex, p-adic
 BA  33- [libpari] ZXC_to_FlxC, ZXM_to_FlxM
 BA  34- [libpari] New function families F3v, F3m
 BA  35- New GP function setdebug
+    36- allow shortcut \g n feat for setdebug("feat", n)
 
   Changed
 HC   1- faster implementation of eulervec + cache result

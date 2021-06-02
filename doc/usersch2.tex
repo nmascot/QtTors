@@ -2969,9 +2969,10 @@ previous section (shortcut for \kbd{default()}, see \secref{se:default}).
 \subsec{\b{e} $\{n\}$} Switches the \tet{echo} mode on (1) or off (0). If
 $n$ is explicitly given, set echo to $n$.
 
-\subsec{\b{g} $\{n\}$} Sets the debugging level \tet{debug} to the
-nonnegative integer $n$. Diagnostics attached to a particular feature can be
-turned on and off using \kbd{setdebug}.
+\subsec{\b{g} $\{n\}$ \{feature\}} Sets the debugging level \tet{debug} to the
+nonnegative integer $n$. If \emph{feature} is present (such as \kbd{bnf} or
+\kbd{qflll}), only set the debugging level for that feature, as by using
+\kbd{setdebug}.
 
 \subsec{\b{gf} $\{n\}$} Sets the file usage debugging level \tet{debugfiles}
 to the nonnegative integer $n$.
