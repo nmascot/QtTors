@@ -1732,6 +1732,7 @@ print_all_user_fun(int member)
   set_avma(av);
 }
 
+/* get_sep, removing enclosing quotes */
 static char *
 get_name(const char *s)
 {
@@ -1743,18 +1744,22 @@ get_name(const char *s)
   }
   return t;
 }
+static void
+ack_debug(const char *s, long d) {pari_printf("   debug(\"%s\") = %ld\n",s,d);}
+static void
+ack_setdebug(const char *s, long d) {setdebug(s, d); ack_debug(s, d);}
 
 static void
 escape(const char *tch, int ismain)
 {
   const char *s = tch;
+  long d;
   char c;
+  GEN x;
   switch ((c = *s++))
   {
     case 'w': case 'x': case 'a': case 'b': case 'B': case 'm':
     { /* history things */
-      long d;
-      GEN x;
       if (c != 'w' && c != 'x') d = get_int(s,0);
       else
       {
@@ -1784,25 +1789,40 @@ escape(const char *tch, int ismain)
       if (!*s) s = (GP_DATA->echo)? "0": "1";
       (void)sd_echo(s,d_ACKNOWLEDGE); break;
     case 'g':
-      switch (*s)
-      {
-        case 'm': s++; (void)sd_debugmem(*s? s: NULL,d_ACKNOWLEDGE); break;
-        case 'f': s++; (void)sd_debugfiles(*s? s: NULL,d_ACKNOWLEDGE); break;
-        default :
-          if (isdigit(*s))
+        if (isdigit(*s))
+        {
+          const char *t = s + 1;
+          if (isdigit(*t)) t++; /* atol(s) < 99 */
+          t = get_name(t);
+          if (*t) { d = atol(s); ack_setdebug(t, d); break; }
+        }
+        else if (*s == '"' || isalpha(*s))
+        {
+          char *t = get_name(s);
+          if (t[1])
           {
-            const char *t = s;
-            do t++; while (isdigit(*t));
-            t = get_name(t);
-            if (*t)
+            char *T = t + strlen(t) - 1;
+            if (isdigit(*T))
             {
-              long d = atol(s);
-              pari_printf("   setdebug(\"%s\", %ld)\n", t, d);
-              setdebug(t, d); break;
+              if (isdigit(T[-1])) T--; /* < 99 */
+              d = atol(T); *T = 0;
+              ack_setdebug(get_name(t), d); /* get_name in case of ".." */
+            }
+            else
+            {
+              x = setdebug(t, -1); ack_debug(t, itos(x));
             }
           }
-          (void)sd_debug(*s? s: NULL,d_ACKNOWLEDGE); break;
-      }
+          else switch (*t)
+          {
+            case 'm':
+              s++; (void)sd_debugmem(*s? s: NULL,d_ACKNOWLEDGE); break;
+            case 'f':
+              s++; (void)sd_debugfiles(*s? s: NULL,d_ACKNOWLEDGE); break;
+          }
+          break;
+        }
+        (void)sd_debug(*s? s: NULL,d_ACKNOWLEDGE); break;
       break;
     case 'h': print_functions_hash(s); break;
     case 'l':

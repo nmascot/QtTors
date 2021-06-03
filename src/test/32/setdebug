@@ -1,0 +1,31 @@
+
+["alg" "arith" "bern" "bnf" "bnr" "bnrclassfield" "bb_group" "compiler" "ell
+" "ellanal" "ellcard" "ellisogeny" "ellrank" "ellsea" "factor" "factorff" "f
+actorint" "factormod" "fflog" "galois" "gammamellininv" "genus2red" "hensel"
+ "hyperell" "intnum" "io" "isprime" "lfun" "mat" "mathnf" "mf" "mod" "mpqs" 
+"ms" "mt" "nf" "nffactor" "nflist" "nfsubfields" "padicfields" "pol" "polcla
+ss" "polgalois" "polmodular" "polroots" "qf" "qflll" "qfsolve" "qfisom" "qua
+dclassunit" "rnf" "stark" "subcyclo" "subgrouplist" "thue" "trans" "zetamult
+"]
+
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+
+2
+0
+   debug = 2
+   debug("bnf") = 2
+   debug("bnf") = 2
+   debug("bnf") = 1
+   debug("bnf") = 1
+   debug("bnf") = 1
+   debug("bnf") = 1
+   debug("bnf") = 2
+   debug("bnf") = 2
+  ***   at top-level: setdebug("does_not_exist")
+  ***                 ^--------------------------
+  *** setdebug: domain error in setdebug: does_not_exist not a valid debug domain
+  ***   domain error in setdebug: does_not_exist not a valid debug domain
+  ***   domain error in setdebug: does_not_exist not a valid debug domain
+  ***   domain error in setdebug: does_not_exist not a valid debug domain
+Total time spent: 0

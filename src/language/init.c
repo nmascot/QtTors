@@ -2943,7 +2943,7 @@ setdebug(const char *s, long n)
     for (i = 0; i < l; i++)
       if (!strcmp(s, pari_DEBUGLEVEL_str[i])) break;
     if (i == l)
-      pari_err_DOMAIN("setdebug", "D", "not a valid",
+      pari_err_DOMAIN("setdebug", s, "not a valid",
                       strtoGENstr("debug domain"), strtoGENstr(s));
     if (n >= 0) { *pari_DEBUGLEVEL_ptr[i] = n; return gnil; }
     return stoi(*pari_DEBUGLEVEL_ptr[i]);
