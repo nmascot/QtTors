@@ -3776,7 +3776,6 @@ GEN PicTorsPairing(GEN J, GEN FRparams, GEN W, GEN LinTests)
 	}
 	if(typ(W)==t_VEC)
 	{ /* Case of multiple tors pts */
-		//printf("Into MultiPairing\n");
 		n = lg(W);
 		res = cgetg(n,typ(LinTests)==t_MAT?t_VEC:t_MAT);
 		pending = 0;
@@ -3796,7 +3795,6 @@ GEN PicTorsPairing(GEN J, GEN FRparams, GEN W, GEN LinTests)
 		res = PicTorsPairing(J,FRparams,W,mkvec(LinTests));
 		return gerepilecopy(av,gel(res,1));
 	}
-	//printf("Into Pairing\n");
   T = JgetT(J);
   p = Jgetp(J);
 	l = gel(FRparams,1);
@@ -4788,6 +4786,42 @@ GEN PicTorsGetAutMats(GEN J, GEN B, GEN FRparams, GEN LinTests, GEN R)
 	return gerepilecopy(av,mats);
 }
 
+GEN PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
+{ /* Let B be an Fl-basis of a Galois-stable subspace T of J[l]
+     and MFrob the matrix of Frob on B.
+     Finds minimal generating set G of T as an Fl[Frob]-module.
+     Returns [G,CG,M] where CG are the coordinates of G
+     and M is the rational canonical form of MFrob. */
+  /* TODO use Auts? */
+  pari_sp av = avma, av1;
+  GEN M,Q,piv,G,CG,res;
+  ulong n,d,k,i;
+  d = lg(B);
+  M = RgM_Frobenius(gmodulo(MFrob,l),0,&Q,&piv);
+  Q = centerlift(RgM_inv(Q));
+  res = cgetg(4,t_VEC);
+  M = centerlift(M);
+  if(DEBUGLEVEL)
+  {
+    av1 = avma;
+    pari_printf("The matrix of Frob_%Ps is\n",Jgetp(J));
+    printp(mkvec(M));
+    avma = av1;
+  }
+  gel(res,3) = M;
+  n = lg(piv);
+  gel(res,1) = G = cgetg(n,t_VEC);
+  gel(res,2) = CG = cgetg(n,t_VEC);
+  for(k=1;k<n;k++)
+  {
+    gel(G,k) = PicLC(J,gel(Q,piv[k]),B);
+    gel(CG,k) = cgetg(d,t_VECSMALL);
+    for(i=1;i<d;i++)
+      gel(CG,k)[i] = itos(gcoeff(Q,i,piv[k]));
+  }
+  return gerepileupto(av,res);
+}
+
 GEN PicTorsBasis_worker(GEN J, GEN l, GEN Chi, GEN Phi, GEN FRparams, GEN Lintests, GEN LinTestsNames, GEN seed)
 {
 	pari_sp av = avma;
@@ -4996,15 +5030,80 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
   /* TODO use auts that are not known to be scalars */
 	pari_sp av = avma;
   GEN Lp,Diva,Phi,phi,ChiT,BW,Bo,BT,matFrob,FRparams,LinTests,LinTestsNames,matPairings,Batch,Pt,res;
-  ulong a,r,d,i,j,nPhi,iPhi,nBatch,iBatch,NewTestName;
+  GEN J1,A,A1,B,C,c,G,I,W;
+	ulong n,a,r,d,i,j,nPhi,iPhi,nBatch,iBatch,NewTestName;
 	struct pari_mt pt;
   GEN worker,done;
-  long pending,workid;
+  long pending,workid,e;
 
 	Lp = JgetLp(J);
 	if(gequal0(Lp))
 		pari_err(e_MISC,"This Jacobian does not contain its local L factor, which is required for point counting");
   a = degree(JgetT(J)); /* Residual degree */
+  if(Chi)
+  {
+    d = degree(Chi); /* dim T */
+    ChiT = Chi;
+  }
+  else
+  {
+    d = degree(Lp);
+    ChiT = Lp;
+  }
+
+	if((e=Jgete(J))>1)
+	{
+		J1 = JacRed(J,1);
+		res = PicTorsBasis(J1,l,Chi);
+		matFrob = gel(res,2);
+		B = gel(res,1);
+		G = PicTors_FrobGen(J1,l,B,matFrob);
+  	C = gel(G,2);
+  	G = gel(G,1);
+  	n = lg(G)-1; /* Number of generators */
+    for(i=1;i<=n;i++) /* TODO parallel? */
+		{
+      gel(G,i) = PicLiftTors(J,gel(G,i),l,1,1);
+			c = cgetg(d+1,t_COL);
+			for(j=1;j<=d;j++)
+				gel(c,j) = utoi(gel(C,i)[j]);
+			gel(C,i) = c;
+		}
+		A = cgetg(a*n+1,t_MAT);
+		B = cgetg(a*n+1,t_VEC);
+		for(j=0;;j++)
+		{
+			for(i=1;i<=n;i++)
+			{
+				c = gel(C,i);
+				gel(A,n*j+i) = c;
+				gel(C,i) = FpM_FpC_mul(matFrob,c,l);
+				W = gel(G,i);
+				gel(B,n*j+i) = W;
+				gel(G,i) = PicFrob(J,W);
+			}
+			setlg(A,1+(j+1)*n);
+			I = gel(FpM_indexrank(A,l),2);
+			if(lg(I)==d+1) break;
+		}
+		for(i=1;i<=d;i++)
+		{
+			gel(A,i) = gel(A,I[i]);
+			gel(B,i) = gel(B,I[i]);
+		}
+		setlg(A,d+1);
+		setlg(B,d+1);
+		A1 = FpM_inv(A,l);
+		gel(res,1) = B;
+		gel(res,2) = FpM_mul(A1,FpM_mul(matFrob,A,l),l);
+		n = lg(gel(res,3));
+		for(i=1;i<n;i++)
+			gmael(res,3,i) = FpM_mul(A1,FpM_mul(gmael(res,3,i),A,l),l);
+		return gerepilecopy(av,res);
+	}
+
+	if(Chi==NULL) Chi = gen_0;
+
   if(a%itou(l))
   {
     Diva = divisorsu(a);
@@ -5023,17 +5122,6 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
   }
   else Phi=NULL;
 	
-	if(Chi)
-	{
-		d = degree(Chi); /* dim T */
-		ChiT = Chi;
-	}
-	else
-	{
-		d = degree(Lp);
-		Chi = gen_0;
-		ChiT = Lp;
-	}
 	r = 0; /* dim we have so far */
 	BW = BT = cgetg(1,t_VEC);
 	Bo = cgetg(1,t_VECSMALL);
@@ -5125,42 +5213,6 @@ GEN FpX_root_order_bound(GEN f, GEN p)
 	return gerepilecopy(av,mkvec2(a,b));
 }
 
-GEN PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
-{ /* Let B be an Fl-basis of a Galois-stable subspace T of J[l]
-		 and MFrob the matrix of Frob on B.
-		 Finds minimal generating set G of T as an Fl[Frob]-module.
-		 Returns [G,CG,M] where CG are the coordinates of G
-		 and M is the rational canonical form of MFrob. */
-	/* TODO use Auts? */
-	pari_sp av = avma, av1;
-	GEN M,Q,piv,G,CG,res;
-	ulong n,d,k,i;
-	d = lg(B);
-	M = RgM_Frobenius(gmodulo(MFrob,l),0,&Q,&piv);
-	Q = centerlift(RgM_inv(Q));
-	res = cgetg(4,t_VEC);
-	M = centerlift(M);
-  if(DEBUGLEVEL)
-  {
-		av1 = avma;
-    pari_printf("The matrix of Frob_%Ps is\n",Jgetp(J));
-    printp(mkvec(M));
-		avma = av1;
-  }
-	gel(res,3) = M;
-	n = lg(piv);
-	gel(res,1) = G = cgetg(n,t_VEC);
-	gel(res,2) = CG = cgetg(n,t_VEC);
-	for(k=1;k<n;k++)
-	{
-		gel(G,k) = PicLC(J,gel(Q,piv[k]),B);
-		gel(CG,k) = cgetg(d,t_VECSMALL);
-		for(i=1;i<d;i++)
-			gel(CG,k)[i] = itos(gcoeff(Q,i,piv[k]));
-	}
-	return gerepileupto(av,res);
-}
-
 GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B)
 {
 	pari_sp av = avma;
@@ -5181,7 +5233,6 @@ GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B)
 	B = gel(B,1);
 	d = lg(B)-1; /* dim */
 	B = PicTors_FrobGen(J1,l,B,MFrob);
-	//return gerepilecopy(av,tmp);
 	C = gel(B,2);
 	B = gel(B,1);
 	n = lg(B); /* Number of generators */
