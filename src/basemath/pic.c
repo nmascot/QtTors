@@ -5066,7 +5066,7 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
       gel(G,i) = PicLiftTors(J,gel(G,i),l,1,1);
 			c = cgetg(d+1,t_COL);
 			for(j=1;j<=d;j++)
-				gel(c,j) = utoi(gel(C,i)[j]);
+				gel(c,j) = modsi(gel(C,i)[j],l);
 			gel(C,i) = c;
 		}
 		A = cgetg(a*n+1,t_MAT);
@@ -5085,6 +5085,7 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
 			setlg(A,1+(j+1)*n);
 			I = gel(FpM_indexrank(A,l),2);
 			if(lg(I)==d+1) break;
+			if(j==10) return NULL; //TODO
 		}
 		for(i=1;i<=d;i++)
 		{
@@ -5101,8 +5102,6 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
 			gmael(res,3,i) = FpM_mul(A1,FpM_mul(gmael(res,3,i),A,l),l);
 		return gerepilecopy(av,res);
 	}
-
-	if(Chi==NULL) Chi = gen_0;
 
   if(a%itou(l))
   {
@@ -5121,6 +5120,7 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
 		if(nPhi==0) Phi=NULL;
   }
   else Phi=NULL;
+	if(Chi==NULL) Chi = gen_0;
 	
 	r = 0; /* dim we have so far */
 	BW = BT = cgetg(1,t_VEC);
