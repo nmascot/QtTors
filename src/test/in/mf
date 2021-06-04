@@ -822,3 +822,4 @@ mfdiv(E,f);
 mf=mfinit([7, 6, Mod(2,7)],0); [F] = mfeigenbasis(mf); mfpow(F,3)
 
 mffromqf(Mat(2),x*y)
+mffromqf(2*matid(2),x*y^2)

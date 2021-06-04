@@ -1640,4 +1640,7 @@ od(0, t^16 + 1), Mod(3/8*t^11, t^16 + 1), Mod(0, t^16 + 1)]
   ***   at top-level: mffromqf(Mat(2),x*y)
   ***                 ^--------------------
   *** mffromqf: too many variables in mffromqf.
-Total time spent: 11010
+  ***   at top-level: mffromqf(2*matid(2),x*y^2)
+  ***                 ^--------------------------
+  *** mffromqf: incorrect type in mffromqf [not a spherical t_POL] (t_POL).
+Total time spent: 10452
