@@ -4541,7 +4541,7 @@ GEN PicRandTors(GEN J, GEN l, GEN Chi, GEN Phi, GEN seed, long returnlpow)
 	if(Jgete(J)>1)
 	{
 		J1 = JacRed(J,1);
-		T = PicRandTors(J1,l,Chi,Phi,seed,0);
+		while(gequal0((T = PicRandTors(J1,l,Chi,Phi,seed,0)))) {}
 		T = PicLiftTors(J,T,l,1,1);
 		return gerepileupto(av,T);
 	}
