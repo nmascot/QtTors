@@ -8906,24 +8906,24 @@ polishomogeneous(GEN P)
   return D;
 }
 
-/* P a t_POL, 1 if spherical, 0 otherwise */
+/* M a pp((Gram q)^(-1)) ZM; P a homogeneous t_POL, is P spherical ? */
 static int
-RgX_isspherical(GEN Qi, GEN P)
+RgX_isspherical(GEN M, GEN P)
 {
   pari_sp av = avma;
-  GEN va, S;
-  long lva, i, j;
-  va = variables_vecsmall(P); lva = lg(va);
-  if (lva > lg(Qi)) pari_err(e_MISC, "too many variables in mffromqf");
+  GEN S, v = variables_vecsmall(P);
+  long i, j, l = lg(v);
+  if (l > lg(M)) pari_err(e_MISC, "too many variables in mffromqf");
   S = gen_0;
-  for (j = 1; j < lva; j++)
+  for (j = 1; j < l; j++)
   {
-    GEN col = gel(Qi, j), Pj = deriv(P, va[j]);
+    GEN Mj = gel(M, j), Pj = deriv(P, v[j]);
     for (i = 1; i <= j; i++)
     {
-      GEN coe = gel(col, i);
-      if (i != j) coe = gmul2n(coe, 1);
-      if (!gequal0(coe)) S = gadd(S, gmul(coe, deriv(Pj, va[i])));
+      GEN c = gel(Mj, i);
+      if (!signe(c)) continue;
+      if (i != j) c = shifti(c, 1);
+      S = gadd(S, gmul(c, deriv(Pj, v[i])));
     }
   }
   return gc_bool(av, gequal0(S));
