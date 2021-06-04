@@ -3741,7 +3741,15 @@ GEN Fq_mu_l_log(GEN x, GEN z, GEN T, GEN p, GEN l)
 
 GEN PicTorsPairingInit(GEN J, GEN l)
 {
-	GEN res,T,p,W0;
+	pari_sp av;
+	GEN J1,res,T,p,W0;
+	if(Jgete(J)>1)
+	{
+		av = avma;
+		J1 = JacRed(J,1);
+		res = PicTorsPairingInit(J1,l);
+		return gerepileupto(av,res);
+	}
 	T = JgetT(J);
 	p = Jgetp(J);
 	W0 = JgetW0(J);
@@ -3756,10 +3764,16 @@ GEN PicTorsPairingInit(GEN J, GEN l)
 GEN PicTorsPairing(GEN J, GEN FRparams, GEN W, GEN LinTests)
 {
   pari_sp av = avma;
-  GEN T,p,l,AddC,W0,z,fr,res,worker,done;
+  GEN J1,T,p,l,AddC,W0,z,fr,res,worker,done;
   ulong n,i;
 	long pending,j,workid;
 	struct pari_mt pt;
+	if(Jgete(J)>1)
+	{
+		J1 = JacRed(J,1);
+		res = PicTorsPairing(J1,FRparams,W,LinTests);
+		return gerepileupto(av,res);
+	}
 	if(typ(W)==t_VEC)
 	{ /* Case of multiple tors pts */
 		//printf("Into MultiPairing\n");
