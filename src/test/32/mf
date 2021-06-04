@@ -1637,4 +1637,7 @@ od(0, t^16 + 1), Mod(3/8*t^11, t^16 + 1), Mod(0, t^16 + 1)]
   ***   at top-level: ...,0);[F]=mfeigenbasis(mf);mfpow(F,3)
   ***                                             ^----------
   *** mfpow: sorry, changing cyclotomic fields in mf is not yet implemented.
-Total time spent: 18470
+  ***   at top-level: mffromqf(Mat(2),x*y)
+  ***                 ^--------------------
+  *** mffromqf: too many variables in mffromqf.
+Total time spent: 11010

@@ -820,3 +820,5 @@ mfgaloistype([4,1,-4],x)
 N=19; f=mfeisenstein(2,Mod(6,N)); g=mfeisenstein(2,Mod(11,N)); E=mfmul(f,g);
 mfdiv(E,f);
 mf=mfinit([7, 6, Mod(2,7)],0); [F] = mfeigenbasis(mf); mfpow(F,3)
+
+mffromqf(Mat(2),x*y)
