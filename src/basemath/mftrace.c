@@ -8913,9 +8913,9 @@ RgX_isspherical(GEN Qi, GEN P)
   pari_sp av = avma;
   GEN va, S;
   long lva, i, j;
-  if (degpol(P) <= 1) return 1;
   va = variables_vecsmall(P); lva = lg(va);
   if (lva > lg(Qi)) pari_err(e_MISC, "too many variables in mffromqf");
+  if (degpol(P) <= 1) return 1;
   S = gen_0;
   for (j = 1; j < lva; j++)
   {
