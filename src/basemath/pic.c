@@ -1284,9 +1284,9 @@ GEN PicMul(GEN J, GEN W, GEN n, long flag)
   if(DEBUGLEVEL>=2)
   {
     if(flag&2)
-      pari_printf("PicMul : Mul by %Ps in %lu steps\n",n,nC-2);
+      pari_printf("picmul by %Ps in %lu steps\n",n,nC-2);
     else
-      pari_printf("PicMul : Mul by ±%Ps in %lu steps\n",n,nC-2);
+      pari_printf("picmul by ±%Ps in %lu steps\n",n,nC-2);
   }
   Wlist = cgetg(nC,t_VEC);
   gel(Wlist,1) = W;
