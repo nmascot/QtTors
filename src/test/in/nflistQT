@@ -24,6 +24,10 @@ nflist("A22",'t)
 nflist([47,6],'t)
 nflist([47,5],'t)
 
+nflist("C1",'t)
+nflist("C2",'t)
+nflist("C3",'t)
+
 \\ ERRORS
 nflist([4,6])
 nflist([18,100000])

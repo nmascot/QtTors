@@ -4921,9 +4921,10 @@ grouptranslate(const char *g, long *t, int QT)
   if (QT)
   {
     r = *g; ell = itos( strtoi(g + 1) );
-    if (ell < 3) return 0;
+    if (ell < 0) return 0;
     if (r == 'A') { *t = -2; return ell; }
     if (r == 'S') { *t = -1; return ell; }
+    if (!strcmp(g, "C3")) { *t = -2; return ell; }
   }
   if (!strcmp(g, "C1")) { *t = 1; return 1; }
   if (!strcmp(g, "C2") || !strcmp(g, "D2")) { *t = 1; return 2; }
