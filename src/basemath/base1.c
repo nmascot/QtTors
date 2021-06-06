@@ -478,16 +478,26 @@ ZX_Q_mul(GEN A, GEN z)
   return gerepilecopy(av, B);
 }
 
-/* pol != 0 in Z[x], returns a monic polynomial POL in Z[x] generating the
- * same field: there exist C in Q, L in Z such that POL(x) = C pol(x/L).
+/* T != 0 in Z[x], returns a monic polynomial U in Z[x] generating the
+ * same field: there exist C in Q, L in Z such that U(x) = C T(x/L).
  * Set *L = NULL if L = 1, and to L otherwise. No garbage collecting. */
 GEN
-ZX_to_monic(GEN pol, GEN *L)
+ZX_to_monic(GEN T, GEN *L)
 {
-  long n = lg(pol)-1;
-  GEN lc = gel(pol,n);
-  if (is_pm1(lc)) { *L = gen_1; return signe(lc) > 0? pol: ZX_neg(pol); }
-  return ZX_primitive_to_monic(Q_primpart(pol), L);
+  GEN lc = leading_coeff(T);
+  if (is_pm1(lc)) { *L = gen_1; return signe(lc) > 0? T: ZX_neg(T); }
+  return ZX_primitive_to_monic(Q_primpart(T), L);
+}
+
+GEN
+poltomonic(GEN T, GEN *L)
+{
+  pari_sp av = avma;
+  if (typ(T) != t_POL || !RgX_is_QX(T)) pari_err_TYPE("poltomonic", T);
+  if (!RgX_is_ZX(T)) T = Q_primpart(T);
+  T = ZX_Q_normalize(T, L);
+  if (L) gerepileall(av, 2, &T, L); else T = gerepilecopy(av, T);
+  return T;
 }
 
 GEN

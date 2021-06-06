@@ -19,6 +19,11 @@ pollead(y,z)
 polgraeffe(x^2+x+1)
 polgraeffe(x^3+x+1)
 polsym(2*x^4+1,4)
+poltomonic(9*x^2-1/2)
+U=poltomonic(9*x^2-1/2,&L);[U,L]
+poltomonic(x^2+4)
+U=poltomonic(x^2+4,&L);[U,L]
+
 norm(I*x+1)
 trace(I*x+1)
 matcompanion(2*x^2+1)

@@ -26,6 +26,10 @@ y
 x^2 + x + 1
 -x^3 - 2*x^2 - x + 1
 [4, 0, 0, 0, -2]~
+x^2 - 2
+[x^2 - 2, 6]
+x^2 + 1
+[x^2 + 1, 1/2]
 x^2 + 1
 2
 
@@ -111,4 +115,4 @@ Mod(-6, y^2 - 2)*x^2 + Mod(48*z, y^2 - 2)*x + Mod(480*z + 600, y^2 - 2)
   ***   at top-level: (1/x)%x
   ***                      ^--
   *** _%_: impossible inverse in QXQ_inv: Mod(0, x).
-Total time spent: 9
+Total time spent: 6

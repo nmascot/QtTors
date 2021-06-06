@@ -2221,6 +2221,7 @@ GEN     polredabs0(GEN x, long flag);
 GEN     polredabs2(GEN x);
 GEN     polredabsall(GEN x, long flun);
 GEN     polredbest(GEN x, long flag);
+GEN     poltomonic(GEN T, GEN *L);
 GEN     rnfpolredabs(GEN nf, GEN pol, long flag);
 GEN     rnfpolredbest(GEN nf, GEN R, long flag);
 GEN     smallpolred(GEN x);
