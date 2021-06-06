@@ -106,7 +106,7 @@ mulRq(GEN x, GEN y) {
 static GEN
 addqf(GEN x, GEN y, long prec) { pari_sp av = avma;
   long i = gexpo(x) - gexpo(y);
-  if (i > 0) prec += nbits2extraprec( i );
+  if (i > 0) prec += nbits2extraprec(i);
   return gerepileupto(av, gadd(y, quadtofp(x, prec)));
 }
 static GEN
@@ -3139,7 +3139,7 @@ ginv(GEN x)
       return gerepile(av,tetpil,divcR(p2,p1));
 
     case t_QUAD:
-      av=avma; p1=gnorm(x); p2=conj_i(x); tetpil=avma;
+      av=avma; p1=quadnorm(x); p2=conj_i(x); tetpil=avma;
       return gerepile(av,tetpil,gdiv(p2,p1));
 
     case t_PADIC: z = cgetg(5,t_PADIC);
