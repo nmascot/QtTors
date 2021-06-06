@@ -7,15 +7,22 @@ Help: mfkohnenbijection(mf): mf being a cuspidal space of half-integral weight
  isomorphism from S_{2k-1}(N,CHI^2) given by mf2 to the Kohnen + space
  S_k+(4N,CHI), K is a basis of the Kohnen + space, and shi gives
  the linear combination of Shimura lifts giving M^(-1).
-Doc: \kbd{mf} being a cuspidal space of half-integral weight, returns
- \kbd{[mf2,M,K,shi]}, where $M$ is a matrix giving a Hecke-module
- isomorphism from the cuspidal space \kbd{mf2} giving
- $S_{2k-1}(\Gamma_0(N),\chi^2)$ to the
- Kohnen $+$-space $S_k^+(\Gamma_0(4N),\chi)$, \kbd{K} represents a basis $B$
- of the Kohnen $+$-space as a matrix whose columns are the coefficients of $B$
- on the basis of \kbd{mf}; \kbd{shi} is a vector of pairs $(t_i,n_i)$
- gives the linear combination of Shimura lifts giving $M^{-1}$: $t_i$ is a
- squarefree positive integer and $n_i$ is a small nonzero integer.
+Doc: Let \kbd{mf} be a cuspidal space of half-integral weight and weight $4N$,
+ with $N$ squarefree and let $S_k^+(\Gamma_0(4N),\chi)$ be the Kohnen
+ $+$-space. Returns \kbd{[mf2,M,K,shi]}, where
+
+ \item \kbd{mf2} gives the cuspidal space $S_{2k-1}(\Gamma_0(N),\chi^2)$;
+
+ \item $M$ is a matrix giving a Hecke-module isomorphism from that space to the
+ Kohnen $+$-space $S_k^+(\Gamma_0(4N),\chi)$;
+
+ \item \kbd{K} represents a basis $B$ of the Kohnen $+$-space as a matrix
+ whose columns are the coefficients of $B$ on the basis of \kbd{mf};
+
+ \item \kbd{shi} is a vector of pairs $(t_i,n_i)$ gives the linear
+ combination of Shimura lifts giving $M^{-1}$: $t_i$ is a squarefree positive
+ integer and $n_i$ is a small nonzero integer.
+
  \bprog
  ? mf=mfinit([60,5/2],1); [mf2,M,K,shi]=mfkohnenbijection(mf); M
  %2 =
