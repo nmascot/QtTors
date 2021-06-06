@@ -60,6 +60,9 @@ BA  49- qfauto([[1,0;0,1],[0,0;1,0]]) -> SEGV
         definition in the documentation [ was using log(p) instead of
         log(Norm P)) for P in S above p ]
 BA  51- rnfdisc could return corrupted result
+    52- quadtofp suffered from catastrophic cancellation [#2298]
+        z=66992092050551637663438906713182313772
+          -47370562574818466708936539960450008968*quadgen(8); z*1. -> 0.75
 
   Added
 HC   1- new GP function eulerreal
