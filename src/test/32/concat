@@ -101,4 +101,7 @@
 
 [1 2]
 
+  ***   at top-level: concat(List([]))
+  ***                 ^----------------
+  *** concat: domain error in concat: vector = List([])
 Total time spent: 0

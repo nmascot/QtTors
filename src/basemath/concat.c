@@ -295,7 +295,6 @@ shallowconcat1(GEN x)
   {
     case t_VEC: case t_COL:
       lx = lg(x);
-      if (lx==1) pari_err_DOMAIN("concat","vector","=",x,x);
       break;
     case t_LIST:
       if (list_typ(x)!=t_LIST_RAW) pari_err_TYPE("concat",x);
@@ -306,6 +305,7 @@ shallowconcat1(GEN x)
       pari_err_TYPE("concat",x);
       return NULL; /* LCOV_EXCL_LINE */
   }
+  if (lx==1) pari_err_DOMAIN("concat","vector","=",x,x);
   if (lx==2) return gel(x,1);
   z = gel(x,1); t = typ(z); i = 2;
   if (is_matvec_t(t) || t == t_VECSMALL || t == t_STR)
