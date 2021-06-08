@@ -879,12 +879,14 @@ list_cmp(GEN x, GEN y, int cmp(GEN x, GEN y))
 {
   int t = list_typ(x);
   GEN vx, vy;
+  long lvx, lvy;
   if (list_typ(y)!=t) return 0;
   vx = list_data(x);
   vy = list_data(y);
-  if (!vx) return vy? 0: 1;
-  if (!vy) return 0;
-  if (lg(vx) != lg(vy)) return 0;
+  lvx = vx ? lg(vx): 1;
+  lvy = vy ? lg(vy): 1;
+  if (lvx==1 && lvy==1) return 1;
+  if (lvx != lvy) return 0;
   switch (t)
   {
   case t_LIST_MAP:

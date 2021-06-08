@@ -43,6 +43,7 @@ List(1)==List()
 List()==List(1)
 List(1)==List(1)
 List(2)==List(1)
+L=List();listput(~L,1);listpop(~L);L==List()
 
 g=ffgen(2^3);
 h=ffgen(3^3);
