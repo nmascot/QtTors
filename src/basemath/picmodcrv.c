@@ -2003,6 +2003,8 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 	forprime_t piter;
 	ul = itou(l);
 	pf = mfparams(f);
+	if(cmpii(gel(pf,2),l)!=-1)
+		pari_err(e_IMPL,"case k >= l");
 	N = itou(gel(pf,1));
 	k = itos(gel(pf,2));
 	eps = znchar(f);

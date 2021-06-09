@@ -2045,10 +2045,41 @@ GEN CurveAutFrobClosure(GEN P, GEN Auts, GEN vars, GEN FrobMat, GEN T, GEN pe, G
   return gerepilecopy(av,res);
 }
 
+void Get_ff_aT(GEN AT, GEN p, ulong* pa, GEN* pT)
+{
+	pari_sp av;
+	long t;
+	ulong a;
+	GEN T;
+	switch(typ(AT))
+  {
+  case t_INT:
+		a = itou(AT);
+		if(pa)
+    	*pa = a;
+    if(pT)
+		{
+			av = avma;
+			t = fetch_var();
+    	name_var(t,"t");
+    	T = liftint(ffinit(p,a,t));
+			*pT = gerepileupto(av,T);
+		}
+    break;
+  case t_POL:
+		if(pT)
+    	*pT = AT;
+		if(pa)
+    	*pa = degpol(*pT);
+    break;
+  default:
+    pari_err_TYPE("picinit",AT);
+  }
+}
+
 GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long e, GEN Lp)
 {
   pari_sp av = avma;
-  long t;
   ulong a,nZ,nV2,nAuts,n,nOP,m,i,j;
   GEN vars,pe,T,FrobMat,Z,P,FrobCyc,AutData,OP,V1,V2,W0,V,M,I,KV,U,params,L12,J;
   struct pari_mt pt;
@@ -2058,23 +2089,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, l
   vars = variables_vecsmall(f);
   nZ = 5*d0+1; /* min required #pts */
 
-	switch(typ(AT))
-	{
-	case t_INT:
-		a = itou(AT);
-  	t = fetch_var();
-  	name_var(t,"t");
-  	T = liftint(ffinit(p,a,t));
-		break;
-	case t_POL:
-		T = AT;
-		a = degpol(T);
-		break;
-	default:
-		T = NULL; /* Prevent compiler from freaking out */
-		a = 0;
-		pari_err_TYPE("picinit",AT);
-	}
+	Get_ff_aT(AT,p,&a,&T);
   pe = powis(p,e);
   FrobMat = ZpXQ_FrobMat(T,p,e,pe);
 
@@ -4271,13 +4286,13 @@ GEN SuperRRdata(GEN f, ulong m, GEN P)
 {
 	pari_sp av = avma;
 	ulong d,g,d0;
-	GEN x,y,L,L2,E2,Auts,eqn,res;
+	GEN x,y,L,L2,E2,eqn,res;
 
 	if(issquarefree(f)==0)
 		pari_err(e_MISC,"%Ps is not squarefree",f);
 	d = degree(f);
 	if(ugcd(m,d)>1)
-		pari_err(e_IMPL,"%lu and the degree of %Ps are not coprime",m,f);
+		pari_err(e_IMPL,"m and the degree of f are not coprime",m,f);
 	if(P)
 	{
 		if(PtIsOnSuperellCurve(f,m,P)==0)
@@ -4299,32 +4314,57 @@ GEN SuperRRdata(GEN f, ulong m, GEN P)
 		gmael(L,3,2) = gmul(L2,ker(gtomat(E2)));
 	}
 	else gel(L,3) = gen_0;
-	if(m%2)
-	{
-		Auts = cgetg(1,t_VEC);
-	}
-	else
-	{
-		Auts = cgetg(2,t_VEC);
-	  gel(Auts,1) = cgetg(3,t_VEC);
-	  gmael(Auts,1,1) = mkvecn(3,x,gneg(y),gen_1); /* Hyperell invol */
-	  gmael(Auts,1,2) = gen_m1; /* Action on J */
-	}
 	f = gcopy(f);
 	setvarn(f,0);
 	eqn = gsub(gpowgs(y,m),f);
-	res = mkvecn(5,eqn,Auts,utoi(g),utoi(d0),L);
+	res = mkvecn(4,eqn,utoi(g),utoi(d0),L);
 	return gerepilecopy(av,res);
+}
+
+GEN SuperAut(ulong m, GEN T, GEN p, long e)
+{
+	pari_sp av = avma;
+	GEN q1,Phi,z,y,Auts,Aut;
+	ulong a,m1;
+	a = degpol(T);
+	q1 = powiu(p,a);
+	q1 = addii(q1,gen_m1);
+	m1 = ugcdiu(q1,m);
+	if(m1==1)
+	{
+		avma = av;
+		return cgetg(1,t_VEC);
+	}
+	if(DEBUGLEVEL)
+		printf("SuperellAut: creating automorphism [x,y] |-> [x,zeta_%lu*y]\n",m1);
+	Phi = polcyclo(m1,0);
+	z = FqX_roots(Phi,T,p);
+	z = gel(z,1);
+	if(e>1)
+		z = ZpX_ZpXQ_liftroot(Phi,z,T,p,e);
+	y = pol_x(1);
+	Auts = cgetg(2,t_VEC);
+	gel(Auts,1) = cgetg(3,t_VEC);
+	Aut = gel(Auts,1);
+	gel(Aut,2) = m1==2?gen_m1:gen_0;
+	gel(Aut,1) = cgetg(4,t_VEC);
+	Aut = gel(Aut,1);
+	gel(Aut,1) = pol_x(0);
+	gel(Aut,2) = gmul(z,y);
+	gel(Aut,3) = gen_1;
+	return gerepileupto(av,Auts);
 }
 
 GEN SuperPicInit(GEN f, ulong m, GEN p, GEN AT, long e, GEN P)
 {
   pari_sp av = avma;
-  GEN J,Lp,RRdata,bad;
+  GEN J,T,Lp,RRdata,Auts,bad;
+	Get_ff_aT(AT,p,NULL,&T);
 	Lp = SuperZeta(f,m,itou(p));
   RRdata = SuperRRdata(f,m,P);
+	Auts = SuperAut(m,T,p,e);
 	bad = pol_x(1); /* y */
-  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),bad,p,AT,e,Lp);
+  J = PicInit(gel(RRdata,1),Auts,itou(gel(RRdata,2)),itou(gel(RRdata,3)),gel(RRdata,4),bad,p,T,e,Lp);
   return gerepileupto(av,J);
 }
 
@@ -5470,12 +5510,14 @@ GEN SuperGalRep(GEN f, ulong m, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong for
    we must have chi || (Lp mod l)
    where Lp is the local L factor at p.*/
   pari_sp av = avma;
-  GEN RRdata, Lp, J, R;
+  GEN RRdata, T, Auts, Lp, J, R;
   ulong a;
 	RRdata = SuperRRdata(f,m,P);
   Lp = SuperZeta(f,m,itou(p));
   a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
-  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),pol_x(1),p,utoi(a),e,Lp);
+	Get_ff_aT(utoi(a),p,NULL,&T);
+	Auts = SuperAut(m,T,p,e);
+  J = PicInit(gel(RRdata,1),Auts,itou(gel(RRdata,2)),itou(gel(RRdata,3)),gel(RRdata,4),pol_x(1),p,T,e,Lp);
   R = PicTorsGalRep(J,l,chi);
   return gerepileupto(av,R);
 }
