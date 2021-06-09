@@ -1531,6 +1531,29 @@ GEN PicAut(GEN J, GEN W, ulong nAut)
   return W2;
 }
 
+GEN PicAutPoly(GEN J, GEN W, GEN F, ulong nAut)
+{
+  pari_sp av = avma;
+  ulong d,i;
+  GEN n,FW,res;
+
+  if(gequal0(F))
+    return gcopy(JgetW0(J));
+  d = degree(F);
+  FW = W;
+  n = truecoeff(F,0);
+  if(d&1L) n = negi(n);
+  res = PicMul(J,W,n,2);
+  for(i=1;i<=d;i++)
+  {
+    FW = PicAut(J,FW,nAut);
+    n = truecoeff(F,i);
+    if((d+1-i)&1L) n = negi(n);
+    res = PicChord(J,res,PicMul(J,FW,n,2),0);
+  }
+  return gerepileupto(av,res);
+}
+
 GEN PicChart(GEN J, GEN W, ulong P0, GEN P1) /* /!\ Not Galois-equivariant ! */
 {
   pari_sp av = avma;
@@ -2022,11 +2045,11 @@ GEN CurveAutFrobClosure(GEN P, GEN Auts, GEN vars, GEN FrobMat, GEN T, GEN pe, G
   return gerepilecopy(av,res);
 }
 
-GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, long e, GEN Lp)
+GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long e, GEN Lp)
 {
   pari_sp av = avma;
   long t;
-  ulong nZ,nV2,nAuts,n,nOP,m,i,j;
+  ulong a,nZ,nV2,nAuts,n,nOP,m,i,j;
   GEN vars,pe,T,FrobMat,Z,P,FrobCyc,AutData,OP,V1,V2,W0,V,M,I,KV,U,params,L12,J;
   struct pari_mt pt;
   GEN worker,done,E;
@@ -2035,13 +2058,27 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
   vars = variables_vecsmall(f);
   nZ = 5*d0+1; /* min required #pts */
 
-  t = fetch_var();
-  name_var(t,"t");
-  T = liftint(ffinit(p,a,t));
+	switch(typ(AT))
+	{
+	case t_INT:
+		a = itou(AT);
+  	t = fetch_var();
+  	name_var(t,"t");
+  	T = liftint(ffinit(p,a,t));
+		break;
+	case t_POL:
+		T = AT;
+		a = degpol(T);
+		break;
+	default:
+		T = NULL; /* Prevent compiler from freaking out */
+		a = 0;
+		pari_err_TYPE("picinit",AT);
+	}
   pe = powis(p,e);
   FrobMat = ZpXQ_FrobMat(T,p,e,pe);
 
-  if(DEBUGLEVEL>=2) printf("PicInit: Finding points\n");
+  if(DEBUGLEVEL>=2) printf("picinit: Finding points\n");
   n = 0; /* current #pts */
   Z = cgetg(1,t_VEC); /* list of pts */
   /* Initialise empty cycles */
@@ -2061,11 +2098,11 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
     P = CurveRandPt(f,T,p,e,bad);
     /* Is it new mod p ? */
     if(FindMod(P,Z,n,p,0)) continue;
-    if(DEBUGLEVEL>=3) printf("PicInit: Got new pt\n");
+    if(DEBUGLEVEL>=3) printf("picinit: Got new pt\n");
     /* Compute closure under Frob and Auts */
     OP = CurveAutFrobClosure(P,Auts,vars,FrobMat,T,pe,p,e);
     nOP = lg(gel(OP,1))-1; /* # new pts */
-    if(DEBUGLEVEL>=3) printf("PicInit: Got closure of size %lu\n",nOP);
+    if(DEBUGLEVEL>=3) printf("picinit: Got closure of size %lu\n",nOP);
     /* Add new pts */
     Z = gconcat(Z,gel(OP,1));
     /* Shift permutation describing Frob and Auts */
@@ -2083,7 +2120,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
     n += nOP;
   }
 
-  if(DEBUGLEVEL>=2) printf("PicInit: Evaluating rational functions\n");
+  if(DEBUGLEVEL>=2) printf("picinit: Evaluating rational functions\n");
 	V = cgetg(6,t_VEC);
   gel(V,1) = V1 = FnsEvalAt_Rescale(gel(L,1),Z,vars,T,p,e,pe);
   gel(V,2) = V2 = FnsEvalAt_Rescale(gel(L,2),Z,vars,T,p,e,pe);
@@ -2100,7 +2137,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
   }
   gel(V,4) = ZpXQMinv(M,T,pe,p,e);
   W0 = V1;
-	if(DEBUGLEVEL>=2) printf("PicInit: Computing equation matrices\n");
+	if(DEBUGLEVEL>=2) printf("picinit: Computing equation matrices\n");
   KV = cgetg(4,t_VEC);
   E = stoi(e);
   worker = strtofunction("_mateqnpadic");
@@ -2112,7 +2149,7 @@ GEN PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, ulong a, 
     if(done) gel(KV,workid) = done;
   }
   mt_queue_end(&pt);
-	if(DEBUGLEVEL>=2) printf("PicInit: Constructing evaluation maps\n");
+	if(DEBUGLEVEL>=2) printf("picinit: Constructing evaluation maps\n");
 	L12 = gel(L,3);
 	if(gequal0(L12)) U = gen_0;
 	else
@@ -4188,14 +4225,14 @@ GEN HyperRRdata(GEN f, GEN P12)
 	return gerepilecopy(av,res);
 }
 
-GEN HyperPicInit(GEN f, GEN p, ulong a, long e, GEN P12)
+GEN HyperPicInit(GEN f, GEN p, GEN AT, long e, GEN P12)
 {
 	pari_sp av = avma;
 	GEN J,Lp,RRdata,bad;
 	Lp = hyperellcharpoly(gmodulo(f,p));
 	RRdata = HyperRRdata(f,P12);
 	bad = pol_x(1); /* y */
-	J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),bad,p,a,e,Lp);
+	J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),bad,p,AT,e,Lp);
 	return gerepileupto(av,J);
 }
 
@@ -4280,14 +4317,14 @@ GEN SuperRRdata(GEN f, ulong m, GEN P)
 	return gerepilecopy(av,res);
 }
 
-GEN SuperPicInit(GEN f, ulong m, GEN p, ulong a, long e, GEN P)
+GEN SuperPicInit(GEN f, ulong m, GEN p, GEN AT, long e, GEN P)
 {
   pari_sp av = avma;
   GEN J,Lp,RRdata,bad;
 	Lp = SuperZeta(f,m,itou(p));
   RRdata = SuperRRdata(f,m,P);
 	bad = pol_x(1); /* y */
-  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),bad,p,a,e,Lp);
+  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),bad,p,AT,e,Lp);
   return gerepileupto(av,J);
 }
 
@@ -4515,13 +4552,13 @@ GEN SmoothRRdata(GEN f, GEN p, GEN P)
 	return gerepilecopy(av,res);
 }
 
-GEN SmoothPicInit(GEN f, GEN p, ulong a, long e, GEN P)
+GEN SmoothPicInit(GEN f, GEN p, GEN AT, long e, GEN P)
 {
 	pari_sp av = avma;
   GEN J,Lp,RRdata;
   RRdata = SmoothRRdata(f,p,P);
 	Lp = PlaneZeta(gel(RRdata,1),itou(p));
-  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,a,e,Lp);
+  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,AT,e,Lp);
   return gerepileupto(av,J);
 }
 
@@ -5415,7 +5452,7 @@ GEN HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
 	RRdata = HyperRRdata(f,P);
 	Lp = hyperellcharpoly(gmodulo(f,p));
   a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
-  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),pol_x(1),p,a,e,Lp);
+  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),pol_x(1),p,utoi(a),e,Lp);
 	R = PicTorsGalRep(J,l,chi);
 	return gerepileupto(av,R);
 }
@@ -5438,7 +5475,7 @@ GEN SuperGalRep(GEN f, ulong m, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong for
 	RRdata = SuperRRdata(f,m,P);
   Lp = SuperZeta(f,m,itou(p));
   a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
-  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),pol_x(1),p,a,e,Lp);
+  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),pol_x(1),p,utoi(a),e,Lp);
   R = PicTorsGalRep(J,l,chi);
   return gerepileupto(av,R);
 }
@@ -5461,7 +5498,7 @@ GEN SmoothGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
 	RRdata = SmoothRRdata(f,p,P);
 	Lp = PlaneZeta(gel(RRdata,1),itou(p));
   a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
-  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,a,e,Lp);
+  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,utoi(a),e,Lp);
 	R = PicTorsGalRep(J,l,chi);
   return gerepileupto(av,R);
 }

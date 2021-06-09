@@ -1,7 +1,7 @@
 Function: picinit
 Section: modular_forms
 C-Name: PicInit
-Prototype: GGUUGGGULDG
+Prototype: GGUUGGGGLDG
 Help: picinit(f,Auts,g,d0,L,badlocus,p,a,e,Lp): TODO
 Doc: TODO 
  \bprog
