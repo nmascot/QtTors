@@ -65,6 +65,7 @@ BA  51- rnfdisc could return corrupted result
           -47370562574818466708936539960450008968*quadgen(8); z*1. -> 0.75
 BA  53- concat(List([1])[1..0]) ->SEGV (instead of error) [#2299]
 BA  54- List([1])[1..0]==List() -> 0 instead of 1
+    55- ZX_squff(T) did not follow its specification if T(0) = 0
 
   Added
 HC   1- new GP function eulerreal

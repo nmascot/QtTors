@@ -1775,23 +1775,25 @@ ZpX_monic_factor_squarefree(GEN f, GEN p, long prec)
   return gerepilecopy(av, L);
 }
 
-/* assume f a ZX with leading_coeff 1, degree > 0 */
+/* assume T a ZX with leading_coeff 1, degree > 0 */
 GEN
-ZpX_monic_factor(GEN f, GEN p, long prec)
+ZpX_monic_factor(GEN T, GEN p, long prec)
 {
-  GEN poly, ex, P, E;
-  long l, i;
+  GEN Q, P, E, F;
+  long L, l, i, v;
 
-  if (degpol(f) == 1) return mkmat2(mkcol(f), mkcol(gen_1));
-  poly = ZX_squff(f,&ex); l = lg(poly);
-  P = cgetg(l, t_VEC);
-  E = cgetg(l, t_VEC);
+  if (degpol(T) == 1) return mkmat2(mkcol(T), mkcol(gen_1));
+  v = ZX_valrem(T, &T);
+  Q = ZX_squff(T, &F); l = lg(Q); L = v? l + 1: l;
+  P = cgetg(L, t_VEC);
+  E = cgetg(L, t_VEC);
   for (i = 1; i < l; i++)
   {
-    GEN L = ZpX_monic_factor_squarefree(gel(poly,i), p, prec);
-    gel(P,i) = L; settyp(L, t_COL);
-    gel(E,i) = const_col(lg(L)-1, utoipos(ex[i]));
+    GEN w = ZpX_monic_factor_squarefree(gel(Q,i), p, prec);
+    gel(P,i) = w; settyp(w, t_COL);
+    gel(E,i) = const_col(lg(w)-1, utoipos(F[i]));
   }
+  if (v) { gel(P,i) = pol_x(varn(T)); gel(E,i) = utoipos(v); }
   return mkmat2(shallowconcat1(P), shallowconcat1(E));
 }
 

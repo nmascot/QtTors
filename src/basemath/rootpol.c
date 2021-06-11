@@ -1801,6 +1801,7 @@ isexactpol(GEN p)
   return 1;
 }
 
+/* p(0) != 0 [for efficiency] */
 static GEN
 solve_exact_pol(GEN p, long bit)
 {

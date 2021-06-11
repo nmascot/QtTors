@@ -875,17 +875,19 @@ ZX_DDF(GEN x)
   return L;
 }
 
-/* SquareFree Factorization. f = prod P^e, all e distinct, in Z[X] (char 0
- * would be enough, if ZX_gcd --> ggcd). Return (P), set *ex = (e) */
+/* SquareFree Factorization in Z[X] (char 0 is enough, if ZX_gcd -> RgX_gcd)
+ * f = prod Q[i]^E[i], E[1] < E[2] < ..., and Q[i] squarefree and coprime.
+ * Return Q, set *pE = E. For efficiency, caller should have used ZX_valrem
+ * so that f(0) != 0 */
 GEN
-ZX_squff(GEN f, GEN *ex)
+ZX_squff(GEN f, GEN *pE)
 {
-  GEN T, V, P, e;
-  long i, k, val = ZX_valrem(f, &f), n = 2 + degpol(f);
+  GEN T, V, P, E;
+  long i, k, n = 1 + degpol(f);
 
   if (signe(leading_coeff(f)) < 0) f = ZX_neg(f);
-  e = cgetg(n,t_VECSMALL);
-  P = cgetg(n,t_COL);
+  E = cgetg(n, t_VECSMALL);
+  P = cgetg(n, t_COL);
   T = ZX_gcd_all(f, ZX_deriv(f), &V);
   for (k = i = 1;; k++)
   {
@@ -897,7 +899,7 @@ ZX_squff(GEN f, GEN *ex)
      * T = prod_{i: e_i > k} T_i^{e_i - k} */
     if (!dW)
     {
-      if (dV) { gel(P,i) = Q_primpart(V); e[i] = k; i++; }
+      if (dV) { gel(P,i) = Q_primpart(V); E[i] = k; i++; }
       break;
     }
     if (dW == dV)
@@ -908,51 +910,55 @@ ZX_squff(GEN f, GEN *ex)
     else
     {
       gel(P,i) = Q_primpart(RgX_div(V,W));
-      e[i] = k; i++; V = W;
+      E[i] = k; i++; V = W;
     }
   }
-  if (val) { gel(P,i) = pol_x(varn(f)); e[i] = val; i++;}
   setlg(P,i);
-  setlg(e,i); *ex = e; return P;
+  setlg(E,i); *pE = E; return P;
 }
 
 static GEN
-fact_from_DDF(GEN fa, GEN e, long n)
+fact_from_DDF(GEN Q, GEN E, long n)
 {
   GEN v,w, y = cgetg(3, t_MAT);
-  long i,j,k, l = lg(fa);
+  long i,j,k, l = lg(Q);
 
-  v = cgetg(n+1,t_COL); gel(y,1) = v;
-  w = cgetg(n+1,t_COL); gel(y,2) = w;
-  for (k=i=1; i<l; i++)
+  v = cgetg(n+1, t_COL); gel(y,1) = v;
+  w = cgetg(n+1, t_COL); gel(y,2) = w;
+  for (k = i = 1; i < l; i++)
   {
-    GEN L = gel(fa,i), ex = utoipos(e[i]);
+    GEN L = gel(Q,i), e = utoipos(E[i]);
     long J = lg(L);
-    for (j=1; j<J; j++,k++)
+    for (j = 1; j < J; j++,k++)
     {
-      gel(v,k) = gcopy(gel(L,j));
-      gel(w,k) = ex;
+      gel(v,k) = ZX_copy(gel(L,j));
+      gel(w,k) = e;
     }
   }
   return y;
 }
 
-/* Factor x in Z[t] */
+/* Factor T in Z[x] */
 static GEN
-ZX_factor_i(GEN x)
+ZX_factor_i(GEN T)
 {
-  GEN fa,ex,y;
-  long n,i,l;
+  GEN Q, E, y;
+  long n, i, l, v;
 
-  if (!signe(x)) return prime_fact(x);
-  fa = ZX_squff(x, &ex);
-  l = lg(fa); n = 0;
-  for (i=1; i<l; i++)
+  if (!signe(T)) return prime_fact(T);
+  v = ZX_valrem(T, &T);
+  Q = ZX_squff(T, &E); l = lg(Q);
+  for (i = 1, n = 0; i < l; i++)
   {
-    gel(fa,i) = ZX_DDF(gel(fa,i));
-    n += lg(gel(fa,i))-1;
+    gel(Q,i) = ZX_DDF(gel(Q,i));
+    n += lg(gel(Q,i)) - 1;
   }
-  y = fact_from_DDF(fa,ex,n);
+  if (v)
+  {
+    Q = vec_append(Q, mkvec(pol_x(varn(T))));
+    E = vecsmall_append(E, v); n++;
+  }
+  y = fact_from_DDF(Q, E, n);
   return sort_factor_pol(y, cmpii);
 }
 GEN
