@@ -1317,7 +1317,7 @@ polsubcycloC4_i(GEN n, long s, long fli, GEN D)
   {
     long c, i, lv, l = lg(P);
     GEN M2 = NULL;
-    c = (v2 >= 4 && !fli)? 2:  1; /* leave 2 in P if 16 | n unless fli is set*/
+    c = (v2 && v2 < 4)? 2:  1; /* leave 2 in P if 16 | n */
     if (c == 2) M2 = mkmat2(mkcol(gen_2),mkcol(gen_1));
     for (i = v2? 2: 1; i < l; i++) /* odd prime divisors of n */
       if (Mod4(gel(P,i)) == 1) gel(P, c++) = gel(P,i);
@@ -1338,6 +1338,19 @@ polsubcycloC4_i(GEN n, long s, long fli, GEN D)
     setlg(v, c); v = shallowconcat1(v);
   }
   return v;
+}
+static GEN
+polsubcycloC4(GEN n, long s)
+{
+  long i, l, c;
+  GEN D = divisors(n);
+  l = lg(D);
+  for (i = 2, c = 1; i < l; i++)
+  {
+    GEN v = polsubcycloC4_i(gel(D,i), s, 1, NULL);
+    if (v) gel(D,c++) = v;
+  }
+  setlg(D, c); return myshallowconcat1(D);
 }
 
 /* x^2 + a */
@@ -5546,7 +5559,7 @@ polsubcyclosmall(GEN n, long ell, long s, long fli)
     case 2: return fli? polsubcycloC2_i(n, s): polsubcycloC2(n, s);
     case 3: return fli? polsubcycloC3_i(n): polsubcycloC3(n);
     case 4: return polsubcycloV4_i(n, s, fli);
-    case -4:return polsubcycloC4_i(n, s, fli, NULL);
+    case -4:return fli? polsubcycloC4_i(n, s, fli, NULL): polsubcycloC4(n, s);
     case 5: return fli? polsubcycloC5_i(n, NULL): polsubcycloC5(n);
     case 6: return fli? polsubcycloC6_i(n, s): polsubcycloC6(n, s);
   }
