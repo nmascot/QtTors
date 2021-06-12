@@ -26,12 +26,14 @@ Doc: let \var{cyc} represent a finite abelian group by its elementary
  \kbd{znstar(q,1)}), characters in Conrey representation are available,
  see \secref{se:dirichletchar} or \kbd{??character}:
  \bprog
- ? G = znstar(8, 1);  \\ (Z/8Z)^*
- ? charorder(G, 3)  \\ Conrey label
- %2 = 2
+ ? G = znstar(16, 1);  \\ (Z/16Z)^*
+ ? charconj(G, 3)  \\ Conrey label
+ %2 = [1, 1]~
+ ? znconreyexp(G, %)
+ %3 = 11 \\ attached Conrey label; indeed 11 = 3^(-1) mod 16
  ? chi = znconreylog(G, 3);
- ? charorder(G, chi)  \\ Conrey logarithm
- %4 = 2
+ ? charconj(G, chi)  \\ Conrey logarithm
+ %5 = [1, 1]~
  @eprog
 
 Variant: Also available is
