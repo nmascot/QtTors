@@ -26,7 +26,9 @@
 8
 8
 2
+[[-1, 1], [-1, -1], [0, 1], [0, -1], [5/3, 7/3], [5/3, -7/3], [3/5, 7/5], [3
+/5, -7/5], [-5/8, 7/8], [-5/8, -7/8], [-3/8, 7/8], [-3/8, -7/8]]
   ***   at top-level: E=ellinit([0,0,1,-7,6]);ellratpoints(E,[10^5,[
   ***                                         ^----------------------
   *** ellratpoints: incorrect type in hyperellratpoints (t_VEC).
-Total time spent: 96
+Total time spent: 92

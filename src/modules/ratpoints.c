@@ -1257,7 +1257,6 @@ find_points_work(ratpoints_args *args,
 
   if (args->b_low < 1)  args->b_low = 1;
   if (args->b_high < 1) args->b_high = height;
-  if (args->b_high > height) args->b_high = height;
   if (args->max_forbidden < 0)
     args->max_forbidden = RATPOINTS_DEFAULT_MAX_FORBIDDEN;
   if (args->max_forbidden > nbprime)
@@ -1269,7 +1268,7 @@ find_points_work(ratpoints_args *args,
   }
   /* Don't reverse if intervals are specified or limits for the denominator
      are given */
-  if (args->num_inter > 0 || args->b_low > 1 || args->b_high < height)
+  if (args->num_inter > 0 || args->b_low > 1 || args->b_high != height)
     args->flags |= RATPOINTS_NO_REVERSE;
 
   /* Check if reversal of polynomial might be better:
