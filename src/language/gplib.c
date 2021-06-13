@@ -1799,7 +1799,7 @@ escape(const char *tch, int ismain)
         else if (*s == '"' || isalpha(*s))
         {
           char *t = get_name(s);
-          if (t[1])
+          if (t[1] && !isdigit(t[1]))
           {
             char *T = t + strlen(t) - 1;
             if (isdigit(*T))
