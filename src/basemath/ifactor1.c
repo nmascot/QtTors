@@ -3595,7 +3595,7 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
 {
   GEN M, N;
   pari_sp av;
-  long nb = 0, i;
+  long nb = 0, nb0 = 0, i;
   ulong lim;
   forprime_t T;
 
@@ -3666,6 +3666,7 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
         affii(n, N); n = N; set_avma(av3);
         STOREu(&nb, p, k);
       }
+      if (p == 1009) { stop = ifac_isprime(n); nb0 = nb; }
       if (stop)
       {
         if (!is_pm1(n)) STOREi(&nb, n, 1);
@@ -3709,7 +3710,8 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
     {
       GEN F;
       if (abscmpiu(n, lim) <= 0
-          || cmpii(n, sqru(lim)) <= 0 || ifac_isprime(n))
+          || cmpii(n, sqru(lim)) <= 0
+          || ((nb > nb0 || k > 1) && ifac_isprime(n)))
       { set_avma(av); STOREi(&nb, n, k); return aux_end(M,n, nb); }
       set_avma(av); F = aux_end(M, NULL, nb); /* don't destroy n */
       *pU = mkvec2(icopy(n), utoipos(k)); /* composite cofactor */
@@ -3723,7 +3725,7 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
       if (expi(n) <= 256) err_printf("\t%Ps\n", n);
     }
   }
-  else if (ifac_isprime(n)) STOREi(&nb, n, 1);
+  else if (nb > nb0 && ifac_isprime(n)) STOREi(&nb, n, 1);
   else nb += ifac_decomp(n, hint);
   return aux_end(M,n, nb);
 }
