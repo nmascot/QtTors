@@ -3666,7 +3666,7 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
         affii(n, N); n = N; set_avma(av3);
         STOREu(&nb, p, k);
       }
-      if (p == 1009) { stop = ifac_isprime(n); nb0 = nb; }
+      if (p == 16381) { stop = ifac_isprime(n); nb0 = nb; }
       if (stop)
       {
         if (!is_pm1(n)) STOREi(&nb, n, 1);
@@ -3711,7 +3711,8 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
       GEN F;
       if (abscmpiu(n, lim) <= 0
           || cmpii(n, sqru(lim)) <= 0
-          || ((nb > nb0 || k > 1) && ifac_isprime(n)))
+          || ((nb > nb0 || k > 1)
+              && bit_accuracy(lgefint(n)) < 2024 && ifac_isprime(n)))
       { set_avma(av); STOREi(&nb, n, k); return aux_end(M,n, nb); }
       set_avma(av); F = aux_end(M, NULL, nb); /* don't destroy n */
       *pU = mkvec2(icopy(n), utoipos(k)); /* composite cofactor */

@@ -27,6 +27,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - QXX_QXQ_eval: renamed to QXY_QXQ_evalx
   - ZX_Zp_root(f,a,p,): assume 0 <= a < p
   - gen_factorback: require extra parameter 'one'. Use NULL for old behavior.
+  - absZ_factor_limit_strict no longer guarantees that q is composite: this is
+    useless for applications and possibly expensive
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.12 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   - the member function bnf.futu and .tufu (deprecated since 2.2) have been
