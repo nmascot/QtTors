@@ -3121,12 +3121,17 @@ architecture.
 \subsubsec{Commands:}
 After preprocessing, the remaining lines are executed as
 sequence of expressions (as usual, separated by \kbd{;} if necessary). Only
-two kinds of expressions are recognized:
+following kinds of expressions are recognized:
 
-\item \var{default} \kbd{=} \var{value}, where \var{default} is one of
+\item \var{dft} \kbd{=} \var{value}, where \var{dft} is one of
 the available defaults (see \secref{se:defaults}), which will be set to
 \var{value} on actual startup. Don't forget the quotes around strings
 (e.g.~for \kbd{prompt} or \kbd{help}).
+
+\item \kbd{default(\var{dft}, \var{value})} as above.
+
+\item \kbd{setdebug(\var{dom}, \var{value})} set debug level for domain
+\var{dom} to \var{value}.
 
 \item \kbd{read "\var{some\_GP\_file}"} where \kbd{\var{some\_GP\_file}}
 is a regular GP script this time, which will be read just before \kbd{gp}

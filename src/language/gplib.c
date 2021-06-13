@@ -933,6 +933,22 @@ parse_key_val(char *src, char **ps, char **pt)
   if (*t == '"') (void)pari_translate_string(t, t, src);
   *s_end = 0; *ps = src; *pt = t;
 }
+/* parse src of the form (s,t) (or "s", or "t"), set *ps to s, and *pt to t. */
+static void
+parse_key_val_paren(char *src, char **ps, char **pt)
+{
+  char *s, *t, *s_end, *t_end;
+  s = t = src + 1; while (*t && *t != ',') t++;
+  if (*t != ',') err_gprc("missing ','",t,src);
+  s_end = t;
+  t++; while (*t && *t != ')') t++;
+  if (*t != ')') err_gprc("missing ')'",t,src);
+  if (t[1])  err_gprc("unexpected character",t+1,src);
+  t_end = t; t = s_end + 1;
+  if (*t == '"') (void)pari_translate_string(t, t, src);
+  if (*s == '"') (void)pari_translate_string(s, s, src);
+  *s_end = 0; *t_end = 0; *ps = s; *pt = t;
+}
 
 void
 gp_initrc(pari_stack *p_A)
@@ -984,6 +1000,16 @@ gp_initrc(pari_stack *p_A)
         t = (char*)pari_malloc(strlen(s) + 1);
         if (*s == '"') (void)pari_translate_string(s, t, s-4); else strcpy(t,s);
         pari_stack_pushp(p_A,t);
+      }
+      else if (!strncmp(s, "default(", 8))
+      {
+        s += 7; parse_key_val_paren(s, &s,&t);
+        (void)setdefault(s,t,d_INITRC);
+      }
+      else if (!strncmp(s, "setdebug(", 9))
+      {
+        s += 8; parse_key_val_paren(s, &s,&t);
+        setdebug(s, atol(t));
       }
       else
       { /* set default */
