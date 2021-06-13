@@ -762,9 +762,12 @@ polsubcyclo0(GEN n, long d, long v)
   if (typ(n) != t_INT) pari_err_TYPE("polsubcyclo",n);
   if (signe(n) <= 0) pari_err_DOMAIN("polsubcyclo","n","<=",gen_0,n);
   if (d <= 0) pari_err_DOMAIN("polsubcyclo","d","<=",gen_0,stoi(d));
+  if (Mod4(n) == 2) n = shifti(n, -1);
   if (d <= 6 || (uisprime(d) && cmpii(powuu(d, 4), n) < 0))
   {
-    GEN a = polsubcyclosmall(n, d, 0, 0);
+    GEN a;
+    n = mkvec2(n, Z_factor(n));
+    a = polsubcyclosmall(n, d, 0, 0);
     if (!a) a = cgetg(1, t_VEC);
     if (d == 4)
     {

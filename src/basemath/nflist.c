@@ -616,10 +616,27 @@ static int
 checkcondell_i(GEN N, long ell, GEN D2, GEN *pP)
 {
   GEN fa, P, E;
-  long l, i, e = Z_lvalrem(N, ell, &N);
+  long l, i, e;
 
-  if (e != 0 && e != 2) return 0;
-  fa = Z_factor(N); P = gel(fa, 1); E = gel(fa, 2); l = lg(P);
+  if (typ(N) == t_VEC)
+  {
+    fa = gel(N,2); P = gel(fa, 1); E = gel(fa, 2);
+    i = ZV_search(P, utoipos(ell));
+    if (!i) e = 0;
+    else
+    {
+      e = itou(E); if (e != 2) return 0;
+      P = vecsplice(P, i);
+      E = vecsplice(E, i);
+    }
+  }
+  else
+  {
+    e = Z_lvalrem(N, ell, &N);
+    if (e != 0 && e != 2) return 0;
+    fa = Z_factor(N); P = gel(fa, 1); E = gel(fa, 2);
+  }
+  l = lg(P);
   for (i = 1; i < l; i++)
   {
     GEN p = gel(P,i);
@@ -639,7 +656,8 @@ checkcondell_i(GEN N, long ell, GEN D2, GEN *pP)
  * the prime divisors of N different from ell */
 static int
 checkcondCL(GEN N, long ell, GEN *pP)
-{ return odd(Mod4(N)) && !equali1(N) && checkcondell_i(N, ell, NULL, pP); }
+{ GEN n = typ(N) == t_VEC? gel(N, 1): N;
+  return odd(Mod4(n)) && !equali1(n) && checkcondell_i(N, ell, NULL, pP); }
 /* D2 fundamental discriminant, ell odd prime, N potential conductor for
  * D_ell field over Q(sqrt(D2)) */
 static int
@@ -823,10 +841,11 @@ decp(GEN Q, GEN t, GEN p)
 static int
 checkcondC3(GEN n, GEN *pP)
 {
-  GEN fa, P, E;
+  GEN fa = NULL, P, E;
   long l, i, n27;
 
   *pP = NULL;
+  if (typ(n) == t_VEC) { fa = gel(n,2); n = gel(n,1); }
   if (cmpiu(n, 7) < 0 || !mpodd(n)) return 0;
   n27 = umodiu(n, 27);
   switch(n27 % 3)
@@ -835,7 +854,8 @@ checkcondC3(GEN n, GEN *pP)
     case 1: i = 1; break;
     default: i = 2; if (n27 != 9 && n27 != 18) return 0;
   }
-  fa = Z_factor(n); P = gel(fa, 1); E = gel(fa, 2); l = lg(P);
+  if (!fa) fa = Z_factor(n);
+  P = gel(fa, 1); E = gel(fa, 2); l = lg(P);
   for (; i < l; i++)
     if (umodiu(gel(P,i), 3) != 1 || !equali1(gel(E,i))) return 0;
   *pP = P; return 1;
@@ -1294,13 +1314,15 @@ zv_is_1(GEN x, long i0)
 static GEN
 polsubcycloC4_i(GEN n, long s, long fli, GEN D)
 {
-  GEN fa, P, Q, v, n2;
+  GEN fa = NULL, P, Q, v, n2;
   long v2;
 
+  if (typ(n) == t_VEC) { fa = gel(n,2); n = gel(n,1); }
   if (s == 1 || equali1(n)) return NULL;
   /* s = -1, 0 or 2 */
   v2 = vali(n); if (fli && (v2 == 1 || v2 > 4)) return NULL;
-  fa = Z_factor(n); P = gel(fa,1);
+  if (!fa) fa = Z_factor(n);
+  P = gel(fa,1);
   if (fli && !ZV_is_1(gel(fa,2), v2? 2: 1)) return NULL;
   n2 = ZV_prod(v2? vecsplice(P, 1): P); /* odd part of rad(n) */
   Q = mkqfb(gen_1, gen_0, gen_1, utoineg(4));
@@ -1343,7 +1365,7 @@ static GEN
 polsubcycloC4(GEN n, long s)
 {
   long i, l, c;
-  GEN D = divisors(n);
+  GEN D = divisors_factored(n);
   l = lg(D);
   for (i = 2, c = 1; i < l; i++)
   {
@@ -2455,6 +2477,7 @@ polsubcycloC5_i(GEN N, GEN T)
   long fl5, i, l, v;
 
   if (!checkcondCL(N, 5, &P)) return NULL;
+  if (typ(N) == t_VEC) N = gel(N,1);
   if (!T) T = C5bnf();
   bnf = gel(T, 1); nf = bnf_get_nf(bnf); pol = nf_get_pol(nf);
   aut = gel(T, 2);
@@ -2536,10 +2559,10 @@ ZX_red_disc2(GEN pol, GEN Xinf, GEN X)
 static GEN
 makeCL_f(long ell, GEN F)
 {
-  GEN bnf, P;
+  GEN bnf, P, f = typ(F) == t_VEC? gel(F,1): F;
   if (!checkcondCL(F, ell, &P)) return cgetg(1,t_VEC);
   bnf = bnfY(pol_x(1));
-  P = Pell2prfa(bnf_get_nf(bnf), P, ell, F);
+  P = Pell2prfa(bnf_get_nf(bnf), P, ell, f);
   return mybnrclassfield(bnf, P, ell);
 }
 /* ell odd prime */
@@ -5381,7 +5404,13 @@ polsubcycloC2_i(GEN n, long s)
   long l, i;
   GEN V;
   int p, m;
-  is_fundamental_pm(n, s, &p, &m);
+  if (typ(n) == t_VEC)
+  {
+    fa_is_fundamental_pm(gel(n,1), gel(n,2), s, &p, &m);
+    n = gel(n,1);
+  }
+  else
+    is_fundamental_pm(n, s, &p, &m);
   if (!(V = fund_pm(n, p, m))) return NULL;
   l = lg(V);
   for (i = 1; i < l; i++) gel(V, i) = quadpoly_i(gel(V, i));
@@ -5390,13 +5419,14 @@ polsubcycloC2_i(GEN n, long s)
 
 static GEN
 polsubcycloC3_i(GEN n)
-{ GEN P; return checkcondC3(n, &P)? makeC3_i(n, P): NULL; }
+{ GEN P; return checkcondC3(n, &P)? makeC3_i(typ(n) == t_VEC? gel(n,1): n, P)
+                                  : NULL; }
 /* Cyclic cubic subfields of Q(zeta_n). */
 static GEN
 polsubcycloC3(GEN n)
 {
   long i, l, c;
-  GEN D = divisors(n);
+  GEN D = divisors_factored(n);
   l = lg(D);
   for (i = 2, c = 1; i < l; i++)
   {
@@ -5444,6 +5474,7 @@ polsubcycloV4_i(GEN n, long s, long fli)
 {
   GEN R, V = divisorsdisc(n, s);
   long l, i, c;
+  if (typ(n) == t_VEC) n = gel(n,1);
   if (s <= 0) { ZV_sort_inplace(V); R = makeV4pairs(V, fli? n: NULL); fli=0; }
   else R = makeV4pairssimple(V);
   l = lg(R);
@@ -5459,7 +5490,7 @@ polsubcycloV4_i(GEN n, long s, long fli)
 static GEN
 polsubcycloC5(GEN n)
 {
-  GEN v, D = divisors(n), T = C5bnf();
+  GEN v, D = divisors_factored(n), T = C5bnf();
   long i, c, l = lg(D);
   for (i = 2, c = 1; i < l; i++)
     if ((v = polsubcycloC5_i(gel(D,i), T))) gel(D,c++) = v;
@@ -5497,9 +5528,10 @@ polsubcycloC6(GEN n, long s)
 static GEN
 polsubcycloC6_i(GEN n, long s)
 {
-  GEN D = divisors(n), R;
+  GEN D = divisors_factored(n), R;
   long l = lg(D), i, j, c, L = 2 * (l-1) * omega(n);
 
+  if (typ(n) == t_VEC) n = gel(n,1);
   R = cgetg(L + 1, t_VEC); c = 1;
   for (i = 2; i < l; i++)
   {
@@ -5507,11 +5539,12 @@ polsubcycloC6_i(GEN n, long s)
     long l2;
     if (!V2) continue;
     l2 = lg(V2);
+    if (typ(d) == t_VEC) d = gel(d,1);
     for (j = 1; j < l; j++)
     {
       GEN V3, e = gel(D, j);
       long l3, i3;
-      if (!equalii(lcmii(d, e), n)) continue;
+      if (!equalii(lcmii(d, typ(e) == t_VEC? gel(e,1): e), n)) continue;
       V3 = polsubcycloC3_i(e); if (!V3) continue;
       l3 = lg(V3);
       for (i3 = 1; i3 < l3; i3++)
@@ -5526,11 +5559,13 @@ polsubcycloC6_i(GEN n, long s)
   setlg(R, c); return R;
 }
 
-/* n > 0, t_INT; set fli = 1 for exact conductor n, otherwise all subfields
- * of Q(zeta_n). Assume ell = -4 (C4), 4 (V4), 1 (C1), 6 (C6) or ell prime*/
+/* N > 0, t_INT or [n, factor(n)] with n != 2 (mod 4); fli = 1 for exact
+ * conductor n, else all subfields of Q(zeta_n); ell = -4 (C4), 4 (V4), 1 (C1),
+ * 6 (C6) or prime*/
 GEN
 polsubcyclosmall(GEN n, long ell, long s, long fli)
 {
+  GEN N;
   if (ell <= 0 && ell != -4)
     pari_err_DOMAIN("polsubcyclo", "d", "<=", gen_0, stoi(ell));
   /* translate wrt r2 for compatibility with nflist functions */
@@ -5542,17 +5577,19 @@ polsubcyclosmall(GEN n, long ell, long s, long fli)
     s = labs(ell) >> 1;
   }
   else pari_err_FLAG("polsubcyclo");
-  if (Mod4(n) == 2)
+  N = typ(n) == t_VEC? gel(n, 1): n;
+  if (Mod4(N) == 2)
   {
     if (fli) return NULL;
-    n = shifti(n, -1);
+    if (n != N) pari_err_IMPL("polsubcyclosmall([N,faN]) with N = 2 mod 4");
+    N = shifti(N, -1);
   }
   if (ell == 1)
   {
-    if (fli && !equali1(n)) return NULL;
+    if (fli && !equali1(N)) return NULL;
     retmkvec(pol_x(0));
   }
-  if (equali1(n)) return NULL;
+  if (equali1(N)) return NULL;
   if (ell >= 7) return fli? makeCLall(ell,n): makeCL_f(ell,n);
   switch(ell)
   {
