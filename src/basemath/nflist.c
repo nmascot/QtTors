@@ -625,7 +625,7 @@ checkcondell_i(GEN N, long ell, GEN D2, GEN *pP)
     if (!i) e = 0;
     else
     {
-      e = itou(E); if (e != 2) return 0;
+      e = itou(gel(E,i)); if (e != 2) return 0;
       P = vecsplice(P, i);
       E = vecsplice(E, i);
     }
@@ -2525,13 +2525,16 @@ static GEN
 makeC5vec(GEN X, GEN Xinf, GEN field, long s)
 {
   GEN v, F, bnfC5;
-  long x, xinf, f;
+  long x, xinf, i, l;
 
   checkfield_i(field, 1); if (s > 0) return NULL;
   xinf = ceilsqrtn(Xinf, 4);
   x = floorsqrtn(X, 4); bnfC5 = C5bnf();
-  F = cgetg(x - xinf + 2, t_VEC);
-  for (f = xinf; f <= x; f++) gel(F, f - xinf + 1) = utoipos(f);
+  if (!odd(xinf)) xinf++;
+  if (!odd(x)) x--;
+  F = vecfactoroddu_i(xinf, x); l = lg(F);
+  for (i = 1; i < l; i++)
+    gel(F,i) = mkvec2(utoipos(xinf + ((i - 1) << 1)), zm_to_ZM(gel(F,i)));
   v = gen_parapply(closure("_nflist_C5_worker", mkvec(bnfC5)), F);
   v = myshallowconcat1(v); return s == -2? vecs(3, v): v;
 }
