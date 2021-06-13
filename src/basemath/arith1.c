@@ -2704,8 +2704,7 @@ chinese1_coprime_Z(GEN x) {return gen_chinese(x,chinese1_coprime_Z_aux);}
 /**                    MODULAR EXPONENTIATION                       **/
 /**                                                                 **/
 /*********************************************************************/
-
-/* xa, ya = t_VECSMALL */
+/* xa ZV or nv */
 GEN
 ZV_producttree(GEN xa)
 {
