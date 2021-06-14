@@ -48,6 +48,7 @@ del()
   fileflush();
   fileclose(f);
 }
+setdebug("io",1)
 my(f=fileopen(F));fileclose(f);fileread(f)
 my(f=fileopen(F));fileclose(f);filereadstr(f)
 my(f=fileopen(F));fileclose(f);filewrite(f,"b")
@@ -58,3 +59,4 @@ my(f=fileopen(F,"a"));filereadstr(f)
 my(f=fileopen(F));filewrite(f,"b");
 my(f=fileopen(F,"r"));filewrite1(f,"b");
 fileflush('x)
+setdebug("io",0)

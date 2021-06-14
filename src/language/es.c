@@ -3326,7 +3326,7 @@ newfile(FILE *f, const char *name, int type)
     last_tmp_file = file;
   }
   if (file->prev) (file->prev)->next = file;
-  if (DEBUGFILES)
+  if (DEBUGLEVEL)
     err_printf("I/O: new pariFILE %s (code %d) \n",name,type);
   return file;
 }
@@ -3352,7 +3352,7 @@ pari_kill_file(pariFILE *f)
       if (pclose(f->file) < 0) pari_warn(warnfile, "close pipe", f->name);
   }
 #endif
-  if (DEBUGFILES)
+  if (DEBUGLEVEL)
     err_printf("I/O: closing file %s (code %d) \n",f->name,f->type);
   pari_free(f);
 }
@@ -3371,7 +3371,7 @@ static pariFILE *
 pari_open_file(FILE *f, const char *s, const char *mode)
 {
   if (!f) pari_err_FILE("requested file", s);
-  if (DEBUGFILES)
+  if (DEBUGLEVEL)
     err_printf("I/O: opening file %s (mode %s)\n", s, mode);
   return newfile(f,s,0);
 }
@@ -3418,7 +3418,7 @@ void
 pari_unlink(const char *s)
 {
   if (unlink(s)) pari_warn(warner, "I/O: can\'t remove file %s", s);
-  else if (DEBUGFILES)
+  else if (DEBUGLEVEL)
     err_printf("I/O: removed file %s\n", s);
 }
 
@@ -3448,7 +3448,7 @@ void
 tmp_restore(pariFILE *F)
 {
   pariFILE *f = last_tmp_file;
-  if (DEBUGFILES>1) err_printf("gp_context_restore: deleting open files...\n");
+  if (DEBUGLEVEL>1) err_printf("gp_context_restore: deleting open files...\n");
   while (f)
   {
     pariFILE *g = f->prev;
@@ -3458,17 +3458,17 @@ tmp_restore(pariFILE *F)
   for (; f; f = f->prev) {
     if (f->type & mf_IN) {
       pari_infile = f->file;
-      if (DEBUGFILES>1)
+      if (DEBUGLEVEL>1)
         err_printf("restoring pari_infile to %s\n", f->name);
       break;
     }
   }
   if (!f) {
     pari_infile = stdin;
-    if (DEBUGFILES>1)
+    if (DEBUGLEVEL>1)
       err_printf("gp_context_restore: restoring pari_infile to stdin\n");
   }
-  if (DEBUGFILES>1) err_printf("done\n");
+  if (DEBUGLEVEL>1) err_printf("done\n");
 }
 
 void
@@ -3557,7 +3557,7 @@ pari_close_files(void)
 static int
 ok_pipe(FILE *f)
 {
-  if (DEBUGFILES) err_printf("I/O: checking output pipe...\n");
+  if (DEBUGLEVEL) err_printf("I/O: checking output pipe...\n");
   pari_CATCH(CATCH_ALL) {
     return 0;
   }
@@ -4808,7 +4808,7 @@ get_file(char *buf, int test(const char *), const char *suf)
     {
       *end = c;
       if (! test(buf)) return 1;
-      if (DEBUGFILES) err_printf("I/O: file %s exists!\n", buf);
+      if (DEBUGLEVEL) err_printf("I/O: file %s exists!\n", buf);
     }
   }
   return 0;
@@ -4853,7 +4853,7 @@ init_unique(const char *s, const char *suf)
 #endif
   sprintf(buf + lpre, "%.8s%s", s, salt);
   if (lsuf) strcat(buf, suf);
-  if (DEBUGFILES) err_printf("I/O: prefix for unique file/dir = %s\n", buf);
+  if (DEBUGLEVEL) err_printf("I/O: prefix for unique file/dir = %s\n", buf);
   return buf;
 }
 
@@ -4912,7 +4912,7 @@ new_gp_file(const char *s, FILE *f, int t)
   gp_file[n].fp = f;
   gp_file[n].type = t;
   gp_file[n].serial = gp_file_serial++;
-  if (DEBUGFILES) err_printf("fileopen:%ld (%ld)\n", n, gp_file[n].serial);
+  if (DEBUGLEVEL) err_printf("fileopen:%ld (%ld)\n", n, gp_file[n].serial);
   return n;
 }
 
@@ -4985,7 +4985,7 @@ void
 gp_fileclose(long n)
 {
   check_gp_file("fileclose", n);
-  if (DEBUGFILES) err_printf("fileclose(%ld)\n",n);
+  if (DEBUGLEVEL) err_printf("fileclose(%ld)\n",n);
   if (gp_file[n].type == mf_PIPE)
     pclose(gp_file[n].fp);
   else
@@ -5003,7 +5003,7 @@ void
 gp_fileflush(long n)
 {
   check_gp_file("fileflush", n);
-  if (DEBUGFILES) err_printf("fileflush(%ld)\n",n);
+  if (DEBUGLEVEL) err_printf("fileflush(%ld)\n",n);
   if (gp_file[n].type == mf_OUT) (void)fflush(gp_file[n].fp);
 }
 void

@@ -14021,7 +14021,7 @@ provided for backward compatibility and are scheduled to disappear.
 The following routines are trivial wrappers around system functions
 (possibly around one of several functions depending on availability).
 They are usually integrated within PARI's diagnostics system, printing
-messages if \kbd{DEBUGFILES} is high enough.
+messages if the debug level for \kbd{"files"} is high enough.
 
 \fun{int}{pari_is_dir}{const char *name} returns $1$ if \kbd{name} points to
 a directory, $0$ otherwise.
@@ -14067,7 +14067,7 @@ is a \kbd{pariFILE}, which is a wrapper around a standard \kbd{FILE*},
 containing further the file name, its type (regular file, pipe, input or
 output file, etc.). The following functions create and manipulate this
 structure; they are integrated within PARI's diagnostics system, printing
-messages if \kbd{DEBUGFILES} is high enough.
+messages if the debug level for \kbd{"files"} is high enough.
 
 \fun{pariFILE*}{pari_fopen}{const char *s, const char *mode} wrapper
 around \kbd{fopen(s, mode)}, return \kbd{NULL} on failure.

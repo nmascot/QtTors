@@ -2979,8 +2979,9 @@ nonnegative integer $n$. If \emph{feature} is present (such as \kbd{bnf} or
 If the nonnegative integer $n$ is present set the debugging level for
 that feature.
 
-\subsec{\b{gf} $\{n\}$} Sets the file usage debugging level \tet{debugfiles}
-to the nonnegative integer $n$.
+\subsec{\b{gf} $\{n\}$} Sets the \kbd{"io"} (or file usage) debugging level
+to the nonnegative integer $n$. This is a shortcut
+for \kbd{setdebug("io", $n$)}.
 
 \subsec{\b{gm} $\{n\}$} Sets the memory debugging level \tet{debugmem}
 to the nonnegative integer $n$.

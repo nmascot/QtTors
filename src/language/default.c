@@ -524,7 +524,7 @@ sd_debug(const char *v, long flag)
 
 GEN
 sd_debugfiles(const char *v, long flag)
-{ return sd_ulong(v,flag,"debugfiles",&DEBUGFILES, 0,20,NULL); }
+{ return sd_ulong(v,flag,"debugfiles",&DEBUGLEVEL_io, 0,20,NULL); }
 
 GEN
 sd_debugmem(const char *v, long flag)

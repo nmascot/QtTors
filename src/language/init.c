@@ -91,7 +91,7 @@ FILE    *pari_outfile, *pari_errfile, *pari_logfile, *pari_infile;
 char    *current_logfile, *current_psfile, *pari_datadir;
 long    gp_colors[c_LAST];
 int     disable_color;
-ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM;
+ulong   DEBUGLEVEL, DEBUGMEM;
 long    DEBUGVAR;
 ulong   pari_mt_nbthreads;
 long    precreal;
@@ -811,7 +811,7 @@ pari_init_defaults(void)
 #endif
 
   precdl = 16;
-  DEBUGFILES = DEBUGLEVEL = 0;
+  DEBUGLEVEL = 0;
   setalldebug(0);
   DEBUGMEM = 1;
   disable_color = 1;
