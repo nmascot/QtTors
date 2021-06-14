@@ -1263,7 +1263,7 @@ find_points_work(ratpoints_args *args,
     args->max_forbidden = nbprime;
   if (args->array_size <= 0) args->array_size = RATPOINTS_ARRAY_SIZE;
   {
-    long s = 2*CEIL(height, BITS_IN_LONG);
+    long s = 2*maxss(1,CEIL(height, BITS_IN_LONG));
     if (args->array_size > s) args->array_size = s;
   }
   /* Don't reverse if intervals are specified or limits for the denominator
