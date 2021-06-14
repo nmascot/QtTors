@@ -1,7 +1,7 @@
 Function: polsubcyclo
 Section: polynomials
-C-Name: polsubcyclo0
-Prototype: GLDn
+C-Name: polsubcyclo
+Prototype: LLDn
 Help: polsubcyclo(n,d,{v='x}): finds an equation (in variable v) for the d-th
  degree subfields of Q(zeta_n). Output is a polynomial, or a vector of
  polynomials if there are several such fields or none.
@@ -21,3 +21,8 @@ Doc: gives polynomials (in variable $v$) defining the (Abelian) subextensions
 
  The function \tet{galoissubcyclo} allows to specify exactly which
  sub-Abelian extension should be computed by giving $H$.
+
+ \misctitle{Complexity} Ignoring logarithmic factors, \kbd{polsubcyclo} runs
+ in time $O(n)$. The function \kbd{polsubcyclofast} returns different, less
+ canonical polynomials but runs in time $O(d^4)$, again ignoring logarithmic
+ factors; thus it can handle much larger values of $n$.

@@ -658,7 +658,7 @@ x^5 - x^4 + 2*x^3 - 4*x^2 + x - 1
 ? polredord(x^3-12*x+45*x-1)
 [x, x^3 + 33*x - 1]
 ? polsubcyclo(31,5)
-x^5 - x^4 - 12*x^3 + 21*x^2 + x - 5
+x^5 + x^4 - 12*x^3 - 21*x^2 + x + 5
 ? setrand(1);poltschirnhaus(x^5-x-1)
 x^5 + 10*x^4 + 32*x^3 - 100*x^2 - 879*x - 1457
 ? p=x^5-5*x+y;aa=rnfpseudobasis(nf2,p)
@@ -714,4 +714,4 @@ x^15 - 15*x^11 + 75*x^7 - x^5 - 125*x^3 + 5*x + 1
 ? getheap()[1]
 166
 ? print("Total time spent: ",gettime);
-Total time spent: 42
+Total time spent: 51

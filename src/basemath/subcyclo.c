@@ -749,37 +749,6 @@ polsubcyclo(long n, long d, long v)
     return gerepileupto(ltop, V);
   }
 }
-static void
-RgXV_setvarn(GEN w, long v)
-{
-  long i, l = lg(w);
-  for (i = 1; i < l; i++) setvarn(gel(w,i), v);
-}
-GEN
-polsubcyclo0(GEN n, long d, long v)
-{
-  pari_sp av = avma;
-  if (typ(n) != t_INT) pari_err_TYPE("polsubcyclo",n);
-  if (signe(n) <= 0) pari_err_DOMAIN("polsubcyclo","n","<=",gen_0,n);
-  if (d <= 0) pari_err_DOMAIN("polsubcyclo","d","<=",gen_0,stoi(d));
-  if (Mod4(n) == 2) n = shifti(n, -1);
-  if (d <= 6 || (uisprime(d) && cmpii(powuu(d, 4), n) < 0))
-  {
-    GEN a;
-    n = mkvec2(n, Z_factor(n));
-    a = polsubcyclosmall(n, d, 0, 0);
-    if (!a) a = cgetg(1, t_VEC);
-    if (d == 4)
-    {
-      GEN w = polsubcyclosmall(n, -4, 0, 0);
-      if (w) a = shallowconcat(a, w);
-    }
-    if (v > 0) RgXV_setvarn(a, v);
-    if (lg(a) == 2) a = gel(a,1);
-    return gerepilecopy(av, a);
-  }
-  return polsubcyclo(itos(n), d, v);
-}
 
 struct aurifeuille_t {
   GEN z, le;

@@ -112,6 +112,7 @@ BA  35- New GP function setdebug
     36- allow shortcut \g n feat for setdebug("feat", n)
     37- New GP function poltomonic [#2200]
     38- in GPRC, support default(key,val) and setdebug(dom,val)
+    39- New GP function polsubcyclofast
 
   Changed
 HC   1- faster implementation of eulervec + cache result

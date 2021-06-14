@@ -5562,14 +5562,16 @@ polsubcycloC6_i(GEN n, long s)
   setlg(R, c); return R;
 }
 
-/* N > 0, t_INT or [n, factor(n)] with n != 2 (mod 4); ell in {1,4,6} U Primes
- * (Cell) or -4 (V4). fli = 1 for conductor n, else all subfields of Q(zeta_n) */
-GEN
-polsubcyclosmall(GEN n, long ell, long s, long fli)
+/* fli = 1 for conductor n, else all subfields of Q(zeta_n) */
+static GEN
+polsubcyclofast_i(GEN n, long ell, long s, long fli)
 {
-  GEN N;
+  GEN N, fa = check_arith_pos(n, "polsubcyclofast");
+
+  if (fa && typ(n) != t_VEC) n = mkvec2(factorback(fa), fa);
+  /* n either t_INT or [N, factor(N)] */
   if (ell <= 0 && ell != -4)
-    pari_err_DOMAIN("polsubcyclo", "d", "<=", gen_0, stoi(ell));
+    pari_err_DOMAIN("polsubcyclofast", "d", "<=", gen_0, stoi(ell));
   /* translate wrt r2 for compatibility with nflist functions */
   if (!s) s = odd(ell)? 0: -1;
   else if (s == 1) s = 0;
@@ -5579,12 +5581,16 @@ polsubcyclosmall(GEN n, long ell, long s, long fli)
     s = labs(ell) >> 1;
   }
   else pari_err_FLAG("polsubcyclo");
-  N = typ(n) == t_VEC? gel(n, 1): n;
+  N = fa? gel(n, 1): n;
   if (Mod4(N) == 2)
   {
     if (fli) return NULL;
-    if (n != N) pari_err_IMPL("polsubcyclosmall([N,faN]) with N = 2 mod 4");
     N = shifti(N, -1);
+    if (fa)
+    { /* remove 2^1 */
+      GEN P = vecsplice(gel(fa,1), 1), E = vecsplice(gel(fa,2), 1);
+      n = mkvec2(N, mkmat2(P, E));
+    }
   }
   if (ell == 1)
   {
@@ -5603,4 +5609,12 @@ polsubcyclosmall(GEN n, long ell, long s, long fli)
     case 6: return fli? polsubcycloC6_i(n, s): polsubcycloC6(n, s);
   }
   return NULL; /* LCOV_EXCL_LINE */
+}
+GEN
+polsubcyclofast(GEN n, long ell, long s, long fli)
+{
+  pari_sp av = avma;
+  GEN v = polsubcyclofast_i(n, ell, s, fli);
+  if (!v) { set_avma(av); return cgetg(1, t_VEC); }
+  return gerepilecopy(av, v);
 }
