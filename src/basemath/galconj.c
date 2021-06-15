@@ -3409,11 +3409,25 @@ galoisconjclasses(GEN G)
   return gerepilecopy(av, e);
 }
 
+static GEN
+groupelts_to_group_or_elts(GEN elts)
+{
+  GEN G = groupelts_to_group(elts);
+  return G ? G: gcopy(elts);
+}
+
+static GEN
+vec_groupelts_to_group_or_elts(GEN x)
+{ pari_APPLY_same(groupelts_to_group_or_elts(gel(x,i))) }
+
 GEN
 galoissubgroups(GEN gal)
 {
   pari_sp av = avma;
   GEN S, G = checkgroup(gal,&S);
+  if (lg(gel(G,1))==1 && lg(S)>2)
+    return gerepileupto(av,
+      vec_groupelts_to_group_or_elts(groupelts_solvablesubgroups(S)));
   return gerepileupto(av, group_subgroups(G));
 }
 
