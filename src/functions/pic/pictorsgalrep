@@ -1,6 +1,0 @@
-Function: pictorsgalrep
-Section: modular_forms
-C-Name: PicTorsGalRep
-Prototype: GGDG
-Help: pictorsgalrep(J,l,{Chi}): Given a p-adic Jacobian J, a prime l, and the characteristic polynomial Lp of Frob_p on J, computes the Galois representation afforded by J[l]. If Chi is present, it must be a divisor of Lp mod l which is coprime to its cofactor mod l, and we compute the Galois representation afforded by the Fl-subspace of J[l] on which Frob_p acts with characteristic polynomial Chi.
-Doc: TODO 

@@ -4751,7 +4751,7 @@ GEN PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN Tne
   */
 	pari_sp av=avma, avK;
 	GEN l,R2,KR2,KR,BT2,NewTest,Rnew;
-	ulong d,nTests,j,rk;
+	ulong d,nTests,j,rk,nwatch;
 	int i;
 	l = gel(FRparams,1);
 	d = lg(R);
@@ -4774,7 +4774,7 @@ GEN PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN Tne
 		*replace = 0;
 		return R2;
 	}
-	KR2 = gel(KR2,1); /* Possibile relation */
+	KR2 = gel(KR2,1); /* Possible relation */
 	if(DEBUGLEVEL>=3) pari_printf("UpdatePairings: found pseudo-relation %Ps.\n",KR2);
 	KR = Fp_Long2ShortRel(KR2,l);
 	if(PicEq(J,Tnew,PicLC(J,KR,BT)))
@@ -4787,13 +4787,22 @@ GEN PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN Tne
 	if(DEBUGLEVEL>=3) printf("UpdatePairings: the pseudo-relation does not hold, changing LinTests.\n");
 	BT2 = VecExtend1_shallow(BT,Tnew);
 	avK = avma;
-	do
+	for(nwatch=1;;nwatch++)
 	{
-		avma = avK;
 		NewTest = PicChord(J,PicRand(J,NULL),PicRand(J,NULL),1);
 		Rnew = PicTorsPairing(J,FRparams,BT2,NewTest);
 		if(DEBUGLEVEL>=4) pari_printf("UpdatePairings: the new test gives pairings %Ps.\n",Rnew);
-	} while(gequal0(FpV_FpC_mul(Rnew,KR2,l))); /* Find new test which disproves this fake relation */
+		if(gequal0(FpV_FpC_mul(Rnew,KR2,l))==0) /* Find new test which disproves this fake relation */
+			break;
+		avma = avK;
+		if(nwatch>=10) /* TODO adjust */
+		{
+			if(DEBUGLEVEL)
+				printf("UpdatePairings: Unable to find suitable new pairing after %lu attempts, giving up.\n",nwatch);
+			avma = av;
+			return NULL;
+		}
+	}
 	/* Now we have d+1 forms of rank d; find one we can drop */
 	KR2 = FpM_ker(shallowtrans(R2),l); /* Relation between forms */
 	KR2 = gel(KR2,1);
@@ -5016,6 +5025,11 @@ void PicTorsBasis_UsePt(GEN J, GEN Pt, GEN Chi, ulong d, ulong* pr, GEN* pBW, GE
   {
 		if(DEBUGLEVEL) printf("PicTorsBasis: Working on %luth iterate under Frob\n",iFrob);
 		res = PicTors_UpdatePairings(J,FRparams,*pBT,*pmatPairings,T,Tpairings,&replace);
+		if(res==NULL) /* Got stuck and want to give up ? */
+		{
+			*pLinTests = NULL;
+			return;
+		}
 		if(replace==-1)
 		{ /* T is dependent on BT */
 			rel = res;
@@ -5250,6 +5264,11 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
 				continue;
 			}
 			PicTorsBasis_UsePt(J,Pt,ChiT,d,&r,&BW,&Bo,&BT,&matFrob,FRparams,&matPairings,&LinTests,&LinTestsNames,&NewTestName);
+			if(LinTests==NULL) /* Got stuck and want to give up? */
+			{
+				av = avma;
+				return NULL;
+			}
 		}
 		if(r==d) break;
 	}
@@ -5375,6 +5394,11 @@ GEN PicTorsGalRep(GEN J, GEN l, GEN chi)
 	}
 	J1 = PicSetPrec(J,1);
 	B = PicTorsBasis(J1,l,chi);
+	if(B==NULL) /* Got stuck and want to give up ? */
+	{
+		av = avma;
+		return NULL;
+	}
 	if(DEBUGLEVEL) timers_printf("pictorsgalrep","basis",&CPUT,&WT);
 	R = PicTorsGalRep_from_basis(J,J1,l,B);
 	return gerepileupto(av,R);
@@ -5488,14 +5512,19 @@ GEN HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
    If chi is nonzero,
    we must have chi || (Lp mod l)
    where Lp is the local L factor at p.*/
-	pari_sp av = avma;
+	pari_sp av = avma, av1;
 	GEN Lp, RRdata, J, R;
 	ulong a;
 	RRdata = HyperRRdata(f,P);
 	Lp = hyperellcharpoly(gmodulo(f,p));
   a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
-  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),pol_x(1),p,utoi(a),e,Lp);
-	R = PicTorsGalRep(J,l,chi);
+	av1 = avma;
+	do
+	{
+		avma = av1;
+  	J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),pol_x(1),p,utoi(a),e,Lp);
+		R = PicTorsGalRep(J,l,chi);
+	} while(R==NULL);
 	return gerepileupto(av,R);
 }
 
@@ -5511,7 +5540,7 @@ GEN SuperGalRep(GEN f, ulong m, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong for
    If chi is nonzero,
    we must have chi || (Lp mod l)
    where Lp is the local L factor at p.*/
-  pari_sp av = avma;
+  pari_sp av = avma, av1;
   GEN RRdata, T, Auts, Lp, J, R;
   ulong a;
 	RRdata = SuperRRdata(f,m,P);
@@ -5519,8 +5548,13 @@ GEN SuperGalRep(GEN f, ulong m, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong for
   a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
 	Get_ff_aT(utoi(a),p,NULL,&T);
 	Auts = SuperAut(m,T,p,e);
-  J = PicInit(gel(RRdata,1),Auts,itou(gel(RRdata,2)),itou(gel(RRdata,3)),gel(RRdata,4),pol_x(1),p,T,e,Lp);
-  R = PicTorsGalRep(J,l,chi);
+	av1 = avma;
+	do
+	{
+		avma = av1;
+  	J = PicInit(gel(RRdata,1),Auts,itou(gel(RRdata,2)),itou(gel(RRdata,3)),gel(RRdata,4),pol_x(1),p,T,e,Lp);
+  	R = PicTorsGalRep(J,l,chi);
+	} while(R==NULL);
   return gerepileupto(av,R);
 }
 
@@ -5536,13 +5570,18 @@ GEN SmoothGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
    If chi is nonzero,
    we must have chi || (Lp mod l)
    where Lp is the local L factor at p.*/
-  pari_sp av = avma;
+  pari_sp av = avma, av1;
   GEN RRdata, Lp, J, R;
   ulong a;
 	RRdata = SmoothRRdata(f,p,P);
 	Lp = PlaneZeta(gel(RRdata,1),itou(p));
   a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
-  J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,utoi(a),e,Lp);
-	R = PicTorsGalRep(J,l,chi);
-  return gerepileupto(av,R);
+	av1 = avma;
+	do
+	{
+		avma = av1;
+  	J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,utoi(a),e,Lp);
+		R = PicTorsGalRep(J,l,chi);
+	} while(R==NULL);
+	return gerepileupto(av,R);
 }
