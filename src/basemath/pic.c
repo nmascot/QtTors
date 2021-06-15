@@ -4208,8 +4208,8 @@ GEN HyperRRdata(GEN f, GEN P12)
 		{
 			x1 = ginv(x1);
 			x2 = ginv(x2);
-			y1 = gdiv(y1,gpowgs(x1,d/2));
-			y2 = gdiv(y2,gpowgs(x2,d/2));
+			y1 = gmul(y1,gpowgs(x1,d/2));
+			y2 = gmul(y2,gpowgs(x2,d/2));
 		}
 	}
 	g = d/2-1;
