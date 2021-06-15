@@ -3327,7 +3327,8 @@ newfile(FILE *f, const char *name, int type)
   }
   if (file->prev) (file->prev)->next = file;
   if (DEBUGLEVEL)
-    err_printf("I/O: new pariFILE %s (code %d) \n",name,type);
+    if (strcmp(name,"stdin") || DEBUGLEVEL > 9)
+      err_printf("I/O: new pariFILE %s (code %d) \n",name,type);
   return file;
 }
 
@@ -3353,7 +3354,8 @@ pari_kill_file(pariFILE *f)
   }
 #endif
   if (DEBUGLEVEL)
-    err_printf("I/O: closing file %s (code %d) \n",f->name,f->type);
+    if (strcmp(f->name,"stdin") || DEBUGLEVEL > 9)
+      err_printf("I/O: closing file %s (code %d) \n",f->name,f->type);
   pari_free(f);
 }
 
@@ -3372,7 +3374,8 @@ pari_open_file(FILE *f, const char *s, const char *mode)
 {
   if (!f) pari_err_FILE("requested file", s);
   if (DEBUGLEVEL)
-    err_printf("I/O: opening file %s (mode %s)\n", s, mode);
+    if (strcmp(s,"stdin") || DEBUGLEVEL > 9)
+      err_printf("I/O: opening file %s (mode %s)\n", s, mode);
   return newfile(f,s,0);
 }
 
@@ -3448,7 +3451,7 @@ void
 tmp_restore(pariFILE *F)
 {
   pariFILE *f = last_tmp_file;
-  if (DEBUGLEVEL>1) err_printf("gp_context_restore: deleting open files...\n");
+  int first = 1;
   while (f)
   {
     pariFILE *g = f->prev;
@@ -3459,16 +3462,22 @@ tmp_restore(pariFILE *F)
     if (f->type & mf_IN) {
       pari_infile = f->file;
       if (DEBUGLEVEL>1)
+      {
+        first = 0;
         err_printf("restoring pari_infile to %s\n", f->name);
+      }
       break;
     }
   }
   if (!f) {
     pari_infile = stdin;
-    if (DEBUGLEVEL>1)
+    if (DEBUGLEVEL>1 && (!first || DEBUGLEVEL > 9))
+    {
+      first = 0;
       err_printf("gp_context_restore: restoring pari_infile to stdin\n");
+    }
   }
-  if (DEBUGLEVEL>1) err_printf("done\n");
+  if (!first && DEBUGLEVEL>1) err_printf("done\n");
 }
 
 void
