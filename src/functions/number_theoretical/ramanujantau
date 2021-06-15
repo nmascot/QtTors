@@ -10,15 +10,18 @@ Doc: compute the value of Ramanujan's tau function at an individual $n$,
  assuming the truth of the GRH (to compute quickly class numbers of imaginary
  quadratic fields using \tet{quadclassunit}). If \kbd{ell} is 16, 18, 20, 22,
  or 26, same for the newform of level 1 and corresponding weight. Otherwise,
- compute the coefficient of the trace form at n.
- Algorithm in $\tilde{O}(n^{1/2})$ using $O(\log n)$ space. If all values up
- to $N$ are required, then
+ compute the coefficient of the trace form at $n$.
+ The complexity is in $\tilde{O}(n^{1/2})$ using $O(\log n)$ space.
+
+ If all values up to $N$ are required, then
  $$\sum \tau(n)q^n = q \prod_{n\geq 1} (1-q^n)^{24}$$
- and more generally
- $$\sum\tau_{\ell}(n)q^n = q \prod_{n\geq 1} (1-q^n)^{24}\Bigl(1-\dfrac{2(\ell-12)}{B_{\ell-12}}\sum_{n\ge1}\dfrac{n^{\ell-13}q^n}{1-q^n}\Bigr)$$
- will produce them in time $\tilde{O}(N)$, against $\tilde{O}(N^{3/2})$ for
+ and more generally, setting $u = \ell - 13$ and $C = 2/\zeta(-u)$ for $\ell
+ > 12$,
+ $$\sum\tau_{\ell}(n)q^n = q \prod_{n\geq 1}
+  (1-q^n)^{24} \Big( 1 + C\sum_{n\ge1}n^u q^n / (1-q^n)\Big)$$
+ produces them in time $\tilde{O}(N)$, against $\tilde{O}(N^{3/2})$ for
  individual calls to \kbd{ramanujantau}; of course the space complexity then
- becomes $\tilde{O}(N)$. For other values of \kbd{ell},
+ becomes $\tilde{O}(N)$. For other values of $\ell$,
  \kbd{mfcoefs(mftraceform([1,ell]),N)} is much faster.
  \bprog
  ? tauvec(N) = Vec(q*eta(q + O(q^N))^24);

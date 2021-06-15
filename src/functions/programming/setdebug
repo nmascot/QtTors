@@ -22,7 +22,7 @@ Doc: set debug level for domain $D$ to $n$ ($0 \leq n \leq 20$).
 
  ? \g 1   \\ set all debug levels to 1
    debug = 1
- ? setdebug("bnf", 0); \\ kill diagnostics related to bnfinit and bnfisrincipal
+ ? setdebug("bnf", 0); \\ kill messages related to bnfinit and bnfisrincipal
  @eprog
 
 Variant: Also available is
