@@ -2,5 +2,5 @@ Function: hyperellpicinit
 Section: modular_forms
 C-Name: HyperPicInit
 Prototype: GGGD1,L,DG
-Help: hyperellpicinit(F,p,a,{e=1},{Pts}): Initiatilises the Jacobian of the hyperellptic curve y²=F(x) over Zq/p^e, where Zq is the ring of integers of the unramified extension of Qp of degree a. F can also be a vector [f(x),h(x)], in which case we construct the Jacobian of y²+h(x)*y=f(x). p must be an odd prime of good reduction of the curve. Pts, if present, should be a pair of affine points on the curve which are not conjugate under the hyperelliptic invoultion. Pts is required to construct maps from the Jacobian to A1.
+Help: hyperellpicinit(F,p,a,{e=1},{Pts}): Initiatilises the Jacobian of the hyperellptic curve y²=F(x) over Zq/p^e, where Zq is the ring of integers of the unramified extension of Qp of degree a. F can also be a vector [f(x),h(x)], in which case we construct the Jacobian of y²+h(x)*y=f(x). p must be an odd prime of good reduction of the curve. Pts, if present, should be a pair of affine points on the curve which are not conjugate under the hyperelliptic involution. Pts is required to construct maps from the Jacobian to A1.
 Doc: TODO 

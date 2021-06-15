@@ -4123,7 +4123,7 @@ long PtIsOnPlaneCurve(GEN F, GEN P)
 // RR spaces, easy cases
 
 GEN HyperRR(ulong n, ulong g, GEN u, GEN v, GEN x, GEN y)
-{ /* L(n*OO - {u(x)=0, y=v(x)}) on hyperell y²=f_{2g+2}(x) */
+{ /* L(n*OO - {u(x)=0,y=v(x)}) on hyperell y²=f_{2g+2}(x) */
 	pari_sp av = avma;
 	GEN L;
 	ulong a,b,i;
@@ -4158,6 +4158,8 @@ GEN HyperRRdata(GEN f, GEN P12)
       pari_err(e_MISC,"the point %Ps is not on the hyperelliptic curve defined by %Ps",P2,f);
     x2 = gel(P2,1);
     y2 = gel(P2,2);
+		if(gequal(x1,x2))
+			pari_err(e_MISC,"the points are not allowed to have the same x");
 	}
 	else x1=x2=y1=y2=NULL; /* Prevent compiler from freaking out */
 	if(typ(f)==t_VEC)
