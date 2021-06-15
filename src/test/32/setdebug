@@ -22,12 +22,16 @@ dclassunit" "rnf" "stark" "subcyclo" "subgrouplist" "thue" "trans" "zetamult
    debug("bnf") = 1
    debug("bnf") = 2
    debug("bnf") = 2
+   debugfiles = 10
+  ***   at top-level: 1/0
+  ***                  ^--
+  *** _/_: impossible inverse in gdiv: 0.
+gp_context_restore: restoring pari_infile to stdin
+done
+   debugfiles = 1
   ***   at top-level: setdebug("does_not_exist")
   ***                 ^--------------------------
   *** setdebug: domain error in setdebug: does_not_exist not a valid debug domain
-gp_context_restore: deleting open files...
-gp_context_restore: restoring pari_infile to stdin
-done
    debugfiles = 0
   ***   domain error in setdebug: does_not_exist not a valid debug domain
   ***   domain error in setdebug: does_not_exist not a valid debug domain

@@ -14,6 +14,9 @@ setdebug("bnf")
 \g bnf
 
 \\ ERRORS
+\gf 10
+1/0
+\gf 1
 setdebug("does_not_exist")
 \gf 0
 \g 1 "does_not_exist"
