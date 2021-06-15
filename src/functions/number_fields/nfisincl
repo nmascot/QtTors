@@ -61,3 +61,9 @@ Doc: let $f$ and $g$ define number fields, where $f$ and $g$ are irreducible
  @eprog
 Variant: Also available is
  \fun{GEN}{nfisisom}{GEN a, GEN b} ($\fl = 0$).
+
+Function: _partmap_reverse_frac_worker
+C-Name: partmap_reverse_frac_worker
+Prototype: GGGGGL
+Section: programming/internals
+Help: worker for partmap_reverse_frac

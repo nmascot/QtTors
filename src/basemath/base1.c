@@ -1240,6 +1240,12 @@ partmap_reverse_frac(GEN a, GEN b, GEN t, GEN la, GEN lb, long v)
   return gerepilecopy(av, mkrfrac(N,D));
 }
 
+GEN
+partmap_reverse_frac_worker(GEN t, GEN a, GEN b, GEN la, GEN lb, long v)
+{
+  return partmap_reverse_frac(a, b, t, la, lb, v);
+}
+
 static GEN
 nfisincl_from_fact(GEN a, long da, GEN b, GEN la, GEN lb, long vb, GEN y, long flag)
 {
@@ -1263,15 +1269,17 @@ static GEN
 nfisincl_from_fact_frac(GEN a, GEN b, GEN la, GEN lb, long vb, GEN y)
 {
   long i, k, lx = lg(y), d = degpol(b) / degpol(a);
+  GEN worker = snm_closure(is_entry("_partmap_reverse_frac_worker"),
+               mkvec5(a,b,la,lb,stoi(vb)));
   GEN x = cgetg(lx, t_VEC);
   for (i=1, k=1; i<lx; i++)
   {
     GEN t = gel(y,i);
     if (degpol(t)!=d) continue;
-    gel(x, k++) = partmap_reverse_frac(a, b, t, la, lb, vb);
+    gel(x, k++) = t;
   }
   if (k==1) return gen_0;
-  setlg(x, k); return x;
+  setlg(x, k); return gen_parapply(worker, x);
 }
 
 GEN
