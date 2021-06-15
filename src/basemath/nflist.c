@@ -5440,54 +5440,54 @@ polsubcycloC3(GEN n)
 }
 
 static GEN
-makeV4pairssimple(GEN D)
+makeV4pairssimple(GEN D, GEN P, GEN f)
 {
-  long l = lg(D), i, j, c;
-  GEN R = cgetg((l-2) * (l-1) / 2 + 1, t_VEC);
-  for (i = c = 1; i < l; i++)
-    for (j = i + 1; j < l; j++) gel(R, c++) = mkvecsmall2(i, j);
-  return R;
+  long l = lg(D), n = l-1, i, j, c;
+  GEN R = cgetg((n-1) * n / 2 + 1, t_VEC);
+  for (i = c = 1; i < n; i++)
+  {
+    GEN Di = gel(D,i);
+    for (j = i + 1; j < l; j++)
+    {
+      if (f && !equalii(lcmii(Di, gel(D,j)), f)) continue;
+      gel(R, c++) = polcompositum0(gel(P,i), gel(P,j), 2);
+    }
+  }
+  setlg(R,c); return R;
 }
 static GEN
-makeV4pairs(GEN D, GEN n)
+makeV4pairs(GEN D, GEN P, GEN f)
 {
-  long l = lg(D), i, j, c;
-  GEN V = cgetg(l, t_VEC), R = cgetg((l-2) * (l-1) / 2 + 1, t_VEC);
+  long l = lg(D), n = l-1, i, j, c;
+  GEN V = cgetg(l, t_VEC), R = cgetg((n-1) * n / 2 + 1, t_VEC);
 
-  for (i = 1; i < l; i++) gel(V, i) = const_vecsmall(l-1, 1);
-  for (i = c = 1; i < l; i++)
+  for (i = 1; i < l; i++) gel(V, i) = const_vecsmall(n, 1);
+  for (i = c = 1; i < n; i++)
   {
-    GEN C = gel(V, i);
+    GEN C = gel(V,i);
     for (j = i + 1; j < l; j++)
       if (C[j])
       { /* Di, Dj fundamental discs */
         GEN d, Di = gel(D,i), Dj = gel(D,j), g = gcdii(Di, Dj);
         long k;
         if (!is_pm1(g)) { Di = diviiexact(Di, g); Dj = diviiexact(Dj, g); }
-        d = mulii(Di, Dj); if (n && !equalii(n, mulii(d, g))) continue;
+        d = mulii(Di, Dj); if (f && !equalii(f, mulii(d, g))) continue;
         if (Mod4(d) > 1) d = shifti(d, 2);
         k = vecsearch(D, d, NULL); /* d = coredisc(Di*Dj), j < k */
-        C[k] = 0; gel(V, j)[k] = 0; gel(R, c++) = mkvecsmall2(i, j);
+        C[k] = gel(V, j)[k] = 0;
+        gel(R, c++) = polcompositum0(gel(P,i), gel(P,j), 2);
       }
   }
   setlg(R, c); return R;
 }
 static GEN
-polsubcycloV4_i(GEN n, long s, long fli)
+polsubcycloV4_i(GEN V, long s, GEN n)
 {
-  GEN R, V = divisorsdisc(n, s);
-  long l, i, c;
-  if (typ(n) == t_VEC) n = gel(n,1);
-  if (s <= 0) { ZV_sort_inplace(V); R = makeV4pairs(V, fli? n: NULL); fli=0; }
-  else R = makeV4pairssimple(V);
-  l = lg(R);
-  for (i = c = 1; i < l; i++)
-  {
-    GEN t = gel(R, i), D1 = gel(V, t[1]), D2 = gel(V, t[2]);
-    if (fli && !equalii(lcmii(D1, D2), n)) continue;
-    gel(R, c++) = polcompositum0(quadpoly_i(D1), quadpoly_i(D2), 2);
-  }
-  setlg(R, c); return R;
+  long i, l = lg(V);
+  GEN P = cgetg(l, t_VEC);
+  if (s <= 0) ZV_sort_inplace(V); /* for vecsearch */
+  for (i = 1; i < l; i++) gel(P,i) = quadpoly_i(gel(V,i));
+  return (s <= 0)? makeV4pairs(V, P, n): makeV4pairssimple(V, P, n);
 }
 
 static GEN
@@ -5598,7 +5598,7 @@ polsubcyclofast_i(GEN n, long ell, long s, long fli)
     retmkvec(pol_x(0));
   }
   if (equali1(N)) return NULL;
-  if (ell == -4) return polsubcycloV4_i(n, s, fli);
+  if (ell == -4) return polsubcycloV4_i(divisorsdisc(n,s), s, fli? N: NULL);
   if (ell >= 7) return fli? makeCLall(ell,n): makeCL_f(ell,n);
   switch(ell)
   {
