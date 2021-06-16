@@ -304,7 +304,7 @@ GEN GammaHCusps(ulong N, GEN H)
 				}
 			}
 			M = Bot2SL2(cd,N); /* [a,b;c,d] in SL2(Z/NZ), the other choices are M*[1,i;0,1]=[a,b+i*a;c,d+i*c] */
-			/* Qqexp iff can choose t so that for all invertible x, ad(x-1)+1 in H */
+			/* Qqexp iff can choose i so that for all invertible x, cd(x-1)=0 & ad(x-1)+1 in H */
 			gel(Mats,nCusp) = M;
 			a = gel(M,1)[1];
 			b = gel(M,2)[1];
@@ -314,7 +314,7 @@ GEN GammaHCusps(ulong N, GEN H)
 				for(x=2;x<N;x++)
 				{
 					if(ugcd(x,N)>1) continue;
-					if(VecSmallFind(H,(a*d*(x-1)+1)%N)==0)
+					if( (c*d*(x-1))%N || VecSmallFind(H,(a*d*(x-1)+1)%N)==0 )
 					{
 						Qqexp[nCusp] = 0;
 						break;
