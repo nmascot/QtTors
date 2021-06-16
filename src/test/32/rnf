@@ -822,6 +822,7 @@ error("inconsistent dimensions in idealtwoelt.")
 [[[205009, 37462, 127633; 0, 1, 0; 0, 0, 1], [0, 0, 0]], Mat(3)]
 [[[1163, 141, 32; 0, 1, 0; 0, 0, 1], [1, 0, 0]], Mat(2)]
 0
+[[1, 0, 0, 0; 0, 1, 0, 0; 0, 0, 1, 0; 0, 0, 0, 1], []]
 0
 1
 1
@@ -866,4 +867,4 @@ error("inconsistent dimensions in idealtwoelt.")
   ***   at top-level: bnfinit(rnf)
   ***                 ^------------
   *** bnfinit: incorrect type in checknf [please apply nfinit()] (t_VEC).
-Total time spent: 1868
+Total time spent: 1536

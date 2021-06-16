@@ -3560,7 +3560,7 @@ nfX_to_monic(GEN nf, GEN T, GEN *pL)
   g = cgetg_copy(T, &l); g[1] = T[1]; a = lT;
   gel(g, l-1) = gen_1;
   gel(g, l-2) = gel(T,l-2);
-  if (l == 4) return g;
+  if (l == 4) { gel(g,l-2) = nf_to_scalar_or_alg(nf, gel(g,l-2)); return g; }
   if (typ(lT) == t_INT)
   {
     gel(g, l-3) = gmul(a, gel(T,l-3));
