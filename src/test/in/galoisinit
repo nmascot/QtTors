@@ -96,3 +96,4 @@ galoissubfields(G,2,z)
 
 P=nfsplitting(x^4-x-1);G=galoisinit([P,nfgaloisconj(P)]);
 vecsort(apply(permorder,Vec(G.group)))
+P=x^5-x-1;galoisinit([P,nfgaloisconj(P)])

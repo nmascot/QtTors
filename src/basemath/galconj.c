@@ -2943,6 +2943,8 @@ galoisinitfromaut(GEN T, GEN aut, ulong l)
       pari_err_DOMAIN("galoisinit","issquarefree(pol)","=",gen_0,T);
     if (!gequal1(gel(T,n+2))) pari_err_IMPL("galoisinit(nonmonic)");
   }
+  if (lg(aut)-1 != n)
+    return gen_0;
   ga.l = l? l: galois_find_totally_split(T, NULL);
   if (!l) aut = RgXV_to_FlxV(aut, ga.l);
   gb.l = utoipos(ga.l);
