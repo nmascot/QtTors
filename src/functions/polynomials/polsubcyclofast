@@ -15,6 +15,9 @@ Doc: If $1 \leq d\leq 6$ or a prime, finds an equation for the subfields of
  all signatures, otherwise $s = 1$ (resp., $-1$) for totally real
  (resp., totally complex). Set \kbd{exact = 1} for subfields of conductor $n$.
 
+ The argument $n$ can be given as in arithmetic functions: as an integer, as a
+ factorization matrix, or (preferred) as a pair $[N, \kbd{factor}(N)]$.
+
  \misctitle{Comparison with \kbd{polsubcyclo}} First \kbd{polsubcyclofast}
  does not usually return Gaussian periods, but ad hoc polynomials which do
  generate the same field. Roughly speaking (ignoring
