@@ -4613,7 +4613,7 @@ GEN PicRandTors(GEN J, GEN l, GEN Chi, GEN Phi, GEN seed, long returnlpow)
 		 If seed, set randseed.
 		 If return lpow, return [W,o,T,B] where W has order l^o, T=l^(o-1)*W in J[l], B in Ann_Z[x] T. */
 	pari_sp av = avma;
-	GEN Lp,J1,A,B,R,W,N,M,Psi,fa,lv,res,T,o;
+	GEN Lp,J1,B,R,W,N,M,Psi,fa,lv,res,T,o;
 	ulong a,v,d;
 	if(Jgete(J)>1)
 	{
@@ -4628,15 +4628,14 @@ GEN PicRandTors(GEN J, GEN l, GEN Chi, GEN Phi, GEN seed, long returnlpow)
 	if(Chi && gequal0(Chi)) Chi = NULL;
 	if(Phi && gequal0(Phi)) Phi = NULL;
 	a = degree(JgetT(J));
-	A = ZX_Z_add(pol_xn(a,0),gen_m1); /* x^a-1 */
+	B = ZX_Z_add(pol_xn(a,0),gen_m1); /* x^a-1 */
 	W = PicRand(J,seed);
 	if(Phi)
 	{ /* Project onto J[Phi] */
-		W = PicFrobPoly(J,W,RgX_div(A,Phi));
-		A = Phi;
+		W = PicFrobPoly(J,W,RgX_div(B,Phi));
+		B = Phi;
 	}
-	B = A;
-	N = ZX_resultant(Lp,A); /* Order of submodule we work in */
+	N = ZX_resultant(Lp,B); /* Order of submodule we work in */
 	v = Z_pvalrem(N,l,&M); /* l^v*M */
 	if(v==0)
 		pari_err(e_MISC,"No %Ps-torsion",l);
@@ -4656,10 +4655,10 @@ GEN PicRandTors(GEN J, GEN l, GEN Chi, GEN Phi, GEN seed, long returnlpow)
 		{
 			Psi = FpX_normalize(Psi,l);
 			if(v>1)
-			{ /* Lift Psi mod l^v as a factor of A */
-				fa = mkvec2(Psi,FpX_div(A,Psi,l));
+			{ /* Lift Psi mod l^v as a factor of B */
+				fa = mkvec2(Psi,FpX_div(B,Psi,l));
 				// TODO ZpXQX_lift_fact
-				fa = polhensellift(A,fa,l,v);
+				fa = polhensellift(B,fa,l,v);
 				Psi = gel(fa,1);
 			}
 			lv = powis(l,v);
@@ -5117,14 +5116,13 @@ void PicTorsBasis_UsePt(GEN J, GEN Pt, GEN Chi, ulong d, ulong* pr, GEN* pBW, GE
 GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
 {
 	/* Computes a basis B of the subspace T of J[l] on which Frob acts with charpoly Chi
-     Assumes Lp = charpoly(Frob|J), so Chi | Lp
      If Chi==NULL, then we take T=J[l]
      Also computes the matrix M of Frob and list of matrices MA of Auts w.r.t B, and returns the vector [B,M,MA] */
   /* TODO use auts that are not known to be scalars */
 	pari_sp av = avma;
   GEN Lp,Diva,Phi,phi,ChiT,BW,Bo,BT,matFrob,FRparams,LinTests,LinTestsNames,matPairings,Batch,Pt,res;
   GEN J1,A,A1,B,C,c,G,I,W;
-	ulong n,a,r,d,i,j,nPhi,iPhi,nBatch,iBatch,NewTestName;
+	ulong n,a,r,rold,d,i,j,nPhi,iPhi,nBatch,iBatch,NewTestName,nwatch;
 	struct pari_mt pt;
   GEN worker,done;
   long pending,workid,e;
@@ -5146,6 +5144,7 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
 
 	if((e=Jgete(J))>1)
 	{
+		/* Get basis mod p^1 */
 		J1 = JacRed(J,1);
 		res = PicTorsBasis(J1,l,Chi);
 		matFrob = gel(res,2);
@@ -5153,6 +5152,7 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
 		G = PicTors_FrobGen(J1,l,B,matFrob);
   	C = gel(G,2);
   	G = gel(G,1);
+		/* Lift basis mod p^e */
   	n = lg(G)-1; /* Number of generators */
     for(i=1;i<=n;i++) /* TODO parallel? */
 		{
@@ -5178,7 +5178,6 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
 			setlg(A,1+(j+1)*n);
 			I = gel(FpM_indexrank(A,l),2);
 			if(lg(I)==d+1) break;
-			if(j==10) return NULL; //TODO
 		}
 		for(i=1;i<=d;i++)
 		{
@@ -5212,7 +5211,11 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
     nPhi = j;
 		if(nPhi==0) Phi=NULL;
   }
-  else Phi=NULL;
+  else
+	{
+		Phi=NULL;
+		nPhi = 1;
+	}
 	if(Chi==NULL) Chi = gen_0;
 	
 	r = 0; /* dim we have so far */
@@ -5232,7 +5235,8 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
 	nBatch = (mt_nbthreads()+1)/2;//TODO
 	worker = strtofunction("_PicTorsBasis_worker");
 	Batch = cgetg(nBatch+1,t_VEC);
-	for(iPhi=1;;)
+	rold = 0; /* dim we had at prev iteration */
+	for(iPhi=nwatch=1;;)
 	{
 		if(DEBUGLEVEL) printf("PicTorsBasis: Generating new batch of %lu torsion points\n",nBatch);
 		mt_queue_start_lim(&pt,worker,nBatch);
@@ -5266,11 +5270,21 @@ GEN PicTorsBasis(GEN J, GEN l, GEN Chi)
 			PicTorsBasis_UsePt(J,Pt,ChiT,d,&r,&BW,&Bo,&BT,&matFrob,FRparams,&matPairings,&LinTests,&LinTestsNames,&NewTestName);
 			if(LinTests==NULL) /* Got stuck and want to give up? */
 			{
-				av = avma;
+				avma = av;
 				return NULL;
 			}
 		}
-		if(r==d) break;
+		if(r==d) break; /* Finished? */
+		if(DEBUGLEVEL)
+			printf("PicTorsBasis: End of batch, r is now %lu (was %lu at beginning of batch)\n",r,rold);
+		if(r==rold) nwatch += nBatch; /* Useless batch? */
+		else nwatch = 0;
+		rold = r;
+		if(nwatch>2*nPhi)
+		{
+			avma = av;
+			return NULL;
+		}
 	}
 	res = cgetg(4,t_VEC);
 	gel(res,1) = BT;

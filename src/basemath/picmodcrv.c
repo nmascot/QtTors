@@ -2038,7 +2038,7 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 {
 	pari_sp av = avma;
 	GEN ilN,pf,H,eps,o,to,pmin,pmax,gen_5,p,qf,listp,Lp,yt,ap,epsp,chi,psi,rem,a1,a2,a,xa1,NJ,M,A,res,res1;
-	ulong ul,N,lN,philN,k,h,epsh,nH,np,i,j,qprec,ncoefs,n,S,nM,nA;
+	ulong ul,N,lN,philN,k,h,epsh,nH,np,i,i1,j,qprec,ncoefs,n,S,nM,nA;
 	long vt,vy;
 	forprime_t piter;
 	ul = itou(l);
@@ -2102,14 +2102,15 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 	forprime_init(&piter,pmin,pmax);
 	while((p = forprime_next(&piter)))
 	{
-		if(dvdui(lN*nH,p)) continue;
+		if(dvdui(N*nH,p)) continue;
+		if(dvdii(l,p)) continue;
 		gel(listp,np++) = gcopy(p);
 	}
 	setlg(listp,np); /* List of candidate p */
 	Lp = ModCrv_charpoly_multi(lN,H,listp);
 	if(degpol(gmael(Lp,1,1))==0)
 		pari_err(e_MISC,"This Galois representation is a power of the cyclotomic character");
-	for(i=j=1;i<np;i++)
+	for(i=i1=1;i<np;i++)
 	{
 		p = gel(listp,i);
 		ap = gel(qf,itou(p)+1);
@@ -2159,16 +2160,16 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 			NJ = ZX_resultant(gmael(Lp,i,1),xa1);
 			pari_printf("mfgalrep_bestp: p=%Ps needs deg %Ps (%Ps to split rep, %Ps for roots of 1) -> lg #J = %ld\n",p,a,a1,a2,logint(NJ,gen_2));
 		}
-		gel(listp,j++) = mkvecn(6,a,p,gmael(Lp,i,1),ap,epsp,chi);
+		gel(listp,i1++) = mkvecn(6,a,p,gmael(Lp,i,1),ap,epsp,chi);
 	}
-	if(j==1)
+	if(i1==1)
 		pari_err(e_MISC,"mfgalrep_bestp: No suitable prime, please enlarge prime range");
-	setlg(listp,j);
+	setlg(listp,i1);
 	res = cgetg(3,t_VEC);
 	gel(res,1) = res1 = cgetg(3,t_VEC);
 	gel(res1,1) = gcopy(ilN);
 	gel(res1,2) = gcopy(H);
-	gel(res,2) = j==2 ? gcopy(listp) : lexsort(listp);
+	gel(res,2) = i1==2 ? gcopy(listp) : lexsort(listp);
 	return gerepileupto(av,res);
 }
 
@@ -2231,7 +2232,7 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
 	/* TODO reuse code from pic.c */
 	pari_sp av = avma;
 	GEN Lp,Diva,Chi,gcdchi,Lp1,Phi,phi,Batch,BT,matTp,LinTests,LinTestsNames,FRparams,R,T,B,PT,UsedTestsNames,K,EBT,FEBT,I,Etests,FrobMat,DiamMat;
-	ulong i,j,iBatch,iFrob,iPhi,a,nPhi,nBatch,d2,dB,d,r,NewTestName;
+	ulong i,j,iBatch,iFrob,iPhi,a,nPhi,nBatch,d2,dB,d,r,NewTestName,nwatch;
 	long workid,pending;
 	GEN worker,done;
 	struct pari_mt pt;
@@ -2256,7 +2257,7 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
   else
 	{
 		Phi = NULL;
-		nPhi = 0;
+		nPhi = 1;
 	}
 	Chi = pol_1(varn(Lp)); /* gcd(Lp,chi^oo) */
 	gcdchi = chi;
@@ -2285,7 +2286,7 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
 	nBatch = (mt_nbthreads()+1)/2;//TODO
   worker = strtofunction("_PicTorsBasis_worker");
   Batch = cgetg(nBatch+1,t_VEC);
-  for(iPhi=1;;)
+  for(iPhi=nwatch=1;;)
   {
     if(DEBUGLEVEL) printf("PicTors_TpEigen: Generating new batch of %lu torsion points\n",nBatch);
     mt_queue_start_lim(&pt,worker,nBatch);
@@ -2315,7 +2316,8 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
 			if(gequal0(T))
       {
         if(DEBUGLEVEL>=2) printf("PicTors_TpEigen: This point is zero, moving on to the next one\n");
-        continue;
+        nwatch++;
+				continue;
       }
 			B = gel(T,4);
 			dB = degpol(B);
@@ -2336,7 +2338,12 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
 					return NULL;
 				}
 				if(DEBUGLEVEL>=2) printf("PicTors_TpEigen: taking Tp closure increases dim by %lu\n",d2);
-				if(d2==0) break;
+				if(d2==0)
+				{
+					nwatch++;
+					break;
+				}
+				else nwatch = 0;
 				K = gcopy(matTp); /* Tp - ap */
 				for(i=1;i<lg(K);i++)
 					gcoeff(K,i,i) = subii(gcoeff(K,i,i),ap);
@@ -2382,6 +2389,11 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
 				}
 				if(++iFrob==dB) break;
 			}
+			if(nwatch>2*nPhi)
+      {
+        avma = av;
+        return NULL;
+      }
 		}
 	}
 }
@@ -2391,7 +2403,7 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 	pari_sp av = avma, av1;
 	pari_timer WT,CPUT;
 	GEN coefs,best,besti,H,p,Lp,ap,epsp,chi,log2,log10,logp,J,J1,B,R;
-	ulong N,a,ip;
+	ulong N,a,ip,nwatch;
 	long e;
 	if(DEBUGLEVEL)
 	{
@@ -2412,9 +2424,17 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 	best = gel(best,2);
 	ip = 1;
 	av1 = avma;
+	nwatch = 0;
 	do
 	{
 		avma = av1;
+		if(nwatch>2)
+		{
+			nwatch = 0;
+			ip++;
+		}
+		if(ip>=lg(best))
+			pari_err(e_MISC,"run out of primes p, try increasing pmax");
 	  if(DEBUGLEVEL)
 		{
 			walltimer_start(&WT);
@@ -2436,9 +2456,8 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 		J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
 		if(J==NULL)
 		{
+			nwatch = 0;
 			ip++;
-			if(ip>=lg(best))
-				pari_err(e_MISC,"run out of primes p, try increasing pmax");
 			continue;
 		}
 		if(DEBUGLEVEL) timers_printf("mfgalrep","modpicinit",&CPUT,&WT);
@@ -2446,11 +2465,16 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 		{
 			J1 = PicSetPrec(J,1);
 			B = PicTors_TpEigen(J1,l,ap,epsp,chi);
-			if(B==NULL) continue;
+			if(B==NULL)
+			{
+				nwatch++;
+				continue;
+			}
 			if(DEBUGLEVEL) timers_printf("mfgalrep","Tp eigenspace",&CPUT,&WT);
 			R = PicTorsGalRep_from_basis(J,J1,l,B);
 		}
 		else R = PicTorsGalRep(J,l,chi);
+		nwatch++;
 	} while(R==NULL);
 	return gerepileupto(av,R);
 }
