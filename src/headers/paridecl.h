@@ -6731,5 +6731,5 @@ GEN Ell_l1_worker(GEN EN, GEN a4, ulong y, GEN T, GEN pe, GEN p, long e);
 GEN M2_worker(GEN vw, GEN Ml1, GEN TH, GEN Mpts, GEN T, GEN pe);
 GEN TrE2qexp(GEN vw, ulong N, GEN H, GEN M, ulong w, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e);
 GEN M4qexp_worker(GEN pageV1, GEN V2gens, GEN U0, GEN T, GEN pe);
-GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec);
+GEN ModPicInit_gp(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec);
 GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qprec);

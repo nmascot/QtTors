@@ -792,8 +792,8 @@ ulong EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN 
 
 GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
 { /* Look for E/Fp such that E[N] def / Fp^d and j not in Badj */
-	pari_sp av = avma;
-	ulong d,nBad,i,r;
+	pari_sp av = avma, av1;
+	ulong d,nBad,i,r,nwatch;
 	GEN q,q2,a4,a6,D,j;
 	d = degpol(T);
 	if(Fl_powu(umodiu(p,N),d,N)!=1)
@@ -802,8 +802,10 @@ GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
 	q = powiu(p,d);
 	q2 = subiu(q,1);
 	q2 = shifti(q2,-1);
-	for(;;)
+	av1 = avma;
+	for(nwatch=1;nwatch<1000;nwatch++) /* TODO adjust */
 	{
+		avma = av1;
 		if(DEBUGLEVEL>=2) printf("EllSplitTors: Trying new curve.\n");
 		a4 = genrand(p);
 		if(gequal0(a4)) continue; /* Avoid j=0 */
@@ -818,6 +820,7 @@ GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
 		{
 			if(gequal(gel(Badj,i),j))
 			{
+				if(DEBUGLEVEL>=2) printf("EllSplitTors: Got one of the forbidden j.\n");
 				a4 = a6 = NULL;
 				break;
 			}
@@ -832,6 +835,9 @@ GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
 			else printf("EllSplitTors: E[%lu]/-1 defined in degree %lu<%lu.\n",N,r,d);
 		}
 	}
+	if(DEBUGLEVEL)
+		printf("EllSplitTors: Unable to find suitable elliptic curve after %lu attempts, giving up.\n",nwatch);
+	return NULL;
 }
 
 GEN EllTorsBasis_lv(GEN a4, GEN a6, GEN A4, ulong l, ulong v, GEN T, GEN p, GEN D)
@@ -892,6 +898,11 @@ GEN EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
 	GEN Fq1,E,a4,a6,A4,P,Q,z,faN,M,D,B,Pi,Qi,zi;
 	ulong nfaN,i,l,v,lv1,lv;
 	E = EllSplitTors(N,p,T,Badj);
+	if(E==NULL) /* Couldn't find E, and giving up? */
+	{
+		avma = av;
+		return NULL;
+	}
 	a4 = gel(E,1);
 	a6 = gel(E,2);
 	A4 = scalarpol(a4,varn(T));
@@ -1093,6 +1104,11 @@ GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref_pows, 
 	ulong m,nPts,i,a,b,c,d,x,y;
 	pe = powis(p,e);
 	E = EllWithTorsBasis(N,T,pe,p,e,Badj);
+	if(E==NULL) /* Couldn't find E, and giving up? */
+	{
+		avma = av;
+		return NULL;
+	}
 	a4 = gmael(E,1,1);
 	P = gel(E,2);
 	Q = gel(E,3);
@@ -1626,6 +1642,8 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	CuspsTags = gel(Cusps,6);
 	Cusps = gel(Cusps,1);
 	nCusps = lg(Cusps)-1;
+	if(nCusps<3)
+		pari_err(e_IMPL,"the case where the number of cusps is < 3");
 	nCuspsGal = lg(CuspsGal);
 	CuspsGalDegs = cgetg(nCuspsGal,t_VECSMALL);
 	for(i=1;i<nCuspsGal;i++)
@@ -1661,6 +1679,11 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	list_j = cgetg(nbE+1,t_VEC);
 	setlg(list_j,1);
 	E = GetMl1(N,Pts,PtsTags,T,p,e,NULL,list_j); /* NULL: no preferred zeta_N for now */
+	if(E==NULL) /* Could not find E, and giving up? */
+	{
+		avma = av;
+		return NULL;
+	}
 	if(DEBUGLEVEL) pari_printf("modpicinit: Working on y²=x³+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
 	Ml1 = gel(E,2);
 	PtsFrob = gel(E,3);
@@ -1712,6 +1735,11 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	{
 		if(DEBUGLEVEL) printf("modpicinit: Getting extra elliptic curve %lu/%lu\n",i,nbE);
 		E = GetMl1(N,Pts,PtsTags,T,p,e,zNpows,list_j);
+		if(E==NULL) /* Could not find E, and giving up? */
+  	{
+    	avma = av;
+    	return NULL;
+  	}
 		if(DEBUGLEVEL) pari_printf("modpicinit: working on y²=x³+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
 		setlg(list_j,i+1);
 		gel(list_j,i) = gmael(E,1,3);
@@ -1909,6 +1937,20 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
 	return gerepilecopy(av,J);
 }
 
+GEN ModPicInit_gp(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec)
+{
+	GEN J;
+	J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
+	if(J==NULL)
+	{
+		if(nbE>1)
+			pari_err(e_MISC,"Unable to find suitable elliptic curve, try another value of the prime p");
+		else
+			pari_err(e_MISC,"Unable to find suitable elliptic curve(s), try requesting fewer elliptic curves or with another value of the prime p");
+	}
+	return J;
+}
+
 GEN PicTp(GEN J, GEN W, GEN l)
 { /* Assumes <p> is given by the 1st aut of J */
   /* TODO check aut 1 is present? */
@@ -1994,11 +2036,9 @@ GEN mfyt(GEN pf, GEN qf, GEN l, GEN coefs)
 
 GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 {
-	/* TODO for now we ignore nebentypus */
-	/* TODO useTp */
 	pari_sp av = avma;
-	GEN ilN,pf,H,eps,o,to,pmin,pmax,gen_5,p,qf,listp,Lp,yt,best,ap,epsp,chi,psi,rem,a1,a2,a,xa1,NJ,M,A;
-	ulong ul,N,lN,philN,k,h,epsh,nH,np,i,qprec,ncoefs,n,S,nM,nA,j;
+	GEN ilN,pf,H,eps,o,to,pmin,pmax,gen_5,p,qf,listp,Lp,yt,ap,epsp,chi,psi,rem,a1,a2,a,xa1,NJ,M,A,res,res1;
+	ulong ul,N,lN,philN,k,h,epsh,nH,np,i,j,qprec,ncoefs,n,S,nM,nA;
 	long vt,vy;
 	forprime_t piter;
 	ul = itou(l);
@@ -2065,12 +2105,11 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 		if(dvdui(lN*nH,p)) continue;
 		gel(listp,np++) = gcopy(p);
 	}
-	setlg(listp,np);
+	setlg(listp,np); /* List of candidate p */
 	Lp = ModCrv_charpoly_multi(lN,H,listp);
 	if(degpol(gmael(Lp,1,1))==0)
 		pari_err(e_MISC,"This Galois representation is a power of the cyclotomic character");
-	best = NULL;
-	for(i=1;i<np;i++)
+	for(i=j=1;i<np;i++)
 	{
 		p = gel(listp,i);
 		ap = gel(qf,itou(p)+1);
@@ -2094,7 +2133,7 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 					for(j=1;j<nA;j++)
 						gcoeff(A,j,j) = subii(gcoeff(A,j,j),ap);
 					S += (lg(FpM_ker(A,l))-1);
-				}
+				} /* S >= dim Ker(Tp-ap) */
 				if(S<1) pari_err(e_BUG,"mfgalrep_bestp_S");
 				if(S>1)
 				{
@@ -2120,15 +2159,20 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 			NJ = ZX_resultant(gmael(Lp,i,1),xa1);
 			pari_printf("mfgalrep_bestp: p=%Ps needs deg %Ps (%Ps to split rep, %Ps for roots of 1) -> lg #J = %ld\n",p,a,a1,a2,logint(NJ,gen_2));
 		}
-		if(best==NULL || cmpii(gel(best,4),a)==1)
-			best = mkvecn(8,ilN,H,p,a,gmael(Lp,i,1),ap,epsp,chi);
+		gel(listp,j++) = mkvecn(6,a,p,gmael(Lp,i,1),ap,epsp,chi);
 	}
-	if(best==NULL)
+	if(j==1)
 		pari_err(e_MISC,"mfgalrep_bestp: No suitable prime, please enlarge prime range");
-	return gerepilecopy(av,best);
+	setlg(listp,j);
+	res = cgetg(3,t_VEC);
+	gel(res,1) = res1 = cgetg(3,t_VEC);
+	gel(res1,1) = gcopy(ilN);
+	gel(res1,2) = gcopy(H);
+	gel(res,2) = j==2 ? gcopy(listp) : lexsort(listp);
+	return gerepileupto(av,res);
 }
 
-ulong PicTors_TpClosure(GEN J, GEN* pBT, GEN* pmatTp, GEN T, GEN PT, GEN FRparams, GEN LinTests, GEN LinTestsNames, GEN* pR, ulong* pNewTestName)
+long PicTors_TpClosure(GEN J, GEN* pBT, GEN* pmatTp, GEN T, GEN PT, GEN FRparams, GEN LinTests, GEN LinTestsNames, GEN* pR, ulong* pNewTestName)
 { /* Shallow */
 	GEN l,X,matTp2,u;
 	ulong i,j,d,d2;
@@ -2139,6 +2183,7 @@ ulong PicTors_TpClosure(GEN J, GEN* pBT, GEN* pmatTp, GEN T, GEN PT, GEN FRparam
 	for(;;)
 	{
 		X = PicTors_UpdatePairings(J,FRparams,*pBT,*pR,T,PT,&replace);
+		if(X==NULL) return -1;
 		if(replace==-1) /* T in span BT */
 		{
 			/* Update mat Tp */
@@ -2285,6 +2330,11 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
         if(DEBUGLEVEL>=2)
 					pari_printf("PicTors_TpEigen: Throwing in Frob-iterate %lu of point %lu (B = %Ps)\n",iFrob,iBatch,B);
 				d2 = PicTors_TpClosure(J,&BT,&matTp,T,PT,FRparams,LinTests,LinTestsNames,&R,&NewTestName);
+				if(d2==-1) /* Got stuck and want to give up? */
+				{
+					avma = av;
+					return NULL;
+				}
 				if(DEBUGLEVEL>=2) printf("PicTors_TpEigen: taking Tp closure increases dim by %lu\n",d2);
 				if(d2==0) break;
 				K = gcopy(matTp); /* Tp - ap */
@@ -2338,10 +2388,10 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
 
 GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qprec)
 {
-	pari_sp av = avma;
+	pari_sp av = avma, av1;
 	pari_timer WT,CPUT;
-	GEN coefs,best,H,p,Lp,ap,epsp,chi,log2,log10,logp,J,J1,B,R;
-	ulong N,a;
+	GEN coefs,best,besti,H,p,Lp,ap,epsp,chi,log2,log10,logp,J,J1,B,R;
+	ulong N,a,ip;
 	long e;
 	if(DEBUGLEVEL)
 	{
@@ -2356,29 +2406,51 @@ GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qpr
 	else coefs = NULL;
 	best = mfgalrep_bestp(f,l,coefs,prange,UseTp);
 	if(DEBUGLEVEL) timers_printf("mfgalrep","choice p",&CPUT,&WT);
-	N = itou(gel(best,1));
-	H = gel(best,2);
-	p = gel(best,3);
-	a = itou(gel(best,4));
-	Lp = gel(best,5);
-	ap = gel(best,6);
-	epsp = gel(best,7);
-	chi = gel(best,8);
-	/* Smallest e such that sqrt(1/2*p^e)>10^D */
-	log2 = logr_abs(utor(2,DEFAULTPREC));
-	log10 = logr_abs(utor(10,DEFAULTPREC));
-	logp = logr_abs(itor(p,DEFAULTPREC));
-	e = itos(gceil(divrr(addrr(log2,mulur(2*D,log10)),logp)));
-	if(DEBUGLEVEL) pari_printf("mfgalrep: X_H(%lu) (H=%Ps), genus %ld, over Q_%Ps^%lu with accuracy O(%Ps^%ld)\n",N,H,degpol(Lp)/2,p,a,p,e);
-	J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
-	if(DEBUGLEVEL) timers_printf("mfgalrep","modpicinit",&CPUT,&WT);
-	if(UseTp)
+	H = gel(best,1);
+	N = itou(gel(H,1));
+	H = gel(H,2);
+	best = gel(best,2);
+	ip = 1;
+	av1 = avma;
+	do
 	{
-		J1 = PicSetPrec(J,1);
-		B = PicTors_TpEigen(J1,l,ap,epsp,chi);
-		if(DEBUGLEVEL) timers_printf("mfgalrep","Tp eigenspace",&CPUT,&WT);
-		R = PicTorsGalRep_from_basis(J,J1,l,B);
-	}
-	else R = PicTorsGalRep(J,l,chi);
+		avma = av1;
+	  if(DEBUGLEVEL)
+		{
+			walltimer_start(&WT);
+			timer_start(&CPUT);
+		}
+		besti = gel(best,ip);
+		a = itou(gel(besti,1));
+		p = gel(besti,2);
+		Lp = gel(besti,3);
+		ap = gel(besti,4);
+		epsp = gel(besti,5);
+		chi = gel(besti,6);
+		/* Smallest e such that sqrt(1/2*p^e)>10^D */
+		log2 = logr_abs(utor(2,DEFAULTPREC));
+		log10 = logr_abs(utor(10,DEFAULTPREC));
+		logp = logr_abs(itor(p,DEFAULTPREC));
+		e = itos(gceil(divrr(addrr(log2,mulur(2*D,log10)),logp)));
+		if(DEBUGLEVEL) pari_printf("mfgalrep: Constructing J_H(%lu) (H=%Ps, genus %ld) over Q_%Ps^%lu with accuracy O(%Ps^%ld)\n",N,H,degpol(Lp)/2,p,a,p,e);
+		J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
+		if(J==NULL)
+		{
+			ip++;
+			if(ip>=lg(best))
+				pari_err(e_MISC,"run out of primes p, try increasing pmax");
+			continue;
+		}
+		if(DEBUGLEVEL) timers_printf("mfgalrep","modpicinit",&CPUT,&WT);
+		if(UseTp)
+		{
+			J1 = PicSetPrec(J,1);
+			B = PicTors_TpEigen(J1,l,ap,epsp,chi);
+			if(B==NULL) continue;
+			if(DEBUGLEVEL) timers_printf("mfgalrep","Tp eigenspace",&CPUT,&WT);
+			R = PicTorsGalRep_from_basis(J,J1,l,B);
+		}
+		else R = PicTorsGalRep(J,l,chi);
+	} while(R==NULL);
 	return gerepileupto(av,R);
 }
