@@ -169,7 +169,7 @@ static GEN
 get_prime_info(GEN bnf)
 {
   long n = 1, e = gexpo(bnf_get_reg(bnf)), nbp = e < 20? 1: 2;
-  GEN L = cgetg(nbp+1, t_VEC), nf = checknf(bnf), fu = bnf_get_fu(bnf);
+  GEN L = cgetg(nbp+1, t_VEC), nf = bnf_get_nf(bnf), fu = bnf_get_fu(bnf);
   GEN X = pol_x(nf_get_varn(nf));
   ulong p;
   for(p = 2147483659UL; n <= nbp; p = unextprime(p+1))
@@ -1205,13 +1205,12 @@ maybe_warn(GEN bnf, GEN a, GEN Ind)
   if (!is_pm1(Ind) && !is_pm1(bnf_get_no(bnf)) && !is_pm1(a))
     pari_warn(warner, "The result returned by 'thue' is conditional on the GRH");
 }
-static GEN bnfisintnorm_fa(GEN bnf, GEN a, GEN fa, long sa);
-/* return solutions of Norm(x) = a mod U(K)^+ */
+/* true bnf; return solutions of Norm(x) = a mod U(K)^+ */
 static GEN
 get_ne(GEN bnf, GEN a, GEN fa, GEN Ind)
 {
   if (DEBUGLEVEL) maybe_warn(bnf,a,Ind);
-  return bnfisintnorm_fa(bnf, a, fa, signe(a));
+  return bnfisintnorm_i(bnf, a, signe(a), bnfisintnormabs(bnf, mkvec2(a, fa)));
 }
 /* return solutions of |Norm(x)| = |a| mod U(K) */
 static GEN
@@ -1619,7 +1618,7 @@ bnfisintnormabs(GEN bnf, GEN a)
     a = typ(a) == t_VEC? gel(a,1): factorback(F);
     if (signe(a) < 0) F = clean_Z_factor(F);
   }
-  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
+  nf = bnf_get_nf(bnf);
   if (!signe(a)) return mkvec(gen_0);
   if (is_pm1(a)) return mkvec(gen_1);
   if (!F) F = absZ_factor(a);
@@ -1657,11 +1656,12 @@ ideals_by_norm(GEN nf, GEN a)
   return res;
 }
 
-/* z = bnfisintnormabs(bnf,a), sa = 1 or -1, return bnfisintnorm(bnf,sa*|a|) */
+/* true bnf; z = bnfisintnormabs(bnf,a), sa = 1 or -1,
+ * return bnfisintnorm(bnf,sa*|a|) */
 static GEN
 bnfisintnorm_i(GEN bnf, GEN a, long sa, GEN z)
 {
-  GEN nf = checknf(bnf), T = nf_get_pol(nf), f = nf_get_index(nf), unit = NULL;
+  GEN nf = bnf_get_nf(bnf), T = nf_get_pol(nf), f = nf_get_index(nf), unit=NULL;
   GEN Tp, A = signe(a) == sa? a: negi(a);
   long sNx, i, j, N = degpol(T), l = lg(z);
   long norm_1 = 0; /* gcc -Wall */
@@ -1706,16 +1706,13 @@ bnfisintnorm_i(GEN bnf, GEN a, long sa, GEN z)
   }
   setlg(z, j); return z;
 }
-/* bnfisintnorm sa * |a|, fa = factor(|a|) */
-static GEN
-bnfisintnorm_fa(GEN bnf, GEN a, GEN fa, long sa)
-{ return bnfisintnorm_i(bnf, a, sa, bnfisintnormabs(bnf, mkvec2(a, fa)));
-}
 GEN
 bnfisintnorm(GEN bnf, GEN a)
 {
   pari_sp av = avma;
-  GEN ne = bnfisintnormabs(bnf,a);
+  GEN ne;
+  bnf = checkbnf(bnf);
+  ne = bnfisintnormabs(bnf,a);
   switch(typ(a))
   {
     case t_VEC: a = gel(a,1); break;
