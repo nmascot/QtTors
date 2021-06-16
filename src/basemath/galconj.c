@@ -2944,6 +2944,7 @@ galoisinitfromaut(GEN T, GEN aut, ulong l)
     if (!gequal1(gel(T,n+2))) pari_err_IMPL("galoisinit(nonmonic)");
   }
   ga.l = l? l: galois_find_totally_split(T, NULL);
+  if (!l) aut = RgXV_to_FlxV(aut, ga.l);
   gb.l = utoipos(ga.l);
   if (DEBUGLEVEL >= 1) timer_start(&ti);
   den = galoisborne(T, den, &gb, degpol(T));
