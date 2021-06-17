@@ -815,7 +815,7 @@ is_unit(GEN M, long r1, GEN x)
   return gc_bool(av, is_pm1(Nx));
 }
 
-/* FIXME: should use smallvectors */
+/* True nf. FIXME: should use smallvectors */
 static double
 minimforunits(GEN nf, long BORNE, ulong w)
 {

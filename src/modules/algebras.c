@@ -423,7 +423,7 @@ algtensor(GEN al1, GEN al2, long maxord) {
   if (alg_type(al1) != al_CYCLIC  || alg_type(al2) != al_CYCLIC)
     pari_err_IMPL("tensor of noncyclic algebras"); /* TODO: do it. */
 
-  nf=alg_get_center(al1);
+  nf = alg_get_center(al1);
   if (!gequal(alg_get_center(al2),nf))
     pari_err_OP("tensor product [not the same center]", al1, al2);
 

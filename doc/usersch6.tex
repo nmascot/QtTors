@@ -612,7 +612,8 @@ return their result in \typ{COL} form.
 
 \fun{GEN}{nfpow}{GEN nf,GEN x,GEN k} returns $x^k$, $k$ is in $\Z$.
 
-\fun{GEN}{nfpow_u}{GEN nf,GEN x, ulong k} returns $x^k$, $k\geq 0$.
+\fun{GEN}{nfpow_u}{GEN nf,GEN x, ulong k} returns $x^k$, $k\geq 0$; the
+argument \kbd{nf} is a true \var{nf} structure.
 
 \fun{GEN}{nfsqr}{GEN nf,GEN x} returns $x^2$.
 
@@ -704,10 +705,11 @@ returns an algebraic integer congruent to $x^n$ modulo $A$.
 
 \fun{GEN}{nfmuli}{GEN nf, GEN x, GEN y} returns $x\times y$ assuming
 that both $x$ and $y$ are either \typ{INT}s or \kbd{ZV}s of the correct
-dimension.
+dimension. The argument \kbd{nf} is a true \var{nf} structure.
 
-\fun{GEN}{nfsqri}{GEN nf, GEN x} returns $x^2$ assuming that $x$ is a \typ{INT}
-or a \kbd{ZV} of the correct dimension.
+\fun{GEN}{nfsqri}{GEN nf, GEN x} returns $x^2$ assuming that $x$ is a
+\typ{INT} or a \kbd{ZV} of the correct dimension. The argument \kbd{nf} is a
+true \var{nf} structure.
 
 \fun{GEN}{nfC_nf_mul}{GEN nf, GEN v, GEN x} given a \typ{VEC} or \typ{COL}
 $v$ of elements of $K$ in \typ{INT}, \typ{FRAC} or \typ{COL} form, multiply

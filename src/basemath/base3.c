@@ -251,7 +251,7 @@ nfsub(GEN nf, GEN x, GEN y)
   return gerepileupto(av, z);
 }
 
-/* product of ZC x,y in nf; ( sum_i x_i sum_j y_j m^{i,j}_k )_k */
+/* product of ZC x,y in (true) nf; ( sum_i x_i sum_j y_j m^{i,j}_k )_k */
 static GEN
 nfmuli_ZC(GEN nf, GEN x, GEN y)
 {
@@ -539,7 +539,7 @@ nfdiv(GEN nf, GEN x, GEN y)
   return gerepileupto(av, z);
 }
 
-/* product of INTEGERS (t_INT or ZC) x and y in nf */
+/* product of INTEGERS (t_INT or ZC) x and y in (true) nf */
 GEN
 nfmuli(GEN nf, GEN x, GEN y)
 {
@@ -674,7 +674,6 @@ nfpow_u(GEN nf, GEN z, ulong n)
   pari_sp av = avma;
   GEN x, cx;
 
-  nf = checknf(nf);
   if (!n) return gen_1;
   x = nf_to_scalar_or_basis(nf, z);
   if (typ(x) != t_COL) return gpowgs(x,n);
@@ -2905,7 +2904,7 @@ sprk_log_prk1_2(GEN nf, GEN a, GEN sprk)
   y = ZM_ZC_mul(U2, log_prk1(nf, a, lg(U2)-1, L2, sprk_get_prk(sprk)));
   return vecmodii(y, sprk_get_cyc(sprk));
 }
-/* assume e >= 2 */
+/* true nf; assume e >= 2 */
 static GEN
 sprk_log_gen_pr2(GEN nf, GEN sprk, long e)
 {
@@ -2944,7 +2943,7 @@ sprk_log_gen_pr2(GEN nf, GEN sprk, long e)
 }
 /* Log on bid.gen of generators of P_{1,I pr^{e-1}} / P_{1,I pr^e} (I,pr) = 1,
  * defined implicitly via CRT. 'ind' is the index of pr in modulus
- * factorization */
+ * factorization; true nf */
 GEN
 log_gen_pr(zlog_S *S, long ind, GEN nf, long e)
 {
@@ -2952,6 +2951,7 @@ log_gen_pr(zlog_S *S, long ind, GEN nf, long e)
   if (e == 1) retmkmat( gel(Uind,1) );
   return ZM_mul(Uind, sprk_log_gen_pr2(nf, gel(S->sprk,ind), e));
 }
+/* true nf */
 GEN
 sprk_log_gen_pr(GEN nf, GEN sprk, long e)
 {
