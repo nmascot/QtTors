@@ -11,7 +11,7 @@ Doc: if \var{pr} is omitted,
  $\var{nf}$, and $-1$ otherwise. Otherwise compute the local symbol modulo
  the prime ideal \var{pr}, as output by \kbd{idealprimedec}.
 Variant:
- Also available is \fun{long}{nfhilbert}{GEN bnf,GEN a,GEN b} (global
- quadratic Hilbert symbol).
+ Also available is \fun{long}{nfhilbert}{GEN nf,GEN a,GEN b} (global
+ quadratic Hilbert symbol), where \kbd{nf} is a true \var{nf} structure.
 
 

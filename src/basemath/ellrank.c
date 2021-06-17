@@ -311,7 +311,7 @@ locally_soluble(GEN nf,GEN T,GEN pr)
 
   if (typ(T)!=t_POL) pari_err_TYPE("nf_hyperell_locally_soluble",T);
   if (gequal0(T)) return 1;
-  checkprid(pr); nf = checknf(nf);
+  checkprid(pr);
   if (absequaliu(pr_get_p(pr), 2))
   { /* tough case */
     zinit = log_prk_init(nf, pr, 1+2*pr_get_e(pr), NULL);
@@ -333,7 +333,7 @@ long
 nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
 {
   pari_sp av = avma;
-  return gc_long(av, locally_soluble(nf, T, pr));
+  return gc_long(av, locally_soluble(checknf(nf), T, pr));
 }
 
 /* return a * denom(a)^2, as an 'liftalg' */
@@ -411,7 +411,6 @@ nfhilbert(GEN nf, GEN a, GEN b)
   long i, l;
   GEN S, S2, Sa, Sb, sa, sb;
 
-  nf = checknf(nf);
   a = nf_to_scalar_or_basis(nf, a);
   b = nf_to_scalar_or_basis(nf, b);
   /* local solutions in real completions ? [ error in nfsign if arg is 0 ]*/
