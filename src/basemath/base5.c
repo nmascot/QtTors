@@ -1211,11 +1211,10 @@ rnfpolred(GEN nf, GEN pol, long prec)
 {
   pari_sp av = avma;
   long i, j, n, v = varn(pol);
-  GEN id, w, I, O, bnf, nfpol;
+  GEN id, w, I, O, nfpol, bnf = checkbnf_i(nf);
 
   if (typ(pol)!=t_POL) pari_err_TYPE("rnfpolred",pol);
-  bnf = nf; nf = checknf(bnf);
-  bnf = (nf == bnf)? NULL: checkbnf(bnf);
+  nf = bnf? bnf_get_nf(bnf): checknf(nf);
   if (degpol(pol) <= 1) { w = cgetg(2, t_VEC); gel(w,1) = pol_x(v); return w; }
   nfpol = nf_get_pol(nf);
 
