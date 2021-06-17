@@ -3547,8 +3547,8 @@ dividesmod(long d, long h, long n) { return !(h%cgcd(d,n)); }
 static GEN
 localcomplete(GEN rnf, GEN pl, GEN cnd, GEN auts, long j, long n, long h, long* v)
 {
-  GEN nf, gens, hgens, pr, modpr, T, p, sol, U, D, b, gene, randg, pu;
-  long ngens, i, d, np, k, d1, d2, hg, dnf, vcnd, curgcd;
+  GEN nf, gens, hgens, pr, modpr, T, p, sol, U, b, gene, randg, pu;
+  long ngens, i, d, np, d1, d2, hg, dnf, vcnd, curgcd;
   nf = rnf_get_nf(rnf);
   pr = gcoeff(cnd,j,1);
   np = umodiu(pr_norm(pr), n);
@@ -3596,21 +3596,15 @@ localcomplete(GEN rnf, GEN pl, GEN cnd, GEN auts, long j, long n, long h, long* 
   setlg(hgens,ngens+1);
 
   sol = ZV_extgcd(hgens);
-  D = gel(sol,1);
-  U = gmael(sol,2,ngens);
-
-  b = gen_1;
-  d = itou(D);
-  d1 = ugcd(d,n);
-  d2 = d/d1;
-  d = ((h/d1)*Fl_inv(d2,n))%n;
-  for (i=1; i<=ngens; i++) {
-    k = (itos(gel(U,i))*d)%n;
-    if (k<0) k = n-k;
-    if (k) b = nfmul(nf, b, nfpow_u(nf, gel(gens,i),k));
-    if (i==1) *v = k;
-  }
-  return b;
+  U = ZV_to_Flv(gmael(sol,2,ngens), n);
+  d = itou(gel(sol,1));
+  d1 = ugcd(d, n);
+  d2 = d / d1;
+  d = Fl_mul(h / d1, Fl_inv(d2,n), n);
+  if (d != 1) U = Flv_Fl_mul(U, d, n);
+  for (i = 1, b = gen_1; i <= ngens; i++)
+    if (U[i]) b = nfmul(nf, b, nfpow_u(nf, gel(gens,i), U[i]));
+  *v = U[1]; return b;
 }
 
 static int
