@@ -909,13 +909,10 @@ nf2selmer_quad(GEN nf, GEN S)
 {
   pari_sp ltop = avma;
   GEN D = nf_get_disc(nf), factD = nf_get_ramified_primes(nf);
-  GEN SlistQ, QS2gen, gen, Hlist, H, KerH, norms, LS2gen, chpol, Q;
-  GEN kerval, S2, G, e, f, b, c, bad;
+  GEN SlistQ = prV_primes(S), QS2gen, gen, Hlist, H, KerH, norms, LS2gen;
+  GEN chpol, Q, kerval, S2, G, e, f, b, c, bad;
   long lS = lg(S), l, lHlist, i, j, k;
 
-  SlistQ = cgetg(lS, t_VEC);
-  for (i = 1; i < lS; i++) gel(SlistQ, i) = pr_get_p(gel(S, i));
-  SlistQ = ZV_sort_uniq(SlistQ);
   QS2gen = vec_prepend(SlistQ, gen_m1);
   bad = ZV_sort_uniq(shallowconcat(factD, SlistQ));
   Hlist = ZV_search(bad, gen_2)? bad: vec_prepend(bad, gen_2);

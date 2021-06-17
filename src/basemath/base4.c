@@ -2964,6 +2964,15 @@ prV_lcm_capZ(GEN L)
   }
   return F;
 }
+/* v vector of prid. Return underlying list of rational primes */
+GEN
+prV_primes(GEN v)
+{
+  long i, l = lg(v);
+  GEN w = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) gel(w,i) = pr_get_p(gel(v,i));
+  return ZV_sort_uniq(w);
+}
 
 /* Given a prime ideal factorization with possibly zero or negative
  * exponents, gives b such that v_p(b) = v_p(x) for all prime ideals pr | x

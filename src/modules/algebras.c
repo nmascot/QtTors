@@ -3656,16 +3656,6 @@ hassereduce(GEN hf)
   setlg(h,j); return mkvec2(pr,h);
 }
 
-/* v vector of prid. Return underlying list of rational primes */
-static GEN
-prV_primes(GEN v)
-{
-  long i, l = lg(v);
-  GEN w = cgetg(l,t_VEC);
-  for (i=1; i<l; i++) gel(w,i) = pr_get_p(gel(v,i));
-  return ZV_sort_uniq(w);
-}
-
 /* rnf complete */
 static GEN
 alg_complete0(GEN rnf, GEN aut, GEN hf, GEN hi, long maxord)

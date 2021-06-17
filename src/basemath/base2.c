@@ -3522,12 +3522,7 @@ rnfallbase(GEN nf, GEN pol, GEN lim, GEN rnf, GEN *pD, GEN *pf, GEN *pDKP)
   }
   setlg(P,j);
   setlg(E,j);
-  if (pDKP)
-  {
-    GEN v = cgetg(j, t_VEC);
-    for (i = 1; i < j; i++) gel(v,i) = pr_get_p(gel(P,i));
-    *pDKP = ZV_sort_uniq(v);
-  }
+  if (pDKP) *pDKP = prV_primes(P);
   if (pf)
   {
     setlg(Pf, jf);

@@ -415,13 +415,7 @@ H_is_good(GEN H, GEN p)
   return status == 1;
 }
 static GEN
-bid_primes(GEN bid)
-{
-  GEN v = leafcopy(gel(bid_get_fact(bid),1));
-  long i, l = lg(v);
-  for (i = 1; i < l; i++) gel(v,i) = pr_get_p(gel(v,i));
-  settyp(v, t_VEC); return v;
-}
+bid_primes(GEN bid) { return prV_primes(gel(bid_get_fact(bid),1)); }
 /* Let K base field, L/K described by bnr (conductor F) + H. Return a list of
  * primes coprime to f*ell of degree 1 in K whose images in Cl_f(K) together
  * with ell*Cl_f(K), generate H:
@@ -1365,7 +1359,7 @@ bad_primes(GEN bnr)
 {
   GEN v = bid_primes(bnr_get_bid(bnr));
   GEN r = nf_get_ramified_primes(bnr_get_nf(bnr));
-  return ZV_sort_uniq(shallowconcat(r, v));
+  return ZV_union_shallow(r, v);
 }
 static struct rnfkummer **
 rnfkummer_initall(GEN bnr, GEN vP, long prec)
