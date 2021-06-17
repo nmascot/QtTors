@@ -3658,7 +3658,7 @@ hassereduce(GEN hf)
 
 /* v vector of prid. Return underlying list of rational primes */
 static GEN
-pr_primes(GEN v)
+prV_primes(GEN v)
 {
   long i, l = lg(v);
   GEN w = cgetg(l,t_VEC);
@@ -3738,7 +3738,7 @@ alg_complete0(GEN rnf, GEN aut, GEN hf, GEN hi, long maxord)
   gel(al,8) = matid(D); /* TODO modify 7, 8 et 9 once LLL added */
   gel(al,9) = algnatmultable(al,D);
   gel(al,11)= algtracebasis(al);
-  if (maxord) al = alg_maximal_primes(al, pr_primes(Lpr));
+  if (maxord) al = alg_maximal_primes(al, prV_primes(Lpr));
   return gerepilecopy(av, al);
 }
 
@@ -3858,23 +3858,15 @@ rnfcycaut(GEN rnf)
   return NULL; /*LCOV_EXCL_LINE*/
 }
 
-/* returns Lpr augmented with an extra, distinct prime */
-/* TODO be less lazy and return a small prime */
+/* returns the smallest prime not in P */
 static GEN
-extraprime(GEN nf, GEN Lpr)
+extraprime(GEN P)
 {
-  GEN Lpr2, p = gen_2, pr;
-  long i;
-  Lpr2 = cgetg(lg(Lpr)+1,t_VEC);
-  for (i=1; i<lg(Lpr); i++)
-  {
-    gel(Lpr2,i) = gel(Lpr,i);
-    p = gmax_shallow(p, pr_get_p(gel(Lpr,i)));
-  }
-  p = nextprime(addis(p,1));
-  pr = gel(idealprimedec_limit_f(nf, p, 0), 1);
-  gel(Lpr2,lg(Lpr)) = pr;
-  return Lpr2;
+  forprime_t T;
+  GEN p;
+  forprime_init(&T, gen_2, NULL);
+  while ((p = forprime_next(&T))) if (!ZV_search(P, p)) break;
+  return p;
 }
 
 GEN
@@ -3902,7 +3894,7 @@ alg_hasse(GEN nf, long n, GEN hf, GEN hi, long var, long maxord)
         Ld[j] = lk/ugcd(lk,Ld[j]);
         maxdeg = maxss(Ld[j],maxdeg);
       }
-      pl = gcopy(hil);
+      pl = leafcopy(hil);
       for (j=1; j<lg(pl); j++) if(pl[j])
       {
         pl[j] = -1;
@@ -3916,10 +3908,9 @@ alg_hasse(GEN nf, long n, GEN hf, GEN hi, long var, long maxord)
         if (maxdeg==1 && lk==2 && lg(pl)>1) pl[1] = -1;
         else
         {
-          Lpr2 = extraprime(nf,Lpr);
-          Ld2 = cgetg(lg(Ld)+1, t_VECSMALL);
-          for (j=1; j<lg(Ld); j++) Ld2[j] = Ld[j];
-          Ld2[lg(Ld)] = lk;
+          GEN p = extraprime(prV_primes(Lpr));
+          Lpr2 = vec_append(Lpr2, idealprimedec_galois(nf, p));
+          Ld2 = vecsmall_append(Ld2, lk);
         }
       }
 
@@ -4187,7 +4178,7 @@ alg_cyclic(GEN rnf, GEN aut, GEN b, long maxord)
 
   if (maxord) {
     GEN hf = alg_get_hasse_f(al), pr = gel(hf,1);
-    al = alg_maximal_primes(al, pr_primes(pr));
+    al = alg_maximal_primes(al, prV_primes(pr));
   }
   return gerepilecopy(av, al);
 }

@@ -1252,6 +1252,10 @@ $p \geq [K:\Q]$ satisfying those conditions.
 (maximal ideals) return the squarefree positive integer generating their
 lcm intersected with $\Z$. Not \kbd{gerepile}-safe.
 
+\fun{GEN}{prV_primes}{GEN}{GEN L} given a vector of \kbd{prid},
+return the (sorted) list of rational primes $P$ they divide. Not
+\kbd{gerepile}-clean but suitable for \kbd{gerepileupto}.
+
 \fun{GEN}{pr_uniformizer}{GEN pr, GEN F} given a \var{prid} attached to
 $\goth{p} / p$ and $F$ in $\Z$ divisible exactly by $p$, return an
 $F$-uniformizer for \kbd{pr}, i.e. a $t$ in $\Z_K$ such that $v_{\goth{p}}(t)
