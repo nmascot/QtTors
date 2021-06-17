@@ -3997,19 +3997,15 @@ GEN
 alg_hilbert(GEN nf, GEN a, GEN b, long v, long maxord)
 {
   pari_sp av = avma;
-  GEN C, P, rnf, aut;
+  GEN rnf, aut;
   dbg_printf(1)("alg_hilbert\n");
-  checknf(nf);
   if (!isint1(Q_denom(a)))
     pari_err_DOMAIN("alg_hilbert", "denominator(a)", "!=", gen_1,a);
   if (!isint1(Q_denom(b)))
     pari_err_DOMAIN("alg_hilbert", "denominator(b)", "!=", gen_1,b);
 
   if (v < 0) v = 0;
-  C = Rg_col_ei(gneg(a), 3, 3);
-  gel(C,1) = gen_1;
-  P = gtopoly(C,v);
-  rnf = rnfinit(nf, P);
+  rnf = rnfinit(nf, deg2pol_shallow(gen_1, gen_0, gneg(a), v));
   aut = gneg(pol_x(v));
   return gerepileupto(av, alg_cyclic(rnf, aut, b, maxord));
 }

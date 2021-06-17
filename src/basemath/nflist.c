@@ -4395,7 +4395,7 @@ static GEN
 ideallistsquare(GEN bnf, long lim)
 {
   pari_sp av = avma;
-  GEN nf = checknf(bnf), V, Z, F;
+  GEN nf = bnf_get_nf(bnf), V, Z, F;
   long d = nf_get_degree(nf), lim2 = lim * lim, p;
   forprime_t T;
 
