@@ -1634,6 +1634,7 @@ bnfisintnormabs(GEN bnf, GEN a)
   return res;
 }
 
+/* true nf */
 GEN
 ideals_by_norm(GEN nf, GEN a)
 {
@@ -1643,7 +1644,6 @@ ideals_by_norm(GEN nf, GEN a)
 
   if ((F = check_arith_pos(a,"ideals_by_norm")))
     a = typ(a) == t_VEC? gel(a,1): factorback(F);
-  nf = checknf(nf);
   if (is_pm1(a)) return mkvec(trivial_fact());
   if (!F) F = absZ_factor(a);
   if (!get_sol_abs(&T, NULL, nf, F, &PR)) return cgetg(1, t_VEC);

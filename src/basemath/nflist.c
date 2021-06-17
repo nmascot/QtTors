@@ -1787,7 +1787,7 @@ makeD4(GEN N, GEN field, long s)
     set_avma(av3);
     if (kroiu(D, cond) == -1) continue;
     bnf = Buchall(Y2m(D), nf_FORCE, DEFAULTPREC);
-    I = ideals_by_norm(bnf, utoipos(cond));
+    I = ideals_by_norm(bnf_get_nf(bnf), utoipos(cond));
     Arch = signe(D) > 0 ? listarch : archempty;
     /* restrict to fields which are not Galois over Q [eliminate V4/C4] */
     G = s != 1? mkvec2(galoisinit(bnf, NULL), gen_0): NULL;
@@ -4034,9 +4034,9 @@ makeA462(GEN N, GEN field, long s)
   l = lg(L); v = cgetg(l, t_VEC);
   for (i = c = 1; i < l; i++)
   {
-    GEN bnf = bnfY(gel(L,i)), aut = cycfindaut(bnf);
-    GEN T, I = ideals_by_norm(bnf, divii(N, sqri(bnf_get_disc(bnf))));
-    GEN G = mkvec2(galoisinit(bnf, NULL), gen_0);
+    GEN bnf = bnfY(gel(L,i)), nf = bnf_get_nf(bnf), aut = cycfindaut(bnf);
+    GEN T, I = ideals_by_norm(nf, divii(N, sqri(nf_get_disc(nf))));
+    GEN G = mkvec2(galoisinit(nf, NULL), gen_0);
     if ((T = doA462(bnf, I, Arch, aut, G, GAL))) gel(v, c++) = T;
   }
   if (c == 1) return NULL;
@@ -4109,17 +4109,17 @@ makeS3C3(GEN N, GEN field, long s)
   v = cgetg(1, t_VEC);
   for (i = 1; i < lg(LD); i++)
   {
-    GEN L, bnf, D = gel(LD, i);
+    GEN L, bnf, nf, D = gel(LD, i);
     long j, k;
     if (!divissquareall(N, powiu(absi_shallow(D), 3), &cond)) continue;
-    bnf = bnfY(Y2m(D));
-    L = ideals_by_norm(bnf, cond);
+    bnf = bnfY(Y2m(D)); nf = bnf_get_nf(bnf);
+    L = ideals_by_norm(nf, cond);
     for (j = 1; j < lg(L); j++)
     {
       GEN R = mybnrclassfield_N(bnf, gel(L,j), N, 3);
       for (k = 1; k < lg(R); k++)
       {
-        GEN P = rnfequation(bnf, gel(R, k));
+        GEN P = rnfequation(nf, gel(R, k));
         if (okgal1(P, 18)) v = vec_append(v, polredabs(P));
       }
     }
@@ -4249,7 +4249,7 @@ makeS462(GEN N, GEN field, long s)
   for (i = 1; i < lg(L); i++)
   {
     GEN bnf = bnfY(gel(L,i)), nf = bnf_get_nf(bnf);
-    GEN I = ideals_by_norm(bnf, divii(N, sqri(nf_get_disc(nf))));
+    GEN I = ideals_by_norm(nf, divii(N, sqri(nf_get_disc(nf))));
     GEN Arch = nf_get_r1(nf) == 1 ? listarch1 : listarch3;
     for (j = 1; j < lg(I); j++)
     {
@@ -4349,9 +4349,10 @@ doC32C4_i(GEN bnf, GEN L, GEN GAL)
 static GEN
 doC32C4(GEN N, GEN P4, GEN GAL)
 {
-  GEN bnf, F, F2, D4 = nfdisc(P4), D2 = nfdisc(_nfsubfields1(P4, 2));
+  GEN nf, bnf, F, F2, D4 = nfdisc(P4), D2 = nfdisc(_nfsubfields1(P4, 2));
   if (!(F2 = divide(N, mulii(D2,D4))) || !Z_issquareall(F2, &F)) return NULL;
-  bnf = bnfY(P4); return doC32C4_i(bnf, ideals_by_norm(bnf, F2), GAL);
+  bnf = bnfY(P4); nf = bnf_get_nf(bnf);
+  return doC32C4_i(bnf, ideals_by_norm(nf, F2), GAL);
 }
 static GEN
 makeC32C4_i(GEN N, GEN field, long s)

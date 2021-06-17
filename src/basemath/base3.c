@@ -3487,7 +3487,7 @@ gideallist(GEN bnf, GEN B, long flag)
   if (signe(B) < 0)
   {
     if (flag != 4) pari_err_IMPL("ideallist with bid for single norm");
-    return gerepilecopy(av, ideals_by_norm(bnf, absi(B)));
+    return gerepilecopy(av, ideals_by_norm(bnf_get_nf(bnf), absi(B)));
   }
   if (flag < 0 || flag > 15) pari_err_FLAG("ideallist");
   return gerepilecopy(av, Ideallist(bnf, itou(B), flag));

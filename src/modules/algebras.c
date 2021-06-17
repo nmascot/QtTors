@@ -4269,7 +4269,6 @@ alg_csa_table(GEN nf, GEN mt0, long v, long maxord)
   long n, D, d2 = lg(mt0)-1, d = usqrt(d2);
   dbg_printf(1)("alg_csa_table\n");
 
-  nf = checknf(nf);
   mt = check_relmt(nf,mt0);
   if (!mt) pari_err_TYPE("alg_csa_table", mt0);
   n = nf_get_degree(nf);

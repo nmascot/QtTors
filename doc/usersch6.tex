@@ -891,7 +891,6 @@ corresponding to $f \cdot g^e$. Shallow function.
 \fun{GEN}{famat_mulpows_shallow}{GEN f, GEN g, long e} \kbd{famat}
 shallow version of \tet{famat_mulpow} where $e$ is a small integer.
 
-
 \fun{GEN}{famat_sqr}{GEN f} returns $f^2$.
 
 \fun{GEN}{famat_inv}{GEN f} returns $f^{-1}$.
@@ -1086,6 +1085,11 @@ HNF reduction (modulo $xy\cap \Z$).
 \fun{GEN}{idealHNF_inv_Z}{GEN nf, GEN I} returns $(I\cap \Z) \cdot I^{-1}$,
 assuming that \kbd{nf} is a true \var{nf} and $x$ is an integral fractional
 ideal in HNF. The result is an integral ideal in HNF.
+
+\fun{GEN}{ideals_by_norm}{GEN nf, GEN N} given a true \var{nf} structure and a
+integer $N$, which can also be given by a factorization matrix or (preferably)
+by a pair $[N, \kbd{factor}(N)]$, return all ideals of norm $N$ in factored
+form. Not \kbd{gerepile} clean.
 
 \misctitle{Approximation}
 
