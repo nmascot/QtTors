@@ -2464,9 +2464,9 @@ C5prim(GEN nf, GEN pr5, GEN z, GEN eps, GEN b)
 static GEN
 C5bnf()
 {
-  GEN bnf = bnfinit0(polcyclo(5, 1), nf_FORCE, NULL, 4);
-  GEN aut = algtobasis(bnf, pol_xn(2, 1));
-  GEN p5 = idealprimedec_galois(bnf, utoipos(5));
+  GEN bnf = bnfinit0(polcyclo(5, 1), nf_FORCE, NULL, 4), nf = bnf_get_nf(bnf);
+  GEN aut = poltobasis(nf, pol_xn(2, 1));
+  GEN p5 = idealprimedec_galois(nf, utoipos(5));
   return mkvec3(bnf, aut, p5);
 }
 
@@ -4476,19 +4476,19 @@ makeC32C4vec(GEN X, GEN Xinf, GEN field, long s)
 static GEN
 bnrcfC9(GEN bnf, GEN P, GEN F)
 {
-  GEN v, cond = F, vec9 = mkvec(utoipos(9));
+  GEN v, cond = F, vec9 = mkvec(utoipos(9)), nf = bnf_get_nf(bnf);
   long i, l, c, lP = lg(P);
   for (i = 1; i < lP; i++)
   {
-    GEN p = gel(P, i), pr = idealprimedec_galois(bnf, p);
-    if (equaliu(p, 3)) pr = idealsqr(bnf, pr);
-    cond = idealmul(bnf, cond, pr);
+    GEN p = gel(P, i), pr = idealprimedec_galois(nf, p);
+    if (equaliu(p, 3)) pr = idealsqr(nf, pr);
+    cond = idealmul(nf, cond, pr);
   }
   v = mybnrclassfield(bnf, cond, 3);
   l = lg(v); if (l == 1) return v;
   for (i = c = 1; i < l; i++)
   {
-    GEN P = rnfequation(bnf, gel(v,i)), G = galoisinit(P, NULL);
+    GEN P = rnfequation(nf, gel(v,i)), G = galoisinit(P, NULL);
     if (typ(G) != t_INT && gequal(galoisisabelian(G, 2), vec9))
       gel(v, c++) = polredabs(P);
   }

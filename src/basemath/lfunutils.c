@@ -1048,6 +1048,7 @@ lfunabelianrelinit(GEN nfabs, GEN bnf, GEN polrel, GEN dom, long der, long bitpr
 /*****************************************************************/
 /*                 Dedekind zeta functions                       */
 /*****************************************************************/
+/* true nf */
 static GEN
 dirzetak0(GEN nf, ulong N)
 {
@@ -2467,7 +2468,7 @@ artin_ram(GEN nf, GEN gal, GEN aut, GEN pr, GEN ramg, GEN ch, long d)
   setvarn(V,0); return gerepileupto(av, ginv(V));
 }
 
-/* [Artin conductor, vec of [p, Lp]] */
+/* N true nf; [Artin conductor, vec of [p, Lp]] */
 static GEN
 artin_badprimes(GEN N, GEN G, GEN aut, GEN ch)
 {
@@ -2551,6 +2552,7 @@ idealfrobenius_hard(GEN nf, GEN gal, GEN aut, GEN pr)
   return NULL; /* LCOV_EXCL_LINE */
 }
 
+/* true nf */
 static GEN
 dirartin(GEN nf, GEN G, GEN V, GEN aut, GEN p, long n)
 {

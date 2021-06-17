@@ -2152,7 +2152,7 @@ primedec_end(GEN nf, GEN L, GEN p, long flim)
 
 /* prime ideal decomposition of p; if flim>0, restrict to f(P,p) <= flim
  * if flim = -1 return only the first P
- * if flim = -2 return only the f(P/p) in a t_VECSMALL */
+ * if flim = -2 return only the f(P/p) in a t_VECSMALL; true nf */
 static GEN
 primedec_aux(GEN nf, GEN p, long flim)
 {
@@ -2272,18 +2272,20 @@ idealprimedec_limit_f(GEN nf, GEN p, long f)
   v = gen_sort(v, (void*)&cmp_prime_over_p, &cmp_nodata);
   return gerepileupto(av,v);
 }
+/* true nf */
 GEN
 idealprimedec_galois(GEN nf, GEN p)
 {
   pari_sp av = avma;
-  GEN v = primedec_aux(checknf(nf), p, -1);
+  GEN v = primedec_aux(nf, p, -1);
   return gerepilecopy(av,v);
 }
+/* true nf */
 GEN
 idealprimedec_degrees(GEN nf, GEN p)
 {
   pari_sp av = avma;
-  GEN v = primedec_aux(checknf(nf), p, -2);
+  GEN v = primedec_aux(nf, p, -2);
   vecsmall_sort(v); return gerepileuptoleaf(av, v);
 }
 GEN

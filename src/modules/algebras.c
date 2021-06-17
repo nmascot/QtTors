@@ -3853,6 +3853,7 @@ extraprime(GEN P)
   return p;
 }
 
+/* true nf */
 GEN
 alg_hasse(GEN nf, long n, GEN hf, GEN hi, long var, long maxord)
 {
