@@ -2019,7 +2019,7 @@ isprincipalfact(GEN bnf, GEN C, GEN P, GEN e, long flag)
   const long gen = flag & (nf_GEN|nf_GENMAT|nf_GEN_IF_PRINCIPAL);
   long prec;
   pari_sp av = avma;
-  GEN C0, Cext, c, id, nf = checknf(bnf);
+  GEN C0, Cext, c, id, nf = bnf_get_nf(bnf);
 
   if (gen)
   {
