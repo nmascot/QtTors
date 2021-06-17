@@ -1417,7 +1417,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   LS2 = cgetg(n+1, t_VEC);
   factLS2 = cgetg(n+1, t_VEC);
   sqrtLS2 = cgetg(n+1, t_VEC);
-  for (k = 1; k <= n; ++k)
+  for (k = 1; k <= n; k++)
   {
     GEN T, Tinv, id, f, sel, L, S, NF = gel(vbnf,k), nf = checknf(NF);
     long i, lk;
