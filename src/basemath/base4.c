@@ -179,11 +179,12 @@ idealhnf_shallow(GEN nf, GEN x)
     default: return idealhnf_principal(nf, x); /* PRINCIPAL */
   }
 }
+/* true nf */
 GEN
 idealhnf(GEN nf, GEN x)
 {
   pari_sp av = avma;
-  GEN y = idealhnf_shallow(checknf(nf), x);
+  GEN y = idealhnf_shallow(nf, x);
   return (avma == av)? gcopy(y): gerepileupto(av, y);
 }
 
@@ -287,10 +288,11 @@ idealhnf0(GEN nf, GEN a, GEN b)
   long ta, tb;
   pari_sp av;
   GEN x;
+  nf = checknf(nf);
   if (!b) return idealhnf(nf,a);
 
   /* HNF of aZ_K+bZ_K */
-  av = avma; nf = checknf(nf);
+  av = avma;
   a = nf_to_scalar_or_basis(nf,a); ta = typ(a);
   b = nf_to_scalar_or_basis(nf,b); tb = typ(b);
   if (ta == t_COL)
@@ -2128,7 +2130,7 @@ idealnumden(GEN nf, GEN x)
       }
       /* t_COL */
       x = Q_remove_denom(x, &d);
-      if (!d) return gerepilecopy(av, mkvec2(idealhnf(nf, x), gen_1));
+      if (!d) return gerepilecopy(av, mkvec2(idealhnf_shallow(nf, x), gen_1));
       mx = zk_multable(nf, x);
       xZ = zkmultable_capZ(mx);
       x = ZM_hnfmodid(mx, xZ); /* principal ideal (x) */

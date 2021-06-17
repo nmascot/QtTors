@@ -975,7 +975,8 @@ easy to ensure from the user's side.
 
 \misctitle{Conversion to HNF}
 
-\fun{GEN}{idealhnf}{GEN nf, GEN x} returns the HNF of the ideal defined by $x$:
+\fun{GEN}{idealhnf}{GEN nf, GEN x} where the argument \kbd{nf} is a true
+\var{nf} structure. Returns the HNF of the ideal defined by $x$:
 $x$ may be an algebraic  number (defining a principal ideal),  a maximal ideal
 (as given by \tet{idealprimedec} or  \tet{idealfactor}), or a matrix whose
 columns give generators for the  ideal. This  last format is complicated,  but

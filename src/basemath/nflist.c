@@ -2001,7 +2001,8 @@ cubictypedec(GEN nf, GEN p)
   switch (lg(P))
   {
     case 2: return NULL;
-    case 3: if (pr_get_f(gel(P,2)) == 2) return mkvec(idealhnf(nf, gel(P,2)));
+    case 3: if (pr_get_f(gel(P,2)) == 2)
+              return mkvec(idealhnf_shallow(nf, gel(P,2)));
             return mkvec(idealmul(nf, gel(P, 1), gel(P, 2)));
     default: return mkvec3(idealmul(nf, gel(P, 1), gel(P, 2)),
                            idealmul(nf, gel(P, 2), gel(P, 3)),

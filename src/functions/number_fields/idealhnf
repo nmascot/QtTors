@@ -70,4 +70,5 @@ Doc: gives the \idx{Hermite normal form} of the ideal $u\Z_K+v\Z_K$, where $u$
    *** idealhnf: Qfb(1, 2, 3) has discriminant != 60 in idealhnf.
  @eprog
 
-Variant: Also available is \fun{GEN}{idealhnf}{GEN nf, GEN a}.
+Variant: Also available is \fun{GEN}{idealhnf}{GEN nf, GEN a}, where \kbd{nf}
+ is a true \var{nf} structure.

@@ -477,7 +477,7 @@ bnflogdegree(GEN nf, GEN A, GEN ell)
 
   if (typ(ell) != t_INT) pari_err_TYPE("bnflogdegree", ell);
   nf = checknf(nf);
-  A = idealhnf(nf, A);
+  A = idealhnf_shallow(nf, A);
   AZ = gcoeff(A,1,1);
   vAZ = Z_pvalrem(AZ, ell, &A0Z);
   if (is_pm1(A0Z))

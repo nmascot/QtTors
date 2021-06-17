@@ -532,7 +532,7 @@ subgroup_info(GEN bnfz, GEN Lprz, GEN gell, GEN vecWA)
   for (i=1; i < lz; i++)
   {
     GEN pr = gel(Lprz,i), EX = subiu(pr_norm(pr), 1);
-    GEN N, g,T,p, prM = idealhnf(nfz, pr);
+    GEN N, g,T,p, prM = idealhnf_shallow(nfz, pr);
     GEN modpr = zk_to_Fq_init(nfz, &pr,&T,&p);
     long v = Z_lvalrem(divis(EX,ell), ell, &N) + 1; /* Norm(pr)-1 = N * ell^v */
     GEN ellv = powuu(ell, v);

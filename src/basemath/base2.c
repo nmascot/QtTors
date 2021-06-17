@@ -3386,7 +3386,7 @@ rnfallbase(GEN nf, GEN pol, GEN lim, GEN rnf, GEN *pD, GEN *pf, GEN *pDKP)
   if (lim)
   {
     GEN rnfeq, zknf, dzknf, U, vU, dA, A, MB, dB, BdB, vj, B, Tabs;
-    GEN D = idealhnf(nf, disc);
+    GEN D = idealhnf_shallow(nf, disc);
     long rU, m = nf_get_degree(nf), n = degpol(pol), N = n*m;
     nfmaxord_t S;
 
