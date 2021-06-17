@@ -2408,11 +2408,13 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
   Nx = gmul(real_1(prec), gaddsg(N - 1, x));
   S1 = S3 = gpow(Nx, a, prec);
   av2 = avma;
-  for (m = N - 2; m >= 0; m--)
-  {
-    S1 = gadd(S1, gpow(gaddsg(m,x), a, prec));
-    if ((m & 0xff) == 0) S1 = gerepileupto(av2, S1);
-  }
+  if (gequal1(x)) S1 = dirpowerssum(N, a, prec);
+  else
+    for (m = N - 2; m >= 0; m--)
+    {
+      S1 = gadd(S1, gpow(gaddsg(m,x), a, prec));
+      if ((m & 0xff) == 0) S1 = gerepileupto(av2, S1);
+    }
   if (DEBUGLEVEL>2) timer_printf(&T,"sum from 0 to N - 1");
   constbern(k >> 1);
   N2 = ginv(gsqr(Nx));
