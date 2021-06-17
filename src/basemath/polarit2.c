@@ -1116,18 +1116,6 @@ roots_to_pol_r1(GEN a, long v, long r1)
 /*                                                                 */
 /*******************************************************************/
 static GEN
-idmulred(void *nf, GEN x, GEN y) { return idealmulred((GEN) nf, x, y); }
-static GEN
-idpowred(void *nf, GEN x, GEN n) { return idealpowred((GEN) nf, x, n); }
-static GEN
-idmul(void *nf, GEN x, GEN y) { return idealmul((GEN) nf, x, y); }
-static GEN
-idpow(void *nf, GEN x, GEN n) { return idealpow((GEN) nf, x, n); }
-static GEN
-eltmul(void *nf, GEN x, GEN y) { return nfmul((GEN) nf, x, y); }
-static GEN
-eltpow(void *nf, GEN x, GEN n) { return nfpow((GEN) nf, x, n); }
-static GEN
 mul(void *a, GEN x, GEN y) { (void)a; return gmul(x,y);}
 static GEN
 powi(void *a, GEN x, GEN y) { (void)a; return powgi(x,y);}
@@ -1193,18 +1181,6 @@ gen_factorback(GEN L, GEN e, void *data, GEN (*_mul)(void*,GEN,GEN),
   x[0] = evaltyp(t_VEC) | _evallg(l);
   return gerepileupto(av, gen_product(x, data, _mul));
 }
-
-GEN
-idealfactorback(GEN nf, GEN L, GEN e, int red)
-{
-  nf = checknf(nf);
-  if (red) return gen_factorback(L, e, (void*)nf, &idmulred, &idpowred, NULL);
-  else     return gen_factorback(L, e, (void*)nf, &idmul, &idpow, NULL);
-}
-
-GEN
-nffactorback(GEN nf, GEN L, GEN e)
-{ return gen_factorback(L, e, (void*)checknf(nf), &eltmul, &eltpow, NULL); }
 
 GEN
 FpV_factorback(GEN L, GEN e, GEN p)

@@ -936,7 +936,7 @@ cleanarch(GEN x, long N, long prec)
 GEN
 nf_cxlog_normalize(GEN nf, GEN x, long prec)
 {
-  long N = nf_get_degree(checknf(nf));
+  long N = nf_get_degree(nf);
   return cleanarch(x, N, prec);
 }
 

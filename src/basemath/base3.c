@@ -688,6 +688,29 @@ nfpow_u(GEN nf, GEN z, ulong n)
 }
 
 static GEN
+idmulred(void *nf, GEN x, GEN y) { return idealmulred((GEN) nf, x, y); }
+static GEN
+idpowred(void *nf, GEN x, GEN n) { return idealpowred((GEN) nf, x, n); }
+static GEN
+idmul(void *nf, GEN x, GEN y) { return idealmul((GEN) nf, x, y); }
+static GEN
+idpow(void *nf, GEN x, GEN n) { return idealpow((GEN) nf, x, n); }
+GEN
+idealfactorback(GEN nf, GEN L, GEN e, int red)
+{
+  nf = checknf(nf);
+  if (red) return gen_factorback(L, e, (void*)nf, &idmulred, &idpowred, NULL);
+  else     return gen_factorback(L, e, (void*)nf, &idmul, &idpow, NULL);
+}
+static GEN
+eltmul(void *nf, GEN x, GEN y) { return nfmul((GEN) nf, x, y); }
+static GEN
+eltpow(void *nf, GEN x, GEN n) { return nfpow((GEN) nf, x, n); }
+GEN
+nffactorback(GEN nf, GEN L, GEN e)
+{ return gen_factorback(L, e, (void*)checknf(nf), &eltmul, &eltpow, NULL); }
+
+static GEN
 _nf_red(void *E, GEN x) { (void)E; return x; }
 
 static GEN
