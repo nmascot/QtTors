@@ -40,7 +40,6 @@ etilde(GEN nf, GEN pr, GEN T)
     v = u_pval(pr_get_f(pr), gp);
     return itou( mului(e, powiu(gp, v)) );
   }
-  nf = checknf(nf);
   p = itou(gp);
   k = e / (p-1) + 1;
   /* log Norm_{F_P/Q_p} (1 + P^k) = Tr(P^k) = p^[(k + v(Diff))/ e] Z_p */
@@ -63,8 +62,9 @@ etilde(GEN nf, GEN pr, GEN T)
 }
 static long
 ftilde_from_e(GEN pr, long e) { return pr_get_e(pr) * pr_get_f(pr) / e; }
+/* true nf */
 static long
-ftilde(GEN K, GEN pr, GEN T) { return ftilde_from_e(pr, etilde(K,pr, T)); }
+ftilde(GEN nf, GEN pr, GEN T) { return ftilde_from_e(pr, etilde(nf, pr, T)); }
 
 static long
 get_ZpX_index(GEN K, GEN pr, GEN T)
