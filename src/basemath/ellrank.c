@@ -333,7 +333,7 @@ long
 nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
 {
   pari_sp av = avma;
-  return gc_long(av, locally_soluble(checknf(nf), T, pr));
+  return gc_long(av, locally_soluble(nf, T, pr));
 }
 
 /* return a * denom(a)^2, as an 'liftalg' */
