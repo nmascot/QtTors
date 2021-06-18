@@ -1200,11 +1200,11 @@ must be a positive \typ{INT}.
 
 \fun{GEN}{idealprimedec_galois}{GEN nf, GEN p} return a single prime ideal
 above $p$.
-The \kbd{nf} argument is a true \varn{nf} structure.
+The \kbd{nf} argument is a true \var{nf} structure.
 
 \fun{GEN}{idealprimedec_degrees}{GEN nf, GEN p} return a (sorted)
 \typ{VECSMALL} containing the residue degrees $f(\goth{p} / p)$.
-The \kbd{nf} argument is a true \varn{nf} structure.
+The \kbd{nf} argument is a true \var{nf} structure.
 
 \fun{GEN}{idealprimedec_kummer}{GEN nf, GEN Ti, long ei, GEN p} let \var{nf}
 (true \var{nf}) correspond to $K = \Q[X]/(T)$ ($T$ monic \kbd{ZX}).
@@ -1215,7 +1215,7 @@ of $(f,g,h)$ in $\F_p[X]$. Let \kbd{Ti} (\kbd{FpX}) be one irreducible factor
 $T_i$ not dividing $D$, with \kbd{ei} $= e_i$. This function returns the
 prime ideal attached to $T_i$ by Kummer / Dedekind criterion, namely
 $p \Z_K + T_i(\bar{X}) \Z_K$, which has ramification index $e_i$ over $p$.
-The \kbd{nf} argument is a true \varn{nf} structure.
+The \kbd{nf} argument is a true \var{nf} structure.
 Shallow function.
 
 \fun{GEN}{idealfactor}{GEN nf, GEN x} factors the fractional (hence nonzero)

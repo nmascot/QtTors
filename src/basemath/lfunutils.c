@@ -1169,10 +1169,10 @@ lfunzetakinit_Galois(GEN nf, GEN gal, GEN dom, long der, long bitprec)
   else return lfunzetakinit_artin(nf, gal, dom, der, bitprec);
 }
 
+/* true nf */
 GEN
-lfunzetakinit(GEN NF, GEN dom, long der, long bitprec)
+lfunzetakinit(GEN nf, GEN dom, long der, long bitprec)
 {
-  GEN nf = checknf(NF);
   GEN G, nfs, sbg;
   long lf, d = nf_get_degree(nf);
   if (d == 1) return lfunzetainit(dom, der, bitprec);
