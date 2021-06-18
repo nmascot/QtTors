@@ -1713,7 +1713,8 @@ nfsetsigns(GEN nf, GEN signs, GEN x, GEN sarch)
   }
   return x;
 }
-/* - sarch = nfarchstar(nf, F);
+/* - true nf
+ * - sarch = nfarchstar(nf, F);
  * - x encodes a vector of signs at arch.archp: either a t_VECSMALL
  *   (vector of signs as {0,1}-vector), NULL (totally positive at archp),
  *   or a nonzero number field element (replaced by its signature at archp);
@@ -1724,7 +1725,6 @@ set_sign_mod_divisor(GEN nf, GEN x, GEN y, GEN sarch)
 {
   GEN archp = sarch_get_archp(sarch);
   if (lg(archp) == 1) return y;
-  nf = checknf(nf);
   if (x && typ(x) != t_VECSMALL) x = nfsign_arch(nf, x, archp);
   y = nf_to_scalar_or_basis(nf,y);
   return nfsetsigns(nf, x, y, sarch);
@@ -2005,7 +2005,6 @@ nfsign_arch(GEN nf, GEN x, GEN arch)
   pari_sp av;
 
   if (!n) return cgetg(1,t_VECSMALL);
-  nf = checknf(nf);
   if (typ(x) == t_MAT)
   { /* factorisation */
     GEN g = gel(x,1), e = gel(x,2);
@@ -2194,7 +2193,7 @@ nfpolsturm(GEN nf, GEN f, GEN ind0)
   return gerepileupto(av, zv_to_ZV(vr1));
 }
 
-/* return the vector of signs of x; the matrix of such if x is a vector
+/* True nf; return the vector of signs of x; the matrix of such if x is a vector
  * of nf elements */
 GEN
 nfsign(GEN nf, GEN x)
@@ -2202,7 +2201,6 @@ nfsign(GEN nf, GEN x)
   long i, l;
   GEN archp, S;
 
-  nf = checknf(nf);
   archp = identity_perm( nf_get_r1(nf) );
   if (typ(x) != t_VEC) return nfsign_arch(nf, x, archp);
   l = lg(x); S = cgetg(l, t_MAT);

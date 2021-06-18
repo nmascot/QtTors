@@ -1448,7 +1448,7 @@ $n$ with ones exactly at the positions $p[1], p[2], \ldots$
 any form of number field, return the $0-1$-vector giving the signs of the
 $r_1$ real embeddings of $x$, as a \typ{VECSMALL}. Linear algebra functions
 like \tet{Flv_add_inplace} then allow keeping track of signs in series of
-multiplications.
+multiplications. The argument \kbd{nf} is a true \var{nf} structure.
 
 If $x$ is a \typ{VEC} of number field elements, return the matrix whose
 columns are the signs of the $x[i]$.
@@ -1457,7 +1457,8 @@ columns are the signs of the $x[i]$.
 distinct real places, either in \kbd{vec01} (\typ{VEC} with \kbd{gen\_0} or
 \kbd{gen\_1} entries) or \kbd{indices} (\typ{VECSMALL}) form (see
 \tet{vec01_to_indices}), returns the signs of $x$ at the corresponding
-places. This is the low-level function underlying \kbd{nfsign}.
+places. This is the low-level function underlying \kbd{nfsign}. The argument
+\kbd{nf} is a true \var{nf} structure.
 
 \fun{int}{nfchecksigns}{GEN nf, GEN x, GEN pl} \var{pl} is a
 \typ{VECSMALL} with $r_1$ components, all of which are in $\{-1,0,1\}$.
@@ -1492,7 +1493,8 @@ let $f = f_0f_\infty$ be a divisor, let \kbd{sarch} be the output of
 \kbd{nfarchstar(nf, f0, finf)}, let $x$ encode a vector of signs at
 the places of $f_\infty$ (see below), and let $y$ be a nonzero
 number field element. Returns $z$ congruent to $y$ mod $f_0$ (integral if $y$
-is) such that $z$ and $x$ have the same signs at $f_\infty$.
+is) such that $z$ and $x$ have the same signs at $f_\infty$. The argument
+\kbd{nf} is a true \var{nf} structure.
 
 The following formats are supported for $x$: a $\{0,1\}$-vector of signs
 as a \typ{VECSMALL} (0 for positive, 1 for negative); \kbd{NULL} for a
