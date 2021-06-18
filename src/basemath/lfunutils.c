@@ -813,7 +813,6 @@ vecan_chigen(GEN an, long n, long prec)
   return v;
 }
 
-static GEN lfunzetak_i(GEN T);
 static GEN
 vec01(long r1, long r2)
 {
@@ -823,6 +822,22 @@ vec01(long r1, long r2)
   for (     ; i <= d;  i++) gel(v,i) = gen_1;
   return v;
 }
+
+/* true nf or t_POL */
+static GEN
+lfunzetak_i(GEN nf)
+{
+  GEN Vga, N;
+  long r1, r2;
+  if (typ(nf) == t_POL) nf = nfinit(nf, DEFAULTPREC);
+  nf_get_sign(nf,&r1,&r2); Vga = vec01(r1+r2,r2);
+  N = absi_shallow(nf_get_disc(nf));
+  return mkvecn(7, tag(nf,t_LFUN_NF), gen_0, Vga, gen_1, N, gen_1, gen_0);
+}
+static GEN
+lfunzetak(GEN T)
+{ pari_sp av = avma; return gerepilecopy(av, lfunzetak_i(T)); }
+
 /* v = vector of normalized characters of order dividing o; renormalize
  * so that all have same apparent order o */
 static GEN
@@ -951,7 +966,7 @@ lfunchigen(GEN bnr, GEN CHI)
   if (!nchi)
   {
     if (equali1(NN)) { set_avma(av); return lfunzeta(); }
-    if (ZV_equal0(CHI)) return gerepilecopy(av, lfunzetak_i(bnr_get_bnf(bnr)));
+    if (ZV_equal0(CHI)) return gerepilecopy(av, lfunzetak_i(bnr_get_nf(bnr)));
     nchi = char_normalize(CHI, cyc_normalize(bnr_get_cyc(bnr)));
   }
   real = abscmpiu(gel(nchi,1), 2) <= 0;
@@ -983,36 +998,6 @@ chigenkerfind(GEN bnr, GEN H, GEN *pcnj)
   setlg(cnj, k);
   setlg(res, k); return res;
 }
-
-static GEN
-lfunzetak_i(GEN T)
-{
-  GEN Vga, N, nf, bnf = checkbnf_i(T), r = gen_0/*unknown*/;
-  long r1, r2;
-
-  if (bnf)
-    nf = bnf_get_nf(bnf);
-  else
-  {
-    nf = checknf_i(T);
-    if (!nf) nf = T = nfinit(T, DEFAULTPREC);
-  }
-  nf_get_sign(nf,&r1,&r2);
-  N = absi_shallow(nf_get_disc(nf));
-  if (bnf)
-  {
-    GEN h = bnf_get_no(bnf);
-    GEN R = bnf_get_reg(bnf);
-    long prec = nf_get_prec(nf);
-    r = gdiv(gmul(mulir(shifti(h, r1+r2), powru(mppi(prec), r2)), R),
-             mulur(bnf_get_tuN(bnf), gsqrt(N, prec)));
-  }
-  Vga = vec01(r1+r2,r2);
-  return mkvecn(7, tag(T,t_LFUN_NF), gen_0, Vga, gen_1, N, gen_1, r);
-}
-static GEN
-lfunzetak(GEN T)
-{ pari_sp ltop = avma; return gerepilecopy(ltop, lfunzetak_i(T)); }
 
 /* bnf = NULL: base field = Q */
 GEN
@@ -2728,7 +2713,6 @@ lfundatatype(GEN data)
     case t_INTMOD: return t_LFUNMISC_CHICONREY;
     case t_POL: return t_LFUNMISC_POL;
     case t_VEC:
-      if (checknf_i(data)) return t_LFUNMISC_POL;
       switch(lg(data))
       {
         case 17: return t_LFUNMISC_ELLINIT;
@@ -2741,12 +2725,14 @@ lfundatatype(GEN data)
 static GEN
 lfunmisc_to_ldata_i(GEN ldata, long shallow)
 {
+  GEN x;
   if (is_linit(ldata)) ldata = linit_get_ldata(ldata);
   if (is_ldata(ldata) && is_tagged(ldata))
   {
     if (!shallow) ldata = gcopy(ldata);
     checkldata(ldata); return ldata;
   }
+  x = checknf_i(ldata); if (x) return lfunzetak(x);
   switch (lfundatatype(ldata))
   {
     case t_LFUNMISC_POL: return lfunzetak(ldata);
