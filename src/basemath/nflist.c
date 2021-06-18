@@ -2465,7 +2465,7 @@ C5prim(GEN nf, GEN pr5, GEN z, GEN eps, GEN b)
 static GEN
 C5bnf()
 {
-  GEN bnf = bnfinit0(polcyclo(5, 1), nf_FORCE, NULL, 4), nf = bnf_get_nf(bnf);
+  GEN bnf = Buchall(polcyclo(5,1), nf_FORCE, DEFAULTPREC), nf = bnf_get_nf(bnf);
   GEN aut = poltobasis(nf, pol_xn(2, 1));
   GEN p5 = idealprimedec_galois(nf, utoipos(5));
   return mkvec3(bnf, aut, p5);
