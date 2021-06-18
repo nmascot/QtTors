@@ -861,17 +861,28 @@ static GEN
 prV_ZM_factorback(GEN nf, GEN S, GEN x)
 { pari_APPLY_type(t_VEC,idealfactorback(nf, S, gel(x,i), 0)) }
 
+/* shortcut for bnf = Q and p = 2 */
 static GEN
-bnfselmer(GEN bnf, GEN S, ulong p)
+bnfselmerQ(GEN S)
 {
+  GEN gen = vec_prepend(prV_primes(S), gen_m1), e;
+  long n = lg(S)-1;
+  e = shallowconcat(zerocol(n), matid(n));
+  return mkvec3(gen, e, const_vec(n + 1, gen_1));
+}
+
+static GEN
+bnfselmer(GEN bnf, GEN S)
+{
+  const long p = 2;
   pari_sp av = avma;
   GEN nf = bnf_get_nf(bnf), S2, S3, e, f, e2, kerval, LS2gen, LS2fu, LS2all;
-  long n = S? lg(S)-1: 0, n3, n2all, r;
+  long n = lg(S)-1, n3, n2all, r;
 
   S2 = bestS(bnf, S, p);
   S3 = shallowconcat(S, S2);
   LS2all = nfV_factorbackmod(nf, gel(bnfunits(bnf, S3), 1), p);
-  n3 = lg(S3)-1; n2all = lg(LS2all)-1; r = n2all - n3 - 1;
+  n3 = lg(S3)-1; n2all = lg(LS2all)-1;
   LS2gen = vecslice(LS2all,1,n3);
   LS2fu  = vecslice(LS2all,n3+1, n2all-1);
   e2 = nfC_prV_val(nf, LS2gen, S2);
@@ -881,11 +892,8 @@ bnfselmer(GEN bnf, GEN S, ulong p)
   e2 = ZM_divexactu(ZM_zm_mul(e2, kerval), p);
   f = prV_ZM_factorback(nf, S2, e2);
   LS2gen = shallowconcat(LS2fu, LS2gen);
-  if (bnf_get_tuN(bnf) % p == 0)
-  {
-    LS2gen = vec_prepend(LS2gen, bnf_get_tuU(bnf));
-    r++;
-  }
+  LS2gen = nfV_to_scalar_or_alg(nf, vec_prepend(LS2gen, bnf_get_tuU(bnf)));
+  r = n2all - n3;
   e = shallowconcat(zeromat(n, r), e);
   f = shallowconcat(const_vec(r, gen_1), f);
   return gerepilecopy(av, mkvec3(LS2gen,e,f));
@@ -969,7 +977,7 @@ nf2selmer_quad(GEN nf, GEN S)
     for (j = 1; j < lS; j++) gel(ei,j) = stoi(idealval(nf, x, gel(S,j)));
     id = idealdiv(nf, x, idealfactorback(nf, S, gel(e,i), 0));
     if (!idealispower(nf, id, 2, &gel(f,i))) pari_err_BUG("nf2selmer_quad");
-    gel(gen, i) = x;
+    gel(gen, i) = nf_to_scalar_or_alg(nf, x);
   }
   return gerepilecopy(ltop, mkvec3(gen, e, f));
 }
@@ -983,7 +991,7 @@ makevbnf(GEN ell, long prec)
   for (k = 1; k < l; k++)
   {
     GEN t = gel(P,k);
-    gel(vbnf,k) = degpol(t) == 2? nfinit(t, prec): Buchall(t, nf_FORCE, prec);
+    gel(vbnf,k) = degpol(t) <= 2? nfinit(t, prec): Buchall(t, nf_FORCE, prec);
   }
   return vbnf;
 }
@@ -1416,8 +1424,9 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   sqrtLS2 = cgetg(n+1, t_VEC);
   for (k = 1; k <= n; k++)
   {
-    GEN T, Tinv, id, f, sel, L, S, NF = gel(vbnf,k), nf = checknf(NF);
+    GEN T, Tinv, id, f, sel, L, S, nf, NF = gel(vbnf,k);
     long i, lk;
+    nf = (n == 1)? bnf_get_nf(NF): NF;
     gel(vnf, k) = nf;
     gel(vpol, k) = T = nf_get_pol(nf);
     Tinv = RgX_div(pol, gel(vpol, k));
@@ -1428,20 +1437,21 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     f = mkvec3(gel(idealfactor(nf, Tinv), 1),
                gel(idealfactor(nf, id), 1), f);
     gel(badprimes, k) = S = gtoset(shallowconcat1(f));
-    if (NF == nf)
-      sel = nf2selmer_quad(NF, S);
-    else
+    if (n == 1)
     {
-      sel = bnfselmer(NF, S, 2);
+      sel = bnfselmer(NF, S);
       obj_free(NF); /* units */
     }
+    else if (degpol(T) == 1)
+      sel = bnfselmerQ(S);
+    else /* degree 2 */
+      sel = nf2selmer_quad(NF, S);
     gel(LS2, k) = L = gel(sel, 1); lk = lg(L);
     gel(factLS2, k) = gel(sel, 2);
     gel(sqrtLS2, k) = gel(sel, 3);
     for (i = 1; i < lk; i++)
     {
-      GEN z = nf_to_scalar_or_alg(nf, gel(L,i));
-      /* z mod T, 1 mod (pol/T) */
+      GEN z = gel(L,i); /* z mod T, 1 mod (pol/T) */
       gel(L,i) = grem(gadd(z, gmul(gsubsg(1,z), gel(vcrt,k))), pol);
     }
   }

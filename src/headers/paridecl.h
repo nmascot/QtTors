@@ -5825,6 +5825,7 @@ INLINE long   nf_get_varn(GEN nf);
 INLINE GEN    nf_get_zk(GEN nf);
 INLINE GEN    nf_get_zkden(GEN nf);
 INLINE GEN    nf_get_zkprimpart(GEN nf);
+INLINE GEN    nfV_to_scalar_or_alg(GEN nf, GEN x);
 INLINE long   pr_get_e(GEN pr);
 INLINE long   pr_get_f(GEN pr);
 INLINE GEN    pr_get_gen(GEN pr);

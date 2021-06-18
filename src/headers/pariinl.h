@@ -2849,13 +2849,13 @@ bnf_get_tuN(GEN bnf) { return gmael3(bnf,8,4,1)[2]; }
 INLINE GEN
 bnf_get_fu_nocheck(GEN bnf) { return gmael(bnf,8,5); }
 INLINE GEN
+nfV_to_scalar_or_alg(GEN nf, GEN x)
+{ pari_APPLY_same(nf_to_scalar_or_alg(nf, gel(x,i))) }
+INLINE GEN
 bnf_get_fu(GEN bnf) {
   GEN fu = bnf_build_units(bnf), nf = bnf_get_nf(bnf);
-  long i, l;
   if (typ(fu) == t_MAT) pari_err(e_MISC,"missing units in bnf");
-  l = lg(fu)-1; fu = vecslice(fu, 2, l);
-  for (i = 1; i < l; i++) gel(fu,i) = nf_to_scalar_or_alg(nf, gel(fu,i));
-  return fu;
+  return nfV_to_scalar_or_alg(nf, vecslice(fu, 2, lg(fu)-1));
 }
 
 INLINE GEN
