@@ -869,7 +869,7 @@ bnfselmer(GEN bnf, GEN S, ulong p)
   long n = S? lg(S)-1: 0, n3, n2all, r;
 
   S2 = bestS(bnf, S, p);
-  S3 = S? shallowconcat(S, S2): S2;
+  S3 = shallowconcat(S, S2);
   LS2all = nfV_factorbackmod(nf, gel(bnfunits(bnf, S3), 1), p);
   n3 = lg(S3)-1; n2all = lg(LS2all)-1; r = n2all - n3 - 1;
   LS2gen = vecslice(LS2all,1,n3);
@@ -877,7 +877,7 @@ bnfselmer(GEN bnf, GEN S, ulong p)
   e2 = nfC_prV_val(nf, LS2gen, S2);
   kerval = Flm_ker(ZM_to_Flm(e2, p), p);
   LS2gen = nfV_zm_factorback(nf, LS2gen, kerval, p);
-  e = S? nfC_prV_val(nf, LS2gen, S): zeromat(0,n3);
+  e = nfC_prV_val(nf, LS2gen, S);
   e2 = ZM_divexactu(ZM_zm_mul(e2, kerval), p);
   f = prV_ZM_factorback(nf, S2, e2);
   LS2gen = shallowconcat(LS2fu, LS2gen);
@@ -977,7 +977,7 @@ nf2selmer_quad(GEN nf, GEN S)
 static GEN
 makevbnf(GEN ell, long prec)
 {
-  GEN vbnf, P = gel(factor(ell2pol(ell)), 1);
+  GEN vbnf, P = gel(ZX_factor(ell2pol(ell)), 1);
   long k, l = lg(P);
   vbnf = cgetg(l, t_VEC);
   for (k = 1; k < l; k++)
