@@ -1056,11 +1056,13 @@ if either $x$ or $y$ is an extended ideal.
 \goth{p}^{-n}$, assuming $x$ is an ideal in HNF or a rational number, and
 \kbd{pr} a \var{prid} attached to $\goth{p}$. Not suitable for
 \tet{gerepileupto} since it returns $x$ when $n = 0$.
+The \kbd{nf} argument must be a true \var{nf} structure.
 
 \fun{GEN}{idealmulpowprime}{GEN nf, GEN x, GEN pr, GEN n} returns $x
 \goth{p}^{n}$, assuming $x$ is an ideal in HNF or a rational number, and
 \kbd{pr} a \var{prid} attached to $\goth{p}$. Not suitable for
 \tet{gerepileupto} since it retunrs $x$ when $n = 0$.
+The \kbd{nf} argument must be a true \var{nf} structure.
 
 \fun{GEN}{idealprodprime}{GEN nf, GEN v} given a list $v$ of prime ideals
 in \var{prid} form, return their product. Assume that \var{nf} is a true

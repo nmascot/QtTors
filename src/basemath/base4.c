@@ -1996,7 +1996,6 @@ idealismaximal_i(GEN nf, GEN x)
     case id_MAT: return idealismaximal_mat(nf, x);
   }
   /* id_PRINCIPAL */
-  nf = checknf(nf);
   x = nf_to_scalar_or_basis(nf, x);
   switch(typ(x))
   {
@@ -2211,15 +2210,13 @@ idealpowprime(GEN nf, GEN pr, GEN n, GEN *pc)
   return mkvec2(q, gen);
 }
 
-/* x * pr^n. Assume x in HNF or scalar (possibly nonintegral) */
+/* True nf. x * pr^n. Assume x in HNF or scalar (possibly nonintegral) */
 GEN
 idealmulpowprime(GEN nf, GEN x, GEN pr, GEN n)
 {
   GEN c, cx, y;
-  long N;
+  long N = nf_get_degree(nf);
 
-  nf = checknf(nf);
-  N = nf_get_degree(nf);
   if (!signe(n)) return typ(x) == t_MAT? x: scalarmat_shallow(x, N);
 
   /* inert, special cased for efficiency */
