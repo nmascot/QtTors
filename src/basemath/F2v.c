@@ -274,6 +274,15 @@ F2v_hamming(GEN H)
   return n;
 }
 
+int
+F2v_subset(GEN x, GEN y)
+{
+  long i, n = lg(y);
+  for (i = 2; i < n; i ++)
+    if ((x[i] & y[i]) != x[i]) return 0;
+  return 1;
+}
+
 GEN
 matid_F2m(long n)
 {

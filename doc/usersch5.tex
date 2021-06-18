@@ -4632,6 +4632,10 @@ shorter than $x$.
 logical \kbd{or} of $x$ and $y$. It is allowed for $y$ to be
 shorter than $x$.
 
+\fun{int}{F2v_subset}{GEN x, GEN y} return $1$ if the set of indices of
+non-zero components of $y$ is a subset of the set of indices of
+non-zero components of $x$, $0$ otherwise.
+
 \fun{ulong}{F2v_hamming}{GEN x} returns the Hamming weight of \kbd{x}, that is
 the number of nonzero entries.
 

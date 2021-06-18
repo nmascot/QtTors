@@ -1622,16 +1622,6 @@ triv_subg(GEN elt)
   return v;
 }
 
-int
-F2v_subset(GEN x, GEN y)
-{
-  long i, n = lg(y);
-  for (i = 2; i < n; i ++)
-    if ((x[i] & y[i]) != x[i]) return 0;
-  return 1;
-}
-
-
 static GEN
 subg_extend(GEN U, long e, long o, GEN elt)
 {
