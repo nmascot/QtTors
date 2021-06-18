@@ -3353,6 +3353,7 @@ get_d(GEN nf, GEN d)
   return nfmul(nf, d, nfsqr(nf,b));
 }
 
+/* true nf */
 static GEN
 pr_factorback(GEN nf, GEN fa)
 {
@@ -3361,6 +3362,7 @@ pr_factorback(GEN nf, GEN fa)
   for (i = 1; i < l; i++) z = idealmulpowprime(nf, z, gel(P,i), gel(E,i));
   return z;
 }
+/* true nf */
 static GEN
 pr_factorback_scal(GEN nf, GEN fa)
 {
@@ -3581,7 +3583,6 @@ rnfdisc_factored(GEN nf, GEN pol, GEN *pd)
   long i, j, l;
   GEN fa, E, P, disc, lim;
 
-  nf = checknf(nf);
   pol = rnfdisc_get_T(nf, pol, &lim);
   disc = nf_to_scalar_or_basis(nf, nfX_disc(nf, pol));
   pol = nfX_to_monic(nf, pol, NULL);
@@ -3607,7 +3608,8 @@ GEN
 rnfdiscf(GEN nf, GEN pol)
 {
   pari_sp av = avma;
-  GEN d, fa = rnfdisc_factored(nf, pol, &d);
+  GEN d, fa;
+  nf = checknf(nf); fa = rnfdisc_factored(nf, pol, &d);
   return gerepilecopy(av, mkvec2(pr_factorback_scal(nf,fa), d));
 }
 
