@@ -1111,7 +1111,8 @@ of $A \cap \Z$ and $B\cap \Z$, which will increase the size of $a$.
 \fun{GEN}{zkchineseinit}{GEN nf, GEN A, GEN B, GEN AB} given two coprime
 integral ideals $A$ and $B$ (in any form, preferably HNF) and
 their product \kbd{AB} (in HNF form), initialize a solution to the Chinese
-remainder problem modulo $AB$.
+remainder problem modulo $AB$. THe \kbd{nf} argument must be a true \var{nf}
+structure.
 
 \fun{GEN}{zkchinese}{GEN zkc, GEN x, GEN y} given \kbd{zkc} from
 \kbd{zkchineseinit}, and $x$, $y$ two integral elements given as \typ{INT}
@@ -1915,7 +1916,8 @@ be integral primes or algebraic integers so that it becomes suitable for
 useful for the output of \kbd{bnf\_get\_sunits}.
 
 \fun{GEN}{Idealstarprk}{GEN nf, GEN pr, long k, long flag} same as
-\kbd{Idealstar} for $I = \kbd{pr}^k$
+\kbd{Idealstar} for $I = \kbd{pr}^k$. The \kbd{nf} argument is a true \var{nf}
+structure.
 
 \subsec{Class field theory}
 

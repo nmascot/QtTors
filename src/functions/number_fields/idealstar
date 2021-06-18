@@ -63,4 +63,5 @@ Variant: Instead the above hardcoded numerical flags, one should rather use
  \kbd{NULL}), where \kbd{flag} is
  an or-ed combination of \tet{nf_GEN} (include generators) and \tet{nf_INIT}
  (return a full \kbd{bid}, not a group), possibly $0$. This offers
- one more combination: gen, but no init.
+ one more combination: gen, but no init. The \kbd{nf} argument must be a true
+ \var{nf} structure.

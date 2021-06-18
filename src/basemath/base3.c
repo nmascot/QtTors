@@ -2417,10 +2417,8 @@ zkVchinese1(GEN zkc, GEN v)
 GEN
 zkchineseinit(GEN nf, GEN A, GEN B, GEN AB)
 {
-  GEN v;
+  GEN v = idealaddtoone_raw(nf, A, B);
   long e;
-  nf = checknf(nf);
-  v = idealaddtoone_raw(nf, A, B);
   if ((e = gexpo(v)) > 5)
   {
     GEN b = (typ(v) == t_COL)? v: scalarcol_shallow(v, nf_get_degree(nf));
@@ -2760,9 +2758,10 @@ log_prk(GEN nf, GEN a, GEN sprk, GEN mod)
   y = ZC_lincomb(gen_1, e, ZM_ZC_mul(U2,y), U1);
   return vecmodii(y, cyc);
 }
+/* true nf */
 GEN
 log_prk_init(GEN nf, GEN pr, long k, GEN MOD)
-{ return sprkinit(checknf(nf),pr,k,NULL,MOD);}
+{ return sprkinit(nf,pr,k,NULL,MOD);}
 GEN
 veclog_prk(GEN nf, GEN v, GEN sprk)
 {
@@ -3068,7 +3067,7 @@ checkarchp(GEN v, long r1)
   return gc_long(av, 1);
 }
 
-/* Compute [[ideal,arch], [h,[cyc],[gen]], idealfact, [liste], U]
+/* True nf. Compute [[ideal,arch], [h,[cyc],[gen]], idealfact, [liste], U]
    flag may include nf_GEN | nf_INIT */
 static GEN
 Idealstarmod_i(GEN nf, GEN ideal, long flag, GEN MOD)
@@ -3076,7 +3075,6 @@ Idealstarmod_i(GEN nf, GEN ideal, long flag, GEN MOD)
   long i, nbp, R1;
   GEN y, cyc, U, u1 = NULL, fa, fa2, sprk, x, arch, archp, E, P, sarch, gen;
 
-  nf = checknf(nf);
   R1 = nf_get_r1(nf);
   if (typ(ideal) == t_VEC && lg(ideal) == 3)
   {
@@ -3165,7 +3163,7 @@ GEN
 Idealstarmod(GEN nf, GEN ideal, long flag, GEN MOD)
 {
   pari_sp av = avma;
-  if (!nf) nf = nfinit(pol_x(0), DEFAULTPREC);
+  nf = nf? checknf(nf): nfinit(pol_x(0), DEFAULTPREC);
   return gerepilecopy(av, Idealstarmod_i(nf, ideal, flag, MOD));
 }
 GEN
@@ -3563,7 +3561,7 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
 {
   pari_sp av;
   long i, j, l = lg(L), lz;
-  GEN v, z, V;
+  GEN v, z, V, nf;
   ideal_data ID;
   GEN (*join_z)(ideal_data*, GEN);
 
@@ -3572,14 +3570,20 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
   z = gel(L,1);
   if (typ(z) != t_VEC) pari_err_TYPE("ideallistarch",z);
   z = gel(z,1); /* either a bid or [bid,U] */
-  ID.nf = checknf(bnf);
   ID.archp = vec01_to_indices(arch);
-  if (lg(z) == 3) { /* the latter: do units */
+  if (lg(z) == 3)
+  { /* [bid,U]: do units */
+    bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
     if (typ(z) != t_VEC) pari_err_TYPE("ideallistarch",z);
     ID.emb = zm_to_ZM( rowpermute(nfsign_units(bnf,NULL,1), ID.archp) );
     join_z = &join_archunit;
-  } else
+  }
+  else
+  {
     join_z = &join_arch;
+    nf = checknf(bnf);
+  }
+  ID.nf = nf;
   av = avma; V = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
   {

@@ -549,7 +549,7 @@ bnrclassno(GEN bnf,GEN ideal)
   bnf = checkbnf(bnf);
   h = bnf_get_no(bnf);
   bid = checkbid_i(ideal);
-  if (!bid) bid = Idealstar(bnf, ideal, nf_INIT);
+  if (!bid) bid = Idealstar(bnf_get_nf(bnf), ideal, nf_INIT);
   cycbid = bid_get_cyc(bid);
   if (lg(cycbid) == 1) { set_avma(av); return icopy(h); }
   D = ideallog_units(bnf, bid); /* (Z_K/f)^* / units ~ Z^n / D */
