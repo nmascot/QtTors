@@ -1,0 +1,6 @@
+Function: rootorder
+Section: modular_forms
+C-Name: FpX_root_order_bound
+Prototype: GG
+Help: rootorder(f,p): Interval [a,b] such that the multiplicative order of the class of x in Z[x]/(f,p) is a multiple of a and divides b.
+Doc: TODO 
