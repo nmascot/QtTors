@@ -3,4 +3,4 @@ Section: modular_forms
 C-Name: ProjGalRep
 Prototype: G
 Help: projgalrep(R): Projectivisation of the linear Galois representation R.
-Doc: TODO 
+Doc: TODO

@@ -3,9 +3,4 @@ Section: modular_forms
 C-Name: PicFrobPoly
 Prototype: GGG
 Help: picfrobpoly(J,W,F): Given a polynomial F with integer coefficients, image of the point W of the p-adic Jacobian J by F(Frob_p), where Frob_p is the absolute Frobenius
-Doc: TODO 
- \bprog
- ? TODO
- %2 = 
- TODO
- @eprog
+Doc: TODO

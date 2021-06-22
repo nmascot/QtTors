@@ -3,4 +3,4 @@ Section: modular_forms
 C-Name: SmoothGalRep
 Prototype: GGGLGDGD0,U,
 Help: smoothplanegalrep(f,l,p,e,P,{Chi},{a}): Computes p-adically the Galois representation afforded by the l-torsion of the smooth plane curve C:f(x,y)=0. p must be a prime of good reduction of this model. P must be a pair of distinct vectors of distinct n points on C, where n = d-1 if d is odd and n = d/2-1 if d is even, and where d is the total degree of f. e is a guess for the required p-adic accuracy. If present, Chi must divide mod l the local L factor of C at p, and be coprime with is cofactor; in this case, we compute the Galois representation attached to the subspace of the l-torsion where Frob_p acts with characteristic polynomial Chi. If a is present, work in the unramified extension of Qp of degree a; else a is chosen automatically.
-Doc: TODO 
+Doc: TODO

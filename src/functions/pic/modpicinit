@@ -3,4 +3,4 @@ Section: modular_forms
 C-Name: ModPicInit_gp
 Prototype: UGGUD1,L,DGD0,L,D1,U,D3,U,
 Help: modpicinit(N,H,p,a,{e=1},{Lp},{UseTp=0},{nbE=1},{qprec=3}): Initiatilises the Jacobian of the modular curve X_G(N) over Zq/p^e, where Zq is the ring of integers of the unramified extension of Qp of degree a, and G is {1} if H=1, (Z/NZ)* if H=0, and the subgroup of (Z/NZ)* spanned by H in other cases. p must be a prime not dividing 6*N*#G. Lp must be the local L factor of the curve at p. If UseTp is set to 1, create extra data to be able to apply the Hecke operator Tp. nbE and qprec are technical parameters: higher values of nbE improve the equidistributivity of random generation of points on the Jacobian; higer values of qprec lead to the construction of more rational maps from the Jacobian to Qbar.
-Doc: TODO 
+Doc: TODO

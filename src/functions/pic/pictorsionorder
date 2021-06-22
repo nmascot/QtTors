@@ -3,4 +3,4 @@ Section: modular_forms
 C-Name: PicTorsOrd
 Prototype: GGG
 Help: pictorsionorder(J,W,F): Given a prime number l and an l-power-torsion point W on the Jacobian J, finds v such that the order of W is exactly l^v, and returns [+-l^(v-1)W, v].
-Doc: TODO 
+Doc: TODO

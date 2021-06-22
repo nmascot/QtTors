@@ -3,9 +3,4 @@ Section: modular_forms
 C-Name: PicLiftTors
 Prototype: GGGD0,L,D0,L,
 Help: piclifttors(J,W,l,{e},{flag=0}): p-adic lift of a non-trivial multiple of the mod p^e l-torsion point W of the p-adic Jacobian J to an l-torsion point at the p-adic precision of J. If not present, e is set to the largest integer such that W is an l-torsion point of J mod p^e. If flag is nonzero, allow to return a nonzero multiple of a lift of W.
-Doc: TODO 
- \bprog
- ? TODO
- %2 = 
- TODO
- @eprog
+Doc: TODO

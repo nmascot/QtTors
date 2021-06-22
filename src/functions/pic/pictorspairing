@@ -3,4 +3,4 @@ Section: modular_forms
 C-Name: PicTorsPairing_Modl
 Prototype: GGGG
 Help: pictorspairing(J,P,W,X): Given a Jacobian J, data P for l-torsion pairings on J obtained by P=pictorspairinginit(J,l), a point W of J[l] and a point X of J, computes the mod l Frey-Rueck pairing [W,X] linearised with respect to the l-th root of unity contained in P. X is also allowed to be a vector of points of J, in which case we obtain the vector of the [W,x] for x in X (more efficient than repeated calls).
-Doc: TODO 
+Doc: TODO

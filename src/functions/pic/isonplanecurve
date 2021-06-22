@@ -3,4 +3,4 @@ Section: modular_forms
 C-Name: PtIsOnPlaneCurve
 Prototype: lGG
 Help: isonplanecurve(F,P): true(1) if P is on the (projective completion of the) plane curve of equation F=0, false(0) if not. F can be a polynomial in two variables, or a homogenous polynomial in three variables. P can be of the form [x,y] (affine coordinates) or [x,y,z] (projective coordinates).
-Doc: TODO 
+Doc: TODO

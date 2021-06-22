@@ -3,4 +3,4 @@ Section: modular_forms
 C-Name: PlaneZeta
 Prototype: GU
 Help: smoothplanecharpoly(f,p): Characteristic polynomial of the Frobenius at p acting on the Jacobian of the smooth plane curve f(x,y)=0. TODO restrictions?
-Doc: TODO 
+Doc: TODO

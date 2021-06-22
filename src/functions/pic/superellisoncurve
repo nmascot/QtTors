@@ -3,4 +3,4 @@ Section: modular_forms
 C-Name: PtIsOnSuperellCurve
 Prototype: lGUG
 Help: superellisoncurve(f,m,P): true(1) if P is on the hyperellptic curve y^m=f(x), false(0) if not.
-Doc: TODO 
+Doc: TODO

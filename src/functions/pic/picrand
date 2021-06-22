@@ -3,9 +3,4 @@ Section: modular_forms
 C-Name: PicRand
 Prototype: GDG
 Help: picrand(J,{randseed=0}): Random point on the Jacobian J. TODO randseed
-Doc: TODO 
- \bprog
- ? TODO
- %2 = 
- TODO
- @eprog
+Doc: TODO

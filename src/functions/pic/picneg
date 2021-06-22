@@ -3,9 +3,4 @@ Section: modular_forms
 C-Name: PicNeg
 Prototype: GGD0,L,
 Help: picneg(J,W,{flag=0}): Negative of the point W in the Jacobian J. TODO flag
-Doc: TODO 
- \bprog
- ? TODO
- %2 = 
- TODO
- @eprog
+Doc: TODO

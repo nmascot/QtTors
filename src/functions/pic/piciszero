@@ -3,4 +3,4 @@ Section: modular_forms
 C-Name: PicIsZero
 Prototype: iGG
 Help: piciszero(J,W): Given a point W on the p-adic Jacobian J, tests whether W represents the origin of J.
-Doc: TODO 
+Doc: TODO

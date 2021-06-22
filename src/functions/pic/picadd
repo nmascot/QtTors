@@ -3,9 +3,4 @@ Section: modular_forms
 C-Name: PicAdd
 Prototype: GGG
 Help: picadd(J,W1,W2): Sum of the points W1 and W2 in the Jacobian J
-Doc: TODO 
- \bprog
- ? TODO
- %2 = 
- TODO
- @eprog
+Doc: TODO

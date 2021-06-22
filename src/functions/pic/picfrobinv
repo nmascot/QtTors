@@ -3,9 +3,4 @@ Section: modular_forms
 C-Name: PicFrobInv
 Prototype: GG
 Help: picfrobinv(J,W): Image of the point W of the p-adic Jacobian J by the inverse of the absolute Frobenius
-Doc: TODO 
- \bprog
- ? TODO
- %2 = 
- TODO
- @eprog
+Doc: TODO

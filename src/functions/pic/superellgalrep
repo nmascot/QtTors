@@ -4,4 +4,4 @@ C-Name: SuperGalRep
 Prototype: GUGGLGDGD0,U,
 Help: superellgalrep(f,m,l,p,e,P,{Chi},{a}): Computes p-adically the Galois representation afforded by the l-torsion of the Jacobian of the superelliptic curve C:y^m=f(x). p must be a prime of good reduction of this model. P must be a point on C. e is a guess for the required p-adic accuracy. If present, Chi must divide mod l the local L factor of C at p, and be coprime with is cofactor; in this case, we compute the Galois representation attached to the subspace of the l-torsion where Frob_p acts with characteristic polynomial Chi. If a is present, work in the unramified extension of Qp of degree a; else a is chosen automatically.
 
-Doc: TODO 
+Doc: TODO

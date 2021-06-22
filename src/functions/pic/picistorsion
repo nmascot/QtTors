@@ -3,4 +3,4 @@ Section: modular_forms
 C-Name: PicIsTors
 Prototype: iGGG
 Help: picistorsion(J,W,F): Given a point W on the p-adic Jacobian J and a polynomial F in Z[x], tests whether F(Frob_p) kills W. F is also allowed to be an integer.
-Doc: TODO 
+Doc: TODO

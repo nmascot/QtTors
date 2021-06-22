@@ -3,4 +3,4 @@ Section: modular_forms
 C-Name: mfgalrep
 Prototype: GGGUD0,L,D1,U,D3,U,
 Help: mfgalrep(f,l,pmax,D,{UseTp=0},{nbE=1},{qprec=3}): Mod l Galois representation attached to the eigenform f. pmax should be either an upper bound or a range [pmin,pmax]; the algorithm works p-adically with the most convenient prime p in this range, to accuracy necessary to identify rational numbers of height D. If UseTp is set to 1, create extra data to be able to apply some Hecke operators, which may allow the algorithm to work with a prime p that would otherwise be unsitable. nbE and qprec are technical parameters: higher values of nbE improve the equidistributivity of random generation of points on the Jacobian; higer values of qprec lead to the construction of more rational maps from the Jacobian to Qbar.
-Doc: TODO 
+Doc: TODO
