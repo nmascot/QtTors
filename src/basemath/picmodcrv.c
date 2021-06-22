@@ -7,20 +7,23 @@
 
 /* Z/NZ */
 
-ulong ZNnorm(long x, ulong N)
+ulong
+ZNnorm(long x, ulong N)
 { /* Z/NZ <-> {1,..,N} */
   x = umodsu(x,N);
   return x?x:N;
 }
 
-ulong ZNneg(long x, ulong N)
+ulong
+ZNneg(long x, ulong N)
 {
   ulong y;
   y = umodsu(x,N);
   return y?N-y:N;
 }
 
-long zM_coef_mod(GEN A, GEN v)
+long
+zM_coef_mod(GEN A, GEN v)
 {
   ulong N,i,j;
   N = lg(A)-1;
@@ -29,7 +32,8 @@ long zM_coef_mod(GEN A, GEN v)
   return gel(A,j?j:N)[i?i:N];
 }
 
-GEN RgM_Coef_mod(GEN A, GEN v)
+GEN
+RgM_Coef_mod(GEN A, GEN v)
 {
   ulong N,i,j;
   N = lg(A)-1;
@@ -39,7 +43,8 @@ GEN RgM_Coef_mod(GEN A, GEN v)
 }
 
 
-GEN znx_span(GEN S, ulong N)
+GEN
+znx_span(GEN S, ulong N)
 { /* Span of vecsmall S in (Z/NZ)* */
   pari_sp av = avma;
   GEN S1,H1,charf,H;
@@ -76,7 +81,8 @@ GEN znx_span(GEN S, ulong N)
   return gerepileupto(av,H);
 }
 
-ulong VecSmallFind(GEN V, long x)
+ulong
+VecSmallFind(GEN V, long x)
 {
   /* Index between a and A */
   ulong a,A,c;
@@ -98,7 +104,8 @@ ulong VecSmallFind(GEN V, long x)
   return 0;
 }
 
-ulong VecSmallFind_unsorted(GEN V, long x)
+ulong
+VecSmallFind_unsorted(GEN V, long x)
 {
   ulong n,c;
   n = lg(V);
@@ -109,7 +116,8 @@ ulong VecSmallFind_unsorted(GEN V, long x)
   return 0;
 }
 
-GEN znx_Hlist(GEN S, ulong N)
+GEN
+znx_Hlist(GEN S, ulong N)
 { /* H = <S,-1> and H/+-1 */
   /* S=0: (Z/NZ)*. S=1: +-1. */
   pari_sp av = avma;
@@ -160,7 +168,8 @@ GEN znx_Hlist(GEN S, ulong N)
 
 /* GammaH(N) */
 
-GEN Flm2_Flm2_mul(GEN A, GEN B, ulong N)
+GEN
+Flm2_Flm2_mul(GEN A, GEN B, ulong N)
 {
   GEN A1,A2,B1,B2,C,C1,C2;
   A1 = gel(A,1);
@@ -177,7 +186,8 @@ GEN Flm2_Flm2_mul(GEN A, GEN B, ulong N)
   return C;
 }
 
-GEN Flv2_Flm2_mul(GEN v, GEN A, ulong N)
+GEN
+Flv2_Flm2_mul(GEN v, GEN A, ulong N)
 {
   GEN A1,A2,w;
   A1 = gel(A,1);
@@ -188,7 +198,8 @@ GEN Flv2_Flm2_mul(GEN v, GEN A, ulong N)
   return w;
 }
 
-GEN Bot2SL2(GEN Bot, ulong N)
+GEN
+Bot2SL2(GEN Bot, ulong N)
 { /* Finds Flm [*,*;c';d'] in SL2(Z/NZ) where Bot=[c,d] */
   GEN M,M1,M2;
   long c,d,g,u,v;
@@ -206,7 +217,8 @@ GEN Bot2SL2(GEN Bot, ulong N)
   return M;
 }
 
-GEN ZNZ2primH(ulong N, GEN H)
+GEN
+ZNZ2primH(ulong N, GEN H)
 { /* Find all (u,v) s.t. gcd(u,v,N)=1 / H. Also returns maps for representatives */
   pari_sp av = avma;
   GEN A,tag;
@@ -252,7 +264,8 @@ sort_lg_rev(void* data, GEN x, GEN y)
   return -1;
 }
 
-GEN GammaHCusps(ulong N, GEN H)
+GEN
+GammaHCusps(ulong N, GEN H)
 {
   /* * Reps (c,d) of all cusps of GammaH
      * Galois orbits
@@ -352,7 +365,8 @@ GEN GammaHCusps(ulong N, GEN H)
   return gerepilecopy(av,mkvecn(6,Cusps,CuspsGal,Qqexp,Mats,Widths,tag));
 }
 
-GEN GammaHCusps_GalDiam_orbits(long y, GEN Cusps, GEN CuspsGal, GEN tags)
+GEN
+GammaHCusps_GalDiam_orbits(long y, GEN Cusps, GEN CuspsGal, GEN tags)
 { /* Orbits of cusps under GalQ and <y> */
   pari_sp av = avma;
   GEN Diam,c,C;
@@ -394,7 +408,8 @@ GEN GammaHCusps_GalDiam_orbits(long y, GEN Cusps, GEN CuspsGal, GEN tags)
   return gerepilecopy(av,Diam);
 }
 
-GEN GammaHmodN(ulong N, GEN H)
+GEN
+GammaHmodN(ulong N, GEN H)
 { /* FlM reps of GammaH(N) / +-Gamma(N) */
   pari_sp av = avma;
   ulong nH,h,x,j;
@@ -419,7 +434,8 @@ GEN GammaHmodN(ulong N, GEN H)
   return gerepilecopy(av,G);
 }
 
-GEN XH_decomp(ulong N, GEN H)
+GEN
+XH_decomp(ulong N, GEN H)
 { /* Returns list of [eps,S2(eps)], where H c Ker eps and dim S2(eps)>0 */
   pari_sp av = avma;
   GEN iN,N2chi,res,G,AllChi,chi,Gchi,VecChi,VecS,S;
@@ -494,7 +510,8 @@ GEN XH_decomp(ulong N, GEN H)
 
 /* LMod */
 
-GEN LMod_worker(GEN p, GEN Gchi, GEN S, long t, GEN Z, GEN zo, GEN MZ)
+GEN
+LMod_worker(GEN p, GEN Gchi, GEN S, long t, GEN Z, GEN zo, GEN MZ)
 {
   pari_sp av = avma;
   GEN epsp,L1,Tp,Xp,res;
@@ -511,7 +528,8 @@ GEN LMod_worker(GEN p, GEN Gchi, GEN S, long t, GEN Z, GEN zo, GEN MZ)
   return gerepileupto(av,res);
 }
 
-GEN ModCrv_charpoly_multi(ulong N, GEN H, GEN Vecp)
+GEN
+ModCrv_charpoly_multi(ulong N, GEN H, GEN Vecp)
 {
   pari_sp av = avma;
   GEN L,XH,VecChi,VecS,chi,S,o,Z,z,worker,Params,done,Psort;
@@ -565,7 +583,8 @@ GEN ModCrv_charpoly_multi(ulong N, GEN H, GEN Vecp)
 
 /* Etors */
 
-GEN elladd_padic(GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
+GEN
+elladd_padic(GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
 {
   pari_sp av = avma, av0;
   GEN P0,xP,yP,xQ,yQ,dx,dy,l,m,xR,yR,R;
@@ -618,7 +637,8 @@ GEN elladd_padic(GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
   return gerepilecopy(av,R);
 }
 
-GEN FpEll_y2_from_Fqx(GEN a4, GEN a6, GEN x, GEN T, GEN p)
+GEN
+FpEll_y2_from_Fqx(GEN a4, GEN a6, GEN x, GEN T, GEN p)
 {
   pari_sp av = avma;
   GEN y;
@@ -629,7 +649,8 @@ GEN FpEll_y2_from_Fqx(GEN a4, GEN a6, GEN x, GEN T, GEN p)
   return gerepileupto(av,y);
 }
 
-ulong FpX_split_deg(GEN F, GEN p)
+ulong
+FpX_split_deg(GEN F, GEN p)
 { /* Smallest d s.t. all roots in GF(p^d), i.e. x^p^d = x mod F */
   pari_sp av = avma;
   GEN x,y;
@@ -642,7 +663,8 @@ ulong FpX_split_deg(GEN F, GEN p)
   return i;
 }
 
-GEN Fp_elldivpol_lv(GEN a4, GEN a6, ulong l, ulong v, GEN p)
+GEN
+Fp_elldivpol_lv(GEN a4, GEN a6, ulong l, ulong v, GEN p)
 { /* pol whose roots are the x of the pts in E[l^v]-E[l^v-1] */
   pari_sp av = avma;
   GEN D,D1;
@@ -658,7 +680,8 @@ GEN Fp_elldivpol_lv(GEN a4, GEN a6, ulong l, ulong v, GEN p)
   return gerepileupto(av,D);
 }
 
-ulong EllTorsIsSplit_lv(GEN a4, GEN a6, ulong l, ulong v, GEN p, ulong d, GEN T, GEN q2)
+ulong
+EllTorsIsSplit_lv(GEN a4, GEN a6, ulong l, ulong v, GEN p, ulong d, GEN T, GEN q2)
 { /* returns [Fp(E[l^v]/+-1):Fp] if E[l^v] defined over Fp^d, else returns 0 */
   pari_sp av = avma;
   GEN D,X,y;
@@ -695,7 +718,8 @@ ulong EllTorsIsSplit_lv(GEN a4, GEN a6, ulong l, ulong v, GEN p, ulong d, GEN T,
   return r;
 }
 
-ulong EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
+ulong
+EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
 { /* returns [Fp(E[N]/+-1):Fp] if E[N] defined over Fp^d, else returns 0 */
   pari_sp av = avma;
   GEN ap,chiE,nu,nud,NE,g,fa;
@@ -790,7 +814,8 @@ ulong EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN 
   return c;
 }
 
-GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
+GEN
+EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
 { /* Look for E/Fp such that E[N] def / Fp^d and j not in Badj */
   pari_sp av = avma, av1;
   ulong d,nBad,i,r,nwatch;
@@ -840,7 +865,8 @@ GEN EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
   return NULL;
 }
 
-GEN EllTorsBasis_lv(GEN a4, GEN a6, GEN A4, ulong l, ulong v, GEN T, GEN p, GEN D)
+GEN
+EllTorsBasis_lv(GEN a4, GEN a6, GEN A4, ulong l, ulong v, GEN T, GEN p, GEN D)
 { /* l,v -> Basis [P,Q] of E[l^v] over Fq, plus its Weil pairing, and mat of Frob */
   pari_sp av = avma;
   GEN lv1,lv,X,P,Q,x,z,z1,FP,FQ,M;
@@ -880,7 +906,8 @@ GEN EllTorsBasis_lv(GEN a4, GEN a6, GEN A4, ulong l, ulong v, GEN T, GEN p, GEN 
   return gerepilecopy(av,mkvecn(4,P,Q,z1,gmodulo(M,lv)));
 }
 
-GEN ZqE_LiftTorsPt(GEN a4, GEN a6, GEN P, GEN D, GEN T, GEN pe, GEN p, long e)
+GEN
+ZqE_LiftTorsPt(GEN a4, GEN a6, GEN P, GEN D, GEN T, GEN pe, GEN p, long e)
 {
   pari_sp av = avma;
   GEN x,y,y2;
@@ -892,7 +919,8 @@ GEN ZqE_LiftTorsPt(GEN a4, GEN a6, GEN P, GEN D, GEN T, GEN pe, GEN p, long e)
   return gerepilecopy(av,mkvec2(x,y));
 }
 
-GEN EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
+GEN
+EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
 { /* Find a4,a6 s.t. E[N] def/Fq and Fp(E[N]/-)=Fq. Returns a4,a6,P,Q,eN(P,Q),MFrob mod p^e. */
   pari_sp av = avma;
   GEN Fq1,E,a4,a6,A4,P,Q,z,faN,M,D,B,Pi,Qi,zi;
@@ -933,7 +961,8 @@ GEN EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
   return gerepilecopy(av,mkvecn(5,E,P,Q,z,M));
 }
 
-GEN Ell_l2(GEN EN, GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
+GEN
+Ell_l2(GEN EN, GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
 { /* Not mem clean */
   ulong N;
   if(P==Q) /* Tangent? */
@@ -951,7 +980,8 @@ GEN Ell_l2(GEN EN, GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
   return ZpXQ_div(ZX_sub(gel(Q,2),gel(P,2)),ZX_sub(gel(Q,1),gel(P,1)),T,pe,p,e);
 }
 
-GEN Ell_l1_c(GEN EN, GEN a4, GEN P, ulong m, GEN T, GEN pe, GEN p, long e)
+GEN
+Ell_l1_c(GEN EN, GEN a4, GEN P, ulong m, GEN T, GEN pe, GEN p, long e)
 {
   /* Not mem clean */
   GEN c,mP;
@@ -973,7 +1003,8 @@ GEN Ell_l1_c(GEN EN, GEN a4, GEN P, ulong m, GEN T, GEN pe, GEN p, long e)
   return c;
 }
 
-GEN Ell_l1(GEN EN, GEN a4, GEN P, GEN T, GEN pe, GEN p, long e)
+GEN
+Ell_l1(GEN EN, GEN a4, GEN P, GEN T, GEN pe, GEN p, long e)
 {
   pari_sp av = avma;
   ulong N,g,o;
@@ -987,7 +1018,8 @@ GEN Ell_l1(GEN EN, GEN a4, GEN P, GEN T, GEN pe, GEN p, long e)
   return gerepileupto(av,c);
 }
 
-GEN Ell_FillTors_worker(GEN Axes, GEN a4, ulong y, GEN T, GEN pe, GEN p, long e)
+GEN
+Ell_FillTors_worker(GEN Axes, GEN a4, ulong y, GEN T, GEN pe, GEN p, long e)
 {
   GEN ENy;
   ulong N,x;
@@ -1001,7 +1033,8 @@ GEN Ell_FillTors_worker(GEN Axes, GEN a4, ulong y, GEN T, GEN pe, GEN p, long e)
   return ENy;
 }
 
-GEN Ell_l1_worker(GEN EN, GEN a4, ulong y, GEN T, GEN pe, GEN p, long e)
+GEN
+Ell_l1_worker(GEN EN, GEN a4, ulong y, GEN T, GEN pe, GEN p, long e)
 { /* t_COL l1(x,y) for x in Z/NZ */
   pari_sp av = avma;
   GEN P,L1y;
@@ -1024,7 +1057,8 @@ GEN Ell_l1_worker(GEN EN, GEN a4, ulong y, GEN T, GEN pe, GEN p, long e)
   return gerepileupto(av,L1y);
 }
 
-GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
+GEN
+EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
 {
   pari_sp av = avma;
   GEN worker,done,E,Axes,ENx0,EN0y,EN,Ml1,params,INTs;
@@ -1097,7 +1131,8 @@ GEN EllMl1(GEN a4, ulong N, GEN P, GEN Q, ulong m, GEN T, GEN pe, GEN p, long e)
   return gerepileupto(av,Ml1);
 }
 
-GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref_pows, GEN Badj)
+GEN
+GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref_pows, GEN Badj)
 {
   pari_sp av = avma;
   GEN pe,E,a4,P,Q,zN,M,Ml1,FP,PtsFrob;
@@ -1145,7 +1180,8 @@ GEN GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref_pows, 
 
 /* Divisors */
 
-GEN BalancedDiv(ulong d, GEN degs)
+GEN
+BalancedDiv(ulong d, GEN degs)
 { /* Let degs = [a1,..,an]. Find balanced b1,..,bn such that sum ai*bi = d. Loops forever if no solution! */
   GEN D;
   ulong n,i;
@@ -1169,7 +1205,8 @@ GEN BalancedDiv(ulong d, GEN degs)
   return D;
 }
 
-GEN BalancedDivInf(ulong d, GEN degs)
+GEN
+BalancedDivInf(ulong d, GEN degs)
 { /* TODO sort/improve Let degs = [a1,..,an]. Find balanced b1,..,bn such that sum ai*bi <= d, not too far. */
   GEN D;
   ulong n,i;
@@ -1190,7 +1227,8 @@ GEN BalancedDivInf(ulong d, GEN degs)
   return D;
 }
 
-GEN DivPerturb(GEN D, GEN degs)
+GEN
+DivPerturb(GEN D, GEN degs)
 { /* TODO improve */
   GEN D2;
   ulong n,i,d;
@@ -1211,7 +1249,8 @@ GEN DivPerturb(GEN D, GEN degs)
   return NULL;
 }
 
-GEN Divo2Div(GEN Do, GEN Orbs, GEN tags, ulong n)
+GEN
+Divo2Div(GEN Do, GEN Orbs, GEN tags, ulong n)
 {
   GEN D,o;
   ulong nO,no,i,j;
@@ -1229,7 +1268,8 @@ GEN Divo2Div(GEN Do, GEN Orbs, GEN tags, ulong n)
   return D;
 }
 
-GEN MRRsubspace(GEN Mqexps, GEN D, GEN B, GEN T, GEN pe, GEN p, long e)
+GEN
+MRRsubspace(GEN Mqexps, GEN D, GEN B, GEN T, GEN pe, GEN p, long e)
 { /* Subspace of mf defined by vanishing orders at cusps */
   pari_sp av=avma;
   GEN K,Ms;
@@ -1256,7 +1296,8 @@ GEN MRRsubspace(GEN Mqexps, GEN D, GEN B, GEN T, GEN pe, GEN p, long e)
 /* permutations */
 /* TODO some functions probably have terrible complexity, better algos certainly possible */
 
-GEN PermConcat(GEN s, GEN t)
+GEN
+PermConcat(GEN s, GEN t)
 {
   GEN st;
   ulong n,m,i;
@@ -1268,7 +1309,8 @@ GEN PermConcat(GEN s, GEN t)
   return st;
 }
 
-GEN Perms_orbits_ind(GEN S)
+GEN
+Perms_orbits_ind(GEN S)
 { /* Perms S=[s[i]] acting on 1..N -> orbits, perms induced on these orbits, and size of thse orbits */
   pari_sp av = avma;
   GEN Orbs,SOrbs,lOrbs,Orb,SOrb,SOrbi,seen;
@@ -1339,7 +1381,8 @@ GEN Perms_orbits_ind(GEN S)
   return gerepilecopy(av,mkvec3(Orbs,SOrbs,lOrbs));
 }
 
-GEN SubPerms_from_orbits_sup(ulong N, GEN Orbs, GEN SOrbs, GEN lOrbs, GEN I, ulong M)
+GEN
+SubPerms_from_orbits_sup(ulong N, GEN Orbs, GEN SOrbs, GEN lOrbs, GEN I, ulong M)
 {
   /* Perms of 1..N split into orbits -> -> [T,ST]
    T subset (possibly reordered) of 1..N stable under S and with #T<=M but close,
@@ -1379,7 +1422,8 @@ GEN SubPerms_from_orbits_sup(ulong N, GEN Orbs, GEN SOrbs, GEN lOrbs, GEN I, ulo
   return gerepilecopy(av,mkvec2(Sub,SubS));
 }
 
-GEN SubPerms_inf(GEN S, ulong M)
+GEN
+SubPerms_inf(GEN S, ulong M)
 { /* Perms S=[s[i]] acting on 1..N, M<=N -> [T,ST]
    T subset (possibly reordered) of 1..N stable under S and with #T>=M but close,
   ST perms induced by S on T */
@@ -1421,7 +1465,8 @@ GEN SubPerms_inf(GEN S, ulong M)
 
 /* qexp */
 
-GEN E1qexp(GEN v, ulong N, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
+GEN
+E1qexp(GEN v, ulong N, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
 { /* v=[c,d] reduced mod N, zpows = powers of primitive Nth root of 1: q-exp of E_1^[c,d] up to O(qN^B) */
   /* TODO use t_SER ? */
   pari_sp av = avma;
@@ -1469,7 +1514,8 @@ GEN E1qexp(GEN v, ulong N, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
   return gerepilecopy(av,E);
 }
 
-GEN TrE2qexp(GEN vw, ulong N, GEN TH, GEN M, ulong w, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
+GEN
+TrE2qexp(GEN vw, ulong N, GEN TH, GEN M, ulong w, GEN zpows, ulong B, GEN T, GEN pe, GEN p, long e)
 { /* vw=[v,w] -> qexp of Tr_H(E_1^v * E_1^w) | M in terms of qw up to O(qw^B) */
   pari_sp av = avma;
   ulong Nw,Nwi,BN,nTH,h,i,j;
@@ -1504,7 +1550,8 @@ GEN TrE2qexp(GEN vw, ulong N, GEN TH, GEN M, ulong w, GEN zpows, ulong B, GEN T,
 
 /* ModJac */
 
-GEN M2_worker(GEN vw, GEN Ml1, GEN TH, GEN Mpts, GEN T, GEN pe)
+GEN
+M2_worker(GEN vw, GEN Ml1, GEN TH, GEN Mpts, GEN T, GEN pe)
 {
   pari_sp avs;
   ulong N, nZ, nTH;
@@ -1535,7 +1582,8 @@ GEN M2_worker(GEN vw, GEN Ml1, GEN TH, GEN Mpts, GEN T, GEN pe)
   return C;
 }
 
-GEN M2mat(GEN M2gens, GEN Ml1, GEN TH, GEN MPts, GEN T, GEN pe)
+GEN
+M2mat(GEN M2gens, GEN Ml1, GEN TH, GEN MPts, GEN T, GEN pe)
 {
   pari_sp av = avma;
   GEN M2;
@@ -1560,7 +1608,8 @@ GEN M2mat(GEN M2gens, GEN Ml1, GEN TH, GEN MPts, GEN T, GEN pe)
   return gerepilecopy(av,M2);
 }
 
-GEN FqCSer_mul(GEN A, GEN B, ulong n, GEN T, GEN p)
+GEN
+FqCSer_mul(GEN A, GEN B, ulong n, GEN T, GEN p)
 { /* Multiplies t_COLS A,B of same length n+1 viewed as series A[1]*1+A[2]*x+..+A[n]*x^{n-1}+O(x^n) */
   /* TODO for now quadratic */
   pari_sp av;
@@ -1579,7 +1628,8 @@ GEN FqCSer_mul(GEN A, GEN B, ulong n, GEN T, GEN p)
   return C;
 }
 
-GEN M4qexp_worker(GEN pageV1, GEN V2gens, GEN U0, GEN T, GEN pe)
+GEN
+M4qexp_worker(GEN pageV1, GEN V2gens, GEN U0, GEN T, GEN pe)
 {
   pari_sp av = avma;
   GEN pageV2;
@@ -1593,7 +1643,8 @@ GEN M4qexp_worker(GEN pageV1, GEN V2gens, GEN U0, GEN T, GEN pe)
   return gerepileupto(av,pageV2);
 }
 
-GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec)
+GEN
+ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec)
 { /* J_H(N) over Zq/p^e, q=p^a */
   /* TODO sort cusps? */
   pari_sp av = avma;
@@ -1937,7 +1988,8 @@ GEN ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong
   return gerepilecopy(av,J);
 }
 
-GEN ModPicInit_gp(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec)
+GEN
+ModPicInit_gp(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec)
 {
   GEN J;
   J = ModPicInit(N,H,p,a,e,Lp,UseTp,nbE,qprec);
@@ -1951,7 +2003,8 @@ GEN ModPicInit_gp(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ul
   return J;
 }
 
-GEN PicTp(GEN J, GEN W, GEN l)
+GEN
+PicTp(GEN J, GEN W, GEN l)
 { /* Assumes <p> is given by the 1st aut of J */
   /* TODO check aut 1 is present? */
   /* Use Eichler-Shimura Tp = Frob + p <p> Frob^-1 */
@@ -1973,7 +2026,8 @@ GEN PicTp(GEN J, GEN W, GEN l)
 
 /* mfgalrep */
 
-GEN mfyt(GEN pf, GEN qf, GEN l, GEN coefs)
+GEN
+mfyt(GEN pf, GEN qf, GEN l, GEN coefs)
 {
   /* pf: mfparams(f)
    * qf: mfcoefs(f), at least up to max coefs
@@ -2034,7 +2088,8 @@ GEN mfyt(GEN pf, GEN qf, GEN l, GEN coefs)
   return gerepilecopy(av,mkvec2(gel(Y,i),gel(T,i)));
 }
 
-GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
+GEN
+mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
 {
   pari_sp av = avma;
   GEN ilN,pf,H,eps,o,to,pmin,pmax,gen_5,p,qf,listp,Lp,yt,ap,epsp,chi,psi,rem,a1,a2,a,xa1,NJ,M,A,res,res1;
@@ -2173,7 +2228,8 @@ GEN mfgalrep_bestp(GEN f, GEN l, GEN coefs, GEN prange, long UseTp)
   return gerepileupto(av,res);
 }
 
-long PicTors_TpClosure(GEN J, GEN* pBT, GEN* pmatTp, GEN T, GEN PT, GEN FRparams, GEN LinTests, GEN LinTestsNames, GEN* pR, ulong* pNewTestName)
+long
+PicTors_TpClosure(GEN J, GEN* pBT, GEN* pmatTp, GEN T, GEN PT, GEN FRparams, GEN LinTests, GEN LinTestsNames, GEN* pR, ulong* pNewTestName)
 { /* Shallow */
   GEN l,X,matTp2,u;
   ulong i,j,d,d2;
@@ -2227,7 +2283,8 @@ long PicTors_TpClosure(GEN J, GEN* pBT, GEN* pmatTp, GEN T, GEN PT, GEN FRparams
   }
 }
 
-GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
+GEN
+PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
 { /* TODO try to use l-power tors */
   /* TODO reuse code from pic.c */
   pari_sp av = avma;
@@ -2398,7 +2455,8 @@ GEN PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
   }
 }
 
-GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qprec)
+GEN
+mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qprec)
 {
   pari_sp av = avma, av1;
   pari_timer WT,CPUT;

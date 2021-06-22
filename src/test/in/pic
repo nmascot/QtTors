@@ -1,6 +1,6 @@
 default(threadsize,"64M");
 default(parisize,"128M");
-f = 'x^5+'x^4; h = 'x^3+'x+1; \\ X1(13): y²+h(x)*y=f(x)
+f = 'x^5+'x^4; h = 'x^3+'x+1; \\ X1(13): y^2+h(x)*y=f(x)
 l = 7; p = 17; e = 30; chi = 'x^2-'x-2;
 P1 = [-1,1]; P2 = [0,0];
 R = hyperellgalrep([f,h],l,p,e,[P1,P2],chi);
