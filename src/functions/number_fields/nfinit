@@ -159,36 +159,30 @@ Doc: \var{pol} being a nonconstant irreducible polynomial in $\Q[X]$,
  of primes or, more generally, a prime not dividing any entry in
  \kbd{nfcertify} output.
  \medskip
+ Binary digits of $\fl$ mean:
 
- If $\fl=2$: \var{pol} is changed into another polynomial $P$ defining the same
- number field, which is as simple as can easily be found using the
+ \item $\fl=1$, return $[\var{nf},\kbd{Mod}(a,P)]$, where $\var{nf}$ is as
+ before and $\kbd{Mod}(a,P)=\kbd{Mod}(x,\var{pol})$ gives the change of
+ variables. If only this bit is set, the behaviour is useless since we have
+ $P = \var{pol}$.
+
+ \item $\fl=2$: \var{pol} is changed into another polynomial $P$ defining the
+ same number field, which is as simple as can easily be found using the
  \tet{polredbest} algorithm, and all the subsequent computations are done
  using this new polynomial. In particular, the first component of the result
  is the modified polynomial.
 
- If $\fl=3$, apply \kbd{polredbest} as in case 2, but outputs
- $[\var{nf},\kbd{Mod}(a,P)]$, where $\var{nf}$ is as before and
- $\kbd{Mod}(a,P)=\kbd{Mod}(x,\var{pol})$ gives the change of
- variables. This is implicit when \var{pol} is not monic or not integral:
- first a linear change of variables is performed, to get a monic integral
- polynomial, then \kbd{polredbest}.
+ Both flags are set automatically when \var{pol} is not monic or not
+ integral: first a linear change of variables is performed, to get a monic
+ integral polynomial, then \kbd{polredbest}.
+
 Variant: Also available are
  \fun{GEN}{nfinit}{GEN x, long prec} ($\fl = 0$),
  \fun{GEN}{nfinitred}{GEN x, long prec} ($\fl = 2$),
  \fun{GEN}{nfinitred2}{GEN x, long prec} ($\fl = 3$).
  Instead of the above hardcoded numerical flags in \kbd{nfinit0}, one should
- rather use
-
- \fun{GEN}{nfinitall}{GEN x, long flag, long prec}, where \fl\ is an
- or-ed combination of
+ rather use an or-ed combination of
 
  \item \tet{nf_RED}: find a simpler defining polynomial,
 
  \item \tet{nf_ORIG}: if \tet{nf_RED} set, also return the change of variable,
-
- \item \tet{nf_ROUND2}: \emph{Deprecated}. Slow down the routine by using an
- obsolete normalization algorithm (do not use this one!),
-
- \item \tet{nf_PARTIALFACT}: \emph{Deprecated}. Lazy factorization of the
- polynomial discriminant. Result is conditional unless \kbd{nfcertify}
- can certify it.

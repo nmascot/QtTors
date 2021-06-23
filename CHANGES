@@ -158,3 +158,4 @@ BA  22- [libpari] gen_factorback now take an extra parameter one.
         qfrsqrraw, qfisqrraw, qficompraw, qfipowraw, qfipow, qficomp,
         qfisqr, redimag
      2- [libpari] obsolete types t_QFI, t_QFR
+     3- [libpari] nfinitall is now obsolete; use nfinit with the same arguments

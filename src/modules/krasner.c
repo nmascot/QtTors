@@ -851,7 +851,7 @@ checkpols(GEN p, GEN EFJ, GEN pols)
     p1 = poldisc0(pol, -1);
     if (gvaluation(p1, p) != f*(e+j-1)) pari_err_BUG("Discriminant is incorrect");
     /* only compute a p-maximal order */
-    p1 = nfinitall(mkvec2(pol, mkvec(p)), 0, DEFAULTPREC);
+    p1 = nfinit0(mkvec2(pol, mkvec(p)), 0, DEFAULTPREC);
     p2 = idealprimedec(p1, p);
     if(lg(p2) > 2) pari_err_BUG("Prime p is split");
     p2 = gel(p2, 1);
@@ -879,7 +879,7 @@ checkpols(GEN p, GEN EFJ, GEN pols)
     p1 = gmael(p1, 1, 1);
     if (poldegree(p1, -1) == e*f) pari_err_BUG("fields are isomorphic");
     /*
-      p1 = nfinitall(mkvec2(pol, mkvec(p)), 0, DEFAULTPREC);
+      p1 = nfinit0(mkvec2(pol, mkvec(p)), 0, DEFAULTPREC);
       p2 = idealprimedec_galois(p1, p);
       if (!cmpis(mulii(gel(p2, 3), gel(p2, 4)), e*f)) pari_err_BUG("fields are isomorphic");
     */

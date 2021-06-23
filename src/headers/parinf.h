@@ -78,11 +78,11 @@ enum {
   nf_GEN = 1,
   nf_ABSOLUTE = 2,
   nf_FORCE = 2,
+  nf_RED = 2,
   nf_ALL = 4,
   nf_GENMAT = 4,
   nf_INIT = 4,
   nf_RAW = 8,
-  nf_RED = 8,
   nf_PARTIALFACT = 16,
   nf_ROUND2 = 64, /* obsolete */
   nf_GEN_IF_PRINCIPAL = 512

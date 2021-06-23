@@ -2082,7 +2082,7 @@ nfinit_basic(nfmaxord_t *S, GEN T)
 GEN
 nfinit_complete(nfmaxord_t *S, long flag, long prec)
 {
-  GEN nf, unscale;
+  GEN nf, unscale = S->unscale, rev = NULL;
 
   if (!ZX_is_irred(S->T)) pari_err_IRREDPOL("nfinit",S->T);
   if (!(flag & nf_RED) && !ZX_is_monic(S->T0))
@@ -2090,78 +2090,65 @@ nfinit_complete(nfmaxord_t *S, long flag, long prec)
     pari_warn(warner,"nonmonic polynomial. Result of the form [nf,c]");
     flag |= nf_RED | nf_ORIG;
   }
-  unscale = S->unscale;
   if (!(flag & nf_RED) && !isint1(unscale))
   { /* implies lc(x0) = 1 and L := 1/unscale is integral */
     long d = degpol(S->T0);
     GEN L = ginv(unscale); /* x = L^(-deg(x)) x0(L X) */
-    GEN f= powiu(L, (d*(d-1)) >> 1);
+    GEN f = powiu(L, (d*(d-1)) >> 1);
     S->T = S->T0; /* restore original user-supplied x0, unscale data */
     S->unscale = gen_1;
     S->dT    = gmul(S->dT, sqri(f));
-    S->basis   = RgXV_unscale(S->basis, unscale);
+    S->basis = RgXV_unscale(S->basis, unscale);
     S->index = gmul(S->index, f);
   }
   nfmaxord_complete(S); /* more expensive after set_LLL_basis */
   if (flag & nf_RED)
   {
-    GEN ro, rev;
+    GEN ro;
     /* lie to polred: more efficient to update *after* modreverse, than to
      * unscale in the polred subsystem */
     S->unscale = gen_1;
     rev = nfpolred(S, &ro);
     nf = nfmaxord_to_nf(S, ro, prec);
-    if (flag & nf_ORIG)
-    {
-      if (!rev) rev = pol_x(varn(S->T)); /* no improvement */
-      if (!isint1(unscale)) rev = RgX_Rg_div(rev, unscale);
-      nf = mkvec2(nf, mkpolmod(rev, S->T));
-    }
     S->unscale = unscale; /* restore */
-  } else {
+  }
+  else
+  {
     GEN ro; set_LLL_basis(S, &ro, 0.99);
     nf = nfmaxord_to_nf(S, ro, prec);
+  }
+  if (flag & nf_ORIG)
+  {
+    if (!rev)
+    { /* no improvement */
+      long v = varn(S->T);
+      rev = degpol(S->T) == 1? pol_0(v): pol_x(v);
+    }
+    if (!isint1(unscale)) rev = RgX_Rg_div(rev, unscale);
+    nf = mkvec2(nf, mkpolmod(rev, S->T));
   }
   return nf;
 }
 /* Initialize the number field defined by the polynomial x (in variable v)
- * flag & nf_RED:     try a polred first.
- * flag & nf_ORIG
- *    do a polred and return [nfinit(x), Mod(a,red)], where
+ * flag & nf_RED: try a polred first.
+ * flag & nf_ORIG: return [nfinit(x), Mod(a,red)], where
  *    Mod(a,red) = Mod(v,x) (i.e return the base change). */
-GEN
-nfinitall(GEN x, long flag, long prec)
-{
-  const pari_sp av = avma;
-  nfmaxord_t S;
-  GEN nf;
-
-  if (checkrnf_i(x)) return rnf_build_nfabs(x, prec);
-  nfinit_basic(&S, x);
-  nf = nfinit_complete(&S, flag, prec);
-  return gerepilecopy(av, nf);
-}
-
-GEN
-nfinitred(GEN x, long prec)  { return nfinitall(x, nf_RED, prec); }
-GEN
-nfinitred2(GEN x, long prec) { return nfinitall(x, nf_RED|nf_ORIG, prec); }
-GEN
-nfinit(GEN x, long prec)     { return nfinitall(x, 0, prec); }
-
 GEN
 nfinit0(GEN x, long flag,long prec)
 {
-  switch(flag)
-  {
-    case 0:
-    case 1: return nfinitall(x,0,prec);
-    case 2: return nfinitall(x,nf_RED,prec);
-    case 3: return nfinitall(x,nf_RED|nf_ORIG,prec);
-    default: pari_err_FLAG("nfinit");
-  }
-  return NULL; /* LCOV_EXCL_LINE */
+  const pari_sp av = avma;
+  nfmaxord_t S;
+  if (flag < 0 || flag > 3) pari_err_FLAG("nfinit");
+  if (checkrnf_i(x)) return rnf_build_nfabs(x, prec);
+  nfinit_basic(&S, x);
+  return gerepilecopy(av, nfinit_complete(&S, flag, prec));
 }
+GEN
+nfinitred(GEN x, long prec)  { return nfinit0(x, nf_RED, prec); }
+GEN
+nfinitred2(GEN x, long prec) { return nfinit0(x, nf_RED|nf_ORIG, prec); }
+GEN
+nfinit(GEN x, long prec)     { return nfinit0(x, 0, prec); }
 
 /* assume x a bnr/bnf/nf */
 long
