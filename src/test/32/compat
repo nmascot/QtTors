@@ -1746,10 +1746,10 @@ New syntax: initalg(pol) ===> nfinit(pol)
 nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial, gives the 
 vector: [pol,[r1,r2],discf,index,[M,MC,T2,T,different] (see manual),r1+r2 first 
 roots, integral basis, matrix of power basis in terms of integral basis, 
-multiplication table of basis]. flag is optional and can be set to 0: default; 
-1: do not compute different; 2: first use polred to find a simpler polynomial; 
-3: outputs a two-element vector [nf,Mod(a,P)], where nf is as in 2 and Mod(a,P) 
-is a polmod equal to Mod(x,pol) and P=nf.pol.
+multiplication table of basis]. flag is optional and can be set to 0,1: 
+default; 2: first use polred to find a simpler polynomial; 3: outputs a 
+two-element vector [nf,Mod(a,P)], where nf is as in 2 and Mod(a,P) is a polmod 
+equal to Mod(x,pol) and P=nf.pol.
 
 
   ***   at top-level: initalgred()
@@ -1762,10 +1762,10 @@ New syntax: initalgred(x) ===> nfinit(x,2)
 nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial, gives the 
 vector: [pol,[r1,r2],discf,index,[M,MC,T2,T,different] (see manual),r1+r2 first 
 roots, integral basis, matrix of power basis in terms of integral basis, 
-multiplication table of basis]. flag is optional and can be set to 0: default; 
-1: do not compute different; 2: first use polred to find a simpler polynomial; 
-3: outputs a two-element vector [nf,Mod(a,P)], where nf is as in 2 and Mod(a,P) 
-is a polmod equal to Mod(x,pol) and P=nf.pol.
+multiplication table of basis]. flag is optional and can be set to 0,1: 
+default; 2: first use polred to find a simpler polynomial; 3: outputs a 
+two-element vector [nf,Mod(a,P)], where nf is as in 2 and Mod(a,P) is a polmod 
+equal to Mod(x,pol) and P=nf.pol.
 
 
   ***   at top-level: initalgred2()
@@ -1778,10 +1778,10 @@ New syntax: initalgred2(x) ===> nfinit(x,3)
 nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial, gives the 
 vector: [pol,[r1,r2],discf,index,[M,MC,T2,T,different] (see manual),r1+r2 first 
 roots, integral basis, matrix of power basis in terms of integral basis, 
-multiplication table of basis]. flag is optional and can be set to 0: default; 
-1: do not compute different; 2: first use polred to find a simpler polynomial; 
-3: outputs a two-element vector [nf,Mod(a,P)], where nf is as in 2 and Mod(a,P) 
-is a polmod equal to Mod(x,pol) and P=nf.pol.
+multiplication table of basis]. flag is optional and can be set to 0,1: 
+default; 2: first use polred to find a simpler polynomial; 3: outputs a 
+two-element vector [nf,Mod(a,P)], where nf is as in 2 and Mod(a,P) is a polmod 
+equal to Mod(x,pol) and P=nf.pol.
 
 
   ***   at top-level: initell()
@@ -4512,4 +4512,4 @@ New syntax: texprint(x) ===> printtex(x)
 printtex({str}*): outputs its string arguments in TeX format.
 
 
-Total time spent: 9
+Total time spent: 8

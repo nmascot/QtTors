@@ -6,7 +6,7 @@ Help: nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial,
  gives the vector: [pol,[r1,r2],discf,index,[M,MC,T2,T,different] (see
  manual),r1+r2 first roots, integral basis, matrix of power basis in terms of
  integral basis, multiplication table of basis]. flag is optional and can be
- set to 0: default; 1: do not compute different; 2: first use polred to find
+ set to 0,1: default; 2: first use polred to find
  a simpler polynomial; 3: outputs a two-element vector [nf,Mod(a,P)], where
  nf is as in 2 and Mod(a,P) is a polmod equal to Mod(x,pol) and P=nf.pol.
 Description:
