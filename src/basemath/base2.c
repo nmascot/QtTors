@@ -3106,6 +3106,8 @@ rnfdedekind(GEN nf, GEN P, GEN pr, long flag)
   nf = checknf(nf);
   P = RgX_nffix("rnfdedekind", nf_get_pol(nf), P, 1);
   dP = nfX_disc(nf, P);
+  if (gequal0(dP))
+    pari_err_DOMAIN("rnfdedekind","issquarefree(pol)","=",gen_0,P);
   if (!pr)
   {
     GEN fa = idealfactor(nf, dP);
@@ -3385,6 +3387,8 @@ rnfallbase(GEN nf, GEN pol, GEN lim, GEN rnf, GEN *pD, GEN *pf, GEN *pDKP)
   if (!gequal1(leading_coeff(pol)))
     pari_err_IMPL("nonmonic relative polynomials in rnfallbase");
   disc = nf_to_scalar_or_basis(nf, nfX_disc(nf, pol));
+  if (gequal0(disc))
+    pari_err_DOMAIN("rnfpseudobasis","issquarefree(pol)","=",gen_0, pol);
   if (lim)
   {
     GEN rnfeq, zknf, dzknf, U, vU, dA, A, MB, dB, BdB, vj, B, Tabs;
@@ -3585,6 +3589,8 @@ rnfdisc_factored(GEN nf, GEN pol, GEN *pd)
 
   pol = rnfdisc_get_T(nf, pol, &lim);
   disc = nf_to_scalar_or_basis(nf, nfX_disc(nf, pol));
+  if (gequal0(disc))
+    pari_err_DOMAIN("rnfdisc","issquarefree(pol)","=",gen_0, pol);
   pol = nfX_to_monic(nf, pol, NULL);
   fa = idealfactor_partial(nf, disc, lim);
   P = gel(fa,1); l = lg(P);

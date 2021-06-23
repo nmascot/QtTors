@@ -1910,7 +1910,10 @@ rnfconductor0(GEN bnf, GEN T, long flag)
   {
     GEN P, E, Ez;
     long i, l, degT = degpol(T);
-    D = idealfactor_partial(nf, nfX_disc(nf, Q_primpart(Tr)), lim);
+    D = nfX_disc(nf, Q_primpart(Tr));
+    if (gequal0(D))
+      pari_err_DOMAIN("rnfconductor","issquarefree(pol)","=",gen_0, Tr);
+    D = idealfactor_partial(nf, D, lim);
     P = gel(D,1); l = lg(P);
     E = gel(D,2); Ez = ZV_to_zv(E);
     if (l > 1 && vecsmall_max(Ez) > 1)

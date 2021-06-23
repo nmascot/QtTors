@@ -231,9 +231,14 @@ rnfdisc(nfinit(y^62-y^2-1),pol)
 rnfdedekind(nf, P, pr2, 1)
 rnfdedekind(nf, P)
 rnfdedekind(nf, P, [pr2,pr3])
+rnfdedekind(nf, x^2)
+
+rnfconductor(nf, x^2);
+rnfconductor(nf, [x^2,1]);
 
 rnfpseudobasis(nf, x^2/2 + 1);
 rnfpseudobasis(nf, x^2 + 1/2);
+rnfpseudobasis(nf, x^2);
 
 rnfislocalcyclo(rnfinit(K, x^6-y+1))
 \\#1530
