@@ -14,8 +14,6 @@ Description:
  (gen, 1):nf:prec        nfinit0($1, 1, $prec)
  (gen, 2):nf:prec        nfinit0($1, 2, $prec)
  (gen, 3):gen:prec       nfinit0($1, 3, $prec)
- (gen, 4):nf:prec        nfinit0($1, 4, $prec)
- (gen, 5):gen:prec       nfinit0($1, 5, $prec)
  (gen, #small):void      $"incorrect flag in nfinit"
  (gen, small):gen:prec   nfinit0($1, $2, $prec)
 Doc: \var{pol} being a nonconstant irreducible polynomial in $\Q[X]$,

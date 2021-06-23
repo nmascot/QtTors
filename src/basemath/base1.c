@@ -2156,8 +2156,8 @@ nfinit0(GEN x, long flag,long prec)
   {
     case 0:
     case 1: return nfinitall(x,0,prec);
-    case 2: case 4: return nfinitall(x,nf_RED,prec);
-    case 3: case 5: return nfinitall(x,nf_RED|nf_ORIG,prec);
+    case 2: return nfinitall(x,nf_RED,prec);
+    case 3: return nfinitall(x,nf_RED|nf_ORIG,prec);
     default: pari_err_FLAG("nfinit");
   }
   return NULL; /* LCOV_EXCL_LINE */
