@@ -2,23 +2,22 @@ Function: nfinit
 Section: number_fields
 C-Name: nfinit0
 Prototype: GD0,L,p
-Help: nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial,
- gives the vector: [pol,[r1,r2],discf,index,[M,MC,T2,T,different] (see
- manual),r1+r2 first roots, integral basis, matrix of power basis in terms of
- integral basis, multiplication table of basis]. flag is optional and can be
- set to 0,1: default; 2: first use polred to find
- a simpler polynomial; 3: outputs a two-element vector [nf,Mod(a,P)], where
- nf is as in 2 and Mod(a,P) is a polmod equal to Mod(x,pol) and P=nf.pol.
+Help: nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial in
+ Q[X], returns an nf structure attached to the number field Q[X] / (pol).
+ Binary digits of flag mean
+ 1: two-element vector [nf,Mod(a,P)], where Mod(a,P) is a polmod equal to
+ Mod(x,pol) and P=nf.pol; 2: first use polredbest to find a simpler
+ polynomial P; 3: do not LLL-reduce the maximal order basis nf.zk.
 Description:
  (gen, ?0):nf:prec       nfinit0($1, 0, $prec)
- (gen, 1):nf:prec        nfinit0($1, 1, $prec)
- (gen, 2):nf:prec        nfinit0($1, 2, $prec)
- (gen, 3):gen:prec       nfinit0($1, 3, $prec)
+ (gen, 1):nf:prec        nfinit0($1, nf_ORIG, $prec)
+ (gen, 2):nf:prec        nfinit0($1, nf_RED, $prec)
+ (gen, 3):gen:prec       nfinit0($1, nf_ORIG|nf_RED, $prec)
  (gen, #small):void      $"incorrect flag in nfinit"
  (gen, small):gen:prec   nfinit0($1, $2, $prec)
 Doc: \var{pol} being a nonconstant irreducible polynomial in $\Q[X]$,
  preferably monic and integral, initializes a
- \emph{number field} structure (\kbd{nf}) attached to the field $K$ defined
+ \emph{number field} (or \var{nf}) structure  attached to the field $K$ defined
  by \var{pol}. As such, it's a technical object passed as the first argument
  to most \kbd{nf}\var{xxx} functions, but it contains some information which
  may be directly useful. Access to this information via \emph{member
@@ -161,12 +160,12 @@ Doc: \var{pol} being a nonconstant irreducible polynomial in $\Q[X]$,
  \medskip
  Binary digits of $\fl$ mean:
 
- \item $\fl=1$, return $[\var{nf},\kbd{Mod}(a,P)]$, where $\var{nf}$ is as
+ \item $1$: return $[\var{nf},\kbd{Mod}(a,P)]$, where $\var{nf}$ is as
  before and $\kbd{Mod}(a,P)=\kbd{Mod}(x,\var{pol})$ gives the change of
  variables. If only this bit is set, the behaviour is useless since we have
  $P = \var{pol}$.
 
- \item $\fl=2$: \var{pol} is changed into another polynomial $P$ defining the
+ \item $2$: \var{pol} is changed into another polynomial $P$ defining the
  same number field, which is as simple as can easily be found using the
  \tet{polredbest} algorithm, and all the subsequent computations are done
  using this new polynomial. In particular, the first component of the result
@@ -175,6 +174,10 @@ Doc: \var{pol} being a nonconstant irreducible polynomial in $\Q[X]$,
  Both flags are set automatically when \var{pol} is not monic or not
  integral: first a linear change of variables is performed, to get a monic
  integral polynomial, then \kbd{polredbest}.
+
+ \item $4$: do not LLL-reduce the maximal order $\Z$-basis, which saves
+ \kbd{nfinit} initialization time in large degrees, but slows down later use
+ of the \var{nf} structure.
 
 Variant: Also available are
  \fun{GEN}{nfinit}{GEN x, long prec} ($\fl = 0$),
@@ -185,4 +188,6 @@ Variant: Also available are
 
  \item \tet{nf_RED}: find a simpler defining polynomial,
 
- \item \tet{nf_ORIG}: if \tet{nf_RED} set, also return the change of variable,
+ \item \tet{nf_ORIG}: also return the change of variable,
+
+ \item \tet{nf_NOLLL}: do not LLL-reduce the maximal order $\Z$-basis.

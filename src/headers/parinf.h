@@ -80,6 +80,7 @@ enum {
   nf_FORCE = 2,
   nf_RED = 2,
   nf_ALL = 4,
+  nf_NOLLL = 4,
   nf_GENMAT = 4,
   nf_INIT = 4,
   nf_RAW = 8,

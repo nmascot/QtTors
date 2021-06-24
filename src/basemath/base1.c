@@ -1900,7 +1900,7 @@ get_red_G(nfmaxord_t *S, GEN *pro)
 /* Compute an LLL-reduced basis for the integer basis of nf(T).
  * set *pro = roots of x if computed [NULL if not computed] */
 static void
-set_LLL_basis(nfmaxord_t *S, GEN *pro, double DELTA)
+set_LLL_basis(nfmaxord_t *S, GEN *pro, long flag, double DELTA)
 {
   GEN B = S->basis;
   long N = degpol(S->T);
@@ -1910,11 +1910,11 @@ set_LLL_basis(nfmaxord_t *S, GEN *pro, double DELTA)
     if (odd(N - S->r1)) pari_err_IRREDPOL("set_LLL_basis", S->T);
   }
   if (!S->basden) S->basden = get_bas_den(B);
+  *pro = NULL; if (flag & nf_NOLLL) return;
   if (S->r1 == N) {
     pari_sp av = avma;
     GEN u = ZM_lll(make_Tr(S), DELTA, LLL_GRAM|LLL_KEEP_FIRST|LLL_IM);
     B = gerepileupto(av, RgV_RgM_mul(B, u));
-    *pro = NULL;
   }
   else
     B = RgV_RgM_mul(B, get_red_G(S, pro));
@@ -2114,7 +2114,7 @@ nfinit_complete(nfmaxord_t *S, long flag, long prec)
   }
   else
   {
-    GEN ro; set_LLL_basis(S, &ro, 0.99);
+    GEN ro; set_LLL_basis(S, &ro, flag, 0.99);
     nf = nfmaxord_to_nf(S, ro, prec);
   }
   if (flag & nf_ORIG)
@@ -2138,7 +2138,7 @@ nfinit0(GEN x, long flag,long prec)
 {
   const pari_sp av = avma;
   nfmaxord_t S;
-  if (flag < 0 || flag > 3) pari_err_FLAG("nfinit");
+  if (flag < 0 || flag > 7) pari_err_FLAG("nfinit");
   if (checkrnf_i(x)) return rnf_build_nfabs(x, prec);
   nfinit_basic(&S, x);
   return gerepilecopy(av, nfinit_complete(&S, flag, prec));
@@ -2403,7 +2403,7 @@ polred_init(nfmaxord_t *S, nffp_t *F, CG_data *d)
   long e, prec, n = degpol(S->T);
   double log2rho;
   GEN ro;
-  set_LLL_basis(S, &ro, 0.9999);
+  set_LLL_basis(S, &ro, 0, 0.9999);
   /* || polchar ||_oo < 2^e ~ 2 (n * rho)^n, rho = max modulus of root */
   log2rho = ro ? (double)gexpo(ro): fujiwara_bound(S->T);
   e = n * (long)(log2rho + log2((double)n)) + 1;
