@@ -1743,13 +1743,11 @@ A function with that name existed in GP-1.39.15. Please update your script.
 
 New syntax: initalg(pol) ===> nfinit(pol)
 
-nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial, gives the 
-vector: [pol,[r1,r2],discf,index,[M,MC,T2,T,different] (see manual),r1+r2 first 
-roots, integral basis, matrix of power basis in terms of integral basis, 
-multiplication table of basis]. flag is optional and can be set to 0,1: 
-default; 2: first use polred to find a simpler polynomial; 3: outputs a 
-two-element vector [nf,Mod(a,P)], where nf is as in 2 and Mod(a,P) is a polmod 
-equal to Mod(x,pol) and P=nf.pol.
+nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial in Q[X], 
+returns an nf structure attached to the number field Q[X] / (pol). Binary 
+digits of flag mean 1: two-element vector [nf,Mod(a,P)], where Mod(a,P) is a 
+polmod equal to Mod(x,pol) and P=nf.pol; 2: first use polredbest to find a 
+simpler polynomial P; 4: do not LLL-reduce the maximal order basis nf.zk.
 
 
   ***   at top-level: initalgred()
@@ -1759,13 +1757,11 @@ A function with that name existed in GP-1.39.15. Please update your script.
 
 New syntax: initalgred(x) ===> nfinit(x,2)
 
-nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial, gives the 
-vector: [pol,[r1,r2],discf,index,[M,MC,T2,T,different] (see manual),r1+r2 first 
-roots, integral basis, matrix of power basis in terms of integral basis, 
-multiplication table of basis]. flag is optional and can be set to 0,1: 
-default; 2: first use polred to find a simpler polynomial; 3: outputs a 
-two-element vector [nf,Mod(a,P)], where nf is as in 2 and Mod(a,P) is a polmod 
-equal to Mod(x,pol) and P=nf.pol.
+nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial in Q[X], 
+returns an nf structure attached to the number field Q[X] / (pol). Binary 
+digits of flag mean 1: two-element vector [nf,Mod(a,P)], where Mod(a,P) is a 
+polmod equal to Mod(x,pol) and P=nf.pol; 2: first use polredbest to find a 
+simpler polynomial P; 4: do not LLL-reduce the maximal order basis nf.zk.
 
 
   ***   at top-level: initalgred2()
@@ -1775,13 +1771,11 @@ A function with that name existed in GP-1.39.15. Please update your script.
 
 New syntax: initalgred2(x) ===> nfinit(x,3)
 
-nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial, gives the 
-vector: [pol,[r1,r2],discf,index,[M,MC,T2,T,different] (see manual),r1+r2 first 
-roots, integral basis, matrix of power basis in terms of integral basis, 
-multiplication table of basis]. flag is optional and can be set to 0,1: 
-default; 2: first use polred to find a simpler polynomial; 3: outputs a 
-two-element vector [nf,Mod(a,P)], where nf is as in 2 and Mod(a,P) is a polmod 
-equal to Mod(x,pol) and P=nf.pol.
+nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial in Q[X], 
+returns an nf structure attached to the number field Q[X] / (pol). Binary 
+digits of flag mean 1: two-element vector [nf,Mod(a,P)], where Mod(a,P) is a 
+polmod equal to Mod(x,pol) and P=nf.pol; 2: first use polredbest to find a 
+simpler polynomial P; 4: do not LLL-reduce the maximal order basis nf.zk.
 
 
   ***   at top-level: initell()
@@ -4512,4 +4506,4 @@ New syntax: texprint(x) ===> printtex(x)
 printtex({str}*): outputs its string arguments in TeX format.
 
 
-Total time spent: 8
+Total time spent: 7

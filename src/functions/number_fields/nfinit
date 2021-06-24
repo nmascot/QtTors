@@ -7,12 +7,13 @@ Help: nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial in
  Binary digits of flag mean
  1: two-element vector [nf,Mod(a,P)], where Mod(a,P) is a polmod equal to
  Mod(x,pol) and P=nf.pol; 2: first use polredbest to find a simpler
- polynomial P; 3: do not LLL-reduce the maximal order basis nf.zk.
+ polynomial P; 4: do not LLL-reduce the maximal order basis nf.zk.
 Description:
  (gen, ?0):nf:prec       nfinit0($1, 0, $prec)
  (gen, 1):nf:prec        nfinit0($1, nf_ORIG, $prec)
  (gen, 2):nf:prec        nfinit0($1, nf_RED, $prec)
  (gen, 3):gen:prec       nfinit0($1, nf_ORIG|nf_RED, $prec)
+ (gen, 4):gen:prec       nfinit0($1, nf_NOLLL, $prec)
  (gen, #small):void      $"incorrect flag in nfinit"
  (gen, small):gen:prec   nfinit0($1, $2, $prec)
 Doc: \var{pol} being a nonconstant irreducible polynomial in $\Q[X]$,
@@ -158,26 +159,57 @@ Doc: \var{pol} being a nonconstant irreducible polynomial in $\Q[X]$,
  of primes or, more generally, a prime not dividing any entry in
  \kbd{nfcertify} output.
  \medskip
- Binary digits of $\fl$ mean:
+ In order to explain the meaning of $\fl$, let $P =
+ \kbd{polredbest}(\var{pol})$, a polynomial defining the same number field
+ obtained using the LLL algorithm on the lattice $(\Z_K, T_2)$, which may be
+ equal to \var{pol} but is usually different and simpler. Binary digits of
+ $\fl$ mean:
 
- \item $1$: return $[\var{nf},\kbd{Mod}(a,P)]$, where $\var{nf}$ is as
- before and $\kbd{Mod}(a,P)=\kbd{Mod}(x,\var{pol})$ gives the change of
- variables. If only this bit is set, the behaviour is useless since we have
- $P = \var{pol}$.
+ \item $1$: return $[\var{nf},\kbd{Mod}(a,P)]$, where $\var{nf}$ is
+ \kbd{nfinit}$(P)$ and $\kbd{Mod}(a,P)=\kbd{Mod}(x,\var{pol})$ gives the
+ change of variables. If only this bit is set, the behaviour is useless since
+ we have $P = \var{pol}$.
 
- \item $2$: \var{pol} is changed into another polynomial $P$ defining the
- same number field, which is as simple as can easily be found using the
- \tet{polredbest} algorithm, and all the subsequent computations are done
- using this new polynomial. In particular, the first component of the result
- is the modified polynomial.
+ \item $2$: return \kbd{nfinit}$(P)$.
 
  Both flags are set automatically when \var{pol} is not monic or not
  integral: first a linear change of variables is performed, to get a monic
  integral polynomial, then \kbd{polredbest}.
 
- \item $4$: do not LLL-reduce the maximal order $\Z$-basis, which saves
- \kbd{nfinit} initialization time in large degrees, but slows down later use
- of the \var{nf} structure.
+ \item $4$: do not LLL-reduce \kbd{nf.zk}, which saves time in large degrees,
+ you may expect to gain a factor $2$ or so in degree $n\geq 100$ or more, at
+ the expense of \emph{possibly} slowing down later uses of the \var{nf}
+ structure. Use this flag if you only need basic arithmetic
+ (the \kbd{nfelt*}, \kbd{nfmodpr*} and \kbd{ideal*} functions); or if you
+ expect the natural basis of the maximal order to contain small elements, this
+ will be the case for cyclotomic fields for instance. On the other hand,
+ functions involving LLL reduction of rank
+ $n$ lattices should be avoided since each call will be about as costly as the
+ initial LLL reduction that the flag prevents and may become more costly
+ because of this missing initial reduction. In particular it is silly to use
+ this flag in addition to the first two, although GP will not protest.
+
+ \bprog
+ ? T = polcyclo(307);
+ ? K = nfinit(T);
+ time = 19,390 ms.
+ ? a = idealhnf(K,1-x);
+ time = 477ms
+ ? idealfactor(K, a)
+ time = 294ms
+
+ ? Kno = nfinit(T, 4);
+ time = 11,256 ms.
+ ? ano = idealhnf(Kno,1-x); \\ no slowdown, even sligthly faster
+ time = 460ms
+ ? idealfactor(Kno, ano)
+ time = 264ms
+
+ ? nfinit(T, 2); \\ polredbest is very slow in high degree
+ time = 4min, 34,870 ms.
+ ? norml2(%.pol) == norml2(T) \\ and gains nothing here
+ %9 = 1
+ @eprog
 
 Variant: Also available are
  \fun{GEN}{nfinit}{GEN x, long prec} ($\fl = 0$),
