@@ -129,7 +129,7 @@ to relative extensions $L/K$.\hfill\break
 
 \smallskip
 \subsec{Linear and algebraic relations}
-\li{poly of degree $\le k$ with root $x\in\CC$}{algdep$(x,k)$}
+\li{poly of degree $\le k$ with root $x\in\CC$ or $\QQ_p$}{algdep$(x,k)$}
 \li{alg. dep. with pol.~coeffs for series $s$}{seralgdep$(s,x,y)$}
 \li{small linear rel.\ on coords of vector $x$}{lindep$(x)$}
 
@@ -170,7 +170,7 @@ Number field elements are \typ{INT}, \typ{FRAC}, \typ{POL}, \typ{POLMOD}, or
 $R = [c,w,h]$ in initialization means we restrict $s\in \CC$
 to domain $|\Re(s)-c| < w$, $|\Im(s)| < h$; $R = [w,h]$ encodes $[1/2,w,h]$
 and $[h]$ encodes $R = [1/2,0,h]$ (critical line up to height $h$).\hfil\break
-\li{$\zeta_K$ as Dirichlet series, $N(I)<b$}{dirzetak$(\var{nf},b)$}
+\li{$\zeta_K$ as Dirichlet series, $N(I)\leq b$}{dirzetak$(\var{nf},b)$}
 \li{init $\zeta_K^{(k)}(s)$ for $k \leq n$}
    {L = lfuninit$(\var{bnf}, R, \{n = 0\})$}
 \li{compute $\zeta_K(s)$ ($n$-th derivative)}{lfun$(L, s, \{n=0\})$}
