@@ -9941,9 +9941,8 @@ be faster.
 \fun{GEN}{QXQ_powers}{GEN x, long n, GEN T} returns $[\kbd{x}^0, \dots,
 \kbd{x}^\kbd{n}]$ as \kbd{RgXQ\_powers} would, but in a more efficient way when
 $x$ has a huge integer denominator (we start by removing that denominator).
-Meant to be used to precompute powers of algebraic integers in $\Q[t]/(T)$.
-The current implementation does not require $x$ to be a \kbd{QX}: any
-polynomial to which \kbd{Q\_remove\_denom} can be applied is fine.
+Assume that $x$ is a \kbd{QX} and $T$ is a \kbd{ZX}. Meant to precompute
+powers of algebraic integers in $\Q[t]/(T)$.
 
 \fun{GEN}{QXQ_reverse}{GEN f, GEN T} as \kbd{RgXQ\_reverse}, assuming $f$
 is a \kbd{QX}.
