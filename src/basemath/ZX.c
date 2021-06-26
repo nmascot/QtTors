@@ -1013,7 +1013,8 @@ ZXQM_mul(GEN x, GEN y, GEN T)
   {
     long e, n, N, ex = ZXM_expi(x), ey = ZXM_expi(y);
 
-    if ((ey && ex > 64 * ey) || (ex && ey > 64 * ex)) return RgM_mul_i(x, y);
+    if ((ey && ex > 64 * ey) || (ex && ey > 64 * ex))
+      return gerepileupto(av, RgXQM_red(RgM_mul_i(x, y), T));
     n = lg(x)-1;
     e = ex + ey + expu(d) + expu(n) + 4;
     N = divsBIL(e)+1;
