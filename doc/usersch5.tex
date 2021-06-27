@@ -6228,9 +6228,10 @@ returns their product.
 \fun{ulong}{FlxC_eval_powers_pre}{GEN x, GEN y, ulong p, ulong pi}
 apply \kbd{Flx\_eval\_powers\_pre} to all elements of \kbd{x}.
 
-\fun{GEN}{FlxV_Flv_multieval}{GEN F, GEN v, ulong p} returns the vector
-$[[F[1](v[1]),\ldots,F[1](v[n])],\ldots,[F[m](v[1]),\ldots,F[m](v[n])]]$
-as a \kbd{FlvV}.
+\fun{GEN}{FlxV_Flv_multieval}{GEN F, GEN v, ulong p} assuming $F$ is a
+vector of \kbd{Flx} with $m$ entries and $v$ is a \kbd{Flv} with $m$ entries,
+returns the $n$-components vector (\kbd{FlvV}) whose $j$-th entry is
+$[F_j(v[1]),\ldots,F_j(v[n])]$, with $F_j = F[j]$.
 
 \fun{GEN}{FlxC_neg}{GEN x, ulong p}
 
@@ -8079,7 +8080,8 @@ If $\kbd{lim} = 0$, the effect is the same as setting $\kbd{lim} =
 \fun{GEN}{absZ_factor_limit}{GEN n, ulong all} returns
 \kbd{Z\_factor\_limit(absi(n))}.
 
-\fun{GEN}{absZ_factor_limit_strict}{GEN n, ulong all, GEN *pU} analogous to
+\fun{GEN}{absZ_factor_limit_strict}{GEN n, ulong all, GEN *pU}. This function
+is analogous to
 \tet{absZ_factor_limit}, with a better interface: trial divide $n$ by all
 primes $p < \kbd{lim}$ in the precomputed list of prime numbers and the
 \kbd{addprimes} prime table. Return the corresponding factorization matrix.
