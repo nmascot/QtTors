@@ -706,22 +706,12 @@ RgM_sqr_fast(GEN x)
 
 /* lx, ly > 1 */
 static GEN
-RgM_mul_basic(GEN x, GEN y, long lx, long ly)
+RgM_mul_i(GEN x, GEN y, long lx, long ly)
 {
   GEN z = cgetg(ly, t_MAT);
   long j, l = lgcols(x);
   for (j = 1; j < ly; j++) gel(z,j) = RgM_RgC_mul_i(x, gel(y,j), lx, l);
   return z;
-}
-GEN
-RgM_mul_i(GEN x, GEN y)
-{
-  long lx, ly = lg(y);
-  if (ly == 1) return cgetg(1,t_MAT);
-  lx = lg(x);
-  if (lx != lgcols(y)) pari_err_OP("operation 'RgM_mul'", x,y);
-  if (lx == 1) return zeromat(0,ly-1);
-  return RgM_mul_basic(x, y, lx, ly);
 }
 GEN
 RgM_mul(GEN x, GEN y)
@@ -734,7 +724,7 @@ RgM_mul(GEN x, GEN y)
   if (lx == 1) return zeromat(0,ly-1);
   z = RgM_mul_fast(x, y);
   if (z) return z;
-  return RgM_mul_basic(x, y, lx, ly);
+  return RgM_mul_i(x, y, lx, ly);
 }
 
 GEN

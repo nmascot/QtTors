@@ -1011,11 +1011,7 @@ ZXQM_mul(GEN x, GEN y, GEN T)
     z = ZM_mul(simplify_shallow(x),simplify_shallow(y));
   else
   {
-    long e, n, N, ex = ZXM_expi(x), ey = ZXM_expi(y);
-
-    if ((ey && ex > 64 * ey) || (ex && ey > 64 * ex))
-      return gerepileupto(av, RgXQM_red(RgM_mul_i(x, y), T));
-    n = lg(x)-1;
+    long e, N, ex = ZXM_expi(x), ey = ZXM_expi(y), n = lg(x)-1;
     e = ex + ey + expu(d) + expu(n) + 4;
     N = divsBIL(e)+1;
     z = ZM_mul(ZXM_eval2BIL(x,N), ZXM_eval2BIL(y,N));
