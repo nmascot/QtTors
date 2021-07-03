@@ -2508,7 +2508,7 @@ makescind(GEN nf, GEN P)
       ulong o = perm_orderu(perm);
       if (o != 2) perm = perm_powu(perm, o >> 1);
       /* perm has order two and doesn't belong to Gal(H_k/k) */
-      return galoisfixedfield(G, perm, 1, varn(P));
+      return polredbest(galoisfixedfield(G, perm, 1, varn(P)), 0);
     }
   }
   pari_err_BUG("makescind");
@@ -2550,16 +2550,15 @@ quadray_init(GEN *pD, GEN *pbnf, long prec)
 static GEN
 quadhilbertreal(GEN D, long prec)
 {
-  pari_sp av = avma;
-  GEN bnf, pol, bnr, dtQ, data, M;
+  GEN bnf, bnr, dtQ, data, M;
   long newprec;
   pari_timer T;
 
   quadray_init(&D, &bnf, prec);
   switch(itou_or_0(cyc_get_expo(bnf_get_cyc(bnf))))
   {
-    case 1: set_avma(av); return pol_x(0);
-    case 2: return gerepileupto(av, GenusFieldQuadReal(D));
+    case 1: return pol_x(0);
+    case 2: return GenusFieldQuadReal(D);
   }
   bnr  = Buchray(bnf, gen_1, nf_INIT);
   M = diagonal_shallow(bnr_get_cyc(bnr));
@@ -2568,10 +2567,8 @@ quadhilbertreal(GEN D, long prec)
   if (DEBUGLEVEL) timer_start(&T);
   data = FindModulus(bnr, dtQ, &newprec);
   if (DEBUGLEVEL) timer_printf(&T,"FindModulus");
-  if (!data) return gerepileupto(av, bnrstark_cyclic(bnr, dtQ, prec));
-  pol = AllStark(data, 0, newprec);
-  pol = makescind(bnf_get_nf(bnf), pol);
-  return gerepileupto(av, polredbest(pol, 0));
+  if (!data) return bnrstark_cyclic(bnr, dtQ, prec);
+  return makescind(bnf_get_nf(bnf), AllStark(data, 0, newprec));
 }
 
 /*******************************************************************/
@@ -2806,7 +2803,6 @@ static GEN
 quadhilbertimag(GEN D)
 {
   GEN L, P, Pi, Pr, qfp, u;
-  pari_sp av = avma;
   long h, i, prec;
   struct gpq_data T;
   pari_timer ti;
@@ -2880,16 +2876,17 @@ quadhilbertimag(GEN D)
     set_avma(av0); prec += nbits2extraprec(prec2nbits(DEFAULTPREC)+exmax);
     if (DEBUGLEVEL) pari_warn(warnprec,"quadhilbertimag",prec);
   }
-  return gerepileupto(av,P);
+  return P;
 }
 
 GEN
 quadhilbert(GEN D, long prec)
 {
+  pari_sp av = avma;
   GEN d = D;
   quadray_init(&d, NULL, 0);
-  return (signe(d)>0)? quadhilbertreal(D,prec)
-                     : quadhilbertimag(d);
+  return gerepileupto(av, signe(d)>0? quadhilbertreal(D,prec)
+                                    : quadhilbertimag(d));
 }
 
 /* return a vector of all roots of 1 in bnf [not necessarily quadratic] */
