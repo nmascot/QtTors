@@ -27,7 +27,7 @@ Doc: defining polynomial $S$ over~$\Q$ for the splitting field of
 
  \item $\fl = 3$: return $[S, v, p]$ a data structure allowing to quickly
  compute the Galois group of the splitting field, which is used by
- \kbd{galoissplittinginit}; more precisely, where $p$ is a prime splitting
+ \kbd{galoissplittinginit}; more precisely, $p$ is a prime splitting
  completely in the splitting field and $v$ is a vector with $\deg S$
  elements describing the automorphisms of $S$ acting on the roots
  of $S$ modulo $p$.
