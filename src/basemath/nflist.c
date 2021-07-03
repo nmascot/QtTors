@@ -2331,10 +2331,10 @@ gal_get_order(GEN G) { return degpol(gal_get_pol(G)); }
 static GEN
 makeA4S4resolvent(long card, GEN pol, long flag)
 {
-  GEN R, D = nfdisc(pol), G = galoissplittinginit(pol, utoipos(card));
+  GEN R, G = galoissplittinginit(pol, utoipos(card));
   if (gal_get_order(G) != card) pari_err_BUG("nfresolvent [Galois group]");
   R = polredabs(galoisfixedfield(G, vecsplice(gal_get_gen(G), 3), 1, 0));
-  return flag? mkvec2(R, sqrti(divii(D, nfdisc(R)))): R;
+  return flag? mkvec2(R, sqrti(divii(nfdisc(pol), nfdisc(R)))): R;
 }
 
 static GEN
@@ -4743,9 +4743,15 @@ makeS32(GEN N, GEN field, long s)
 static GEN
 makeS32resolvent(GEN pol, long flag)
 {
-  GEN w, P = nfsplitting(pol, utoipos(36)), v = _nfsubfields(P, 3);
-  long i;
-  for (i = 1; i < lg(v); i++) gel(v, i) = polredabs(gel(v,i));
+  GEN w, G = galoissplittinginit(pol, utoipos(36)), v = galoissubgroups(G);
+  long i, c, l = lg(v);
+  for (i = c = 1; i < l; i++)
+  {
+    GEN H = gel(v,i);
+    if (group_order(H) == 12)
+      gel(v, c++) = polredabs(galoisfixedfield(G,H,1,0));
+  }
+  setlg(v, c);
   v = gtoset_shallow(v); if (lg(v) != 3) pari_err_BUG("nfresolvent");
   w = condrel_dummy(gel(v,1), flag);
   if (flag >= 2) w = mkvec2(w, condrel_dummy(gel(v,2), flag));
