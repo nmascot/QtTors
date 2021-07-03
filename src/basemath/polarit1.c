@@ -136,8 +136,16 @@ grem(GEN x, GEN y)
         case t_POLMOD: return polmod_mod(x,y);
         case t_POL: return RgX_rem(x,y);
         case t_RFRAC:
-          av = avma; z = RgXQ_inv(RgX_rem(gel(x,2), y), y);
-          return gerepileupto(av, grem(gmul(gel(x,1), z), y));
+        {
+          GEN a = gel(x,1), b = gel(x,2), p, pol;
+          if (typ(a) == t_POL && RgX_is_ZX(y) && ZX_is_monic(y))
+          {
+            long pa, t = RgX_type2(a,b, &p,&pol,&pa);
+            if (t == t_FRAC || t == t_INT) return QXQ_div(a, b, y);
+          }
+          av = avma; z = RgXQ_inv(RgX_rem(b, y), y);
+          return gerepileupto(av, grem(gmul(a, z), y));
+        }
         case t_SER:
           if (RgX_is_monomial(y))
           {
