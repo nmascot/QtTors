@@ -72,3 +72,5 @@ Doc: defining polynomial $S$ over~$\Q$ for the splitting field of
  [... degree 720 polynomial deleted ...]
  time = 11,020 ms.
  @eprog
+ Variant: Also available is
+ \fun{GEN}{nfsplitting}{GEN T, GEN D} for $\fl = 0$.
