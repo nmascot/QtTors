@@ -115,6 +115,7 @@ BA  35- New GP function setdebug
     39- New GP function polsubcyclofast
     40- [libpari] prV_primes, ideals_by_norm, nfV_to_scalar_or_alg
     41- new bit in nfinit flag: don't perform LLL on nf.zk
+BA  42- new flag value in nfisincl
 
   Changed
 HC   1- faster implementation of eulervec + cache result

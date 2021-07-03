@@ -2975,7 +2975,7 @@ GEN
 galoissplittinginit(GEN T, GEN D)
 {
   pari_sp av = avma;
-  GEN R = nfsplitting0(T, D, 2), P = gel(R,1), aut = gel(R,2);
+  GEN R = nfsplitting0(T, D, 3), P = gel(R,1), aut = gel(R,2);
   ulong p = itou(gel(R,3));
   return gerepileupto(av, galoisinitfromaut(P, aut, p));
 }

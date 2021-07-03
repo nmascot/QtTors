@@ -1242,22 +1242,20 @@ partmap_reverse_frac(GEN a, GEN b, GEN t, GEN la, GEN lb, long v)
 
 GEN
 partmap_reverse_frac_worker(GEN t, GEN a, GEN b, GEN la, GEN lb, long v)
-{
-  return partmap_reverse_frac(a, b, t, la, lb, v);
-}
+{ return partmap_reverse_frac(a, b, t, la, lb, v); }
 
 static GEN
-nfisincl_from_fact(GEN a, long da, GEN b, GEN la, GEN lb, long vb, GEN y, long flag)
+nfisincl_from_fact(GEN a, long da, GEN b, GEN la, GEN lb, long vb, GEN y,
+                   long flag)
 {
-  long i, k, lx = lg(y);
-  long db = degpol(b), d = db/da;
-  GEN x = cgetg(lx, t_VEC);
-  for (i=1, k=1; i<lx; i++)
+  long i, k, l = lg(y), db = degpol(b), d = db / da;
+  GEN x = cgetg(l, t_VEC);
+  for (i= k = 1; i < l; i++)
   {
     GEN t = gel(y,i);
-    if (degpol(t)!=d) continue;
+    if (degpol(t) != d) continue;
     gel(x, k++) = partmap_reverse(a, b, t, la, lb, vb);
-    if (flag==1) return gel(x,1);
+    if (flag) return gel(x,1);
   }
   if (k==1) return gen_0;
   setlg(x, k);
@@ -1268,17 +1266,17 @@ nfisincl_from_fact(GEN a, long da, GEN b, GEN la, GEN lb, long vb, GEN y, long f
 static GEN
 nfisincl_from_fact_frac(GEN a, GEN b, GEN la, GEN lb, long vb, GEN y)
 {
-  long i, k, lx = lg(y), d = degpol(b) / degpol(a);
-  GEN worker = snm_closure(is_entry("_partmap_reverse_frac_worker"),
-               mkvec5(a,b,la,lb,stoi(vb)));
-  GEN x = cgetg(lx, t_VEC);
-  for (i=1, k=1; i<lx; i++)
+  long i, k, l = lg(y), d = degpol(b) / degpol(a);
+  GEN worker, x = cgetg(l, t_VEC);
+  for (i = k = 1; i < l; i++)
   {
     GEN t = gel(y,i);
-    if (degpol(t)!=d) continue;
+    if (degpol(t) != d) continue;
     gel(x, k++) = t;
   }
   if (k==1) return gen_0;
+  worker = snm_closure(is_entry("_partmap_reverse_frac_worker"),
+                       mkvec5(a,b,la,lb,stoi(vb)));
   setlg(x, k); return gen_parapply(worker, x);
 }
 
@@ -1312,7 +1310,7 @@ nfisincl0(GEN fa, GEN fb, long flag)
   vb = varn(b); newvar = (varncmp(varn(a),vb) <= 0);
   if (newvar) { b = leafcopy(b); setvarn(b, fetch_var_higher()); }
   y = lift_shallow(gel(nffactor(nfa,b),1));
-  if (flag>=2)
+  if (flag==2)
     x = nfisincl_from_fact_frac(a, b, la, lb, vb, y);
   else
     x = nfisincl_from_fact(nfa, degpol(a), b, la, lb, vb, y, flag);
@@ -1386,6 +1384,7 @@ nfsplitting0(GEN T0, GEN D, long flag)
   pari_sp av = avma;
   long d, Ds, v;
   GEN T, F, K, N = NULL, lT = NULL;
+  if (flag < 0 || flag > 3) pari_err_FLAG("nfsplitting");
   T = T0 = get_nfpol(T0, &K);
   if (!K)
   {
@@ -1435,20 +1434,12 @@ nfsplitting0(GEN T0, GEN D, long flag)
     pari_warn(warner,stack_strcat("ignoring incorrect degree bound ",sD));
   }
   setvarn(F, v); (void)delete_var();
-  if (flag) F = odd(flag)? mkvec2(F, N): nfsplitting_auto(F, N);
+  if (flag) F = flag == 3? nfsplitting_auto(F, N): mkvec2(F, N);
   return gerepilecopy(av, F);
 }
 
 GEN
 nfsplitting(GEN T, GEN D) { return nfsplitting0(T, D, 0); }
-
-GEN
-nfsplitting_gp(GEN T, GEN D, long flag)
-{
-  if (flag < 0 || flag > 1)
-    pari_err_FLAG("nfsplitting");
-  return nfsplitting0(T, D, flag);
-}
 
 /*************************************************************************/
 /**                                                                     **/
