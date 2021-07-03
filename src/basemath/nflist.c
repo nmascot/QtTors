@@ -2325,11 +2325,14 @@ makeS4(GEN N, GEN field, long s)
   return v? sturmseparate(v, s, 4): NULL;
 }
 
+static long
+gal_get_order(GEN G) { return degpol(gal_get_pol(G)); }
+
 static GEN
 makeA4S4resolvent(long card, GEN pol, long flag)
 {
   GEN R, D = nfdisc(pol), G = galoissplittinginit(pol, utoipos(card));
-  if (typ(G) == t_INT) pari_err_BUG("nfresolvent [Galois group]");
+  if (gal_get_order(G) != card) pari_err_BUG("nfresolvent [Galois group]");
   R = polredabs(galoisfixedfield(G, vecsplice(gal_get_gen(G), 3), 1, 0));
   return flag? mkvec2(R, sqrti(divii(D, nfdisc(R)))): R;
 }
@@ -2930,7 +2933,7 @@ makeMgenresolvent(long ell, long a, GEN pol, long flag)
   GEN Dpow = checkfield(pol, ell), G, R, DR, F2, nf, pell, F;
 
   G = galoissplittinginit(pol, utoipos(a*ell));
-  if (typ(G) == t_INT) pari_err_BUG("nfresolvent [Galois group]");
+  if (gal_get_order(G) != a * ell) pari_err_BUG("nfresolvent [Galois group]");
   R = polredabs(galoisfixedfield(G, vecsplice(gal_get_gen(G), 2), 1, 0));
   if (!flag) return R;
   DR = nfdisc(R);
@@ -5150,29 +5153,28 @@ nfresolvent_small(GEN pol, long flag)
 static GEN
 nfresolvent_i(GEN pol, long flag)
 {
-  long deg;
-  GEN G, P;
+  long d;
+  GEN G;
 
   if (!okfield(pol)) pari_err_TYPE("nfresolvent", pol);
   if (flag < 0 || flag > 3) pari_err_FLAG("nfresolvent");
-  deg = degpol(pol);
-  if (deg < 8) return nfresolvent_small(pol, flag);
-  if (deg != 9 && !uisprime(deg)) return gen_0;
+  d = degpol(pol);
+  if (d < 8) return nfresolvent_small(pol, flag);
+  if (d != 9 && !uisprime(d)) return gen_0;
   G = galoisinit(pol, NULL);
   if (typ(G) != t_INT)
   {
-    if (deg == 9)
+    if (d == 9)
     {
       long n = lg(gal_get_gen(G))-1;
       return n == 1? condrelresolvent(pol,3,flag) /*C9*/
                    : makeC3C3resolvent(pol, flag); /*C3xC3*/
     }
-    return makeCLresolvent(deg, pol, flag);
+    return makeCLresolvent(d, pol, flag);
   }
-  P = nfsplitting(pol, utoipos(2*deg));
-  G = galoisinit(P, NULL); if (typ(G) == t_INT) return gen_0;
-  return deg == 9? makeD9resolvent(G, flag)
-                 : makeDLresolvent(deg, pol, flag);
+  G = galoissplittinginit(pol, utoipos(2*d));
+  if (gal_get_order(G) != 2*d) return gen_0;
+  return d == 9? makeD9resolvent(G, flag): makeDLresolvent(d, pol, flag);
 }
 GEN
 nfresolvent(GEN pol, long flag)

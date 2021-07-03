@@ -52,6 +52,7 @@ nfresolvent(T,3)
 T=x^6-3*x^5+7*x^4-9*x^3+7*x^2-3*x+1;nfresolvent(T,3)
 T=x^9-15*x^7-4*x^6+54*x^5+12*x^4-38*x^3-9*x^2+6*x+1;nfresolvent(T,3)
 nfresolvent(x^5-x-1)
+nfresolvent(x^9-6669*x^7-40014*x^6+13304655*x^5+124923708*x^4-7296039387*x^3-42603746094*x^2+931129781400*x+6414841742400)
 
 \\ regression tests
 nflist("C2",[3.5,4.5])
