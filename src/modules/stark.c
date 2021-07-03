@@ -2518,16 +2518,14 @@ makescind(GEN nf, GEN P)
 /* pbnf = NULL if no bnf is needed, f = NULL may be passed for a trivial
  * conductor */
 static void
-quadray_init(GEN *pD, GEN f, GEN *pbnf, long prec)
+quadray_init(GEN *pD, GEN *pbnf, long prec)
 {
   GEN D = *pD, nf, bnf = NULL;
   if (typ(D) == t_INT)
   {
     int isfund;
     if (pbnf) {
-      long v = f? gvar(f): NO_VARIABLE;
-      if (v == NO_VARIABLE) v = 1;
-      bnf = Buchall(quadpoly0(D, v), nf_FORCE, prec);
+      bnf = Buchall(quadpoly0(D, 1), nf_FORCE, prec);
       nf = bnf_get_nf(bnf);
       isfund = equalii(D, nf_get_disc(nf));
     }
@@ -2557,7 +2555,7 @@ quadhilbertreal(GEN D, long prec)
   long newprec;
   pari_timer T;
 
-  quadray_init(&D, NULL, &bnf, prec);
+  quadray_init(&D, &bnf, prec);
   switch(itou_or_0(cyc_get_expo(bnf_get_cyc(bnf))))
   {
     case 1: set_avma(av); return pol_x(0);
@@ -2889,7 +2887,7 @@ GEN
 quadhilbert(GEN D, long prec)
 {
   GEN d = D;
-  quadray_init(&d, NULL, NULL, 0);
+  quadray_init(&d, NULL, 0);
   return (signe(d)>0)? quadhilbertreal(D,prec)
                      : quadhilbertimag(d);
 }
@@ -3275,7 +3273,9 @@ quadray(GEN D, GEN f, long prec)
   pari_sp av = avma;
 
   if (isint1(f)) return quadhilbert(D, prec);
-  quadray_init(&D, f, &bnf, prec);
+  if (typ(D) == t_INT && typ(f) != t_INT)
+    pari_err_TYPE("quadray [conductor]", f);
+  quadray_init(&D, &bnf, prec);
   bnr = Buchray(bnf, f, nf_INIT|nf_GEN);
   if (is_pm1(bnr_get_no(bnr))) { set_avma(av); return pol_x(0); }
   if (signe(D) > 0)
