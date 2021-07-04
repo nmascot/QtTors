@@ -4741,20 +4741,26 @@ makeS32(GEN N, GEN field, long s)
 }
 
 static GEN
+group_add_elt(GEN H, GEN g, long r)
+{ return mkvec2(vec_append(gel(H,1),g), vecsmall_append(gel(H,2), r)); }
+
+static GEN
 makeS32resolvent(GEN pol, long flag)
 {
-  GEN w, G = galoissplittinginit(pol, utoipos(36)), v = galoissubgroups(G);
+  GEN w, g1, g2, H1, H2, G = galoissplittinginit(pol, utoipos(36));
+  GEN v = galoissubgroups(G), g = galois_group(G);
   long i, c, l = lg(v);
   for (i = c = 1; i < l; i++)
   {
     GEN H = gel(v,i);
-    if (group_order(H) == 12)
-      gel(v, c++) = polredabs(galoisfixedfield(G,H,1,0));
+    if (group_order(H) == 6 && group_subgroup_isnormal(g,H)) gel(v, c++) = H;
   }
-  setlg(v, c);
-  v = gtoset_shallow(v); if (lg(v) != 3) pari_err_BUG("nfresolvent");
-  w = condrel_dummy(gel(v,1), flag);
-  if (flag >= 2) w = mkvec2(w, condrel_dummy(gel(v,2), flag));
+  H1 = gel(v,1); g1 = gel(H1,1);
+  H2 = gel(v,2); g2 = gel(H2,1); /* G = H1 x H2, Hi ~ S3 */
+  H1 = group_add_elt(H1, gel(g2,2), 2);
+  H2 = group_add_elt(H2, gel(g1,2), 2);
+  w = condrel_dummy(galoisfixedfield(G,H1,1,0), flag);
+  if (flag >= 2) w = mkvec2(w, condrel_dummy(galoisfixedfield(G,H2,1,0),flag));
   return w;
 }
 
