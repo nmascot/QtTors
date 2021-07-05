@@ -3170,18 +3170,20 @@ findquad_pol(GEN p, GEN a, GEN x)
   for (i=2; i<lx; i++) gel(y,i) = findquad(a, gel(x,i), p);
   y[1] = x[1]; return y;
 }
-/* m is 4, prime or 4 * prime */
+/* m is 3, 4 or 12 */
 static GEN
-compocyclo(GEN nf, long m, long d)
+compocyclo(GEN D, long m)
+{ return do_compo(quadhilbertimag(D), polcyclo(m,0)); }
+/* m is prime or 4 * prime */
+static GEN
+compocyclop(GEN nf, long m)
 {
   GEN sb,a,b,s,p1,p2,p3,res,polL,polLK,nfL, D = nf_get_disc(nf);
   long ell,vx;
 
   p1 = quadhilbertimag(D);
   p2 = polcyclo(m,0);
-  if (d==1) return do_compo(p1,p2);
-
-  ell = odd(m)? m: (m>>2); /* 1 or prime */
+  ell = odd(m)? m: (m>>2); /* prime */
   if (absequalui(ell,D)) /* ell = |D| */
   {
     p2 = gcoeff(nffactor(nf,p2),1,1);
@@ -3244,10 +3246,10 @@ treatspecialsigma(GEN bnr)
   Ds = smodis(D,48);
   if (i)
   {
-    if (i==2 && Ds%16== 8) return compocyclo(nf, 4,1);
-    if (i==3 && Ds% 3== 1) return compocyclo(nf, 3,1);
-    if (i==4 && Ds% 8== 1) return compocyclo(nf, 4,1);
-    if (i==6 && Ds   ==40) return compocyclo(nf,12,1);
+    if (i==2 && Ds%16== 8) return compocyclo(D, 4);
+    if (i==3 && Ds% 3== 1) return compocyclo(D, 3);
+    if (i==4 && Ds% 8== 1) return compocyclo(D, 4);
+    if (i==6 && Ds   ==40) return compocyclo(D,12);
     return NULL;
   }
 
@@ -3261,7 +3263,7 @@ treatspecialsigma(GEN bnr)
   }
   if (tryf <= 3 || umodiu(D, tryf) || !uisprime(tryf)) return NULL;
   if (fl) tryf <<= 2;
-  return compocyclo(nf,tryf,2);
+  return compocyclop(nf, tryf);
 }
 
 GEN
