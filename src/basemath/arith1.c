@@ -5443,7 +5443,7 @@ quadunit(GEN x)
   long r, i = 1;
 
   check_quaddisc_real(x, &r, "quadunit");
-  pol = quadpoly(x);
+  pol = quadpoly_i(x);
   sqd = sqrti(x); av2 = avma;
   a = shifti(addui(r,sqd),-1);
   f = zerovec(2+(expi(x)>>1));

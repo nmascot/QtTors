@@ -113,7 +113,7 @@ BA  35- New GP function setdebug
     37- New GP function poltomonic [#2200]
     38- in GPRC, support default(key,val) and setdebug(dom,val)
     39- New GP function polsubcyclofast
-    40- [libpari] prV_primes, ideals_by_norm, nfV_to_scalar_or_alg
+    40- [libpari] prV_primes, ideals_by_norm, nfV_to_scalar_or_alg, quadpoly_i
     41- new bit in nfinit flag: don't perform LLL on nf.zk
 BA  42- new flag value in nfisincl
 

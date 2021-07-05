@@ -1330,7 +1330,7 @@ thue(GEN tnf, GEN rhs, GEN ne)
           GEN D = coredisc(ZX_disc(POL));
           if (cmpis(D, -4) >= 0)
           {
-            GEN F, T = quadpoly(D);
+            GEN F, T = quadpoly_i(D);
             w = equalis(D, -4)? 4: 6;
             setvarn(T, fetch_var_higher());
             F = gcoeff(nffactor(POL, T), 1, 1);

@@ -3170,6 +3170,7 @@ findquad_pol(GEN p, GEN a, GEN x)
   for (i=2; i<lx; i++) gel(y,i) = findquad(a, gel(x,i), p);
   y[1] = x[1]; return y;
 }
+/* m is 4, prime or 4 * prime */
 static GEN
 compocyclo(GEN nf, long m, long d)
 {
@@ -3180,7 +3181,7 @@ compocyclo(GEN nf, long m, long d)
   p2 = polcyclo(m,0);
   if (d==1) return do_compo(p1,p2);
 
-  ell = m&1 ? m : (m>>2);
+  ell = odd(m)? m: (m>>2); /* 1 or prime */
   if (absequalui(ell,D)) /* ell = |D| */
   {
     p2 = gcoeff(nffactor(nf,p2),1,1);
@@ -3188,7 +3189,7 @@ compocyclo(GEN nf, long m, long d)
   }
   if (ell%4 == 3) ell = -ell;
   /* nf = K = Q(a), L = K(b) quadratic extension = Q(t) */
-  polLK = quadpoly(stoi(ell)); /* relative polynomial */
+  polLK = quadpoly_i(stoi(ell)); /* relative polynomial */
   res = rnfequation2(nf, polLK);
   vx = nf_get_varn(nf);
   polL = gsubst(gel(res,1),0,pol_x(vx)); /* = charpoly(t) */

@@ -11553,6 +11553,10 @@ $x \cdot i^k$.
 \fun{GEN}{mkquad}{GEN n, GEN x, GEN y} creates the \typ{QUAD} $x + yw$,
 where $w$ is a root of $n$, which is of the form \kbd{quadpoly(D)}.
 
+\fun{GEN}{quadpoly_i}{GEN D} creates the canonical quadratic polynomial of
+discriminant $D$. Assume that the \typ{INT} $D$ is congruent to $0,1$ mod $4$
+and not a square.
+
 \fun{GEN}{mkfrac}{GEN x, GEN y} creates the \typ{FRAC} $x/y$. Assumes that
 $y > 1$ and $(x,y) = 1$.
 
