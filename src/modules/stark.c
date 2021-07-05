@@ -1080,7 +1080,7 @@ EvalCoeff(GEN z, int* c, long deg)
   return e;
 }
 
-/* copy the n * (m+1) array matan */
+/* a2 <- copy the n x m array */
 static void
 CopyCoeff(int** a, int** a2, long n, long m)
 {
