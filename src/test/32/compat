@@ -1518,7 +1518,7 @@ New syntax: ideallistunit(nf,list) ===> ideallist(nf,list,2)
 ideallist(nf,bound,{flag=4}): vector of vectors L of all idealstar of all 
 ideals of norm<=bound. If (optional) flag is present, its binary digits are 
 toggles meaning 1: give generators; 2: add units; 4: give only the ideals and 
-not the bid.
+not the bid; 8: omit ideals which cannot be conductors.
 
 
   ***   at top-level: ideallistunitarch()
@@ -1559,7 +1559,7 @@ New syntax: ideallistunitgen ===> ideallist(nf,list,3)
 ideallist(nf,bound,{flag=4}): vector of vectors L of all idealstar of all 
 ideals of norm<=bound. If (optional) flag is present, its binary digits are 
 toggles meaning 1: give generators; 2: add units; 4: give only the ideals and 
-not the bid.
+not the bid; 8: omit ideals which cannot be conductors.
 
 
   ***   at top-level: ideallistzstar()
@@ -1572,7 +1572,7 @@ New syntax: ideallistzstar(nf,bound) ===> ideallist(nf,bound)
 ideallist(nf,bound,{flag=4}): vector of vectors L of all idealstar of all 
 ideals of norm<=bound. If (optional) flag is present, its binary digits are 
 toggles meaning 1: give generators; 2: add units; 4: give only the ideals and 
-not the bid.
+not the bid; 8: omit ideals which cannot be conductors.
 
 
   ***   at top-level: ideallistzstargen()
@@ -1585,7 +1585,7 @@ New syntax: ideallistzstargen(nf,bound) ===> ideallist(nf,bound,1)
 ideallist(nf,bound,{flag=4}): vector of vectors L of all idealstar of all 
 ideals of norm<=bound. If (optional) flag is present, its binary digits are 
 toggles meaning 1: give generators; 2: add units; 4: give only the ideals and 
-not the bid.
+not the bid; 8: omit ideals which cannot be conductors.
 
 
   ***   at top-level: ideallllred()
@@ -4508,4 +4508,4 @@ New syntax: texprint(x) ===> printtex(x)
 printtex({str}*): outputs its string arguments in TeX format.
 
 
-Total time spent: 3
+Total time spent: 7
