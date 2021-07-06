@@ -63,3 +63,7 @@ Doc: computes the list of all ideals of norm less or equal to \var{bound} in
  factorization matrix. If needed, one can obtain their HNF using
  \kbd{idealfactorback}, and the corresponding \var{bid} structures using
  \kbd{idealstar} (which accepts ideals in factored form).
+Variant: Also available is
+ \fun{GEN}{ideallist0}{GEN nf,long bound, long flag} for a non-negative
+ bound.
+
