@@ -2597,7 +2597,7 @@ hclassno6u(ulong D)
 }
 /* same as hclassno6u without creating caches */
 ulong
-hclassno6u_from_cache(ulong D)
+hclassno6u_no_cache(ulong D)
 {
   cache *S = &caches[cache_H];
   long D0, F;

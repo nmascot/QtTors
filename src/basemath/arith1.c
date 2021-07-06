@@ -6018,7 +6018,7 @@ hclassno6_large(GEN x)
   l = lg(P);
   if (l > 1 && lgefint(x) == 3)
   { /* F != 1, second chance */
-    ulong h = hclassno6u_from_cache(x[2]);
+    ulong h = hclassno6u_no_cache(x[2]);
     if (h) H = utoipos(h);
   }
   if (!H)
@@ -6054,7 +6054,7 @@ hclassno6(GEN x)
   ulong d = itou_or_0(x);
   if (d)
   { /* create cache if d small */
-    ulong h = d < 500000 ? hclassno6u(d): hclassno6u_from_cache(d);
+    ulong h = d < 500000 ? hclassno6u(d): hclassno6u_no_cache(d);
     if (h) return utoipos(h);
   }
   return hclassno6_large(x);

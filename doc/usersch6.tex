@@ -2345,7 +2345,12 @@ individually and are not memoized.
 This is a low-level function behind \kbd{hclassno}.
 
 \fun{ulong}{hclassno6u}{ulong d} assuming $d > 0$, returns the integer
-$6 H(d)$.
+$6 H(d)$. Using this function creates caches of Hurwitz class numbers
+and Corediscs of negative integers to speed up consecutive or repeated
+calls (see \kbd{getcache}). If this is a problem, use:
+
+\fun{ulong}{hclassno6u_no_cache}{ulong d} as \kbd{hclassno6u} without
+creating caches.
 
 \subsec{\typ{QFB}}
 
