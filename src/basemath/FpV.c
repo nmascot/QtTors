@@ -1323,7 +1323,7 @@ zCs_to_ZC(GEN R, long nbrow)
 
 GEN
 zMs_to_ZM(GEN x, long nbrow)
-{ pari_APPLY_same(zCs_to_ZC(gel(x, i), nbrow)) }
+{ pari_APPLY_type(t_MAT, zCs_to_ZC(gel(x, i), nbrow)) }
 
 /* Solve equation f(X) = B (mod p) where B is a FpV, and f is an endomorphism.
  * Return either a solution as a t_COL, or a kernel vector as a t_VEC. */
