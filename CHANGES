@@ -118,6 +118,7 @@ BA  35- New GP function setdebug
     41- new bit in nfinit flag: don't perform LLL on nf.zk
 BA  42- new flag value in nfisincl
     43- [libpari] hclassno6u_from_cache
+BA  44- [libpari] RgXQ_minpoly
 
   Changed
 HC   1- faster implementation of eulervec + cache result

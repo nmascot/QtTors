@@ -42,6 +42,17 @@ matadjoint(Mat(1))
 matadjoint([x,0,0;0,0,0;0,0,0])
 matadjoint([Mod(1,2)*x,0,0;0,0,0;0,0,0])
 charpoly(x*matid(3))
+
+charpoly(Mod(0,x^0))
+charpoly(Mod(0*x,x^0))
+charpoly(Mod(1,x^0))
+charpoly(Mod(x,x^0))
+
+minpoly(Mod(0,x^0))
+minpoly(Mod(0*x,x^0))
+minpoly(Mod(1,x^0))
+minpoly(Mod(x,x^0))
+
 minpoly(Mod(x+1,x^4+1))
 minpoly(Mod(x,x^2))
 minpoly(Mod(1,x^2+x+1))

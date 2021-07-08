@@ -758,6 +758,22 @@ RgXQ_minpoly_fast(GEN x, GEN y)
 
 #undef code
 
+/* return caract(Mod(x,T)) in variable v */
+GEN
+RgXQ_minpoly(GEN x, GEN T, long v)
+{
+  pari_sp av = avma;
+  GEN R = RgXQ_minpoly_fast(x,T);
+  if (R) { setvarn(R, v); return R; }
+  if (!issquarefree(T))
+  {
+    R = RgXQ_minpoly_naive(x, T);
+    setvarn(R,v); return R;
+  }
+  R = RgXQ_charpoly(x, T, v);
+  return gerepileupto(av, RgX_div(R,RgX_gcd(R, RgX_deriv(R))));
+}
+
 static GEN
 easymin(GEN x, long v)
 {
@@ -771,18 +787,13 @@ easymin(GEN x, long v)
   if (tx == t_POLMOD)
   {
     GEN a = gel(x,2), b = gel(x,1);
+    if (degpol(b)==0) return pol_1(v);
     if (typ(a) != t_POL || varn(a) != varn(b))
     {
       if (varncmp(gvar(a), v) <= 0) pari_err_PRIORITY("minpoly", x, "<", v);
       return deg1pol(gen_1, gneg_i(a), v);
     }
-    R = RgXQ_minpoly_fast(a,b);
-    if (R) { setvarn(R, v); return R; }
-    if (!issquarefree(b))
-    {
-      R = RgXQ_minpoly_naive(a, b);
-      setvarn(R,v); return R;
-    }
+    return RgXQ_minpoly(a, b, v);
   }
   R = easychar(x, v); if (!R) return NULL;
   dR = RgX_deriv(R);  if (!lgpol(dR)) return NULL;

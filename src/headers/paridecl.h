@@ -4852,6 +4852,7 @@ void    RgX_type_decode(long x, long *t1, long *t2);
 int     RgX_type_is_composite(long t);
 GEN     RgXQ_charpoly(GEN x, GEN T, long v);
 GEN     RgXQ_inv(GEN x, GEN y);
+GEN     RgXQ_minpoly(GEN x, GEN T, long v);
 GEN     RgXQ_mul(GEN x, GEN y, GEN T);
 int     RgXQ_ratlift(GEN y, GEN x, long amax, long bmax, GEN *P, GEN *Q);
 GEN     RgXQ_sqr(GEN x, GEN y);
