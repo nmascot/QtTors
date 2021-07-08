@@ -1241,7 +1241,12 @@ gpow(GEN x, GEN n, long prec)
       if (signe(x) < 0)
       {
         if (equaliu(d, 2) && Z_issquareall(negi(x), &z))
-          return gerepilecopy(av, mkcomplex(gen_0, powgi(z, a)));
+        {
+          z = powgi(z, a);
+          if (Mod4(a) == 3) z = gneg(z);
+          return gerepilecopy(av, mkcomplex(gen_0, z))
+          ;
+        }
         break;
       }
       if (ispower(x, d, &z)) return powgi(z, a);
