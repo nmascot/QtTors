@@ -2746,7 +2746,7 @@ RgXQ_norm(GEN x, GEN T)
   pari_sp av;
   long dx = degpol(x);
   GEN L, y;
-
+  if (degpol(T)==0) return gpowgs(x,0);
   av = avma; y = resultant(T, x);
   L = leading_coeff(T);
   if (gequal1(L) || !signe(x)) return y;

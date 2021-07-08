@@ -31,6 +31,9 @@ x^2 - 2
 x^2 + 1
 [x^2 + 1, 1/2]
 x^2 + 1
+1
+1
+1
 2
 
 [0 -1/2]
@@ -115,4 +118,4 @@ Mod(-6, y^2 - 2)*x^2 + Mod(48*z, y^2 - 2)*x + Mod(480*z + 600, y^2 - 2)
   ***   at top-level: (1/x)%x
   ***                      ^--
   *** _%_: impossible inverse in QXQ_inv: Mod(0, x).
-Total time spent: 6
+Total time spent: 10

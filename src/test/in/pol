@@ -25,6 +25,10 @@ poltomonic(x^2+4)
 U=poltomonic(x^2+4,&L);[U,L]
 
 norm(I*x+1)
+norm(Mod(0,x^0))
+norm(Mod(1,x^0))
+norm(Mod(x^0,x^0))
+
 trace(I*x+1)
 matcompanion(2*x^2+1)
 serlaplace(1+x+x^2)
