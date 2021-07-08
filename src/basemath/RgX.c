@@ -2757,9 +2757,11 @@ GEN
 RgXQ_trace(GEN x, GEN T)
 {
   pari_sp av = avma;
-  GEN dT = RgX_deriv(T);
-  long n = degpol(dT);
-  GEN z = RgXQ_mul(x, dT, T);
+  GEN dT, z;
+  long n;
+  if (degpol(T)==0) return gmulgs(x,0);
+  dT = RgX_deriv(T); n = degpol(dT);
+  z = RgXQ_mul(x, dT, T);
   if (degpol(z)<n) return gc_const(av, gen_0);
   return gerepileupto(av, gdiv(gel(z,2+n), gel(T,3+n)));
 }
