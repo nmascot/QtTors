@@ -865,10 +865,10 @@ prV_ZM_factorback(GEN nf, GEN S, GEN x)
 static GEN
 bnfselmerQ(GEN S)
 {
-  GEN gen = vec_prepend(prV_primes(S), gen_m1), e;
+  GEN g = vec_prepend(prV_primes(S), gen_m1), e;
   long n = lg(S)-1;
-  e = shallowconcat(zerocol(n), matid(n));
-  return mkvec3(gen, e, const_vec(n + 1, gen_1));
+  e = n? shallowconcat(zerocol(n), matid(n)): zeromat(0, 1);
+  return mkvec3(g, e, const_vec(n + 1, gen_1));
 }
 
 static GEN
