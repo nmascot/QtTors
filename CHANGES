@@ -72,7 +72,7 @@ BA  54- List([1])[1..0]==List() -> 0 instead of 1
 HC   1- new GP function eulerreal
 BA   2- fplll: fast, dpe and heuristic variants
      3- dirpowerssum: allow a completely multiplicative function
-     4- [libpari] atanhuu, atanhui, powcx, powcx_prec
+     4- [libpari] atanhuu, atanhui, powcx, powcx_prec, cx_approx0
      5- new GP function lfunparams (initial implementation P. Molin)
      6- [libpari] row_Q_primpart
 BA   7- [libpari] RgXQ_trace, RgX_chinese_coprime, RgXQV_factorback

@@ -1815,7 +1815,7 @@ pol_approx0(GEN r, GEN x, int exact)
   if (exact) return !signe(r);
   l = minss(lg(x), lg(r));
   for (i = 2; i < l; i++)
-    if (!approx_0(gel(r,i), gel(x,i))) return 0;
+    if (!cx_approx0(gel(r,i), gel(x,i))) return 0;
   return 1;
 }
 

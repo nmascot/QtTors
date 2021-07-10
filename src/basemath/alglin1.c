@@ -2314,16 +2314,6 @@ FqM_indexrank(GEN x, GEN T, GEN p) {
 /*                       Solve A*X=B (Gauss pivot)                 */
 /*                                                                 */
 /*******************************************************************/
-/* x ~ 0 compared to reference y */
-int
-approx_0(GEN x, GEN y)
-{
-  long tx = typ(x);
-  if (tx == t_COMPLEX)
-    return approx_0(gel(x,1), y) && approx_0(gel(x,2), y);
-  return gequal0(x) ||
-         (tx == t_REAL && gexpo(y) - gexpo(x) > bit_prec(x));
-}
 /* x a column, x0 same column in the original input matrix (for reference),
  * c list of pivots so far */
 static long
@@ -2351,7 +2341,7 @@ gauss_get_pivot_max(GEN X, GEN X0, long ix, GEN c)
   if (!k) return lx;
   p = gel(x,k);
   r = gel(x0,k); if (isrationalzero(r)) r = x0;
-  return approx_0(p, r)? lx: k;
+  return cx_approx0(p, r)? lx: k;
 }
 static long
 gauss_get_pivot_padic(GEN X, GEN p, long ix, GEN c)

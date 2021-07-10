@@ -536,7 +536,7 @@ GEN   red_montgomery(GEN T, GEN N, ulong inv);
 GEN   sqrispec(GEN x, long nx);
 ulong *convi(GEN x, long *l);
 
-int approx_0(GEN x, GEN y);
+int cx_approx0(GEN x, GEN y);
 
 /* powers */
 GEN    rpowuu(ulong a, ulong n, long prec);

@@ -12738,6 +12738,12 @@ This returns $1$ if and only if the division by $a-b$ would produce a
 division by $0$ (which is a less stringent test than testing whether $a-b$
 evaluates to $0$).
 
+\fun{int}{cx_approx0}{GEN a, GEN b} test whether (\typ{INT}, \typ{FRAC},
+\typ{REAL}, or \typ{COMPLEX} of those) $a$ is approximately $0$, where $b$
+is a reference point. A non-$0$ \typ{REAL} component $x$ is
+approximately $0$ if
+$$\kbd{exponent}(b) - \kbd{exponent}(x) > \kbd{bit\_prec(x)}\;.$$
+
 \section{Quadratic numbers and binary quadratic forms}
 
 \fun{GEN}{quad_disc}{GEN x} returns the discriminant of the \typ{QUAD} $x$.

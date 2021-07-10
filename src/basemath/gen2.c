@@ -1116,6 +1116,44 @@ cx_approx_equal(GEN a, GEN b)
   d = gsub(a,b);
   return gc_bool(av, gequal0(d) || (typ(d)==t_COMPLEX && gequal0(cxnorm(d))));
 }
+static int
+r_approx0(GEN x, long e) { return e - expo(x) > bit_prec(x); }
+/* x ~ 0 compared to reference y */
+int
+cx_approx0(GEN x, GEN y)
+{
+  GEN a, b;
+  long e;
+  switch(typ(x))
+  {
+    case t_COMPLEX:
+      a = gel(x,1); b = gel(x,2);
+      if (typ(a) != t_REAL)
+      {
+        if (!gequal0(a)) return 0;
+        a = NULL;
+      }
+      else if (!signe(a)) a = NULL;
+      if (typ(b) != t_REAL)
+      {
+        if (!gequal0(b)) return 0;
+        if (!a) return 1;
+        b = NULL;
+      }
+      else if (!signe(b))
+      {
+        if (!a) return 1;
+        b = NULL;
+      }
+      /* a or b is != NULL iff it is non-zero t_REAL; one of them is */
+      e = gexpo(y);
+      return (!a || r_approx0(a, e)) && (!b || r_approx0(b, e));
+    case t_REAL:
+      return !signe(x) || r_approx0(x, gexpo(y));
+    default:
+      return gequal0(x);
+  }
+}
 /*******************************************************************/
 /*                                                                 */
 /*                          VALUATION                              */
