@@ -1811,11 +1811,10 @@ glcm(GEN x, GEN y)
 static int
 pol_approx0(GEN r, GEN x, int exact)
 {
-  long i, lx,lr;
-  if (exact) return gequal0(r);
-  lx = lg(x);
-  lr = lg(r); if (lr < lx) lx = lr;
-  for (i=2; i<lx; i++)
+  long i, l;
+  if (exact) return !signe(r);
+  l = minss(lg(x), lg(r));
+  for (i = 2; i < l; i++)
     if (!approx_0(gel(r,i), gel(x,i))) return 0;
   return 1;
 }
