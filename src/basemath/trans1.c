@@ -61,16 +61,14 @@ abpq_init(struct abpq *A, long n)
 }
 static GEN
 mulii3(GEN a, GEN b, GEN c) { return mulii(mulii(a,b),c); }
-static GEN
-mulii4(GEN a, GEN b, GEN c, GEN d) { return mulii(mulii(a,b),mulii(c,d)); }
 
-/* T_{n1,n1+1}, given P = p[n1]p[n1+1] */
+/* T_{n1,n1+1} */
 static GEN
-T2(struct abpq *A, long n1, GEN P)
+T2(struct abpq *A, long n1)
 {
-  GEN u1 = mulii4(A->a[n1], A->p[n1], A->b[n1+1], A->q[n1+1]);
-  GEN u2 = mulii3(A->b[n1],A->a[n1+1], P);
-  return addii(u1, u2);
+  GEN u = mulii3(A->a[n1], A->b[n1+1], A->q[n1+1]);
+  GEN v = mulii3(A->b[n1], A->a[n1+1], A->p[n1+1]);
+  return mulii(A->p[n1], addii(u, v));
 }
 
 /* assume n2 > n1. Compute sum_{n1 <= n < n2} a/b(n) p/q(n1)... p/q(n) */
@@ -83,7 +81,7 @@ abpq_sum(struct abpq_res *r, long n1, long n2, struct abpq *A)
   long n;
   switch(n2 - n1)
   {
-    GEN b, p, q;
+    GEN b, q;
     case 1:
       r->P = A->p[n1];
       r->Q = A->q[n1];
@@ -95,19 +93,18 @@ abpq_sum(struct abpq_res *r, long n1, long n2, struct abpq *A)
       r->Q = mulii(A->q[n1], A->q[n1+1]);
       r->B = mulii(A->b[n1], A->b[n1+1]);
       av = avma;
-      r->T = gerepileuptoint(av, T2(A, n1, r->P));
+      r->T = gerepileuptoint(av, T2(A, n1));
       return;
 
     case 3:
-      p = mulii(A->p[n1+1], A->p[n1+2]);
       q = mulii(A->q[n1+1], A->q[n1+2]);
       b = mulii(A->b[n1+1], A->b[n1+2]);
-      r->P = mulii(A->p[n1], p);
+      r->P = mulii3(A->p[n1], A->p[n1+1], A->p[n1+2]);
       r->Q = mulii(A->q[n1], q);
       r->B = mulii(A->b[n1], b);
       av = avma;
       u1 = mulii3(b, q, A->a[n1]);
-      u2 = mulii(A->b[n1], T2(A, n1+1, p));
+      u2 = mulii(A->b[n1], T2(A, n1+1));
       r->T = gerepileuptoint(av, mulii(A->p[n1], addii(u1, u2)));
       return;
   }
