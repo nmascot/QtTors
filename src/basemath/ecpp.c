@@ -1339,7 +1339,7 @@ ecpp0(GEN C, long stopat)
   for (i = 1; i <= tunelen && ecpp_tune[i-1][3]; i++)
     gel(tune,i) = mkvecsmall4(ecpp_tune[i-1][0], ecpp_tune[i-1][1],
                               ecpp_tune[i-1][2], ecpp_tune[i-1][3]);
-  for (; i <= tunelen; i++) gel(tune,i) = mkvecsmall4(200*(i-1),6*i-4,30,500*i);
+  for (; i <= tunelen; i++) gel(tune,i) = mkvecsmall4(100*(i+20),4*i+42,30,500*i);
   for(;;)
   {
     GEN C2, param, x = gel(tune, tunelen);
