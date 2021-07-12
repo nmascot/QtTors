@@ -136,8 +136,10 @@ PE=substvec(P,[x,y],H)
 ellisoncurve(E,PE)
 
 \\ gcov
+for(i=1,8,setrand(i); ellrank(ellinit([1,0,0,-164,-1386])));
 mwrank(ellinit([-3888,-97200]))
 mwrank(ellinit([-2109,-37100]))
+for(i=1,4,setrand(i); ellrank(ellinit([0,-1,0,-30169,-2107466])));
 
 \\ check for old regressions
 mwrank(ellinit([-181^2,-1]))
@@ -145,6 +147,8 @@ mwrank(ellinit([1,0,1,-33,68]))
 mwrank(ellinit([0,1,0,-150908,-22509312]))
 E=ellinit([0,-7396/27]); ellglobalred(E); mwrank(E)
 mwrank(ellinit([0,-1,0,-260,-1530]))
+E=ellinit([0,0,0,-1,351298031616]); mwrank(E)
+mwrank(ellinit([-625,3125]))
 
 \\error
 checktwist([1,2],[1,3])

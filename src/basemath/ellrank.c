@@ -439,6 +439,443 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
 }
 
 /*******************************************************************/
+/*                      HYPERELL_LOCAL_SOLVE                       */
+/*******************************************************************/
+
+/* Based on
+T.A. Fisher and G.F. Sills
+Local solubility and height bounds for coverings of elliptic curves
+https://www.dpmms.cam.ac.uk/~taf1000/papers/htbounds.pdf
+*/
+
+static int
+FpX_issquare(GEN q, GEN p)
+{
+  GEN F = FpX_factor_squarefree(q,p);
+  long i, l = lg(F);
+  for (i = 1; i < l; i+=2)
+    if (degpol(gel(F,i)) > 0) return 0;
+  return 1;
+}
+
+static GEN
+ZX_affine(GEN P, GEN a, GEN b)
+{
+  return ZX_unscale(ZX_translate(P, b), a);
+}
+
+static GEN
+hyperell_red(GEN q, GEN p)
+{
+  long v = ZX_pval(q, p), w = odd(v);
+  if (v-w)
+    q = ZX_Z_divexact(q, powiu(p, v-w));
+  return q;
+}
+
+static GEN
+hyperell_reg_point(GEN q, GEN p)
+{
+  long i, l, v = ZX_pval(q, p), w = odd(v);
+  GEN qp, F;
+  if (v-w)
+    q = ZX_Z_divexact(q, powiu(p, v-w));
+  if (w==0)
+  {
+    GEN qr = FpX_red(q, p);
+    if (!FpX_issquare(qr,p) || Fp_issquare(leading_coeff(qr), p))
+      return mkvec2s(0,1);
+  }
+  qp = w ? ZX_Z_divexact(q, p): q;
+  F = FpX_roots(qp, p); l = lg(F);
+  for (i = 1; i < l; i++)
+  {
+    GEN r = gel(F,i), s = hyperell_reg_point(ZX_affine(q, p, r), p);
+    if (s)
+      retmkvec2(addii(r,mulii(gel(s,1),p)), mulii(gel(s,2),p));
+  }
+  return NULL;
+}
+
+static GEN
+hyperell_lift(GEN q, GEN x, GEN p)
+{
+  long e;
+  GEN qy2 = ZX_Z_sub(q, sqri(p));
+  for (e = 2; ; e<<=1)
+  {
+    pari_sp av = avma;
+    GEN z = ZpX_liftroot(qy2, x, p, e);
+    if (signe(z) == 0) z = powiu(p, e);
+    if (Zp_issquare(poleval(q, z), p)) return z;
+    set_avma(av);
+  }
+}
+
+static GEN
+affine_apply(GEN r, GEN x)
+{
+  return addii(mulii(gel(r,2),x), gel(r,1));
+}
+
+static GEN
+Qp_hyperell_solve_odd(GEN q, GEN p)
+{
+  GEN qi = RgX_recip_shallow(q);
+  GEN r = hyperell_reg_point(q,  p), qr, qrp;
+  GEN s = hyperell_reg_point(qi, p), qs, qsp;
+  if (!r && !s) return NULL;
+  if (r)
+  {
+    qr = hyperell_red(ZX_affine(q,  gel(r,2), gel(r,1)), p);
+    qrp = FpX_deriv(qr, p);
+  }
+  if (s)
+  {
+    qs = hyperell_red(ZX_affine(qi, gel(s,2), gel(s,1)), p);
+    qsp = FpX_deriv(qs, p);
+  }
+  while(1)
+  {
+    GEN x = randomi(p);
+    if (r)
+    {
+      GEN y2 = FpX_eval(qr, x, p);
+      if (Fp_issquare(y2,p))
+      {
+         if (signe(y2))
+           return affine_apply(r,x);
+         if (signe(FpX_eval(qrp, x, p)))
+         {
+           x = hyperell_lift(qr, x, p);
+           return affine_apply(r,x);
+         }
+      }
+    }
+    if (s)
+    {
+      GEN y2 = FpX_eval(qs, x, p);
+      if (Fp_issquare(y2,p))
+      {
+         if (signe(x)==0) x = p;
+         if (signe(y2))
+           return ginv(affine_apply(s,x));
+         if (signe(FpX_eval(qsp, x, p)))
+         {
+           GEN xl = hyperell_lift(qs, x, p);
+           return ginv(affine_apply(s,xl));
+         }
+      }
+    }
+  }
+}
+
+static GEN
+Q2_hyperell_lift(GEN p, GEN q, long x, long y)
+{
+  GEN T, h;
+  long e;
+  if (y==0) y = 2;
+  T = ZX_sub(p, ZX_Z_add(ZX_mulu(q, y), sqru(y)));
+  h = ZX_add(ZX_sqr(q), ZX_shifti(p, 2));
+  for (e = 3; ; e++)
+  {
+    pari_sp av = avma;
+    GEN r = ZpX_liftroot(T, utoi(x), gen_2, e);
+    if (signe(r) == 0) r = int2n(e);
+    if (Zp_issquare(poleval(h, r), gen_2)) return r;
+    set_avma(av);
+  }
+  return NULL;/*LCOV_EXCL_LINE*/
+}
+
+static GEN
+Q2_hyperell_regpoint(GEN P, GEN Q)
+{
+  long x;
+  GEN p = ZX_to_F2x(P), dp = F2x_deriv(p);
+  GEN q = ZX_to_F2x(Q), dq = F2x_deriv(q);
+
+  for (x = 0; x <= 1; x++)
+  {
+    long px = F2x_eval(p,x), qx = F2x_eval(q,x);
+    long dpx, dqx;
+    if (qx == 1)
+    {
+      if(px == 0) return x==0 ? gen_2: gen_1;
+      continue;
+    }
+    dpx = F2x_eval(dp,x);
+    dqx = F2x_eval(dq,x);
+    if (odd(dqx * px + dpx))
+      return Q2_hyperell_lift(P, Q, x, px);
+  }
+  return NULL;
+}
+
+static GEN
+Q2_hyperell_solve_affine(GEN p, GEN q)
+{
+  pari_sp av = avma;
+  GEN R, p4, q4;
+  long x;
+  while(1)
+  {
+    GEN pp, p0, p1;
+    long vp = ZX_lval(p, 2);
+    long vq = ZX_lval(q, 2);
+    long w = minss(vp>>1, vq);
+    p = ZX_shifti(p, -2*w);
+    q = ZX_shifti(q, -w);
+    if (ZX_lval(q,2)==0) break;
+    pp = RgX_splitting(p,2); p0 = gel(pp,1); p1 = gel(pp,2);
+    if (ZX_lval(p1,2)==0 || ZX_lval(p0,2)>=1) break;
+    p = ZX_sub(p, ZX_mul(p0, ZX_add(q, p0)));
+    q = ZX_add(q, ZX_shifti(p0, 1));
+  }
+  R = Q2_hyperell_regpoint(p, q);
+  if (R) return gerepileuptoint(av, R);
+  p4 = ZX_to_Flx(p,4);
+  q4 = ZX_to_Flx(q,4);
+  for (x = 0; x <= 1; x++)
+  {
+    ulong px = Flx_eval(p4, x, 4);
+    ulong qx = Flx_eval(q4, x, 4);
+    if (px == 0 || (1+qx+3*px)%4==0)
+    {
+      GEN p2 = ZX_affine(p, gen_2, utoi(x));
+      GEN q2 = ZX_affine(q, gen_2, utoi(x));
+      GEN S = Q2_hyperell_solve_affine(p2, q2);
+      if (S) return gerepileuptoint(av, addiu(shifti(S,1),x));
+    }
+  }
+  return gc_NULL(av);
+}
+
+static GEN
+Q2_hyperell_solve(GEN P)
+{
+  long v = varn(P);
+  GEN S = Q2_hyperell_solve_affine(P, pol_0(v));
+  if (!S) S = ginv(Q2_hyperell_solve_affine(RgX_recip(P), pol_0(v)));
+  return S;
+}
+
+static GEN
+hyperell_local_solve(GEN q, GEN p)
+{
+  if (equaliu(p,2))
+    return Q2_hyperell_solve(q);
+  return Qp_hyperell_solve_odd(q, p);
+}
+
+/*******************************************************************/
+/*                         BINARY QUARTIC                          */
+/*******************************************************************/
+
+static int
+Qp_issquare(GEN a, GEN p)
+{
+  if (typ(a)==t_INT) return Zp_issquare(a, p);
+  return Zp_issquare(mulii(gel(a,1), gel(a,2)), p);
+}
+
+static GEN
+quartic_IJ(GEN g)
+{
+  GEN a = gel(g, 6), b = gel(g, 5), c = gel(g, 4), d = gel(g, 3), e = gel(g, 2);
+  GEN ae = gmul(a,e), bd = gmul(b,d), c2 = gsqr(c), d2 = gsqr(d), b2 = gsqr(b);
+  GEN I = gadd(gsub(gmulsg(12, ae), gmulsg(3, bd)), c2);
+  GEN J = gsub(gsub(gmul(gsub(gadd(gmulsg(72, ae), gmulsg(9, bd)), gmulsg(2, c2)), c),
+            gmul(gmulsg(27, a), d2)), gmul(gmulsg(27, b2), e));
+  return mkvec2(I, J);
+}
+
+static GEN
+quartic_hessiandd(GEN g)
+{
+  GEN a = gel(g, 6), b = gel(g, 5), c = gel(g, 4), d = gel(g, 3), e = gel(g, 2);
+  GEN p4 = gsub(gmulsg(3, gsqr(b)), gmul(gmulsg(8, a), c));
+  GEN p3 = gsub(gmul(gmulsg(4, b), c), gmul(gmulsg(24, a), d));
+  GEN p2 = gsub(gsub(gmulsg(4, gsqr(c)), gmul(gmulsg(6, b), d)), gmul(gmulsg(48, a), e));
+  return deg2pol_shallow(gmulgs(p4,12), gmulgs(p3,6), gmulgs(p2,2), 1);
+}
+
+static GEN
+quartic_cubic(GEN g, long v)
+{
+  GEN a = gel(g, 6), b = gel(g, 5), c = gel(g, 4);
+  GEN a3 = gdivgs(a,3);
+  return deg1pol(gmul2n(a3,2), gsub(gsqr(b),gmul2n(gmul(a3,c),3)), v);
+}
+
+static GEN
+quartic_H(GEN g)
+{
+  GEN a = gel(g, 6), b = gel(g, 5), c = gel(g, 4);
+  GEN I = gel(quartic_IJ(g), 1);
+  GEN ddh = quartic_hessiandd(g);
+  GEN ddg = deg2pol_shallow(gmulgs(a,12), gmulgs(b,6), gmulgs(c,2), 1);
+  return deg2pol_shallow(stoi(-8), gmul2n(ddg,2), gadd(ddh,gmul2n(I,3)),0);
+}
+
+static GEN
+quarticinv_pol(GEN IJ)
+{
+  GEN I = gel(IJ,1), J = gel(IJ,2);
+  return mkpoln(4, gen_1, gen_0, gmulgs(I,-3), J);
+}
+
+static GEN
+quartic_disc(GEN q)
+{
+  GEN IJ = quartic_IJ(q), I = gel(IJ,1), J = gel(IJ,2);
+  return gsub(gmul2n(gpowgs(I, 3), 2), gsqr(J));
+}
+
+static GEN
+nfsqrt(GEN nf, GEN z)
+{
+  long v = fetch_var_higher();
+  GEN R = nfroots(nf, deg2pol_shallow(gen_m1, gen_0, z, v));
+  delete_var();
+  return lg(R)==1 ? NULL: gel(R,1);
+}
+
+static GEN
+vecnfsqrtmod(GEN x, GEN P)
+{ pari_APPLY_same(gmodulo(nfsqrt(gel(x,i),P),gel(x,i))) }
+
+static GEN
+enfsqrt(GEN T, GEN P)
+{
+  GEN F = gel(ZX_factor(T),1);
+  return liftpol(chinese1(vecnfsqrtmod(F,P)));
+}
+
+static int
+cassels_oo_solve(GEN q, GEN g, GEN a)
+{
+  pari_sp av = avma;
+  GEN R;
+  long i, lR;
+  if (signe(a) > 0)
+    return 1;
+  if (signe(leading_coeff(q)) > 0)
+    return gc_int(av, signe(leading_coeff(g)));
+  R = realroots(RgX_deriv(q), NULL, BIGDEFAULTPREC); lR = lg(R);
+  for (i=1; i<lR; i++)
+  {
+    GEN r = gel(R,i);
+    if (signe(poleval(q, r)) > 0)
+    {
+      long s = signe(poleval(g, r));
+      if (s) return gc_int(av, s); /* FIXME: use rational arithmetic */
+      pari_err_BUG("cassels_oo_solve, loss of accuracy");
+    }
+  }
+  pari_err_BUG("cassels_oo_solve, q not soluble over R");
+  return 0;/*LCOV_EXCL_LINE*/
+}
+
+static GEN
+cassels_Qp_solve(GEN q, GEN gam, GEN p)
+{
+  pari_sp av = avma;
+  GEN a = hyperell_local_solve(q, p);
+  GEN c = poleval(gam,a);
+  long e;
+  if (!gequal0(c)) return c;
+  for (e = 2; ; e++)
+  {
+    GEN b = gadd(a, powiu(p,e));
+    if (Qp_issquare(poleval(q, b), p))
+    {
+      c = poleval(gam, b);
+      if (!gequal0(c)) return gerepileupto(av,c);
+    }
+  }
+}
+
+static GEN
+to_ZX(GEN a, long v) { return typ(a)==t_INT? scalarpol_shallow(a,v): a; }
+
+/* Crude implementation of
+ * an algorithm by Tom Fisher
+ * On binary quartics and the Cassels-Tate pairing
+ * https://www.dpmms.cam.ac.uk/~taf1000/papers/bq-ctp.pdf
+ */
+
+/* FD = gel(absZ_factor(D),1) */
+
+static long
+casselspairingt(GEN q1, GEN q2, GEN q3, GEN FD)
+{
+  pari_sp av = avma;
+  GEN IJ = quartic_IJ(q1);
+  GEN T = quarticinv_pol(IJ);
+  GEN z1 = quartic_cubic(q1, 0);
+  GEN z2 = quartic_cubic(q2, 0);
+  GEN z3 = quartic_cubic(q3, 0);
+  GEN m = to_ZX(enfsqrt(T, QXQ_mul(QX_mul(z1,z2),z3,T)), 0);
+  GEN H = quartic_H(q1);
+  GEN Hm = RgXQ_mul(QXQ_div(m, z1, T), H, T);
+  GEN gam = degpol(Hm) < 2 ? pol_0(1): to_ZX(Q_remove_denom(gel(Hm,4), NULL),1);
+  GEN a = leading_coeff(q2);
+  GEN Fa = gel(absZ_factor(a),1);
+  GEN F = ZV_sort_uniq(shallowconcat1(mkvec3(mkcol4s(2,3,5,7), Fa, FD)));
+  long e = cassels_oo_solve(q1, gam, a) < 0 ;
+  long i, lF = lg(F);
+  for (i = 1; i< lF; i++)
+  {
+    GEN p = gel(F, i);
+    GEN c = cassels_Qp_solve(q1, gam, p);
+    if (hilbert(c, a, p) < 0) e = !e;
+  }
+  return gc_long(av,e);
+}
+
+static long
+casselspairing(GEN q1, GEN q2, GEN q3)
+{
+  pari_sp av = avma;
+  GEN D1 = absi(quartic_disc(q1));
+  GEN D2 = absi(quartic_disc(q2));
+  GEN D3 = absi(quartic_disc(q3));
+  GEN L = ZV_lcm(mkvec3(D1, D2, D3));
+  GEN F = gel(Z_factor(L),1);
+  if (!equalii(L,D1))
+    q1 = gmul(q1, sqrtnint(diviiexact(L, D1), 6));
+  if (!equalii(L,D2))
+    q2 = gmul(q2, sqrtnint(diviiexact(L, D2), 6));
+  if (!equalii(L,D3))
+    q3 = gmul(q3, sqrtnint(diviiexact(L, D3), 6));
+  return gc_long(av, casselspairingt(q1, q2, q3, F));
+}
+
+static GEN
+matcassels(GEN M, long prec)
+{
+  long i, j, l = lg(M);
+  GEN C = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++)
+    gel(C, i) = cgetg(l, t_VECSMALL);
+  for (i = 1; i < l; i++)
+  {
+    GEN Mii = gcoeff(M,i,i);
+    for (j = 1; j < i; j++)
+    {
+      GEN Mjj = gcoeff(M,j,j);
+      long p = isintzero(Mii) || isintzero(Mjj) ? 0
+             : casselspairing(Mii, Mjj, gcoeff(M,i,j));
+      coeff(C,i,j) = coeff(C,j,i) = p;
+    }
+    coeff(C,i,i) = 0;
+  }
+  return C;
+}
+
+/*******************************************************************/
 /*                         ELLRANK                                 */
 /*******************************************************************/
 /* This section is a port by Bill Allombert of ellQ.gp by Denis Simon
@@ -695,13 +1132,6 @@ kpmodsquares(GEN vnf, GEN z, GEN PP)
 static GEN
 veckpmodsquares(GEN x, GEN vnf, GEN PP)
 { pari_APPLY_type(t_MAT, kpmodsquares(vnf, gel(x, i), PP)) }
-
-static int
-Qp_issquare(GEN a, GEN p)
-{
-  if (typ(a)==t_INT) return Zp_issquare(a, p);
-  return Zp_issquare(mulii(gel(a,1), gel(a,2)), p);
-}
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
 /*    GENERIC FUNCTIONS FOR ELLIPTIC CURVES    \\ */
@@ -1261,7 +1691,7 @@ liftselmer_cover(GEN b, GEN expo, GEN LS2, GEN pol, GEN K)
 }
 
 static GEN
-liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry)
+liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry, GEN *pt_Q)
 {
   pari_sp av = avma, av2;
   long t, lim = ntry * LIM1;
@@ -1293,13 +1723,17 @@ liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry)
     if (den) q1 = ZX_Z_mul(q1, den);
     Q = hyperellreduce(q1, &R);
     if (!equali1(K)) Q = RgX_Rg_mul(Q, K);
+    if (pt_Q) *pt_Q = Q;
     if (DEBUGLEVEL>1) err_printf("  reduced quartic: Y^2 = %Ps\n", Q);
 
     xz = projratpointxz(Q, lim, &zz);
     if (!xz)
     {
       xz = projratpointxz2(Q, lim, &zz);
-      if (!xz) continue;
+      if (!xz)
+      {
+        if (pt_Q) return NULL; else continue;
+      }
     }
     P = RgM_RgC_mul(R, xz); x = gel(P,1); y = gel(P,2);
 
@@ -1310,6 +1744,7 @@ liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry)
     (void)issquareall(gdiv(poleval(pol, x), K), &y); /* K y^2 = pol(x) */
     P = mkvec2(x, y);
     if (DEBUGLEVEL) err_printf("Found point: %Ps\n", P);
+    if (pt_Q) *pt_Q = gen_0;
     return gerepilecopy(av, P);
   }
   return NULL;
@@ -1379,12 +1814,26 @@ get_row(GEN vnf, GEN K)
 }
 
 static GEN
+findunit(GEN q)
+{
+  GEN T = quarticinv_pol(quartic_IJ(q));
+  while(1)
+  {
+    pari_sp av = avma;
+    GEN z = quartic_cubic(q,0);
+    if (signe(QXQ_norm(z,T))) return q;
+    set_avma(av);
+    q = ZX_translate(RgX_recip(q), gen_1);
+  }
+}
+
+static GEN
 ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
            long effort, long flag, long prec)
 {
   GEN KP, pol, vnf, vpol, vcrt, sbase, LS2, factLS2, sqrtLS2, signs;
   GEN selmer, helpLS2, LS2chars, helpchars, newselmer, factdisc, badprimes;
-  GEN helplist, listpoints, etors2, p;
+  GEN helplist, listpoints, etors2, p, covers;
   long i, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u;
   forprime_t T;
 
@@ -1485,37 +1934,62 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     return P;
   }
   listpoints = vec_lengthen(help, dim); /* points on ell */
+  covers = zerovec(dim);
   for (i=1; i <= dim; i++)
   {
-    pari_sp btop = avma;
     GEN b, P, expo, vec = vecsmall_ei(dim, i);
     if (Flm_Flc_invimage(newselmer, vec, 2)) continue;
     expo = Flm_Flc_mul(selmer, vec, 2);
     b = liftselmerinit(expo, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
-    P = liftselmer(b, expo, sbase, LS2, pol, K, 1);
+    P = liftselmer(b, expo, sbase, LS2, pol, K, 1, &gel(covers,i));
     if (P)
     {
       gel(listpoints, ++nbpoints) = P; /* new point on ell */
       gel(newselmer, nbpoints) = vec;
       setlg(newselmer, nbpoints+1);
-    } else set_avma(btop);
+    }
   }
-  for (t=1, u=1; nbpoints < dim && effort > 0; t++)
+  if (nbpoints < dim)
   {
-    pari_sp btop = avma;
-    GEN expo, b, P, vec;
-    do vec = random_Flv(dim, 2);
-    while (zv_equal0(vec) || Flm_Flc_invimage(newselmer, vec, 2));
-    expo = Flm_Flc_mul(selmer, vec, 2);
-    b = liftselmerinit(expo, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
-    P = liftselmer(b, expo, sbase, LS2, pol, K, u);
-    if (P)
+    long i, j;
+    GEN M = cgetg(dim+1, t_MAT), selker;
+    for (i = 1; i <= dim; i++)
+      gel(M,i) = cgetg(dim+1, t_COL);
+    for (i = 1; i <= dim; i++)
+      for (j = 1; j <= i; j++)
+      {
+        GEN Q;
+        if (isintzero(gel(covers,i)))
+          Q = gen_0;
+        else if (i==j)
+          Q = findunit(gel(covers,i));
+        else
+        {
+          GEN e = Flv_add(gel(selmer,i), gel(selmer,j), 2);
+          GEN b = liftselmerinit(e, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
+          Q = findunit(gel(liftselmer_cover(b, e, LS2, pol, K),1));
+        }
+        gmael(M,j,i) = gmael(M,i,j) = Q;
+      }
+    selker = Flm_ker(matcassels(M, prec), 2);
+    dim = lg(selker)-1;
+    for (t=1, u=1; nbpoints < dim && effort > 0; t++)
     {
-      gel(listpoints, ++nbpoints) = P;
-      gel(newselmer, nbpoints) = vec;
-      setlg(newselmer, nbpoints+1);
-    } else set_avma(btop);
-    if (t == dim) { t = 0; u++; effort--; }
+      pari_sp btop = avma;
+      GEN expo, b, P, vec;
+      do vec = Flm_Flc_mul(selker,random_Flv(dim, 2), 2);
+      while (zv_equal0(vec) || Flm_Flc_invimage(newselmer, vec, 2));
+      expo = Flm_Flc_mul(selmer, vec, 2);
+      b = liftselmerinit(expo, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
+      P = liftselmer(b, expo, sbase, LS2, pol, K, u, NULL);
+      if (P)
+      {
+        gel(listpoints, ++nbpoints) = P;
+        gel(newselmer, nbpoints) = vec;
+        setlg(newselmer, nbpoints+1);
+      } else set_avma(btop);
+      if (t == dim) { t = 0; u++; effort--; }
+    }
   }
   setlg(listpoints, nbpoints+1);
   mwrank = nbpoints - tors2;

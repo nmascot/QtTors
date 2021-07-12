@@ -36,15 +36,16 @@ Doc: if $E$ is an elliptic curve over $\Q$,
  Note that the \kbd{ellrankinit} initialization is independent of $f$!
 
  \misctitle{Technical explanation:}
- The algorithm uses $2$-descent which has an intrinsic limitation:
- $R$ is equal to the sum of the rank of $E$ and of the $2$-rank of the
+ The algorithm, which computes the $2$-descent and the $2$-part of the Cassels
+ pairings has an intrinsic limitation:
+ $R$ is equal to the sum of the rank of $E$ and of the $4$-rank of the
  Tate-Shafarevich group (which is conjecturally even). In particular we can
- never have $r = R$ when the Tate-Shafarevic group has $2$-torsion.
+ never have $r = R$ when the Tate-Shafarevic group has $4$-torsion.
 
  When the conductor of $E$ is small, the BSD conjecture can be used
  to find the true rank:
  \bprog
- ? E=ellinit([-289,0]);
+ ? E=ellinit([-113^2,0]);
  ? ellrootno(E) \\ rank is even (parity conjecture)
  %2 = 1
  ? ellrank(E)
@@ -52,12 +53,12 @@ Doc: if $E$ is an elliptic curve over $\Q$,
  ? ellrank(E, 3) \\ try harder
  %4 = [0, 2, []] \\ no luck
  ? [r,L] = ellanalyticrank(E) \\ assume BSD
- %5 = [0, 2.5437...]
+ %5 = [0, 3.9465...]
  ? L / ellbsd(E) \\ analytic rank is 0, compute Sha
- %6 = 4.0000000000000000000000000000000000000
+ %6 = 16.0000000000000000000000000000000000000
  @eprog
  We find that the rank is $0$ and the cardinal of the Tate-Shafarevich group
- is $4$ (assuming BSD!).
+ is $16$ (assuming BSD!).
 
  When the rank is $1$ and the conductor is small, \kbd{ellheegner} can be used
  to find the point.
