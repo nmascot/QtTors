@@ -247,7 +247,7 @@ jbesselintern(GEN n, GEN z, long J, long prec)
       if (issmall(n,&ki)) n = utoi(labs(ki));
       y = gmul2n(gsqr(y),-2); if (J) y = gneg(y);
       v = valp(y);
-      if (v < 0) pari_err_DOMAIN(f, "valuation", "<", gen_0, y);
+      if (v < 0) pari_err_DOMAIN(f, "valuation", "<", gen_0, z);
       if (v == 0) pari_err_IMPL(stack_strcat(f, " around a!=0"));
       m = lg(y) - 2;
       k = m - (v >> 1);
@@ -341,7 +341,7 @@ jbesselh(GEN n, GEN z, long prec)
       av = avma; if (!(y = toser_i(z))) break;
       if (gequal0(y)) return gerepileupto(av, gpowgs(y,k));
       v = valp(y);
-      if (v < 0) pari_err_DOMAIN("besseljh","valuation", "<", gen_0, y);
+      if (v < 0) pari_err_DOMAIN("besseljh","valuation", "<", gen_0, z);
       t = lg(y)-2;
       if (v) y = sertoser(y, t + (2*k+1)*v);
       if (!k)
@@ -599,7 +599,7 @@ kbesselintern(GEN n, GEN z, long N, long prec)
         setlg(y, mv+2); return gerepilecopy(av, _kbessel1(k, y, m, prec));
       }
       if (!issmall(gmul2n(n,1),&ki))
-        pari_err_DOMAIN(f, "2n mod Z", "!=", gen_0,n);
+        pari_err_DOMAIN(f, "2n mod Z", "!=", gen_0, n);
       k = labs(ki); n = gmul2n(stoi(k),-1);
       fl2 = (k&3)==1;
       pm = jbesselintern(gneg(n), y, N, prec);
