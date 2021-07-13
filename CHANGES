@@ -117,7 +117,8 @@ BA  35- New GP function setdebug
     40- [libpari] prV_primes, ideals_by_norm, nfV_to_scalar_or_alg, quadpoly_i
     41- new bit in nfinit flag: don't perform LLL on nf.zk
 BA  42- new flag value in nfisincl
-    43- [libpari] hclassno6u_from_cache
+    43- [libpari] hclassno6u_from_cache, vandermondeinverseinit,
+        vandermondeinversinit
 BA  44- [libpari] RgXQ_minpoly
 
   Changed

@@ -9127,6 +9127,8 @@ attached to the entries of $v$ (matrix, or vector of vectors).
 the same length, returns the polynomial $T$ in variable $v$ such that
 $T(X[i]) = Y[i]$ for all $i$. The special case $X = \kbd{NULL}$
 corresponds to $X = [1,2,\dots,n]$, where $n$ is the length of $Y$.
+This is the function underlying \kbd{polint} for formal
+interpolation.
 
 \fun{GEN}{polintspec}{GEN X, GEN Y, GEN t, long n, long *pe}
 return $P(t)$ where $P$ is the Lagrange interpolation polynomial
@@ -9137,9 +9139,32 @@ contains an error estimate for the returned value (Neville's algorithm, see
 integration, this function is usually called on actual \kbd{GEN} vectors
 with offsets: $x + k$ and $y + k$ so as to interpolate on $x[k..k+n-1]$
 without having to use \kbd{vecslice}.
+This is the function underlying \kbd{polint} for numerical
+interpolation.
 
 \fun{GEN}{polint_i}{GEN X, GEN Y, GEN t, long *pe} as \kbd{polintspec},
 where $X$ and $Y$ are actual \kbd{GEN} vectors.
+
+\fun{GEN}{vandermondeinverse}{GEN r, GEN T, GEN d, GEN V} Given a vector $r$
+of $n$ scalars and the \typ{POL} $T = \prod_{i=1}^n (X - r_i)$,
+return $dM^{-1}$, where $M = (r_i^{j-1})_{1\leq i,j\leq n}$ is the van der
+Monde matrix;  $V$ is \kbd{NULL} or a vector containing the $T'(r_i)$, as
+returned by \kbd{vandermodeinverseinit}. The demonimator $d$ may be set to
+\kbd{NULL} (handled as $1$). If $c$ is the $k$-column of the result, it is
+essentially $d$ times  the $k$-th Lagrange interpolation polynomial: we have
+$\sum_j c_j r_i^{j-1} = d \delta_{i=k}$. This is the function underlying
+\kbd{RgV\_polint} when the base field is not $\Z/p\Z$: it uses $O(n^2)$
+scalar operations and is asymptotically slower than variants using
+multi-evaluation such as \kbd{FpV\_polint}; it is also accurate over inexact
+fields.
+
+\fun{GEN}{vandermondeinverseinit}{GEN r} Given a vector $r$ of $n$ scalars, let
+$T$ be the \typ{POL} $T = \prod_{j=1}^n (X - r_j)$. This function returns the
+$T'(r_i)$ computed stably via products of difference: the $i$-th entry is
+$T'(r_i) = \prod_{j\neq i} (r_i - r_j)$. It is asymptotically slow (uses
+$O(n^2)$ scalar operations, where multi-evaluation achieves quasi-linear
+running time) but allows accurate computation at low accuracies when $T$ has
+large complex coefficients.
 
 \subsubsec{Special shapes}
 

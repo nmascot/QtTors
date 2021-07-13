@@ -1171,20 +1171,19 @@ vandermondeinverseinit(GEN L)
 
 /* Compute the inverse of the van der Monde matrix of T multiplied by den */
 GEN
-vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
+vandermondeinverse(GEN L, GEN T, GEN den, GEN V)
 {
   pari_sp av = avma;
   long i, n = lg(L)-1;
   GEN M = cgetg(n+1, t_MAT);
 
-  if (!prep) prep = vandermondeinverseinit(L);
+  if (!V) V = vandermondeinverseinit(L);
   if (den && equali1(den)) den = NULL;
   for (i = 1; i <= n; i++)
   {
-    GEN d = gel(prep,i);
-    GEN P = RgX_Rg_mul(RgX_div_by_X_x(T, gel(L,i), NULL),
-                       den? gdiv(den,d): ginv(d));
-    gel(M,i) = RgX_to_RgC(P,n);
+    GEN d = gel(V,i), P = RgX_Rg_mul(RgX_div_by_X_x(T, gel(L,i), NULL),
+                                     den? gdiv(den,d): ginv(d));
+    gel(M,i) = RgX_to_RgC(P, n);
   }
   return gerepilecopy(av, M);
 }
@@ -1217,7 +1216,7 @@ RgV_polint(GEN X, GEN Y, long v)
     GEN T, dP;
     if (gequal0(gel(Y,i))) continue;
     T = RgX_div_by_X_x(Q, gel(X,i), NULL);
-    dP = RgX_Rg_mul(T, gmul(gel(Y,i), ginv(gel(L,i))));
+    dP = RgX_Rg_mul(T, gdiv(gel(Y,i), gel(L,i)));
     P = P? RgX_add(P, dP): dP;
     if (gc_needed(av,2))
     {
