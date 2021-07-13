@@ -13450,6 +13450,10 @@ converts $x$ to a suitable type:
 Then evaluates the function at \typ{VEC}, \typ{COL}, \typ{MAT} arguments
 coefficientwise.
 
+\fun{GEN}{trans_evalgen}{const char *fun, void *E, GEN (*f)(void*,GEN,long), GEN x, long prec}, general variant evaluating $f(E, x, \var{prec})$, where the
+function prototype allows to wrap an arbitrary context given by the argument
+$E$.
+
 \subsec{Modular functions}
 
 \fun{GEN}{cxredsl2}{GEN z, GEN *g} given $t$ a \typ{COMPLEX} belonging to the
