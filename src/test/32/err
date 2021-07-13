@@ -188,13 +188,13 @@
   *** besseljh: domain error in besseljh: valuation < 0
   ***   at top-level: besselk(2,1/x)
   ***                 ^--------------
-  *** besselk: domain error in _kbessel1: valuation < 0
+  *** besselk: domain error in besselk: valuation < 0
   ***   at top-level: besselk(1/3,O(x))
   ***                 ^-----------------
   *** besselk: domain error in besselk: 2n mod Z != 0
   ***   at top-level: besseln(2,1/x)
   ***                 ^--------------
-  *** besseln: domain error in _kbessel1: valuation < 0
+  *** besseln: domain error in besseln: valuation < 0
   ***   at top-level: besseln(1/3,O(x))
   ***                 ^-----------------
   *** besseln: domain error in besseln: 2n mod Z != 0
@@ -650,4 +650,4 @@ INFINITY
   ***                                   ^-
   ***   incorrect value for plothsizes: [2,
   ***                                      ^
-Total time spent: 10
+Total time spent: 9

@@ -850,12 +850,12 @@ error("forbidden multiplication t_REAL * t_STR.")
 error("forbidden multiplication t_REAL * t_STR.")
 error("incorrect type in gexpo (t_STR).")
 error("incorrect type in isint (t_STR).")
-error("sorry, p-adic jbessel function is not yet implemented.")
-error("sorry, p-adic jbessel function is not yet implemented.")
+error("sorry, p-adic besseli is not yet implemented.")
+error("sorry, p-adic besselj is not yet implemented.")
 error("sorry, p-adic besselk is not yet implemented.")
 error("sorry, p-adic besseln is not yet implemented.")
-error("incorrect type in jbessel (t_STR).")
-error("incorrect type in jbessel (t_STR).")
+error("incorrect type in besseli (t_STR).")
+error("incorrect type in besselj (t_STR).")
 error("incorrect type in besselk (t_STR).")
 error("incorrect type in besseln (t_STR).")
   ***   at top-level: besseljzero(0,-1)
@@ -864,4 +864,4 @@ error("incorrect type in besseln (t_STR).")
   ***   at top-level: besselyzero(0,-1)
   ***                 ^-----------------
   *** besselyzero: domain error in besselzero: n <= 0
-Total time spent: 21
+Total time spent: 27
