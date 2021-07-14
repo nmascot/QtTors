@@ -607,7 +607,7 @@ Zp_issquare(GEN a, GEN p)
   long v;
   GEN ap;
 
-  if (!signe(a) || gequal1(a)) return 1;
+  if (!signe(a) || equali1(a)) return 1;
   v = Z_pvalrem(a, p, &ap);
   if (v&1) return 0;
   return absequaliu(p, 2)? umodiu(ap, 8) == 1
