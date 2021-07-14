@@ -28,51 +28,37 @@ static long
 lemma6(GEN T, GEN p, long nu, GEN x)
 {
   long la, mu;
-  pari_sp av = avma;
-  GEN gpx, gx = ZX_Z_eval(T, x);
+  GEN y = ZX_Z_eval(T, x);
 
-  if (Zp_issquare(gx, p)) return gc_long(av,1);
-
-  la = Z_pval(gx, p);
-  gpx = ZX_Z_eval(ZX_deriv(T), x);
-  mu = signe(gpx)? Z_pval(gpx,p)
-                 : la+nu+1; /* mu = +oo */
-  set_avma(av);
-  if (la > mu<<1) return 1;
-  if (la >= nu<<1 && mu >= nu) return 0;
-  return -1;
+  if (Zp_issquare(y, p)) return 1;
+  la = Z_pval(y, p); y = ZX_Z_eval(ZX_deriv(T), x);
+  if (!signe(y)) return la >= (nu<<1)? 0: -1;
+  mu = Z_pval(y,p); if (la > (mu<<1)) return 1;
+  return (la >= (nu<<1) && mu >= nu)? 0: -1;
+}
+static long
+lemma7_aux(long nu, long la, long r)
+{
+  long nu2 = nu << 1;
+  return (la >= nu2 || (la == nu2 - 2 && r == 1))? 0: -1;
 }
 /* p = 2, T ZX, x t_INT: return 1 = yes, -1 = no, 0 = inconclusive */
 static long
 lemma7(GEN T, long nu, GEN x)
 {
-  long odd4, la, mu;
-  pari_sp av = avma;
-  GEN gpx, oddgx, gx = ZX_Z_eval(T, x);
+  long r, la, mu;
+  GEN y = ZX_Z_eval(T, x);
 
-  if (Zp_issquare(gx,gen_2)) return 1;
-
-  gpx = ZX_Z_eval(ZX_deriv(T), x);
-  la = Z_lvalrem(gx, 2, &oddgx);
-  odd4 = umodiu(oddgx,4); set_avma(av);
-
-  mu = vali(gpx);
-  if (mu < 0) mu = la+nu+1; /* mu = +oo */
-
-  if (la > mu<<1) return 1;
-  if (nu > mu)
-  {
-    long mnl = mu+nu-la;
-    if (odd(la)) return -1;
-    if (mnl==1) return 1;
-    if (mnl==2 && odd4==1) return 1;
-  }
-  else
-  {
-    long nu2 = nu << 1;
-    if (la >= nu2) return 0;
-    if (la == nu2 - 2 && odd4==1) return 0;
-  }
+  if (!signe(y)) return 1;
+  la = Z_lvalrem(y, 2, &y);
+  r = Mod8(y); if (!odd(la) && r == 1) return 1;
+  r &= 3; /* T(x) / 2^oo mod 4 */
+  y = ZX_Z_eval(ZX_deriv(T), x);
+  if (!signe(y)) return lemma7_aux(nu, la, r);
+  mu = vali(y); if (la > mu<<1) return 1;
+  if (nu <= mu) return lemma7_aux(nu, la, r);
+  /* la <= 2mu, mu < nu */
+  if (!odd(la) && mu + nu - la <= (r == 1? 2: 1)) return 1;
   return -1;
 }
 
@@ -85,6 +71,7 @@ zpsol(GEN T, GEN p, long nu, GEN pnu, GEN x0)
   GEN x, pnup;
 
   res = absequaliu(p,2)? lemma7(T,nu,x0): lemma6(T,p,nu,x0);
+  set_avma(av);
   if (res== 1) return 1;
   if (res==-1) return 0;
   x = x0; pnup = mulii(pnu,p);
@@ -192,19 +179,14 @@ psquare2nf(GEN nf, GEN x, GEN pr, GEN sprk)
 static long
 lemma6nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN modpr)
 {
-  pari_sp av = avma;
   long la, mu;
-  GEN gpx, gx = nfpoleval(nf, T, x);
+  GEN y = nfpoleval(nf, T, x);
 
-  if (psquarenf(nf,gx,pr,modpr)) return 1;
-
-  la = nfval(nf,gx,pr);
-  gpx = nfpoleval(nf, RgX_deriv(T), x);
-  mu = gequal0(gpx)? la+nu+1 /* +oo */: nfval(nf,gpx,pr);
-  set_avma(av);
-  if (la > (mu<<1)) return 1;
-  if (la >= (nu<<1) && mu >= nu) return 0;
-  return -1;
+  if (psquarenf(nf,y,pr,modpr)) return 1;
+  la = nfval(nf, y, pr); y = nfpoleval(nf, RgX_deriv(T), x);
+  if (gequal0(y)) return la >= (nu<<1)? 0: -1;
+  mu = nfval(nf, y, pr); if (la > (mu<<1)) return 1;
+  return (la >= (nu<<1) && mu >= nu)? 0: -1;
 }
 /* pr above 2 */
 static long
