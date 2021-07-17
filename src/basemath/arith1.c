@@ -610,8 +610,8 @@ Zp_issquare(GEN a, GEN p)
   if (!signe(a) || equali1(a)) return 1;
   v = Z_pvalrem(a, p, &ap);
   if (v&1) return 0;
-  return absequaliu(p, 2)? umodiu(ap, 8) == 1
-                      : kronecker(ap,p) == 1;
+  return absequaliu(p, 2)? Mod8(ap) == 1
+                         : kronecker(ap,p) == 1;
 }
 
 static long
