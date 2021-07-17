@@ -266,8 +266,9 @@ of $\Z_K^*$.
 $\Z_K^*$, i.e.~the number of roots of unity in $K$.
 
 \fun{GEN}{bnf_get_sunits}{GEN bnf} allows access to the algebraic data
-stored by \kbd{bnfinit(,1)}. It returns \kbd{NULL} unless the \kbd{bnf}
-was initialized by \kbd{bnfinit(,1)}, else a vector $[X,U,E,\kbd{lim}]$ where
+stored by \kbd{bnfinit(,1)}. The function returns \kbd{NULL} unless the
+\kbd{bnf} was initialized by \kbd{bnfinit(,1)}, else a vector
+$[X,U,E,\kbd{lim}]$ where
 
 \item $X$ is a vector of rational primes and algebraic integers all of whose
 prime divisors have norm less than \kbd{lim},
@@ -1277,7 +1278,7 @@ $\goth{p} / p$ and $F$ in $\Z$ divisible exactly by $p$, return an
 $F$-uniformizer for \kbd{pr}, i.e. a $t$ in $\Z_K$ such that $v_{\goth{p}}(t)
 = 1$ and $(t, F/\goth{p}) = 1$. Not \kbd{gerepile}-safe.
 
-\subsec{Decomposition group}
+\subsec{Decomposition groups}
 
 \fun{GEN}{idealramfrobenius}{GEN nf, GEN gal, GEN pr, GEN ram}
 Let $K$ be the number field defined by $nf$ and assume $K/\Q$ be a
