@@ -3503,11 +3503,11 @@ numroots3(long a, long b, long c, long p, long *mult)
 {
   if (p == 2)
   {
-    if ((c + a * b) & 1) return 3;
-    *mult = b; return (a + b) & 1 ? 2 : 1;
+    if (odd(c + a * b)) return 3;
+    *mult = b; return odd(a + b)? 2: 1;
   }
   /* p = 3 */
-  if (!a) { *mult = -c; return b ? 3 : 1; }
+  if (!a) { *mult = -c; return b? 3: 1; }
   *mult = a * b;
   if (b == 2)
     return (a + c) == 3 ? 2 : 3;
@@ -3519,7 +3519,7 @@ numroots3(long a, long b, long c, long p, long *mult)
 static long
 numroots2(long a, long b, long c, long p, long *mult)
 {
-  if (p == 2) { *mult = c; return b & 1 ? 2 : 1; }
+  if (p == 2) { *mult = c; return odd(b)? 2: 1; }
   /* p = 3 */
   *mult = a * b; return (b * b - a * c) % 3 ? 2 : 1;
 }
@@ -3543,16 +3543,16 @@ localred_23(GEN e, long p)
   }
   /* model is minimal */
   nuD = Z_lval(ell_get_disc(e), (ulong)p);
+  if (!nuD) return localred_result(0, 1, 1, v); /* I0 */
   if (p == 2) { p2 = 4; p3 = 8;  p4 = 16; p5 = 32; }
   else        { p2 = 9; p3 = 27; p4 = 81; p5 =243; }
 
-  if (!nuD) return localred_result(0, 1, 1, v); /* I0 */
   if (umodiu(ell_get_b2(e), p)) /* p \nmid b2 */
   {
     if (umodiu(negi(ell_get_c6(e)), p == 2 ? 8 : 3) == 1)
       c = nuD;
     else
-      c = 2 - (nuD & 1);
+      c = odd(nuD)? 1: 2;
     return localred_result(1, 4 + nuD, c, v); /* Inu */
   }
   if (p == 2)
@@ -3629,7 +3629,7 @@ localred_23(GEN e, long p)
         p2k = mului(p, p2k); nu++;
       }
       if (p == 2)
-        c = 4 - 2 * (ga & 1);
+        c = odd(ga)? 2: 4;
       else
         c = 3 + kross(be * be - al * ga, 3);
       return localred_result(nuD - 4 - nu, -4 - nu, c, v); /* Inu* */
@@ -5557,8 +5557,8 @@ neron_3(long v4, long v6, long vD, long kod)
   if (labs(kod) > 4) return 1;
   switch(kod)
   {
-    case -1: case 1: return v4&1 ? 2 : 1;
-    case -3: case 3: return (2*v6>vD+3) ? 2 : 1;
+    case -1: case 1: return odd(v4)? 2: 1;
+    case -3: case 3: return (2*v6>vD+3)? 2: 1;
     case -4: case 2:
       switch (vD%6)
       {
@@ -5756,7 +5756,7 @@ ellrootno_p(GEN e, GEN p)
   }
   if (nuj) return krosi(-1,p);
   ep = 12 / ugcd(12, nu);
-  if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
+  if (ep==4) z = 2; else z = odd(ep)? 3: 1;
   return krosi(-z, p);
 }
 
