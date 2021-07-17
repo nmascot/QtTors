@@ -2165,7 +2165,18 @@ primitive $w$-th root of unity.
 
 \fun{GEN}{nfcyclotomicunits}{GEN nf, GEN zu} where \kbd{zu} is as output by
 \kbd{nfrootsof1(nf)}, return the vector of the cyclotomic units in \kbd{nf}
-expressed over the integral basis.
+expressed over the integral basis. If $\zeta = \zeta_n$ belongs to the base
+field ($n$ maximal), this function returns
+
+\item (when $n$ is not a prime power) the $\zeta^a - 1$, for all $1 \leq a <
+n/2$ such that $n/(a,n)$ is not a prime power and $a$ is a strict divisor of
+$n$.
+
+\item (all $n$) for $p$ prime, $v_p(n) = k > 0$, the $(z^a - 1)/(z - 1)$,  where
+$z = \zeta^{n/p^k}$, for all $1 < a \leq (p^k-1) / 2$, $(p, a) = 1$.
+
+These are independent modulo torsion if $n$ is a prime power, but not
+necessarily so otherwise.
 
 \subsec{Obsolete routines}
 
