@@ -2157,7 +2157,7 @@ internally a conditional \kbd{nf} attached to $K$ , whose \kbd{nf.zk} may not
 define the maximal order $\Z_K$ (see \kbd{nfroots}); \kbd{*pT} is then
 replaced by the conditional \kbd{nf} to avoid losing that information.
 
-\subsec{Cyclotomic units}
+\subsec{Units}
 
 \fun{GEN}{nfrootsof1}{GEN nf} returns a two-component vector $[w,z]$ where $w$
 is the number of roots of unity in the number field \var{nf}, and $z$ is a
@@ -2177,6 +2177,8 @@ $z = \zeta^{n/p^k}$, for all $1 < a \leq (p^k-1) / 2$, $(p, a) = 1$.
 
 These are independent modulo torsion if $n$ is a prime power, but not
 necessarily so otherwise.
+
+\fun{GEN}{sunits_mod_units}{GEN bnf, GEN S} return a list of independent generators for $U_S(K)/U(K)$.
 
 \subsec{Obsolete routines}
 
