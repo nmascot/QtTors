@@ -1064,7 +1064,12 @@ compilecall(long n, int mode, entree *ep)
       compile_err("unexpected ';'", tree[x].str+tree[x].len);
     else if (f==Findarg)
     {
-      compilenode(tree[arg[j]].x, Ggen,FLnocopy);
+      long a = tree[arg[j]].x;
+      entree *ep = getlvalue(a);
+      long vn = getmvar(ep);
+      if (vn)
+        op_push(OCcowvarlex, vn, a);
+      compilenode(a, Ggen,FLnocopy);
       op_push(OClock,0,n);
     } else if (tx==CSTmember)
     {
@@ -1509,10 +1514,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
             entree *ep = getlvalue(a);
             long vn = getmvar(ep);
             if (vn)
-            {
-              access_push(vn);
               op_push(OCcowvarlex, vn, a);
-            }
             else op_push(OCcowvardyn, (long)ep, a);
             compilenode(a, Ggen,FLnocopy);
             j++;

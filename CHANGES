@@ -70,6 +70,8 @@ BA  54- List([1])[1..0]==List() -> 0 instead of 1
     57- lfuntheta inaccurate in large weight [#2305]
     58- GC error in ZX_Uspensky(, flag = 0)
 BA  59- ellisomat(ell/nf not integral) -> oo-loop or wrong result
+BA  60- (f(~v)=v[1]=1);(g(v) = f(~v)); my(V=[0]);g(V);V -> [1] instead of [0]
+        due to missing copy on write [#2304]
 
   Added
 HC   1- new GP function eulerreal
