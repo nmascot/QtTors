@@ -7,3 +7,6 @@ Help: ellE(k): Complete elliptic integral of the second kind for the
 Doc: Complete elliptic integral of the second kind
  $$E(k)=\int_0^{\pi/2}(1-k^2\sin(t)^2)^{1/2}\,dt$$ for the
  complex parameter $k$ using the agm.
+
+ In particular, the perimeter of an ellipse of semi-major and semi-minor axes
+ $a$ and $b$ is given by \kbd{4*a*ellE(sqrt(1-(b/a)^2))}.

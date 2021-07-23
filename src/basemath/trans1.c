@@ -2859,6 +2859,13 @@ magm_gap(GEN a, GEN b, long L)
   return !gequal0(d) && gexpo(d) - gexpo(b) >= L;
 }
 
+/*
+http://www.ams.org/notices/201208/rtx120801094p.pdf
+An Eloquent Formula for the Perimeter of an Ellipse
+Semjon Adlaj
+Notices of the AMS
+*/
+
 static GEN
 magm(GEN a, GEN b, long prec)
 {
