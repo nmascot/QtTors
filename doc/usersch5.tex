@@ -13473,6 +13473,11 @@ reduced modulo $\text{SL}_2(\Z)$. Not \kbd{gerepile}-clean but suitable for
 
 \fun{GEN}{Qp_exp}{GEN x} shortcut for \kbd{gexp(x, /*ignored*/prec)}
 
+\fun{long}{Qp_exp_prec}{GEN x} number of terms to sum in the $\exp(x)$
+series to reach the same $p$-adic accuracy as $x\neq 0$. If $n = p-1$, $e =
+v_p(x)$ and $b = \kbd{precp}(x)$, this is the ceiling of $nb / (ne - 1)$.
+Return $-1$ if the series does not converge ($ne \leq 1$).
+
 \fun{GEN}{Qp_gamma}{GEN x} shortcut for \kbd{ggamma(x, /*ignored*/prec)}
 
 \fun{GEN}{Qp_log}{GEN x} shortcut for \kbd{glog(x, /*ignored*/prec)}

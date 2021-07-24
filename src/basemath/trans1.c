@@ -2365,25 +2365,27 @@ mpexp(GEN x)
   return gc_const((pari_sp)z, z);
 }
 
+/* x != 0; k = ceil(tn / (te-1)), t = p-1 */
 long
 Qp_exp_prec(GEN x)
 {
-  long k, e = valp(x), n = e + precp(x);
-  GEN p = gel(x,2);
-  int is2 = absequaliu(p,2);
-  if (e < 1 || (e == 1 && is2)) return -1;
-  if (is2)
-  {
-    n--; e--; k = n/e;
-    if (n%e == 0) k--;
-  }
-  else
-  { /* e > 0, n > 0 */
-    GEN r, t = subiu(p, 1);
-    k = itos(dvmdii(subiu(muliu(t,n), 1), subiu(muliu(t,e), 1), &r));
-    if (!signe(r)) k--;
-  }
-  return k;
+  long e = valp(x), n = precp(x);
+  ulong a, b, q, r, p, t;
+
+  if (e < 1) return -1;
+  if (e > n) return 1;
+  p = itos_or_0(gel(x,2));
+  if (!p) return n / e + 1;
+  if (p == 2) return e < 2? -1: ceildivuu(n, e - 1);
+  /* n >= e > 0, n = qe + r */
+  /* tn = q (te-1) + rt + q = (q+1)(te-1) - t(e-r) + q + 1 */
+  t = p - 1;
+  if (e == 1) return n + ceildivuu(n, t - 1);
+  q = n / e;
+  r = n % e; /* k = q + 1 if rt + q < te */
+  a = umuluu_or_0(e - r, t); if (!a || a > q) return q + 1;
+  b = umuluu_or_0(e, t); if (!b) return q + 2;
+  return q + 1 + ceildivuu(q + 1 - a, b - 1);
 }
 
 static GEN
