@@ -387,11 +387,11 @@ static GEN
 lambertp(GEN x)
 {
   pari_sp av = avma;
-  GEN y = gcopy(x);
   long k;
+  GEN y;
 
-  if (gequal0(x)) return y;
-  if (!valp(x)) { setvalp(y, 1); x = y; }
+  if (gequal0(x)) return gcopy(x);
+  if (!valp(x)) { x = leafcopy(x); setvalp(x, 1); }
   k = Qp_exp_prec(x);
   if (k < 0) return NULL;
   y = gpowgs(cvstop2(k, x), k - 1);
