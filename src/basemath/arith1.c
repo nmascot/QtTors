@@ -5656,31 +5656,31 @@ update_g1(GEN *pg1, GEN *pd1, GEN *pfad1, GEN f, GEN o, GEN fao)
 /* Write x = Df^2, where D = fundamental discriminant,
  * P^E = factorisation of conductor f, with E[i] >= 0 */
 static void
-corediscfact(GEN x, long xmod4, GEN *ptD, GEN *ptP, GEN *ptE)
+corediscfact(GEN x, GEN *ptD, GEN *ptP, GEN *ptE)
 {
-  long s = signe(x), l, i;
   GEN fa = absZ_factor(x);
-  GEN d, P = gel(fa,1), E = gtovecsmall(gel(fa,2));
+  GEN P = gel(fa,1), E = gtovecsmall(gel(fa,2));
+  GEN d = signe(x) > 0? gen_1: gen_m1;
+  long l = lg(P), i;
 
-  l = lg(P); d = gen_1;
-  for (i=1; i<l; i++)
+  for (i = 1; i < l; i++)
   {
-    if (E[i] & 1) d = mulii(d, gel(P,i));
+    if (odd(E[i])) d = mulii(d, gel(P,i));
     E[i] >>= 1;
   }
-  if (!xmod4 && mod4(d) != ((s < 0)? 3: 1)) { d = shifti(d,2); E[1]--; }
-  *ptD = (s < 0)? negi(d): d;
+  if (Mod4(d) != 1) { d = shifti(d,2); E[1]--; }
+  *ptD = d;
   *ptP = P;
   *ptE = E;
 }
 
 static GEN
-conductor_part(GEN x, long xmod4, GEN *ptD, GEN *ptreg)
+conductor_part(GEN x, GEN *ptD, GEN *ptreg)
 {
   long l, i, s = signe(x);
   GEN E, H, D, P, reg;
 
-  corediscfact(x, xmod4, &D, &P, &E);
+  corediscfact(x, &D, &P, &E);
   H = gen_1; l = lg(P);
   /* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] = \prod_{p^e||f} p^(e-1) [ p - (D/p) ] */
   for (i=1; i<l; i++)
@@ -5836,7 +5836,7 @@ classno(GEN x)
   check_quaddisc(x, &s, &k, "classno");
   if (abscmpiu(x,12) <= 0) return gen_1;
 
-  Hf = conductor_part(x, k, &D, NULL);
+  Hf = conductor_part(x, &D, NULL);
   if (abscmpiu(D,12) <= 0) return gerepilecopy(av, Hf);
   forms =  get_forms(D, &L);
   r2 = two_rank(D);
@@ -5921,7 +5921,7 @@ quadclassno(GEN x)
   long s, r;
   check_quaddisc(x, &s, &r, "quadclassno");
   if (s < 0 && abscmpiu(x,12) <= 0) return gen_1;
-  Hf = conductor_part(x, r, &D, NULL);
+  Hf = conductor_part(x, &D, NULL);
   return gerepileuptoint(av, mulii(Hf, gel(quadclassunit0(D,0,NULL,0),1)));
 }
 
@@ -5937,7 +5937,7 @@ classno2(GEN x)
   check_quaddisc(x, &s, &r, "classno2");
   if (s < 0 && abscmpiu(x,12) <= 0) return gen_1;
 
-  Hf = conductor_part(x, r, &D, &reg);
+  Hf = conductor_part(x, &D, &reg);
   if (s < 0 && abscmpiu(D,12) <= 0) return gerepilecopy(av, Hf); /* |D| < 12*/
 
   Pi = mppi(prec);
@@ -6014,7 +6014,7 @@ hclassno6_large(GEN x)
 
   x = negi(x);
   check_quaddisc(x, &s, &xmod4, "hclassno");
-  corediscfact(x, xmod4, &D, &P, &E);
+  corediscfact(x, &D, &P, &E);
   l = lg(P);
   if (l > 1 && lgefint(x) == 3)
   { /* F != 1, second chance */
