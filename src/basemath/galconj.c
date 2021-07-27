@@ -2921,7 +2921,7 @@ galois_find_totally_split(GEN P, GEN Q)
   return 0;
 }
 
-static GEN
+GEN
 galoisinitfromaut(GEN T, GEN aut, ulong l)
 {
   pari_sp ltop = avma;

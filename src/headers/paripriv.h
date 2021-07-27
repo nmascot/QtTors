@@ -836,6 +836,7 @@ void    init_modular_small(forprime_t *S);
 /* galconj.c */
 
 GEN     galoiscosets(GEN O, GEN perm);
+GEN     galoisinitfromaut(GEN T, GEN aut, ulong l);
 GEN     matrixnorm(GEN M, long prec);
 
 /* gen1.c */

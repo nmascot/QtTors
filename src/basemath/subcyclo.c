@@ -216,6 +216,40 @@ znstar_cosets(long n, long phi_n, GEN H)
   return cosets;
 }
 
+static GEN
+znstar_quotient(long n, long phi_n, GEN H, GEN R, ulong l)
+{
+  long i, j, k;
+  long c = 0;
+  long card   = znstar_order(H);
+  long index  = phi_n/card;
+  GEN  cosets = cgetg(index+1,t_VECSMALL);
+  GEN  mult  = cgetg(index+1, t_VEC);
+  GEN  bits   = zero_F2v(n);
+  GEN  vbits  = zero_F2m_copy(n,index);
+  for (k = 1; k <= index; k++)
+  {
+    for (c++ ; F2v_coeff(bits,c) || ugcd(c,n)!=1; c++);
+    cosets[k]=c;
+    znstar_coset_bits_inplace(n, H, gel(vbits,k), c);
+    F2v_add_inplace(bits, gel(vbits,k));
+  }
+
+  for (k = 1; k <= index; k++)
+  {
+    GEN v = cgetg(index+1, t_VECSMALL);
+    for (j = 1; j <= index; j++)
+    {
+      long s = Fl_mul(cosets[k],cosets[j],n);
+      for (i = 1; i <= index; i++)
+        if (F2v_coeff(gel(vbits,i),s)) break;
+      v[j] = R[i];
+    }
+    gel(mult,k) = v;
+  }
+  return Flv_Flm_polint(R, mult, l, 0);
+}
+
 /*************************************************************************/
 /**                                                                     **/
 /**                     znstar/HNF interface                            **/
@@ -351,6 +385,45 @@ polsubcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
     gel(V,i) = gerepileupto(av, s);
   }
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "polsubcyclo_cyclic");
+  return V;
+}
+
+struct _subcyclo_orbits_u
+{
+  GEN bab, gig;
+  ulong l;
+  ulong s;
+  long m;
+};
+
+static void
+_Fl_subcyclo_orbits(void *E, long k)
+{
+  struct _subcyclo_orbits_u *D = (struct _subcyclo_orbits_u *) E;
+  ulong l = D->l;
+  long q = k/D->m, r = k%D->m; /*k=m*q+r*/
+  ulong g = uel(D->bab,r+1), G = uel(D->gig,q+1);
+  D->s = Fl_add(D->s, Fl_mul(g, G, l), l);
+}
+
+/* Newton sums mod le. if le==NULL, works with complex instead */
+static GEN
+Fl_polsubcyclo_orbits(long n, GEN H, GEN O, ulong z, ulong l)
+{
+  long i, d = lg(O);
+  GEN V = cgetg(d,t_VECSMALL);
+  struct _subcyclo_orbits_u D;
+  long m = 1+usqrt(n);
+  D.l = l;
+  D.m = m;
+  D.bab = Fl_powers(z, m, l);
+  D.gig = Fl_powers(uel(D.bab,m+1), m-1, l);
+  for(i=1; i<d; i++)
+  {
+    D.s = 0;
+    znstar_coset_func(n, H, _Fl_subcyclo_orbits, (void *) &D, O[i]);
+    uel(V,i) = D.s;
+  }
   return V;
 }
 
@@ -566,7 +639,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   long i, card, phi_n, val,l, n, cnd, complex=1;
   pari_timer ti;
 
-  if (flag<0 || flag>2) pari_err_FLAG("galoissubcyclo");
+  if (flag<0 || flag>3) pari_err_FLAG("galoissubcyclo");
   if (v < 0) v = 0;
   if (!sg) sg = gen_1;
   switch(typ(N))
@@ -685,6 +758,26 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   T = FpV_roots_to_pol(L,le,v);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "roots_to_pol");
   T = FpX_center(T,le,shifti(le,-1));
+  if (flag==3)
+  {
+    GEN L2, aut;
+    if (Flx_is_squarefree(ZX_to_Flx(T, l),l))
+      L2 = ZV_to_Flv(L,l);
+    else
+    {
+      ulong z;
+      do
+      {
+        l+=n;
+      } while (!uisprime(l) || !Flx_is_squarefree(ZX_to_Flx(T, l),l));
+      z = rootsof1_Fl(n,l);
+      L2 = Fl_polsubcyclo_orbits(n,H,O,z,l);
+      if (DEBUGLEVEL >= 4)
+        err_printf("galoissubcyclo: switching to unramified prime %lu\n",l);
+    }
+    aut  = znstar_quotient(n, phi_n, H, L2, l);
+    return gerepileupto(ltop, galoisinitfromaut(T, aut, l));
+  }
   return gerepileupto(ltop, gscycloconductor(T,n,flag));
 }
 

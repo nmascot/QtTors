@@ -8,6 +8,7 @@ Help: galoissubcyclo(N,H,{fl=0},{v}): compute a polynomial (in variable v)
  by a generator, a set of generator given by a vector or a HNF matrix (see
  manual). If flag is 1, output only the conductor of the abelian extension.
  If flag is 2 output [pol,f] where pol is the polynomial and f the conductor.
+ If flag is 3 output galoisinit(pol).
 Doc: computes the subextension $L$ of $\Q(\zeta_n)$ fixed by the subgroup
  $H \subset (\Z/n\Z)^*$. By the Kronecker-Weber theorem, all abelian number
  fields can be generated in this way (uniquely if $n$ is taken to be minimal).
@@ -42,6 +43,8 @@ Doc: computes the subextension $L$ of $\Q(\zeta_n)$ fixed by the subgroup
 
  If $fl=2$, output $[pol, N]$, where $pol$ is the polynomial as output when
  $fl=0$ and $N$ the conductor as output when $fl=1$.
+
+ If $fl=3$; output \kbd{galoisinit(pol)}.
 
  The following function can be used to compute all subfields of
  $\Q(\zeta_n)$ (of exact degree \kbd{d}, if \kbd{d} is set):
