@@ -1896,13 +1896,13 @@ polclass_psum(
 }
 
 static GEN
-polclass_small_disc(long D, long inv, long xvar)
+polclass_small_disc(long D, long inv, long vx)
 {
-  if (D == -3) return pol_x(xvar);
+  if (D == -3) return pol_x(vx);
   if (D == -4) {
     switch (inv) {
-    case INV_J: return deg1pol(gen_1, stoi(-1728), xvar);
-    case INV_G2:return deg1pol(gen_1, stoi(-12), xvar);
+    case INV_J: return deg1pol(gen_1, stoi(-1728), vx);
+    case INV_G2:return deg1pol(gen_1, stoi(-12), vx);
     default: /* no other invariants for which we can calculate H_{-4}(X) */
       pari_err_BUG("polclass_small_disc");
     }
@@ -1911,7 +1911,7 @@ polclass_small_disc(long D, long inv, long xvar)
 }
 
 GEN
-polclass0(long D, long inv, long xvar, GEN *db)
+polclass0(long D, long inv, long vx, GEN *db)
 {
   pari_sp av = avma;
   GEN primes;
@@ -1925,7 +1925,7 @@ polclass0(long D, long inv, long xvar, GEN *db)
   static const long k = 2;
   static const double delta = 0.5;
 
-  if (D >= -4) return polclass_small_disc(D, inv, xvar);
+  if (D >= -4) return polclass_small_disc(D, inv, vx);
 
   (void) corediscs(D, &u);
   h = classno_wrapper(D);
@@ -2008,7 +2008,7 @@ polclass0(long D, long inv, long xvar, GEN *db)
     GEN v = gel(H, i), pol;
     ulong p = uel(plist, i);
     if (!p) { del++; continue; }
-    pol = Flv_roots_to_pol(v, p, xvar);
+    pol = Flv_roots_to_pol(v, p, vx);
     uel(plist, j) = p;
     gel(H, j++) = Flx_to_Flv(pol, lg(pol) - 2);
   }
@@ -2020,7 +2020,7 @@ polclass0(long D, long inv, long xvar, GEN *db)
   H = ncV_chinese_center(H, plist, &P);
   dbg_printf(1)("Result height: %.2f\n",
              dbllog2r(itor(gsupnorm(H, DEFAULTPREC), DEFAULTPREC)));
-  return gerepilecopy(av, RgV_to_RgX(H, xvar));
+  return gerepilecopy(av, RgV_to_RgX(H, vx));
 }
 
 void

@@ -5010,7 +5010,7 @@ GEN     residual_characteristic(GEN x);
 
 /* polclass.c */
 
-GEN     polclass(GEN D, long inv, long xvar);
+GEN     polclass(GEN D, long inv, long vx);
 
 /* polmodular.c */
 
@@ -5023,9 +5023,9 @@ int     modinv_good_disc(long inv, long D);
 int     modinv_good_prime(long inv, long p);
 int     modinv_is_Weber(long inv);
 int     modinv_is_double_eta(long inv);
-GEN     polmodular(long L, long inv, GEN x, long yvar, long compute_derivs);
+GEN     polmodular(long L, long inv, GEN x, long vy, long compute_derivs);
 GEN     polmodular_ZM(long L, long inv);
-GEN     polmodular_ZXX(long L, long inv, long xvar, long yvar);
+GEN     polmodular_ZXX(long L, long inv, long vx, long vy);
 
 /* prime.c */
 

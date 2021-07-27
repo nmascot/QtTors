@@ -885,7 +885,7 @@ GEN     vecperm_extendschreier(GEN C, GEN v, long n);
 
 /* polclass.c */
 
-GEN polclass0(long D, long inv, long xvar, GEN *db);
+GEN polclass0(long D, long inv, long vx, GEN *db);
 
 /* polmodular.c */
 
