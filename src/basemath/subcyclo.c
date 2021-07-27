@@ -490,7 +490,7 @@ galoiscyclo(long n, long v)
   GEN zn = znstar(stoi(n));
   long card = itos(gel(zn,1));
   GEN gen = vec_to_vecsmall(lift_shallow(gel(zn,3)));
-  GEN ord = gtovecsmall(gel(zn,2));
+  GEN ord = vec_to_vecsmall(gel(zn,2));
   GEN T = polcyclo(n,v);
   long d = degpol(T);
   GEN borneabs = powuu(2,d);

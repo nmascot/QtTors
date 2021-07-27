@@ -2066,7 +2066,8 @@ parse_embed(GEN ind, long r, const char *f)
   if (!ind) return identity_perm(r);
   switch(typ(ind))
   {
-    case t_INT: case t_VEC: case t_COL: ind = gtovecsmall(ind); break;
+    case t_INT: ind = mkvecsmall(itos(ind)); break;
+    case t_VEC: case t_COL: ind = vec_to_vecsmall(ind); break;
     case t_VECSMALL: break;
     default: pari_err_TYPE(f, ind);
   }

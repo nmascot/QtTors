@@ -5659,7 +5659,7 @@ static void
 corediscfact(GEN x, GEN *ptD, GEN *ptP, GEN *ptE)
 {
   GEN fa = absZ_factor(x);
-  GEN P = gel(fa,1), E = gtovecsmall(gel(fa,2));
+  GEN P = gel(fa,1), E = vec_to_vecsmall(gel(fa,2));
   GEN d = signe(x) > 0? gen_1: gen_m1;
   long l = lg(P), i;
 

@@ -459,7 +459,7 @@ cyc2elts_normal(GEN cyc, long maxord, GEN ORD)
   long i, n, o, N, j = 1;
   GEN z, vcoprime;
 
-  if (typ(cyc) != t_VECSMALL) cyc = gtovecsmall(cyc);
+  if (typ(cyc) != t_VECSMALL) cyc = vec_to_vecsmall(cyc);
   n = lg(cyc)-1;
   if (n == 0) return cgetg(1, t_VEC);
   N = zv_prod(cyc);
