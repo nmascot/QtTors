@@ -5677,8 +5677,8 @@ corediscfact(GEN x, GEN *ptD, GEN *ptP, GEN *ptE)
 static GEN
 conductor_part(GEN x, GEN *ptD, GEN *ptreg)
 {
-  long l, i, s = signe(x);
   GEN E, H, D, P, reg;
+  long l, i;
 
   corediscfact(x, &D, &P, &E);
   H = gen_1; l = lg(P);
@@ -5695,7 +5695,7 @@ conductor_part(GEN x, GEN *ptD, GEN *ptreg)
   }
 
   /* divide by [ O_K^* : O^* ] */
-  if (s < 0)
+  if (signe(x) < 0)
   {
     reg = NULL;
     switch(itou_or_0(D))
@@ -5932,7 +5932,7 @@ classno2(GEN x)
   pari_sp av = avma;
   const long prec = DEFAULTPREC;
   long n, i, r, s;
-  GEN p1, p2, S, p4, p5, p7, Hf, Pi, reg, logd, d, dr, D, half;
+  GEN p1, p2, S, p4, p5, p7, Hf, Pi, reg, logd, sqrtd, D, half;
 
   check_quaddisc(x, &s, &r, "classno2");
   if (s < 0 && abscmpiu(x,12) <= 0) return gen_1;
@@ -5941,9 +5941,9 @@ classno2(GEN x)
   if (s < 0 && abscmpiu(D,12) <= 0) return gerepilecopy(av, Hf); /* |D| < 12*/
 
   Pi = mppi(prec);
-  d = absi_shallow(D); dr = itor(d, prec);
-  logd = logr_abs(dr);
-  p1 = sqrtr(divrr(mulir(d,logd), gmul2n(Pi,1)));
+  sqrtd = sqrtr_abs(itor(D, prec));
+  logd = logr_abs(sqrtd); shiftr_inplace(logd,1);
+  p1 = sqrtr_abs(divrr(mulir(D,logd), gmul2n(Pi,1)));
   if (s > 0)
   {
     GEN invlogd = invr(logd);
@@ -5953,12 +5953,12 @@ classno2(GEN x)
   n = itos_or_0( mptrunc(p1) );
   if (!n) pari_err_OVERFLOW("classno [discriminant too large]");
 
-  p4 = divri(Pi,d);
+  p4 = divri(Pi, D); setsigne(p4, 1);
   p7 = invr(sqrtr_abs(Pi));
   half = real2n(-1, prec);
   if (s > 0)
   { /* i = 1, shortcut */
-    p1 = sqrtr_abs(dr);
+    p1 = sqrtd;
     p5 = subsr(1, mulrr(p7,incgamc(half,p4,prec)));
     S = addrr(mulrr(p1,p5), eint1(p4,prec));
     for (i=2; i<=n; i++)
@@ -5973,7 +5973,7 @@ classno2(GEN x)
   }
   else
   { /* i = 1, shortcut */
-    p1 = gdiv(sqrtr_abs(dr), Pi);
+    p1 = gdiv(sqrtd, Pi);
     p5 = subsr(1, mulrr(p7,incgamc(half,p4,prec)));
     S = addrr(p5, divrr(p1, mpexp(p4)));
     for (i=2; i<=n; i++)
