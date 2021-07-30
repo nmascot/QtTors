@@ -1473,17 +1473,15 @@ height_margin(long inv, long D)
 }
 
 static GEN
-select_classpoly_primes(
-  ulong *vfactors, ulong *biggest_v,
-  long k, double delta, classgp_pcp_t G, double height)
+select_classpoly_primes(ulong *vfactors, ulong *biggest_v, double delta,
+  classgp_pcp_t G, double height)
 {
+  const long k = 2;
   pari_sp av = avma;
   long i, s, D = G->D, inv = G->inv;
   ulong biggest_p;
   double prime_bits, min_prime_bits, b;
   GEN prime_pool;
-
-  if (k < 2) pari_err_BUG("select_suitable_primes");
 
   s = modinv_height_factor(inv);
   b = height / s + height_margin(inv, D);
@@ -1522,7 +1520,7 @@ oneroot_of_classpoly(
   pari_sp av = avma;
   long nfactors, L_bound, i;
   ulong p = ne->p, pi = ne->pi;
-  GEN factw, factors, u_levels, vdepths;
+  GEN factw, factors, vdepths;
 
   if (j == 0 || j == 1728 % p) pari_err_BUG("oneroot_of_classpoly");
 
@@ -1533,9 +1531,6 @@ oneroot_of_classpoly(
   factw = factoru(ne->u * ne->v);
   factors = gel(factw, 1);
   nfactors = lg(factors) - 1;
-  u_levels = cgetg(nfactors + 1, t_VECSMALL);
-  for (i = 1; i <= nfactors; ++i)
-    u_levels[i] = z_lval(ne->u, gel(factw, 1)[i]);
   vdepths = gel(factw, 2);
 
   /* FIXME: This should be bigger */
@@ -1545,8 +1540,7 @@ oneroot_of_classpoly(
   for (i = 1; i <= nfactors; ++i) {
     pari_sp bv = avma;
     GEN phi;
-    long jlvl, lvl_diff, depth = vdepths[i];
-    long L = factors[i];
+    long jlvl, lvl_diff, depth = vdepths[i], L = factors[i];
     if (L > L_bound) { *endo_cert = 0; break; }
 
     phi = polmodular_db_getp(jdb, L, p);
@@ -1555,8 +1549,7 @@ oneroot_of_classpoly(
      * later in {ascend,descend}_volcano(), perhaps by combining the
      * functions into one "adjust_level" function. */
     jlvl = j_level_in_volcano(phi, j, p, pi, L, depth);
-    lvl_diff = u_levels[i] - jlvl;
-
+    lvl_diff = z_lval(ne->u, L) - jlvl;
     if (lvl_diff < 0)
       /* j's level is less than v(u) so we must ascend */
       j = ascend_volcano(phi, j, p, pi, jlvl, L, depth, -lvl_diff);
@@ -1565,16 +1558,12 @@ oneroot_of_classpoly(
       j = descend_volcano(phi, j, p, pi, jlvl, L, depth, lvl_diff);
     set_avma(bv);
   }
-  set_avma(av);
-  /* At this point the probability that j has the wrong endomorphism
-   * ring is about \sum_{p|u_compl} 1/p (and u_compl must be bigger
-   * than L_bound, so pretty big), so just return it and rely on
-   * detection code in enum_j_with_endo_ring().  Detection is that we
-   * hit a previously found j-invariant earlier than expected.  OR, we
-   * evaluate class polynomials of the suborders at j and if any are
-   * zero then j must be chosen again.  */
-  *j_endo = j;
-  return j != 0 && j != 1728 % p;
+  /* Prob(j has the wrong endomorphism ring) ~ \sum_{p|u_compl} 1/p
+   * (and u_compl > L_bound), so just return it and rely on detection code in
+   * enum_j_with_endo_ring().  Detection is that we hit a previously found
+   * j-invariant earlier than expected.  OR, we evaluate class polynomials of
+   * the suborders at j and if any are zero then j must be chosen again. */
+  set_avma(av); *j_endo = j; return j != 0 && j != 1728 % p;
 }
 
 INLINE long
@@ -1914,15 +1903,12 @@ GEN
 polclass0(long D, long inv, long vx, GEN *db)
 {
   pari_sp av = avma;
-  GEN primes;
-  long n_curves_tested = 0;
-  long nprimes, s, i, j, del, ni, orient;
-  GEN P, H, plist, pilist;
-  ulong u, L, maxL, vfactors, biggest_v;
-  long h, p1, p2, filter = 1;
+  GEN primes, P, H, plist, pilist;
+  long n_curves_tested = 0, filter = 1;
+  long nprimes, s, i, j, del, ni, orient, h, p1, p2;
+  ulong u, L, vfactors, biggest_v;
   classgp_pcp_t G;
   double height;
-  static const long k = 2;
   static const double delta = 0.5;
 
   if (D >= -4) return polclass_small_disc(D, inv, vx);
@@ -1936,13 +1922,13 @@ polclass0(long D, long inv, long vx, GEN *db)
   orient = modinv_is_double_eta(inv) && kross(D, p1) && kross(D, p2);
 
   classgp_make_pcp(G, &height, &ni, h, D, u, inv, filter, orient);
-  primes = select_classpoly_primes(&vfactors, &biggest_v, k, delta, G, height);
+  primes = select_classpoly_primes(&vfactors, &biggest_v, delta, G, height);
 
   /* Prepopulate *db with all the modpolys we might need */
   /* TODO: Clean this up; in particular, note that u is factored later on. */
-  /* This comes from L_bound in oneroot_of_classpoly() above */
-  maxL = maxdd(log((double) -D), (double)biggest_v);
+  /* This comes from L_bound in oneroot_of_classpoly() */
   if (u > 1) {
+    long maxL = maxdd(log((double) -D), (double)biggest_v);
     for (L = 2; L <= maxL; L = unextprime(L + 1))
       if (!(u % L)) polmodular_db_add_level(db, L, INV_J);
   }
