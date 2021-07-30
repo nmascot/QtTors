@@ -1955,7 +1955,6 @@ GEN     quadpoly_i(GEN D);
 GEN     quadpoly0(GEN x, long v);
 
 /* arith1.c */
-
 ulong   Fl_2gener_pre(ulong p, ulong pi);
 ulong   Fl_log(ulong a, ulong g, ulong ord, ulong p);
 ulong   Fl_log_pre(ulong a, ulong g, ulong ord, ulong p, ulong pi);
@@ -2030,6 +2029,7 @@ const struct bb_field *get_Fp_field(void **E, GEN p);
 long    gisanypower(GEN x, GEN *pty);
 GEN     gissquare(GEN x);
 GEN     gissquareall(GEN x, GEN *pt);
+GEN     hclassnoF_fact(GEN P, GEN E, GEN D);
 GEN     hclassno(GEN x);
 GEN     hclassno6(GEN x);
 long    hilbert(GEN x, GEN y, GEN p);
@@ -2092,6 +2092,7 @@ long    sisfundamental(long x);
 GEN     sqrtint(GEN a);
 GEN     sqrtint0(GEN a, GEN *r);
 ulong   u_chinese_coprime(ulong a, ulong b, ulong A, ulong B, ulong C);
+long    uhclassnoF_fact(GEN faF, long D);
 long    uisprimepower(ulong n, ulong *p);
 long    uissquare(ulong A);
 long    uissquareall(ulong A, ulong *sqrtA);

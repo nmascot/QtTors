@@ -2355,6 +2355,15 @@ calls for \emph{small} consecutive values of $d$ are instantaneous, see
 \kbd{getcache}. Large values of $d$ ($d > 500000$) call \kbd{quadclassunit}
 individually and are not memoized.
 
+\fun{GEN}{hclassnoF_fact}{GEN P, GEN E, GEN D} return $H(Df^2)/H(D)$ assuming
+$D$ is a negative fundamental discriminant, where the conductor $f$ is given in
+factored form: $P$ (\kbd{ZV}) is the list of prime divisors of $f$ and $E$
+(\typ{VECSMALL}) their multiplicities.
+
+\fun{long}{uhclassnoF_fact}{GEN faf, long D} return $H(Df^2)/H(D)$ assuming
+$D$ is a negative fundamental discriminant and $d = Df^2$ is an \kbd{ulong}
+and \kbd{faf} is \kbd{factoru}$(d)$.
+
 \fun{GEN}{hclassno6}{GEN d} assuming $d > 0$, returns the integer $6 H(d)$.
 This is a low-level function behind \kbd{hclassno}.
 

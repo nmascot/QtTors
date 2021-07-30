@@ -2513,32 +2513,6 @@ mycoredisc2pos(ulong n, long *pf)
   return (long)m;
 }
 
-/* 1+p+...+p^e, e >= 1 */
-static ulong
-usumpow(ulong p, long e)
-{
-  ulong q = 1+p;
-  long i;
-  for (i = 1; i < e; i++) q = p*q + 1;
-  return q;
-}
-/* Hurwitz(D0 F^2)/ Hurwitz(D0)
- * = \sum_{f|F}  f \prod_{p|f} (1-kro(D0/p)/p)
- * = \prod_{p^e || F} (1 + (p^e-1) / (p-1) * (p-kro(D0/p))) */
-static long
-get_sh(long F, long D0)
-{
-  GEN fa = myfactoru(F), P = gel(fa,1), E = gel(fa,2);
-  long i, l = lg(P), t = 1;
-  for (i = 1; i < l; i++)
-  {
-    long p = P[i], e = E[i], s = kross(D0,p);
-    if (e == 1) { t *= 1 + p - s; continue; }
-    if (s == 1) { t *= upowuu(p,e); continue; }
-    t *= 1 + usumpow(p,e-1)*(p-s);
-  }
-  return t;
-}
 /* d > 0, d = 0,3 (mod 4). Return 6*hclassno(d); -d must be fundamental
  * Faster than quadclassunit up to 5*10^5 or so */
 static ulong
@@ -2580,7 +2554,7 @@ hclassno6u_2(ulong D, long D0, long F)
   { /* second chance */
     h = (ulong)cache_get(cache_H, -D0);
     if (!h) h = hclassno6u_count(-D0);
-    h *= get_sh(F,D0);
+    h *= uhclassnoF_fact(myfactoru(F), D0);
   }
   return h;
 }
