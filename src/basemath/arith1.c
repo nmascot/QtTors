@@ -5686,7 +5686,7 @@ corediscfact(GEN fa, long s, GEN *pD, GEN *pP, GEN *pE)
 
 /* *pD = coredisc(x), *pR = regulator (x > 0) or NULL */
 static GEN
-quadclassno_factor(GEN x, GEN *pD, GEN *pR)
+quadclassnoF(GEN x, GEN *pD, GEN *pR)
 {
   GEN E, H, D, P, R = NULL;
   long l, i;
@@ -5847,7 +5847,7 @@ classno(GEN x)
   check_quaddisc(x, &s, &k, "classno");
   if (abscmpiu(x,12) <= 0) return gen_1;
 
-  Hf = quadclassno_factor(x, &D, NULL);
+  Hf = quadclassnoF(x, &D, NULL);
   if (abscmpiu(D,12) <= 0) return gerepilecopy(av, Hf);
   forms =  get_forms(D, &L);
   r2 = two_rank(D);
@@ -5932,7 +5932,7 @@ quadclassno(GEN x)
   long s, r;
   check_quaddisc(x, &s, &r, "quadclassno");
   if (s < 0 && abscmpiu(x,12) <= 0) return gen_1;
-  Hf = quadclassno_factor(x, &D, NULL);
+  Hf = quadclassnoF(x, &D, NULL);
   return gerepileuptoint(av, mulii(Hf, gel(quadclassunit0(D,0,NULL,0),1)));
 }
 
@@ -5948,7 +5948,7 @@ classno2(GEN x)
   check_quaddisc(x, &s, &r, "classno2");
   if (s < 0 && abscmpiu(x,12) <= 0) return gen_1;
 
-  Hf = quadclassno_factor(x, &D, &reg);
+  Hf = quadclassnoF(x, &D, &reg);
   if (s < 0 && abscmpiu(D,12) <= 0) return gerepilecopy(av, Hf); /* |D| < 12*/
 
   Pi = mppi(prec);
