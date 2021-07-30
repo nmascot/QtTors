@@ -666,7 +666,8 @@ lfunthetainit0(GEN ldata, GEN tdom, GEN an2, long m,
     tdom = mkvec2(dbltor(r), a? dbltor(a): gen_0);
   }
   tech = mkvecn(7, an2,K,R, stoi(bitprec), stoi(m), tdom,
-                   gsqrt(ginv(N), prec + EXTRAPRECWORD));
+                   gsqrt(ginv(N), prec + maxss(EXTRAPRECWORD,
+                                               nbits2extraprec(extrabit))));
   return mkvec3(mkvecsmall(t_LDESC_THETA), ldata, tech);
 }
 
@@ -681,7 +682,8 @@ lfunthetainit_i(GEN data, GEN tdom, long m, long bitprec)
   GEN an = ldata_vecan(ldata_get_an(ldatan), L, prec);
   GEN Vga = ldata_get_gammavec(ldatan);
   if (m == 0 && Vgaeasytheta(Vga)) an = antwist(an, Vga, prec);
-  return lfunthetainit0(ldatan, tdom, an, m, bitprec, 32);
+  return lfunthetainit0(ldatan, tdom, an, m, bitprec,
+                        typ(an) == t_VECSMALL? 32: gexpo(an));
 }
 
 GEN
@@ -862,13 +864,15 @@ lfuntheta(GEN data, GEN t, long m, long bitprec)
   pari_sp ltop = avma;
   long limt, d;
   GEN isqN, vecan, Vga, ldata, theta, thetainit, S;
-  long n, prec = nbits2prec(bitprec);
-  t = gprec_w(t, prec);
+  long n, prec;
+
   theta = lfunthetacheckinit(data, t, m, bitprec);
   ldata = linit_get_ldata(theta);
   thetainit = linit_get_tech(theta);
   vecan = theta_get_an(thetainit);
   isqN = theta_get_isqrtN(thetainit);
+  prec = maxss(realprec(isqN), nbits2prec(bitprec));
+  t = gprec_w(t, prec);
   limt = lg(vecan)-1;
   if (theta == data)
     limt = minss(limt, lfunthetacost(ldata, t, m, bitprec));
