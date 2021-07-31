@@ -5655,8 +5655,8 @@ update_g1(GEN *pg1, GEN *pd1, GEN *pfad1, GEN f, GEN o, GEN fao)
 
 /* Write x = Df^2, where D = fundamental discriminant,
  * P^E = factorisation of conductor f */
-static void
-corediscfact(GEN fa, long s, GEN *pD, GEN *pP, GEN *pE)
+static GEN
+corediscfact(GEN fa, long s, GEN *pP, GEN *pE)
 {
   GEN P, E, P0 = gel(fa,1), E0 = gel(fa,2), D = s > 0? gen_1: gen_m1;
   long l = lg(P0), i, j;
@@ -5679,9 +5679,8 @@ corediscfact(GEN fa, long s, GEN *pD, GEN *pP, GEN *pE)
       E[1] = E[0]; E++; j--;
     }
   }
-  *pD = D;
   setlg(P,j); *pP = P;
-  setlg(E,j); *pE = E;
+  setlg(E,j); *pE = E; return D;
 }
 
 /* *pD = coredisc(x), *pR = regulator (x > 0) or NULL */
@@ -5691,7 +5690,7 @@ quadclassnoF(GEN x, GEN *pD, GEN *pR)
   GEN E, H, D, P, R = NULL;
   long l, i;
 
-  corediscfact(absZ_factor(x), signe(x), &D, &P, &E);
+  D = corediscfact(absZ_factor(x), signe(x), &P, &E);
   H = gen_1; l = lg(P);
   /* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] = \prod_{p^e||f} p^(e-1) [ p - (D/p) ] */
   for (i=1; i<l; i++)
@@ -6067,7 +6066,7 @@ hclassno6_large(GEN x)
   GEN H = NULL, D, P, E;
   long l;
 
-  corediscfact(absZ_factor(x), -1, &D, &P, &E);
+  D = corediscfact(absZ_factor(x), -1, &P, &E);
   l = lg(P);
   if (l > 1 && lgefint(x) == 3)
   { /* F != 1, second chance */
