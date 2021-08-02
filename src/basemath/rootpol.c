@@ -2325,7 +2325,7 @@ usp(GEN Q0, long flag, long bitprec)
         s = addir(c, divrr(s, addsr(1, s)));
         shiftr_inplace(s, -k);
         if (realprec(s) != prec) s = rtor(s, prec);
-        gerepileupto(av2, s);
+        s = gerepileupto(av2, s);
       }
       else set_avma(av2);
       gel(sol, ++nbr) = s;
