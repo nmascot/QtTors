@@ -3893,7 +3893,7 @@ scanD0(long *tablelen, long *minD, long maxD, long maxh, long L0)
   /* d = 7, 11, 15, 19, 23, ... */
   for (av = avma, d = *minD, cnt = 0; d <= maxD; d += 4, set_avma(av))
   {
-    GEN DD, H, fact, ordL, frm;
+    GEN DD, H, fact, ordL, f;
     long i, j, k, n, h, L1, D = -d;
     long *q, *e;
     ulong m;
@@ -3923,26 +3923,26 @@ scanD0(long *tablelen, long *minD, long maxD, long maxh, long L0)
     h = itos(H);
     if (h > 2*maxh || (!L1 && h > maxh)) continue;
 
-    /* Check if ord(q) is not big enough to generate at least half the
-     * class group (where q is the L0-primeform). */
-    frm = primeform_u(DD, L0);
-    ordL = qfi_order(qfbred_i(frm), H);
+    /* Check if ord(f) is not big enough to generate at least half the
+     * class group (where f is the L0-primeform). */
+    f = primeform_u(DD, L0);
+    ordL = qfi_order(qfbred_i(f), H);
     n = itos(ordL);
     if (n < h/2 || (!L1 && n < h)) continue;
 
-    /* If q is big enough, great!  Otherwise, for each potential L1,
+    /* If f is big enough, great!  Otherwise, for each potential L1,
      * do a discrete log to see if it is NOT in the subgroup generated
      * by L0; stop as soon as such is found. */
     for (j = 0; ; j++) {
-      if (n == h || (L1 && !qfi_Shanks(primeform_u(DD, L1), frm, n))) {
+      if (n == h || (L1 && !qfi_Shanks(primeform_u(DD, L1), f, n))) {
         dbg_printf(2)("D0=%ld good with L1=%ld\n", D, L1);
         break;
       }
       if (!L1) break;
       L1 = (j < k && k > 1 && q[j] <= MAX_L1 ? q[j] : 0);
     }
-    /* The first bit of m indicates whether q generates a proper
-     * subgroup of cl(D) (hence implying that we need L1) or if q
+    /* The first bit of m indicates whether f generates a proper
+     * subgroup of cl(D) (hence implying that we need L1) or if f
      * generates the whole class group. */
     m = (n < h ? 1 : 0);
     /* bits i and i+1 of m give the 2-bit number 1 + (D|p) where p is
@@ -3974,7 +3974,7 @@ discriminant_with_classno_at_least(disc_info bestD[MODPOLY_MAX_DCNT],
 {
   enum { SMALL_L_BOUND = 101 };
   long max_max_D = 160000 * (inv ? 2 : 1);
-  long minD, maxD, maxh, L0, max_L1, minbits, Dcnt, flags, s, d, h, i, tablen;
+  long minD, maxD, maxh, L0, max_L1, minbits, Dcnt, flags, s, d, i, tablen;
   D_entry *tab;
   double eps, cost, best_eps = -1.0, best_cost = -1.0;
   disc_info Ds[MODPOLY_MAX_DCNT];
@@ -4049,7 +4049,7 @@ discriminant_with_classno_at_least(disc_info bestD[MODPOLY_MAX_DCNT],
     pari_sp av = avma;
     err_printf("Found discriminant(s):\n");
     for (i = 0; i < best_cnt; ++i) {
-      h = itos(classno(stoi(bestD[i].D1)));
+      long h = itos(classno(stoi(bestD[i].D1)));
       set_avma(av);
       err_printf("  D = %ld, h = %ld, u = %ld, L0 = %ld, L1 = %ld, n1 = %ld, n2 = %ld, cost = %ld\n",
           bestD[i].D1, h, usqrt(bestD[i].D1 / bestD[i].D0), bestD[i].L0,
