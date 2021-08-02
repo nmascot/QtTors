@@ -1385,46 +1385,46 @@ select_classpoly_prime_pool(double min_bits, double delta, classgp_pcp_t G)
   const long V_MAX = 1200;
   pari_sp av = avma;
   double bits = 0.0, hurwitz, z;
-  ulong t_size_lim;
-  long ires, D = G->D, inv = G->inv;
+  ulong t_size_lim, d = (ulong)-G->D;
+  long ires, inv = G->inv;
   GEN res, t_min; /* t_min[v] = lower bound for the t we look at for that v */
 
-  hurwitz = hclassno_wrapper(D, G->h);
+  hurwitz = hclassno_wrapper(d, G->h);
 
   res = cgetg(128+1, t_VEC);
   ires = 1;
   /* Initialise t_min to be all 2's.  This avoids trace 0 and trace 1 curves */
   t_min = const_vecsmall(V_MAX-1, 2);
 
-  /* maximum possible trace = sqrt(2^BIL - D) */
-  t_size_lim = 2.0 * sqrt((double)((1UL << (BITS_IN_LONG - 2)) - (((ulong)-D) >> 2)));
+  /* maximum possible trace = sqrt(2^BIL + D) */
+  t_size_lim = 2.0 * sqrt((double)((1UL << (BITS_IN_LONG - 2)) - (d >> 2)));
 
-  for (z = -D / (2.0 * hurwitz); ; z *= delta + 1.0)
-  { /* v_bound_aux = -4 z H(-D) */
-    double v_bound_aux = -4.0 * z * hurwitz;
+  for (z = d / (2.0 * hurwitz); ; z *= delta + 1.0)
+  {
+    double v_bound_aux = 4.0 * z * hurwitz; /* = 4 z H(d) */
     ulong v;
     dbg_printf(1)("z = %.2f\n", z);
     for (v = 1; v < V_MAX; v++)
     {
-      ulong p, t, t_max, vfactors, m_vsqr_D = v * v * (ulong)(-D);
+      ulong p, t, t_max, vfactors, v2d = v * v * d;
       /* hurwitz_ratio_bound = 11 * log(log(v + 4))^2 */
       double hurwitz_ratio_bound = log(log(v + 4.0)), max_p, H;
       long ires0;
       hurwitz_ratio_bound *= 11.0 * hurwitz_ratio_bound;
 
-      if (v >= v_bound_aux * hurwitz_ratio_bound / D) break;
+      if (v >= v_bound_aux * hurwitz_ratio_bound / d) break;
       if (!is_smooth_enough(&vfactors, v)) continue;
-      H = hclassno_wrapper(m_vsqr_D, 0);
+      H = hclassno_wrapper(v2d, G->h);
 
-      /* t <= 2 sqrt(p) and p <= z H(-v^2 D) and
-       *   H(-v^2 D) < vH(-D) (11 log(log(v + 4))^2)
+      /* t <= 2 sqrt(p) and p <= z H(v^2 d) and
+       *   H(v^2 d) < vH(d) (11 log(log(v + 4))^2)
        * This last term is v * hurwitz * hurwitz_ratio_bound. */
       max_p = z * v * hurwitz * hurwitz_ratio_bound;
-      t_max = 2.0 * sqrt(mindd((1UL<<(BITS_IN_LONG-2)) - (m_vsqr_D>>2), max_p));
-      t = t_min[v]; if ((t & 1) != (m_vsqr_D & 1)) t++;
-      p = (t * t + m_vsqr_D) >> 2;
+      t_max = 2.0 * sqrt(mindd((1UL<<(BITS_IN_LONG-2)) - (v2d>>2), max_p));
+      t = t_min[v]; if ((t & 1) != (v2d & 1)) t++;
+      p = (t * t + v2d) >> 2;
       ires0 = ires;
-      for (; t <= t_max; p += t+1, t += 2) /* 4p = t^2 - v^2*D */
+      for (; t <= t_max; p += t+1, t += 2) /* 4p = t^2 + v^2*d */
         if (modinv_good_prime(inv,p) && uisprime(p))
         {
           if (ires == lg(res)) res = vec_lengthen(res, lg(res) << 1);
@@ -1443,7 +1443,7 @@ select_classpoly_prime_pool(double min_bits, double delta, classgp_pcp_t G)
     }
     if (uel(t_min,1) >= t_size_lim) {
       /* exhausted all solutions that fit in ulong */
-      char *err = stack_sprintf("class polynomial of discriminant %ld", D);
+      char *err = stack_sprintf("class polynomial of discriminant %ld", G->D);
       pari_err(e_ARCH, err);
     }
   }
