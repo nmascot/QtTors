@@ -1200,8 +1200,7 @@ classgp_make_pcp(
   G->u = u;
   G->h = h;
   G->inv = inv;
-  G->L0 = (modinv_is_double_eta(inv) && modinv_ramified(D, inv))
-    ? modinv_degree(NULL, NULL, inv) : 0;
+  if (!modinv_is_double_eta(inv) || !modinv_ramified(D, inv, &G->L0)) G->L0 = 0;
   G->enum_cnt = h / (1 + !!G->L0);
   G->Lfilter = ulcm(Lfilter, lvl);
 
@@ -1209,7 +1208,7 @@ classgp_make_pcp(
     if (G->L0) pari_err_BUG("classgp_pcp");
     G->k = 0;
     G->_data = NULL;
-    v = const_vecsmall(1, 1);
+    v = mkvecsmall(1);
     *height = upper_bound_on_classpoly_coeffs(D, h, v);
     /* NB: No need to set *ni when h = 1 */
     set_avma(av); return;

@@ -57,11 +57,8 @@ modinv_level(long inv)
  * related to the same f are N-isogenous, and 0 otherwise.  This is
  * often (but not necessarily) equal to the level. */
 long
-modinv_degree(long *P1, long *P2, long inv)
+modinv_degree(long *p1, long *p2, long inv)
 {
-  long *p1, *p2, ignored;
-  p1 = P1? P1: &ignored;
-  p2 = P2? P2: &ignored;
   switch (inv) {
     case INV_W3W5:  return (*p1 = 3) * (*p2 = 5);
     case INV_W2W3E2:
@@ -352,10 +349,10 @@ modinv_double_eta_good_disc(long D, long inv)
 /* Assumes D is a good discriminant for inv, which implies that the
  * level is prime to the conductor */
 long
-modinv_ramified(long D, long inv)
+modinv_ramified(long D, long inv, long *pN)
 {
-  long p1, p2, N = modinv_degree(&p1, &p2, inv);
-  if (N <= 1) return 0;
+  long p1, p2; *pN = modinv_degree(&p1, &p2, inv);
+  if (*pN <= 1) return 0;
   return !(D % p1) && !(D % p2);
 }
 

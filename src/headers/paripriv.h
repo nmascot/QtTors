@@ -904,7 +904,7 @@ GEN polmodular_db_getp(GEN fdb, long L, ulong p);
 
 long modinv_level(long inv);
 long modinv_degree(long *p1, long *p2, long inv);
-long modinv_ramified(long D, long inv);
+long modinv_ramified(long D, long inv, long *pN);
 long modinv_j_from_2double_eta(GEN F, long inv, ulong x0, ulong x1, ulong p, ulong pi);
 GEN double_eta_raw(long inv);
 ulong modfn_root(ulong j, norm_eqn_t ne, long inv);
