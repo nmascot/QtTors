@@ -19,10 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #define dbg_printf(lvl) if (DEBUGLEVEL >= (lvl) + 3) err_printf
 
-/*
- * SECTION: Functions dedicated to finding a j-invariant with a given
- * trace.
- */
+/* SECTION: Functions dedicated to finding a j-invariant with a given
+ * trace. */
 
 /* TODO: This code is shared with
  * torsion_compatible_with_characteristic() in 'torsion.c'. */
@@ -760,9 +758,7 @@ find_j_inv_with_given_trace(
   return gc_long(ltop, curves_tested);
 }
 
-/*
- * SECTION: Functions for dealing with polycyclic presentations.
- */
+/* SECTION: Functions for dealing with polycyclic presentations. */
 
 static GEN
 next_generator(GEN DD, long D, ulong u, long filter, GEN *genred, long *P)
@@ -1339,9 +1335,7 @@ classgp_make_pcp(
   set_avma(av); return;
 }
 
-/*
- * SECTION: Functions for calculating class polynomials.
- */
+/* SECTION: Functions for calculating class polynomials. */
 
 static const long SMALL_PRIMES[11] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31 };
 static long
