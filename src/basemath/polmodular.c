@@ -3870,7 +3870,7 @@ _qsort_cmp(const void *a, const void *b)
  * INPUT:
  * - maxd: largest allowed discriminant
  * - maxh: largest allowed class number
- * - L0: norm of class group generator
+ * - L0: norm of class group generator (2, 3, 5, or 7)
  *
  * OUTPUT:
  * - tablelen: length of return value
@@ -3888,58 +3888,48 @@ scanD0(long *tablelen, long *minD, long maxD, long maxh, long L0)
   /* 2*maxh if cl(D) is cyclic. */
   if (maxh < 0) pari_err_BUG("scanD0");
 
-  /* Not checked, but L0 should be 2, 3, 5 or 7. */
   tab = (D_entry *) stack_malloc((maxD/4)*sizeof(*tab)); /* Overestimate */
   /* d = 7, 11, 15, 19, 23, ... */
   for (av = avma, d = *minD, cnt = 0; d <= maxD; d += 4, set_avma(av))
   {
-    GEN DD, H, fact, ordL, f;
+    GEN DD, fa, ordL, f, q, e;
     long i, j, k, n, h, L1, D = -d;
-    long *q, *e;
     ulong m;
-    /* Check to see if (D | L0) = 1 */
+
     if (kross(D, L0) < 1) continue;
-
-    /* [q, e] is the factorisation of d. */
-    fact = factoru(d);
-    q = zv_to_longptr(gel(fact, 1));
-    e = zv_to_longptr(gel(fact, 2));
-    k = lg(gel(fact, 1)) - 1;
-
-    /* Check if the discriminant is square-free */
-    for (i = 0; i < k; i++)
-      if (e[i] > 1) break;
-    if (i < k) continue;
-
-    /* L1 initially the first factor of d if small enough, otherwise ignored */
-    L1 = (k > 1 && q[0] <= MAX_L1)? q[0]: 0;
-
+    fa = factoru(d); q = gel(fa, 1); k = lg(q) - 1;
     /* restrict to possibly cyclic class groups */
     if (k > 2) continue;
+    e = gel(fa, 2);
+    for (i = 1; i <= k; i++)
+      if (e[i] > 1) break;
+    if (i <= k) continue; /* restrict to square-free discriminant */
+
+    /* L1 initially the first factor of d if small enough, otherwise ignored */
+    L1 = (k > 1 && q[1] <= MAX_L1)? q[1]: 0;
 
     /* Check if h(D) is too big */
-    DD = stoi(D);
-    H = classno(DD);
-    h = itos(H);
+    h = hclassno6u(d) / 6;
     if (h > 2*maxh || (!L1 && h > maxh)) continue;
 
     /* Check if ord(f) is not big enough to generate at least half the
      * class group (where f is the L0-primeform). */
+    DD = stoi(D);
     f = primeform_u(DD, L0);
-    ordL = qfi_order(qfbred_i(f), H);
+    ordL = qfi_order(qfbred_i(f), stoi(h));
     n = itos(ordL);
     if (n < h/2 || (!L1 && n < h)) continue;
 
     /* If f is big enough, great!  Otherwise, for each potential L1,
      * do a discrete log to see if it is NOT in the subgroup generated
      * by L0; stop as soon as such is found. */
-    for (j = 0; ; j++) {
+    for (j = 1;; j++) {
       if (n == h || (L1 && !qfi_Shanks(primeform_u(DD, L1), f, n))) {
         dbg_printf(2)("D0=%ld good with L1=%ld\n", D, L1);
         break;
       }
       if (!L1) break;
-      L1 = (j < k && k > 1 && q[j] <= MAX_L1 ? q[j] : 0);
+      L1 = (j <= k && k > 1 && q[j] <= MAX_L1 ? q[j] : 0);
     }
     /* The first bit of m indicates whether f generates a proper
      * subgroup of cl(D) (hence implying that we need L1) or if f
@@ -3956,8 +3946,7 @@ scanD0(long *tablelen, long *minD, long maxD, long maxh, long L0)
     /* Insert d, h and m into the table */
     tab[cnt].D = D;
     tab[cnt].h = h;
-    tab[cnt].m = m;
-    cnt++;
+    tab[cnt].m = m; cnt++;
   }
 
   /* Sort the table */
