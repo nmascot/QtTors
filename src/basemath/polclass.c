@@ -930,56 +930,29 @@ logfac(long n)
 {
   const double HALFLOGPI = 0.57236494292470008707171367567653;
   return n * log((double) n) - (double) n +
-    log((double) n * (1.0 + 4.0 * n * (1.0 + 2.0 * n))) / 6.0 +
-    HALFLOGPI;
+    log((double) n * (1.0 + 4.0 * n * (1.0 + 2.0 * n))) / 6.0 + HALFLOGPI;
 }
 
 /* This is based on Sutherland 2009, Lemma 8 (p31). */
 static double
 upper_bound_on_classpoly_coeffs(long D, long h, GEN qfinorms)
 {
-  const double LOG2E = 1.44269504088896340735992468100189;
-  pari_sp ltop = avma;
-  GEN C = dbltor(2114.567);
-  double Mk, m, logbinom;
-  GEN tmp = mulrr(mppi(LOWDEFAULTPREC), sqrtr(utor(-D, LOWDEFAULTPREC)));
-  /* We treat this case separately since the table is not initialised when
-   * h = 1. This is the same as in the for loop below but with ak = 1. */
-  double log2Mk = dbllog2r(mpadd(mpexp(tmp), C));
-  double res = log2Mk;
-  ulong maxak = 1;
-  double log2Mh = log2Mk;
-
-  pari_sp btop = avma;
+  double B, lnMk, lnMh, m, logbinom, C = 2114.567, t = M_PI * sqrt((double)-D);
+  ulong maxak = 0;
   long k;
-  for (k = 2; k <= h; ++k) {
-    ulong ak = uel(qfinorms, k);
-    /* exp(tmp/a[k]) can overflow for even moderate discriminants, so we need
-     * to use t_REALs instead of doubles.  Sutherland has a (more complicated)
-     * implementation in the classpoly package which should be consulted if
-     * this ever turns out to be a bottleneck.
-     *
-     * One idea to avoid t_REALs is the following: we have
-     * log(e^x + C) - x <= log(2) ~ 0.69 for x >= log(C) ~ 0.44 and
-     * the difference is basically zero for x slightly bigger than log(C).
-     * Hence for large discriminants, we have x = \pi\sqrt{-D}/ak >> log(C)
-     * and so we could approximate log(e^x + C) by x. */
-    log2Mk = dbllog2r(mpadd(mpexp(divru(tmp, ak)), C));
-    res += log2Mk;
-    if (ak > maxak) { maxak = ak; log2Mh = log2Mk; }
-    set_avma(btop);
-  }
 
-  Mk = pow(2.0, log2Mh);
-  m = floor((h + 1)/(Mk + 1.0));
-  /* This line computes "log2(itos(binomialuu(h, m)))".  The smallest
-   * fundamental discriminant for which logbinom is not zero is
-   * -1579751. */
-  logbinom = (m > 0 && m < h)
-    ? LOG2E * (logfac(h) - logfac(m) - logfac(h - m))
-    : 0;
-  set_avma(ltop);
-  return res + logbinom - m * log2Mh + 2.0;
+  for (k = 1, B = 0.0; k <= h; ++k)
+  {
+    ulong ak = uel(qfinorms, k);
+    double tk = t / ak;
+    lnMk = tk + log(1.0 + C * exp(-tk));
+    B += lnMk;
+    if (ak > maxak) { maxak = ak; lnMh = lnMk; }
+  }
+  m = floor((h + 1)/(exp(lnMh) + 1.0));
+  /* log(binom(h, m)); 0 unless D <= -1579751 */
+  logbinom = (m > 0 && m < h)? logfac(h) - logfac(m) - logfac(h - m): 0;
+  return (B + logbinom - m * lnMh) * (1 / M_LN2) + 2.0;
 }
 
 INLINE long
@@ -1291,7 +1264,6 @@ classgp_make_pcp(
   v = cgetg(h + 1, t_VECSMALL);
   v[1] = 1;
   for (i = 2; i <= h; ++i) uel(v,i) = itou(gmael(T,i,1));
-
   *height = upper_bound_on_classpoly_coeffs(D, G->enum_cnt, v);
 
   /* The norms of the last one or two generators. */
