@@ -22,22 +22,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  * genus 1 for N = 11, 14, and 15. */
 
 INLINE ulong
-Fl_div4(ulong x, ulong p)
-{
-  return Fl_halve(Fl_halve(x, p), p);
-}
+Fl_div4(ulong x, ulong p) { return Fl_halve(Fl_halve(x, p), p); }
 
 INLINE ulong
-Fl_div8(ulong x, ulong p)
-{
-  return Fl_halve(Fl_div4(x, p), p);
-}
+Fl_div8(ulong x, ulong p) { return Fl_halve(Fl_div4(x, p), p); }
 
-/* These tags describe which map to use to convert from (r,s) to (b,c)
- * coeffs. */
-typedef enum {
-  RS_MAP, T_MAP, QT_MAP, TQ_MAP
-} map_type;
+/* which map to use to convert from (r,s) to (b,c) coeffs. */
+typedef enum { RS_MAP, T_MAP, QT_MAP, TQ_MAP } map_type;
 
 typedef struct {
   GEN crv;
@@ -53,12 +44,9 @@ typedef struct {
 /* The table is defined at the end of the file. */
 INLINE const X1_info *get_X1_info(ulong N);
 
-/* Compute the image of
- * (x,y) |--> (r_n(x,y)/r_d(x,y), s_n(x,y), s_d(x,y)) */
+/* Compute the image of (x,y) -> (r_n(x,y)/r_d(x,y), s_n(x,y), s_d(x,y)) */
 static void
-map_X1_points(
-  GEN r, GEN s,
-  const X1_info *X1, long ncurves, ulong p, ulong pi)
+map_X1_points(GEN r, GEN s, const X1_info *X1, long ncurves, ulong p, ulong pi)
 {
   pari_sp ltop = avma, av;
   GEN X1_c, rn_pol, rd_pol, sn_pol, sd_pol, rn, sn, rd, sd;
@@ -252,10 +240,10 @@ qt_to_a4a6_and_tors(
                    Fl_mul_pre(Fl_div4(z, p),
                               Fl_sub(t, 1L, p), p, pi), p, pi);
   /* Map to isomorphic curve:
-   * (x, y) |--> (3(12x + 4b + 1), 108(2y + x + b)) */
+   * (x, y) -> (3(12x + 4b + 1), 108(2y + x + b)) */
   *ty = Fl_mul_pre(c_108, Fl_add(Fl_double(*ty, p),
                                  Fl_add(b, *tx, p), p), p, pi);
-  *tx = Fl_triple(Fl_addmul_pre(Fl_add(Fl_double(bb, p), 1L, p), c_12, *tx, p, pi),
+  *tx = Fl_triple(Fl_addmul_pre(Fl_add(Fl_double(bb,p), 1L, p), c_12, *tx,p,pi),
                   p);
 }
 
@@ -273,7 +261,7 @@ t_to_a4a6_and_tors(
   *tx = Fl_neg(t, p);
   *ty = Fl_sqr_pre(t, p, pi);
   /* Map to isomorphic curve:
-   * (x, y) |--> (x + 1/12*a1^2, 1/2*a1*x + (y + 1/2*a3))  */
+   * (x, y) -> (x + 1/12*a1^2, 1/2*a1*x + (y + 1/2*a3))  */
   t1 = Fl_halve(a1, p);
   *ty = Fl_addmul_pre(Fl_add(*ty, Fl_halve(a3, p), p), *tx, t1, p, pi);
   *tx = Fl_addmul_pre(*tx, inv3, Fl_sqr_pre(t1, p, pi), p, pi);
@@ -343,8 +331,7 @@ random_curves_with_general_X1(
 
 INLINE void
 random_curves_with_11_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   pari_sp ltop = avma, av;
   const ulong A4 = Fl_neg(432 % p, p), A6 = 8208 % p;
@@ -377,8 +364,7 @@ random_curves_with_11_torsion(
 
     /* den = 6x + 72 */
     den = Fl_addmul_pre(c_72, c_6, Q[1], p, pi);
-    if (den == 0)
-      continue;
+    if (den == 0) continue;
 
     /* r = (y + 108)/216, s = 1 + (y - 108)/(6x + 72) */
     r = Fl_mul_pre(Fl_add(Q[2], c_108, p), inv216, p, pi);
@@ -392,8 +378,7 @@ random_curves_with_11_torsion(
 
 INLINE void
 random_curves_with_2_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m1 = p - 1, inv3 = Fl_inv(3L, p);
   while (ncurves--) {
@@ -411,8 +396,7 @@ random_curves_with_2_torsion(
 
 INLINE void
 random_curves_with_3_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m1 = p - 1;
   const ulong inv3 = Fl_inv(3, p), inv4 = Fl_inv(4, p);
@@ -433,8 +417,7 @@ random_curves_with_3_torsion(
 
 INLINE void
 random_curves_with_4_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m1 = p - 1;
   while (ncurves--) {
@@ -445,8 +428,7 @@ random_curves_with_4_torsion(
 
 INLINE void
 random_curves_with_5_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m1 = p - 1;
   while (ncurves--) {
@@ -457,8 +439,7 @@ random_curves_with_5_torsion(
 
 INLINE void
 random_curves_with_6_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m2 = p - 2;
   while (ncurves--) {
@@ -470,8 +451,7 @@ random_curves_with_6_torsion(
 
 INLINE void
 random_curves_with_7_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m2 = p - 2;
   while (ncurves--) {
@@ -484,8 +464,7 @@ random_curves_with_7_torsion(
 
 INLINE void
 random_curves_with_8_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m1 = p - 1;
   while (ncurves--) {
@@ -501,8 +480,7 @@ random_curves_with_8_torsion(
 
 INLINE void
 random_curves_with_9_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   while (ncurves--) {
     ulong f = random_Fl(p);
@@ -518,8 +496,7 @@ random_curves_with_9_torsion(
 
 INLINE void
 random_curves_with_10_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   while (ncurves) {
     ulong f, f2, d, c, b, t;
@@ -544,8 +521,7 @@ random_curves_with_10_torsion(
 
 INLINE void
 random_curves_with_12_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   while (ncurves--) {
     ulong tau, t1, t2, M, f, d, c, b;
@@ -572,8 +548,7 @@ random_curves_with_12_torsion(
 
 static void
 random_curves_with_any_torsion(
-  ulong *a4, ulong *a6, ulong *px, ulong *py,
-  long ncurves, ulong p, ulong pi)
+  ulong *a4, ulong *a6, ulong *px, ulong *py, long ncurves, ulong p, ulong pi)
 {
   pari_sp av = avma;
   ulong c_1728 = 1728 % p;
@@ -602,9 +577,8 @@ torsion_compatible_with_characteristic(long m, ulong p)
   return ceildivuu(p + 1 - u, m) <= (p + 1 + u) / m;
 }
 
-/* Input: pointers a4, a6, t{x,y} where t{x,y} is allowed to be zero, each
- * (nonzero one) pointing to space for at least ncurves elements; an integer
- * 1 <= m <= LAST_X1_LEVEL; a prime p > 3.
+/* Input: pointers a4, a6, t{x,y} pointing to space for at least ncurves
+ * elements; an integer 1 <= m <= LAST_X1_LEVEL; a prime p > 3.
  *
  * Output: Put the coefficients of ncurves elliptic curves with m-torsion into
  * a4 and a6. The actual number of unique curves is not guaranteed to be
@@ -626,7 +600,7 @@ random_curves_with_m_torsion(
   switch (m) {
   case 1:
     random_curves_with_any_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
+    return;
   case 2:
     random_curves_with_2_torsion(a4, a6, tx, ty, ncurves, p, pi);
     break;
