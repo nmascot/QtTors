@@ -1187,7 +1187,7 @@ classgp_make_pcp(
 {
   enum { MAX_GENS = 16, MAX_RLEN = MAX_GENS * (MAX_GENS - 1) / 2 };
   pari_sp av = avma, bv;
-  long curr_p, h2, nelts, lvl = modinv_level(inv);
+  long curr_p, nelts, lvl = modinv_level(inv);
   GEN DD, ident, T, v;
   hashtable *tbl;
   long i, L1, L2;
@@ -1205,11 +1205,9 @@ classgp_make_pcp(
   G->Lfilter = ulcm(Lfilter, lvl);
 
   if (h == 1) {
-    if (G->L0) pari_err_BUG("classgp_pcp");
     G->k = 0;
     G->_data = NULL;
-    v = mkvecsmall(1);
-    *height = upper_bound_on_classpoly_coeffs(D, h, v);
+    *height = upper_bound_on_classpoly_coeffs(D, h, mkvecsmall(1));
     /* NB: No need to set *ni when h = 1 */
     set_avma(av); return;
   }
@@ -1294,8 +1292,7 @@ classgp_make_pcp(
   v[1] = 1;
   for (i = 2; i <= h; ++i) uel(v,i) = itou(gmael(T,i,1));
 
-  h2 = G->L0 ? h / 2 : h;
-  *height = upper_bound_on_classpoly_coeffs(D, h2, v);
+  *height = upper_bound_on_classpoly_coeffs(D, G->enum_cnt, v);
 
   /* The norms of the last one or two generators. */
   L1 = L[k - 1];
