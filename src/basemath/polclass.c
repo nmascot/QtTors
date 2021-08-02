@@ -110,10 +110,7 @@ static GEN
 random_FleV(GEN x, GEN a6, ulong p, ulong pi)
 { pari_APPLY_type(t_VEC, random_Fle_pre(uel(x,i), uel(a6,i), p, pi)) }
 
-/**
- * START Code from AVSs "torcosts.h"
- */
-
+/* START Code from AVSs "torcosts.h" */
 struct torctab_rec {
   int m;
   int fix2, fix3;
@@ -123,10 +120,7 @@ struct torctab_rec {
   double rating;
 };
 
-/*
-  These costs assume p=2 mod 3, 3 mod 4 and not 1 mod N
-*/
-
+/* These costs assume p=2 mod 3, 3 mod 4 and not 1 mod N */
 static struct torctab_rec torctab1[] = {
 { 11, 1, 1, 11, 1, 1, 0.047250 },
 { 33, 1, 0, 11, 1, 2, 0.047250 },
