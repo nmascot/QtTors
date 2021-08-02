@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  * genus 1 for N = 11, 14, and 15. */
 
 INLINE ulong
+Fl_mul4(ulong x, ulong p) { return Fl_double(Fl_double(x, p), p); }
+
+INLINE ulong
 Fl_div4(ulong x, ulong p) { return Fl_halve(Fl_halve(x, p), p); }
 
 INLINE ulong
@@ -149,15 +152,10 @@ a1a3_to_a4a6(
   *a6 = Fl_addmul_pre(t1, inv4, Fl_sqr_pre(a3, p, pi), p, pi);
 }
 
-/* Assumes m > 3, p > 5 */
-/* FIXME: Where do we assume that p > 5?  Some testing suggests that
- * this works for p == 5 also. */
-/* Sutherland has a version of this function in tecurve.c
- * around line 306. */
-/* FIXME: Could precompute some of the constants. */
+/* Assumes m > 3, p > 3; Sutherland has a version of this function in tecurve.c
+ * around line 306. FIXME: Could precompute some of the constants. */
 INLINE void
-bc_to_a4a6(
-  ulong *a4, ulong *a6, ulong b, ulong c, ulong p, ulong pi)
+bc_to_a4a6(ulong *a4, ulong *a6, ulong b, ulong c, ulong p, ulong pi)
 {
   /* E: y^2 + (1 - c)xy - by = x^3 - bx^2, so a1 = 1 - c
    * and a2 = a3 = -b. */
@@ -165,7 +163,7 @@ bc_to_a4a6(
 
   b6 = Fl_sub(c, 1, p);
   t0 = Fl_sqr_pre(b6, p, pi);
-  b4 = Fl_double(Fl_double(b, p), p);
+  b4 = Fl_mul4(b, p);
   b2 = Fl_sub(t0, b4, p);
   b4 = Fl_mul_pre(b6, b, p, pi);
   b6 = Fl_sqr_pre(b, p, pi);
@@ -183,6 +181,7 @@ bc_to_a4a6(
   *a6 = Fl_mul_pre(54 % p, c6, p, pi);
 }
 
+/* Singular iff c^4 - 3*c^3 + (-8*b+3)*c^2 + (-20*b-1)*c + (16*b^2+b) = 0 */
 INLINE void
 bc_to_a4a6_and_tors(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty,
@@ -191,8 +190,7 @@ bc_to_a4a6_and_tors(
   bc_to_a4a6(a4, a6, b, c, p, pi);
 
   /* tx = 3((c - 1)^2 - 4b) */
-  *tx = Fl_triple(Fl_sub(Fl_sqr(Fl_sub(c, 1, p), p),
-                         Fl_double(Fl_double(b, p), p), p), p);
+  *tx = Fl_triple(Fl_sub(Fl_sqr(Fl_sub(c, 1, p), p), Fl_mul4(b, p), p), p);
   /* ty = -108 b */
   *ty = Fl_neg(Fl_mul_pre(108 % p, b, p, pi), p);
 }
@@ -280,7 +278,7 @@ rs_to_a4a6_and_tors(
 }
 
 INLINE void
-random_curves_with_general_X1(
+E_general_X1(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty,
   long ncurves, long m, ulong p, ulong pi)
 {
@@ -301,28 +299,22 @@ random_curves_with_general_X1(
   {
     ulong inv3 = Fl_inv(3L, p), inv4 = Fl_div4(1L, p);
     ulong inv9 = Fl_sqr_pre(inv3, p, pi);
-    while (ncurves--) {
-      t_to_a4a6_and_tors(a4++, a6++, tx++, ty++, *r++, *s++,
-                         p, pi, inv3, inv4, inv9);
-    }
+    while (ncurves--)
+      t_to_a4a6_and_tors(a4++,a6++, tx++,ty++, *r++,*s++, p, pi, inv3, inv4, inv9);
     break;
   }
   case TQ_MAP:
   {
     ulong inv3 = Fl_inv(3L, p);
-    while (ncurves--) {
-      tq_to_a4a6_and_tors(a4++, a6++, tx++, ty++, *r++, *s++,
-                          p, pi, inv3);
-    }
+    while (ncurves--)
+      tq_to_a4a6_and_tors(a4++, a6++, tx++, ty++, *r++, *s++, p, pi, inv3);
     break;
   }
   case QT_MAP:
   {
     ulong c_12 = 12 % p, c_108 = 108 % p;
-    while (ncurves--) {
-      qt_to_a4a6_and_tors(a4++, a6++, tx++, ty++, *r++, *s++,
-                          p, pi, c_12, c_108);
-    }
+    while (ncurves--)
+      qt_to_a4a6_and_tors(a4++,a6++, tx++,ty++, *r++,*s++, p, pi, c_12, c_108);
     break;
   }
   }
@@ -330,26 +322,22 @@ random_curves_with_general_X1(
 }
 
 INLINE void
-random_curves_with_11_torsion(
+E_11_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
-  pari_sp ltop = avma, av;
+  pari_sp av = avma;
   const ulong A4 = Fl_neg(432 % p, p), A6 = 8208 % p;
   const ulong c_6 = 6 % p, c_72 = 72 % p, c_108 = 108 % p;
   const ulong inv216 = Fl_inv(216 % p, p);
 
-  av = avma;
-  while (ncurves) {
+  while (ncurves)
+  {
     GEN Q;
     ulong r, s, den;
 
-    /* FIXME: Curve arithmetic in Pari is slow enough that it's faster
-     * to generate random points on the curve than it is to compute
-     * random multiples of a point. I don't know if this is to be
-     * expected or not.  Should check if this is still true when using
-     * the fast jac_{add,mul} routines in 'classpoly.c'. Anyway,
-     * disabled for now. */
 #if 0
+    /* FIXME: it's faster * to generate random points on the curve than to
+     * compute random multiples of a point. Disabled for now. */
     /* Must guard against the possibility that [n]Q = 0 */
     do {
       /* FIXME: should perhaps use p + 1 + 2\sqrt{p} instead of p - 1 */
@@ -368,204 +356,221 @@ random_curves_with_11_torsion(
 
     /* r = (y + 108)/216, s = 1 + (y - 108)/(6x + 72) */
     r = Fl_mul_pre(Fl_add(Q[2], c_108, p), inv216, p, pi);
+    if (r == 1) continue;
     s = Fl_add(1, Fl_div(Fl_sub(Q[2], c_108, p), den, p), p);
-    rs_to_a4a6_and_tors(a4++, a6++, tx++, ty++, r, s, p, pi);
-    set_avma(av);
-    --ncurves;
+    if (s == 0) continue;
+    rs_to_a4a6_and_tors(a4, a6, tx, ty, r, s, p, pi);
+    if (!Fl_elldisc_pre(*a4, *a6, p, pi)) continue;
+    a4++; a6++; tx++; ty++; ncurves--;
   }
-  set_avma(ltop);
+  set_avma(av);
 }
 
 INLINE void
-random_curves_with_2_torsion(
+E_2_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m1 = p - 1, inv3 = Fl_inv(3L, p);
-  while (ncurves--) {
+  while (ncurves) {
     ulong A2 = random_Fl(m1) + 1;  /* nonzero */
     ulong A4 = random_Fl(m1) + 1;  /* nonzero */
 
+    if (!Fl_sub(Fl_sqr_pre(A2, p, pi), Fl_mul4(A4, p), p)) continue;
     a2a4_to_a4a6(a4++, a6++, A2, A4, inv3, p, pi);
-
     /* [0,0] is a 2-torsion point on y^2 = x(x^2 + a2x + a4) which
      * is mapped to [(1/3)a2, 0] on y^2 = x^3 + A4x + A6. */
     *tx++ = Fl_mul_pre(inv3, A2, p, pi);
-    *ty++ = 0L;
+    *ty++ = 0L; ncurves--;
   };
 }
 
 INLINE void
-random_curves_with_3_torsion(
+E_3_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m1 = p - 1;
   const ulong inv3 = Fl_inv(3, p), inv4 = Fl_inv(4, p);
   const ulong inv9 = Fl_sqr_pre(inv3, p, pi);
 
-  while (ncurves--) {
+  while (ncurves) {
     ulong a1 = random_Fl(m1) + 1;  /* nonzero */
     ulong a3 = random_Fl(m1) + 1;  /* nonzero */
-
+    /* a1^3 - 27 a^3 != 0 */
+    if (!Fl_sub(Fl_mul_pre(a1, Fl_sqr_pre(a1, p, pi), p, pi),
+                Fl_mul_pre(27 % p, a3, p, pi), p)) continue;
     a1a3_to_a4a6(a4++, a6++, a1, a3, inv3, inv4, inv9, p, pi);
-
     /* [0,0] is a 3-torsion point on y^2 + a1xy + a3y = x^3 which
      * is mapped to [a1^2/12, a3/2] on y^2 = x^3 + a4x + a6. */
     *tx++ = Fl_mul_pre(Fl_sqr_pre(Fl_halve(a1, p), p, pi), inv3, p, pi);
-    *ty++ = Fl_halve(a3, p);
+    *ty++ = Fl_halve(a3, p); ncurves--;
   }
 }
 
 INLINE void
-random_curves_with_4_torsion(
+E_4_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m1 = p - 1;
-  while (ncurves--) {
+  while (ncurves) {
     ulong b = random_Fl(m1) + 1;  /* nonzero */
+    if (!Fl_add(b, Fl_sqr_pre(Fl_mul4(b, p), p, pi), p)) continue;
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, 0L, p, pi);
+    ncurves--;
   }
 }
 
 INLINE void
-random_curves_with_5_torsion(
+E_5_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m1 = p - 1;
-  while (ncurves--) {
+  while (ncurves) {
     ulong b = random_Fl(m1) + 1;  /* nonzero */
+    if (!Fl_sub(b, Fl_mul_pre(b, Fl_sub(b, 11 % p, p), p, pi), p)) continue;
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, b, p, pi);
+    ncurves--;
   }
 }
 
 INLINE void
-random_curves_with_6_torsion(
+E_6_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m2 = p - 2;
-  while (ncurves--) {
-    ulong c = random_Fl(m2) + 1; /* in [1, p - 2] */
-    ulong b = Fl_add(c, Fl_sqr_pre(c, p, pi), p); /* b = c + c^2 */
+  while (ncurves) {
+    ulong b, c = random_Fl(m2) + 1; /* in [1, p - 2] */
+    if (!Fl_add(Fl_mul_pre(c, 9 % p, p, pi), 1, p)) continue;
+    b = Fl_add(c, Fl_sqr_pre(c, p, pi), p); /* b = c + c^2 */
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, c, p, pi);
+    ncurves--;
   }
 }
 
 INLINE void
-random_curves_with_7_torsion(
+E_7_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
   const ulong m2 = p - 2;
-  while (ncurves--) {
-    ulong d = random_Fl(m2) + 2; /* in [2, p - 2] */
+  while (ncurves) {
+    ulong d = random_Fl(m2) + 2; /* in [2, p - 1] */
     ulong c = Fl_sub(Fl_sqr_pre(d, p, pi), d, p); /* c = d^2 - d */
     ulong b = Fl_mul_pre(c, d, p, pi); /* b = d^3 - d^2 */
+    if (Fl_sub(Fl_sub(b, Fl_mul(c, 7 % p, p), p), Fl_double(d, p), p) == m2+1)
+      continue;
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, c, p, pi);
+    ncurves--;
   }
 }
 
 INLINE void
-random_curves_with_8_torsion(
+E_8_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
-  const ulong m1 = p - 1;
-  while (ncurves--) {
-    ulong d = random_Fl(m1) + 1;  /* nonzero */
+  const ulong m2 = p - 2;
+  while (ncurves) {
+    ulong b, c, d = random_Fl(m2) + 2;  /* in [2, p - 1] */
+    b = Fl_sub(Fl_double(d, p), 1, p); /* 2d - 1 */
+    if (!b) continue;
     /* b = (2d - 1)(d - 1) */
-    ulong b = Fl_mul_pre(Fl_sub(Fl_double(d, p), 1, p),
-                         Fl_sub(d, 1, p), p, pi);
+    b = Fl_mul_pre(b, Fl_sub(d, 1, p), p, pi);
     /* c = (2d - 1)(d - 1)/d */
-    ulong c = Fl_div(b, d, p);
+    c = Fl_div(b, d, p);
+    if (Fl_mul4(Fl_add(c, d, p), p) == p - 3) continue;
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, c, p, pi);
+    ncurves--;
   }
 }
 
 INLINE void
-random_curves_with_9_torsion(
+E_9_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
-  while (ncurves--) {
-    ulong f = random_Fl(p);
-    /* d = f(f - 1) + 1 = f^2 - f + 1 = f^2 - (f - 1) */
+  const ulong m2 = p - 2;
+  while (ncurves) {
+    ulong f = random_Fl(m2) + 2; /* in [2, p - 1] */
+    /* d = f^2 - f + 1 */
     ulong d = Fl_sub(Fl_sqr_pre(f, p, pi), Fl_sub(f, 1, p), p);
     /* c = fd - f */
     ulong c = Fl_mul_pre(f, Fl_sub(d, 1, p), p, pi);
     /* b = cd */
     ulong b = Fl_mul_pre(c, d, p, pi);
+    /* f^3 - 6*f^2 + 3*f + 1 != 0 */
+    if (!Fl_sub(Fl_sub(c, Fl_mul(5 % p, d, p), p),
+               Fl_double(Fl_sub(f, 3, p), p ), p)) continue;
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, c, p, pi);
+    ncurves--;
   }
 }
 
 INLINE void
-random_curves_with_10_torsion(
+E_10_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
+  const ulong m2 = p - 2;
   while (ncurves) {
-    ulong f, f2, d, c, b, t;
-
-    f = random_Fl(p);
+    ulong f, ff, f2, d, c, b, t;
+    f = random_Fl(m2) + 2; /* in [2, p - 1] */
     /* t = f - (f - 1)^2 = (3f - 1) - f^2 */
-    f2 = Fl_sqr_pre(f, p, pi);
-    t = Fl_sub(Fl_sub(Fl_triple(f, p), 1, p), f2, p);
-    if (t == 0)
-      continue;
+    f2 = Fl_double(f, p);
+    t = Fl_sub(f2, 1, p); if (!t || Fl_mul_pre(f2, t, p, pi) == 1) continue;
+    ff = Fl_sqr_pre(f, p, pi);
+    t = Fl_sub(Fl_add(t, f, p), ff, p); if (!t) continue;
 
     /* d = f^2 / (f - (f - 1)^2) */
-    d = Fl_div(f2, t, p);
+    d = Fl_div(ff, t, p);
     /* c = fd - f */
     c = Fl_mul_pre(f, Fl_sub(d, 1, p), p, pi);
     /* b = cd */
     b = Fl_mul_pre(c, d, p, pi);
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, c, p, pi);
-    --ncurves;
+    ncurves--;
   }
 }
 
 INLINE void
-random_curves_with_12_torsion(
+E_12_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
-  while (ncurves--) {
+  const long m2 = p - 2;
+  while (ncurves) {
     ulong tau, t1, t2, M, f, d, c, b;
-    tau = random_Fl(p);
-    /* tau mustn't be = 1.  If it is, just set tau = 2. */
-    tau += tau == 1;
-
+    tau = random_Fl(m2) + 2; /* in [2, p - 1] */
     /* t1 = tau - 1 */
     t1 = Fl_sub(tau, 1, p);
     /* M = (3 tau - 3 tau^2 - 1)/(tau - 1) = -(3 tau + 1/(tau - 1)) */
     t2 = Fl_inv(t1, p);
     M = Fl_neg(Fl_add(Fl_triple(tau, p), t2, p), p);
+    /* (3 tau^2 - 3 tau + 1)(6 tau^2 - 6 tau + 1) = 0 */
+    if (!M || !Fl_add(Fl_double(M, p), t2, p)) continue;
     /* f = M/(1 - tau) = -M / (tau - 1) */
     f = Fl_neg(Fl_mul_pre(M, t2, p, pi), p);
     /* d = M + tau */
-    d = Fl_add(M, tau, p);
+    d = Fl_add(M, tau, p); if (d == 1) continue; /* <=> 2tau - 1 = 0 */
     /* c = fd - f */
     c = Fl_mul_pre(f, Fl_sub(d, 1, p), p, pi);
     /* b = cd */
     b = Fl_mul_pre(c, d, p, pi);
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, c, p, pi);
+    ncurves--;
   }
 }
 
 static void
-random_curves_with_any_torsion(
+E_any_torsion(
   ulong *a4, ulong *a6, ulong *px, ulong *py, long ncurves, ulong p, ulong pi)
 {
   pari_sp av = avma;
   ulong c_1728 = 1728 % p;
   long i;
-  for (i = 0; i < ncurves; ++i) {
+  for (i = 0; i < ncurves; i++)
+  {
     GEN P;
     ulong j;
-    do
-      j = random_Fl(p);
-    while (j == 0 || j == c_1728);
-
+    do j = random_Fl(p); while (j == 0 || j == c_1728);
     Fl_ellj_to_a4a6(j, p, &a4[i], &a6[i]);
-
     P = random_Fle_pre(a4[i], a6[i], p, pi);
     px[i] = P[1];
-    py[i] = P[2];
-    set_avma(av);
+    py[i] = P[2]; set_avma(av);
   }
 }
 
@@ -582,13 +587,11 @@ torsion_compatible_with_characteristic(long m, ulong p)
  *
  * Output: Put the coefficients of ncurves elliptic curves with m-torsion into
  * a4 and a6. The actual number of unique curves is not guaranteed to be
- * ncurves, but will be close whenever p >> ncurves.  When nonzero, (torx[i],
- * tory[i]) will contain the m-torsion point on [a4[i], a6[i]].
- */
+ * ncurves, but will be close whenever p >> ncurves. (tx[i], ty[i])
+ * is an m-torsion point on [a4[i], a6[i]]. */
 void
 random_curves_with_m_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, long m, ulong p)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, long m, ulong p)
 {
   ulong pi = get_Fl_red(p);
 
@@ -596,57 +599,29 @@ random_curves_with_m_torsion(
 
   if (m < 1 || m > LAST_X1_LEVEL
       || ! torsion_compatible_with_characteristic(m, p))
-    pari_err_BUG("random_curves_with_m_torsion");
+    pari_err_BUG("E_m_torsion");
   switch (m) {
-  case 1:
-    random_curves_with_any_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    return;
-  case 2:
-    random_curves_with_2_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 3:
-    random_curves_with_3_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 4:
-    random_curves_with_4_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 5:
-    random_curves_with_5_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 6:
-    random_curves_with_6_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 7:
-    random_curves_with_7_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 8:
-    random_curves_with_8_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 9:
-    random_curves_with_9_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 10:
-    random_curves_with_10_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 11:
-    random_curves_with_11_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 12:
-    random_curves_with_12_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
+  case 1: E_any_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
+  case 2: E_2_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
+  case 3: E_3_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
+  case 4: E_4_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
+  case 5: E_5_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
+  case 6: E_6_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
+  case 7: E_7_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
+  case 8: E_8_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
+  case 9: E_9_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
+  case 10: E_10_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
+  case 11: E_11_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
+  case 12: E_12_torsion(a4, a6, tx, ty, ncurves, p, pi); break;
   default:
-    random_curves_with_general_X1(a4, a6, tx, ty, ncurves, m, p, pi);
+    E_general_X1(a4, a6, tx, ty, ncurves, m, p, pi);
+    while (ncurves--) {
+      while (!Fl_elldisc_pre(*a4, *a6, p, pi)) /* rare */
+        E_general_X1(a4, a6, tx, ty, 1L, m, p, pi);
+      a4++; a6++; tx++; ty++;
+    }
   }
 
-  /* The likelihood of getting *any* zero discriminants is small
-   * enough that we can check using this slightly roundabout and
-   * expensive manner. */
-  while (ncurves--) {
-    ulong d = Fl_elldisc_pre(*a4, *a6, p, pi);
-    if (d == 0)  /* should almost never be true */
-      random_curves_with_m_torsion(a4, a6, tx, ty, 1L, m, p);
-    ++a4; ++a6; ++tx; ++ty;
-  }
 }
 
 #define vZ evalvarn(1) /* variable number for secondary variable */
