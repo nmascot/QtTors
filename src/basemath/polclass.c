@@ -49,34 +49,28 @@ famatsmall_divexact(GEN a, GEN b)
 /* This is Sutherland, 2009, TestCurveOrder.
  *
  * [a4, a6] and p specify an elliptic curve over FF_p.  N0,N1 are the two
- * possible curve orders, and n0,n1 their factoru */
+ * possible curve orders (N0+N1 = 2p+2), and n0,n1 their factoru */
 static long
 test_curve_order(norm_eqn_t ne, ulong a4, ulong a6,
-  long N0, long N1, GEN n0, GEN n1, const long hasse[2])
+  long N0, long N1, GEN n0, GEN n1, long hasse_low, long hasse_high)
 {
   pari_sp ltop = avma, av;
-  ulong a4t, a6t, p = ne->p, pi = ne->pi, T = ne->T, swapped = 0;
-  long m0, m1, hasse_low, hasse_high;
+  ulong a4t, a6t, p = ne->p, pi = ne->pi, T = ne->T;
+  long m0, m1;
+  int swapped = 0, first = 1;
 
   if (p <= 11) {
     long card = (long)p + 1 - Fl_elltrace(a4, a6, p);
     return card == N0 || card == N1;
   }
-  /* [a4, a6] is the given curve and [a4t, a6t] is its quadratic twist */
-  Fl_elltwist_disc(a4, a6, T, p, &a4t, &a6t);
-
   m0 = m1 = 1;
-  if (N0 + N1 != 2 * (long)p + 2) pari_err_BUG("test_curve_order");
-
-  hasse_low = hasse[0];
-  hasse_high = hasse[1];
   for (av = avma;;)
   {
-    GEN pt, Q, fa0;
+    GEN Q, fa0;
     long a1, x, n_s;
 
-    pt = random_Flj_pre(a4, a6, p, pi);
-    Q = Flj_mulu_pre(pt, m0, a4, p, pi);
+    Q = random_Flj_pre(a4, a6, p, pi);
+    if (m0 != 1) Q = Flj_mulu_pre(Q, m0, a4, p, pi);
     fa0 = m0 == 1? n0: famatsmall_divexact(n0, factoru(m0));
     n_s = Flj_order_ufact(Q, N0 / m0, fa0, a4, p, pi);
     if (n_s == 0) {
@@ -94,6 +88,8 @@ test_curve_order(norm_eqn_t ne, ulong a4, ulong a6,
     /* every x was either N0 or N1, so we return true */
     if (x > hasse_high) return gc_long(ltop,1);
 
+    /* [a4, a6] is the given curve and [a4t, a6t] is its quadratic twist */
+    if (first) { Fl_elltwist_disc(a4, a6, T, p, &a4t, &a6t); first = 0; }
     lswap(a4, a4t);
     lswap(a6, a6t);
     lswap(m0, m1); set_avma(av);
@@ -683,14 +679,9 @@ find_j_inv_with_given_trace(
   ulong *j_t, norm_eqn_t ne, long rho_inv, long max_curves)
 {
   pari_sp ltop = avma, av;
-  long curves_tested = 0, batch_size;
-  long N0, N1, hasse[2];
-  GEN n0, n1;
-  long i, found = 0;
-  ulong p = ne->p, pi = ne->pi;
-  long t = ne->t;
-  ulong p1 = p + 1, a4, a6, m, N;
-  GEN A4, A6, tx, ty;
+  long tested = 0, t = ne->t, batch_size, N0, N1, hasse_low, hasse_high, i;
+  GEN n0, n1, A4, A6, tx, ty;
+  ulong p = ne->p, pi = ne->pi, p1 = p + 1, a4, a6, m, N;
   int twist;
 
   if (p == 2 || p == 3) {
@@ -714,9 +705,9 @@ find_j_inv_with_given_trace(
 
   dbg_printf(2)("  Selected torsion constraint m = %lu and batch "
                 "size = %ld\n", m, batch_size);
-  hasse_bounds(&hasse[0], &hasse[1], p);
+  hasse_bounds(&hasse_low, &hasse_high, p);
   av = avma;
-  while (!found && (max_curves <= 0 || curves_tested < max_curves))
+  while (max_curves <= 0 || tested < max_curves)
   {
     GEN Pp1, Pt;
     random_curves_with_m_torsion((ulong *)(A4 + 1), (ulong *)(A6 + 1),
@@ -727,20 +718,20 @@ find_j_inv_with_given_trace(
     FleV_mulu_pre_inplace(Pp1, N, A4, p, pi);
     if (twist >= 3) FleV_mulu_pre_inplace(Pt, t, A4,  p, pi);
     for (i = 1; i <= batch_size; ++i) {
-      ++curves_tested;
+      ++tested;
       a4 = A4[i];
       a6 = A6[i]; if (a4 == 0 || a6 == 0) continue;
 
       if (( (twist >= 3 && mael(Pp1,i,1) == mael(Pt,i,1))
          || (twist < 3 && umael(Pp1,i,1) == p))
-          && test_curve_order(ne, a4, a6, N0, N1, n0, n1, hasse)) {
+          && test_curve_order(ne, a4, a6, N0,N1, n0,n1, hasse_low,hasse_high)) {
         *j_t = Fl_ellj_pre(a4, a6, p, pi);
-        found = 1; break;
+        return gc_long(ltop, tested);
       }
     }
     set_avma(av);
   }
-  return gc_long(ltop, curves_tested);
+  return gc_long(ltop, tested);
 }
 
 /* SECTION: Functions for dealing with polycyclic presentations. */
