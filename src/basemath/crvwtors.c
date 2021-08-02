@@ -391,34 +391,6 @@ random_curves_with_11_torsion(
 }
 
 INLINE void
-random_curves_with_elliptic_X1(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, long m, ulong p, ulong pi)
-{
-  switch (m) {
-  case 11:
-    random_curves_with_11_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  /* cases 12 and 13 are not missing, it is handled by
-   * random_curves_with_rational_X1() and
-   * random_curves_with_general_X1() respectively. */
-  case 14:
-    /*random_curves_with_14_torsion(a4, a6, tx, ty, ncurves, p, pi);
-      break;*/
-  case 15:
-    /*random_curves_with_14_torsion(a4, a6, tx, ty, ncurves, p, pi);
-      break;*/
-    /* FIXME: random_curves_with_elliptic_X1() currently uses the
-     * alternative (but nevertheless very efficient) nonelliptic
-     * implementation for levels 14 and 15. */
-    random_curves_with_general_X1(a4, a6, tx, ty, ncurves, m, p, pi);
-    break;
-  default:
-    pari_err_BUG("random_curves_with_elliptic_X1");
-  }
-}
-
-INLINE void
 random_curves_with_2_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty,
   long ncurves, ulong p, ulong pi)
@@ -598,48 +570,6 @@ random_curves_with_12_torsion(
   }
 }
 
-INLINE void
-random_curves_with_rational_X1(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty,
-  long ncurves, long m, ulong p, ulong pi)
-{
-  switch (m) {
-  case 2:
-    random_curves_with_2_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 3:
-    random_curves_with_3_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 4:
-    random_curves_with_4_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 5:
-    random_curves_with_5_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 6:
-    random_curves_with_6_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 7:
-    random_curves_with_7_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 8:
-    random_curves_with_8_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 9:
-    random_curves_with_9_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  case 10:
-    random_curves_with_10_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  /* case 11 is not missing, it is handled by random_curves_with_elliptic_X1() */
-  case 12:
-    random_curves_with_12_torsion(a4, a6, tx, ty, ncurves, p, pi);
-    break;
-  default:
-    pari_err_BUG("random_curves_with_rational_X1");
-  }
-}
-
 static void
 random_curves_with_any_torsion(
   ulong *a4, ulong *a6, ulong *px, ulong *py,
@@ -672,19 +602,13 @@ torsion_compatible_with_characteristic(long m, ulong p)
   return ceildivuu(p + 1 - u, m) <= (p + 1 + u) / m;
 }
 
-/*
- * Input: pointers a4, a6, t{x,y} where t{x,y} is allowed to be
- * zero, each (nonzero one) pointing to space for at least ncurves
- * elements; an integer m <= 50; a prime p > 3; a flag in {0, 1}.
+/* Input: pointers a4, a6, t{x,y} where t{x,y} is allowed to be zero, each
+ * (nonzero one) pointing to space for at least ncurves elements; an integer
+ * 1 <= m <= LAST_X1_LEVEL; a prime p > 3.
  *
- * The flag indicates that we should generate curves faster at the
- * expense of not guaranteeing uniform randomness.  This only makes a
- * difference when m = 11, 14 and 15.
- *
- * Output: Put the coefficients of ncurves elliptic curves with
- * m-torsion into a4 and a6.  The actual number of *unique* curves
- * generated is *not* guaranteed to be ncurves, but will be close
- * whenever p is big relative to ncurves.  When nonzero, (torx[i],
+ * Output: Put the coefficients of ncurves elliptic curves with m-torsion into
+ * a4 and a6. The actual number of unique curves is not guaranteed to be
+ * ncurves, but will be close whenever p >> ncurves.  When nonzero, (torx[i],
  * tory[i]) will contain the m-torsion point on [a4[i], a6[i]].
  */
 void
@@ -694,20 +618,51 @@ random_curves_with_m_torsion(
 {
   ulong pi = get_Fl_red(p);
 
-  if (ncurves == 0)
-    return;
+  if (ncurves == 0) return;
 
   if (m < 1 || m > LAST_X1_LEVEL
       || ! torsion_compatible_with_characteristic(m, p))
     pari_err_BUG("random_curves_with_m_torsion");
-  else if (m == 1)
+  switch (m) {
+  case 1:
     random_curves_with_any_torsion(a4, a6, tx, ty, ncurves, p, pi);
-  else if (m <= 10 || m == 12)
-    random_curves_with_rational_X1(a4, a6, tx, ty, ncurves, m, p, pi);
-  else if (m == 11 || m == 14 || m == 15)
-    random_curves_with_elliptic_X1(a4, a6, tx, ty, ncurves, m, p, pi);
-  else
+    break;
+  case 2:
+    random_curves_with_2_torsion(a4, a6, tx, ty, ncurves, p, pi);
+    break;
+  case 3:
+    random_curves_with_3_torsion(a4, a6, tx, ty, ncurves, p, pi);
+    break;
+  case 4:
+    random_curves_with_4_torsion(a4, a6, tx, ty, ncurves, p, pi);
+    break;
+  case 5:
+    random_curves_with_5_torsion(a4, a6, tx, ty, ncurves, p, pi);
+    break;
+  case 6:
+    random_curves_with_6_torsion(a4, a6, tx, ty, ncurves, p, pi);
+    break;
+  case 7:
+    random_curves_with_7_torsion(a4, a6, tx, ty, ncurves, p, pi);
+    break;
+  case 8:
+    random_curves_with_8_torsion(a4, a6, tx, ty, ncurves, p, pi);
+    break;
+  case 9:
+    random_curves_with_9_torsion(a4, a6, tx, ty, ncurves, p, pi);
+    break;
+  case 10:
+    random_curves_with_10_torsion(a4, a6, tx, ty, ncurves, p, pi);
+    break;
+  case 11:
+    random_curves_with_11_torsion(a4, a6, tx, ty, ncurves, p, pi);
+    break;
+  case 12:
+    random_curves_with_12_torsion(a4, a6, tx, ty, ncurves, p, pi);
+    break;
+  default:
     random_curves_with_general_X1(a4, a6, tx, ty, ncurves, m, p, pi);
+  }
 
   /* The likelihood of getting *any* zero discriminants is small
    * enough that we can check using this slightly roundabout and
