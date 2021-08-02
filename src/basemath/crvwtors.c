@@ -152,13 +152,13 @@ a1a3_to_a4a6(
   *a6 = Fl_addmul_pre(t1, inv4, Fl_sqr_pre(a3, p, pi), p, pi);
 }
 
-/* Assumes m > 3, p > 3; Sutherland has a version of this function in tecurve.c
+/* E: y^2 + (1 - c)xy - by = x^3 - bx^2; p > 3
+ * Singular iff b(c^4 - 3*c^3 + (-8*b+3)*c^2 + (-20*b-1)*c + (16*b^2+b)) = 0
+ * Sutherland has a version of this function in tecurve.c
  * around line 306. FIXME: Could precompute some of the constants. */
 INLINE void
 bc_to_a4a6(ulong *a4, ulong *a6, ulong b, ulong c, ulong p, ulong pi)
 {
-  /* E: y^2 + (1 - c)xy - by = x^3 - bx^2, so a1 = 1 - c
-   * and a2 = a3 = -b. */
   ulong t0, t2, b2, b4, b6, c4, c6;
 
   b6 = Fl_sub(c, 1, p);
@@ -181,7 +181,6 @@ bc_to_a4a6(ulong *a4, ulong *a6, ulong b, ulong c, ulong p, ulong pi)
   *a6 = Fl_mul_pre(54 % p, c6, p, pi);
 }
 
-/* Singular iff c^4 - 3*c^3 + (-8*b+3)*c^2 + (-20*b-1)*c + (16*b^2+b) = 0 */
 INLINE void
 bc_to_a4a6_and_tors(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty,
@@ -487,13 +486,14 @@ E_9_torsion(
 {
   const ulong m2 = p - 2;
   while (ncurves) {
-    ulong f = random_Fl(m2) + 2; /* in [2, p - 1] */
+    ulong b, c, d, f = random_Fl(m2) + 2; /* in [2, p - 1] */
     /* d = f^2 - f + 1 */
-    ulong d = Fl_sub(Fl_sqr_pre(f, p, pi), Fl_sub(f, 1, p), p);
+    d = Fl_sub(Fl_sqr_pre(f, p, pi), Fl_sub(f, 1, p), p);
+    if (!d) continue;
     /* c = fd - f */
-    ulong c = Fl_mul_pre(f, Fl_sub(d, 1, p), p, pi);
+    c = Fl_mul_pre(f, Fl_sub(d, 1, p), p, pi);
     /* b = cd */
-    ulong b = Fl_mul_pre(c, d, p, pi);
+    b = Fl_mul_pre(c, d, p, pi);
     /* f^3 - 6*f^2 + 3*f + 1 != 0 */
     if (!Fl_sub(Fl_sub(c, Fl_mul(5 % p, d, p), p),
                Fl_double(Fl_sub(f, 3, p), p ), p)) continue;
@@ -542,10 +542,10 @@ E_12_torsion(
     M = Fl_neg(Fl_add(Fl_triple(tau, p), t2, p), p);
     /* (3 tau^2 - 3 tau + 1)(6 tau^2 - 6 tau + 1) = 0 */
     if (!M || !Fl_add(Fl_double(M, p), t2, p)) continue;
+    /* d = M + tau */
+    d = Fl_add(M, tau, p); if (!d || d == 1) continue;
     /* f = M/(1 - tau) = -M / (tau - 1) */
     f = Fl_neg(Fl_mul_pre(M, t2, p, pi), p);
-    /* d = M + tau */
-    d = Fl_add(M, tau, p); if (d == 1) continue; /* <=> 2tau - 1 = 0 */
     /* c = fd - f */
     c = Fl_mul_pre(f, Fl_sub(d, 1, p), p, pi);
     /* b = cd */
