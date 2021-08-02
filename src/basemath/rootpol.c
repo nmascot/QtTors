@@ -2315,15 +2315,20 @@ usp(GEN Q0, long flag, long bitprec)
     { /* exactly one root */
       GEN s = gen_0;
       if (flag == 0)
+      {
         s = mkvec2(gmul2n(c,-k), gmul2n(addiu(c,1),-k));
+        s = gerepilecopy(av2, s);
+      }
       else if (flag == 1) /* Caveat: Qremapped is the reciprocal polynomial */
       {
         s = polsolve(*pQremapped, bitprec+1);
         s = addir(c, divrr(s, addsr(1, s)));
         shiftr_inplace(s, -k);
         if (realprec(s) != prec) s = rtor(s, prec);
+        gerepileupto(av2, s);
       }
-      gel(sol, ++nbr) = gerepileupto(av2, s);
+      else set_avma(av2);
+      gel(sol, ++nbr) = s;
     }
     else if (nb)
     { /* unknown, add two nodes to refine */
