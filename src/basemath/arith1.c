@@ -5653,47 +5653,29 @@ update_g1(GEN *pg1, GEN *pd1, GEN *pfad1, GEN f, GEN o, GEN fao)
   *pd1 = mulii(A,B); /* g1 has order d1 <- lcm(d1,o) */
 }
 
-/* Write x = Df^2, where D = fundamental discriminant,
- * P^E = factorisation of conductor f */
-static GEN
-corediscfact(GEN fa, long s, GEN *pP, GEN *pE)
-{
-  GEN P, E, P0 = gel(fa,1), E0 = gel(fa,2), D = s > 0? gen_1: gen_m1;
-  long l = lg(P0), i, j;
-
-  E = cgetg(l, t_VECSMALL);
-  P = cgetg(l, t_VEC);
-  for (i = j = 1; i < l; i++)
-  {
-    long e = itos(gel(E0,i));
-    if (odd(e)) D = mulii(D, gel(P0,i));
-    e >>= 1;
-    if (e) { gel(P, j) = gel(P0, i); E[j] = e; j++; }
-  }
-  if (Mod4(D) != 1)
-  {
-    D = shifti(D, 2);
-    if (!--E[1])
-    {
-      P[1] = P[0]; P++;
-      E[1] = E[0]; E++; j--;
-    }
-  }
-  setlg(P,j); *pP = P;
-  setlg(E,j); *pE = E; return D;
-}
-
 /* *pD = coredisc(x), *pR = regulator (x > 0) or NULL */
-static GEN
+GEN
 quadclassnoF(GEN x, GEN *pD, GEN *pR)
 {
-  GEN E, H, D, P, R = NULL;
-  long l, i;
+  GEN D, H, P, E, R = NULL;
+  long i, l;
 
-  D = corediscfact(absZ_factor(x), signe(x), &P, &E);
-  H = gen_1; l = lg(P);
+  if (lgefint(x) == 3)
+  {
+    long d, h;
+    if (signe(x) < 0)
+    {
+      h = unegquadclassnoF(x[2], &d);
+      if (pR) *pR = NULL;
+    }
+    else
+      h = uposquadclassnoF(x[2], &d, pR);
+    if (pD) *pD = stoi(d); return utoi(h);
+  }
+  D = coredisc2_fact(absZ_factor(x), signe(x), &P, &E);
+  l = lg(P);
   /* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] = \prod_{p^e||f} p^(e-1) [ p - (D/p) ] */
-  for (i=1; i<l; i++)
+  for (i = 1, H = gen_1; i < l; i++)
   {
     GEN p = gel(P,i);
     long e = E[i], s = kronecker(D,p);
@@ -5705,10 +5687,9 @@ quadclassnoF(GEN x, GEN *pD, GEN *pR)
       if (e >= 2) H = mulii(H, e == 2? p: powiu(p,e-1));
     }
   }
-
   /* divide by [ O_K^* : O^* ] */
   if (signe(x) < 0) switch(itou_or_0(D))
-  {
+  { /* |x| >= 2^BIL, hence x != D */
     case 4: H = shifti(H,-1); break;
     case 3: H = divis(H,3); break;
   }
@@ -5717,6 +5698,53 @@ quadclassnoF(GEN x, GEN *pD, GEN *pR)
     R = quadregulator(D,DEFAULTPREC);
     if (!equalii(x,D))
       H = divii(H, roundr(divrr(quadregulator(x,DEFAULTPREC), R)));
+  }
+  if (pR) *pR = R;
+  if (pD) *pD = D; return H;
+}
+
+/* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] = \prod_{p^e||f} p^(e-1) [ p - (D/p) ] */
+static long
+sclassnoF(long D, GEN P, GEN E)
+{
+  long i, H = 1, l = lg(P);
+  for (i = 1; i < l; i++)
+  {
+    long p = P[i], e = E[i], s = kross(D,p);
+    if (!s)
+      H *= upowuu(p, e);
+    else
+    {
+      H *= p - s;
+      if (e >= 2) H *= upowuu(p, e-1);
+    }
+  }
+  return H;
+}
+
+ulong
+unegquadclassnoF(ulong x, long *pD)
+{
+  pari_sp av = avma;
+  GEN E, P;
+  long D = coredisc2s_fact(factoru(x), -1, &P, &E), H = sclassnoF(D, P, E);
+  switch(D)
+  { /* divide by [ O_K^* : O^* ] */
+    case -4: H >>= 1; break;
+    case -3: H /= 3; break;
+  }
+  *pD = D; return gc_ulong(av, H);
+}
+ulong
+uposquadclassnoF(ulong x, long *pD, GEN *pR)
+{
+  GEN P, E, R = NULL;
+  long D = coredisc2s_fact(factoru(x), 1, &P, &E), H = sclassnoF(D, P, E);
+  if (pR || x != D) R = quadregulator(utoi(D),DEFAULTPREC);
+  if (x != D)
+  {
+    GEN t = roundr(divrr(quadregulator(utoi(x),DEFAULTPREC), R));
+    H /= itou(t);
   }
   if (pR) *pR = R;
   *pD = D; return H;
@@ -5923,16 +5951,27 @@ END:
   return gerepileuptoint(av, shifti(mulii(d1,Hf), r2));
 }
 
+static GEN
+quadh(GEN D) { return abgrp_get_no(quadclassunit0(D, 0, NULL, 0)); }
 GEN
-quadclassno(GEN x)
+quadclassno(GEN x, GEN *pD)
+{
+  GEN D, t = quadclassnoF(x, &D, NULL);
+  if (pD) *pD = D; return mulii(quadh(D), t);
+}
+long
+quadclassnos(long x, long *pD)
 {
   pari_sp av = avma;
-  GEN Hf, D;
-  long s, r;
-  check_quaddisc(x, &s, &r, "quadclassno");
-  if (s < 0 && abscmpiu(x,12) <= 0) return gen_1;
-  Hf = quadclassnoF(x, &D, NULL);
-  return gerepileuptoint(av, mulii(Hf, gel(quadclassunit0(D,0,NULL,0),1)));
+  long h, D;
+  if (x < 0 && x >= -12)
+  {
+    if (pD) *pD = x == -12? -3: x;
+    return 1;
+  }
+  h = unegquadclassnoF(-x, &D);
+  h *= itos( quadh(stoi(D)) );
+  if (pD) *pD = D; return gc_long(av, h);
 }
 
 /* use Euler products */
@@ -5941,10 +5980,10 @@ classno2(GEN x)
 {
   pari_sp av = avma;
   const long prec = DEFAULTPREC;
-  long n, i, r, s;
+  long n, i, s;
   GEN p1, p2, S, p4, p5, p7, Hf, Pi, reg, logd, sqrtd, D, half;
 
-  check_quaddisc(x, &s, &r, "classno2");
+  check_quaddisc(x, &s, NULL, "classno2");
   if (s < 0 && abscmpiu(x,12) <= 0) return gen_1;
 
   Hf = quadclassnoF(x, &D, &reg);
@@ -6063,11 +6102,9 @@ hclassnoF_fact(GEN P, GEN E, GEN D)
 static GEN
 hclassno6_large(GEN x)
 {
-  GEN H = NULL, D, P, E;
-  long l;
+  GEN H = NULL, P, E, D = coredisc2_fact(absZ_factor(x), -1, &P, &E);
+  long l = lg(P);
 
-  D = corediscfact(absZ_factor(x), -1, &P, &E);
-  l = lg(P);
   if (l > 1 && lgefint(x) == 3)
   { /* F != 1, second chance */
     ulong h = hclassno6u_no_cache(x[2]);

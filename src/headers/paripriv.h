@@ -288,6 +288,7 @@ typedef classgp_pcp_struct classgp_pcp_t[1];
  * t is the absolute trace, so always > 0.
  * T is a twisting parameter, which satisfies (T|p) == -1. */
 typedef struct {
+  GEN faw; /* factor(u*v) */
   long D, t, u, v;
   ulong p, pi, s2, T;
 } norm_eqn_struct;

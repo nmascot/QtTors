@@ -1337,14 +1337,6 @@ classgp_make_pcp(
   set_avma(av); return;
 }
 
-INLINE ulong
-classno_wrapper(long D)
-{
-  pari_sp av = avma;
-  GEN G = quadclassunit0(stoi(D), 0, NULL, DEFAULTPREC);
-  return gc_ulong(av, itou(abgrp_get_no(G)));
-}
-
 /*
  * SECTION: Functions for calculating class polynomials.
  */
@@ -1520,18 +1512,14 @@ oneroot_of_classpoly(
   pari_sp av = avma;
   long nfactors, L_bound, i;
   ulong p = ne->p, pi = ne->pi;
-  GEN factw, factors, vdepths;
+  GEN factors, vdepths;
 
   if (j == 0 || j == 1728 % p) pari_err_BUG("oneroot_of_classpoly");
 
   *endo_cert = 1;
-  if (ne->u * ne->v == 1) { *j_endo = j; return 1; }
-
-  /* TODO: Precalculate all this data further up */
-  factw = factoru(ne->u * ne->v);
-  factors = gel(factw, 1);
-  nfactors = lg(factors) - 1;
-  vdepths = gel(factw, 2);
+  factors = gel(ne->faw, 1); nfactors = lg(factors) - 1;
+  if (!nfactors) { *j_endo = j; return 1; }
+  vdepths = gel(ne->faw, 2);
 
   /* FIXME: This should be bigger */
   L_bound = maxdd(log((double) -ne->D), (double)ne->v);
@@ -1590,6 +1578,7 @@ setup_norm_eqn(norm_eqn_t ne, long D, long u, GEN norm_eqn)
   ne->u = u;
   ne->t = norm_eqn[2];
   ne->v = norm_eqn[3];
+  ne->faw = factoru(ne->u * ne->v);
   ne->p = (ulong) norm_eqn[1];
   ne->pi = get_Fl_red(ne->p);
   ne->s2 = Fl_2gener_pre(ne->p, ne->pi);
@@ -1905,7 +1894,7 @@ polclass0(long D, long inv, long vx, GEN *db)
   pari_sp av = avma;
   GEN primes, P, H, plist, pilist;
   long n_curves_tested = 0, filter = 1;
-  long nprimes, s, i, j, del, ni, orient, h, p1, p2;
+  long D0, nprimes, s, i, j, del, ni, orient, h, p1, p2;
   ulong u, L, vfactors, biggest_v;
   classgp_pcp_t G;
   double height;
@@ -1913,9 +1902,8 @@ polclass0(long D, long inv, long vx, GEN *db)
 
   if (D >= -4) return polclass_small_disc(D, inv, vx);
 
-  (void) corediscs(D, &u);
-  h = classno_wrapper(D);
-
+  h = quadclassnos(D, &D0);
+  u = D == D0? 1: (ulong)sqrt(D / D0);
   dbg_printf(1)("D = %ld, conductor = %ld, inv = %ld\n", D, u, inv);
 
   ni = modinv_degree(&p1, &p2, inv);

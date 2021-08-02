@@ -2594,51 +2594,12 @@ hclassno6u_i(ulong D, long D0, long F)
   return hclassno6u_2(D,D0,F);
 }
 
-#if 0
-/* D > 0, return h(-D) [ordinary class number].
- * Assume consttabh(D or more) was previously called */
-static long
-hfromH(long D)
-{
-  pari_sp ltop = avma;
-  GEN m, d, fa = myfactoru(D), P = gel(fa,1), E = gel(fa,2);
-  GEN VH = caches[cache_H].cache;
-  long i, nd, S, l = lg(P);
-
-  /* n = d[i] loops through squarefree divisors of f, where f^2 = largest square
-   * divisor of N = |D|; m[i] = moebius(n) */
-  nd = 1 << (l-1);
-  d = cgetg(nd+1, t_VECSMALL);
-  m = cgetg(nd+1, t_VECSMALL);
-  d[1] = 1; S = VH[D >> 1]; /* 6 hclassno(-D) */
-  m[1] = 1; nd = 1;
-  i = 1;
-  if (P[1] == 2 && E[1] <= 3) /* need D/n^2 to be a discriminant */
-  { if (odd(E[1]) || (E[1] == 2 && (D & 15) == 4)) i = 2; }
-  for (; i<l; i++)
-  {
-    long j, p = P[i];
-    if (E[i] == 1) continue;
-    for (j=1; j<=nd; j++)
-    {
-      long n, s, hn;
-      d[nd+j] = n = d[j] * p;
-      m[nd+j] = s = - m[j]; /* moebius(n) */
-      hn = VH[(D/(n*n)) >> 1]; /* 6 hclassno(-D/n^2) */
-      if (s > 0) S += hn; else S -= hn;
-    }
-    nd <<= 1;
-  }
-  return gc_long(ltop, S/6);
-}
-#endif
 /* D < -4 fundamental, h(D), ordinary class number */
 static long
 myh(long D)
 {
   ulong z = (ulong)cache_get(cache_H, -D);
-  if (z) return z/6; /* should be hfromH(-D) if D nonfundamental */
-  return itou(quadclassno(stoi(D)));
+  return z? z / 6: quadclassnos(D, NULL);
 }
 
 /*************************************************************************/

@@ -2332,10 +2332,12 @@ $4$ (0 or 1), unless \kbd{mod4} is \kbd{NULL}.
 
 \subsec{Class number}
 
-The function \kbd{quadclassunit} uses index calculus and runs in
-subexponential time but it assumes the truth of the GRH. For imaginary
-quadratic orders, it is comparatively slow for \emph{small} values,
-say $|D|\leq 10^{18}$. Here are some alternatives:
+Given a $D$ congruent to $0$ or $1$ modulo $4$, let $h(D)$ denote the class
+number of the order of discriminant $D$.
+The function \kbd{quadclassunit} uses index calculus and computes $h(D)$ in
+subexponential time in $\log |D|$ but it assumes the truth of the GRH. For
+imaginary quadratic orders, it is also comparatively slow for \emph{small}
+values, say $|D|\leq 10^{18}$. Here are some alternatives:
 
  \fun{GEN}{classno}{GEN D} corresponds to \kbd{qfbclassno(D,0)} and is only
 useful for $D < 0$, uses a baby-step giant-step technique and runs in time
@@ -2345,8 +2347,20 @@ longer rigorous and may give incorrect results (we know no concrete example);
 it also becomes relatively less interesting compared to \kbd{quadclassunit}.
 
 \fun{GEN}{classno2}{GEN D}  corresponds to \kbd{qfbclassno(D,1)} and runs in
-time $O(D^{1/2})$; it is provided for testing purposes only: it is never
-competitive.
+time $O(D^{1/2})$; the function is provided for testing purposes only since
+it is never competitive.
+
+\fun{GEN}{quadclassnoF}{GEN x, GEN *pd, GEN *pR} returns $h(D)/h(d)$ where
+$d$ is the fundamental discriminant attached to $D$. If \kbd{pd} is not
+\kbd{NULL}, set \kbd{*pd} to $d$. If \kbd{pR} is not \kbd{NULL}, further set
+\kbd{*pR} to the regulator if $x > 0$ and to \kbd{NULL} otherwise.
+
+\fun{long}{quadclassnos}{long x, long *pd} returns $h(D)/h(d)$; if \kbd{pd}
+is not \kbd{NULL}, set \kbd{*pd} to $d$.
+
+\fun{ulong}{unegquadclassnoF}{ulong x, long *pd} returns $h(-x)/h(d)$.
+
+\fun{ulong}{uposquadclassnoF}{ulong x, long *pd, GEN *pR} returns $h(x)/h(d)$.
 
 \fun{GEN}{hclassno}{GEN d} returns the Hurwitz-Kronecker class number $H(d)$.
 These play a central role in trace fomulas and are usually needed for many

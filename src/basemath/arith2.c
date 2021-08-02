@@ -639,11 +639,10 @@ _mod4(GEN c) {
 long
 corediscs(long D, ulong *f)
 { /* D = f^2 d */
-  long d = D>=0 ? (long) coreu(D) : -(long) coreu(-(ulong) D);
-  ulong dmod4 = ((ulong)d)&3UL;
-  if (dmod4 == 2 || dmod4 == 3) d *= 4;
+  long d = D >= 0? (long)coreu(D) : -(long)coreu(-(ulong)D);
+  if ((((ulong)d)&3UL) != 1) d *= 4;
   if (f) *f = usqrt((ulong)(D/d));
-  return D;
+  return d;
 }
 
 GEN
@@ -669,6 +668,62 @@ coredisc2(GEN n)
 
 GEN
 coredisc0(GEN n,long flag) { return flag? coredisc2(n): coredisc(n); }
+
+/* Write x = Df^2, where D = fundamental discriminant,
+ * P^E = factorisation of conductor f */
+GEN
+coredisc2_fact(GEN fa, long s, GEN *pP, GEN *pE)
+{
+  GEN P, E, P0 = gel(fa,1), E0 = gel(fa,2), D = s > 0? gen_1: gen_m1;
+  long l = lg(P0), i, j;
+
+  E = cgetg(l, t_VECSMALL);
+  P = cgetg(l, t_VEC);
+  for (i = j = 1; i < l; i++)
+  {
+    long e = itos(gel(E0,i));
+    GEN p = gel(P0,i);
+    if (odd(e)) D = mulii(D, p);
+    e >>= 1; if (e) { gel(P, j) = p; E[j] = e; j++; }
+  }
+  if (Mod4(D) != 1)
+  {
+    D = shifti(D, 2);
+    if (!--E[1])
+    {
+      P[1] = P[0]; P++;
+      E[1] = E[0]; E++; j--;
+    }
+  }
+  setlg(P,j); *pP = P;
+  setlg(E,j); *pE = E; return D;
+}
+long
+coredisc2s_fact(GEN fa, long s, GEN *pP, GEN *pE)
+{
+  GEN P, E, P0 = gel(fa,1), E0 = gel(fa,2);
+  long i, j, l = lg(P0), D = s > 0? 1: -1;
+
+  E = cgetg(l, t_VECSMALL);
+  P = cgetg(l, t_VECSMALL);
+  for (i = j = 1; i < l; i++)
+  {
+    long e = E0[i], p = P0[i];
+    if (odd(e)) D *= p;
+    e >>= 1; if (e) { P[j] = p; E[j] = e; j++; }
+  }
+  if ((D & 3) != 1)
+  {
+    D *= 4;
+    if (!--E[1])
+    {
+      P[1] = P[0]; P++;
+      E[1] = E[0]; E++; j--;
+    }
+  }
+  setlg(P,j); *pP = P;
+  setlg(E,j); *pE = E; return D;
+}
 
 long
 omegau(ulong n)

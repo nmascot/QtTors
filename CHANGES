@@ -122,6 +122,8 @@ BA  42- new flag value in nfisincl
         vandermondeinverseinit, vandermondeinverse, trans_evalgen,
         sunits_mod_units, Qp_exp_prec
 BA  44- [libpari] RgXQ_minpoly
+    45- [libpari] quadclassnos, quadclassnoF, unegquadclassnoF,
+        uposquadclassnoF, coredisc2_fact, coredisc2s_fact
 
   Changed
 HC   1- faster implementation of eulervec + cache result
@@ -159,6 +161,8 @@ BA  22- [libpari] gen_factorback now take an extra parameter one.
     24- [libpari] absZ_factor_limit_strict no longer guarantees that q is
         composite: this is useless for applications and possibly expensive
     25- default(debugfiles,) is now obsolete, use setdebug("io",)
+    26- [libpari] quadclassno now has a second argument (to recover the
+        attached fundamental discriminant)
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

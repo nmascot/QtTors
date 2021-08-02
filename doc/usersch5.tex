@@ -3708,6 +3708,20 @@ being congruent to $0$ or $1$ modulo $4$, return the fundamental
 discriminant $D$ such that $d=D*f^2$ and set \kbd{*pt\_f} to $f$
 (if \kbd{*pt\_f} not \kbd{NULL}).
 
+\fun{GEN}{coredisc2_fact}{GEN fa, long s, GEN *pP, GEN *pE} let $d$ be an
+integer congruent to $0$ or $1$ mod $4$. Return
+$D = \kbd{coredisc}(d)$ assuming that \kbd{fa} is the factorization of $|d|$
+and $s d > 0$ ($s$ is the sign of $d$). Set \kbd{*pP} and \kbd{*pE} to the
+factorization of the conductor $f$ such that $d = Df^2$, where $P$ is a
+\typ{VEC} of primes and $E$ a \typ{VECSMALL} of exponents.
+
+\fun{long}{coredisc2s_fact}{GEN fa, long s, GEN *pP, GEN *pE} let $d$ be a
+\kbd{long} integer congruent to $0$ or $1$ mod $4$. Return $D =
+\kbd{corediscs}(d)$ assuming that \kbd{fa} is the factorization of $|d|$ and
+$s d > 0$ ($s$ is the sign of $d$). Set \kbd{*pP} and \kbd{*pE} to the
+factorization of the conductor $f$ such that $d = Df^2$, where $P$ is a
+\typ{VECSMALL} of primes and $E$ a \typ{VECSMALL} of exponents.
+
 \fun{ulong}{eulerphiu}{ulong n}, Euler's totient function of $n$.
 
 \fun{ulong}{eulerphiu_fact}{GEN fa} same, where \kbd{fa} is \kbd{factoru(n)}.
