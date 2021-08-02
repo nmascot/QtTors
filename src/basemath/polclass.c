@@ -1211,7 +1211,7 @@ classgp_pcp_clear(classgp_pcp_t G)
 static void
 classgp_make_pcp(
   classgp_pcp_t G, double *height, long *ni,
-  long h, long D, ulong u, long inv, long Lfilter, long orient)
+  long h, long D, long D0, ulong u, long inv, long Lfilter, long orient)
 {
   enum { MAX_GENS = 16, MAX_RLEN = MAX_GENS * (MAX_GENS - 1) / 2 };
   pari_sp av = avma, bv;
@@ -1224,6 +1224,8 @@ classgp_make_pcp(
   memset(G, 0, sizeof *G);
 
   G->D = D;
+  G->D0 = D0;
+  G->u = u;
   G->h = h;
   G->inv = inv;
   G->L0 = (modinv_is_double_eta(inv) && modinv_ramified(D, inv))
@@ -1360,22 +1362,19 @@ is_smooth_enough(ulong *factors, long v)
   return v == 1;
 }
 
-/* Hurwitz class number of |D| assuming hclassno() and attached
- * conversion to double costs much more than unegisfundamental(). */
-INLINE double
-hclassno_wrapper(long D, long h)
+/* Hurwitz class number of Df^2, D < 0; h = classno(D) */
+static double
+hclassno_wrapper(long D, ulong f, long h)
 {
-  /* TODO: Can probably calculate hurwitz faster using -D, factor(u)
-   * and classno(D). */
-  pari_sp av = avma;
-  ulong abs_D = D < 0 ? -D : D;
-  double hurwitz;
-
-  if (h && unegisfundamental(abs_D))
-    hurwitz = (double) h;
-  else
-    hurwitz = rtodbl(gtofp(hclassno(utoi(abs_D)), DEFAULTPREC));
-  set_avma(av); return hurwitz;
+  pari_sp av;
+  if (f == 1) switch(D)
+  {
+    case -3: return 1. / 3;
+    case -4: return 1. / 2;
+    default: return (double)h;
+  }
+  av = avma;
+  return (double)gc_long(av,  h * uhclassnoF_fact(factoru(f), D));
 }
 
 /* This is Sutherland 2009, Algorithm 2.1 (p8); delta > 0 */
@@ -1389,7 +1388,7 @@ select_classpoly_prime_pool(double min_bits, double delta, classgp_pcp_t G)
   long ires, inv = G->inv;
   GEN res, t_min; /* t_min[v] = lower bound for the t we look at for that v */
 
-  hurwitz = hclassno_wrapper(d, G->h);
+  hurwitz = hclassno_wrapper(G->D0, G->u, G->h);
 
   res = cgetg(128+1, t_VEC);
   ires = 1;
@@ -1414,7 +1413,7 @@ select_classpoly_prime_pool(double min_bits, double delta, classgp_pcp_t G)
 
       if (v >= v_bound_aux * hurwitz_ratio_bound / d) break;
       if (!is_smooth_enough(&vfactors, v)) continue;
-      H = hclassno_wrapper(v2d, G->h);
+      H = hclassno_wrapper(G->D0, G->u * v, G->h);
 
       /* t <= 2 sqrt(p) and p <= z H(v^2 d) and
        *   H(v^2 d) < vH(d) (11 log(log(v + 4))^2)
@@ -1909,7 +1908,7 @@ polclass0(long D, long inv, long vx, GEN *db)
   ni = modinv_degree(&p1, &p2, inv);
   orient = modinv_is_double_eta(inv) && kross(D, p1) && kross(D, p2);
 
-  classgp_make_pcp(G, &height, &ni, h, D, u, inv, filter, orient);
+  classgp_make_pcp(G, &height, &ni, h, D, D0, u, inv, filter, orient);
   primes = select_classpoly_primes(&vfactors, &biggest_v, delta, G, height);
 
   /* Prepopulate *db with all the modpolys we might need */

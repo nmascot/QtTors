@@ -257,6 +257,8 @@ enum { fupb_NONE = 0, fupb_RELAT, fupb_LARGE, fupb_PRECI };
 /* Polycyclic presentation for the classgroup of discriminant D */
 typedef struct {
   long D; /* Negative discriminant */
+  long D0; /* Attached fundamental discriminant */
+  long u; /* Conductor of D = D0 u^2 */
   long h; /* Size of classgroup */
   long enum_cnt; /* Either h or h/2 (if L0 is set) */
   /* If nonzero, L0=L[0] and n[0]=2 and classpoly is a perfect square
