@@ -1343,17 +1343,13 @@ classgp_make_pcp(
  * SECTION: Functions for calculating class polynomials.
  */
 
-#define NSMALL_PRIMES 11
-static const long SMALL_PRIMES[11] = {
-  2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31
-};
-
+static const long SMALL_PRIMES[11] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31 };
 static long
 is_smooth_enough(ulong *factors, long v)
 {
-  long i;
+  long i, l = numberof(SMALL_PRIMES);
   *factors = 0;
-  for (i = 0; i < NSMALL_PRIMES; ++i) {
+  for (i = 0; i < l; ++i) {
     long p = SMALL_PRIMES[i];
     if (v % p == 0) *factors |= 1UL << i;
     while (v % p == 0) v /= p;
