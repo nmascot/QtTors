@@ -94,13 +94,10 @@ test_curve_order(norm_eqn_t ne, ulong a4, ulong a6,
       return gc_long(ltop,0);
     }
 
-    m0 *= n_s;
-    a1 = (2 * p + 2) % m1;
-    x = (hasse_low + m0 - 1) / m0; /* using ceil(n/d) = (n + d - 1)/d */
-    x *= m0;
-    for ( ; x <= hasse_high; x += m0)
+    m0 *= n_s; a1 = (2 * p + 2) % m1;
+    for (x = ceildivuu(hasse_low, m0) * m0; x <= hasse_high; x += m0)
       if ((x % m1) == a1 && x != N0 && x != N1) break;
-    /* every x in N was either N0 or N1, so we return true */
+    /* every x was either N0 or N1, so we return true */
     if (x > hasse_high) return gc_long(ltop,1);
 
     lswap(a4, a4t);
