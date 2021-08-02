@@ -937,9 +937,9 @@ logfac(long n)
 static double
 upper_bound_on_classpoly_coeffs(long D, long h, GEN qfinorms)
 {
-  double B, lnMk, lnMh, m, logbinom, C = 2114.567, t = M_PI * sqrt((double)-D);
+  double B, logbinom, lnMk, lnMh = 0, C = 2114.567, t = M_PI * sqrt((double)-D);
   ulong maxak = 0;
-  long k;
+  long k, m;
 
   for (k = 1, B = 0.0; k <= h; ++k)
   {
