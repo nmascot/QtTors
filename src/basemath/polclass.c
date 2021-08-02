@@ -1034,7 +1034,7 @@ next_prime_evec(long *qq, long f[], const long m[], long k,
   P = qfbred_i(primeform_u(DD, q));
   he = hash_search(tbl, P);
   if (!he) pari_err_BUG("next_prime_evec");
-  idx = itos((GEN) he->val);
+  idx = (long)he->val;
   index_to_evec(f, idx, m, k);
   return gc_long(av,1);
 }
@@ -1100,7 +1100,7 @@ orient_pcp(classgp_pcp_t G, long *ni, long D, long u, hashtable *tbl)
     GEN N = qfb_nform(D, *ni);
     hashentry *he = hash_search(tbl, N);
     if (!he) pari_err_BUG("orient_pcp");
-    *ni = itos((GEN) he->val);
+    *ni = (long)he->val;
   }
   return gc_bool(av,1);
 }
@@ -1219,12 +1219,12 @@ classgp_make_pcp(
   bv = avma;
   while (1) {
     k = 0;
-    /* Hash table has an imaginary QFB as a key and the (boxed) index of that
+    /* Hash table has an imaginary QFB as a key and the index of that
      * form in T as its value */
     tbl = hash_create(h, (ulong(*)(void*)) hash_GEN,
-                         (int(*)(void*,void*))&gequal, 1);
+                         (int(*)(void*,void*))&gidentical, 1);
     ident = qfbred_i(primeform_u(DD, 1));
-    hash_insert(tbl, ident, gen_0);
+    hash_insert(tbl, ident, (void*)0);
 
     T = vectrunc_init(h + 1);
     vectrunc_append(T, ident);
@@ -1234,7 +1234,7 @@ classgp_make_pcp(
     while (nelts < h) {
       GEN gamma_i, beta;
       hashentry *e;
-      long N = glength(T), Tlen = N, ri = 1;
+      long N = lg(T)-1, ri = 1;
 
       if (k == MAX_GENS) pari_err_IMPL("classgp_pcp");
 
@@ -1254,7 +1254,7 @@ classgp_make_pcp(
         for (j = 1; j <= N; ++j) {
           GEN t = qfbcomp_i(beta, gel(T, j));
           vectrunc_append(T, t);
-          hash_insert(tbl, t, stoi(Tlen++));
+          hash_insert(tbl, t, (void*)tbl->nb);
         }
         beta = qfbcomp_i(beta, gamma_i);
         ++ri;
@@ -1270,7 +1270,7 @@ classgp_make_pcp(
         if (curr_p == G->L0) curr_p = 1;
 
         N = 1;
-        si = itos((GEN) e->val);
+        si = (long)e->val;
         for (j = 0; j < k; ++j) {
           evec_ri_mutate(r, k)[j] = (si / N) % n[j];
           N *= n[j];
