@@ -664,19 +664,12 @@ random_curves_with_any_torsion(
   }
 }
 
-/* Assumes p < 2^62 or thereabouts. */
+/* Assume p < 2^62. Is there an n such that mn belongs to Hasse's interval? */
 INLINE long
 torsion_compatible_with_characteristic(long m, ulong p)
 {
-  ulong two_sqrt_p = usqrt(4*p);
-  ulong lo = p + 1 - two_sqrt_p;
-  ulong hi = p + 1 + two_sqrt_p;
-
-  /* If ceil(lo/m) <= floor(hi/m) then there is a positive
-   * integer n such that lo <= mn <= hi. */
-  /* NB: Ceil(a/b) = (a + b - 1)/b, Floor(a/b) = a/b (using integer
-   * truncation). */
-  return (lo + m - 1)/m <= hi/m;
+  ulong u = usqrt(4*p);
+  return ceildivuu(p + 1 - u, m) <= (p + 1 + u) / m;
 }
 
 /*

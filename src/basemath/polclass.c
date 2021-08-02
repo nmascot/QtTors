@@ -22,15 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /* SECTION: Functions dedicated to finding a j-invariant with a given
  * trace. */
 
-/* TODO: This code is shared with
- * torsion_compatible_with_characteristic() in 'torsion.c'. */
 static void
 hasse_bounds(long *low, long *high, long p)
-{
-  long two_sqrt_p = usqrt(4*p);
-  *low = p + 1 - two_sqrt_p;
-  *high = p + 1 + two_sqrt_p;
-}
+{ long u = usqrt(4*p); *low = p + 1 - u; *high = p + 1 + u; }
 
 /* a / b : a and b are from factoru and b must divide a exactly */
 INLINE GEN
