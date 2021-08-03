@@ -474,7 +474,7 @@ E_8_torsion(
     b = Fl_mul_pre(b, Fl_sub(d, 1, p), p, pi);
     /* c = (2d - 1)(d - 1)/d */
     c = Fl_div(b, d, p);
-    if (Fl_mul4(Fl_add(c, d, p), p) == p - 3) continue;
+    if (Fl_mul4(Fl_add(b, d, p), p) == 3) continue;
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, c, p, pi);
     ncurves--;
   }
