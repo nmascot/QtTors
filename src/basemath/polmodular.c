@@ -789,17 +789,12 @@ modfn_preimage(ulong x, norm_eqn_t ne, long inv)
   pari_err_BUG("modfn_preimage"); return ULONG_MAX;/*LCOV_EXCL_LINE*/
 }
 
-/**
- * SECTION: class group bb_group.
- */
+/* SECTION: class group bb_group. */
 
 INLINE GEN
 mkqfis(GEN a, ulong b, ulong c, GEN D) { retmkqfb(a, utoi(b), utoi(c), D); }
 
-/**
- * SECTION: Fixed-length dot-product-like functions on Fl's with
- * precomputed inverse.
- */
+/* SECTION: dot-product-like functions on Fl's with precomputed inverse. */
 
 /* Computes x0y1 + y0x1 (mod p); assumes p < 2^63. */
 INLINE ulong
@@ -927,9 +922,7 @@ polmodular_db_getp(GEN db, long L, ulong p)
   return ZM_to_Flm(f, p);
 }
 
-/**
- * SECTION: Table of discriminants to use.
- */
+/* SECTION: Table of discriminants to use. */
 typedef struct {
   long GENcode0;  /* used when serializing the struct to a t_VECSMALL */
   long inv;      /* invariant */
@@ -963,10 +956,7 @@ static long
 discriminant_with_classno_at_least(disc_info Ds[MODPOLY_MAX_DCNT], long L,
   long inv, GEN Q, long ignore_sparse);
 
-/**
- * SECTION: Hard-coded evaluation functions for modular polynomials of
- * small level.
- */
+/* SECTION: evaluation functions for modular polynomials of small level. */
 
 /* Based on phi2_eval_ff() in Sutherland's classpoly programme.
  * Calculates Phi_2(X, j) (mod p) with 6M+7A (4 reductions, not
@@ -1101,10 +1091,7 @@ Flm_Fl_polmodular_evalx(GEN phi, long L, ulong j, ulong p, ulong pi)
   }
 }
 
-/**
- * SECTION: Velu's formula for the codmain curve in the case of small
- * prime base field.
- */
+/* SECTION: Velu's formula for the codmain curve (Fl case). */
 
 INLINE ulong
 Fl_mul4(ulong x, ulong p)
@@ -1162,9 +1149,7 @@ Fle_quotient_from_kernel_generator(
   *a6_img = Fl_sub(a6, Fl_mul7(w, p), p);
 }
 
-/**
- * SECTION: Calculation of modular polynomials.
- */
+/* SECTION: Calculation of modular polynomials. */
 
 /* Given an elliptic curve [a4, a6] over FF_p, try to find a
  * nontrivial L-torsion point on the curve by considering n times a
@@ -2008,9 +1993,7 @@ polmodular(long L, long inv, GEN x, long v, long compute_derivs)
   return gerepileupto(av, gmul(res, one));
 }
 
-/**
- * SECTION: Modular polynomials of level <= MAX_INTERNAL_MODPOLY_LEVEL.
- */
+/* SECTION: Modular polynomials of level <= MAX_INTERNAL_MODPOLY_LEVEL. */
 
 /* These functions return a vector of coefficients of classical modular
  * polynomials Phi_L(X,Y) of small level L.  The number of such coefficients is
@@ -3099,9 +3082,7 @@ double_eta_raw(long inv)
   }
 }
 
-/**
- * SECTION: Select discriminant for given modpoly level.
- */
+/* SECTION: Select discriminant for given modpoly level. */
 
 /* require an L1, useful for multi-threading */
 #define MODPOLY_USE_L1    1
