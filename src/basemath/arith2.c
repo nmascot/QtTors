@@ -698,11 +698,12 @@ coredisc2_fact(GEN fa, long s, GEN *pP, GEN *pE)
   setlg(P,j); *pP = P;
   setlg(E,j); *pE = E; return D;
 }
-long
-coredisc2s_fact(GEN fa, long s, GEN *pP, GEN *pE)
+ulong
+coredisc2u_fact(GEN fa, long s, GEN *pP, GEN *pE)
 {
   GEN P, E, P0 = gel(fa,1), E0 = gel(fa,2);
-  long i, j, l = lg(P0), D = s > 0? 1: -1;
+  ulong D = 1;
+  long i, j, l = lg(P0);
 
   E = cgetg(l, t_VECSMALL);
   P = cgetg(l, t_VECSMALL);
@@ -712,7 +713,7 @@ coredisc2s_fact(GEN fa, long s, GEN *pP, GEN *pE)
     if (odd(e)) D *= p;
     e >>= 1; if (e) { P[j] = p; E[j] = e; j++; }
   }
-  if ((D & 3) != 1)
+  if ((D & 3) != (s > 0? 1: 3))
   {
     D *= 4;
     if (!--E[1])

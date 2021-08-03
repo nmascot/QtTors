@@ -3715,12 +3715,13 @@ and $s d > 0$ ($s$ is the sign of $d$). Set \kbd{*pP} and \kbd{*pE} to the
 factorization of the conductor $f$ such that $d = Df^2$, where $P$ is a
 \typ{VEC} of primes and $E$ a \typ{VECSMALL} of exponents.
 
-\fun{long}{coredisc2s_fact}{GEN fa, long s, GEN *pP, GEN *pE} let $d$ be a
-\kbd{long} integer congruent to $0$ or $1$ mod $4$. Return $D =
-\kbd{corediscs}(d)$ assuming that \kbd{fa} is the factorization of $|d|$ and
-$s d > 0$ ($s$ is the sign of $d$). Set \kbd{*pP} and \kbd{*pE} to the
-factorization of the conductor $f$ such that $d = Df^2$, where $P$ is a
-\typ{VECSMALL} of primes and $E$ a \typ{VECSMALL} of exponents.
+\fun{ulong}{coredisc2u_fact}{GEN fa, long s, GEN *pP, GEN *pE} let $d$ be an
+integer congruent to $0$ or $1$ mod $4$ whose absolute value fits in an
+\kbd{ulong}. Return the absolute value of $D = \kbd{corediscs}(d)$ assuming
+that \kbd{fa} is the factorization of $|d|$ and $s d > 0$ ($s$ is the sign of
+$d$ and $D$). Set \kbd{*pP} and \kbd{*pE} to the factorization of the
+conductor $f$ such that $d = Df^2$, where $P$ is a \typ{VECSMALL} of primes
+and $E$ a \typ{VECSMALL} of exponents.
 
 \fun{ulong}{eulerphiu}{ulong n}, Euler's totient function of $n$.
 

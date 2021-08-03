@@ -5662,15 +5662,19 @@ quadclassnoF(GEN x, GEN *pD, GEN *pR)
 
   if (lgefint(x) == 3)
   {
-    long d, h;
+    ulong d, h;
     if (signe(x) < 0)
     {
       h = unegquadclassnoF(x[2], &d);
+      if (pD) *pD = utoineg(d);
       if (pR) *pR = NULL;
     }
     else
+    {
       h = uposquadclassnoF(x[2], &d, pR);
-    if (pD) *pD = stoi(d); return utoi(h);
+      if (pD) *pD = utoipos(d);
+    }
+    return utoi(h);
   }
   D = coredisc2_fact(absZ_factor(x), signe(x), &P, &E);
   l = lg(P);
@@ -5703,19 +5707,23 @@ quadclassnoF(GEN x, GEN *pD, GEN *pR)
   if (pD) *pD = D; return H;
 }
 
-/* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] = \prod_{p^e||f} p^(e-1) [ p - (D/p) ] */
+/* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] = \prod_{p^e||f} p^(e-1) [ p - (D/p) ];
+ * s = 1 or -1; D = s * d; assume Df^2 fits in an ulong */
 static long
-sclassnoF(long D, GEN P, GEN E)
+uclassnoF(ulong d, long s, GEN P, GEN E)
 {
   long i, H = 1, l = lg(P);
   for (i = 1; i < l; i++)
   {
-    long p = P[i], e = E[i], s = kross(D,p);
-    if (!s)
+    ulong p = P[i], e = E[i];
+    long D = (long)(p == 2? d & 7: d % p), a;
+    if (s < 0) D = -D;
+    a = kross(D,p);
+    if (!a)
       H *= upowuu(p, e);
     else
     {
-      H *= p - s;
+      H *= p - a;
       if (e >= 2) H *= upowuu(p, e-1);
     }
   }
@@ -5723,23 +5731,25 @@ sclassnoF(long D, GEN P, GEN E)
 }
 
 ulong
-unegquadclassnoF(ulong x, long *pD)
+unegquadclassnoF(ulong x, ulong *pD)
 {
   pari_sp av = avma;
   GEN E, P;
-  long D = coredisc2s_fact(factoru(x), -1, &P, &E), H = sclassnoF(D, P, E);
+  ulong D = coredisc2u_fact(factoru(x), -1, &P, &E);
+  long H = uclassnoF(D, -1, P, E);
   switch(D)
   { /* divide by [ O_K^* : O^* ] */
-    case -4: H >>= 1; break;
-    case -3: H /= 3; break;
+    case 4: H >>= 1; break;
+    case 3: H /= 3; break;
   }
   *pD = D; return gc_ulong(av, H);
 }
 ulong
-uposquadclassnoF(ulong x, long *pD, GEN *pR)
+uposquadclassnoF(ulong x, ulong *pD, GEN *pR)
 {
   GEN P, E, R = NULL;
-  long D = coredisc2s_fact(factoru(x), 1, &P, &E), H = sclassnoF(D, P, E);
+  ulong D = coredisc2u_fact(factoru(x), 1, &P, &E);
+  long H = uclassnoF(D, 1, P, E);
   if (pR || x != D) R = quadregulator(utoi(D),DEFAULTPREC);
   if (x != D)
   {
@@ -5963,14 +5973,24 @@ long
 quadclassnos(long x, long *pD)
 {
   pari_sp av = avma;
-  long h, D;
-  if (x < 0 && x >= -12)
+  ulong h, d;
+  long D;
+  if (x < 0)
   {
-    if (pD) *pD = x == -12? -3: x;
-    return 1;
+    if (x >= -12)
+    {
+      if (pD) *pD = x == -12? -3: x;
+      return 1;
+    }
+    h = unegquadclassnoF((ulong)-x, &d);
+    D = -(long)d;
   }
-  h = unegquadclassnoF(-x, &D);
-  h *= itos( quadh(stoi(D)) );
+  else
+  {
+    h = uposquadclassnoF(x, &d, NULL);
+    D = (long)d;
+  }
+  h *= itou(quadh(stoi(D)));
   if (pD) *pD = D; return gc_long(av, h);
 }
 
