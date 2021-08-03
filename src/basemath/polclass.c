@@ -1821,22 +1821,36 @@ polclass_small_disc(long D, long inv, long vx)
   return NULL;
 }
 
+static ulong
+quadnegclassnou(long D, long *pD0, GEN *pP, GEN *pE)
+{
+  ulong d = (ulong)-D, d0 = coredisc2u_fact(factoru(d), -1, pP, pE);
+  ulong h = uquadclassnoF_fact(d0, -1, *pP, *pE);
+  h *= itou(abgrp_get_no(quadclassunit0(utoineg(d0), 0, NULL, 0)));
+  if (d0 != d) switch(d0)
+  {
+    case 4: h >>= 1; break;
+    case 3: h /= 3; break;
+  }
+  *pD0 = -(long)d0; return h;
+}
+
 GEN
 polclass0(long D, long inv, long vx, GEN *db)
 {
   pari_sp av = avma;
-  GEN primes, P, H, plist, pilist;
+  GEN primes, H, plist, pilist, Pu, Eu;
   long n_curves_tested = 0, filter = 1;
   long D0, nprimes, s, i, j, del, ni, orient, h, p1, p2;
-  ulong u, L, vfactors, biggest_v;
+  ulong u, vfactors, biggest_v;
   classgp_pcp_t G;
   double height;
   static const double delta = 0.5;
 
   if (D >= -4) return polclass_small_disc(D, inv, vx);
 
-  h = quadclassnos(D, &D0);
-  u = D == D0? 1: (ulong)sqrt(D / D0);
+  h = quadnegclassnou(D, &D0, &Pu, &Eu);
+  u = D == D0? 1: (ulong)sqrt(D / D0); /* u = \prod Pu[i]^Eu[i] */
   dbg_printf(1)("D = %ld, conductor = %ld, inv = %ld\n", D, u, inv);
 
   ni = modinv_degree(&p1, &p2, inv);
@@ -1846,12 +1860,15 @@ polclass0(long D, long inv, long vx, GEN *db)
   primes = select_classpoly_primes(&vfactors, &biggest_v, delta, G, height);
 
   /* Prepopulate *db with all the modpolys we might need */
-  /* TODO: Clean this up; in particular, note that u is factored later on. */
-  /* This comes from L_bound in oneroot_of_classpoly() */
-  if (u > 1) {
-    long maxL = maxdd(log((double) -D), (double)biggest_v);
-    for (L = 2; L <= maxL; L = unextprime(L + 1))
-      if (!(u % L)) polmodular_db_add_level(db, L, INV_J);
+  if (u > 1)
+  { /* L_bound in oneroot_of_classpoly() */
+    long l = lg(Pu), maxL = maxdd(log((double) -D), (double)biggest_v);
+    for (i = 1; i < l; i++)
+    {
+      long L = Pu[i];
+      if (L > maxL) break;
+      polmodular_db_add_level(db, L, INV_J);
+    }
   }
   for (i = 0; vfactors; ++i) {
     if (vfactors & 1UL)
@@ -1924,7 +1941,7 @@ polclass0(long D, long inv, long vx, GEN *db)
   classgp_pcp_clear(G);
 
   dbg_printf(1)("Total number of curves tested: %ld\n", n_curves_tested);
-  H = ncV_chinese_center(H, plist, &P);
+  H = ncV_chinese_center(H, plist, NULL);
   dbg_printf(1)("Result height: %.2f\n",
              dbllog2r(itor(gsupnorm(H, DEFAULTPREC), DEFAULTPREC)));
   return gerepilecopy(av, RgV_to_RgX(H, vx));

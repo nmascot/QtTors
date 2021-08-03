@@ -2103,6 +2103,7 @@ long    unegisfundamental(ulong x);
 ulong   unegquadclassnoF(ulong x, ulong *pD);
 long    uposisfundamental(ulong x);
 ulong   uposquadclassnoF(ulong x, ulong *pD, GEN *pR);
+ulong   uquadclassnoF_fact(ulong d, long s, GEN P, GEN E);
 GEN     znlog(GEN x, GEN g, GEN o);
 GEN     znorder(GEN x, GEN o);
 GEN     znprimroot(GEN m);

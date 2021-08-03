@@ -5709,10 +5709,11 @@ quadclassnoF(GEN x, GEN *pD, GEN *pR)
 
 /* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] = \prod_{p^e||f} p^(e-1) [ p - (D/p) ];
  * s = 1 or -1; D = s * d; assume Df^2 fits in an ulong */
-static long
-uclassnoF(ulong d, long s, GEN P, GEN E)
+ulong
+uquadclassnoF_fact(ulong d, long s, GEN P, GEN E)
 {
-  long i, H = 1, l = lg(P);
+  long i, l = lg(P);
+  ulong H = 1;
   for (i = 1; i < l; i++)
   {
     ulong p = P[i], e = E[i];
@@ -5736,7 +5737,7 @@ unegquadclassnoF(ulong x, ulong *pD)
   pari_sp av = avma;
   GEN E, P;
   ulong D = coredisc2u_fact(factoru(x), -1, &P, &E);
-  long H = uclassnoF(D, -1, P, E);
+  long H = uquadclassnoF_fact(D, -1, P, E);
   switch(D)
   { /* divide by [ O_K^* : O^* ] */
     case 4: H >>= 1; break;
@@ -5749,7 +5750,7 @@ uposquadclassnoF(ulong x, ulong *pD, GEN *pR)
 {
   GEN P, E, R = NULL;
   ulong D = coredisc2u_fact(factoru(x), 1, &P, &E);
-  long H = uclassnoF(D, 1, P, E);
+  long H = uquadclassnoF_fact(D, 1, P, E);
   if (pR || x != D) R = quadregulator(utoi(D),DEFAULTPREC);
   if (x != D)
   {
