@@ -5493,46 +5493,33 @@ quadregulator(GEN x, long prec)
 {
   pari_sp av = avma, av2;
   GEN R, rsqd, u, v, sqd;
-  long r, Rexpo;
+  long r, e;
 
   check_quaddisc_real(x, &r, "quadregulator");
   sqd = sqrti(x);
-  rsqd = gsqrt(x,prec);
-  Rexpo = 0; R = real2n(1, prec); /* = 2 */
-  av2 = avma;
-  u = stoi(r); v = gen_2;
+  rsqd = gsqrt(x,prec); av2 = avma;
+  e = 0; R = real2n(1, prec); u = utoi(r); v = gen_2;
   for(;;)
   {
     GEN u1 = subii(mulii(divii(addii(u,sqd),v), v), u);
     GEN v1 = divii(subii(x,sqri(u1)),v);
-    if (equalii(v,v1))
-    {
-      R = sqrr(R); shiftr_inplace(R, -1);
-      R = mulrr(R, divri(addir(u1,rsqd),v));
-      break;
-    }
-    if (equalii(u,u1))
-    {
-      R = sqrr(R); shiftr_inplace(R, -1);
-      break;
-    }
+    if (equalii(v,v1)) { R = mulrr(sqrr(R), divri(addir(u1,rsqd),v)); break; }
+    if (equalii(u,u1)) { R = sqrr(R); break; }
     R = mulrr(R, divri(addir(u1,rsqd),v));
-    Rexpo += expo(R); setexpo(R,0);
+    e += expo(R); setexpo(R,0);
     u = u1; v = v1;
-    if (Rexpo & ~EXPOBITS) pari_err_OVERFLOW("quadregulator [exponent]");
+    if (e & ~EXPOBITS) pari_err_OVERFLOW("quadregulator [exponent]");
     if (gc_needed(av2,2))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"quadregulator");
       gerepileall(av2,3, &R,&u,&v);
     }
   }
-  R = logr_abs(divri(R,v));
-  if (Rexpo)
-  {
-    GEN t = mulsr(Rexpo, mplog2(prec));
-    shiftr_inplace(t, 1);
-    R = addrr(R,t);
-  }
+  R = divri(R, v); e = 2*e - 1;
+  /* avoid loss of accuracy */
+  if (!((e + expo(R)) & ~EXPOBITS)) { setexpo(R, e + expo(R)); e = 0; }
+  R = logr_abs(R);
+  if (e) R = addrr(R, mulsr(e, mplog2(prec)));
   return gerepileuptoleaf(av, R);
 }
 
