@@ -664,7 +664,7 @@ static GEN
 lfunthetainit0(GEN ldata, GEN tdom, GEN an2, long m,
     long bitprec, long extrabit)
 {
-  long b, prec = nbits2prec(bitprec);
+  long prec = nbits2prec(bitprec);
   GEN tech, N = ldata_get_conductor(ldata);
   GEN K = gammamellininvinit(ldata, m, bitprec + extrabit);
   GEN R = lfunrtoR(ldata, prec);
