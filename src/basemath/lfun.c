@@ -649,12 +649,22 @@ static GEN
 lfunrtoR(GEN ldata, long prec)
 { return lfunrtoR_eno(ldata, ldata_get_rootno(ldata), prec); }
 
+static long
+prec_fix(long prec)
+{
+#ifndef LONG_IS_64BIT
+  /* make sure that default accuracy is the same on 32/64bit */
+  if (odd(prec)) prec += EXTRAPRECWORD;
+#endif
+  return prec;
+}
+
 /* thetainit using {an: n <= L}; if (m = 0 && easytheta), an2 is an * n^al */
 static GEN
 lfunthetainit0(GEN ldata, GEN tdom, GEN an2, long m,
     long bitprec, long extrabit)
 {
-  long prec = nbits2prec(bitprec);
+  long b, prec = nbits2prec(bitprec);
   GEN tech, N = ldata_get_conductor(ldata);
   GEN K = gammamellininvinit(ldata, m, bitprec + extrabit);
   GEN R = lfunrtoR(ldata, prec);
@@ -665,25 +675,25 @@ lfunthetainit0(GEN ldata, GEN tdom, GEN an2, long m,
     get_cone_fuzz(tdom, &r, &a);
     tdom = mkvec2(dbltor(r), a? dbltor(a): gen_0);
   }
+  prec += maxss(EXTRAPRECWORD, nbits2extraprec(extrabit));
   tech = mkvecn(7, an2,K,R, stoi(bitprec), stoi(m), tdom,
-                   gsqrt(ginv(N), prec + maxss(EXTRAPRECWORD,
-                                               nbits2extraprec(extrabit))));
+                   gsqrt(ginv(N), prec_fix(prec)));
   return mkvec3(mkvecsmall(t_LDESC_THETA), ldata, tech);
 }
 
 /* tdom: 1) positive real number r, t real, t >= r; or
  *       2) [r,a], describing the cone |t| >= r, |arg(t)| <= a */
 static GEN
-lfunthetainit_i(GEN data, GEN tdom, long m, long bitprec)
+lfunthetainit_i(GEN data, GEN tdom, long m, long bit)
 {
   GEN ldata = lfunmisc_to_ldata_shallow(data);
-  long L = lfunthetacost(ldata, tdom, m, bitprec), prec = nbits2prec(bitprec);
+  long b = 32, L = lfunthetacost(ldata, tdom, m, bit), prec = nbits2prec(bit);
   GEN ldatan = ldata_newprec(ldata, prec);
   GEN an = ldata_vecan(ldata_get_an(ldatan), L, prec);
   GEN Vga = ldata_get_gammavec(ldatan);
   if (m == 0 && Vgaeasytheta(Vga)) an = antwist(an, Vga, prec);
-  return lfunthetainit0(ldatan, tdom, an, m, bitprec,
-                        typ(an) == t_VECSMALL? 32: gexpo(an));
+  if (typ(an) != t_VECSMALL) b = maxss(b, gexpo(an));
+  return lfunthetainit0(ldatan, tdom, an, m, bit, b);
 }
 
 GEN
