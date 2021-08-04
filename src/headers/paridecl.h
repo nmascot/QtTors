@@ -1955,6 +1955,7 @@ GEN     quadpoly_i(GEN D);
 GEN     quadpoly0(GEN x, long v);
 
 /* arith1.c */
+
 ulong   Fl_2gener_pre(ulong p, ulong pi);
 ulong   Fl_log(ulong a, ulong g, ulong ord, ulong p);
 ulong   Fl_log_pre(ulong a, ulong g, ulong ord, ulong p, ulong pi);
@@ -1994,7 +1995,6 @@ GEN     Z_chinese_post(GEN a, GEN b, GEN C, GEN U, GEN d);
 void    Z_chinese_pre(GEN A, GEN B, GEN *pC, GEN *pU, GEN *pd);
 GEN     Z_factor_listP(GEN N, GEN L);
 long    Z_isanypower(GEN x, GEN *y);
-long    Z_isfundamental(GEN x);
 long    Z_ispow2(GEN x);
 long    Z_ispowerall(GEN x, ulong k, GEN *pt);
 long    Z_issquareall(GEN x, GEN *pt);
@@ -2017,8 +2017,6 @@ GEN     bestapprPade(GEN x, long B);
 GEN     chinese(GEN x, GEN y);
 GEN     chinese1(GEN x);
 GEN     chinese1_coprime_Z(GEN x);
-GEN     classno(GEN x);
-GEN     classno2(GEN x);
 GEN     contfrac0(GEN x, GEN b, long flag);
 GEN     contfracpnqn(GEN x, long n);
 GEN     fibo(long n);
@@ -2034,7 +2032,6 @@ GEN     hclassno(GEN x);
 GEN     hclassno6(GEN x);
 long    hilbert(GEN x, GEN y, GEN p);
 long    hilbertii(GEN x, GEN y, GEN p);
-long    isfundamental(GEN x);
 long    ispolygonal(GEN x, GEN S, GEN *N);
 long    ispower(GEN x, GEN k, GEN *pty);
 long    isprimepower(GEN x, GEN *pty);
@@ -2078,38 +2075,22 @@ GEN     pgener_Fp_local(GEN p, GEN L);
 ulong   pgener_Zl(ulong p);
 GEN     pgener_Zp(GEN p);
 GEN     pnqn(GEN x);
-GEN     qfbclassno0(GEN x,long flag);
-GEN     quadclassno(GEN x, GEN *pD);
-long    quadclassnos(long x, long *pD);
-GEN     quadclassnoF(GEN x, GEN *pD, GEN *pR);
-GEN     quaddisc(GEN x);
-GEN     quadregulator(GEN x, long prec);
-GEN     quadunit(GEN x);
-GEN     quadunit0(GEN x, long v);
 GEN     ramanujantau(GEN n, long ell);
 ulong   rootsof1_Fl(ulong n, ulong p);
 GEN     rootsof1_Fp(GEN n, GEN p);
 GEN     rootsof1u_Fp(ulong n, GEN p);
-long    sisfundamental(long x);
 GEN     sqrtint(GEN a);
 GEN     sqrtint0(GEN a, GEN *r);
 ulong   u_chinese_coprime(ulong a, ulong b, ulong A, ulong B, ulong C);
-long    uhclassnoF_fact(GEN faF, long D);
 long    uisprimepower(ulong n, ulong *p);
 long    uissquare(ulong A);
 long    uissquareall(ulong A, ulong *sqrtA);
 long    ulogintall(ulong B, ulong y, ulong *ptq);
-long    unegisfundamental(ulong x);
-ulong   unegquadclassnoF(ulong x, ulong *pD);
-long    uposisfundamental(ulong x);
-ulong   uposquadclassnoF(ulong x, ulong *pD, GEN *pR);
-ulong   uquadclassnoF_fact(ulong d, long s, GEN P, GEN E);
 GEN     znlog(GEN x, GEN g, GEN o);
 GEN     znorder(GEN x, GEN o);
 GEN     znprimroot(GEN m);
 GEN     znstar(GEN x);
 GEN     znstar0(GEN N, long flag);
-GEN     Zn_quad_roots(GEN N, GEN B, GEN C);
 
 /* arith2.c */
 
@@ -5089,6 +5070,32 @@ GEN     qforbits(GEN G, GEN V);
 
 GEN     qfsolve(GEN G);
 GEN     qfparam(GEN G, GEN sol, long fl);
+
+/* quad.c */
+
+long    Z_isfundamental(GEN x);
+GEN     classno(GEN x);
+GEN     classno2(GEN x);
+long    isfundamental(GEN x);
+GEN     qfbclassno0(GEN x,long flag);
+GEN     quadclassno(GEN x, GEN *pD);
+long    quadclassnos(long x, long *pD);
+GEN     quadclassnoF(GEN x, GEN *pD);
+GEN     quadclassnoF_fact(GEN D, GEN P, GEN E);
+GEN     quaddisc(GEN x);
+GEN     quadregulator(GEN x, long prec);
+GEN     quadunit(GEN x);
+GEN     quadunit0(GEN x, long v);
+GEN     quadunitindex(GEN x, GEN N);
+long    quadunitnorm(GEN x);
+long    sisfundamental(long x);
+long    uhclassnoF_fact(GEN faF, long D);
+long    unegisfundamental(ulong x);
+ulong   unegquadclassnoF(ulong x, ulong *pD);
+long    uposisfundamental(ulong x);
+ulong   uposquadclassnoF(ulong x, ulong *pD);
+ulong   uquadclassnoF_fact(ulong d, long s, GEN P, GEN E);
+GEN     Zn_quad_roots(GEN N, GEN B, GEN C);
 
 /* random.c */
 

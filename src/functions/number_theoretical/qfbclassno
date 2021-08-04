@@ -37,8 +37,7 @@ Doc: ordinary class number of the quadratic order of discriminant $D$, for
  compatibility reasons. Use the following routine if you are only interested
  in the number of classes of forms:
  \bprog
- QFBclassno(D) =
- qfbclassno(D) * if (D < 0 || norm(quadunit(D)) < 0, 1, 2)
+ QFBclassno(D) = qfbclassno(D) * if (quadunitnorm(D) == 1, 1, 2)
  @eprog\noindent
  Here are a few examples:
  \bprog
