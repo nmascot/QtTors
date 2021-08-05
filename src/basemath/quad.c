@@ -274,8 +274,8 @@ static GEN
 quadunit_mod(GEN D, GEN d, GEN Q)
 {
   GEN u1, u2, v1, v2, p, q, q1, u, v;
-  long m = Mod2(D);
-  p = (Mod2(d) == m)? d: subiu(d, 1);
+  int m = mpodd(D);
+  p = (mpodd(d) == m)? d: subiu(d, 1);
   u1 = negi(p); u2 = gen_2;
   v1 = gen_1; v2 = gen_0; q = gen_2;
   q1 = shifti(subii(D, sqri(p)), -1);
@@ -308,8 +308,8 @@ GEN
 quadunit2(GEN D)
 {
   GEN d, u1, u2, v1, v2, p, q, q1, u, v;
-  long m = Mod2(D);
-  d = sqrti(D); p = (Mod2(d) == m)? d: subiu(d, 1);
+  int m = mpodd(D);
+  d = sqrti(D); p = (mpodd(d) == m)? d: subiu(d, 1);
   u1 = negi(p); u2 = gen_2;
   v1 = gen_1; v2 = gen_0; q = gen_2;
   q1 = shifti(subii(D, sqri(p)), -1);
