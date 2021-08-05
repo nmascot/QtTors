@@ -260,6 +260,7 @@ quadunit_mod(GEN D, GEN d, GEN Q)
 {
   GEN u1, u2, v1, v2, p, q, q1, u, v;
   int m = mpodd(D);
+  pari_sp av = avma;
   p = (mpodd(d) == m)? d: subiu(d, 1);
   u1 = negi(p); u2 = gen_2;
   v1 = gen_1; v2 = gen_0; q = gen_2;
@@ -283,6 +284,11 @@ quadunit_mod(GEN D, GEN d, GEN Q)
       v = addii(mulii(u1,v2), mulii(u2,v1));
       break;
     }
+    if (gc_needed(av, 2))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"quadunit_mod");
+      gerepileall(av, 7, &p, &u1,&u2,&v1,&v2, &q,&q1);
+    }
   }
   u = divii(modii(u, Q), q); v = divii(modii(v, Q), q); /* exact */
   if (m == 1) u = subii(u, v);
@@ -294,6 +300,7 @@ quadunit2(GEN D)
 {
   GEN d, u1, u2, v1, v2, p, q, q1, u, v;
   int m = mpodd(D);
+  long first = 1;
   d = sqrti(D); p = (mpodd(d) == m)? d: subiu(d, 1);
   u1 = negi(p); u2 = gen_2;
   v1 = gen_1; v2 = gen_0; q = gen_2;
@@ -302,12 +309,13 @@ quadunit2(GEN D)
   {
     GEN r, A = dvmdii(addii(p, d), q, &r), p1 = p, t;
     p = subii(d, r);
-    if (equalii(p1, p) && signe(v2))
+    if (!first && equalii(p1, p))
     { /* even period */
       u = addii(sqri(u2), mulii(D, sqri(v2)));
       v = shifti(mulii(u2,v2), 1);
       break;
     }
+    first = 0;
     t = addii(mulii(A, u2), u1); u1 = u2; u2 = t;
     t = addii(mulii(A, v2), v1); v1 = v2; v2 = t;
     t = q; q = subii(q1, mulii(A, subii(p, p1))); q1 = t;
@@ -318,7 +326,8 @@ quadunit2(GEN D)
       break;
     }
   }
-  u = divii(u, q); v = divii(v, q); /* exact */
+  u = diviiexact(u, q);
+  v = diviiexact(v, q);
   if (m == 1) u = subii(u, v);
   return mkvec2(shifti(u, -1), v);
 }
@@ -340,7 +349,7 @@ quadunit_q(GEN D, GEN d, long *pN)
     first = 0;
     t = q; q = subii(q1, mulii(A, subii(p, p1))); q1 = t;
     if (equalii(q, t)) { *pN = -1; return q; } /* odd period */
-    if (low_stack(av, 2))
+    if (gc_needed(av, 2))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"quadunitnorm");
       gerepileall(av, 3, &p, &q, &q1);
