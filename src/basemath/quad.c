@@ -147,96 +147,62 @@ quaddisc(GEN x)
 /**         FUNDAMENTAL UNIT AND REGULATOR (QUADRATIC FIELDS)         **/
 /**                                                                   **/
 /***********************************************************************/
-
-static GEN
-get_quad(GEN f, GEN pol, long r)
-{
-  GEN p1 = gcoeff(f,1,2), q1 = gcoeff(f,2,2);
-  return mkquad(pol, r? subii(p1,q1): p1, q1);
-}
-
-/* replace f by f * [a,1; 1,0] */
+/* replace f by f * [u,1; 1,0] */
 static void
-update_f(GEN f, GEN a)
+update_f(GEN f, GEN u)
 {
-  GEN c;
-  c = gcoeff(f,1,1);
-  gcoeff(f,1,1) = addii(mulii(a,c), gcoeff(f,1,2));
-  gcoeff(f,1,2) = c;
-
-  c = gcoeff(f,2,1);
-  gcoeff(f,2,1) = addii(mulii(a,c), gcoeff(f,2,2));
-  gcoeff(f,2,2) = c;
+  GEN a = gcoeff(f,1,1), b = gcoeff(f,1,2);
+  GEN c = gcoeff(f,2,1), d = gcoeff(f,2,2);
+  gcoeff(f,1,1) = addmulii(b, u,a); gcoeff(f,1,2) = a;
+  gcoeff(f,2,1) = addmulii(d, u,c); gcoeff(f,2,2) = c;
 }
 
 /* f is a vector of matrices and i an index whose bits give the non-zero
  * entries; the product of the non zero entries is the actual result.
  * if i odd, f[1] is implicitely [f[1],1;1,0] */
-static void
+
+static long
 update_fm(GEN f, GEN a, long i)
 {
-  if (!odd(i))
-    gel(f,1) = a;
-  else
-  {
-    GEN b = gel(f,1), u = mkmat22(addiu(mulii(a, b), 1), b, a, gen_1);
-    long k, v = vals(i+1);
-    gel(f,1) = gen_0;
-    for (k = 1; k < v; k++) { u = ZM2_mul(gel(f,k+1), u); gel(f,k+1) = gen_0; }
-    gel(f,v+1) = u;
-  }
+#ifdef LONG_IS_64BIT
+  const long LIM = 10;
+#else
+  const long LIM = 18;
+#endif
+  long k, v;
+  GEN u;
+  if (!odd(i)) { gel(f,1) = a; return i+1; }
+  u = gel(f, 1);
+  if (typ(u) == t_INT) /* [u,1;1,0] * [a,1;1,0] */
+  { gel(f,1) = mkmat22(addiu(mulii(a, u), 1), u, a, gen_1); return i; }
+  update_f(u, a); if (lgefint(gcoeff(u,1,1)) < LIM) return i;
+  v = vals(i+1); gel(f,1) = gen_0;
+  for (k = 1; k < v; k++) { u = ZM2_mul(gel(f,k+1), u); gel(f,k+1) = gen_0; }
+  gel(f,v+1) = u; return i+1;
 }
+/* \prod f[j]; if first only return column 1 */
 static GEN
-prod_fm(GEN f, long i)
+prod_fm(GEN f, long i, long first)
 {
   long k, v = vals(i) + 1;
-  GEN u = gel(f, v);
-  if (v == 1) u = mkmat22(u, gen_1, gen_1, gen_0);
-  for (i >>= v, k = v+1; i; i >>= 1, k++)
-    if (odd(i)) u = ZM2_mul(gel(f,k), u);
-  return u;
-}
-
-GEN
-quadunit(GEN x)
-{
-  pari_sp av = avma, av2;
-  GEN pol, y, a, u, v, sqd, f;
-  long r, i = 1;
-
-  check_quaddisc_real(x, &r, "quadunit");
-  pol = quadpoly_i(x); sqd = sqrti(x); av2 = avma;
-  f = zerovec(2+(expi(x)>>1));
-  gel(f,1) = a = shifti(addui(r,sqd),-1);
-  u = stoi(r); v = gen_2;
-  for(;;)
+  GEN w, u = gel(f, v);
+  if (!(i >>= v))
   {
-    GEN u1, v1;
-    u1 = subii(mulii(a,v),u);
-    v1 = divii(subii(x,sqri(u1)),v);
-    if ( equalii(v,v1) ) {
-      f = prod_fm(f,i);
-      y = get_quad(f,pol,r);
-      update_f(f,a);
-      y = gdiv(get_quad(f,pol,r), conj_i(y));
-      break;
-    }
-    a = divii(addii(sqd,u1), v1);
-    if ( equalii(u,u1) ) {
-      y = get_quad(prod_fm(f,i),pol,r);
-      y = gdiv(y, conj_i(y));
-      break;
-    }
-    update_fm(f,a,i++); u = u1; v = v1;
-    if (gc_needed(av2,2))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"quadunit (%ld)", i);
-      gerepileall(av2,4, &a,&f,&u,&v);
-    }
+    if (typ(u) == t_MAT) return first? gel(u,1): u;
+    return first? mkcol2(u, gen_1) : mkmat22(u, gen_1, gen_1, gen_0);
   }
-  if (signe(gel(y,3)) < 0) y = gneg(y);
-  return gerepileupto(av, y);
+  for (k = v+1; i > 1; i >>= 1, k++)
+    if (odd(i))
+    {
+      w = gel(f,k);
+      if (typ(u) == t_MAT) u = ZM2_mul(gel(f,k), u);
+      else { update_f(w, u); u = w; }
+    }
+  w = gel(f,k); /* i = 1 */
+  if (typ(u) != t_MAT) { update_f(w, u); return first? gel(w,1): w; }
+  return first? ZM_ZC_mul(w, gel(u, 1)): ZM2_mul(w, u);
 }
+
 GEN
 quadunit0(GEN x, long v)
 {
@@ -271,17 +237,17 @@ quadunit_mod(GEN D, GEN d, GEN Q)
     p = subii(d, r);
     if (equalii(p1, p) && signe(v2))
     { /* even period */
-      u = addii(sqri(u2), mulii(D, sqri(v2)));
+      u = addmulii(sqri(u2), D, sqri(v2));
       v = shifti(mulii(u2,v2), 1);
       break;
     }
     t = Fp_addmul(u1, A, u2, Q); u1 = u2; u2 = t;
     t = Fp_addmul(v1, A, v2, Q); v1 = v2; v2 = t;
-    t = q; q = subii(q1, mulii(A, subii(p, p1))); q1 = t;
+    t = q; q = submulii(q1, A, subii(p, p1)); q1 = t;
     if (equalii(q, t))
     { /* odd period */
-      u = addii(mulii(u1,u2), mulii(D, mulii(v1,v2)));
-      v = addii(mulii(u1,v2), mulii(u2,v1));
+      u = addmulii(mulii(u1,u2), D, mulii(v1,v2));
+      v = addmulii(mulii(u1,v2), u2, v1);
       break;
     }
     if (gc_needed(av, 2))
@@ -294,10 +260,10 @@ quadunit_mod(GEN D, GEN d, GEN Q)
   if (m == 1) u = subii(u, v);
   return mkvec2(shifti(u, -1), v);
 }
-/* faster version of quadunit; should use the update_fm / prod_fm scheme */
 GEN
-quadunit2(GEN D)
+quadunit_basecase(GEN D)
 {
+  pari_sp av0 = avma;
   GEN d, u1, u2, v1, v2, p, q, q1, u, v;
   int m = mpodd(D);
   long first = 1;
@@ -311,25 +277,76 @@ quadunit2(GEN D)
     p = subii(d, r);
     if (!first && equalii(p1, p))
     { /* even period */
-      u = addii(sqri(u2), mulii(D, sqri(v2)));
+      u = addmulii(sqri(u2), D, sqri(v2));
       v = shifti(mulii(u2,v2), 1);
       break;
     }
     first = 0;
-    t = addii(mulii(A, u2), u1); u1 = u2; u2 = t;
-    t = addii(mulii(A, v2), v1); v1 = v2; v2 = t;
-    t = q; q = subii(q1, mulii(A, subii(p, p1))); q1 = t;
+    t = addmulii(u1, A, u2); u1 = u2; u2 = t;
+    t = addmulii(v1, A, v2); v1 = v2; v2 = t;
+    t = q; q = submulii(q1, A, subii(p, p1)); q1 = t;
     if (equalii(q, t))
     { /* odd period */
-      u = addii(mulii(u1,u2), mulii(D, mulii(v1,v2)));
-      v = addii(mulii(u1,v2), mulii(u2,v1));
+      u = addmulii(mulii(u1,u2), D, mulii(v1,v2));
+      v = addmulii(mulii(u1,v2), u2, v1);
       break;
     }
   }
   u = diviiexact(u, q);
   v = diviiexact(v, q);
   if (m == 1) u = subii(u, v);
-  return mkvec2(shifti(u, -1), v);
+  u = shifti(u, -1);
+  return gerepilecopy(av0, mkquad(quadpoly_i(D), u, v));
+}
+
+GEN
+quadunit(GEN D)
+{
+  pari_sp av0 = avma, av;
+  GEN f, d, p, q, q1, u, v;
+  int m = mpodd(D);
+  long i = 0;
+  d = sqrti(D); p = (mpodd(d) == m)? d: subiu(d, 1);
+  av = avma;
+  f = zerovec(2+(expi(D)>>1));
+  q = gen_2;
+  q1 = shifti(subii(D, sqri(p)), -1);
+  for(;;)
+  {
+    GEN r, A = dvmdii(addii(p, d), q, &r), p1 = p, t, u1,u2, v1,v2;
+    p = subii(d, r);
+    if (i && equalii(p1, p))
+    { /* even period */
+      f = prod_fm(f, i, 1); u2 = gel(f,1); v2 = gel(f,2);
+      u = addmulii(sqri(u2), D, sqri(v2));
+      v = shifti(mulii(u2,v2), 1); break;
+    }
+    if (i) i = update_fm(f, A, i);
+    else
+    { /*[2,-p1;0,1]*[A,1;1,0] */
+      gel(f,1) = mkmat22(subii(shifti(A,1), p1), gen_2, gen_1, gen_0);
+      i = 1;
+    }
+    t = q; q = submulii(q1, A, subii(p, p1)); q1 = t;
+    if (equalii(q, t))
+    { /* odd period */
+      f = prod_fm(f, i, 0);
+      u2 = gcoeff(f,1,1); u1 = gcoeff(f,1,2);
+      v2 = gcoeff(f,2,1); v1 = gcoeff(f,2,2);
+      u = addmulii(mulii(u1,u2), D, mulii(v1,v2));
+      v = addmulii(mulii(u1,v2), u2, v1); break;
+    }
+    if (gc_needed(av, 2))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"quadunit (%ld)", i);
+      gerepileall(av, 4, &p, &f, &q,&q1);
+    }
+  }
+  u = diviiexact(u, q);
+  v = diviiexact(v, q);
+  if (m == 1) u = subii(u, v);
+  u = shifti(u, -1);
+  return gerepilecopy(av0, mkquad(quadpoly_i(D), u, v));
 }
 /* D > 0, d = sqrti(D) */
 static GEN
@@ -347,7 +364,7 @@ quadunit_q(GEN D, GEN d, long *pN)
     p = subii(d, r);
     if (!first && equalii(p1, p)) { *pN = 1; return q; } /* even period */
     first = 0;
-    t = q; q = subii(q1, mulii(A, subii(p, p1))); q1 = t;
+    t = q; q = submulii(q1, A, subii(p, p1)); q1 = t;
     if (equalii(q, t)) { *pN = -1; return q; } /* odd period */
     if (gc_needed(av, 2))
     {

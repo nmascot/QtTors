@@ -5085,6 +5085,7 @@ GEN     quadclassnoF_fact(GEN D, GEN P, GEN E);
 GEN     quaddisc(GEN x);
 GEN     quadregulator(GEN x, long prec);
 GEN     quadunit(GEN x);
+GEN     quadunit_basecase(GEN D);
 GEN     quadunit0(GEN x, long v);
 GEN     quadunitindex(GEN x, GEN N);
 long    quadunitnorm(GEN x);
