@@ -3370,7 +3370,7 @@ A function with that name existed in GP-1.39.15. Please update your script.
 
 New syntax: regula(x) ===> quadregulator(x)
 
-quadregulator(x): regulator of the real quadratic field of discriminant x.
+quadregulator(D): regulator of the real quadratic field of discriminant D.
 
 
   ***   at top-level: reorder()
@@ -4508,4 +4508,4 @@ New syntax: texprint(x) ===> printtex(x)
 printtex({str}*): outputs its string arguments in TeX format.
 
 
-Total time spent: 7
+Total time spent: 2
