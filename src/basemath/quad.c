@@ -584,7 +584,7 @@ quadclassnoF(GEN x, GEN *pD)
     case 3: H = divis(H,3); break;
   }
   else if (!equalii(x,D))
-    H = diviiexact(H, quadunitindex(H, mkmat2(P, E)));
+    H = diviiexact(H, quadunitindex(H, mkmat2(P, zc_to_ZC(E))));
   if (pD) *pD = D; return H;
 }
 
@@ -655,7 +655,7 @@ uposquadclassnoF(ulong x, ulong *pD)
   if (x != D)
   {
     GEN F = mkvec2(utoipos(usqrt(x / D)), mkmat2(zc_to_ZC(P), zc_to_ZC(E)));
-    H /= itou(quadunitindex(utoipos(H), F));
+    H /= itou(quadunitindex(utoipos(D), F));
   }
   *pD = D; return H;
 }
