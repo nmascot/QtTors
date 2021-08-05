@@ -159,24 +159,19 @@ get_quad(GEN f, GEN pol, long r)
 static void
 update_f(GEN f, GEN a)
 {
-  GEN p1;
-  p1 = gcoeff(f,1,1);
-  gcoeff(f,1,1) = addii(mulii(a,p1), gcoeff(f,1,2));
-  gcoeff(f,1,2) = p1;
+  GEN c;
+  c = gcoeff(f,1,1);
+  gcoeff(f,1,1) = addii(mulii(a,c), gcoeff(f,1,2));
+  gcoeff(f,1,2) = c;
 
-  p1 = gcoeff(f,2,1);
-  gcoeff(f,2,1) = addii(mulii(a,p1), gcoeff(f,2,2));
-  gcoeff(f,2,2) = p1;
+  c = gcoeff(f,2,1);
+  gcoeff(f,2,1) = addii(mulii(a,c), gcoeff(f,2,2));
+  gcoeff(f,2,2) = c;
 }
 
-/*
- * fm is a vector of matrices and i an index
- * the bits of i give the non-zero entries
- * the product of the non zero entries is the
- * actual result.
- * if i odd, fm[1] is implicitely [fm[1],1;1,0]
- */
-
+/* f is a vector of matrices and i an index whose bits give the non-zero
+ * entries; the product of the non zero entries is the actual result.
+ * if i odd, f[1] is implicitely [f[1],1;1,0] */
 static void
 update_fm(GEN f, GEN a, long i)
 {
@@ -184,31 +179,21 @@ update_fm(GEN f, GEN a, long i)
     gel(f,1) = a;
   else
   {
-    long v = vals(i+1), k;
-    GEN b = gel(f,1);
-    GEN u = mkmat22(addiu(mulii(a, b), 1), b, a, gen_1);
+    GEN b = gel(f,1), u = mkmat22(addiu(mulii(a, b), 1), b, a, gen_1);
+    long k, v = vals(i+1);
     gel(f,1) = gen_0;
-    for (k = 1; k < v; k++)
-    {
-      u = ZM2_mul(gel(f, k+1), u);
-      gel(f,k+1) = gen_0; /* for gerepileall */
-    }
+    for (k = 1; k < v; k++) { u = ZM2_mul(gel(f,k+1), u); gel(f,k+1) = gen_0; }
     gel(f,v+1) = u;
   }
 }
-
 static GEN
 prod_fm(GEN f, long i)
 {
-  long v = vals(i);
-  GEN u;
-  long k;
-  if (!v) u = mkmat22(gel(f,1),gen_1,gen_1,gen_0);
-  else u = gel(f,v+1);
-  v++;
-  for (i>>=v, k = v+1; i; i>>=1, k++)
-    if (odd(i))
-      u = ZM2_mul(gel(f,k), u);
+  long k, v = vals(i) + 1;
+  GEN u = gel(f, v);
+  if (v == 1) u = mkmat22(u, gen_1, gen_1, gen_0);
+  for (i >>= v, k = v+1; i; i >>= 1, k++)
+    if (odd(i)) u = ZM2_mul(gel(f,k), u);
   return u;
 }
 
