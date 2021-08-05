@@ -368,8 +368,8 @@ quadunitnorm(GEN D)
 GEN
 quadunitindex(GEN D, GEN N)
 {
-  pari_sp av = avma;
-  GEN q, d, P, E, F, y, a, faH, H;
+  pari_sp av = avma, av2;
+  GEN Q, d, P, E, F, y, a, faH, H;
   struct uimod S;
   long r, s;
 
@@ -383,9 +383,10 @@ quadunitindex(GEN D, GEN N)
     default: return gen_1;
   }
   if (!F) F = Z_factor(N);
-  d = sqrti(D);
-  q = quadunit_q(D, d, &s);
-  y = quadunit_mod(D, d, shifti(mulii(q, N), 1));
+  d = sqrti(D); av2 = avma;
+  Q = quadunit_q(D, d, &s);
+  Q = gerepileuptoint(av2, shifti(mulii(Q, N), 1));
+  y = quadunit_mod(D, d, Q);
   /* fundamental unit = y mod N */
   S.N = N; S.T = quadpoly_i(D);
   y = deg1pol_shallow(modii(gel(y,2), N), modii(gel(y,1), N), 0);
