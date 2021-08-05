@@ -37,7 +37,9 @@
 \li{minimal polynomial of $\omega$}{quadpoly$(x)$}
 \li{discriminant of $\QQ(\sqrt{x})$}{quaddisc$(x)$}
 \li{regulator of real quadratic field}{quadregulator$(x)$}
-\li{fundamental unit in real $\QQ(\sqrt{D})$}{quadunit($D$,\{'w\})}
+\li{fundamental unit in $O_D$, $D > 0$}{quadunit$(D,\{\kbd{'w}\})$}
+\li{norm of fundamental unit in $O_D$}{quadunitnorm$(D)$}
+\li{index of $O_{Df^2}^\times$ in $O_D^\times$}{quadunitindex$(D,f)$}
 \li{class group of $\QQ(\sqrt{D})$}{quadclassunit$(D,\{\fl\},\{t\})$}
 \li{Hilbert class field of $\QQ(\sqrt{D})$}{quadhilbert$(D,\{\fl\})$}
 \li{\dots using specific class invariant ($D<0$)}{polclass$(D,\{\var{inv}\})$}
@@ -82,8 +84,6 @@ to relative extensions $L/K$.\hfill\break
 \li{fundamental/torsion units}{\var{bnf}.fu{\rm, }\var{bnf}.tu}
 \endindentedkeys
 \li{add $S$-class group and units, yield \var{bnf}S}{bnfsunit$(\var{bnf},S)$}
-\newcolumn
-
 \li{init class field structure \var{bnr}}{bnrinit$(\var{bnf},m,\{\fl\})$}
 %
 \subsec{bnr members: {\rm same as \var{bnf}, plus}}
@@ -224,11 +224,11 @@ $\var{bnr},H$ (congruence subgroup) or $\var{bnr},\chi$ (character on
 \li{class field defined by $H < \text{Cl}_f$}{bnrclassfield$(\var{bnr},H)$}
 \li{\dots low level equivalent, prime degree}{rnfkummer$(\var{bnr},H)$}
 \li{same, using Stark units (real field)}{bnrstark$(\var{bnr},sub,\{\fl\})$}
+\shortcopyrightnotice
+\newcolumn
 \li{is $a$ an $n$-th power in $K_v$ ?}{nfislocalpower$(\var{nf},v,a,n)$}
 \li{cyclic $L/K$ satisf. local conditions}
    {nfgrunwaldwang$(\var{nf},P,D,\var{pl})$}
-\shortcopyrightnotice
-\newcolumn
 \subsec{Logarithmic class group}
 \li{logarithmic $\ell$-class group}{bnflog$(\var{bnf},\ell)$}
 \li{$[\tilde{e}(F_v/\Q_p),\tilde{f}(F_v/\Q_p)]$}
@@ -298,14 +298,15 @@ $\var{bnr},H$ (congruence subgroup) or $\var{bnr},\chi$ (character on
 \li{action of $p$ in nfgaloisconj form}{galoispermtopol$(G,\{p\})$}
 \li{identify as abstract group}{galoisidentify$(G)$}
 \li{export a group for GAP/MAGMA}{galoisexport$(G,\{\fl\})$}
-\li{subgroups of the Galois group $G$}{galoissubgroups$(G)$}
-\li{is subgroup $H$ normal?}{galoisisnormal$(G,H)$}
 
 \newcolumn
 \title{\TITLE}
 \centerline{(PARI-GP version \PARIversion)}
 
 \medskip
+
+\li{subgroups of the Galois group $G$}{galoissubgroups$(G)$}
+\li{is subgroup $H$ normal?}{galoisisnormal$(G,H)$}
 
 \li{subfields from subgroups}{galoissubfields$(G,\{\fl\},\{v\})$}
 \li{fixed field}{galoisfixedfield$(G,\var{perm},\{\fl\},\{v\})$}
