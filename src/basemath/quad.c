@@ -579,7 +579,7 @@ quadclassnoF(GEN x, GEN *pD)
     case 3: H = divis(H,3); break;
   }
   else if (!equalii(x,D))
-    H = diviiexact(H, quadunitindex(H, mkmat2(P, zc_to_ZC(E))));
+    H = diviiexact(H, quadunitindex(D, mkmat2(P, zc_to_ZC(E))));
   if (pD) *pD = D; return H;
 }
 
