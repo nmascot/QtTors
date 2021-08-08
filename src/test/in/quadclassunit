@@ -1,4 +1,5 @@
 default(realprecision,38);
+default(parisize, "60M");
 test(D) =
 {
   for (d = D, D+10^3,
@@ -15,16 +16,19 @@ setrand(1); test(10^15); test(-10^15)
     my(w=quadunit(D), N=norm(w));
     if(denominator(w)>1 || abs(N)!=1 || quadunitnorm(D) != N, error(D)))
 }
+quadunit(2^50+55) * Mod(1,2^64-59)
 quadunitindex(157,3)
 quadunitindex(-3,1)
 quadunitindex(-3,2)
 quadunitindex(-4,2)
+quadunitindex(-8,2)
 quadunitnorm(17345)
 quadunitindex(17345, 10)
 quadunitindex(5, [100, [2,2;5,2]])
 quadunitindex(5, 100)
 quadunitindex(5, [2,2;5,2])
 quadunitindex(5, 2^32)
+quadunitindex(28, 2^32)
 
 default(echo,1);
 
