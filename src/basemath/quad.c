@@ -873,39 +873,6 @@ END:
   return gerepileuptoint(av, shifti(mulii(d1,Hf), r2));
 }
 
-static GEN
-quadh(GEN D) { return abgrp_get_no(quadclassunit0(D, 0, NULL, 0)); }
-GEN
-quadclassno(GEN x, GEN *pD)
-{
-  GEN D, t = quadclassnoF(x, &D);
-  if (pD) *pD = D; return mulii(quadh(D), t);
-}
-long
-quadclassnos(long x, long *pD)
-{
-  pari_sp av = avma;
-  ulong h, d;
-  long D;
-  if (x < 0)
-  {
-    if (x >= -12)
-    {
-      if (pD) *pD = x == -12? -3: x;
-      return 1;
-    }
-    h = unegquadclassnoF((ulong)-x, &d);
-    D = -(long)d;
-  }
-  else
-  {
-    h = uposquadclassnoF(x, &d);
-    D = (long)d;
-  }
-  h *= itou(quadh(stoi(D)));
-  if (pD) *pD = D; return gc_long(av, h);
-}
-
 /* use Euler products */
 GEN
 classno2(GEN x)

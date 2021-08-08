@@ -2354,12 +2354,19 @@ it is never competitive.
 $d$ is the fundamental discriminant attached to $D$. If \kbd{pd} is not
 \kbd{NULL}, set \kbd{*pd} to $d$.
 
-\fun{long}{quadclassnos}{long D, long *pd} returns $h(D)$; if \kbd{pd}
-is not \kbd{NULL}, set \kbd{*pd} to $d$.
+\fun{GEN}{quadclassno}{GEN D} returns $h(D)$ using Buchmann's algorithm
+on the order of discriminant $D$. If $D$ is not fundamental, it will
+usually be faster to call \kbd{coredisc2\_fact} and
+\kbd{quadclassnoF\_fact} to reduce to this case first.
+
+\fun{long}{quadclassnos}{long D} returns $h(D)$ using Buchmann's algorithm
+on the order of discriminant $D$.
 
 \fun{ulong}{unegquadclassnoF}{ulong x, long *pd} returns $h(-x)/h(d)$.
+Set \kbd{*pd} to $d$.
 
 \fun{ulong}{uposquadclassnoF}{ulong x, long *pd} returns $h(x)/h(d)$.
+Set \kbd{*pd} to $d$.
 
 \fun{GEN}{quadclassnoF_fact}{GEN D, GEN P, GEN E}
 let $D$ be a fundamental discriminant, and $f = \prod_i P[i]^{E[i]}$ be a

@@ -947,16 +947,16 @@ quad_be_honest(struct buch_quad *B)
   return r;
 }
 
-GEN
-Buchquad(GEN D, double cbach, double cbach2, long prec)
+static GEN
+Buchquad_i(GEN D, double cbach, double cbach2, long prec)
 {
   const long MAXRELSUP = 7, SFB_MAX = 3;
   pari_timer T;
-  pari_sp av0 = avma, av, av2;
+  pari_sp av, av2;
   const long RELSUP = 5;
   long i, s, current, triv, sfb_trials, nrelsup, nreldep, need, nsubFB, minSFB;
   ulong low, high, LIMC0, LIMC, LIMC2, LIMCMAX, cp;
-  GEN W, cyc, res, gen, dep, mat, C, extraC, B, R, invhr, h = NULL; /*-Wall*/
+  GEN W, cyc, gen, dep, mat, C, extraC, B, R, invhr, h = NULL; /*-Wall*/
   double drc, sdrc, lim, LOGD, LOGD2;
   GRHcheck_t GRHcheck;
   struct qfr_data q;
@@ -970,11 +970,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   if (s < 0)
   {
     if (abscmpiu(q.D,4) <= 0)
-    {
-      GEN z = cgetg(5,t_VEC);
-      gel(z,1) = gel(z,4) = gen_1; gel(z,2) = gel(z,3) = cgetg(1,t_VEC);
-      return z;
-    }
+      retmkvec4(gen_1, cgetg(1,t_VEC), cgetg(1,t_VEC), gen_1);
     prec = BQ.PRECREG = 0;
   } else {
     BQ.PRECREG = maxss(prec+EXTRAPRECWORD, nbits2prec(2*expi(q.D) + 128));
@@ -1142,11 +1138,14 @@ START:
   gen = get_clgp(&BQ,W,&cyc);
   gunclone(BQ.subFB);
   gunclone(BQ.powsubFB);
-  res = cgetg(5,t_VEC);
-  gel(res,1) = h;
-  gel(res,2) = cyc;
-  gel(res,3) = gen;
-  gel(res,4) = R; return gerepilecopy(av0,res);
+  return mkvec4(h, cyc, gen, R);
+}
+GEN
+Buchquad(GEN D, double c, double c2, long prec)
+{
+  pari_sp av = avma;
+  GEN z = Buchquad_i(D, c, c2, prec);
+  return gerepilecopy(av, z);
 }
 
 GEN
@@ -1180,4 +1179,18 @@ quadclassunit0(GEN x, long flag, GEN data, long prec)
   }
   if (flag) pari_err_IMPL("narrow class group");
   return Buchquad(x,c1,c2,prec);
+}
+GEN
+quadclassno(GEN D)
+{
+  pari_sp av = avma;
+  GEN h = abgrp_get_no(Buchquad_i(D, 0, 0, 0));
+  return icopy_avma(h, av);
+}
+long
+quadclassnos(long D)
+{
+  pari_sp av = avma;
+  long h = itos(abgrp_get_no(Buchquad_i(stoi(D), 0, 0, 0)));
+  return gc_long(av, h);
 }

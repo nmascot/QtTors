@@ -2776,6 +2776,8 @@ GEN     sunits_mod_units(GEN bnf, GEN S);
 /* buch1.c */
 
 GEN     Buchquad(GEN D, double c1, double c2, long prec);
+GEN     quadclassno(GEN x);
+long    quadclassnos(long x);
 GEN     quadclassunit0(GEN x, long flag,GEN data, long prec);
 GEN     quadhilbert(GEN D, long prec);
 GEN     quadray(GEN bnf, GEN f, long prec);
@@ -5078,8 +5080,6 @@ GEN     classno(GEN x);
 GEN     classno2(GEN x);
 long    isfundamental(GEN x);
 GEN     qfbclassno0(GEN x,long flag);
-GEN     quadclassno(GEN x, GEN *pD);
-long    quadclassnos(long x, long *pD);
 GEN     quadclassnoF(GEN x, GEN *pD);
 GEN     quadclassnoF_fact(GEN D, GEN P, GEN E);
 GEN     quaddisc(GEN x);

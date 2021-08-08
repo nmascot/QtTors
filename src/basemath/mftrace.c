@@ -2599,7 +2599,7 @@ static long
 myh(long D)
 {
   ulong z = (ulong)cache_get(cache_H, -D);
-  return z? z / 6: quadclassnos(D, NULL);
+  return z? z / 6: quadclassnos(D);
 }
 
 /*************************************************************************/
