@@ -1825,8 +1825,7 @@ static ulong
 quadnegclassnou(long D, long *pD0, GEN *pP, GEN *pE)
 {
   ulong d = (ulong)-D, d0 = coredisc2u_fact(factoru(d), -1, pP, pE);
-  ulong h = uquadclassnoF_fact(d0, -1, *pP, *pE);
-  h *= itou(abgrp_get_no(quadclassunit0(utoineg(d0), 0, NULL, 0)));
+  ulong h = uquadclassnoF_fact(d0, -1, *pP, *pE) * quadclassnos(-(long)d0);
   if (d0 != d) switch(d0)
   {
     case 4: h >>= 1; break;

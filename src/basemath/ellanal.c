@@ -1190,7 +1190,7 @@ listheegner(GEN N, GEN faN4, GEN listQ, GEN D)
 {
   pari_sp av = avma;
   const long kmin = 30;
-  long h = itos(gel(quadclassunit0(D, 0, NULL, DEFAULTPREC), 1));
+  long h = itos(quadclassno(D));
   GEN ymin, b = Zn_sqrt(D, faN4), L = vectrunc_init(h+1);
   long l, k, s = 0;
   for (k = 0; k < kmin || s < h; k++)

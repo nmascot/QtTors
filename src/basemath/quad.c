@@ -1012,8 +1012,7 @@ hclassno6_large(GEN x)
   }
   if (!H)
   {
-    GEN Q = quadclassunit0(D, 0, NULL, 0);
-    H = gel(Q,1);
+    H = quadclassno(D);
     switch(itou_or_0(D))
     {
       case 3: H = shifti(H,1);break;

@@ -2513,17 +2513,15 @@ mycoredisc2pos(ulong n, long *pf)
   return (long)m;
 }
 
-/* d > 0, d = 0,3 (mod 4). Return 6*hclassno(d); -d must be fundamental
- * Faster than quadclassunit up to 5*10^5 or so */
+/* D < 0 fundamental. Return 6*hclassno(-D); faster than quadclassunit up
+ * to 5*10^5 or so */
 static ulong
-hclassno6u_count(ulong d)
+hclassno6_count(long D)
 {
-  ulong a, b, b2, h = 0;
+  ulong a, b, b2, h = 0, d = -D;
   int f = 0;
 
-  if (d > 500000)
-    return 6 * itou(gel(quadclassunit0(utoineg(d), 0, NULL, 0), 1));
-
+  if (d > 500000) return 6 * quadclassnos(D);
   /* this part would work with -d non fundamental */
   b = d&1; b2 = (1+d)>>2;
   if (!b)
@@ -2549,11 +2547,11 @@ static long
 hclassno6u_2(ulong D, long D0, long F)
 {
   long h;
-  if (F == 1) h = hclassno6u_count(D);
+  if (F == 1) h = hclassno6_count(D0);
   else
   { /* second chance */
     h = (ulong)cache_get(cache_H, -D0);
-    if (!h) h = hclassno6u_count(-D0);
+    if (!h) h = hclassno6_count(D0);
     h *= uhclassnoF_fact(myfactoru(F), D0);
   }
   return h;
