@@ -40,6 +40,11 @@ nf=nfinit(a^2-2);
 chk(ellinit([a,-1,0,18,46],nf))
 ellisomat(ellinit([-824740032823875,9115932407325507114750],nfinit(y-16581375)),1)[2]
 
+E=ellinit([-1880854563/4225,6682049310818/274625]);
+ellisomat(E,,1)[2]
+E=ellinit([-1880854563/4225,6682049310818/274625],nfinit(a^2+1));
+ellisomat(E,,1)[2]
+
 \\ From Barinder Banwait:
 nf=nfinit(w^2-5);
 E=ellinit([95673435586560*w - 213932305612800],nf);
