@@ -1294,16 +1294,14 @@ ellnf_prime_degree(GEN E)
 {
   forprime_t T;
   long i;
-  GEN nf = ellnf_get_nf(E);
-  GEN disc = ell_get_disc(E);
-  GEN P, B = gen_0, rB;
-  GEN nor = nfnorm(nf, disc);
-  GEN bad = mulii(mulii(denom_i(nor),numer_i(nor)),nf_get_disc(nf));
+  GEN nf = ellnf_get_nf(E), N = nfnorm(nf, ell_get_disc(E)), B = gen_0, rB, P;
+  GEN bad = mulii(typ(N) == t_FRAC? mulii(gel(N,1),gel(N,2)): N,
+                  nf_get_disc(nf));
   u_forprime_init(&T, 5UL,ULONG_MAX);
   for(i=1; i<=20; i++)
   {
     ulong p = u_forprime_next(&T);
-    if (dvdiu(bad, p)) {i--; continue;}
+    if (dvdiu(bad, p)) { i--; continue; }
     B = gcdii(B, ellnf_get_degree(E, utoipos(p)));
     if (Z_issquareall(B,&rB)) B=rB;
   }
