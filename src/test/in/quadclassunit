@@ -18,6 +18,7 @@ setrand(1); test(10^15); test(-10^15)
 }
 quadunit(2^50+55) * Mod(1,2^64-59)
 quadunitindex(157,3)
+quadunitindex(157,11)
 quadunitindex(-3,1)
 quadunitindex(-3,2)
 quadunitindex(-4,2)

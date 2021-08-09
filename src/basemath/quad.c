@@ -220,9 +220,8 @@ ui_equal1(GEN x) { return degpol(x) < 1; }
 static const struct bb_group
 ui_group={ NULL,ui_pow,NULL,NULL,NULL,ui_equal1,NULL};
 
-/* Q = 2 * N * final q; result correct mod N */
-static GEN
-quadunit_mod(GEN D, GEN d, GEN Q)
+static void
+quadunit_mod(GEN D, GEN d, GEN N, GEN *pu, GEN *pv)
 {
   GEN u1, u2, v1, v2, p, q, q1, u, v;
   int m = mpodd(D);
@@ -241,8 +240,8 @@ quadunit_mod(GEN D, GEN d, GEN Q)
       v = shifti(mulii(u2,v2), 1);
       break;
     }
-    t = Fp_addmul(u1, A, u2, Q); u1 = u2; u2 = t;
-    t = Fp_addmul(v1, A, v2, Q); v1 = v2; v2 = t;
+    t = Fp_addmul(u1, A, u2, N); u1 = u2; u2 = t;
+    t = Fp_addmul(v1, A, v2, N); v1 = v2; v2 = t;
     t = q; q = submulii(q1, A, subii(p, p1)); q1 = t;
     if (equalii(q, t))
     { /* odd period */
@@ -256,9 +255,8 @@ quadunit_mod(GEN D, GEN d, GEN Q)
       gerepileall(av, 7, &p, &u1,&u2,&v1,&v2, &q,&q1);
     }
   }
-  u = divii(modii(u, Q), q); v = divii(modii(v, Q), q); /* exact */
-  if (m == 1) u = subii(u, v);
-  return mkvec2(shifti(u, -1), v);
+  *pu = modii(u, N);
+  *pv = modii(v, N); if (m) *pu = Fp_sub(*pu, *pv, N);
 }
 GEN
 quadunit_basecase(GEN D)
@@ -379,7 +377,7 @@ GEN
 quadunitindex(GEN D, GEN N)
 {
   pari_sp av = avma, av2;
-  GEN Q, d, P, E, F, y, a, faH, H;
+  GEN y, u, v, q, d, P, E, F, a, faH, H;
   struct uimod S;
   long r, s;
 
@@ -394,12 +392,23 @@ quadunitindex(GEN D, GEN N)
   }
   if (!F) F = Z_factor(N);
   d = sqrti(D); av2 = avma;
-  Q = quadunit_q(D, d, &s);
-  Q = gerepileuptoint(av2, shifti(mulii(Q, N), 1));
-  y = quadunit_mod(D, d, Q);
+  q = gerepileuptoint(av2, quadunit_q(D, d, &s));
+  if (mpodd(N) && equali1(gcdii(q, N)))
+  {
+    quadunit_mod(D, d, N, &u, &v);
+    q = Fp_inv(shifti(q, 1), N);
+    u = Fp_mul(u, q, N);
+    v = Fp_mul(v, q, N); v = modii(shifti(v, 1), N);
+  }
+  else
+  {
+    GEN M = shifti(mulii(q, N), 1);
+    quadunit_mod(D, d, M, &u, &v);
+    u = diviiexact(u, q);
+    v = diviiexact(v, q); u = shifti(u,-1);
+  }
   /* fundamental unit = y mod N */
-  S.N = N; S.T = quadpoly_i(D);
-  y = deg1pol_shallow(modii(gel(y,2), N), modii(gel(y,1), N), 0);
+  S.N = N; S.T = quadpoly_i(D); y = deg1pol_shallow(v, u, 0);
   H = quadclassnoF_fact(D, gel(F,1), gel(F,2));
   a = Z_smoothen(H, gel(F,1), &P, &E);
   faH = mkmat2(P, E);
