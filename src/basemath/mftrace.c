@@ -2542,9 +2542,9 @@ hclassno6_count(long D)
   if (f) return 6*h+3;
   return 6*h;
 }
-/* D > 0; 6 * hclassno(D), using D = D0*F^2 */
+/* D0 < 0; 6 * hclassno(-D), using D = D0*F^2 */
 static long
-hclassno6u_2(ulong D, long D0, long F)
+hclassno6u_2(long D0, long F)
 {
   long h;
   if (F == 1) h = hclassno6_count(D0);
@@ -2565,7 +2565,7 @@ hclassno6u(ulong D)
   long D0, F;
   if (z) return z;
   D0 = mycoredisc2neg(D, &F);
-  return hclassno6u_2(D,D0,F);
+  return hclassno6u_2(D0,F);
 }
 /* same as hclassno6u without creating caches */
 ulong
@@ -2581,7 +2581,7 @@ hclassno6u_no_cache(ulong D)
   S = &caches[cache_D];
   if (!S->cache || (ulong)lg(S->cache) <= D) return 0;
   D0 = mycoredisc2neg(D, &F);
-  return hclassno6u_2(D,D0,F);
+  return hclassno6u_2(D0,F);
 }
 /* same, where the decomposition D = D0*F^2 is already known */
 static ulong
@@ -2589,7 +2589,7 @@ hclassno6u_i(ulong D, long D0, long F)
 {
   ulong z = (ulong)cache_get(cache_H, D);
   if (z) return z;
-  return hclassno6u_2(D,D0,F);
+  return hclassno6u_2(D0,F);
 }
 
 /* D < -4 fundamental, h(D), ordinary class number */
