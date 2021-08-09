@@ -820,15 +820,9 @@ ellisog_by_jt(GEN c4, GEN c6, GEN jt, GEN jtp, GEN s0, long n, long flag)
   }
 }
 
-/*
-Based on
-RENE SCHOOF
-Counting points on elliptic curves over finite fields
-Journal de Theorie des Nombres de Bordeaux,
-tome 7, no 1 (1995), p. 219-254.
-<http://www.numdam.org/item?id=JTNB_1995__7_1_219_0>
-*/
-
+/* RENE SCHOOF, Counting points on elliptic curves over finite fields,
+ * Journal de Theorie des Nombres de Bordeaux, tome 7, no 1 (1995), p. 219-254.
+ * http://www.numdam.org/item?id=JTNB_1995__7_1_219_0 */
 static GEN
 ellisog_by_j(GEN e, GEN jt, long n, GEN P, long flag)
 {
@@ -860,8 +854,7 @@ ellisograph_iso(GEN nf, GEN e, ulong p, GEN P, GEN oj, long flag)
   R = nfroots(nf,oj ? RgX_div_by_X_x(Pj, oj, NULL):Pj);
   r = lg(R);
   V = cgetg(r, t_VEC);
-  for (i=1; i < r; i++)
-    gel(V, i) = ellisog_by_j(e, gel(R, i), p, P, flag);
+  for (i=1; i < r; i++) gel(V, i) = ellisog_by_j(e, gel(R, i), p, P, flag);
   return V;
 }
 
@@ -921,8 +914,7 @@ etree_nbnodes(GEN T)
 {
   GEN F = gel(T,2);
   long n = 1, i, l = lg(F);
-  for (i = 1; i < l; i++)
-    n += etree_nbnodes(gel(F, i));
+  for (i = 1; i < l; i++) n += etree_nbnodes(gel(F, i));
   return n;
 }
 
@@ -990,8 +982,7 @@ etree_distmat(GEN T)
 {
   long i, n = etree_nbnodes(T);
   GEN M = cgetg(n+1, t_MAT);
-  for(i = 1; i <= n; i++)
-    gel(M,i) = cgetg(n+1, t_VECSMALL);
+  for(i = 1; i <= n; i++) gel(M,i) = cgetg(n+1, t_VECSMALL);
   (void)etree_distmatr(T, M, 1);
   return M;
 }
@@ -1122,15 +1113,10 @@ mkisomatdbl(ulong p, GEN T, ulong p2, GEN T2, long flag)
   return isomatdbl(NULL, gel(v,1), gel(v,2), p2, T2, flag);
 }
 
-/*
-See
-M.A Kenku
-On the number of Q-isomorphism classes of elliptic curves in each Q-isogeny class
-Journal of Number Theory
-Volume 15, Issue 2, October 1982, Pages 199-202
-http://www.sciencedirect.com/science/article/pii/0022314X82900257
-*/
-
+/*See M.A Kenku, On the number of Q-isomorphism classes of elliptic curves in
+ * each Q-isogeny class, Journal of Number Theory Volume 15, Issue 2,
+ * October 1982, pp 199-202,
+ * http://www.sciencedirect.com/science/article/pii/0022314X82900257 */
 enum { _2 = 1, _3 = 2, _5 = 4, _7 = 8, _13 = 16 };
 static ulong
 ellQ_goodl(GEN E)
@@ -1147,7 +1133,7 @@ ellQ_goodl(GEN E)
     if (umodiu(disc,p)==0) i--;
     else
     {
-      long t = ellap_CM_fast(E, p, CM), D = t*t-4*p;
+      long t = ellap_CM_fast(E, p, CM), D = t*t - 4*p;
       if (t%2) mask &= ~_2;
       if ((mask & _3) && kross(D,3)==-1)  mask &= ~_3;
       if ((mask & _5) && kross(D,5)==-1)  mask &= ~_5;
@@ -1165,8 +1151,8 @@ ellQ_goodl_l(GEN E, long l)
   long i;
   GEN disc = ell_get_disc(E);
   pari_sp av = avma;
-  u_forprime_init(&T, 17UL,ULONG_MAX);
-  for(i=1; i<=20; i++)
+  u_forprime_init(&T, 17UL, ULONG_MAX);
+  for (i=1; i<=20; i++)
   {
     ulong p = u_forprime_next(&T);
     if (umodiu(disc,p)==0) { i--; continue; }
@@ -1175,12 +1161,12 @@ ellQ_goodl_l(GEN E, long l)
       long t = itos(ellap(E, utoipos(p)));
       if (l==2)
       {
-        if (t%2==1) return 0;
+        if (odd(t)) return 0;
       }
       else
       {
-        long D = t*t-4*p;
-        if (kross(D,l)==-1) return 0;
+        long D = t*t - 4*p;
+        if (kross(D,l) == -1) return 0;
       }
       set_avma(av);
     }
@@ -1192,14 +1178,12 @@ static ulong
 ellnf_goodl_l(GEN E, GEN v)
 {
   forprime_t T;
-  long i;
-  GEN nf = ellnf_get_nf(E);
-  GEN disc = ell_get_disc(E);
-  long lv = lg(v);
+  GEN nf = ellnf_get_nf(E), disc = ell_get_disc(E);
+  long i, lv = lg(v);
   ulong w = 0UL;
   pari_sp av = avma;
   u_forprime_init(&T, 17UL,ULONG_MAX);
-  for(i=1; i<=20; i++)
+  for (i = 1; i <= 20; i++)
   {
     ulong p = u_forprime_next(&T);
     GEN pr = idealprimedec(nf, utoipos(p));
@@ -1216,11 +1200,11 @@ ellnf_goodl_l(GEN E, GEN v)
           long l = v[k];
           if (l==2)
           {
-            if (t%2==1) w |= 1<<(k-1);
+            if (odd(t)) w |= 1<<(k-1);
           }
           else
           {
-            GEN D = subii(sqrs(t),shifti(pr_norm(prj),2));
+            GEN D = subii(sqrs(t), shifti(pr_norm(prj),2));
             if (krois(D,l)==-1) w |= 1<<(k-1);
           }
         }
@@ -1233,9 +1217,7 @@ ellnf_goodl_l(GEN E, GEN v)
 
 static GEN
 ellnf_charpoly(GEN E, GEN pr)
-{
-  return deg2pol_shallow(gen_1, negi(ellap(E,pr)), pr_norm(pr), 0);
-}
+{ return deg2pol_shallow(gen_1, negi(ellap(E,pr)), pr_norm(pr), 0); }
 
 static GEN
 RgX_homogenize(GEN P, long v)
@@ -1256,56 +1238,46 @@ starlaw(GEN p, GEN q)
 static GEN
 startor(GEN p, long r)
 {
-  GEN xr = pol_xn(r, 0);
-  GEN psir = gsub(xr, gen_1);
+  GEN xr = pol_xn(r, 0), psir = gsub(xr, gen_1);
   return gsubstpol(starlaw(p, psir),xr,pol_x(0));
 }
 
 static GEN
 ellnf_get_degree(GEN E, GEN p)
 {
-  GEN nf = ellnf_get_nf(E);
-  long d = nf_get_degree(nf);
-  GEN dec = idealprimedec(nf, p);
-  long i, l = lg(dec), k;
+  GEN nf = ellnf_get_nf(E), dec = idealprimedec(nf, p);
+  long d = nf_get_degree(nf), l = lg(dec), i, k;
   GEN R, starl = deg1pol_shallow(gen_1, gen_m1, 0);
-  for(i=1; i < l; i++)
+  for (i=1; i < l; i++)
   {
-    GEN pr = gel(dec,i);
-    GEN q = ellnf_charpoly(E, pr);
+    GEN pr = gel(dec,i), q = ellnf_charpoly(E, pr);
     starl = starlaw(starl, startor(q, 12*pr_get_e(pr)));
   }
-  R = p;
-  for(k=0; 2*k<=d; k++)
-    R = mulii(R, poleval(starl,powiu(p,12*k)));
+  for (k = 0, R = p; 2*k <= d; k++) R = mulii(R, poleval(starl, powiu(p,12*k)));
   return R;
 }
 
-/*
-Based on a GP script by Nicolas Billerey itself
-based on Th\'eor\`emes 2.4 and 2.8 of the following article:
-N. Billerey, Crit\`eres d'irr\'eductibilit\'e pour les
-repr\'esentations des courbes elliptiques,
-Int. J. Number Theory 7 (2011), no. 4, 1001-1032.
-*/
-
+/* Based on a GP script by Nicolas Billerey and Theorems 2.4 and 2.8 of
+ * N. Billerey, Criteres d'irreductibilite pour les representations des
+ * courbes elliptiques, Int. J. Number Theory 7 (2011), no. 4, 1001-1032. */
 static GEN
 ellnf_prime_degree(GEN E)
 {
   forprime_t T;
   long i;
-  GEN nf = ellnf_get_nf(E), N = nfnorm(nf, ell_get_disc(E)), B = gen_0, rB, P;
+  GEN nf = ellnf_get_nf(E), N = nfnorm(nf, ell_get_disc(E)), B = gen_0, P;
   GEN bad = mulii(typ(N) == t_FRAC? mulii(gel(N,1),gel(N,2)): N,
                   nf_get_disc(nf));
   u_forprime_init(&T, 5UL,ULONG_MAX);
-  for(i=1; i<=20; i++)
+  for (i = 1; i <= 20; i++)
   {
     ulong p = u_forprime_next(&T);
+    GEN r;
     if (dvdiu(bad, p)) { i--; continue; }
     B = gcdii(B, ellnf_get_degree(E, utoipos(p)));
-    if (Z_issquareall(B,&rB)) B=rB;
+    if (Z_issquareall(B, &r)) B = r;
   }
-  if (signe(B)==0) pari_err_DOMAIN("ellisomat", "E","has",strtoGENstr("CM"),E);
+  if (!signe(B)) pari_err_DOMAIN("ellisomat", "E","has",strtoGENstr("CM"),E);
   P = vec_to_vecsmall(gel(Z_factor(B),1));
   return shallowextract(P, utoi(ellnf_goodl_l(E, P)));
 }
