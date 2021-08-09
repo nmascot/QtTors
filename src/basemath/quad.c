@@ -264,7 +264,7 @@ GEN
 quadunit_basecase(GEN D)
 {
   pari_sp av0 = avma;
-  GEN d, u1, u2, v1, v2, p, q, q1, u, v;
+  GEN d, u1, u2, v1, v2, p, q, q1, u, v, a, b, c;
   int m = mpodd(D);
   long first = 1;
   d = sqrti(D); p = (mpodd(d) == m)? d: subiu(d, 1);
@@ -274,26 +274,21 @@ quadunit_basecase(GEN D)
   for(;;)
   {
     GEN r, A = dvmdii(addii(p, d), q, &r), p1 = p, t;
-    p = subii(d, r);
+    p = subii(d, r); /* even period */
     if (!first && equalii(p1, p))
-    { /* even period */
-      u = addmulii(sqri(u2), D, sqri(v2));
-      v = shifti(mulii(u2,v2), 1);
-      break;
-    }
+    { a = sqri(u2); b = sqri(v2); c = sqri(addii(u2, v2)); break; }
     first = 0;
     t = addmulii(u1, A, u2); u1 = u2; u2 = t;
     t = addmulii(v1, A, v2); v1 = v2; v2 = t;
     t = q; q = submulii(q1, A, subii(p, p1)); q1 = t;
     if (equalii(q, t))
     { /* odd period */
-      u = addmulii(mulii(u1,u2), D, mulii(v1,v2));
-      v = addmulii(mulii(u1,v2), u2, v1);
-      break;
+      a = mulii(u1, u2); b = mulii(v1, v2);
+      c = mulii(addii(u1, v1), addii(u2, v2)); break;
     }
   }
-  u = diviiexact(u, q);
-  v = diviiexact(v, q);
+  u = diviiexact(addmulii(a, D, b), q);
+  v = diviiexact(subii(c, addii(a, b)), q);
   if (m == 1) u = subii(u, v);
   u = shifti(u, -1);
   return gerepilecopy(av0, mkquad(quadpoly_i(D), u, v));
@@ -303,7 +298,7 @@ GEN
 quadunit(GEN D)
 {
   pari_sp av0 = avma, av;
-  GEN f, d, p, q, q1, u, v;
+  GEN f, d, p, q, q1, u, v, a, b, c;
   int m = mpodd(D);
   long i = 0;
   d = sqrti(D); p = (mpodd(d) == m)? d: subiu(d, 1);
@@ -318,8 +313,7 @@ quadunit(GEN D)
     if (i && equalii(p1, p))
     { /* even period */
       f = prod_fm(f, i, 1); u2 = gel(f,1); v2 = gel(f,2);
-      u = addmulii(sqri(u2), D, sqri(v2));
-      v = shifti(mulii(u2,v2), 1); break;
+      a = sqri(u2); b = sqri(v2); c = sqri(addii(u2, v2)); break;
     }
     if (i) i = update_fm(f, A, i);
     else
@@ -331,10 +325,9 @@ quadunit(GEN D)
     if (equalii(q, t))
     { /* odd period */
       f = prod_fm(f, i, 0);
-      u2 = gcoeff(f,1,1); u1 = gcoeff(f,1,2);
-      v2 = gcoeff(f,2,1); v1 = gcoeff(f,2,2);
-      u = addmulii(mulii(u1,u2), D, mulii(v1,v2));
-      v = addmulii(mulii(u1,v2), u2, v1); break;
+      u2 = gcoeff(f,1,1); u1 = gcoeff(f,1,2); a = mulii(u1, u2);
+      v2 = gcoeff(f,2,1); v1 = gcoeff(f,2,2); b = mulii(v1, v2);
+      c = mulii(addii(u1, v1), addii(u2, v2)); break;
     }
     if (gc_needed(av, 2))
     {
@@ -342,8 +335,8 @@ quadunit(GEN D)
       gerepileall(av, 4, &p, &f, &q,&q1);
     }
   }
-  u = diviiexact(u, q);
-  v = diviiexact(v, q);
+  u = diviiexact(addmulii(a, D, b), q);
+  v = diviiexact(subii(c, addii(a, b)), q);
   if (m == 1) u = subii(u, v);
   u = shifti(u, -1);
   return gerepilecopy(av0, mkquad(quadpoly_i(D), u, v));
