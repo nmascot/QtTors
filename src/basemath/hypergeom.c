@@ -501,7 +501,7 @@ zind(GEN z, long ind)
 
 /* z not 0 or 1, c not a nonpositive integer */
 static long
-F21ind(GEN a, GEN b, GEN c, GEN z)
+F21ind(GEN a, GEN b, GEN c, GEN z, long bit)
 {
   GEN v = const_vec(6, mkoo());
   long ind = 0;
@@ -512,8 +512,8 @@ F21ind(GEN a, GEN b, GEN c, GEN z)
   if (!isnegint(cind(a,b,c, 4))) gel(v,4) = gabs(zind(z,4), LD);
   if (!isnegint(cind(a,b,c, 5))) gel(v,5) = gabs(zind(z,5), LD);
   if (!isnegint(cind(a,b,c, 6))) gel(v,6) = gabs(zind(z,6), LD);
-  ind = vecindexmin(v); /* |znew| close to 1 ? */
-  return (gcmp(gel(v,ind), mkfracss(49,50)) <= 0)? -ind: ind;
+  ind = vecindexmin(v); /* |znew| <= 1; close to 1 ? */
+  return (gexpo(gsubgs(gel(v,ind),1)) > -maxss(bit / 4, 32))? -ind: ind;
 }
 static GEN
 mul4(GEN a, GEN b, GEN c, GEN d) { return gmul(a,gmul(b, gmul(c, d))); }
@@ -598,7 +598,7 @@ static GEN
 F21finite(long m, GEN b, GEN c, GEN z, long prec)
 {
   GEN a = stoi(-m), b1 = b, c1 = c, z1;
-  long ind = F21ind(a, b, c, z), inda = labs(ind);
+  long ind = F21ind(a, b, c, z, prec2nbits(prec)), inda = labs(ind);
   z1 = zind(z, inda);
   if (ind < 0)
   {
@@ -659,22 +659,20 @@ Basic transforms:
   5: (1+a-c,b-c+a+1,1-1/z)
   6: (1+a-c,1+a-b,1/z)
 
-F21: calls F21_i and increase accuracy if too much cancellation
-F21_i:
-- z approx 0: return 1.
-- z=1: return Gauss multgam
-- a (or b) negative integer: call F21finite(-a,b)
-- c-a negative integer: call F21finite(a-c,c-b)
+F21: calls F21_i and increase prec if too much cancellation
+F21_i: c is not a non-positive integer
+- z ~ 0 or 1: return special value
+- if a, b, c-b or c-a a non-positive integer: use F21finite
 - compute index, value of z
-   If |z|<=0.98 call F21taylorind
-   else: if R(b)<=0, swap and/or recurse so may assume
-   R(b)>0 and R(a)>=R(b) and integrate.
+   if |z| < 1-epsilon return F21taylorind
+   if Re(b)<=0, swap and/or recurse
+   so may assume Re(b)>0 and Re(a)>=Re(b) and integrate.
 
 F21finite:
 - compute index, value of z
 - call F21finitetaylor
 
-F21ind: find best index (1 to 6, -1 to -6 if |z| < 0.98)
+F21ind: find best index (1 to 6, -1 to -6 if |z| < 1-epsilon)
 F21finitetaylor: a or b in Z_{<=0}; calls precFtaylor
 
 F21taylorind: in case 2, may lose accuracy, possible bug.
@@ -700,19 +698,19 @@ F21_i(GEN a, GEN b, GEN c, GEN z, long prec)
   if (is0(z, bitprec)) return real_1(prec);
   if (gequal1(z))
   {
-    GEN tmp = gsub(c, gadd(a, b)); check_hyp1(tmp);
-    return multgam(c, tmp, gsub(c,a), gsub(c,b), prec);
+    GEN x = gsub(c, gadd(a, b)); check_hyp1(x);
+    return multgam(c, x, gsub(c,a), gsub(c,b), prec);
   }
   if (isnegint2(b, &m)) return F21finite(m, a, c, z, prec);
   if (isnegint2(a, &m)) return F21finite(m, b, c, z, prec);
   if (isnegint(gsub(c, b))) swap(a, b);
   if (isnegint2(gsub(c, a), &m))
   {
-    GEN tmp = gpow(gsubsg(1, z), gneg(gaddsg(m, b)), prec);
-    return gmul(tmp, F21finite(m, gsub(c, b), c, z, prec));
+    GEN x = gpow(gsubsg(1, z), gneg(gaddsg(m, b)), prec);
+    return gmul(x, F21finite(m, gsub(c, b), c, z, prec));
   }
   /* Here a, b, c, c-a, c-b are not nonpositive integers */
-  ind = F21ind(a, b, c, z);
+  ind = F21ind(a, b, c, z, bitprec);
   if (ind < 0) return gmul(ggamma(c, prec), F21taylorind(a,b,c, z, ind, prec));
   if (gsigne(real_i(b)) <= 0)
   {
@@ -752,6 +750,7 @@ F21_i(GEN a, GEN b, GEN c, GEN z, long prec)
   return gmul(multgam(gen_1, c, b, gsub(c,b), prec), res);
 }
 
+/* c not a non-positive integer */
 static GEN
 F21(GEN a, GEN b, GEN c, GEN z, long prec)
 {
