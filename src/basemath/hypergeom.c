@@ -553,7 +553,7 @@ F21lam(long N, GEN a, GEN c)
   gel(S,i+1) = gel(vb,N); return RgV_to_RgX(S,0);
 }
 
-/* F21finite stuff: case where a or b is a nonpositive integer */
+/* F(-m,b; c; z), m >= 0 */
 static GEN
 F21finitetaylor(long m, GEN b, GEN c, GEN z, long prec)
 {
@@ -593,7 +593,7 @@ F21finite_i(long m, GEN b, GEN c, GEN z, GEN B, GEN C, GEN coe, long prec)
               F21finitetaylor(m, b, c, z, prec));
 }
 
-/* c not a nonpositive integer */
+/* F(-m,b; c; z), m >= 0; c not a nonpositive integer */
 static GEN
 F21finite(long m, GEN b, GEN c, GEN z, long prec)
 {
@@ -610,10 +610,10 @@ F21finite(long m, GEN b, GEN c, GEN z, long prec)
     case 1: return F21finite_i(m, b1, c1, z1, b, c, gsubsg(1,z), prec);
     case 2: return gmul(gpowgs(gsubsg(1,z), m),
                         F21finitetaylor(m, b1, c, z1, prec));
-    case 4: return F21finite_i(m, b, c1, z1, gsub(c,b), c, gen_1, prec);
+    case 4: return F21finite_i(m, b1, c1, z1, gsub(c,b), c, gen_1, prec);
     case 5: return F21finite_i(m, b1, c1, z1, gsub(c,b), c, z, prec);
     case 6: return F21finite_i(m, b1, c1, z1, b, c, gneg(z), prec);
-    default:return F21finitetaylor(m, b, c, z, prec);
+    default:return F21finitetaylor(m, b1, c1, z, prec);
   }
 }
 
@@ -810,6 +810,7 @@ F21taylorlim(GEN N, long m, GEN z, long si, long prec)
   return gdiv(S, mpfact(m));
 }
 
+/* N = [a,b]; (m-1)! sum_{1 <= k < m} (-z)^k (a)_k (b)_k / k! (m-k)!*/
 static GEN
 F21finitelim(GEN N, long m, GEN z, long prec)
 {
@@ -819,7 +820,7 @@ F21finitelim(GEN N, long m, GEN z, long prec)
   a = gel(N,1);
   b = gel(N,2);
   S = C = real_1(prec + EXTRAPRECWORD);
-  for (j = 1; j < m; ++j)
+  for (j = 1; j < m; j++)
   {
     GEN v1 = gaddsg(j-1, a), v2 = gaddsg(j-1, b);
     C = gdivgs(gmul(C, gmul(gmul(v1, v2), z)), j*(j-m));
