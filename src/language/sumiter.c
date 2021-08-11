@@ -1316,9 +1316,9 @@ sumpos0(GEN a, GEN code, long flag, long prec)
 GEN
 zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
 {
-  long sig, iter, itmax;
+  long sig, iter, itmax, bit;
   pari_sp av = avma;
-  GEN c, d, e, tol, fa, fb, fc;
+  GEN c, d, e, fa, fb, fc;
 
   if (typ(a) == t_INFINITY && typ(b) != t_INFINITY) swap(a,b);
   if (typ(a) == t_INFINITY && typ(b) == t_INFINITY)
@@ -1377,53 +1377,49 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
     pari_err_DOMAIN("solve", "f(a)f(b)", ">", gen_0, mkvec2(fa, fb));
 SOLVE:
   itmax = prec2nbits(prec) * 2 + 1;
-  tol = real2n(5-prec2nbits(prec), LOWDEFAULTPREC);
+  bit = 4-prec2nbits(prec);
   fc = fb;
   e = d = NULL; /* gcc -Wall */
   for (iter = 1; iter <= itmax; ++iter)
   {
-    GEN xm, tol1;
-    if (gsigne(fb)*gsigne(fc) > 0)
-    {
-      c = a; fc = fa; e = d = subrr(b, a);
-    }
+    long bit2;
+    GEN m;
+    if (gsigne(fb)*gsigne(fc) > 0) { c = a; fc = fa; e = d = subrr(b, a); }
     if (gcmp(gabs(fc, 0), gabs(fb, 0)) < 0)
-    {
-      a = b; b = c; c = a; fa = fb; fb = fc; fc = fa;
-    }
-    tol1 = abscmprr(tol, b) > 0? sqrr(tol): mulrr(tol, absr(b));
-    xm = shiftr(subrr(c, b), -1);
-    if (abscmprr(xm, tol1) <= 0 || gequal0(fb)) break; /* SUCCESS */
+    { a = b; b = c; c = a; fa = fb; fb = fc; fc = fa; }
+    bit2 = bit-1 + maxss(bit, expo(b));
+    m = shiftr(subrr(c, b), -1);
+    if (expo(m) <= bit2 || gequal0(fb)) break; /* SUCCESS */
 
-    if (abscmprr(e, tol1) >= 0 && gcmp(gabs(fa, 0), gabs(fb, 0)) > 0)
-    { /* attempt interpolation */
+    if (expo(e) >= bit2 && gexpo(fa) > gexpo(fb))
+    { /* attempt interpolation, m != 0, |f(c)| >= |f(b)|, f(b)f(c) < 0 */
       GEN min1, min2, p, q, s = gdiv(fb, fa);
-      if (cmprr(a, c) == 0)
+      if (a == c)
       {
-        p = gmul2n(gmul(xm, s), 1);
+        p = gmul2n(gmul(m, s), 1);
         q = gsubsg(1, s);
       }
       else
       {
         GEN r = gdiv(fb, fc);
         q = gdiv(fa, fc);
-        p = gmul2n(gmul(gsub(q, r), gmul(xm, q)), 1);
-        p = gmul(s, gsub(p, gmul(gsub(b, a), gsubgs(r, 1))));
+        p = gmul2n(gmul(gsub(q, r), gmul(m, q)), 1);
+        p = gmul(s, gsub(p, gmul(subrr(b, a), gsubgs(r, 1))));
         q = gmul(gmul(gsubgs(q, 1), gsubgs(r, 1)), gsubgs(s, 1));
       }
       if (gsigne(p) > 0) q = gneg_i(q); else p = gneg_i(p);
-      min1 = gsub(gmulsg(3, gmul(xm,q)), gabs(gmul(q, tol1), 0));
+      min1 = gsub(gmulsg(3, gmul(m,q)), gmul2n(gabs(q,0), bit2));
       min2 = gabs(gmul(e, q), 0);
       if (gcmp(gmul2n(p, 1), gmin_shallow(min1, min2)) < 0)
         { e = d; d = gdiv(p, q); } /* interpolation OK */
       else
-        { d = xm; e = d; } /* failed, use bisection */
+        { d = m; e = d; } /* failed, use bisection */
     }
-    else { d = xm; e = d; } /* bound decreasing too slowly, use bisection */
+    else { d = m; e = d; } /* bound decreasing too slowly, use bisection */
     a = b; fa = fb;
-    if (gcmp(gabs(d, 0), tol1) > 0) b = gadd(b, d);
-    else if (gsigne(xm) > 0)      b = addrr(b, tol1);
-    else                          b = subrr(b, tol1);
+    if (gexpo(d) > bit2) b = gadd(b, d);
+    else if (gsigne(m) > 0) b = addrr(b, real2n(bit2, LOWDEFAULTPREC));
+    else                     b = subrr(b, real2n(bit2, LOWDEFAULTPREC));
     if (realprec(b) < prec) b = rtor(b, prec);
     fb = eval(E, b);
   }
