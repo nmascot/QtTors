@@ -1191,7 +1191,7 @@ ellnf_goodl_l(GEN E, GEN v)
     for (j=1; j<=g; j++)
     {
       GEN prj = gel(pr, j);
-      if (idealval(nf,disc,prj) > 0) {i--; continue;}
+      if (idealval(nf,disc,prj) != 0) {i--; continue;}
       else
       {
         long t = itos(ellap(E, prj));
