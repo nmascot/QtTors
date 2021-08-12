@@ -1,11 +1,12 @@
 default(realprecision,38);
+default(parisize,"10M");
 hardy(x)=real(zeta(1/2+I*x)*exp(I*(arg(gamma((1/2+I*x)/2))-log(Pi)/2*x)));
 solve(x=1,20,hardy(x))
 solvestep(x=1,100,1,hardy(x))
 #solvestep(x=0,10000,2,sin(x))
-solve(x=-oo,oo,exp(x)-2)
-solve(x=-oo,2,exp(x)-2)
-solve(x=0,oo,exp(x)-2)
+exponent(solve(x=-oo,oo,exp(x)-2)-log(2))
+exponent(solve(x=-oo,2,exp(x)-2)-log(2))
+exponent(solve(x=0,oo,exp(x)-2)-log(2))
 
 \\ Errors, keep at end
 solvestep(x=1,100,-1,hardy(x))

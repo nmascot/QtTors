@@ -1316,7 +1316,7 @@ sumpos0(GEN a, GEN code, long flag, long prec)
 GEN
 zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
 {
-  long sig, iter, itmax, bit;
+  long sig, iter, itmax, bit, bit0;
   pari_sp av = avma;
   GEN c, d, e, fa, fb, fc;
 
@@ -1376,25 +1376,23 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
   if (gsigne(fa)*gsigne(fb) > 0)
     pari_err_DOMAIN("solve", "f(a)f(b)", ">", gen_0, mkvec2(fa, fb));
 SOLVE:
-  itmax = prec2nbits(prec) * 2 + 1;
-  bit = 4-prec2nbits(prec);
-  fc = fb;
-  e = d = NULL; /* gcc -Wall */
+  bit0 = -prec2nbits(prec); bit = 3+bit0; itmax = 1 - 2*bit0;
+  fc = fb; e = d = NULL;
   for (iter = 1; iter <= itmax; ++iter)
-  {
+  { /* b = current best guess, a and c auxiliary points */
     long bit2;
     GEN m;
     if (gsigne(fb)*gsigne(fc) > 0) { c = a; fc = fa; e = d = subrr(b, a); }
     if (gcmp(gabs(fc, 0), gabs(fb, 0)) < 0)
     { a = b; b = c; c = a; fa = fb; fb = fc; fc = fa; }
     bit2 = bit-1 + maxss(bit, expo(b));
-    m = shiftr(subrr(c, b), -1);
-    if (expo(m) <= bit2 || gequal0(fb)) break; /* SUCCESS */
+    m = subrr(c, b); shiftr_inplace(m, -1);
+    if (expo(m) <= expo(b)+bit0 || gequal0(fb)) break; /*SUCCESS*/
 
-    if (expo(e) >= bit2 && gexpo(fa) > gexpo(fb))
-    { /* attempt interpolation, m != 0, |f(c)| >= |f(b)|, f(b)f(c) < 0 */
+    if (expo(e) > bit2 && gexpo(fa) > gexpo(fb))
+    { /* interpolation, m != 0, |f(c)| >= |f(b)|, f(b)f(c) < 0 */
       GEN min1, min2, p, q, s = gdiv(fb, fa);
-      if (a == c)
+      if (a == c || equalrr(a,c))
       {
         p = gmul2n(gmul(m, s), 1);
         q = gsubsg(1, s);
@@ -1413,13 +1411,15 @@ SOLVE:
       if (gcmp(gmul2n(p, 1), gmin_shallow(min1, min2)) < 0)
         { e = d; d = gdiv(p, q); } /* interpolation OK */
       else
-        { d = m; e = d; } /* failed, use bisection */
+        { e = m; d = NULL; } /* failed, use bisection */
     }
-    else { d = m; e = d; } /* bound decreasing too slowly, use bisection */
+    else { e = m; d = NULL; } /* bound decreasing too slowly, use bisection */
     a = b; fa = fb;
-    if (gexpo(d) > bit2) b = gadd(b, d);
+    if (!d) { b = addrr(c, b); shiftr_inplace(b,-1); }
+    else if (gexpo(d) > bit2) b = gadd(b, d);
     else if (gsigne(m) > 0) b = addrr(b, real2n(bit2, LOWDEFAULTPREC));
-    else                     b = subrr(b, real2n(bit2, LOWDEFAULTPREC));
+    else                    b = subrr(b, real2n(bit2, LOWDEFAULTPREC));
+    if (equalrr(a, b)) break;
     if (realprec(b) < prec) b = rtor(b, prec);
     fb = eval(E, b);
   }
