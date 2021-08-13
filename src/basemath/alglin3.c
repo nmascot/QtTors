@@ -865,7 +865,7 @@ genfold(void *E, GEN (*f)(void* E, GEN x, GEN y), GEN x)
 GEN
 fold0(GEN f, GEN x)
 {
-  if (typ(f) != t_CLOSURE || closure_arity(f) < 2) pari_err_TYPE("apply",f);
+  if (typ(f) != t_CLOSURE || closure_arity(f) < 2) pari_err_TYPE("fold",f);
   return genfold((void *) f, gp_call2, x);
 }
 /*******************************************************************/
