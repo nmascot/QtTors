@@ -3129,6 +3129,13 @@ gtovecpost(GEN x, long n)
       imax = minss(lx-1, n);
       for (i=1; i<=imax; i++) gel(y,i) = gcopy(gel(x,i));
       return y;
+    case t_STR:
+    {
+      char *s = GSTR(x);
+      imax = minss(strlen(s), n); s--;
+      for (i=1; i<=imax; i++) gel(y,i) = chartoGENstr(s[i]);
+      return y;
+    }
     case t_VECSMALL:
       lx=lg(x);
       imax = minss(lx-1, n);
@@ -3175,6 +3182,13 @@ gtovecpre(GEN x, long n)
       y0 = init_vectopre(lx-1, n, y, &imax);
       for (i=1; i<=imax; i++) gel(y0,i) = gcopy(gel(x,i));
       return y;
+    case t_STR:
+    {
+      char *s = GSTR(x);
+      y0 = init_vectopre(strlen(s), n, y, &imax); s--;
+      for (i=1; i<=imax; i++) gel(y,i) = chartoGENstr(s[i]);
+      return y;
+    }
     case t_VECSMALL:
       lx=lg(x);
       y0 = init_vectopre(lx-1, n, y, &imax);
@@ -3326,6 +3340,13 @@ gtovecsmallpost(GEN x, long n)
       imax = minss(lx-1, n);
       for (i=1; i<=imax; i++) y[i] = x[i];
       return y;
+    case t_STR:
+    {
+      unsigned char *s = (unsigned char*)GSTR(x);
+      imax = minss(strlen((const char *)s), n); s--;
+      for (i=1; i<=imax; i++) y[i] = (long)s[i];
+      return y;
+    }
     default: pari_err_TYPE("gtovecsmall",x);
       return NULL; /*LCOV_EXCL_LINE*/
   }
@@ -3365,6 +3386,13 @@ gtovecsmallpre(GEN x, long n)
       y0 = init_vectopre(lx-1, n, y, &imax);
       for (i=1; i<=imax; i++) y0[i] = x[i];
       return y;
+    case t_STR:
+    {
+      unsigned char *s = (unsigned char*)GSTR(x);
+      y0 = init_vectopre(strlen((const char *)s), n, y, &imax); s--;
+      for (i=1; i<=imax; i++) y0[i] = (long)s[i];
+      return y;
+    }
     default: pari_err_TYPE("gtovecsmall",x);
       return NULL; /*LCOV_EXCL_LINE*/
   }
