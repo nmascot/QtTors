@@ -785,7 +785,7 @@ F21taylorlim(GEN N, long m, GEN z, GEN Z, long ind, long prec)
   }
   bitmin = -(prec2nbits(prec) + 10);
   P = glog(Z, prec);
-  if (ind == 4) P = gneg(P);
+  if (ind == 4 || ind == 5) P = gneg(P);
   P = gadd(P, gsub(gpsi(stoi(m+1), prec), mpeuler(prec)));
   tmp = gel(N, 2); if (si == -1) tmp = gsubsg(1, tmp);
   P = gsub(P, gadd(gpsi(gel(N, 1), prec), gpsi(tmp, prec)));
