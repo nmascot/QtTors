@@ -773,7 +773,7 @@ static GEN
 F21taylorlim(GEN N, long m, GEN z, GEN Z, long ind, long prec)
 {
   pari_sp av;
-  GEN C, P, S, tmp;
+  GEN C, P, S, a, b;
   long j, ct, pradd, mi, fl, bitmin, tol, si = (ind == 5 || ind == 6)? -1: 1;
   pradd = precFtaylor(N, mkvec(stoi(m + 1)), z, &mi);
   if (pradd)
@@ -783,30 +783,27 @@ F21taylorlim(GEN N, long m, GEN z, GEN Z, long ind, long prec)
     z = gprec_wensure(z, prec);
     Z = gprec_wensure(Z, prec);
   }
+  av = avma; a = gel(N,1); b = gel(N,2);
   bitmin = -(prec2nbits(prec) + 10);
-  P = glog(Z, prec);
-  if (ind == 4 || ind == 5) P = gneg(P);
+  P = glog(Z, prec); if (ind == 4 || ind == 5) P = gneg(P);
   P = gadd(P, gsub(gpsi(stoi(m+1), prec), mpeuler(prec)));
-  tmp = gel(N, 2); if (si == -1) tmp = gsubsg(1, tmp);
-  P = gsub(P, gadd(gpsi(gel(N, 1), prec), gpsi(tmp, prec)));
-  C = real_1(prec); ct = 0; j = 0; tol = 0;
-  S = P; fl = 1;
-  av = avma;
-  for(;;)
+  P = gsub(P, gadd(gpsi(a, prec), gpsi(si == -1? gsubsg(1, b): b, prec)));
+  C = real_1(prec); ct = 0; tol = 0; S = P;
+  for(j = 0, fl = 1;;)
   {
-    GEN v1 = gaddsg(j, gel(N,1)), v2 = gaddsg(j, gel(N,2));
-    long jB = (j+1) * (j+1+m);
-    C = gdivgs(gmul(z, gmul(C, v1)), jB);
+    GEN v1 = gaddgs(a, j), v2 = gaddgs(b, j);
+    long J = (j+1) * (j+1+m);
+    C = gmul(C, gdivgs(gmul(z, v1), J));
     if (gequal0(v2)) fl = 0; else C = gmul(C, v2);
     if (j > mi) tol = gequal0(S) ? 0 : gexpo(C) - gexpo(S);
     if (fl)
     {
-      P = gadd(P, gsub(sstoQ(2*j+2+m, jB), gadd(ginv(v1), ginv(v2))));
+      P = gadd(P, gsub(sstoQ(2*j+2+m, J), gadd(ginv(v1), ginv(v2))));
       S = gadd(S, gmul(C, P));
     }
-    else S = (si == 1)? gadd(S, C): gsub(S, C);
-    if (++j > mi)
-    { if (tol > bitmin) ct = 0; else if (++ct == 3) break; }
+    else
+      S = (si == 1)? gadd(S, C): gsub(S, C);
+    if (++j > mi) { if (tol > bitmin) ct = 0; else if (++ct == 3) break; }
     if (gc_needed(av, 1)) gerepileall(av, 3, &S, &C, &P);
   }
   return gdiv(S, mpfact(m));
