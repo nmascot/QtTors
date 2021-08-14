@@ -12,4 +12,7 @@
   ***   at top-level: harmonic(1,x)
   ***                 ^-------------
   *** harmonic: incorrect type in harmonic (t_POL).
-Total time spent: 1
+  ***   at top-level: harmonic(2^63)
+  ***                 ^--------------
+  *** harmonic: overflow in harmonic.
+Total time spent: 0
