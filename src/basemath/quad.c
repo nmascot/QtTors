@@ -185,22 +185,17 @@ static GEN
 prod_fm(GEN f, long i, long first)
 {
   long k, v = vals(i) + 1;
-  GEN w, u = gel(f, v);
-  if (!(i >>= v))
-  {
-    if (typ(u) == t_MAT) return first? gel(u,1): u;
-    return first? mkcol2(u, gen_1) : mkmat22(u, gen_1, gen_1, gen_0);
-  }
-  for (k = v+1; i > 1; i >>= 1, k++)
+  GEN u = gel(f, v);
+  /* i a power of 2: f[1] can't be a t_INT */
+  if (!(i >>= v)) return first? gel(u,1): u;
+  for (k = v+1; i; i >>= 1, k++)
     if (odd(i))
     {
-      w = gel(f,k);
-      if (typ(u) == t_MAT) u = ZM2_mul(gel(f,k), u);
-      else { update_f(w, u); u = w; }
+      GEN w = gel(f,k);
+      if (typ(u) == t_INT) { update_f(w, u); u = first? gel(w,1): w; }
+      else u = first? ZM_ZC_mul(w, u): ZM2_mul(w, u);
     }
-  w = gel(f,k); /* i = 1 */
-  if (typ(u) != t_MAT) { update_f(w, u); return first? gel(w,1): w; }
-  return first? ZM_ZC_mul(w, gel(u, 1)): ZM2_mul(w, u);
+  return u;
 }
 
 GEN
