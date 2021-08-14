@@ -1411,11 +1411,11 @@ SOLVE:
       if (gcmp(gmul2n(p, 1), gmin_shallow(min1, min2)) < 0)
         { e = d; d = gdiv(p, q); } /* interpolation OK */
       else
-        { e = m; d = NULL; } /* failed, use bisection */
+        e = d = m; /* failed, use bisection */
     }
-    else { e = m; d = NULL; } /* bound decreasing too slowly, use bisection */
+    else e = d = m; /* bound decreasing too slowly, use bisection */
     a = b; fa = fb;
-    if (!d) { b = addrr(c, b); shiftr_inplace(b,-1); }
+    if (d == m) { b = addrr(c, b); shiftr_inplace(b,-1); }
     else if (gexpo(d) > bit2) b = gadd(b, d);
     else if (gsigne(m) > 0) b = addrr(b, real2n(bit2, LOWDEFAULTPREC));
     else                    b = subrr(b, real2n(bit2, LOWDEFAULTPREC));
