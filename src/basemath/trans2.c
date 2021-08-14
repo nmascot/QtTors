@@ -2190,21 +2190,6 @@ serpsi(GEN y, long prec)
   return Q;
 }
 
-static GEN
-hrec(ulong a, long b)
-{
-  long m;
-  switch(b - a)
-  {
-    case 1: return mkfrac(gen_1, utoipos(a));
-    case 2: return mkfrac(utoipos(2*a + 1), muluu(a, a+1));
-  }
-  m = (a + b) >> 1;
-  return gadd(hrec(a, m), hrec(m, b));
-}
-/* exact Harmonic number H_n */
-static GEN
-harmonic(ulong n) { return hrec(1, n+1); }
 static ulong
 psi_n(ulong b)
 {

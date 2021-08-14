@@ -195,7 +195,25 @@ sstoQ(long n, long d)
   if (!r) return n > 0? utoipos(q): utoineg(q);
   g = ugcd(d,r); /* gcd(n,d) */
   if (g != 1) { n /= g; d /= g; }
-  retmkfrac(stoi(n), utoi(d));
+  retmkfrac(stoi(n), utoipos(d));
+}
+
+INLINE GEN
+uutoQ(ulong n, ulong d)
+{
+  ulong r;
+  long g, q;
+  if (!n)
+  {
+    if (!d) pari_err_INV("uutoQ",gen_0);
+    return gen_0;
+  }
+  if (d == 1) return utoipos(n);
+  q = udivuu_rem(n,d,&r);
+  if (!r) return utoipos(q);
+  g = ugcd(d,r); /* gcd(n,d) */
+  if (g != 1) { n /= g; d /= g; }
+  retmkfrac(utoipos(n), utoipos(d));
 }
 
 INLINE GEN

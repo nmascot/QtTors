@@ -134,6 +134,7 @@ BA  44- [libpari] RgXQ_minpoly
     46- new GP functions quadunitnorm, quadunitindex
 LGr 47- allow endpoints in solve() to by +oo or -oo
     48- allow Vec(t_STR, n) and Vecsmall(t_STR, n)
+    49- new GP function: harmonic
 
   Changed
 HC   1- faster implementation of eulervec + cache result

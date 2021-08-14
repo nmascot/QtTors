@@ -2402,15 +2402,6 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
 /**                                                                   **/
 /***********************************************************************/
 
-/* returns H_n = 1 + 1/2 + ... + 1/n, as a rational number (n "small") */
-static GEN
-Harmonic(long n)
-{
-  GEN h = gen_1;
-  long i;
-  for (i=2; i<=n; i++) h = gadd(h, mkfrac(gen_1, utoipos(i)));
-  return h;
-}
 /* smallish k such that bernbitprec(K) > bit + Kdz, K = 2k+4 */
 static long
 get_k(double dz, long bit)
@@ -2455,7 +2446,7 @@ cxpolylog(long m, GEN x, long prec)
   }
   /* n = m-1 */
     q = gdivgs(gmul(q,z),n); /* multiply by "zeta(1)" */
-    h = gmul(q, gsub(Harmonic(m-1), glog(gneg_i(z),prec)));
+    h = gmul(q, gsub(harmonic(m-1), glog(gneg_i(z),prec)));
     s = gadd(s, real? real_i(h): h);
   /* n = m */
     q = gdivgs(gmul(q,z),m);

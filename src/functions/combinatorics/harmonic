@@ -1,0 +1,22 @@
+Function: harmonic
+Section: combinatorics
+C-Name: harmonic0
+Prototype: UDG
+Help: harmonic(n,{r = 1}): generalized harmonic number of index n in power r.
+Doc: generalized harmonic number of index $n \geq 1$ in power $r$, as a rational
+ number. If $r = 1$ (or omitted), this is the harmonic number
+ $$ H_n = \sum_{i = 1}^n \frac{1}{i}.$$
+ In general, this is
+ $$ H_{n,r} = \sum_{i = 1}^n \frac{1}{i^r}.$$
+ The function runs in time $\tilde{O}(r n)$, essentially linear in the
+ size of the output.
+ \bprog
+ ? harmonic(1)
+ %1 = 1
+ ? harmonic(10)
+ %2 = 7381/2520
+ ? harmonic(10, 2)
+ %3 = 1968329/1270080
+ ? harmonic(10, -2)
+ %4 = 385
+ @eprog

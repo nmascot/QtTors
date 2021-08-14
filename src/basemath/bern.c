@@ -348,6 +348,64 @@ eulerpol(long k, long v)
   return gerepileupto(av, E);
 }
 
+/*******************************************************************/
+/**                      HARMONIC NUMBERS                         **/
+/*******************************************************************/
+/* 1/a + ... + 1/(b-1); a < b <= 2^(BIL-1) */
+static GEN
+hrec(ulong a, ulong b)
+{
+  ulong m;
+  switch(b - a)
+  {
+    case 1: retmkfrac(gen_1, utoipos(a));
+    case 2: if (a < 65536) retmkfrac(utoipos(2*a + 1), utoipos(a * a + a));
+      retmkfrac(utoipos(2*a + 1), muluu(a, a+1));
+  }
+  m = (a + b) >> 1;
+  return gadd(hrec(a, m), hrec(m, b));
+}
+/* exact Harmonic number H_n, 2 < 2^(BIL-1).
+ * Could use H_n = sum_k 2^(-k) H^odd_{n \ 2^k} */
+GEN
+harmonic(ulong n) { pari_sp av = avma; return gerepileupto(av, hrec(1, n+1)); }
+
+/* 1/a^k + ... + 1/(b-1)^k; a < b */
+static GEN
+hreck(ulong a, ulong b, ulong k)
+{
+  ulong m;
+  switch(b - a)
+  {
+    GEN x, y;
+    case 1: retmkfrac(gen_1, powuu(a, k));
+    case 2:
+      x = powuu(a, k); y = powuu(a + 1, k);
+      retmkfrac(addii(x, y), mulii(x, y));
+  }
+  m = (a + b) >> 1;
+  return gadd(hreck(a, m, k), hreck(m, b, k));
+}
+GEN
+harmonic0(ulong n, GEN k)
+{
+  pari_sp av = avma;
+  ulong r;
+  if (!n) pari_err_DOMAIN("harmonic", "n", "=", gen_0, gen_0);
+  if (!k) return harmonic(n);
+  if (typ(k) != t_INT) pari_err_TYPE("harmonic", k);
+  if (signe(k) < 0)
+  {
+    GEN H = poleval(faulhaber(-itos(k), 0), utoipos(n));
+    return gerepileuptoint(av, H);
+  }
+  r = itou(k);
+  if (!r) return utoipos(n);
+  if (r == 1) return harmonic(n);
+  return gerepileupto(av, hreck(1, n+1, r));
+}
+
+
 /**************************************************************/
 /*                      Euler numbers                         */
 /**************************************************************/

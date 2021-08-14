@@ -2027,9 +2027,6 @@ const struct bb_field *get_Fp_field(void **E, GEN p);
 long    gisanypower(GEN x, GEN *pty);
 GEN     gissquare(GEN x);
 GEN     gissquareall(GEN x, GEN *pt);
-GEN     hclassnoF_fact(GEN P, GEN E, GEN D);
-GEN     hclassno(GEN x);
-GEN     hclassno6(GEN x);
 long    hilbert(GEN x, GEN y, GEN p);
 long    hilbertii(GEN x, GEN y, GEN p);
 long    ispolygonal(GEN x, GEN S, GEN *N);
@@ -2603,6 +2600,8 @@ GEN     eulerfrac(long k);
 GEN     eulerpol(long k, long v);
 GEN     eulerreal(long n, long prec);
 GEN     eulervec(long n);
+GEN     harmonic(ulong n);
+GEN     harmonic0(ulong n, GEN k);
 
 /* bibli1.c */
 
@@ -5078,6 +5077,9 @@ GEN     qfparam(GEN G, GEN sol, long fl);
 long    Z_isfundamental(GEN x);
 GEN     classno(GEN x);
 GEN     classno2(GEN x);
+GEN     hclassnoF_fact(GEN P, GEN E, GEN D);
+GEN     hclassno(GEN x);
+GEN     hclassno6(GEN x);
 long    isfundamental(GEN x);
 GEN     qfbclassno0(GEN x,long flag);
 GEN     quadclassnoF(GEN x, GEN *pD);
@@ -6292,6 +6294,7 @@ INLINE GEN    sqrti(GEN x);
 INLINE GEN    sqrtnr(GEN x, long n);
 INLINE GEN    sqrtr(GEN x);
 INLINE GEN    sstoQ(long n, long d);
+INLINE GEN    uutoQ(ulong n, ulong d);
 INLINE void   pari_stack_alloc(pari_stack *s, long nb);
 INLINE void** pari_stack_base(pari_stack *s);
 INLINE void   pari_stack_delete(pari_stack *s);
