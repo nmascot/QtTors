@@ -574,6 +574,13 @@ get_ret_type(const char **p, long arity, Gtype *t, long *flag)
   *t=Ggen; return arity==2?OCcallgen2:OCcallgen;
 }
 
+static void
+U_compile_err(const char *s)
+{ compile_err("this should be a small non-negative integer",s); }
+static void
+L_compile_err(const char *s)
+{ compile_err("this should be a small integer",s); }
+
 /*supported types:
  * type: Gusmall, Gsmall, Ggen, Gvoid, Gvec, Gclosure
  * mode: Gusmall, Gsmall, Ggen, Gvar, Gvoid
@@ -587,14 +594,12 @@ compilecast_loc(int type, int mode, const char *loc)
   case Gusmall:
     if (type==Ggen)        op_push_loc(OCitou,-1,loc);
     else if (type==Gvoid)  op_push_loc(OCpushlong,0,loc);
-    else if (type!=Gsmall)
-      compile_err("this should be a small integer >=0",loc);
+    else if (type!=Gsmall) U_compile_err(loc);
     break;
   case Gsmall:
     if (type==Ggen)        op_push_loc(OCitos,-1,loc);
     else if (type==Gvoid)  op_push_loc(OCpushlong,0,loc);
-    else if (type!=Gusmall)
-      compile_err("this should be a small integer",loc);
+    else if (type!=Gusmall) L_compile_err(loc);
     break;
   case Ggen:
     if (type==Gsmall)      op_push_loc(OCstoi,0,loc);
@@ -924,8 +929,7 @@ compilesmall(long n, long x, long mode)
     op_push(OCpushstoi, x, n);
   else
   {
-    if (mode==Gusmall && x < 0)
-      compile_err("this should be a small integer >=0",tree[n].str);
+    if (mode==Gusmall && x < 0) U_compile_err(tree[n].str);
     op_push(OCpushlong, x, n);
     compilecast(n,Gsmall,mode);
   }
@@ -2156,8 +2160,8 @@ compilenode(long n, int mode, long flag)
         if (mode==Gvoid) return;
         if (mode==Gvar) compile_varerr(tree[n].str);
       }
-      if (mode==Gsmall || mode==Gusmall)
-        compile_err("this should be a small integer", tree[n].str);
+      if (mode==Gsmall) L_compile_err(tree[n].str);
+      if (mode==Gusmall) U_compile_err(tree[n].str);
       switch(tree[n].x)
       {
       case CSTreal:
