@@ -1735,7 +1735,7 @@ setsigns_init(GEN nf, GEN archp, GEN F, GEN DATA)
 {
   GEN lambda, Mr = rowpermute(nf_get_M(nf), archp), MI = F? RgM_mul(Mr,F): Mr;
   lambda = gmul2n(matrixnorm(MI,DEFAULTPREC), -1);
-  if (typ(lambda) != t_REAL) lambda = gmul(lambda, sstoQ(1001,1000));
+  if (typ(lambda) != t_REAL) lambda = gmul(lambda, uutoQ(1001,1000));
   if (lg(archp) < lg(MI))
   {
     GEN perm = gel(indexrank(MI), 2);

@@ -6465,15 +6465,15 @@ ellnf_localheight(GEN e, GEN P, GEN pr)
   vu = nfval(nf, u, pr);
   v1 = nfval(nf, ec_dFdx_evalQ(E, Q), pr);
   v2 = nfval(nf, ec_dmFdy_evalQ(E, Q), pr);
-  vD = nfval(nf, ell_get_disc(E), pr);
+  vD = nfval(nf, ell_get_disc(E), pr); /* >= 0 */
   if (v1<0)
     vu = 0;
   if (v1<=0 || v2<=0)
     v = gen_0;
   else if (cmpis(k,5) >= 0)
   {
-    GEN a = sstoQ(minss(2*v2,vD), 2*vD);
-    v = gmul(gsub(gsqr(a),a), sstoQ(vD,2));
+    GEN a = uutoQ(minss(2*v2,vD), 2*vD);
+    v = gmul(gsub(gsqr(a),a), uutoQ(vD,2));
   }
   else
   {

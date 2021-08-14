@@ -524,7 +524,7 @@ gammamellininvasymp_i(GEN Vga, long nlimmax, long m, long *status)
   for (i = 1; i <= m; i++, A = gadd(A,Aadd))
     for (n = nlim-1; n >= 1; --n)
       gel(M, n+1) = gsub(gel(M, n+1),
-                         gmul(gel(M, n), gsub(A, sstoQ(n-1, d))));
+                         gmul(gel(M, n), gsub(A, uutoQ(n-1, d))));
   stripzeros(M); return M;
 }
 static GEN

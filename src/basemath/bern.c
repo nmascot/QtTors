@@ -344,7 +344,7 @@ eulerpol(long k, long v)
   GEN B, E;
   if (k < 0) pari_err_DOMAIN("eulerpol", "index", "<", gen_0, stoi(k));
   k++; B = bernpol_i(k, v);
-  E = RgX_Rg_mul(RgX_sub(B, RgX_rescale(B, gen_2)), sstoQ(2,k));
+  E = RgX_Rg_mul(RgX_sub(B, RgX_rescale(B, gen_2)), uutoQ(2,k));
   return gerepileupto(av, E);
 }
 

@@ -2325,7 +2325,7 @@ lfunqf(GEN M, long prec)
   if (typ(M) != t_MAT) pari_err_TYPE("lfunqf", M);
   if (!RgM_is_ZM(M))   pari_err_TYPE("lfunqf [not integral]", M);
   n = lg(M)-1;
-  k = sstoQ(n,2);
+  k = uutoQ(n,2);
   M = Q_primpart(M);
   Mi = ZM_inv(M, &d); /* d M^(-1) */
   if (!qfiseven(M)) { M = gmul2n(M, 1); d = shifti(d,1); }

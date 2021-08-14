@@ -306,7 +306,7 @@ static GEN
 modulareven(long D, long r, long N0)
 {
   long B, d, i, l, N = labs(N0);
-  GEN V, vs, R, M, C, den, L, vP, vD, k = sstoQ(2*r+1, 2);
+  GEN V, vs, R, M, C, den, L, vP, vD, k = uutoQ(2*r+1, 2);
   SIGMA_F S = get_S_even(N0);
 
   d = dimeven(r, N);
@@ -511,7 +511,7 @@ static GEN
 modularodd(long D, long r, long N0)
 {
   long B, d, i, l, dim, kro = kross(D, 2), Da = labs(D), N = labs(N0);
-  GEN V, vs, R, M, C, den, L, vP, vD, vD4, k = sstoQ(2*r+1, 2);
+  GEN V, vs, R, M, C, den, L, vP, vD, vD4, k = uutoQ(2*r+1, 2);
   SIGMA_Fodd S = get_S_odd(N);
 
   dim = dimodd(r, kro, N); d = (dim + 1) >> 1;

@@ -3124,7 +3124,7 @@ eta_correction(GEN x, GEN U, long flag)
   if (!sc) {
     if (signe(d) < 0) togglesign_safe(&b);
     s = gen_1;
-    t = sstoQ(umodiu(b, 24), 12);
+    t = uutoQ(umodiu(b, 24), 12);
   } else {
     if (sc < 0) {
       togglesign_safe(&a);

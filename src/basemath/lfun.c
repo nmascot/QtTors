@@ -2007,7 +2007,7 @@ lfuncheckfeq(GEN lmisc, GEN t0, long bitprec)
   av = avma;
   if (!t0)
   { /* ~Pi/3 + I/7, some random complex number */
-    t0 = mkcomplex(sstoQ(355,339), sstoQ(1,7));
+    t0 = mkcomplex(uutoQ(355,339), uutoQ(1,7));
     t0i = ginv(t0);
   }
   else if (gcmpgs(gnorm(t0), 1) < 0) { t0i = t0; t0 = ginv(t0); }
@@ -2531,12 +2531,12 @@ lfunconductor(GEN data, GEN maxcond, long flag, long bitprec)
     if (lg(M) == 1) { set_avma(av); return cgetg(1,t_VEC); }
     eval = NULL; tdom = dbltor(0.7);
   }
-  else if (!r) { eval = wrap1; tdom = sstoQ(10,11); }
+  else if (!r) { eval = wrap1; tdom = uutoQ(10,11); }
   else
   {
     if (typ(r) == t_VEC && lg(r) > 2)
       pari_err_IMPL("multiple poles in lfunconductor");
-    eval = wrap2; tdom = sstoQ(11,13);
+    eval = wrap2; tdom = uutoQ(11,13);
   }
   if (eval) bitprec += bitprec/2;
   prec = nbits2prec(bitprec);
@@ -2558,7 +2558,7 @@ lfunconductor(GEN data, GEN maxcond, long flag, long bitprec)
   if (!eval)
   {
     long i, besti = 0, beste = -10, l = lg(M);
-    t0 = sstoQ(11,10); t0i = sstoQ(10,11);
+    t0 = uutoQ(11,10); t0i = uutoQ(10,11);
     for (i = 1; i < l; i++)
     {
       pari_sp av2 = avma;

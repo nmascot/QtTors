@@ -744,7 +744,7 @@ Hermite_bound(long n, long prec)
   }
   av = avma;
   h  = powru(divur(2,mppi(prec)), n);
-  h1 = sqrr(ggamma(sstoQ(n+4,2),prec));
+  h1 = sqrr(ggamma(uutoQ(n+4,2),prec));
   return gerepileuptoleaf(av, mulrr(h,h1));
 }
 

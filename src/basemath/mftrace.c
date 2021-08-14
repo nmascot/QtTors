@@ -1545,7 +1545,7 @@ c_mfEH(long n, long d, GEN F)
     for (i = 1; i <= n; i++)
     {
       long id = i*d, a = id & 3;
-      gel(v,i+1) = (a==1 || a==2)? gen_0: sstoQ(hclassno6u(id), 6);
+      gel(v,i+1) = (a==1 || a==2)? gen_0: uutoQ(hclassno6u(id), 6);
     }
     return v; /* no gerepile needed */
   }
@@ -2669,7 +2669,7 @@ ceildiv(long m, long d)
 /* contribution of scalar matrices in dimension formula */
 static GEN
 A1(long N, long k)
-{ return sstoQ(mypsiu(N)*(k-1), 12); }
+{ return uutoQ(mypsiu(N)*(k-1), 12); }
 static long
 ceilA1(long N, long k)
 { return ceildiv(mypsiu(N) * (k-1), 12); }
@@ -2879,7 +2879,7 @@ A3(long N, long FC)
 {
   long i, S, NF, l;
   GEN D;
-  if (FC == 1) return sstoQ(nuinf(N),2);
+  if (FC == 1) return uutoQ(nuinf(N),2);
   D = mydivisorsu(N); l = lg(D);
   S = 0; NF = N/FC;
   for (i = 1; i < l; i++)
@@ -2887,7 +2887,7 @@ A3(long N, long FC)
     long g = ugcd(D[i], D[l-i]);
     if (NF%g == 0) S += myeulerphiu(g);
   }
-  return sstoQ(S, 2);
+  return uutoQ(S, 2);
 }
 
 /* special contribution in weight 2 in dimension formula */
@@ -3092,7 +3092,7 @@ TA2(long N, long k, GEN VCHI, long n, GEN SQRTS, GEN MUP, GEN GCD)
     { /* (N,F) = 1 => single value in mutglistall */
       GEN mut = mutg1(t, N, VCHI, li, GCD);
       if (!mut) { set_avma(av); continue; }
-      sh = gmul(sstoQ(hclassno6u_i(D,D0,F),6), mut);
+      sh = gmul(uutoQ(hclassno6u_i(D,D0,F),6), mut);
     }
     else
     {
@@ -4678,7 +4678,7 @@ mfheckemat(GEN mf, GEN vn)
     if (dk == 2)
     {
       C = N % p? gmul(mfchareval(CHI,p*p), powuu(p, nk-2)): NULL;
-      if (e == 2) u0 = sstoQ(p+1,p); /* special case T_{p^4} */
+      if (e == 2) u0 = uutoQ(p+1,p); /* special case T_{p^4} */
     }
     else
       C = N % p? gmul(mfchareval(CHI,p),   powuu(p, nk-1)): NULL;
@@ -6914,7 +6914,7 @@ mfinit_i(GEN NK, long space)
     GEN mf, vCHI = CHI;
     long i, j, l;
     if (CHI && lg(CHI) == 1) return cgetg(1,t_VEC);
-    if (k < 0) return mfEMPTYall(N, sstoQ(k,dk), CHI, space);
+    if (k < 0) return mfEMPTYall(N, uutoQ(k,dk), CHI, space);
     if (k == 1 && dk == 1 && space != mf_EISEN)
     {
       GEN TMP, vSP, gN, gs;
@@ -7063,7 +7063,7 @@ findqganew(long N, GEN z)
 {
   GEN MI, DI, x = real_i(z), y = imag_i(z), Ck = gen_0, Dk = gen_1, fa, P, E;
   long i;
-  MI = ginv(utoi(N));
+  MI = uutoQ(1,N);
   DI = mydivisorsu(mysqrtu(N));
   fa = myfactoru(N); P = gel(fa,1); E = gel(fa,2);
   for (i = 1; i < lg(DI); i++)
@@ -7515,7 +7515,7 @@ mfcuspval(GEN mf, GEN F, GEN cusp, long bitprec)
     GEN r = mfcuspval(mf2, FT, cusp, bitprec);
     if ((C & 3L) == 2)
     {
-      GEN z = sstoQ(1,4);
+      GEN z = uutoQ(1,4);
       r = gsub(r, typ(r) == t_VEC? const_vec(lg(r)-1, z): z);
     }
     return gerepileupto(av, r);
@@ -7539,7 +7539,7 @@ mfcuspval(GEN mf, GEN F, GEN cusp, long bitprec)
     if (ok)
     {
       res = cgetg(lvE, t_VEC);
-      for (j = 1; j < lvE; j++) gel(res,j) = gadd(gel(R,1), sstoQ(v[j], w));
+      for (j = 1; j < lvE; j++) gel(res,j) = gadd(gel(R,1), uutoQ(v[j], w));
       return gerepilecopy(av, lvE==2? gel(res,1): res);
     }
     if (n == sb) return lvE==2? mkoo(): const_vec(lvE-1, mkoo()); /* 0 */
@@ -7646,7 +7646,7 @@ mfatkineigenquad(GEN mf, GEN CHIP, long Q, GEN MF, long bitprec)
   la2 = mfchareval(CHIP, Q); /* 1 or -1 */
   (void)cbezout(Q, NQ, &x, &yq);
   sqrtQ = sqrtr_abs(utor(Q,prec));
-  tau = mkcomplex(gadd(sstoQ(-1, NQ), ginv(utoi(1000))),
+  tau = mkcomplex(gadd(sstoQ(-1, NQ), uutoQ(1, 1000)),
                   divru(sqrtQ, N));
   den = gaddgs(gmulsg(NQ, tau), 1);
   wtau = gdiv(gsub(gmulsg(x, tau), sstoQ(yq, Q)), den);
@@ -8188,7 +8188,7 @@ mfthetaexpansion(GEN M, long n)
       s = gmul2n(s, 1);
       for (f = 1; f <= lim; f++) gel(V, f*f + 1) = s;
       break;
-    case 2: al = sstoQ(1,4); w = gen_1;
+    case 2: al = uutoQ(1,4); w = gen_1;
       E = subii(C, shifti(D,1)); /* (E, D) = 1 */
       s = gmul2n(mfthetamultiplier(E, D), 1);
       if ((!signe(E) && equalim1(D)) || (signe(E) > 0 && signe(C) < 0))
@@ -8261,7 +8261,7 @@ mfgaexpansionatkin(GEN mf, GEN F, GEN C, GEN D, long Q, long n, long prec)
   V = RgM_RgC_mul(mfcoefs_mf(mf,n,1), RgM_RgC_mul(MQ, mftobasis_i(mf,F)));
   (void)bezout(utoipos(Q), C, &x, &v);
   s = mfchareval(CHI, (umodiu(x, FC) * umodiu(D, FC)) % FC);
-  s = gdiv(s, gpow(utoipos(Q), sstoQ(k,2), prec));
+  s = gdiv(s, gpow(utoipos(Q), uutoQ(k,2), prec));
   V = RgV_Rg_mul(V, s);
   z = rootsof1powinit(umodiu(D,Q)*umodiu(v,Q) % Q, Q, prec);
   for (i = 1; i <= n+1; i++) gel(V,i) = gmul(gel(V,i), rootsof1pow(z, i-1));
@@ -8935,7 +8935,7 @@ mffromqf(GEN Q, GEN P)
         pari_err_TYPE("mffromqf [not a spherical t_POL]", P);
     }
   }
-  gk = sstoQ(m + 2*d, 2);
+  gk = uutoQ(m + 2*d, 2);
   D = ZM_det(Q);
   if (!odd(m)) { if ((m & 3) == 2) D = negi(D); } else D = shifti(D, 1);
   space = d > 0 ? mf_CUSP : mf_FULL;
@@ -9468,7 +9468,7 @@ mfcusps_i(long N)
       if (ugcd(A0, lima) == 1)
       {
         A = A0; while (ugcd(A,C) > 1) A += lima;
-        gel(v, c++) = sstoQ(A, C);
+        gel(v, c++) = uutoQ(A, C);
       }
   }
   return v;
@@ -10107,8 +10107,8 @@ mfcanfindp0(GEN F, long k)
   V = mfcoefsser(F,l);
   E4 = mfcoefsser(mfEk(4),l);
   E6 = mfcoefsser(mfEk(6),l);
-  V1 = gdiv(V, gpow(E4, sstoQ(k,4), 0));
-  Q = gdiv(E6, gpow(E4, sstoQ(3,2), 0));
+  V1 = gdiv(V, gpow(E4, uutoQ(k,4), 0));
+  Q = gdiv(E6, gpow(E4, uutoQ(3,2), 0));
   W = gpowers(Q, l - 1);
   M = cgetg(l + 1, t_MAT);
   for (j = 1; j <= l; j++) gel(M,j) = sertocol2(gel(W,j), l);
@@ -10143,11 +10143,11 @@ mftaylor(GEN F, long n, long flreal, long prec)
   if (flreal)
   {
     GEN pi2 = Pi2n(1, prec), pim4 = gmulsg(-2, pi2), VPC;
-    GEN C = gmulsg(3, gdiv(gpowgs(ggamma(ginv(utoi(4)), prec), 8), gpowgs(pi2, 6)));
+    GEN C = gmulsg(3, gdiv(gpowgs(ggamma(uutoQ(1,4), prec), 8), gpowgs(pi2, 6)));
     /* E_4(i): */
     GEN facn = gen_1;
     VPC = gpowers(gmul(pim4, gsqrt(C, prec)), n);
-    C = gpow(C, sstoQ(k,4), prec);
+    C = gpow(C, uutoQ(k,4), prec);
     for (m = 0; m <= n; m++)
     {
       gel(v, m+1) = gdiv(gmul(C, gmul(gel(v, m+1), gel(VPC, m+1))), facn);
@@ -11301,7 +11301,7 @@ RgV_heckef2(long n, long d, GEN V, GEN F, GEN DATA)
     if (e > 1)
     {
       q = r? powuu(p,k2m2): a;
-      if (e == 2) q = gmul(q, sstoQ(p+1,p)); /* special case T_{p^4} */
+      if (e == 2) q = gmul(q, uutoQ(p+1,p)); /* special case T_{p^4} */
       q = gmul(C2, q); /* chi(p^2) [ p^(2k-2) or (p+1)p^(2k-3) ] */
     }
     V = tp2eapply(V, p, p2, e, q, c1, c2);
@@ -12856,7 +12856,7 @@ fs2_init(GEN mf, GEN F, long bit)
     Lw = N*lim;
     tab = cgetg(Lw+1,t_VEC);
     for (n = 1; n <= Lw; n++)
-      gel(tab,n) = WfromZ(sstoQ(n,N), vP, gkm1, Wf, k, pi4, prec);
+      gel(tab,n) = WfromZ(uutoQ(n,N), vP, gkm1, Wf, k, pi4, prec);
     if (!cusps) cusps = mfcusps_i(N);
     DEN = gmul2n(gmulgs(gpow(Pi2n(3, prec), gkm1, prec), mypsiu(N)), -2);
     if (odd(k2)) DEN = gdiv(DEN, sqrtr_abs(Pi2n(-1,prec)));
@@ -12886,7 +12886,7 @@ fs2_init(GEN mf, GEN F, long bit)
     {
       W = cgetg(Lw+2, t_VEC);
       for (n = 0; n <= Lw; n++)
-        gel(W, n+1) = al? WfromZ(gadd(al,sstoQ(n,w)),vP,gkm1,Wf,k,pi4, prec)
+        gel(W, n+1) = al? WfromZ(gadd(al,uutoQ(n,w)),vP,gkm1,Wf,k,pi4, prec)
                         : (n? gel(tab, n * wi): W0);
     }
     al0[i] = !al;

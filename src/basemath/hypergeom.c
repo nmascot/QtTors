@@ -68,7 +68,7 @@ airy_i(GEN x, long prec)
   if (is0(x, bit))
   {
     GEN s = sqrtnr_abs(utor(3,prec), 6), s3 = powrs(s,3), s4 = mulrr(s,s3);
-    A = invr(mulrr(s4, ggamma(sstoQ(2,3), prec)));
+    A = invr(mulrr(s4, ggamma(uutoQ(2,3), prec)));
     B = mulrr(A, s3); return mkvec2(A, B);
   }
   prec2 = prec + EXTRAPRECWORD;
@@ -82,7 +82,7 @@ airy_i(GEN x, long prec)
     b = gdiv(x, a);
   }
   a = gmul(a, ibessel(sstoQ(-1,3),z2, prec));
-  b = gmul(b, ibessel(sstoQ(1,3), z2, prec));
+  b = gmul(b, ibessel(uutoQ(1,3), z2, prec));
   if (isexactzero(imag_i(x))) { a = real_i(a); b = real_i(b); }
   A = gdivgs(gsub(a,b), 3);
   B = gdiv(gadd(a,b), sqrtr_abs(utor(3, prec)));
@@ -798,7 +798,7 @@ F21taylorlim(GEN N, long m, GEN z, GEN Z, long ind, long prec)
     if (j > mi) tol = gequal0(S) ? 0 : gexpo(C) - gexpo(S);
     if (fl)
     {
-      P = gadd(P, gsub(sstoQ(2*j+2+m, J), gadd(ginv(v1), ginv(v2))));
+      P = gadd(P, gsub(uutoQ(2*j+2+m, J), gadd(ginv(v1), ginv(v2))));
       S = gadd(S, gmul(C, P));
     }
     else
