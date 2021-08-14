@@ -2161,7 +2161,7 @@ compilenode(long n, int mode, long flag)
         if (mode==Gvar) compile_varerr(tree[n].str);
       }
       if (mode==Gsmall) L_compile_err(tree[n].str);
-      if (mode==Gusmall) U_compile_err(tree[n].str);
+      if (mode==Gusmall && tree[n].x != CSTint) U_compile_err(tree[n].str);
       switch(tree[n].x)
       {
       case CSTreal:
