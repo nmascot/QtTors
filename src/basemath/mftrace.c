@@ -9934,7 +9934,7 @@ mkF2bd(long d, long lim)
 {
   GEN V = zerovec(lim + 1);
   long n;
-  gel(V, 1) = ginv(stoi(-24));
+  gel(V, 1) = sstoQ(-1, 24);
   for (n = 1; n <= lim/d; n++) gel(V, n*d + 1) = mysumdivku(n, 1);
   return V;
 }

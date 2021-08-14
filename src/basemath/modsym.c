@@ -4050,7 +4050,8 @@ log1x(long n)
   long i, l = n+3;
   GEN v = cgetg(l, t_POL);
   v[1] = evalvarn(0)|evalsigne(1); gel(v,2) = gen_0;
-  for (i = 3; i < l; i++) gel(v,i) = ginv(stoi(odd(i)? i-2: 2-i));
+  for (i = 3; i < l; i++)
+    gel(v,i) = mkfrac(odd(i)? gen_1: gen_m1, utoipos(i-2));
   return v;
 }
 
