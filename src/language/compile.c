@@ -2156,7 +2156,7 @@ compilenode(long n, int mode, long flag)
         if (mode==Gvoid) return;
         if (mode==Gvar) compile_varerr(tree[n].str);
       }
-      if (mode==Gsmall)
+      if (mode==Gsmall || mode==Gusmall)
         compile_err("this should be a small integer", tree[n].str);
       switch(tree[n].x)
       {

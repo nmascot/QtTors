@@ -4,6 +4,8 @@
 7381/2520
 1968329/1270080
 385
+  ***   this should be a small integer: harmonic(1.)
+  ***                                            ^---
   ***   at top-level: harmonic(0)
   ***                 ^-----------
   *** harmonic: domain error in harmonic: n = 0
