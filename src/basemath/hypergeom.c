@@ -454,7 +454,7 @@ Ftaylor(GEN N, GEN D, GEN z, long prec)
     GEN a = gen_1, b = gen_1;
     for (i = 1; i < lN; i++) a = gmul(a, gaddsg(j, gel(N,i)));
     for (i = 1; i < lD; i++) b = gmul(b, gaddsg(j, gel(D,i)));
-    C = gmul(C, gmul(gdiv(a, b), gdivgs(z, j+1)));
+    C = gmul(C, gmul(gdiv(a, gmulsg(j+1, b)), z));
     if (gequal0(C)) break;
     if (j > mi) tol = gequal0(S)? 0: gexpo(C) - gexpo(S);
     S = gadd(S, C); ++j;
@@ -1068,10 +1068,7 @@ f_pochall(void *E, GEN n)
 }
 static GEN
 f_pochall_alt(void *E, GEN n)
-{
-  GEN z = f_pochall(E,n);
-  return mpodd(n)? gneg(z): z;
-}
+{ GEN z = f_pochall(E,n); return mpodd(n)? gneg(z): z; }
 /* z = \pm1 */
 static GEN
 sumz(GEN N, GEN D, long z, long prec)
