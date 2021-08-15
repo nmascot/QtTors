@@ -148,11 +148,11 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
   nia = vecmax(gabs(A, 0));
 
   /* Check for the precision in matrix inversion. See paper, Lemma 2.4.2. */
-  p1 = addrr(mulsr(r, gmul2n(nia, e)), eps2); /* t_REAL */
+  p1 = addrr(mulur(r, gmul2n(nia, e)), eps2); /* t_REAL */
   if (expo(p1) < -2*r) pari_err_PREC("thue");
 
-  p1 = addrr(mulsr(r, gmul2n(nia,-e)), eps2);
-  eps3 = mulrr(mulsr(2*r*r,nia), p1);
+  p1 = addrr(mulur(r, gmul2n(nia,-e)), eps2);
+  eps3 = mulrr(mulur(2*r*r,nia), p1);
   if (!signe(eps3))
     eps3 = real2n(expo(eps3), LOWDEFAULTPREC);
   else
