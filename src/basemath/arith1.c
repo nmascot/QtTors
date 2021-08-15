@@ -720,7 +720,8 @@ nonsquare1_Fl(ulong p)
   checkp(q, p);
   q = p % 7; if (q != 4 && q >= 3) return 7UL;
   checkp(q, p);
-  u_forprime_init(&S, 11, p);
+  /* log^2(2^64) < 1968 is enough under GRH (and p^(1/4)log(p) without it)*/
+  u_forprime_init(&S, 11, 1967);
   while ((q = u_forprime_next(&S)))
   {
     if (krouu(q, p) < 0) return q;
