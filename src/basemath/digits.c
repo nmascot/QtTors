@@ -119,6 +119,7 @@ _dvmdii(void *data /* ignored */, GEN x, GEN y, GEN *r)
 
 static struct bb_ring Z_ring = { _addii, _mulii, _sqri };
 
+/* does not affect stack unless B = NULL */
 static GEN
 check_basis(GEN B)
 {
@@ -158,20 +159,14 @@ digits(GEN x, GEN B)
   {
     long k = expi(B);
     if (k == 1) return binaire(x);
-    if (k < BITS_IN_LONG)
-    {
-      (void)new_chunk(4*(expi(x) + 2)); /* HACK */
-      z = binary_2k_nv(x, k);
-      set_avma(av); return Flv_to_ZV(z);
-    }
-    else
-    {
-      set_avma(av); return binary_2k(x, k);
-    }
+    if (k >= BITS_IN_LONG) return binary_2k(x, k);
+    (void)new_chunk(4*(expi(x) + 2)); /* HACK */
+    z = binary_2k_nv(x, k);
+    set_avma(av); return Flv_to_ZV(z);
   }
   x = absi_shallow(x);
   lz = logint(x,B) + 1;
-  if (lgefint(B)>3)
+  if (lgefint(B) > 3)
   {
     z = gerepileupto(av, gen_digits_i(x, B, lz, NULL, &Z_ring, _dvmdii));
     vecreverse_inplace(z); return z;
@@ -217,8 +212,7 @@ ZV_in_range(GEN v, GEN B)
   for(i=1; i < l; i++)
   {
     GEN vi = gel(v, i);
-    if (signe(vi) < 0 || cmpii(vi, B) >= 0)
-      return 0;
+    if (signe(vi) < 0 || cmpii(vi, B) >= 0) return 0;
   }
   return 1;
 }
@@ -230,8 +224,7 @@ fromdigits(GEN x, GEN B)
   if (typ(x)!=t_VEC || !RgV_is_ZV(x)) pari_err_TYPE("fromdigits",x);
   if (lg(x)==1) return gen_0;
   B = check_basis(B);
-  if (Z_ispow2(B) && ZV_in_range(x, B))
-    return fromdigits_2k(x, expi(B));
+  if (Z_ispow2(B) && ZV_in_range(x, B)) return fromdigits_2k(x, expi(B));
   x = vecreverse(x);
   return gerepileuptoint(av, gen_fromdigits(x, B, NULL, &Z_ring));
 }
