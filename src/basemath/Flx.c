@@ -25,23 +25,17 @@ get_Flx_red(GEN T, GEN *B)
 }
 
 /***********************************************************************/
-/**                                                                   **/
-/**               Flx                                                 **/
-/**                                                                   **/
+/**                              Flx                                  **/
 /***********************************************************************/
 /* Flx objects are defined as follows:
-   Let l an ulong. An Flx is a t_VECSMALL:
-   x[0] = codeword
-   x[1] = evalvarn(variable number)  (signe is not stored).
-   x[2] = a_0 x[3] = a_1, etc.
-   With 0 <= a_i < l
-
-   signe(x) is not valid. Use degpol(x)>=0 instead.
-*/
+ * Let l an ulong. An Flx is a t_VECSMALL:
+ * x[0] = codeword
+ * x[1] = evalvarn(variable number)  (signe is not stored).
+ * x[2] = a_0 x[3] = a_1, etc. with 0 <= a_i < l
+ *
+ * signe(x) is not valid. Use degpol(x)>0 instead. */
 /***********************************************************************/
-/**                                                                   **/
-/**          Conversion from Flx                                      **/
-/**                                                                   **/
+/**                      Conversion from Flx                          **/
 /***********************************************************************/
 
 GEN
@@ -151,16 +145,11 @@ FlxM_Flx_add_shallow(GEN x, GEN y, ulong p)
 }
 
 /***********************************************************************/
-/**                                                                   **/
-/**          Conversion to Flx                                        **/
-/**                                                                   **/
+/**                      Conversion to Flx                            **/
 /***********************************************************************/
 /* Take an integer and return a scalar polynomial mod p,  with evalvarn=vs */
 GEN
-Fl_to_Flx(ulong x, long sv)
-{
-  return x? mkvecsmall2(sv, x): pol0_Flx(sv);
-}
+Fl_to_Flx(ulong x, long sv) { return x? mkvecsmall2(sv, x): pol0_Flx(sv); }
 
 /* a X^d */
 GEN
@@ -169,8 +158,7 @@ monomial_Flx(ulong a, long d, long vs)
   GEN P;
   if (a==0) return pol0_Flx(vs);
   P = const_vecsmall(d+2, 0);
-  P[1] = vs; P[d+2] = a;
-  return P;
+  P[1] = vs; P[d+2] = a; return P;
 }
 
 GEN
@@ -297,9 +285,7 @@ Rg_to_Flxq(GEN x, GEN T, ulong p)
 }
 
 /***********************************************************************/
-/**                                                                   **/
-/**          Basic operation on Flx                                   **/
-/**                                                                   **/
+/**                   Basic operation on Flx                          **/
 /***********************************************************************/
 /* = zx_renormalize. Similar to normalizepol, in place */
 GEN
@@ -2556,27 +2542,17 @@ Flv_invVandermonde(GEN L, ulong den, ulong p)
 }
 
 /***********************************************************************/
-/**                                                                   **/
 /**                               Flxq                                **/
-/**                                                                   **/
 /***********************************************************************/
-/* Flxq objects are defined as follows:
-   They are Flx modulo another Flx called q.
-*/
+/* Flxq objects are Flx modulo another Flx called q. */
 
 /* Product of y and x in Z/pZ[X]/(T), as t_VECSMALL. */
 GEN
-Flxq_mul(GEN x,GEN y,GEN T,ulong p)
-{
-  return Flx_rem(Flx_mul(x,y,p),T,p);
-}
+Flxq_mul(GEN x,GEN y,GEN T,ulong p) { return Flx_rem(Flx_mul(x,y,p),T,p); }
 
 /* Square of y in Z/pZ[X]/(T), as t_VECSMALL. */
 GEN
-Flxq_sqr(GEN x,GEN T,ulong p)
-{
-  return Flx_rem(Flx_sqr(x,p),T,p);
-}
+Flxq_sqr(GEN x,GEN T,ulong p) { return Flx_rem(Flx_sqr(x,p),T,p); }
 
 static GEN
 _Flxq_red(void *E, GEN x)
@@ -3413,9 +3389,7 @@ const struct bb_field *get_Flxq_field(void **E, GEN T, ulong p)
 }
 
 /***********************************************************************/
-/**                                                                   **/
 /**                               Flxn                                **/
-/**                                                                   **/
 /***********************************************************************/
 
 GEN
@@ -3813,9 +3787,7 @@ zlx_translate1(GEN P, ulong p, long e)
 }
 
 /***********************************************************************/
-/**                                                                   **/
 /**                               Fl2                                 **/
-/**                                                                   **/
 /***********************************************************************/
 /* Fl2 objects are Flv of length 2 [a,b] representing a+bsqrt(D) for
  * a nonsquare D. */
@@ -3960,9 +3932,7 @@ Flx_Fl2_eval_pre(GEN x, GEN y, ulong D, ulong p, ulong pi)
 }
 
 /***********************************************************************/
-/**                                                                   **/
 /**                               FlxV                                **/
-/**                                                                   **/
 /***********************************************************************/
 /* FlxV are t_VEC with Flx coefficients. */
 
@@ -4042,9 +4012,7 @@ FlxC_eval_powers_pre(GEN z, GEN x, ulong p, ulong pi)
 }
 
 /***********************************************************************/
-/**                                                                   **/
 /**                               FlxM                                **/
-/**                                                                   **/
 /***********************************************************************/
 
 GEN
