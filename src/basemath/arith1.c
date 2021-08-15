@@ -723,8 +723,7 @@ nonsquare1_Fl(ulong p)
   u_forprime_init(&S, 11, p);
   while ((q = u_forprime_next(&S)))
   {
-    long i = krouu(q, p);
-    if (i < 0) return q;
+    if (krouu(q, p) < 0) return q;
     checkp(q, p);
   }
   checkp(0, p);
