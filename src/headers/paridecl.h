@@ -2110,7 +2110,6 @@ GEN     coredisc(GEN n);
 GEN     coredisc0(GEN n,long flag);
 GEN     coredisc2(GEN n);
 long    corediscs(long D, ulong *f);
-GEN     digits(GEN N, GEN B);
 GEN     divisors(GEN n);
 GEN     divisors_factored(GEN N);
 GEN     divisors0(GEN N, long flag);
@@ -2121,20 +2120,12 @@ GEN     divisorsu_fact_factored(GEN fa);
 GEN     factor_pn_1(GEN p, ulong n);
 GEN     factor_pn_1_limit(GEN p, long n, ulong lim);
 GEN     factoru_pow(ulong n);
-GEN     fromdigits(GEN x, GEN B);
-GEN     fromdigitsu(GEN x, GEN B);
 GEN     fuse_Z_factor(GEN f, GEN B);
-GEN     gen_digits(GEN x, GEN B, long n, void *E, struct bb_ring *r,
-                          GEN (*div)(void *E, GEN x, GEN y, GEN *r));
-GEN     gen_fromdigits(GEN x, GEN B, void *E, struct bb_ring *r);
 int     is_Z_factor(GEN f);
 int     is_Z_factornon0(GEN f);
 int     is_Z_factorpos(GEN f);
 int     is_nf_factor(GEN F);
 int     is_nf_extfactor(GEN F);
-GEN     sumdigits(GEN n);
-GEN     sumdigits0(GEN n, GEN B);
-ulong   sumdigitsu(ulong n);
 GEN     usumdiv_fact(GEN f);
 GEN     usumdivk_fact(GEN f, ulong k);
 
@@ -2986,6 +2977,17 @@ GEN sd_toggle(const char *v, long flag, const char *s, int *ptn);
 GEN sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong Max, const char **msg);
 GEN setdefault(const char *s, const char *v, long flag);
 long setrealprecision(long n, long *prec);
+
+/* digits.c */
+GEN     digits(GEN N, GEN B);
+GEN     fromdigits(GEN x, GEN B);
+GEN     fromdigitsu(GEN x, GEN B);
+GEN     gen_digits(GEN x, GEN B, long n, void *E, struct bb_ring *r,
+                          GEN (*div)(void *E, GEN x, GEN y, GEN *r));
+GEN     gen_fromdigits(GEN x, GEN B, void *E, struct bb_ring *r);
+GEN     sumdigits(GEN n);
+GEN     sumdigits0(GEN n, GEN B);
+ulong   sumdigitsu(ulong n);
 
 /* ecpp.c */
 
