@@ -1419,28 +1419,20 @@ Z_isanypower(GEN x, GEN *pty)
   return k;
 }
 
-/* Faster than */
-/*   !cmpii(n, int2n(vali(n))) */
-/*   !cmpis(shifti(n, -vali(n)), 1) */
-/*   expi(n) == vali(n) */
-/*   hamming(n) == 1 */
-/* even for single-word values, and much faster for multiword values. */
-/* If all you have is a word, you can just use n & !(n & (n-1)). */
+/* Faster than expi(n) == vali(n) or hamming(n) == 1 even for single-word
+ * values. If all you have is a word, you can just use n & !(n & (n-1)). */
 long
 Z_ispow2(GEN n)
 {
   GEN xp;
-  long i, lx;
+  long i, l;
   ulong u;
   if (signe(n) != 1) return 0;
-  xp = int_LSW(n);
-  lx = lgefint(n);
-  u = *xp;
-  for (i = 3; i < lx; ++i)
+  xp = int_LSW(n); u = *xp; l = lgefint(n);
+  for (i = 3; i < l; ++i)
   {
     if (u) return 0;
-    xp = int_nextW(xp);
-    u = *xp;
+    xp = int_nextW(xp); u = *xp;
   }
   return !(u & (u-1));
 }
