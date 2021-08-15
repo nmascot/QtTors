@@ -43,10 +43,17 @@
 1
 3
 2
+[]
+[]
+[1]
+[1, 0, 2]
 74565
 90144042671290236482932261665
 74565
 219
 13221424875890015231
 219
-Total time spent: 47
+  ***   at top-level: digits(2+O(3),2)
+  ***                 ^----------------
+  *** digits: incorrect type in digits (t_PADIC).
+Total time spent: 44

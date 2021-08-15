@@ -144,15 +144,15 @@ digits_dacsmall(GEN x, GEN vB, long l, ulong* z)
   set_avma(av);
 }
 
-GEN
-digits(GEN x, GEN B)
+/* x t_INT */
+static GEN
+digits_i(GEN x, GEN B)
 {
-  pari_sp av=avma;
+  pari_sp av = avma;
   long lz;
-  GEN z, vB;
-  if (typ(x)!=t_INT) pari_err_TYPE("digits",x);
+  GEN z;
   B = check_basis(B);
-  if (signe(B)<0) pari_err_DOMAIN("digits","B","<",gen_0,B);
+  if (signe(B) < 0) pari_err_DOMAIN("digits","B","<",gen_0,B);
   if (!signe(x))       {set_avma(av); return cgetg(1,t_VEC); }
   if (abscmpii(x,B)<0) {set_avma(av); retmkvec(absi(x)); }
   if (Z_ispow2(B))
@@ -173,12 +173,26 @@ digits(GEN x, GEN B)
   }
   else
   {
-    vB = get_vB(B, lz, NULL, &Z_ring);
+    GEN vB = get_vB(B, lz, NULL, &Z_ring);
     (void)new_chunk(3*lz); /* HACK */
     z = zero_zv(lz);
     digits_dacsmall(x,vB,lz,(ulong*)(z+1));
     set_avma(av); return Flv_to_ZV(z);
   }
+}
+GEN
+digits(GEN x, GEN B)
+{
+  pari_sp av = avma;
+  long v = 0;
+  if (typ(x) == t_INT) return digits_i(x, B);
+  if (typ(x) != t_PADIC || (v = valp(x)) < 0 || (B && !gequal(B, gel(x,2))))
+    pari_err_TYPE("digits",x);
+  if (!signe(gel(x, 4))) return cgetg(1, t_VEC);
+  x = digits_i(gel(x, 4), gel(x, 2));
+  vecreverse_inplace(x);
+  if (!v) return x;
+  return gerepileupto(av, concat(zerovec(v), x));
 }
 
 static GEN
