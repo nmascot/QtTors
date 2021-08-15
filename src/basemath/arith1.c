@@ -1403,20 +1403,16 @@ Z_isanypower(GEN x, GEN *pty)
     long v = vals(k);
     if (v)
     {
-      GEN y;
       k >>= v;
       if (k == 1) return gc_long(av,0);
       if (!pty) return gc_long(av,k);
-      y = *pty;
-      y = powiu(y, 1<<v);
-      togglesign(y);
-      *pty = gerepileuptoint(av, y);
-      return k;
+      *pty = gerepileuptoint(av, powiu(*pty, 1<<v));
+      togglesign(*pty); return k;
     }
     if (pty) togglesign_safe(pty);
   }
-  if (pty) *pty = gerepilecopy(av, *pty); else set_avma(av);
-  return k;
+  if (!pty) return gc_long(av, k);
+  *pty = gerepilecopy(av, *pty); return k;
 }
 
 /* Faster than expi(n) == vali(n) or hamming(n) == 1 even for single-word
