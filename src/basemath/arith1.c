@@ -1716,14 +1716,12 @@ ZV_nv_mod_tree(GEN B, GEN A, GEN T)
   pari_sp av;
   long i, j, l = lg(B), n = lg(A)-1;
   GEN V = cgetg(n+1, t_VEC);
-  for (j=1; j <= n; j++)
-    gel(V, j) = cgetg(l, t_VECSMALL);
+  for (j=1; j <= n; j++) gel(V, j) = cgetg(l, t_VECSMALL);
   av = avma;
   for (i=1; i < l; i++)
   {
     GEN v = Z_ZV_mod_tree(gel(B, i), A, T);
-    for (j=1; j <= n; j++)
-      mael(V, j, i) = v[j];
+    for (j=1; j <= n; j++) mael(V, j, i) = v[j];
     set_avma(av);
   }
   return V;
@@ -1735,13 +1733,11 @@ ZM_nv_mod_tree(GEN M, GEN xa, GEN T)
   pari_sp av = avma;
   long i, j, l = lg(M), n = lg(xa)-1;
   GEN V = cgetg(n+1, t_VEC);
-  for (j=1; j <= n; j++)
-    gel(V, j) = cgetg(l, t_MAT);
+  for (j=1; j <= n; j++) gel(V, j) = cgetg(l, t_MAT);
   for (i=1; i < l; i++)
   {
     GEN v = ZV_nv_mod_tree(gel(M, i), xa, T);
-    for (j=1; j <= n; j++)
-      gmael(V, j, i) = gel(v,j);
+    for (j=1; j <= n; j++) gmael(V, j, i) = gel(v,j);
   }
   return gerepilecopy(av, V);
 }
@@ -1761,8 +1757,7 @@ ZV_sqr(GEN z)
 static GEN
 ZT_sqr(GEN x)
 {
-  if (typ(x) == t_INT)
-    return sqri(x);
+  if (typ(x) == t_INT) return sqri(x);
   pari_APPLY_type(t_VEC, ZT_sqr(gel(x,i)))
 }
 
@@ -1776,8 +1771,7 @@ ZV_invdivexact(GEN y, GEN x)
     {
       pari_sp av = avma;
       ulong a = Fl_inv(umodiu(diviuexact(gel(y,i),x[i]), x[i]), x[i]);
-      set_avma(av);
-      gel(z,i) = utoi(a);
+      set_avma(av); gel(z,i) = utoi(a);
     }
   else
     for (i=1; i<l; i++)
@@ -2319,24 +2313,18 @@ Fp_pow(GEN A, GEN K, GEN N)
 
 static GEN
 _Fp_mul(void *E, GEN x, GEN y) { return Fp_mul(x,y,(GEN)E); }
-
 static GEN
 _Fp_sqr(void *E, GEN x) { return Fp_sqr(x,(GEN)E); }
-
 static GEN
 _Fp_one(void *E) { (void) E; return gen_1; }
 
 GEN
 Fp_pow_init(GEN x, GEN n, long k, GEN p)
-{
-  return gen_pow_init(x, n, k, (void*)p, &_Fp_sqr, &_Fp_mul);
-}
+{ return gen_pow_init(x, n, k, (void*)p, &_Fp_sqr, &_Fp_mul); }
 
 GEN
 Fp_pow_table(GEN R, GEN n, GEN p)
-{
-  return gen_pow_table(R, n, (void*)p, &_Fp_one, &_Fp_mul);
-}
+{ return gen_pow_table(R, n, (void*)p, &_Fp_one, &_Fp_mul); }
 
 GEN
 Fp_powers(GEN x, long n, GEN p)
@@ -2347,40 +2335,29 @@ Fp_powers(GEN x, long n, GEN p)
 }
 
 GEN
-FpV_prod(GEN V, GEN p)
-{
-  return gen_product(V, (void *)p, &_Fp_mul);
-}
+FpV_prod(GEN V, GEN p) { return gen_product(V, (void *)p, &_Fp_mul); }
 
 static GEN
 _Fp_pow(void *E, GEN x, GEN n) { return Fp_pow(x,n,(GEN)E); }
-
 static GEN
 _Fp_rand(void *E) { return addiu(randomi(subiu((GEN)E,1)),1); }
 
 static GEN Fp_easylog(void *E, GEN a, GEN g, GEN ord);
-
 static const struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,hash_GEN,
                                       equalii,equali1,Fp_easylog};
 
 static GEN
 _Fp_red(void *E, GEN x) { return Fp_red(x, (GEN)E); }
-
 static GEN
 _Fp_add(void *E, GEN x, GEN y) { (void) E; return addii(x,y); }
-
 static GEN
 _Fp_neg(void *E, GEN x) { (void) E; return negi(x); }
-
 static GEN
 _Fp_rmul(void *E, GEN x, GEN y) { (void) E; return mulii(x,y); }
-
 static GEN
 _Fp_inv(void *E, GEN x) { return Fp_inv(x,(GEN)E); }
-
 static int
 _Fp_equal0(GEN x) { return signe(x)==0; }
-
 static GEN
 _Fp_s(void *E, long x) { (void) E; return stoi(x); }
 
@@ -2388,9 +2365,7 @@ static const struct bb_field Fp_field={_Fp_red,_Fp_add,_Fp_rmul,_Fp_neg,
                                         _Fp_inv,_Fp_equal0,_Fp_s};
 
 const struct bb_field *get_Fp_field(void **E, GEN p)
-{
-  *E = (void*)p; return &Fp_field;
-}
+{ *E = (void*)p; return &Fp_field; }
 
 /*********************************************************************/
 /**               ORDER of INTEGERMOD x  in  (Z/nZ)*                **/
@@ -2442,12 +2417,7 @@ Zp_order(GEN a, GEN p, long e, GEN pe)
   {
     if (e == 1) return gen_1;
     if (e == 2) return mod4(a) == 1? gen_1: gen_2;
-    if (mod4(a) == 1)
-      op = gen_1;
-    else {
-      op = gen_2;
-      a = Fp_sqr(a, pe);
-    }
+    if (mod4(a) == 1) op = gen_1; else { op = gen_2; a = Fp_sqr(a, pe); }
   } else {
     ap = (e == 1)? a: remii(a,p);
     op = Fp_order(ap, subiu(p,1), p);
@@ -2514,11 +2484,8 @@ static GEN
 Fp_log_find_rel(GEN b, ulong bnd, GEN C, GEN p, GEN *g, long *e)
 {
   GEN rel;
-  do
-  {
-    (*e)++; *g = Fp_mul(*g, b, p);
-    rel = Fp_log_halfgcd(bnd, C, *g, p);
-  } while (!rel);
+  do { (*e)++; *g = Fp_mul(*g, b, p); rel = Fp_log_halfgcd(bnd, C, *g, p); }
+  while (!rel);
   return rel;
 }
 
@@ -2566,14 +2533,11 @@ GEN
 Fp_log_sieve_worker(long a, long prmax, GEN C, GEN c, GEN Ci, GEN ci, GEN pi, GEN sz)
 {
   pari_sp ltop = avma;
-  long th, n = lg(pi)-1;
-  long i, j;
+  long i, j, th, n = lg(pi)-1, rel = 1;
   GEN sieve = zero_zv(a+2)+1;
   GEN L = cgetg(1+a+2, t_VEC);
   pari_sp av = avma;
-  long rel = 1;
-  GEN z, h;
-  h = addis(C,a);
+  GEN z, h = addis(C,a);
   if ((z = Z_issmooth_fact(h, prmax)))
   {
     gel(L, rel++) = mkvec2(z, mkvecsmall3(1, a, -1));
@@ -2585,8 +2549,7 @@ Fp_log_sieve_worker(long a, long prmax, GEN C, GEN c, GEN Ci, GEN ci, GEN pi, GE
     ulong u, iv = Fl_invsafe(Fl_add(Ci[i],al,li),li);
     if (!iv) continue;
     u = Fl_mul(Fl_sub(ci[i],Fl_mul(Ci[i],al,li),li), iv ,li);
-    for(j = u; j<=a; j+=li)
-      sieve[j] += s;
+    for(j = u; j<=a; j+=li) sieve[j] += s;
   }
   if (a)
   {
@@ -2610,8 +2573,7 @@ Fp_log_sieve_worker(long a, long prmax, GEN C, GEN c, GEN Ci, GEN ci, GEN pi, GE
     if ((z = Z_issmooth_fact(h, prmax)))
       gel(L, rel++) = mkvec2(z, mkvecsmall3(1, a, -2));
   }
-  setlg(L, rel);
-  return gerepilecopy(ltop, L);
+  setlg(L, rel); return gerepilecopy(ltop, L);
 }
 
 static long
