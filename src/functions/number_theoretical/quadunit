@@ -2,15 +2,17 @@ Function: quadunit
 Section: number_theoretical
 C-Name: quadunit0
 Prototype: GDn
-Help: quadunit(D,{v = 'w}): fundamental unit u of the quadratic field of
+Help: quadunit(D,{v = 'w}): fundamental unit u of the quadratic order of
  discriminant D where D must be positive.
  If v is given, the variable name is used to display u, else 'w' is used.
-Doc: fundamental unit\sidx{fundamental units} $u$ of the
- real quadratic field $\Q(\sqrt D)$ where  $D$ is the positive discriminant
- of the field. If $D$ is not a fundamental discriminant, this
- gives the fundamental unit of the corresponding order. $D$ must be an
- integer congruent to 0 or 1 modulo 4, which is not a square; the result
- is a quadratic number (see \secref{se:quadgen}).
+Doc: a fundamental unit\sidx{fundamental units} $u$ of the real quadratic order
+ of discriminant $D$. The integer $D$ must be congruent to 0 or 1 modulo 4
+ and not a square; the result is a quadratic number (see \secref{se:quadgen}).
+ If $D$ is not a fundamental discriminant, the algorithm is wasteful: if $D =
+ df^2$ with $d$ fundamental, it will be faster to compute \kbd{quadunit}$(d)$
+ then raise it to the power \kbd{quadunitindex}$(d,f)$; or keep it in
+ factored form.
+
  If \var{v} is given, the variable name is used to display $u$
  else 'w' is used. The algorithm computes the continued fraction
  of $(1 + \sqrt{D}) / 2$ or $\sqrt{D}/2$ (see GTM 138, algorithm 5.7.2).
