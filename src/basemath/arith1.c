@@ -1040,7 +1040,9 @@ Fp_sqrt_i(GEN a, GEN y, GEN p)
 
   if (lgefint(p) == 3)
   {
-    ulong pp = uel(p,2), u = Fl_sqrt(umodiu(a, pp), pp);
+    ulong pp = uel(p,2), u = umodiu(a, pp);
+    if (!u) return gen_0;
+    u = Fl_sqrt(u, pp);
     return (u == ~0UL)? NULL: utoipos(u);
   }
 
