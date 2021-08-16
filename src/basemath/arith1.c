@@ -1038,17 +1038,13 @@ Fp_sqrt_i(GEN a, GEN y, GEN p)
   long i, k, e;
   GEN p1, q, v, w;
 
-  if (typ(a) != t_INT) pari_err_TYPE("Fp_sqrt",a);
-  if (typ(p) != t_INT) pari_err_TYPE("Fp_sqrt",p);
-  if (signe(p) <= 0 || equali1(p)) pari_err_PRIME("Fp_sqrt",p);
   if (lgefint(p) == 3)
   {
     ulong pp = uel(p,2), u = Fl_sqrt(umodiu(a, pp), pp);
-    if (u == ~0UL) return NULL;
-    return utoi(u);
+    return (u == ~0UL)? NULL: utoipos(u);
   }
 
-  a = modii(a, p); if (!signe(a)) { set_avma(av); return gen_0; }
+  a = modii(a, p); if (!signe(a)) return gc_const(av, gen_0);
   p1 = subiu(p,1); e = vali(p1);
   if (e <= 2)
   { /* direct formulas more efficient */
@@ -1112,9 +1108,7 @@ Fp_sqrt_i(GEN a, GEN y, GEN p)
 
 GEN
 Fp_sqrt(GEN a, GEN p)
-{
-  return Fp_sqrt_i(a, NULL, p);
-}
+{ return Fp_sqrt_i(a, NULL, p); }
 
 /*********************************************************************/
 /**                        GCD & BEZOUT                             **/
