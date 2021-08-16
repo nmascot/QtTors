@@ -790,16 +790,11 @@ Fl_sqrt_pre_i(ulong a, ulong y, ulong p, ulong pi)
 
 ulong
 Fl_sqrt(ulong a, ulong p)
-{
-  ulong pi = get_Fl_red(p);
-  return Fl_sqrt_pre_i(a, 0, p, pi);
-}
+{ ulong pi = get_Fl_red(p); return Fl_sqrt_pre_i(a, 0, p, pi); }
 
 ulong
 Fl_sqrt_pre(ulong a, ulong p, ulong pi)
-{
-  return Fl_sqrt_pre_i(a, 0, p, pi);
-}
+{ return Fl_sqrt_pre_i(a, 0, p, pi); }
 
 static ulong
 Fl_lgener_pre_all(ulong l, long e, ulong r, ulong p, ulong pi, ulong *pt_m)
@@ -813,8 +808,7 @@ Fl_lgener_pre_all(ulong l, long e, ulong r, ulong p, ulong pi, ulong *pt_m)
     m = Fl_powu_pre(y, le1, p, pi);
     if (m != 1) break;
   }
-  *pt_m = m;
-  return y;
+  *pt_m = m; return y;
 }
 
 /* solve x^l = a , l prime in G of order q.
@@ -864,16 +858,11 @@ Fl_sqrtl_i(ulong a, ulong l, ulong p, ulong pi, ulong y, ulong m)
 
 ulong
 Fl_sqrtl_pre(ulong a, ulong l, ulong p, ulong pi)
-{
-  return Fl_sqrtl_i(a, l, p, pi, 0, 0);
-}
+{ return Fl_sqrtl_i(a, l, p, pi, 0, 0); }
 
 ulong
 Fl_sqrtl(ulong a, ulong l, ulong p)
-{
-  ulong pi = get_Fl_red(p);
-  return Fl_sqrtl_i(a, l, p, pi, 0, 0);
-}
+{ ulong pi = get_Fl_red(p); return Fl_sqrtl_i(a, l, p, pi, 0, 0); }
 
 ulong
 Fl_sqrtn_pre(ulong a, long n, ulong p, ulong pi, ulong *zetan)
@@ -955,46 +944,42 @@ sqrt_Cipolla_sqr(void *data, GEN y)
   GEN u2 = sqri(u), v2 = sqri(v);
   v = subii(sqri(addii(v,u)), addii(u2,v2));
   u = addii(u2, mulii(v2,n));
-  /* NOT mkvec2: must be gerepileupto-able */
   retmkvec2(modii(u,p), modii(v,p));
 }
 /* compute (t+X) y^2 */
 static GEN
 sqrt_Cipolla_msqr(void *data, GEN y)
 {
-  GEN u = gel(y,1), v = gel(y,2), a = gel(data,1), p = gel(data,2), gt = gel(data,4);
-  ulong t = gt[2];
-  GEN d = addii(u, mului(t,v)), d2= sqri(d);
+  GEN u = gel(y,1), v = gel(y,2), a = gel(data,1), p = gel(data,2);
+  ulong t = gel(data,4)[2];
+  GEN d = addii(u, mului(t,v)), d2 = sqri(d);
   GEN b = remii(mulii(a,v), p);
   u = subii(mului(t,d2), mulii(b,addii(u,d)));
   v = subii(d2, mulii(b,v));
-  /* NOT mkvec2: must be gerepileupto-able */
   retmkvec2(modii(u,p), modii(v,p));
 }
 /* assume a reduced mod p [ otherwise correct but inefficient ] */
 static GEN
 sqrt_Cipolla(GEN a, GEN p)
 {
-  pari_sp av1;
+  pari_sp av;
   GEN u, v, n, y, pov2;
   ulong t;
 
   if (kronecker(a, p) < 0) return NULL;
-  pov2 = shifti(p,-1);
-  if (cmpii(a,pov2) > 0) a = subii(a,p); /* center: avoid multiplying by huge base*/
-
-  av1 = avma;
-  for(t=1; ; t++)
+  pov2 = shifti(p,-1); /* center to avoid multiplying by huge base*/
+  if (cmpii(a,pov2) > 0) a = subii(a,p);
+  av = avma;
+  for (t=1; ; t++, set_avma(av))
   {
     n = subsi((long)(t*t), a);
     if (kronecker(n, p) < 0) break;
-    set_avma(av1);
   }
 
   /* compute (t+X)^((p-1)/2) =: u+vX */
   u = utoipos(t);
   y = gen_pow_fold(mkvec2(u, gen_1), pov2, mkvec4(a,p,n,u),
-                         sqrt_Cipolla_sqr, sqrt_Cipolla_msqr);
+                   sqrt_Cipolla_sqr, sqrt_Cipolla_msqr);
   /* Now u+vX = (t+X)^((p-1)/2); thus
    *   (u+vX)(t+X) = sqrt(a) + 0 X
    * Whence,
