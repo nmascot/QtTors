@@ -1,4 +1,4 @@
-  ***   Warning: new stack size = 60000000 (57.220 Mbytes).
+  ***   Warning: new stack size = 300000000 (286.102 Mbytes).
 1000000000000001 [4, 4, 2, 2, 2]
 1000000000000005 [2, 2, 2, 2]
 1000000000000009 [2, 2]
@@ -607,7 +607,7 @@
 -999999999999011 [10976478]
 -999999999999007 [2903838, 2, 2]
 -999999999999003 [4036316, 2]
-Mod(16261799160836366227, 18446744073709551557) + Mod(14232435716445105183, 
+Mod(16117536208599666398, 18446744073709551557) + Mod(15447797518844911155, 
 18446744073709551557)*w
 2
 10
@@ -644,5 +644,21 @@ Mod(16261799160836366227, 18446744073709551557) + Mod(14232435716445105183,
 [192199]
 ? setrand(2);quadclassunit(-699,,[6,6]).cyc
 [10]
+? quadunit(1.)
+  ***   at top-level: quadunit(1.)
+  ***                 ^------------
+  *** quadunit: incorrect type in quadunit (t_REAL).
+? quadunitindex(1.,2)
+  ***   at top-level: quadunitindex(1.,2)
+  ***                 ^-------------------
+  *** quadunitindex: incorrect type in quadunitindex (t_REAL).
+? quadunitindex(5,1.)
+  ***   at top-level: quadunitindex(5,1.)
+  ***                 ^-------------------
+  *** quadunitindex: incorrect type in quadunitindex (t_REAL).
+? quadunitnorm(1.)
+  ***   at top-level: quadunitnorm(1.)
+  ***                 ^----------------
+  *** quadunitnorm: incorrect type in quadunitnorm (t_REAL).
 ? print("Total time spent: ",gettime);
-Total time spent: 5224
+Total time spent: 9017

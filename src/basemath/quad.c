@@ -258,8 +258,10 @@ quadunit_basecase(GEN D)
 {
   pari_sp av0 = avma;
   GEN d, u1, u2, v1, v2, p, q, q1, u, v, a, b, c;
-  int m = mpodd(D);
+  int m;
   long first = 1;
+  check_quaddisc_real(D, NULL, "quadunit");
+  m = mpodd(D);
   d = sqrti(D); p = (mpodd(d) == m)? d: subiu(d, 1);
   u1 = negi(p); u2 = gen_2;
   v1 = gen_1; v2 = gen_0; q = gen_2;
@@ -292,8 +294,10 @@ quadunit(GEN D)
 {
   pari_sp av0 = avma, av;
   GEN f, d, p, q, q1, u, v, a, b, c;
-  int m = mpodd(D);
+  int m;
   long i = 0;
+  check_quaddisc_real(D, NULL, "quadunit");
+  m = mpodd(D);
   d = sqrti(D); p = (mpodd(d) == m)? d: subiu(d, 1);
   av = avma;
   f = zerovec(2+(expi(D)>>1));
