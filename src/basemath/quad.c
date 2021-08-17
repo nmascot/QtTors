@@ -261,21 +261,26 @@ quadunit_basecase(GEN D)
   int m;
   long first = 1;
   check_quaddisc_real(D, NULL, "quadunit");
-  m = mpodd(D);
-  d = sqrti(D); p = (mpodd(d) == m)? d: subiu(d, 1);
-  u1 = negi(p); u2 = gen_2;
-  v1 = gen_1; v2 = gen_0; q = gen_2;
-  q1 = shifti(subii(D, sqri(p)), -1);
+  m = mpodd(D); d = sqrtremi(D, &a);
+  p = d; q1 = shifti(a, -1); q = gen_2;
+  if (mpodd(d) != m) { p = subiu(d,1); q1 = addii(q1,d); } /* q1 = (D-p^2)/2 */
+  u1 = gen_2; u2 = p;
+  v1 = gen_0; v2 = gen_1;
   for(;;)
   {
-    GEN r, A = dvmdii(addii(p, d), q, &r), p1 = p, t;
-    p = subii(d, r); /* even period */
-    if (!first && equalii(p1, p))
-    { a = sqri(u2); b = sqri(v2); c = sqri(addii(u2, v2)); break; }
-    first = 0;
-    t = addmulii(u1, A, u2); u1 = u2; u2 = t;
-    t = addmulii(v1, A, v2); v1 = v2; v2 = t;
-    t = q; q = submulii(q1, A, subii(p, p1)); q1 = t;
+    GEN t = q;
+    if (first) { first = 0; q = q1; }
+    else
+    {
+      GEN r, A = dvmdii(addii(p, d), q, &r), p1 = p;
+      p = subii(d, r);
+      if (equalii(p1, p)) /* even period */
+      { a = sqri(u2); b = sqri(v2); c = sqri(addii(u2, v2)); break; }
+      r = addmulii(u1, A, u2); u1 = u2; u2 = r;
+      r = addmulii(v1, A, v2); v1 = v2; v2 = r;
+      q = submulii(q1, A, subii(p, p1));
+    }
+    q1 = t;
     if (equalii(q, t))
     { /* odd period */
       a = mulii(u1, u2); b = mulii(v1, v2);
@@ -297,28 +302,28 @@ quadunit(GEN D)
   int m;
   long i = 0;
   check_quaddisc_real(D, NULL, "quadunit");
-  m = mpodd(D);
-  d = sqrti(D); p = (mpodd(d) == m)? d: subiu(d, 1);
-  av = avma;
-  f = zerovec(2+(expi(D)>>1));
-  q = gen_2;
-  q1 = shifti(subii(D, sqri(p)), -1);
+  m = mpodd(D); d = sqrtremi(D, &a); av = avma;
+  p = d; q1 = shifti(a, -1); q = gen_2;
+  if (mpodd(d) != m) { p = subiu(d,1); q1 = addii(q1,d); } /* q1 = (D-p^2)/2 */
+  f = zerovec(2 + (expi(D)>>1));
+  gel(f,1) = mkmat22(p, gen_2, gen_1, gen_0);
   for(;;)
   {
-    GEN r, A = dvmdii(addii(p, d), q, &r), p1 = p, t, u1,u2, v1,v2;
-    p = subii(d, r);
-    if (i && equalii(p1, p))
-    { /* even period */
-      f = prod_fm(f, i, 1); u2 = gel(f,1); v2 = gel(f,2);
-      a = sqri(u2); b = sqri(v2); c = sqri(addii(u2, v2)); break;
-    }
-    if (i) i = update_fm(f, A, i);
+    GEN t = q, u1,u2, v1,v2;
+    if (!i) { i = 1; q = q1; }
     else
-    { /*[2,-p1;0,1]*[A,1;1,0] */
-      gel(f,1) = mkmat22(subii(shifti(A,1), p1), gen_2, gen_1, gen_0);
-      i = 1;
+    {
+      GEN r, A = dvmdii(addii(p, d), q, &r), p1 = p;
+      p = subii(d, r);
+      if (equalii(p1, p))
+      { /* even period */
+        f = prod_fm(f, i, 1); u2 = gel(f,1); v2 = gel(f,2);
+        a = sqri(u2); b = sqri(v2); c = sqri(addii(u2, v2)); break;
+      }
+      i = update_fm(f, A, i);
+      q = submulii(q1, A, subii(p, p1));
     }
-    t = q; q = submulii(q1, A, subii(p, p1)); q1 = t;
+    q1 = t;
     if (equalii(q, t))
     { /* odd period */
       f = prod_fm(f, i, 0);
