@@ -1,5 +1,5 @@
 default(realprecision,38);
-default(parisize, "60M");
+default(parisize, "80M");
 test(D) =
 {
   for (d = D, D+10^3,

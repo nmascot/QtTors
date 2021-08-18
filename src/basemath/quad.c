@@ -169,6 +169,7 @@ update_fm(GEN f, GEN a, long i)
 #else
   const long LIM = 18;
 #endif
+  pari_sp av = avma;
   long k, v;
   GEN u;
   if (!odd(i)) { gel(f,1) = a; return i+1; }
@@ -178,6 +179,7 @@ update_fm(GEN f, GEN a, long i)
   update_f(u, a); if (lgefint(gcoeff(u,1,1)) < LIM) return i;
   v = vals(i+1); gel(f,1) = gen_0;
   for (k = 1; k < v; k++) { u = ZM2_mul(gel(f,k+1), u); gel(f,k+1) = gen_0; }
+  if (v != 1) u = gerepileupto(av, u);
   gel(f,v+1) = u; return i+1;
 }
 /* \prod f[j]; if first only return column 1 */
