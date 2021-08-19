@@ -3019,7 +3019,6 @@ GEN  strtime(long t);
 
 GEN     direuler(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, GEN c);
 GEN     dirpowers(long n, GEN x, long prec);
-GEN     dirpowerssum0(GEN N, GEN s, GEN f, long prec);
 GEN     dirpowerssum(ulong N, GEN s, long prec);
 GEN     dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *,ulong,long), long prec);
 GEN     vecpowuu(long N, ulong B);

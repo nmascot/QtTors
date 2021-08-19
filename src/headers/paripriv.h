@@ -71,6 +71,7 @@ GEN setloop(GEN a);
 #define EXPR_ARGBOOL __E, &gp_evalbool
 #define EXPR_ARGVOID __E, &gp_evalvoid
 
+GEN  dirpowerssum0(GEN N, GEN s, GEN f, long prec);
 GEN  iferrpari(GEN a, GEN b, GEN c);
 void forfactored(GEN a, GEN b, GEN code);
 void forpari(GEN a, GEN b, GEN node);
