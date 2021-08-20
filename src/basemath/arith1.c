@@ -3105,8 +3105,9 @@ mulu_interval(ulong a, ulong b)
   {
     if (n == 1) return utoipos(a);
     x = muluu(a,a+1); if (n == 2) return x;
-    for (k=a+2; k<=b; k++) x = mului(k,x);
-    return gerepileuptoint(av, x);
+    for (k=a+2; k<b; k++) x = mului(k,x);
+    /* avoid k <= b: broken if b = ULONG_MAX */
+    return gerepileuptoint(av, mului(b,x));
   }
   lx = 1; x = cgetg(2 + n/2, t_VEC);
   N = b + a;
