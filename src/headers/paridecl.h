@@ -1918,6 +1918,7 @@ GEN     qfbcomp(GEN x, GEN y);
 GEN     qfbcomp_i(GEN x, GEN y);
 GEN     qfbcompraw(GEN x, GEN y);
 GEN     qfbcompraw_i(GEN x, GEN y);
+GEN     qfbcornacchia(GEN d, GEN p);
 GEN     qfbpow(GEN x, GEN n);
 GEN     qfbpow_i(GEN x, GEN n);
 GEN     qfbpowraw(GEN x, long n);

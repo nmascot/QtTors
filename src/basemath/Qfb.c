@@ -1764,3 +1764,15 @@ cornacchia2_sqrt(GEN d, GEN p, GEN b, GEN *px, GEN *py)
   if (abscmpii(p4, d) < 0) return gc_long(av,0);
   return cornacchia2_i(av, d, p, b, p4, px, py);
 }
+
+GEN
+qfbcornacchia(GEN d, GEN p)
+{
+  pari_sp av = avma;
+  GEN x, y;
+  if (typ(d) != t_INT || signe(d) <= 0) pari_err_TYPE("qfbcornacchia", d);
+  if (typ(p) != t_INT || cmpiu(p, 2) < 0) pari_err_TYPE("qfbcornacchia", p);
+  if (mod4(p)? cornacchia(d, p, &x, &y): cornacchia2(d, shifti(p, -2), &x, &y))
+    return gerepilecopy(av, mkvec2(x, y));
+  set_avma(av); return cgetg(1, t_VEC);
+}
