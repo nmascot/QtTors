@@ -1683,7 +1683,7 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
   if (signe(d) <= 0) pari_err_DOMAIN("cornacchia", "d","<=",gen_0,d);
   *px = *py = gen_0;
   b = subii(p, d);
-  if (signe(b) < 0) return 0;
+  if (signe(b) < 0) return gc_long(av,0);
   if (signe(b) == 0) { *py = gen_1; return gc_long(av,1); }
   b = Fp_sqrt(b, p); /* sqrt(-d) */
   if (!b) return gc_long(av,0);
