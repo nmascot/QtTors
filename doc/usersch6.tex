@@ -2494,14 +2494,16 @@ an imaginary \typ{QFB} $Q$. Return \kbd{gen\_0} if there are no solutions.
 a real \typ{QFB} $Q$. Return \kbd{gen\_0} if there are no solutions.
 
 \fun{long}{cornacchia}{GEN d, GEN p, GEN *px, GEN *py} solves
-$x^2+ dy^2 = p$ over the integers, where $d > 0$. Return $1$ if there is a
+$x^2+ dy^2 = p$ over the integers, where $d > 0$ is congruent to $0$ or $3$
+modulo $4$. Return $1$ if there is a
 solution (and store it in \kbd{*x} and \kbd{*y}), $0$ otherwise.
 
 \fun{long}{cornacchia2}{GEN d, GEN p, GEN *px, GEN *py} as \kbd{cornacchia},
 for the equation $x^2 + dy^2 = 4p$.
 
-\fun{long}{cornacchia2_sqrt}{GEN d, GEN p, GEN b, GEN *px, GEN *py} as \kbd{cornacchia2},
-where  $p > 2$ and $b$ is the smallest squareroot of $d$ modulo $p$.
+\fun{long}{cornacchia2_sqrt}{GEN d, GEN p, GEN b, GEN *px, GEN *py} as
+\kbd{cornacchia2}, where  $p > 2$ and $b$ is the smallest squareroot of $d$
+modulo $p$.
 
 \subsubsec{Prime forms}
 

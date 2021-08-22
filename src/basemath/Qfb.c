@@ -1671,16 +1671,14 @@ qfbsolve(GEN Q, GEN n, long fl)
                                   : qfbsolve_primitive(Q, n, fl & 1));
 }
 
-/* 1 if there exists x,y such that x^2 + dy^2 = p [prime], 0 otherwise */
+/* 1 if there exists x,y such that x^2 + dy^2 = p, 0 otherwise;
+ * Assume d > 0 and p is prime */
 long
 cornacchia(GEN d, GEN p, GEN *px, GEN *py)
 {
   pari_sp av = avma;
-  GEN a, b, c, r;
+  GEN b, c, r;
 
-  if (typ(d) != t_INT) pari_err_TYPE("cornacchia", d);
-  if (typ(p) != t_INT) pari_err_TYPE("cornacchia", p);
-  if (signe(d) <= 0) pari_err_DOMAIN("cornacchia", "d","<=",gen_0,d);
   *px = *py = gen_0;
   b = subii(p, d);
   if (signe(b) < 0) return gc_long(av,0);
@@ -1688,8 +1686,7 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
   b = Fp_sqrt(b, p); /* sqrt(-d) */
   if (!b) return gc_long(av,0);
   b = gmael(halfgcdii(p, b), 2, 2);
-  a = subii(p, sqri(b));
-  c = dvmdii(a, d, &r);
+  c = dvmdii(subii(p, sqri(b)), d, &r);
   if (r != gen_0 || !Z_issquareall(c, &c)) return gc_long(av,0);
   set_avma(av);
   *px = icopy(b);
@@ -1700,16 +1697,16 @@ static GEN
 lastqi(GEN Q)
 {
   GEN s = gcoeff(Q,1,1), q = gcoeff(Q,1,2), p = absi_shallow(gcoeff(Q,2,2));
-  if (signe(q)==0) return gen_0;
-  if (signe(s)==0) return p;
-  if (is_pm1(q))   return subiu(p,1);
+  if (!signe(q)) return gen_0;
+  if (!signe(s)) return p;
+  if (is_pm1(q)) return subiu(p,1);
   return divii(p, absi_shallow(q));
 }
 
 static long
-cornacchia2_helper(long av, GEN d, GEN p, GEN b, GEN px4, GEN *px, GEN *py)
+cornacchia2_i(long av, GEN d, GEN p, GEN b, GEN px4, GEN *px, GEN *py)
 {
-  GEN M, Q, V, a, c, r;
+  GEN M, Q, V, c, r, b2;
   if (!signe(b)) { /* d = p,2p,3p,4p */
     set_avma(av);
     if (absequalii(d, px4)){ *py = gen_1; return 1; }
@@ -1718,33 +1715,30 @@ cornacchia2_helper(long av, GEN d, GEN p, GEN b, GEN px4, GEN *px, GEN *py)
   }
   if (mod2(b) != mod2(d)) b = subii(p,b);
   M = halfgcdii(shifti(p,1), b); Q = gel(M,1); V = gel(M, 2);
-  b = addii(mulii(gel(V,1), lastqi(Q)),gel(V,2));
-  if (cmpii(sqri(b),px4) > 0) b = gel(V,1);
-  if (cmpii(sqri(b),px4) > 0) b = gel(V,2);
-  a = subii(px4, sqri(b));
-  c = dvmdii(a, d, &r);
+  b = addii(mulii(gel(V,1), lastqi(Q)), gel(V,2));
+  b2 = sqri(b);
+  if (cmpii(b2,px4) > 0)
+  {
+    b = gel(V,1); b2 = sqri(b);
+    if (cmpii(b2,px4) > 0) { b = gel(V,2); b2 = sqri(b); }
+  }
+  c = dvmdii(subii(px4, b2), d, &r);
   if (r != gen_0 || !Z_issquareall(c, &c)) return gc_long(av,0);
   set_avma(av);
   *px = icopy(b);
   *py = icopy(c); return 1;
 }
 
-/* 1 if there exists x,y such that x^2 + dy^2 = 4p [p prime], 0 otherwise */
+/* 1 if there exists x,y such that x^2 + dy^2 = 4p, 0 otherwise;
+ * Assume d > 0 is congruent to 0 or 3 mod 4 and p is prime */
 long
 cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
 {
   pari_sp av = avma;
-  GEN b, px4;
-  long k;
+  GEN b, p4 = shifti(p,2);
 
-  if (typ(d) != t_INT) pari_err_TYPE("cornacchia2", d);
-  if (typ(p) != t_INT) pari_err_TYPE("cornacchia2", p);
-  if (signe(d) <= 0) pari_err_DOMAIN("cornacchia2", "d","<=",gen_0,d);
   *px = *py = gen_0;
-  k = mod4(d);
-  if (k == 1 || k == 2) pari_err_DOMAIN("cornacchia2","-d mod 4", ">",gen_1,d);
-  px4 = shifti(p,2);
-  if (abscmpii(px4, d) < 0) return gc_long(av,0);
+  if (abscmpii(p4, d) < 0) return gc_long(av,0);
   if (absequaliu(p, 2))
   {
     set_avma(av);
@@ -1757,7 +1751,7 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
   }
   b = Fp_sqrt(negi(d), p);
   if (!b) return gc_long(av,0);
-  return cornacchia2_helper(av, d, p, b, px4, px, py);
+  return cornacchia2_i(av, d, p, b, p4, px, py);
 }
 
 /* 1 if there exists x,y such that x^2 + dy^2 = 4p [p prime], 0 otherwise */
@@ -1765,9 +1759,8 @@ long
 cornacchia2_sqrt(GEN d, GEN p, GEN b, GEN *px, GEN *py)
 {
   pari_sp av = avma;
-  GEN px4;
+  GEN p4 = shifti(p,2);
   *px = *py = gen_0;
-  px4 = shifti(p,2);
-  if (abscmpii(px4, d) < 0) return gc_long(av,0);
-  return cornacchia2_helper(av, d, p, b, px4, px, py);
+  if (abscmpii(p4, d) < 0) return gc_long(av,0);
+  return cornacchia2_i(av, d, p, b, p4, px, py);
 }
