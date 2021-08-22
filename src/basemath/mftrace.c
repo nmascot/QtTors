@@ -13064,7 +13064,7 @@ search_solvable(GEN LG, GEN mf, GEN F, long prec)
   { /* n prime, find a (Z/nZ)^k - extension */
     GEN G = gel(LG,i);
     long n = G[1], k = G[2];
-    nf = nfinit0(mkvec2(pol,Nfa), 2, prec);
+    nf = nfinitred(mkvec2(pol,Nfa), prec);
     pol = search_abelian(nf, n, k, N, CHI, F, &P, &O, &bound, prec);
     setvarn(pol,v);
   }
