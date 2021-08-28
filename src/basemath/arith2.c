@@ -988,6 +988,7 @@ uissquarefree_fact(GEN f)
 {
   GEN E = gel(f,2);
   long i, l = lg(E);
+  if (l == 2) return umael(f,1,1)? E[1] == 1: 0; /* handle factor(0) */
   for (i = 1; i < l; i++)
     if (E[i] > 1) return 0;
   return 1;
