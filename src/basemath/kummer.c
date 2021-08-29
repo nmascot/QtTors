@@ -960,11 +960,11 @@ _rnfkummer_step4(struct rnfkummer *kum, long d, long m)
 
 /* alg 5.3.5 */
 static void
-rnfkummer_init(struct rnfkummer *kum, GEN bnf, ulong ell, long prec)
+rnfkummer_init(struct rnfkummer *kum, GEN bnf, GEN P, ulong ell, long prec)
 {
   compo_s *COMPO = &kum->COMPO;
   toK_s *T = &kum->T;
-  GEN nf  = bnf_get_nf(bnf), polnf = nf_get_pol(nf), vselmer, bnfz;
+  GEN nf  = bnf_get_nf(bnf), polnf = nf_get_pol(nf), vselmer, bnfz, nfz;
   long degK, degKz, m, d;
   ulong g;
   pari_timer ti;
@@ -985,8 +985,9 @@ rnfkummer_init(struct rnfkummer *kum, GEN bnf, ulong ell, long prec)
   if (Fl_powu(g, m, ell*ell) == 1) g += ell;
   /* ord(g) = m in all (Z/ell^k)^* */
   if (DEBUGLEVEL>2) err_printf("Step 3\n");
-  /* could factor disc(R) using th. 2.1.6. */
-  kum->bnfz = bnfz = Buchall(COMPO->R, nf_FORCE, maxss(prec,BIGDEFAULTPREC));
+  nfz = nfinit(mkvec2(COMPO->R, P), prec);
+  if (lg(nfcertify(nfz)) > 1) nfz = nfinit(COMPO->R, prec); /* paranoia */
+  kum->bnfz = bnfz = Buchall(nfz, nf_FORCE, prec);
   if (DEBUGLEVEL) timer_printf(&ti, "[rnfkummer] bnfinit(Kz)");
   kum->cycgenmod = bnf_cycgenmod(bnfz, ell, &vselmer, &kum->rc);
   kum->ell = ell;
@@ -1073,7 +1074,7 @@ static GEN
 _rnfkummer(GEN bnr, GEN H, long prec)
 {
   ulong ell;
-  GEN gell;
+  GEN gell, bnf, nf, P;
   struct rnfkummer kum;
 
   bnrclassfield_sanitize(&bnr, &H);
@@ -1083,7 +1084,9 @@ _rnfkummer(GEN bnr, GEN H, long prec)
   if (!uisprime(ell)) pari_err_IMPL("rnfkummer for composite relative degree");
   if (bnf_get_tuN(bnr_get_bnf(bnr)) % ell == 0)
     return rnfkummersimple(bnr, H, ell);
-  rnfkummer_init(&kum, bnr_get_bnf(bnr), ell, prec);
+  bnf =  bnr_get_bnf(bnr); nf = bnf_get_nf(bnf);
+  P = ZV_union_shallow(nf_get_ramified_primes(nf), mkvec(gell));
+  rnfkummer_init(&kum, bnf, P, ell, maxss(prec,BIGDEFAULTPREC));
   return rnfkummer_ell(&kum, bnr, H);
 }
 
@@ -1129,7 +1132,7 @@ static GEN
 bnrclassfield_tower(GEN bnr, GEN subgroup, GEN TB, GEN p, long finaldeg, long absolute, long prec)
 {
   pari_sp av = avma;
-  GEN nf, nf2, rnf, bnf, bnf2, bnr2, q, H, dec, cyc, pk, sgpk, pol2, emb, emb2, famod, fa, Lbad, cert;
+  GEN nf, nf2, rnf, bnf, bnf2, bnr2, q, H, dec, cyc, pk, sgpk, pol2, emb, emb2, famod, fa, Lbad;
   long i, r1, ell, sp, spk, last;
   forprime_t iter;
 
@@ -1139,8 +1142,7 @@ bnrclassfield_tower(GEN bnr, GEN subgroup, GEN TB, GEN p, long finaldeg, long ab
   nf2 = rnf_build_nfabs(rnf, prec);
   gsetvarn(nf2, varn(nf_get_pol(nf)));
 
-  cert = nfcertify(nf2);
-  if (lg(cert)>1)
+  if (lg(nfcertify(nf2)) > 1)
   {
     rnf = rnfinit0(nf, gel(TB,1), 1);
     nf2 = rnf_build_nfabs(rnf, prec);
@@ -1355,27 +1357,28 @@ nfcompositumall(GEN nf, GEN L)
 }
 
 static GEN
-bad_primes(GEN bnr)
+disc_primes(GEN bnr)
 {
   GEN v = bid_primes(bnr_get_bid(bnr));
   GEN r = nf_get_ramified_primes(bnr_get_nf(bnr));
   return ZV_union_shallow(r, v);
 }
 static struct rnfkummer **
-rnfkummer_initall(GEN bnr, GEN vP, long prec)
+rnfkummer_initall(GEN bnr, GEN vP, GEN P, long prec)
 {
-  long i, w, lP = lg(vP);
+  long i, w, l = lg(vP), S = vP[l-1] + 1;
   GEN bnf = bnr_get_bnf(bnr);
   struct rnfkummer **vkum;
 
   w = bnf_get_tuN(bnf);
-  vkum = (struct rnfkummer **)stack_malloc(vP[lP-1] * sizeof(struct rnfkummer*));
-  for (i = 1; i < lP; i++)
+  vkum = (struct rnfkummer **)stack_malloc(S * sizeof(struct rnfkummer*));
+  if (prec < BIGDEFAULTPREC) prec = BIGDEFAULTPREC;
+  for (i = 1; i < l; i++)
   {
     long p = vP[i];
     if (w % p == 0) { vkum[p] = NULL; continue; }
     vkum[p] = (struct rnfkummer *)stack_malloc(sizeof(struct rnfkummer));
-    rnfkummer_init(vkum[p], bnf, p, prec);
+    rnfkummer_init(vkum[p], bnf, P, p, prec);
   }
   return vkum;
 }
@@ -1430,8 +1433,8 @@ bnrclassfieldvec(GEN bnr, GEN v, long flag, long prec)
   }
   vP = shallowconcat1(vP); vecsmall_sort(vP);
   vP = vecsmall_uniq_sorted(vP);
-  if (lg(vP) > 1) vkum = rnfkummer_initall(bnr, vP, prec);
-  P = bad_primes(bnr);
+  P = disc_primes(bnr);
+  if (lg(vP) > 1) vkum = rnfkummer_initall(bnr, vP, P, prec);
   for (j = 1; j < lv; j++)
     gel(w,j) = bnrclassfield_H(vkum, bnr, P, gel(vH,j), gel(vfa,j), flag, prec);
   return w;
@@ -1459,8 +1462,7 @@ bnrclassfield(GEN bnr, GEN subgroup, long flag, long prec)
   N = ZM_det_triangular(subgroup);
   if (equali1(N)) { set_avma(av); return pol_x(0); }
   if (is_bigint(N)) pari_err_OVERFLOW("bnrclassfield [too large degree]");
-  fa = Z_factor(N);
-  vkum = rnfkummer_initall(bnr, ZV_to_zv(gel(fa,1)), prec);
-  P = bad_primes(bnr);
+  fa = Z_factor(N); P = disc_primes(bnr);
+  vkum = rnfkummer_initall(bnr, ZV_to_zv(gel(fa,1)), P, prec);
   return  gerepilecopy(av, bnrclassfield_H(vkum, bnr, P, subgroup, fa, flag, prec));
 }
