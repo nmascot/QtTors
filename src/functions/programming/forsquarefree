@@ -33,28 +33,28 @@ Doc: evaluates \var{seq}, where the formal variable $N$ is $[n,
  \bprog
  ? B = 10^9;
  ? for (N = B, B+10^6, factor(N))
- time = 4,392 ms.
+ time = 2,463 ms.
  ? forfactored (N = B, B+10^6, [n,fan] = N)
- time = 915 ms.
+ time = 567 ms.
  ? forsquarefree (N = B, B+10^6, [n,fan] = N)
- time = 532 ms.
+ time = 343 ms.
 
  ? B = 10^11;
  ? for (N = B, B+10^6, factor(N))
- time = 13,053 ms.
+ time = 8,012 ms.
  ? forfactored (N = B, B+10^6, [n,fan] = N)
- time = 1,976 ms.
+ time = 1,293 ms.
  ? forsquarefree (N = B, B+10^6, [n,fan] = N)
- time = 1,245 ms.
+ time = 713 ms.
 
  ? B = 10^14;
  ? for (N = B, B+10^6, factor(N))
- time = 50,612 ms.
+ time = 41,283 ms.
  ? forsquarefree (N = B, B+10^6, [n,fan] = N)
- time = 46,309 ms.
+ time = 33,399 ms.
  @eprog\noindent The last timing is with the default \kbd{primelimit}
  (500000) which is much less than $\sqrt{B+10^6}$; it goes down
- to \kbd{20,396ms} if \kbd{primelimit} gets bigger than that bound.
+ to \kbd{29,253ms} if \kbd{primelimit} gets bigger than that bound.
  In any case $\sqrt{B+10^6}$ is much larger than the interval length $10^6$
  so \kbd{forsquarefree} gets relatively slower for that reason as well.
 
@@ -62,10 +62,10 @@ Doc: evaluates \var{seq}, where the formal variable $N$ is $[n,
  argument natively:
  \bprog
  ? s = 0; forsquarefree(N = 1, 10^7, s += moebius(N)*eulerphi(N)); s
- time = 3,788 ms.
+ time = 2,003 ms.
  %1 = 6393738650
  ? s = 0; for(N = 1, 10^7, s += moebius(N)*eulerphi(N)); s
- time = 28,630 ms. \\ slower, we must factor N. Twice.
+ time = 18,024 ms. \\ slower, we must factor N. Twice.
  %2 = 6393738650
  @eprog
 
@@ -73,11 +73,11 @@ Doc: evaluates \var{seq}, where the formal variable $N$ is $[n,
  \bprog
  ? X = 10^8;
  ? for(d=1,X, if (isfundamental(d),))
- time = 1min, 29,066 ms.
+ time = 53,387 ms.
  ? forfactored(d=1,X, if (isfundamental(d),));
- time = 42,387 ms.
+ time = 13,861 ms.
  ? forsquarefree(d=1,X, D = quaddisc(d); if (D <= X, ));
- time = 32,479 ms.
+ time = 14,341 ms.
  @eprog\noindent Note that in the last loop, the fundamental discriminants
  $D$ are not evaluated in order (since \kbd{quaddisc(d)} for squarefree $d$
  is either $d$ or $4d$). This is the price we pay for a faster evaluation,

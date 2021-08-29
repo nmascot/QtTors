@@ -131,7 +131,7 @@ BA  42- new flag value in nfisincl
 BA  44- [libpari] RgXQ_minpoly
     45- [libpari] quadclassnos, quadclassnoF, unegquadclassnoF,
         uposquadclassnoF, coredisc2_fact, coredisc2u_fact, uquadclassnoF_fact
-        quadclassnoF_fact
+        quadclassnoF_fact, Z_issquarefree_fact
     46- new GP functions quadunitnorm, quadunitindex
 LGr 47- allow endpoints in solve() to by +oo or -oo
     48- allow Vec(t_STR, n) and Vecsmall(t_STR, n)

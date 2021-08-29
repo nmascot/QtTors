@@ -2074,6 +2074,7 @@ GEN     znstar0(GEN N, long flag);
 
 int     RgV_is_ZVpos(GEN v);
 int     RgV_is_ZVnon0(GEN v);
+long    Z_issquarefree_fact(GEN F);
 GEN     Z_lsmoothen(GEN N, GEN L, GEN *pP, GEN *pe);
 GEN     Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pe);
 GEN     boundfact(GEN n, ulong lim);

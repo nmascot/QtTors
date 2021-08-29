@@ -136,9 +136,20 @@ GEN
 quaddisc(GEN x)
 {
   const pari_sp av = avma;
-  if (is_rational_t(typ(x))) x = factor(x);
-  else x = check_arith_all(x,"quaddisc");
-  return gerepileuptoint(av, fa_quaddisc(x));
+  long tx = typ(x);
+  GEN F;
+  if (is_rational_t(tx)) F = factor(x);
+  else
+  {
+    F = check_arith_all(x,"quaddisc");
+    if (tx == t_VEC && typ(gel(x,1)) == t_INT
+                    && Z_issquarefree_fact(gel(x,2)))
+    {
+      x = gel(x,1);
+      return (Mod4(x) > 1)? shifti(x, 2): icopy(x);
+    }
+  }
+  return gerepileuptoint(av, fa_quaddisc(F));
 }
 
 
