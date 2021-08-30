@@ -4107,7 +4107,8 @@ START:
       if (!A || (lg(A) > 1 && gprecision(A) <= 2))
       {
         long add = nbits2extraprec( gexpo(AU) + 64 ) - gprecision(AU);
-        precpb = "cleanarch"; PREC += maxss(add, 1); continue;
+        long t = maxss((PREC-2) * 0.15, add);
+        precpb = "cleanarch"; PREC += maxss(t, EXTRAPRECWORD); continue;
       }
       if (flag)
       {
