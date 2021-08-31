@@ -49,24 +49,26 @@ sliding_window_powu(GEN x, ulong n, long e, void *E, GEN (*sqr)(void*,GEN),
 {
   pari_sp av;
   long i, l = expu(n), u = (1UL<<(e-1));
-  long w, v;
-  GEN tab = cgetg(1+u, t_VEC);
-  GEN x2 = sqr(E, x), z = NULL, tw;
+  GEN tab = cgetg(1+u, t_VEC), x2 = sqr(E, x), z = NULL;
+
   gel(tab, 1) = x;
-  for (i=2; i<=u; i++) gel(tab,i) = mul(E, gel(tab,i-1), x2);
+  for (i = 2; i <= u; i++) gel(tab,i) = mul(E, gel(tab,i-1), x2);
   av = avma;
-  while (l>=0)
+  while (l >= 0)
   {
+    long w, v;
+    GEN tw;
     if (e > l+1) e = l+1;
     w = (n>>(l+1-e)) & ((1UL<<e)-1); v = vals(w); l-=e;
-    tw = gel(tab, 1+(w>>(v+1)));
-    if (z)
+    tw = gel(tab, 1 + (w>>(v+1)));
+    if (!z) z = tw;
+    else
     {
-      for (i=1; i<=e-v; i++) z = sqr(E, z);
+      for (i = 1; i <= e-v; i++) z = sqr(E, z);
       z = mul(E, z, tw);
-    } else z = tw;
-    for (i=1; i<=v; i++) z = sqr(E, z);
-    while (l>=0)
+    }
+    for (i = 1; i <= v; i++) z = sqr(E, z);
+    while (l >= 0)
     {
       if (gc_needed(av,1))
       {
@@ -87,24 +89,26 @@ sliding_window_pow(GEN x, GEN n, long e, void *E, GEN (*sqr)(void*,GEN),
 {
   pari_sp av;
   long i, l = expi(n), u = (1UL<<(e-1));
-  long w, v;
   GEN tab = cgetg(1+u, t_VEC);
-  GEN x2 = sqr(E, x), z = NULL, tw;
+  GEN x2 = sqr(E, x), z = NULL;
+
   gel(tab, 1) = x;
   for (i=2; i<=u; i++) gel(tab,i) = mul(E, gel(tab,i-1), x2);
   av = avma;
-  while (l>=0)
+  while (l >= 0)
   {
+    long w, v;
+    GEN tw;
     if (e > l+1) e = l+1;
     w = int_block(n,l,e); v = vals(w); l-=e;
     tw = gel(tab, 1+(w>>(v+1)));
-    if (z)
+    if (!z) z = tw;
     {
-      for (i=1; i<=e-v; i++) z = sqr(E, z);
+      for (i = 1; i <= e-v; i++) z = sqr(E, z);
       z = mul(E, z, tw);
-    } else z = tw;
-    for (i=1; i<=v; i++) z = sqr(E, z);
-    while (l>=0)
+    }
+    for (i = 1; i <= v; i++) z = sqr(E, z);
+    while (l >= 0)
     {
       if (gc_needed(av,1))
       {
