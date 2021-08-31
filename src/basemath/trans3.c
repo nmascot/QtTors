@@ -1738,24 +1738,24 @@ czeta(GEN s0, long prec)
   if (DEBUGLEVEL>2) err_printf("lim, nn: [%ld, %ld]\n", lim, nn);
 
   ms = gneg(s);
-  if (nn > 50000)
-  {
-    Ns = dirpowerssum(nn, ms, prec);
-    incrprec(prec); /* one extra word of precision */
-    ns = gpow(utor(nn, prec), ms, prec);
-    y = gsub(Ns, gmul2n(ns, -1));
-  }
-  else
+  if (umuluu_le(nn, prec, 10000000))
   {
     incrprec(prec); /* one extra word of precision */
     Ns = vecpowug(nn, ms, prec);
     ns = gel(Ns,nn); setlg(Ns, nn);
     y = gadd(gmul2n(ns, -1), RgV_sum(Ns));
   }
+  else
+  {
+    Ns = dirpowerssum(nn, ms, prec);
+    incrprec(prec); /* one extra word of precision */
+    ns = gpow(utor(nn, prec), ms, prec);
+    y = gsub(Ns, gmul2n(ns, -1));
+  }
   if (DEBUGLEVEL>2) timer_printf(&T,"sum from 1 to N");
-
-  invn2 = divri(real_1(prec), sqru(nn)); lim2 = lim<<1;
   constbern(lim);
+  if (DEBUGLEVEL>2) timer_start(&T);
+  invn2 = divri(real_1(prec), sqru(nn)); lim2 = lim<<1;
   tes = bernfrac(lim2);
   {
     GEN s1, s2, s3, s4, s5;
