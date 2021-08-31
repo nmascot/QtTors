@@ -75,6 +75,7 @@ BA  60- (f(~v)=v[1]=1);(g(v) = f(~v)); my(V=[0]);g(V);V -> [1] instead of [0]
     61- hypergeom([1/12,1/12],2/3,3) -> wrong result (incorrect
         limiting case of transformation formula)
     62- overflow in mulu_interval(,ULONG_MAX) [#2309]
+    63- ellE(1) -> domain error [#2312]
 
   Added
 HC   1- new GP function eulerreal

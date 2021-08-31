@@ -2840,18 +2840,17 @@ agm(GEN x, GEN y, long prec)
   return gerepileupto(av, gmul(y, agm1(gdiv(x,y), prec)));
 }
 
+/* b2 != 0 */
 static GEN
 ellK_i(GEN b2, long prec)
-{
-  GEN b = gsqrt(b2, prec);
-  if (gequal0(b)) pari_err_DOMAIN("ellK", "k^2", "=", gen_1, gsubsg(1,b2));
-  return gdiv(Pi2n(-1, prec), agm1(b, prec));
-}
+{ return gdiv(Pi2n(-1, prec), agm1(gsqrt(b2, prec), prec)); }
 GEN
 ellK(GEN k, long prec)
 {
   pari_sp av = avma;
-  return gerepileupto(av, ellK_i(gsubsg(1, gsqr(k)), prec));
+  GEN k2 = gsqr(k), b2 = gsubsg(1, k2);
+  if (gequal0(b2)) pari_err_DOMAIN("ellK", "k^2", "=", gen_1, k2);
+  return gerepileupto(av, ellK_i(b2, prec));
 }
 
 static int
@@ -2883,6 +2882,7 @@ ellE(GEN k, long prec)
 {
   pari_sp av = avma;
   GEN b2 = gsubsg(1, gsqr(k));
+  if (gequal0(b2)) { set_avma(av); return real_1(prec); }
   return gerepileupto(av, gmul(ellK_i(b2, prec), magm(gen_1, b2, prec)));
 }
 
