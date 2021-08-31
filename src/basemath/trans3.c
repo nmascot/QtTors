@@ -1689,9 +1689,28 @@ szeta(long k, long prec)
   return gerepileuptoleaf(av, z);
 }
 
+/* Ensure |1-s| >= 1/32 and (|s| <= 1/32 or real(s) >= 1/2) */
+static int
+zeta_funeq(GEN *ps)
+{
+  GEN s = *ps, u;
+  if (typ(s) == t_REAL)
+  {
+    u = subsr(1, s);
+    if (expo(u) >= -5
+        && ((signe(s) > 0 && expo(s) >= -1) || expo(s) <= -5)) return 0;
+  }
+  else
+  {
+    GEN sig = gel(s,1);
+    u = gsubsg(1, s);
+    if (gexpo(u) >= -5
+        && ((signe(sig) > 0 && expo(sig) >= -1) || gexpo(s) <= -5)) return 0;
+  }
+  *ps = u; return 1;
+}
 /* s0 a t_INT, t_REAL or t_COMPLEX.
- * If a t_INT, assume it's not a trivial case (i.e we have s0 > 1, odd)
- * */
+ * If a t_INT, assume it's not a trivial case (i.e we have s0 > 1, odd) */
 static GEN
 czeta(GEN s0, long prec)
 {
@@ -1703,31 +1722,10 @@ czeta(GEN s0, long prec)
   if (DEBUGLEVEL>2) timer_start(&T);
   s = trans_fix_arg(&prec,&s0,&sig,&tau,&av,&res);
   if (typ(s0) == t_INT) return gerepileupto(av0, gzeta(s0, prec));
-  if (!signe(tau)) /* real */
-  {
-    long e = expo(sig);
-    if (e >= -5 && (signe(sig) <= 0 || e < -1))
-    { /* s < 1/2 */
-      s = subsr(1, s);
-      funeq_factor = gen_1;
-    }
-  }
-  else
-  {
-    u = gsubsg(1, s); /* temp */
-    if (gexpo(u) < -5 || ((signe(sig) <= 0 || expo(sig) < -1) && gexpo(s) > -5))
-    { /* |1-s| < 1/32  || (real(s) < 1/2 && |imag(s)| > 1/32) */
-      s = u;
-      funeq_factor = gen_1;
-    }
-  }
-
-  if (funeq_factor)
-  { /* s <--> 1-s */
-    GEN t;
+  if (zeta_funeq(&s)) /* s -> 1-s */
+  { /* Gamma(s) (2Pi)^-s 2 cos(Pi s/2) [new s] */
+    GEN t = gmul(ggamma(s,prec), pow2Pis(gsubgs(s0,1), prec));
     sig = real_i(s);
-    /* Gamma(s) (2Pi)^-s 2 cos(Pi s/2) */
-    t = gmul(ggamma(s,prec), gpow(Pi2n(1,prec), gsubgs(s0,1), prec));
     funeq_factor = gmul2n(gmul(t, gsin(gmul(Pi2n(-1,prec),s0), prec)), 1);
   }
   if (gcmpgs(sig, prec2nbits(prec) + 1) > 0) { /* zeta(s) = 1 */
