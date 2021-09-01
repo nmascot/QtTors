@@ -977,9 +977,9 @@ binomial(GEN n, long k)
     if (signe(n) > 0)
     {
       GEN z = subiu(n,k);
-      if (cmpis(z,k) < 0)
+      if (cmpiu(z,k) < 0)
       {
-        k = itos(z); set_avma(av);
+        k = itou(z); set_avma(av);
         if (k <= 1)
         {
           if (k < 0) return gen_0;
@@ -991,16 +991,12 @@ binomial(GEN n, long k)
     /* k > 1 */
     if (lgefint(n) == 3 && signe(n) > 0)
     {
-      y = binomialuu(itou(n),(ulong)k);
-      return gerepileupto(av, y);
+      y = binomialuu(n[2],(ulong)k);
+      return gerepileuptoint(av, y);
     }
-    else
-    {
-      y = cgetg(k+1,t_VEC);
-      for (i=1; i<=k; i++) gel(y,i) = subiu(n,i-1);
-      y = ZV_prod(y);
-    }
-    y = diviiexact(y, mpfact(k));
+    y = cgetg(k+1,t_VEC);
+    for (i=1; i<=k; i++) gel(y,i) = subiu(n,i-1);
+    y = diviiexact(ZV_prod(y), mpfact(k));
     return gerepileuptoint(av, y);
   }
 
