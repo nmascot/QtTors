@@ -1,3 +1,4 @@
+  ***   Warning: new stack size = 20000000 (19.073 Mbytes).
 -1/2
 1/6
 0
@@ -104,4 +105,4 @@ x^4 + 26*x^3 + 66*x^2 + 26*x + 1
   ***   at top-level: eulerianpol(-1)
   ***                 ^---------------
   *** eulerianpol: domain error in eulerianpol: index <= 0
-Total time spent: 2
+Total time spent: 29763
