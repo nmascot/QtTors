@@ -77,6 +77,7 @@ BA  60- (f(~v)=v[1]=1);(g(v) = f(~v)); my(V=[0]);g(V);V -> [1] instead of [0]
     62- overflow in mulu_interval(,ULONG_MAX) [#2309]
     63- ellE(1) -> domain error [#2312]
     64- log1p(-1 + 10^-10) -> oo time
+    65- bernvec entries were wrong from B_{2*4064} on [#2311]
 
   Added
 HC   1- new GP function eulerreal

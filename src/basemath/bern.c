@@ -43,7 +43,7 @@ bernbitprec(long N)
 { /* 1.612086 ~ log(8Pi) / 2 */
   const double log2PI = 1.83787706641;
   double t = (N + 0.5) * log((double)N) - N*(1 + log2PI) + 1.612086;
-  return (long)ceil(t / M_LN2) + 16;
+  return (long)ceil(t / M_LN2) + (N < 4000? 16: 32);
 }
 static long
 bernprec(long N) { return nbits2prec(bernbitprec(N)); }

@@ -18,6 +18,12 @@ eulervec(30)
 forstep(k = 0, 20, 2, print(eulerfrac(k)));
 for(k = 0, 5, print(eulerpol(k)));
 for(k = 1, 5, print(eulerianpol(k)));
+
+p=2^32-5; B=Mod(bernvec(7000), p);
+X=Mod(1,p)*x + O(x^14002); t=X/(exp(X)-1);
+j=0; J=Mod(1,p); /* 2i and j! mod p */
+for (i=0, #B-1, if (B[1+i] != polcoeff(t,j)*J, error(i)); j+=2; J *= j*(j-1))
+
 \\ Errors, keep at end of file
 bernfrac(-1)
 bernreal(-1)
