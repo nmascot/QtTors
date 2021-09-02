@@ -3267,7 +3267,7 @@ mplog1p(GEN x)
 {
   long ex, a, b, l, L;
   if (!signe(x)) return rcopy(x);
-  ex = expo(x); if (ex >= 0) return glog(addrs(x,1), 0);
+  ex = expo(x); if (ex >= -3) return glog(addrs(x,1), 0);
   a = -ex;
   b = realprec(x); L = b+1;
   if (b > a*log2(L) && prec2nbits(b) > prec2nbits(LOGAGM_LIMIT))
