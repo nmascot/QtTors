@@ -47,21 +47,23 @@ bernbitprec(long N)
 }
 static long
 bernprec(long N) { return nbits2prec(bernbitprec(N)); }
-/* \sum_{k > M} k^(-n) <= M^(1-n) / (n-1) < 2^-bit_accuracy(prec) */
+/* \sum_{k > M} k^(-n) <= M^(1-n) / (n-1) < 2^-b */
 static long
-zetamaxpow(long n, long prec)
+zetamaxpow(long n, long b)
 {
-  long b = bit_accuracy(prec), M = (long)exp2((double)b/(n-1.0));
+  long M = (long)exp2((double)b / (n-1.0));
   return M | 1; /* make it odd */
 }
 /* zeta(k) using 'max' precomputed odd powers */
 static GEN
-bern_zeta(long k, GEN pow, long max, long prec)
+bern_zeta(long k, GEN pow, long max, long bit)
 {
   GEN s = gel(pow, max);
   long j;
   for (j = max - 2; j >= 3; j -= 2) s = addrr(s, gel(pow,j));
-  return divrr(addrs(s,1), subsr(1, real2n(-k, prec)));
+  s = addrs(s, 1); /* divide by 1 - 2^(-k): s + s/2^k + s/2^(2k) + ... */
+  for (; k < bit; k <<= 1) s = addrr(s, shiftr(s, -k));
+  return s;
 }
 /* z * j^2 */
 static GEN
@@ -78,7 +80,7 @@ bernset(GEN *y, long m, long n)
   prec = nbits2prec(bit);
   A = sqrr(Pi2n(1, prec)); /* (2Pi)^2 */
   C = divrr(mpfactr(N, prec), powru(A, n)); shiftr_inplace(C,1);
-  max = zetamaxpow(N, prec);
+  max = zetamaxpow(N, bit);
   pow = cgetg(max+1, t_VEC);
   for (j = 3; j <= max; j += 2)
   { /* fixed point, precision decreases with j */
@@ -89,7 +91,7 @@ bernset(GEN *y, long m, long n)
   for (i = n, k = N;; i--)
   { /* set B_n, k = 2i */
     pari_sp av2 = avma;
-    GEN B, z = fracB2k(divisorsu(i)), s = bern_zeta(k, pow, max, prec);
+    GEN B, z = fracB2k(divisorsu(i)), s = bern_zeta(k, pow, max, bit);
     long j;
     /* s = zeta(k), C = 2*k! / (2Pi)^k */
     B = mulrr(s, C); if (!odd(i)) setsigne(B, -1); /* B ~ B_n */
@@ -98,18 +100,15 @@ bernset(GEN *y, long m, long n)
     if (i == m) break;
     affrr(divrunu(mulrr(C,A), k-1), C);
     for (j = max; j >= 3; j -= 2) affrr(mulru2(gel(pow,j), j), gel(pow,j));
-    set_avma(av2);
-    k -= 2;
+    set_avma(av2); k -= 2;
     if ((k & 0xf) == 0)
     { /* reduce precision if possible */
-      long bit2 = bernbitprec(k), prec2 = nbits2prec(bit2), max2;
-      if (prec2 == prec) continue;
-      prec = prec2;
-      max2 = zetamaxpow(k,prec);
-      if (max2 > max) continue;
-      bit = bit2;
-      max = max2;
+      long prec2 = prec, max2;
+      bit = bernbitprec(k);
+      prec = nbits2prec(bit); if (prec2 == prec) continue;
       setprec(C, prec);
+      max2 = zetamaxpow(k, bit); if (max2 > max) continue;
+      max = max2;
       for (j = 3; j <= max; j += 2)
       {
         GEN P = gel(pow,j);
