@@ -2659,11 +2659,9 @@ vchip_polmod(GEN VCHI, GEN S)
 
 /* contribution of scalar matrices in dimension formula */
 static GEN
-A1(long N, long k)
-{ return uutoQ(mypsiu(N)*(k-1), 12); }
+A1(long N, long k) { return uutoQ(mypsiu(N)*(k-1), 12); }
 static long
-ceilA1(long N, long k)
-{ return ceildivuu(mypsiu(N) * (k-1), 12); }
+ceilA1(long N, long k) { return ceildivuu(mypsiu(N) * (k-1), 12); }
 
 /* sturm bound, slightly larger than dimension */
 long
