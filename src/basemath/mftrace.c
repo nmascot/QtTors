@@ -2657,22 +2657,13 @@ static GEN
 vchip_polmod(GEN VCHI, GEN S)
 { return (typ(S) == t_POL)? mkpolmod(S, gel(VCHI,2)): S; }
 
-/* ceil(m/d) */
-static long
-ceildiv(long m, long d)
-{
-  long q;
-  if (!m) return 0;
-  q = m/d; return m%d? q+1: q;
-}
-
 /* contribution of scalar matrices in dimension formula */
 static GEN
 A1(long N, long k)
 { return uutoQ(mypsiu(N)*(k-1), 12); }
 static long
 ceilA1(long N, long k)
-{ return ceildiv(mypsiu(N) * (k-1), 12); }
+{ return ceildivuu(mypsiu(N) * (k-1), 12); }
 
 /* sturm bound, slightly larger than dimension */
 long
@@ -3934,7 +3925,7 @@ heckenewtrace(long m0, long m, long l, long N, long NBIG, long k, long n, cachen
   k1 = k - 1;
   for (a = 2; a < lD; a++)
   { /* d > 1, (d,NBIG) = 1 */
-    long i, j, d = D[a], c = ugcd(l, d), dl = d/c, m0d = ceildiv(m0, dl);
+    long i, j, d = D[a], c = ugcd(l, d), dl = d/c, m0d = ceildivuu(m0, dl);
     GEN C = vchip_lift(VCHIP, d, powuu(d, k1));
     /* m0=0: i = 1 => skip F(0) = 0 */
     if (!m0) { i = 1; j = dl; } else { i = 0; j = m0d*dl; }
@@ -4143,7 +4134,7 @@ bhnmat_extend(GEN M, long m, long r, GEN S, cachenew_t *cache)
     long d, j, md, N;
     GEN c, f = bhn_parse(gel(S,i), &d,&j); /* t_MF_NEWTRACE */
     N = mf_get_N(f);
-    md = ceildiv(m0r,d);
+    md = ceildivuu(m0r,d);
     if (N != Nold) { reset_cachenew(cache, N, f); Nold = N; jold = 0; }
     if (!cache->DATA) { gel(MAT,i) = zerocol(m+1); continue; }
     if (j != jold || md)

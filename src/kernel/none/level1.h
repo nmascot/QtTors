@@ -753,8 +753,9 @@ udivuu_rem(ulong x, ulong y, ulong *r)
 INLINE ulong
 ceildivuu(ulong a, ulong b)
 {
-  ulong c = a/b;
-  return (a%b)? c+1: c;
+  ulong c;
+  if (!a) return 0;
+  c = a / b; return (a % b)? c+1: c;
 }
 
 INLINE ulong
