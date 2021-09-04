@@ -1027,7 +1027,7 @@ F21taylorind(GEN a, GEN b, GEN c, GEN z, long ind, long prec)
   return gprec_wtrunc(res, prec);
 }
 
-static void
+static long
 hypersimplify(GEN *pn, GEN *pd)
 {
   GEN n = *pn, d = *pd;
@@ -1040,10 +1040,10 @@ hypersimplify(GEN *pn, GEN *pd)
       if (gequal(t, gel(n, k)))
       {
         *pd = vecsplice(d, j);
-        *pn = vecsplice(n, k); return hypersimplify(pd, pn);
+        *pn = vecsplice(n, k); return hypersimplify(pd, pn) + 1;
       }
   }
-  return;
+  return 0;
 }
 
 static GEN
@@ -1186,13 +1186,13 @@ hypergeom(GEN N, GEN D, GEN y, long prec)
 {
   pari_sp av = avma;
   GEN z;
-  long j;
+  long j, n;
   N = hypergeom_arg(N);
   D = hypergeom_arg(D);
-  hypersimplify(&N, &D);
+  n = hypersimplify(&N, &D);
   for (j = 1; j < lg(D); j++)
     if (isnegint(gel(D,j)))
-      pari_err_DOMAIN("hypergeom", stack_sprintf("b[%ld]", j),
+      pari_err_DOMAIN("hypergeom", stack_sprintf("b[%ld]", j + n),
                       "<=", gen_0, gel(D,j));
   if (is_scalar_t(typ(y)))
     return gerepilecopy(av, hypergeom_i(N, D, y, prec));
