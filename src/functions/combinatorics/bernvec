@@ -15,9 +15,9 @@ Doc: returns a vector containing, as rational numbers,
  repeated calls to \kbd{bernfrac}:
  \bprog
  ? forstep(n = 2, 10000, 2, bernfrac(n))
- time = 41,522 ms.
+ time = 18,245 ms.
  ? bernvec(5000);
- time = 4,784 ms.
+ time = 1,338 ms.
  @eprog\noindent The computed Bernoulli numbers are stored in an incremental
  cache which makes later calls to \kbd{bernfrac} and \kbd{bernreal}
  instantaneous in the cache range: re-running the same previous \kbd{bernfrac}s
@@ -26,5 +26,5 @@ Doc: returns a vector containing, as rational numbers,
  ? forstep(n = 2, 10000, 2, bernfrac(n))
  time = 1 ms.
  @eprog\noindent The time and space complexity of this function are
- $\tilde{O}(n^2)$; in the feasible range $n \leq 10^5$ (requires about 2 hours),
- the practical time complexity is closer to $\tilde{O}(n^{\log_2 6})$.
+ $\tilde{O}(n^2)$; in the feasible range $n \leq 10^5$ (requires about two
+ hours), the practical time complexity is closer to $\tilde{O}(n^{\log_2 6})$.
