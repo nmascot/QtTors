@@ -1191,7 +1191,9 @@ hypergeom(GEN N, GEN D, GEN y, long prec)
   D = hypergeom_arg(D);
   hypersimplify(&N, &D);
   for (j = 1; j < lg(D); j++)
-    if (isnegint(gel(D,j))) pari_err_TYPE("hypergeom", D);
+    if (isnegint(gel(D,j)))
+      pari_err_DOMAIN("hypergeom", stack_sprintf("b[%ld]", j),
+                      "<=", gen_0, gel(D,j));
   if (is_scalar_t(typ(y)))
     return gerepilecopy(av, hypergeom_i(N, D, y, prec));
   if (!(z = toser_i(y))) pari_err_TYPE("hypergeom", y);
