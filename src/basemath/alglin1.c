@@ -4903,8 +4903,7 @@ fill_wcol(GEN M, GEN iscol, GEN Wrow, long *w, GEN wcol)
 void
 RgMs_structelim_col(GEN M, long nbcol, long nbrow, GEN A, GEN *p_col, GEN *p_row)
 {
-  long i,j,k;
-  long lA = lg(A);
+  long i, j, k, lA = lg(A);
   GEN prow = cgetg(nbrow+1, t_VECSMALL);
   GEN pcol = zero_zv(nbcol);
   pari_sp av = avma;
@@ -4912,13 +4911,12 @@ RgMs_structelim_col(GEN M, long nbcol, long nbrow, GEN A, GEN *p_col, GEN *p_row
   GEN iscol = const_vecsmall(nbcol, 1);
   GEN Wrow  = zero_zv(nbrow);
   GEN wcol = cgetg(nbcol+1, t_VECSMALL);
-  pari_sp av2=avma;
+  pari_sp av2 = avma;
   for (i = 1; i <= nbcol; ++i)
   {
     GEN F = gmael(M, i, 1);
     long l = lg(F)-1;
-    for (j = 1; j <= l; ++j)
-      Wrow[F[j]]++;
+    for (j = 1; j <= l; ++j) Wrow[F[j]]++;
   }
   for (j = 1; j < lA; ++j)
   {
@@ -4926,59 +4924,45 @@ RgMs_structelim_col(GEN M, long nbcol, long nbrow, GEN A, GEN *p_col, GEN *p_row
     Wrow[A[j]] = -1;
   }
   for (i = 1; i <= nbrow; ++i)
-    if (Wrow[i])
-      rrow++;
+    if (Wrow[i]) rrow++;
   rem_singleton(M, iscol, Wrow, 1, &rcol, &rrow);
-  if (rcol<rrow) pari_err_BUG("RgMs_structelim, rcol<rrow");
-  for (; rcol>rrow;)
+  if (rcol < rrow) pari_err_BUG("RgMs_structelim, rcol<rrow");
+  while (rcol > rrow)
   {
     long w;
     GEN per = fill_wcol(M, iscol, Wrow, &w, wcol);
     for (i = nbcol; i>=imin && wcol[per[i]]>=w && rcol>rrow; i--)
       rem_col(gmael(M, per[i], 1), per[i], iscol, Wrow, &rcol, &rrow);
-    rem_singleton(M, iscol, Wrow, 1, &rcol, &rrow);
-    set_avma(av2);
+    rem_singleton(M, iscol, Wrow, 1, &rcol, &rrow); set_avma(av2);
   }
   for (j = 1, i = 1; i <= nbcol; ++i)
-    if (iscol[i])
-      pcol[j++] = i;
+    if (iscol[i]) pcol[j++] = i;
   setlg(pcol,j);
-  for (k = 1, i = 1; i <= nbrow; ++i)
-    prow[i] = Wrow[i] ? k++: 0;
-  set_avma(av);
-  *p_col = pcol; *p_row = prow;
+  for (k = 1, i = 1; i <= nbrow; ++i) prow[i] = Wrow[i]? k++: 0;
+  *p_col = pcol; *p_row = prow; set_avma(av);
 }
 
 void
 RgMs_structelim(GEN M, long nbrow, GEN A, GEN *p_col, GEN *p_row)
-{
-  RgMs_structelim_col(M, lg(M)-1, nbrow, A, p_col, p_row);
-}
+{ RgMs_structelim_col(M, lg(M)-1, nbrow, A, p_col, p_row); }
 
 GEN
 F2Ms_colelim(GEN M, long nbrow)
 {
-  long i,j;
-  long nbcol = lg(M)-1;
+  long i,j, nbcol = lg(M)-1, rcol = nbcol, rrow = 0;
   GEN pcol = zero_zv(nbcol);
   pari_sp av = avma;
-  long rcol = nbcol, rrow = 0;
-  GEN iscol = const_vecsmall(nbcol, 1);
-  GEN Wrow  = zero_zv(nbrow);
+  GEN iscol = const_vecsmall(nbcol, 1), Wrow  = zero_zv(nbrow);
   for (i = 1; i <= nbcol; ++i)
   {
     GEN F = gel(M, i);
     long l = lg(F)-1;
-    for (j = 1; j <= l; ++j)
-      Wrow[F[j]]++;
+    for (j = 1; j <= l; ++j) Wrow[F[j]]++;
   }
   rem_singleton(M, iscol, Wrow, 0, &rcol, &rrow);
   for (j = 1, i = 1; i <= nbcol; ++i)
-    if (iscol[i])
-      pcol[j++] = i;
-  fixlg(pcol,j);
-  set_avma(av);
-  return pcol;
+    if (iscol[i]) pcol[j++] = i;
+  fixlg(pcol,j); return gc_const(av, pcol);
 }
 
 /*******************************************************************/
