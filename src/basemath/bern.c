@@ -416,16 +416,16 @@ eulerbitprec(long N)
 { /* 1.1605 ~ log(32/Pi) / 2 */
   const double logPIS2 = 0.4515827;
   double t = (N + 0.5) * log((double)N) - N*(1 + logPIS2) + 1.1605;
-  return (long)ceil(t / M_LN2) + 16;
+  return (long)ceil(t / M_LN2) + (N < 10000? 16: 128);
 }
 static long
 eulerprec(long N) { return nbits2prec(eulerbitprec(N)); }
 
-/* sum_{k > M, k odd} (-1)^((k-1)/2)k^(-n) < M^(-n) < 2^-bit_accuracy(prec) */
+/* sum_{k > M, k odd} (-1)^((k-1)/2)k^(-n) < M^(-n) < 2^-b */
 static long
-lfun4maxpow(long n, long prec)
+lfun4maxpow(long n, long b)
 {
-  long b = bit_accuracy(prec), M = (long)exp2((double)b/(n+0.));
+  long M = (long)exp2((double)b/(n+0.));
   return M | 1; /* make it odd */
 }
 
@@ -446,11 +446,10 @@ eulerset(GEN *y, long m, long n)
 {
   long i, j, k, bit, prec, max, N = n << 1, N1 = N + 1; /* up to E_N */
   GEN A, C, pow;
-  bit = eulerbitprec(N);
-  prec = nbits2prec(bit);
+  bit = eulerbitprec(N); prec = nbits2prec(bit);
   A = sqrr(Pi2n(-1, prec)); /* (Pi/2)^2 */
   C = divrr(mpfactr(N, prec), mulrr(powru(A, n), Pi2n(-2,prec)));
-  max = lfun4maxpow(N1, prec);
+  max = lfun4maxpow(N1, bit);
   pow = cgetg(max+1, t_VEC);
   for (j = 3; j <= max; j += 2)
   { /* fixed point, precision decreases with j */
@@ -469,18 +468,15 @@ eulerset(GEN *y, long m, long n)
     if (i == m) break;
     affrr(divrunu(mulrr(C,A), k-2), C);
     for (j = max; j >= 3; j -= 2) affrr(mulru2(gel(pow,j), j), gel(pow,j));
-    set_avma(av2);
-    k -= 2;
+    set_avma(av2); k -= 2;
     if ((k & 0xf) == 0)
     { /* reduce precision if possible */
-      long bit2 = eulerbitprec(k), prec2 = nbits2prec(bit2), max2;
-      if (prec2 == prec) continue;
-      prec = prec2;
-      max2 = lfun4maxpow(k,prec);
-      if (max2 > max) continue;
-      bit = bit2;
-      max = max2;
+      long prec2 = prec, max2;
+      bit = eulerbitprec(k);
+      prec = nbits2prec(bit); if (prec2 == prec) continue;
       setprec(C, prec);
+      max2 = lfun4maxpow(k,bit); if (max2 > max) continue;
+      max = max2;
       for (j = 3; j <= max; j += 2)
       {
         GEN P = gel(pow,j);
