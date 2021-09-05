@@ -10307,6 +10307,9 @@ that behavior
 \item \tet{ONLY_DIVIDES}: return the quotient if the division is exact, and
 \kbd{NULL} otherwise.
 
+In the generic case, the remainder is created after the quotient and can be
+disposed of individually with a \kbd{cgiv(r)}.
+
 \fun{GEN}{RgX_div}{GEN x, GEN y}
 
 \fun{GEN}{RgX_div_by_X_x}{GEN A, GEN a, GEN *r} returns the

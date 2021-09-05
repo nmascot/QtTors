@@ -1736,8 +1736,7 @@ RgX_divrem_i(GEN x, GEN y, GEN *pr)
     if (!pr || pr == ONLY_REM || pr == ONLY_DIVIDES)
       return gerepileupto(av, z);
     *pr = FpX_to_mod(*pr, p);
-    gerepileall(av, 2, pr, &z);
-    return z;
+    return gc_all(av, 2, &z, pr);
   }
   switch(typ(y_lead))
   {
