@@ -459,8 +459,8 @@ nfbasis(GEN x, GEN *pdK)
   GEN B;
   nfmaxord(&S, x, 0);
   B = RgXV_unscale(S.basis, S.unscale);
-  if (pdK)  *pdK = S.dK;
-  gerepileall(av, pdK? 2: 1, &B, pdK); return B;
+  if (pdK) *pdK = S.dK;
+  return gc_all(av, pdK? 2: 1, &B, pdK);
 }
 /* field discriminant: faster than nfmaxord, use local data only */
 static GEN

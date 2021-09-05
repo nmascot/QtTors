@@ -265,7 +265,7 @@ msfarey(GEN F, void *E, long (*in)(void *, GEN), GEN *pCM)
   }
   F = rectify(V2, ast2, gam2);
   if (pCM) *pCM = mkvec2(C,M);
-  gerepileall(av, pCM? 2: 1, &F, pCM); return F;
+  return gc_all(av, pCM? 2: 1, &F, pCM);
 }
 
 GEN

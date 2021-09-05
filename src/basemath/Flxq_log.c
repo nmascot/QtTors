@@ -215,7 +215,7 @@ Flxq_log_find_rel(GEN b, long r, GEN T, ulong p, GEN *g, long *e)
         GEN G = factorel(gcoeff(M,1,1), p);
         GEN rel = mkmat2(vecsmall_concat(gel(F, 1),gel(G, 1)),
                          vecsmall_concat(gel(F, 2),zv_neg(gel(G, 2))));
-        gerepileall(av,2,g,&rel); return rel;
+        return gc_all(av,2,&rel,g);
       }
     }
     if (gc_needed(av,2))

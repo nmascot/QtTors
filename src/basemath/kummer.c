@@ -457,7 +457,7 @@ get_prlist(GEN bnr, GEN H, GEN gell, GEN *pfa, struct rnfkummer *kum)
       if (H_is_good(Hz, gell))
       {
         *pfa = gel(bnrconductor_factored(bnrz, Hz), 2);
-        gerepileall(av0, 2, &L, pfa); return L;
+        return gc_all(av0, 2, &L, pfa);
       }
     }
   }
@@ -466,8 +466,8 @@ get_prlist(GEN bnr, GEN H, GEN gell, GEN *pfa, struct rnfkummer *kum)
   Hsofar = diagonal_shallow(cyc);
   if (H_is_good(Hsofar, gell))
   {
+    if (!Hz) return gc_all(av0, pfa? 2: 1, &L, pfa);
     Ldone = 1;
-    if (!Hz) { gerepileall(av0, pfa? 2: 1, &L, pfa); return L; }
   }
   /* restrict to primes not dividing bad and 1 mod ell */
   u_forprime_arith_init(&T, 2, ULONG_MAX, 1, ell);
@@ -499,7 +499,7 @@ get_prlist(GEN bnr, GEN H, GEN gell, GEN *pfa, struct rnfkummer *kum)
             {
               *pfa = gel(bnrconductor_factored(bnrz, Hz), 2);
               if (!Ldone) L = vec_append(L, gel(vP,1));
-              gerepileall(av0, 2, &L, pfa); return L;
+              return gc_all(av0, 2, &L, pfa);
             }
           }
         }
@@ -511,8 +511,8 @@ get_prlist(GEN bnr, GEN H, GEN gell, GEN *pfa, struct rnfkummer *kum)
       Hsofar = M;
       if (H_is_good(Hsofar, gell))
       {
+        if (!Hz) return gc_all(av0, pfa? 2: 1, &L, pfa);
         Ldone = 1;
-        if (!Hz) { gerepileall(av0, pfa? 2: 1, &L, pfa); return L; }
       }
     }
   }

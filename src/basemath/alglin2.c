@@ -1037,8 +1037,7 @@ QM_charpoly_ZX_slice(GEN A, GEN dM, GEN P, GEN *mod)
     if (dp != 1) gel(H,i) = Flx_rescale(gel(H,i), Fl_inv(dp, p), p);
   }
   H = nxV_chinese_center_tree(H, P, T, ZV_chinesetree(P,T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod); return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN

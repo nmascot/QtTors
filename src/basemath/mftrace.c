@@ -11436,7 +11436,7 @@ mfslashexpansion(GEN mf, GEN f, GEN ga, long n, long flrat, GEN *params, long pr
     A = matid(2);
   }
   if (params) *params = mkvec3(al, utoipos(w), A);
-  gerepileall(av,params?2:1,&V,params); return V;
+  return gc_all(av,params?2:1,&V,params);
 }
 
 /**************************************************************/

@@ -5417,8 +5417,7 @@ ZM_det_slice(GEN A, GEN P, GEN *mod)
     H[i] = Flm_det_sp(a, p);
   }
   H = ZV_chinese_tree(H, P, T, ZV_chinesetree(P,T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod); return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN

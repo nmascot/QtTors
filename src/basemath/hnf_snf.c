@@ -558,7 +558,7 @@ hnfspec(GEN mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 {
   pari_sp av = avma;
   GEN H = hnfspec_i(mat, perm, ptdep, ptB, ptC, k0);
-  gerepileall(av, 4, ptC, ptdep, ptB, &H); return H;
+  return gc_all(av, 4, &H, ptC, ptdep, ptB);
 }
 
 /* HNF reduce x, apply same transforms to C */
@@ -663,7 +663,7 @@ hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
 {
   pari_sp av = avma;
   H = hnfadd_i(H, perm, ptdep, ptB, ptC, ZM_to_zm(extramat), extraC);
-  gerepileall(av, 4, ptC, ptdep, ptB, &H); return H;
+  return gc_all(av, 4, &H, ptC, ptdep, ptB);
 }
 
 /* zero aj = Aij (!= 0)  using  ak = Aik (maybe 0), via linear combination of

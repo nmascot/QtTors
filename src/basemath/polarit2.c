@@ -3076,8 +3076,8 @@ RgX_resultant_all(GEN P, GEN Q, GEN *sol)
   if (sig == -1) s = gneg(s);
   if (cP) s = gmul(s, gpowgs(cP,dQ));
   if (cQ) s = gmul(s, gpowgs(cQ,dP));
-  if (sol) { *sol = P; gerepileall(av, 2, &s, sol); return s; }
-  return gerepilecopy(av, s);
+  if (!sol) return gerepilecopy(av, s);
+  *sol = P; return gc_all(av, 2, &s, sol);
 }
 
 static GEN

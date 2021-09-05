@@ -2550,7 +2550,7 @@ cxredsl2(GEN t, GEN *pU)
   pari_sp av = avma;
   GEN czd;
   t = cxredsl2_i(t, pU, &czd);
-  gerepileall(av, 2, &t, pU); return t;
+  return gc_all(av, 2, &t, pU);
 }
 
 /* swap w1, w2 so that Im(t := w1/w2) > 0. Set tau = representative of t in
@@ -4278,7 +4278,7 @@ ellintegralbmodel(GEN e, GEN *pv)
     gcomposev(pv, v); f = coordch(f, v);
   }
   if (f != e) ell_reset(f);
-  gerepileall(av, 2, &f, pv); return f;
+  return gc_all(av, 2, &f, pv);
 }
 
 static long

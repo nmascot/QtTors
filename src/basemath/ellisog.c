@@ -1575,7 +1575,7 @@ ellweilcurve(GEN E, GEN *ms)
   for (i = 1; i < l; i++) obj_free(gel(vE,i));
   vE = mkvec2(vE, vL);
   if (!ms) return gerepilecopy(av, vE);
-  *ms = Wx; gerepileall(av, 2, &vE, ms); return vE;
+  *ms = Wx; return gc_all(av, 2, &vE, ms);
 }
 
 GEN
