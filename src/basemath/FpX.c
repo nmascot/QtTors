@@ -851,8 +851,8 @@ FpX_extgcd_halfgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
 GEN
 FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
 {
+  pari_sp av = avma;
   GEN d;
-  pari_sp ltop=avma;
   if (lgefint(p)==3)
   {
     ulong pp = to_Flx(&x, &y, p);
@@ -870,8 +870,7 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
     else
       d = FpX_extgcd_basecase(x, y, p, ptu, ptv);
   }
-  gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
-  return d;
+  return gc_all(av, ptu?3:2, &d, ptv, ptu);
 }
 
 GEN
@@ -1418,22 +1417,20 @@ FpX_divrem(GEN x, GEN T, GEN p, GEN *pr)
     pari_sp av = avma;
     ulong pp = to_Flxq(&x, &T, p);
     GEN z = Flx_divrem(x, T, pp, pr);
-    if (!z) return NULL;
+    if (!z) return gc_NULL(av);
     if (!pr || pr == ONLY_DIVIDES)
       return Flx_to_ZX_inplace(gerepileuptoleaf(av, z));
     z = Flx_to_ZX(z);
     *pr = Flx_to_ZX(*pr);
-    gerepileall(av, 2, &z, pr);
-    return z;
+    return gc_all(av, 2, &z, pr);
   } else
   {
-    pari_sp av=avma;
+    pari_sp av = avma;
     GEN mg = B? B: FpX_invBarrett(y, p);
-    GEN q1 = FpX_divrem_Barrett(x,mg,y,p,pr);
-    if (!q1) return gc_NULL(av);
-    if (!pr || pr==ONLY_DIVIDES) return gerepilecopy(av, q1);
-    gerepileall(av,2,&q1,pr);
-    return q1;
+    GEN z = FpX_divrem_Barrett(x,mg,y,p,pr);
+    if (!z) return gc_NULL(av);
+    if (!pr || pr==ONLY_DIVIDES) return gerepilecopy(av, z);
+    return gc_all(av, 2, &z, pr);
   }
 }
 
@@ -2430,8 +2427,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
     if (!z) return NULL;
     if (!zeta) return gerepileupto(av, z);
   }
-  gerepileall(av, 2, &z,zeta);
-  return z;
+  return gc_all(av, 2, &z,zeta);
 }
 
 GEN
@@ -2646,9 +2642,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
     ulong pp = to_Flxq(NULL, &T, p);
     g = gener_Flxq(T, pp, po);
     if (!po) return Flx_to_ZX_inplace(gerepileuptoleaf(av, g));
-    g = Flx_to_ZX(g);
-    gerepileall(av, 2, &g, po);
-    return g;
+    g = Flx_to_ZX(g); return gc_all(av, 2, &g, po);
   }
   /* p now odd */
   q_1 = subiu(powiu(p,f), 1);

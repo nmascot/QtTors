@@ -2984,9 +2984,7 @@ ZM_inv_slice(GEN A, GEN P, GEN *mod)
   for(i=1; i <= n; i++)
     gel(H,i) = Flm_adjoint(gel(A, i), uel(P,i));
   H = nmV_chinese_center_tree_seq(H, P, T, ZV_chinesetree(P,T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 static GEN
@@ -3093,8 +3091,7 @@ ZM_inv_ratlift(GEN M, GEN *pden)
     }
   }
   if (!*pden) *pden = gen_1;
-  gerepileall(av, 2, &H, pden);
-  return H;
+  return gc_all(av, 2, &H, pden);
 }
 
 GEN
@@ -3237,8 +3234,7 @@ ZM_inv_i(GEN A, GEN *pden, GEN T)
     }
   }
   if (T && !isint1(T)) H = ZM_Q_mul(H, T);
-  gerepileall(av, pden? 2: 1, &H, pden);
-  return H;
+  return gc_all(av, pden? 2: 1, &H, pden);
 }
 GEN
 ZM_inv(GEN A, GEN *pden) { return ZM_inv_i(A, pden, NULL); }
@@ -4561,9 +4557,7 @@ ZabM_inv_slice(GEN A, GEN Q, GEN P, GEN *mod)
     gel(H,i) = FlkM_adjoint(a, q, p);
   }
   H = nxMV_chinese_center_tree_seq(H, P, T, ZV_chinesetree(P,T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN
@@ -4622,12 +4616,8 @@ ZabM_inv(GEN A, GEN Q, long n, GEN *pt_den)
     D = ZX_Z_divexact(D, d);
     H = Q_div_to_int(H, d);
   }
-  if (pt_den)
-  {
-    gerepileall(av, 2, &H, &D);
-    *pt_den = D; return H;
-  }
-  return gerepileupto(av, H);
+  if (!pt_den) return gerepileupto(av, H);
+  *pt_den = D; return gc_all(av, 2, &H, pt_den);
 }
 
 GEN
@@ -4674,8 +4664,7 @@ ZabM_inv_ratlift(GEN M, GEN P, long n, GEN *pden)
       gerepileall(av2, 2, &H, &q);
     }
   }
-  gerepileall(av, 2, &H, pden);
-  return H;
+  return gc_all(av, 2, &H, pden);
 }
 
 static GEN
@@ -4804,8 +4793,7 @@ ZabM_gauss(GEN M, GEN P, long n, GEN *den)
   v = ZabM_indexrank(M, P, n);
   S = shallowmatextract(M,gel(v,1),gel(v,2));
   W = ZabM_inv(S, P, n, den);
-  gerepileall(av,2,&W,den);
-  return W;
+  return gc_all(av,2,&W,den);
 }
 #endif
 

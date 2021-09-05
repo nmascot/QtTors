@@ -4249,13 +4249,9 @@ ellintegralmodel(GEN e, GEN *pv)
     default: pari_err_TYPE("ellintegralmodel",e);
   }
   e = ellintegralmodel_i(e, pv);
-  if (!pv || !*pv)
-  {
-    e = gerepilecopy(av, e);
-    if (pv) *pv = init_ch();
-  }
-  else
-    gerepileall(av, 2, &e, pv);
+  if (pv && *pv) return gc_all(av, 2, &e, pv);
+  e = gerepilecopy(av, e);
+  if (pv) *pv = init_ch();
   return e;
 }
 
@@ -4762,11 +4758,8 @@ ellQminimalmodel(GEN E, GEN *ptv)
   if (!is_trivial_change(v)) ch_Q(y, E, v);
   DP = gel(S,1);
   obj_insert_shallow(y, Q_MINIMALMODEL, mkvec(DP));
-  if (!ptv)
-    y = gerepilecopy(av, y);
-  else
-  { *ptv = v; gerepileall(av, 2, &y, ptv); }
-  return y;
+  if (!ptv) return gerepilecopy(av, y);
+  *ptv = v; return gc_all(av, 2, &y, ptv);
 }
 
 static GEN
@@ -4818,11 +4811,8 @@ ellnfminimalmodel(GEN E, GEN *ptv)
   pari_sp av = avma;
   GEN v, y = ellnfminimalmodel_i(E, &v);
   if (v) obj_insert_shallow(y, NF_MINIMALMODEL, cgetg(1,t_VEC));
-  if (!v || !ptv)
-    y = gerepilecopy(av, y);
-  else
-  { *ptv = v; gerepileall(av, 2, &y, ptv); }
-  return y;
+  if (!v || !ptv) return gerepilecopy(av, y);
+  *ptv = v; return gc_all(av, 2, &y, ptv);
 }
 GEN
 ellminimalmodel(GEN E, GEN *ptv)
@@ -5308,9 +5298,7 @@ ellQ_factorback_slice(GEN A, GEN L, ulong l, GEN E, GEN P, GEN *mod)
   B = ellQ_factorback_filter(H, P, &Q);
   if (lg(Q) != lg(P)) T = ZV_producttree(Q);
   H = ncV_chinese_center_tree(B, Q, T, ZV_chinesetree(Q,T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN

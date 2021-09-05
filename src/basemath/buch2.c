@@ -1040,9 +1040,7 @@ chinese_unit_slice(GEN A, GEN U, GEN B, GEN D, GEN C, GEN P, GEN *mod)
     gel(H,i) = FlxqX_chinese_unit(a, U, b, d, c, p);
   }
   H = nmV_chinese_center_tree_seq(H, P, T, ZV_chinesetree(P, T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN
@@ -2964,9 +2962,8 @@ compute_multiple_of_R(GEN Ar, long RU, long N, long *pneed, long *bit, GEN *ptL)
   if (!L || (*bit = - gexpo(RgM_Rg_sub(RgM_mul(L,Im_mdet), gen_1))) < 16)
   { *ptL = NULL; return gc_NULL(av); }
 
-  L = RgM_mul(rowslice(L,2,RU), Ar); /* approximate rational entries */
-  gerepileall(av,2, &L, &kR);
-  *ptL = L; return kR;
+  *ptL = RgM_mul(rowslice(L,2,RU), Ar); /* approximate rational entries */
+  return gc_all(av,2, &kR, ptL);
 }
 
 /* leave small integer n as is, convert huge n to t_REAL (for readability) */

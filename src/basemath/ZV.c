@@ -391,9 +391,7 @@ ZM_mul_slice(GEN A, GEN B, GEN P, GEN *mod)
   for(i=1; i <= n; i++)
     gel(H,i) = Flm_mul(gel(A,i),gel(B,i),P[i]);
   H = nmV_chinese_center_tree_seq(H, P, T, ZV_chinesetree(P, T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN

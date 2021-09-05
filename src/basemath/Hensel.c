@@ -926,8 +926,7 @@ ZpXQX_divrem(GEN x, GEN Sp, GEN T, GEN q, GEN p, long e, GEN *pr)
   if (pr==ONLY_DIVIDES && !Q) { set_avma(av); return NULL; }
   if (pr==ONLY_REM || pr==ONLY_DIVIDES) return gerepileupto(av, Q);
   Q = FpXQX_FpXQ_mul(Q, bi, T, q);
-  gerepileall(av, 2, &Q, pr);
-  return Q;
+  return gc_all(av, 2, &Q, pr);
 }
 
 GEN

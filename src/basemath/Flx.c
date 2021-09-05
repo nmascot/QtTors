@@ -1561,8 +1561,7 @@ Flx_divrem(GEN x, GEN T, ulong p, GEN *pr)
     GEN q1 = Flx_divrem_Barrett(x,mg,y,p,pr);
     if (!q1) return gc_NULL(av);
     if (!pr || pr==ONLY_DIVIDES) return gerepileuptoleaf(av, q1);
-    gerepileall(av,2,&q1,pr);
-    return q1;
+    return gc_all(av, 2, &q1, pr);
   }
 }
 
@@ -2085,15 +2084,14 @@ Flx_extgcd_halfgcd(GEN x, GEN y, ulong p, GEN *ptu, GEN *ptv)
 GEN
 Flx_extgcd(GEN x, GEN y, ulong p, GEN *ptu, GEN *ptv)
 {
+  pari_sp av = avma;
   GEN d;
-  pari_sp ltop=avma;
   long lim = get_Fl_threshold(p, Flx_EXTGCD_LIMIT, Flx_EXTGCD2_LIMIT);
   if (lgpol(y) >= lim)
     d = Flx_extgcd_halfgcd(x, y, p, ptu, ptv);
   else
     d = Flx_extgcd_basecase(x, y, p, ptu, ptv);
-  gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
-  return d;
+  return gc_all(av, ptu?3:2, &d, ptv, ptu);
 }
 
 ulong
@@ -3094,8 +3092,8 @@ Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
     const struct bb_group *S = get_Flxq_star(&E,T,p);
     GEN o = subiu(powuu(p,get_Flx_degree(T)), 1);
     GEN s = gen_Shanks_sqrtn(a,n,o,zeta,E,S);
-    if (s) gerepileall(av, zeta?2:1, &s, zeta);
-    return s;
+    if (!s) return gc_NULL(av);
+    return gc_all(av, zeta?2:1, &s, zeta);
   }
 }
 

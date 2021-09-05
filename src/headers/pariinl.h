@@ -1343,13 +1343,12 @@ INLINE GEN
 gc_all(pari_sp av, int n, ...)
 {
   va_list a; va_start(a, n);
-  GEN *gptr[10];
+  GEN *v[10];
   int i;
-  for (i=0; i<n; i++)
-  { gptr[i] = va_arg(a,GEN*); *gptr[i] = (GEN)copy_bin(*gptr[i]); }
+  for (i=0; i<n; i++) { v[i] = va_arg(a,GEN*); *v[i] = (GEN)copy_bin(*v[i]); }
   set_avma(av);
-  for (--i; i>=0; i--) *gptr[i] = bin_copy((GENbin*)*gptr[i]);
-  return *gptr[0];
+  for (i=0; i<n; i++) *v[i] = bin_copy((GENbin*)*v[i]);
+  return *v[0];
 }
 
 INLINE void

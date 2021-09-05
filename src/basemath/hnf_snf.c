@@ -2056,8 +2056,7 @@ ZM_hnfall(GEN A, GEN *ptB, long remove)
 {
   pari_sp av = avma;
   A = ZM_hnfall_i(A, ptB, remove);
-  gerepileall(av, ptB? 2: 1, &A, ptB);
-  return A;
+  return gc_all(av, ptB? 2: 1, &A, ptB);
 }
 
 GEN

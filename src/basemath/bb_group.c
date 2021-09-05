@@ -1008,9 +1008,8 @@ gen_ellgroup(GEN N, GEN d, GEN *pt_m, void *E, const struct bb_group *grp,
     if (equalii(mulii(m, d), N0))
     {
       GEN g = mkvec2(mulii(N1,m), d);
-      if (pt_m) *pt_m = m;
-      gerepileall(av,pt_m?2:1,&g,pt_m);
-      return g;
+      if (!pt_m) return gerepilecopy(av, g);
+      *pt_m = m; return gc_all(av, 2, &g, pt_m);
     }
     set_avma(av2);
   }

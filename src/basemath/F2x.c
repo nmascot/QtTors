@@ -1401,8 +1401,7 @@ F2xq_log_find_rel(GEN b, long r, GEN T, GEN *g, ulong *e)
         GEN G = F2x_factorel(gcoeff(M,1,1));
         GEN rel = mkmat2(vecsmall_concat(gel(F, 1),gel(G, 1)),
                          vecsmall_concat(gel(F, 2),zv_neg(gel(G, 2))));
-        gerepileall(av, 2, g, &rel);
-        return rel;
+        return gc_all(av, 2, &rel, g);
       }
     }
     if (gc_needed(av,2))
@@ -2492,8 +2491,7 @@ F2xqX_divrem(GEN x, GEN S, GEN T, GEN *pr)
     GEN q = F2xqX_divrem_Barrett(x,mg,y,T,pr);
     if (!q) return gc_NULL(av);
     if (!pr || pr==ONLY_DIVIDES) return gerepilecopy(av, q);
-    gerepileall(av,2,&q,pr);
-    return q;
+    return gc_all(av,2,&q,pr);
   }
 }
 
@@ -2730,16 +2728,15 @@ F2xqX_extgcd_halfgcd(GEN x, GEN y, GEN T,  GEN *ptu, GEN *ptv)
 GEN
 F2xqX_extgcd(GEN x, GEN y, GEN T,  GEN *ptu, GEN *ptv)
 {
+  pari_sp av = avma;
   GEN d;
-  pari_sp ltop=avma;
   x = F2xqX_red(x, T);
   y = F2xqX_red(y, T);
   if (lg(y)>F2xqX_EXTGCD_LIMIT)
     d = F2xqX_extgcd_halfgcd(x, y, T, ptu, ptv);
   else
     d = F2xqX_extgcd_basecase(x, y, T, ptu, ptv);
-  gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
-  return d;
+  return gc_all(av, ptu?3:2, &d, ptv, ptu);
 }
 
 static GEN

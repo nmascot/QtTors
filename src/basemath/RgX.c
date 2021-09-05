@@ -2189,8 +2189,7 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
     GEN c = gel(ypow,p); r = RgX_Rg_mul(r, c);
     if (T && typ(c) == t_POL && varn(c) == varn(T)) r = RgXQX_red(r, T);
   }
-  gerepileall(av, 2, &z, &r);
-  *ptr = r; return z;
+  *ptr = r; return gc_all(av, 2, &z, ptr);
 }
 GEN
 RgX_pseudodivrem(GEN x, GEN y, GEN *ptr)

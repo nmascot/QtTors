@@ -753,8 +753,8 @@ FpXQX_extgcd_halfgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
 GEN
 FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
 {
+  pari_sp av = avma;
   GEN d;
-  pari_sp ltop=avma;
   if (lgefint(p) == 3)
   {
     GEN Pl, Ql, Tl, Dl;
@@ -773,8 +773,7 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
     else
       d = FpXQX_extgcd_basecase(x, y, T, p, ptu, ptv);
   }
-  gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
-  return d;
+  return gc_all(av, ptu?3:2, &d, ptv, ptu);
 }
 
 GEN
@@ -1091,8 +1090,7 @@ FpXQX_divrem(GEN x, GEN S, GEN T, GEN p, GEN *pr)
     GEN q = FpXQX_divrem_Barrett(x,mg,y,T,p,pr);
     if (!q) return gc_NULL(av);
     if (!pr || pr==ONLY_DIVIDES) return gerepilecopy(av, q);
-    gerepileall(av,2,&q,pr);
-    return q;
+    return gc_all(av, 2, &q, pr);
   }
 }
 

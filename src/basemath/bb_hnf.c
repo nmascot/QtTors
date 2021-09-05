@@ -778,8 +778,7 @@ gen_howell(GEN A, long remove_zerocols, long permute_zerocols, long early_abort,
 {
   pari_sp av = avma;
   GEN H = gen_howell_i(A, remove_zerocols, permute_zerocols, early_abort, only_triangular, ops, data, R);
-  gerepileall(av, ops?2:1, &H, ops);
-  return H;
+  return gc_all(av, ops?2:1, &H, ops);
 }
 
 static GEN
@@ -807,10 +806,9 @@ gen_matimage(GEN A, GEN* U, void *data, const struct bb_hermite *R)
       }
     }
     if (r<n2) *U = vecslice(*U, n2-r+1, n2);
-    gerepileall(av, 2, &H, U);
-    return H;
+    return gc_all(av, 2, &H, U);
   }
-  else return gen_howell(A, 2, 0, 0, 0, NULL, data, R);
+  return gen_howell(A, 2, 0, 0, 0, NULL, data, R);
 }
 
 static GEN
@@ -943,12 +941,7 @@ gen_reduce_mod_howell(GEN H, GEN Y, GEN *X, void* data, const struct bb_hermite 
     if (X) gel(*X,j) = q;
   }
   gen_redcol(Z, lg(Z)-1, data, R);
-  if (X)
-  {
-    gerepileall(av, 2, &Z, X);
-    return Z;
-  }
-  return gerepilecopy(av, Z);
+  return gc_all(av, X?2:1, &Z, X);
 }
 
 /* H: Howell form of A */
@@ -1058,9 +1051,7 @@ matkermod(GEN A, GEN d, GEN* im)
   RgM_dimensions(A,&m,&n);
   if (!im && m>2*n) /* TODO tune treshold */
     A = shallowtrans(matimagemod(shallowtrans(A),d,NULL));
-  K = gen_kernel(A, im, data, R);
-  gerepileall(av,im?2:1,&K,im);
-  return K;
+  K = gen_kernel(A, im, data, R); return gc_all(av,im?2:1,&K,im);
 }
 
 /* left inverse */

@@ -2600,8 +2600,7 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
 {
   pari_sp av = avma;
   GEN z = subresext_i(x, y, U, V);
-  gerepileall(av, 3, &z, U, V);
-  return z;
+  return gc_all(av, 3, &z, U, V);
 }
 
 static GEN
@@ -2629,9 +2628,8 @@ static GEN
 gc_gcdext(pari_sp av, GEN r, GEN *u, GEN *v)
 {
   if (!u && !v) return gerepileupto(av, r);
-  if (u  &&  v) gerepileall(av, 3, &r, u, v);
-  else          gerepileall(av, 2, &r, u ? u: v);
-  return r;
+  if (u  &&  v) return gc_all(av, 3, &r, u, v);
+  return gc_all(av, 2, &r, u ? u: v);
 }
 
 static GEN

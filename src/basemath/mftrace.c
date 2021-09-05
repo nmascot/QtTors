@@ -11117,9 +11117,7 @@ mfdescribe(GEN F, GEN *U)
     return gsprintf(f, MF_get_gk(mf), MF_get_N(mf), mfchisimpl(MF_get_CHI(mf)));
   }
   if (!checkmf_i(F)) pari_err_TYPE("mfdescribe", F);
-  F = desc_i(F, U);
-  gerepileall(av, U ? 2: 1, &F, U);
-  return F;
+  F = desc_i(F, U); return gc_all(av, U ? 2: 1, &F, U);
 }
 
 /***********************************************************************/
@@ -13034,9 +13032,7 @@ search_abelian(GEN nf, long n, long k, GEN N, GEN CHI, GEN F,
     GEN pol = rnfkummer(bnr, Hi, prec);
     T = T? nfcompositum(nf, T, pol, 2): pol;
   }
-  T = rnfequation(nf, T);
-  gerepileall(av, 3, pP, pO, &T);
-  return T;
+  T = rnfequation(nf, T); return gc_all(av, 3, &T, pP, pO);
 }
 
 static GEN

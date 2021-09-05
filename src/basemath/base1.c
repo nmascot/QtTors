@@ -495,9 +495,7 @@ poltomonic(GEN T, GEN *L)
   pari_sp av = avma;
   if (typ(T) != t_POL || !RgX_is_QX(T)) pari_err_TYPE("poltomonic", T);
   if (!RgX_is_ZX(T)) T = Q_primpart(T);
-  T = ZX_Q_normalize(T, L);
-  if (L) gerepileall(av, 2, &T, L); else T = gerepilecopy(av, T);
-  return T;
+  T = ZX_Q_normalize(T, L); return gc_all(av, L? 2: 1, &T, L);
 }
 
 GEN

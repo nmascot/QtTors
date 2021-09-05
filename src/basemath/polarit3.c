@@ -1733,8 +1733,7 @@ ZX_ZXY_resultant_LERS(GEN A, GEN B0, long *plambda, GEN *LERS)
     H = gsubst(B, vY, gdiv(gneg(a0),a1));
    if (!equali1(a1)) H = RgX_Rg_mul(H, powiu(a1, poldegree(B,vY)));
     *LERS = mkvec2(scalarpol_shallow(a0,vX), scalarpol_shallow(a1,vX));
-    gerepileall(av, 2, &H, LERS);
-    return H;
+    return gc_all(av, 2, &H, LERS);
   }
 
   dglist = Hp = H0p = H1p = C0 = C1 = NULL; /* gcc -Wall */
@@ -1851,8 +1850,7 @@ END:
   if (DEBUGLEVEL>5) err_printf(" done\n");
   setvarn(H, vX); (void)delete_var();
   *LERS = mkvec2(H0,H1);
-  gerepileall(av, 2, &H, LERS);
-  *plambda = lambda; return H;
+  *plambda = lambda; return gc_all(av, 2, &H, LERS);
 }
 
 GEN
@@ -1970,9 +1968,7 @@ ZX_resultant_slice(GEN A, GEN B, GEN dB, GEN P, GEN *mod)
     H[i] = ZX_resultant_prime(a, b, dB, degA, degB, p);
   }
   H = ZV_chinese_tree(H, P, T, ZV_chinesetree(P,T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN
@@ -2159,9 +2155,7 @@ ZXQX_resultant_slice(GEN A, GEN B, GEN U, GEN dB, GEN P, GEN *mod)
   }
   if (redo) T = ZV_producttree(P);
   H = nxV_chinese_center_tree(H, P, T, ZV_chinesetree(P, T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN
@@ -2337,9 +2331,7 @@ QXQ_inv_slice(GEN A, GEN B, GEN P, GEN *mod)
   }
   if (redo) T = ZV_producttree(P);
   H = nxV_chinese_center_tree(H, P, T, ZV_chinesetree(P, T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN
@@ -2442,9 +2434,7 @@ QXQ_div_slice(GEN A, GEN B, GEN C, GEN P, GEN *mod)
   }
   if (redo) T = ZV_producttree(P);
   H = nxV_chinese_center_tree(H, P, T, ZV_chinesetree(P, T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN
@@ -2545,9 +2535,7 @@ ZXQ_minpoly_slice(GEN A, GEN B, long d, GEN P, GEN *mod)
     gel(H, i) = m;
   }
   H = nxV_chinese_center_tree(H, P, T, ZV_chinesetree(P, T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN
@@ -2636,9 +2624,7 @@ ZX_ZXY_resultant_slice(GEN A, GEN B, GEN dB, long degA, long degB, long dres,
     gel(H,i) = ZX_ZXY_resultant_prime(a, b, dp, p, degA, degB, dres, sX);
   }
   H = nxV_chinese_center_tree(H, P, T, ZV_chinesetree(P, T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN
@@ -2753,9 +2739,7 @@ ZX_direct_compositum_slice(GEN A, GEN B, GEN P, GEN *mod)
     gel(H,i) = Flx_direct_compositum(a, b, p);
   }
   H = nxV_chinese_center_tree(H, P, T, ZV_chinesetree(P, T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN
@@ -2847,9 +2831,7 @@ ZXQX_direct_compositum_slice(GEN A, GEN B, GEN C, GEN P, GEN *mod)
     gel(H,i) = FlxX_to_Flm(FlxqX_direct_compositum(a, b, c, p), dC);
   }
   H = nmV_chinese_center_tree_seq(H, P, T, ZV_chinesetree(P, T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN

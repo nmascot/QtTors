@@ -239,12 +239,8 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
       *Pnew = RgXQX_pseudodivrem(P, dsol, T, &R);
       if (signe(R)) continue;
     }
-    else
-    {
-      if (!ZXQX_dvd(P, dsol, T)) continue;
-    }
-    gerepileall(ltop, Pnew? 2: 1, &dsol, Pnew);
-    return dsol; /* both remainders are 0 */
+    else if (!ZXQX_dvd(P, dsol, T)) continue;
+    return gc_all(ltop, Pnew? 2: 1, &dsol, Pnew); /* both remainders are 0 */
   }
 }
 GEN

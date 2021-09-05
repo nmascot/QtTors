@@ -241,13 +241,12 @@ bezout_halfgcd(GEN x, GEN y, GEN *ptu, GEN *ptv)
 GEN
 bezout(GEN x, GEN y, GEN *ptu, GEN *ptv)
 {
-  pari_sp ltop=avma;
+  pari_sp av = avma;
   GEN d;
   if (lgefint(y)-2 >= EXTGCD_HALFGCD_LIMIT)
     d = bezout_halfgcd(x, y, ptu, ptv);
   else
     d = bezout_lehmer(x, y, ptu, ptv);
-  if (ptv) gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
-  else gerepileall(ltop,ptu?2:1,&d,ptu);
-  return d;
+  if (ptv) return gc_all(av,ptu?3:2, &d, ptv, ptu);
+  return gc_all(av, ptu?2:1, &d, ptu);
 }

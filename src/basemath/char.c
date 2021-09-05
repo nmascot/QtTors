@@ -1024,8 +1024,7 @@ znconreyconductor(GEN bid, GEN chi, GEN *pm)
     E = zc_to_ZC(E);
     q = mkvec2(factorback2(P,E), mkmat2(P,E));
   }
-  gerepileall(av, pm? 2: 1, &q, pm);
-  return q;
+  return gc_all(av, pm? 2: 1, &q, pm);
 }
 
 GEN

@@ -1050,8 +1050,7 @@ FlxqX_divrem(GEN x, GEN S, GEN T, ulong p, GEN *pr)
     GEN q = FlxqX_divrem_Barrett(x,mg,y,T,p,pr);
     if (!q) return gc_NULL(av);
     if (!pr || pr==ONLY_DIVIDES) return gerepilecopy(av, q);
-    gerepileall(av,2,&q,pr);
-    return q;
+    return gc_all(av, 2, &q, pr);
   }
 }
 
@@ -1289,16 +1288,15 @@ FlxqX_extgcd_halfgcd(GEN x, GEN y, GEN T, ulong p, GEN *ptu, GEN *ptv)
 GEN
 FlxqX_extgcd(GEN x, GEN y, GEN T, ulong p, GEN *ptu, GEN *ptv)
 {
+  pari_sp av = avma;
   GEN d;
-  pari_sp ltop=avma;
   x = FlxqX_red(x, T, p);
   y = FlxqX_red(y, T, p);
   if (lg(y)>FlxqX_EXTGCD_LIMIT)
     d = FlxqX_extgcd_halfgcd(x, y, T, p, ptu, ptv);
   else
     d = FlxqX_extgcd_basecase(x, y, T, p, ptu, ptv);
-  gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
-  return d;
+  return gc_all(av, ptu?3:2, &d, ptv, ptu);
 }
 
 static GEN

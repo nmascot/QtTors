@@ -2215,8 +2215,7 @@ galoisgenfixedfield0(GEN O, GEN L, GEN sigma, GEN T, GEN bad, GEN *pt_V,
   if (DEBUGLEVEL >= 4)
     err_printf("GaloisConj: Back to Earth:%Ps\n", gg_get_std(gel(PG,1)));
   if (pt_V) *pt_V = mkvec3(sym, PL, P);
-  gerepileall(btop, pt_V ? 4: 3, &gf->Tmod, &gf->psi, &PG, pt_V);
-  return PG;
+  return gc_all(btop, pt_V ? 4: 3, &PG, &gf->Tmod, &gf->psi, pt_V);
 }
 
 /* Let sigma^m=1, tau*sigma*tau^-1=sigma^s. Return n = sum_{0<=k<e,0} s^k mod m

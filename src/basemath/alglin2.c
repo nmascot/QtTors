@@ -334,9 +334,7 @@ caradj(GEN x, long v, GEN *py)
   { /* n! not invertible in base ring */
     T = charpoly(x, v);
     if (!py) return gerepileupto(av, T);
-    *py = RgM_adj_from_char(x, v, T);
-    gerepileall(av, 2, &T,py);
-    return T;
+    *py = RgM_adj_from_char(x, v, T); return gc_all(av, 2, &T,py);
   }
   av = avma; y = RgM_shallowcopy(x);
   for (i = 1; i <= n; i++) gcoeff(y,i,i) = gadd(gcoeff(y,i,i), t);
@@ -1907,8 +1905,7 @@ QM_ImZ_all(GEN x, GEN *U, long remove, long hnf)
 {
   pari_sp av = avma;
   x = QM_ImZ_all_i(x, U, remove, hnf, 0);
-  if (U) gerepileall(av, 2, &x, &U); else x = gerepilecopy(av, x);
-  return x;
+  return gc_all(av, U?2:1, &x, &U);
 }
 GEN
 QM_ImZ_hnfall(GEN x, GEN *U, long remove) { return QM_ImZ_all(x, U, remove, 1); }

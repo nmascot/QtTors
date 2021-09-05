@@ -900,8 +900,7 @@ lift_points(GEN listQ, GEN f, GEN *pt, GEN *pQ)
     GEN t = best_lift(Q, NQ, f), y = qimag2(t);
     if (gcmp(y, yf) > 0) { yf = y; Qf = Q; tf = t; }
   }
-  gerepileall(av, 3, &tf, &Qf, &yf);
-  *pt = tf; *pQ = Qf; return yf;
+  *pt = tf; *pQ = Qf; return gc_all(av, 3, &yf, pt, pQ);
 }
 
 /***************************/

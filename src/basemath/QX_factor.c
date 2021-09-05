@@ -1096,9 +1096,7 @@ ZX_gcd_slice(GEN A, GEN B, GEN g, GEN P, GEN *mod)
   if (ZX_gcd_filter(&H, &P))
     T = ZV_producttree(P);
   H = nxV_chinese_center_tree(H, P, T, ZV_chinesetree(P, T));
-  *mod = gmael(T, lg(T)-1, 1);
-  gerepileall(av, 2, &H, mod);
-  return H;
+  *mod = gmael(T, lg(T)-1, 1); return gc_all(av, 2, &H, mod);
 }
 
 GEN
