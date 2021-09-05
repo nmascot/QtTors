@@ -1338,6 +1338,20 @@ gerepileall(pari_sp av, int n, ...)
   va_end(a);
 }
 
+/* assume 1 <= n < 10 */
+INLINE GEN
+gc_all(pari_sp av, int n, ...)
+{
+  va_list a; va_start(a, n);
+  GEN *gptr[10];
+  int i;
+  for (i=0; i<n; i++)
+  { gptr[i] = va_arg(a,GEN*); *gptr[i] = (GEN)copy_bin(*gptr[i]); }
+  set_avma(av);
+  for (--i; i>=0; i--) *gptr[i] = bin_copy((GENbin*)*gptr[i]);
+  return *gptr[0];
+}
+
 INLINE void
 gerepilecoeffs(pari_sp av, GEN x, int n)
 {

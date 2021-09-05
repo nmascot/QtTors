@@ -1252,6 +1252,23 @@ destroys everything from the reference point on, including $z$.
 stack (clone, universal constant such as \kbd{gen\_0}) or was defined
 before \kbd{av}.
 
+\fun{GEN}{gc_all}{pari_sp av, int n, ...}. Assumes that $1 \leq n \leq
+10$; This is similar to \kbd{gerepileall}, expecting $n$ further \kbd{GEN*}
+arguments: the stack is cleaned and the corresponding \kbd{GEN} are
+copied to the stack starting from \kbd{av} (in this order: the first argument
+comes first), and the first such \kbd{GEN} is returned. To be used in the
+following scenario:
+\bprog
+  GEN f(..., GEN *py)
+  {
+    pari_sp av = avma;
+    GEN x = ..., y = ...
+    *py = y; return gc_all(av, 2, &x, py);
+  }
+@eprog\noindent This function returns $x$, and the user also recovers $y$
+as a side effect. Not that we can later use \kbd{cgiv}$(y)$ to recover the
+memory used by $y$ while still keeping $x$.
+
 \fun{void}{cgiv}{GEN x} frees object \kbd{x}, assuming it is the last created
 on the stack.
 

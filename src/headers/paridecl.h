@@ -6116,6 +6116,7 @@ INLINE long   divsBIL(long n);
 INLINE void   gabsz(GEN x, long prec, GEN z);
 INLINE GEN    gaddgs(GEN y, long s);
 INLINE void   gaddz(GEN x, GEN y, GEN z);
+INLINE GEN    gc_all(pari_sp av, int n, ...);
 INLINE int    gcmpgs(GEN y, long s);
 INLINE void   gdiventz(GEN x, GEN y, GEN z);
 INLINE GEN    gdivsg(long s, GEN y);

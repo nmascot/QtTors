@@ -141,6 +141,7 @@ LGr 47- allow endpoints in solve() to by +oo or -oo
     49- new GP function: harmonic
     50- allow digits(integral t_PADIC)
     51- new GP function qfbcornacchia
+    52- [libpari] gc_all
 
   Changed
 HC   1- faster implementation of eulervec + cache result

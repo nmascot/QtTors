@@ -371,9 +371,7 @@ factoredextchinesetest(GEN nf, GEN x, GEN y, GEN pl, GEN* fa, GEN data, int (*te
   /* restore known factors */
   for (i=1; i<lg(E); i++) gel(E,i) = stoi(nfval(nf,y1,gel(P,i)));
   *fa = famat_reduce(famat_mul_shallow(*fa, mkmat2(P, E)));
-
-  gerepileall(av, 2, &y1, fa);
-  return y1;
+  return gc_all(av, 2, &y1, fa);
 }
 
 static GEN
@@ -4400,10 +4398,8 @@ alggroupcenter(GEN G, GEN p, GEN *pcc)
 {
   pari_sp av = avma;
   GEN cc = group_to_cc(G), al = conjclasses_algcenter(cc, p);
-  if (!pcc) al = gerepilecopy(av,al);
-  else
-  { *pcc = cc; gerepileall(av,2,&al,pcc); }
-  return al;
+  if (!pcc) return gerepilecopy(av,al);
+  *pcc = cc; return gc_all(av, 2, &al, pcc);
 }
 
 static GEN
@@ -4910,42 +4906,34 @@ alglataddinter(GEN al, GEN lat1, GEN lat2, GEN *sum, GEN *inter)
 }
 
 GEN
-alglatinter(GEN al, GEN lat1, GEN lat2, GEN* ptsum)
+alglatinter(GEN al, GEN lat1, GEN lat2, GEN* psum)
 {
   pari_sp av = avma;
   GEN inter, d;
-  d = alglataddinter(al, lat1, lat2, ptsum, &inter);
+  d = alglataddinter(al, lat1, lat2, psum, &inter);
   inter = primlat(mkvec2(inter, d));
-  if (ptsum)
-  {
-    *ptsum = primlat(mkvec2(*ptsum,d));
-    gerepileall(av, 2, &inter, ptsum);
-  }
-  else inter = gerepilecopy(av, inter);
-  return inter;
+  if (!psum) return gerepilecopy(av, inter);
+  *psum = primlat(mkvec2(*psum,d));
+  return gc_all(av, 2, &inter, psum);
 }
 
 GEN
-alglatadd(GEN al, GEN lat1, GEN lat2, GEN* ptinter)
+alglatadd(GEN al, GEN lat1, GEN lat2, GEN* pinter)
 {
   pari_sp av = avma;
   GEN sum, d;
-  d = alglataddinter(al, lat1, lat2, &sum, ptinter);
+  d = alglataddinter(al, lat1, lat2, &sum, pinter);
   sum = primlat(mkvec2(sum, d));
-  if (ptinter)
-  {
-    *ptinter = primlat(mkvec2(*ptinter,d));
-    gerepileall(av, 2, &sum, ptinter);
-  }
-  else sum = gerepilecopy(av, sum);
-  return sum;
+  if (!pinter) return gerepilecopy(av, sum);
+  *pinter = primlat(mkvec2(*pinter,d));
+  return gc_all(av, 2, &sum, pinter);
 }
 
+/* TODO version that returns the quotient as abelian group? */
+/* return matrices to convert coordinates from one to other? */
 int
-alglatsubset(GEN al, GEN lat1, GEN lat2, GEN* ptindex)
+alglatsubset(GEN al, GEN lat1, GEN lat2, GEN* pindex)
 {
-  /* TODO version that returns the quotient as abelian group? */
-  /* return matrices to convert coordinates from one to other? */
   pari_sp av = avma;
   int res;
   GEN m1, m2, m2i, m, t;
@@ -4958,13 +4946,9 @@ alglatsubset(GEN al, GEN lat1, GEN lat2, GEN* ptindex)
   t = gdiv(alglat_get_scalar(lat1), alglat_get_scalar(lat2));
   m = RgM_Rg_mul(RgM_mul(m2i,m1), t);
   res = RgM_is_ZM(m);
-  if (res && ptindex)
-  {
-    *ptindex = mpabs(ZM_det_triangular(m));
-    gerepileall(av,1,ptindex);
-  }
-  else set_avma(av);
-  return res;
+  if (!res || !pindex) return gc_int(av, res);
+  *pindex = gerepileuptoint(av, mpabs(ZM_det_triangular(m)));
+  return 1;
 }
 
 GEN
@@ -5056,7 +5040,7 @@ alglatcontains(GEN al, GEN lat, GEN x, GEN *ptc)
   sol = hnf_solve(m,x);
   if (!sol) return gc_bool(av,0);
   if (!ptc) return gc_bool(av,1);
-  *ptc = sol; gerepileall(av,1,ptc); return 1;
+  *ptc = gerepilecopy(av, sol); return 1;
 }
 
 GEN
