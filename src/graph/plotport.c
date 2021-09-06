@@ -1065,22 +1065,14 @@ get_xy_from_vec(long cplx, GEN t, long *i, double *x, double *y)
   *x = gtodouble(a);
   *y = gtodouble(b);
 }
-/* X,Y t_VEC; next (x,y) coordinate starting at index i; Y ignored if (cplx) */
+
 static void
-get_xy_from_vec2(long cplx, GEN X, GEN Y, long i, double *x, double *y)
+dblV_from_RgV(dblPointList *L, GEN x)
 {
-  GEN a, b;
-  if (cplx)
-  {
-    GEN z = gel(X,i);
-    a = real_i(z); b = imag_i(z);
-  }
-  else
-  {
-    a = gel(X,i); b = gel(Y,i);
-  }
-  *x = gtodouble(a);
-  *y = gtodouble(b);
+  long j, l = lg(x);
+  double *X = (double*)pari_malloc(l*sizeof(double));
+  for (j = 1; j < l; j++) X[j-1] = gtodouble(gel(x,j));
+  L->d = X; L->nb = l-1;
 }
 
 /* Convert data from GEN to double before we call plotrecthrawin. */
@@ -1089,41 +1081,65 @@ gtodblList(GEN data, long flags)
 {
   dblPointList *l, *L;
   double *X, *Y;
-  long nl=lg(data)-1, lx1, i, j;
+  long nl = lg(data)-1, i, j;
   const long param = (flags & (PLOT_PARAMETRIC|PLOT_COMPLEX));
   const long cplx = (flags & PLOT_COMPLEX);
 
   if (! is_vec_t(typ(data))) pari_err_TYPE("gtodblList",data);
   if (!nl) return NULL;
-  lx1 = lg(gel(data,1));
-  if (!param && lx1 == 1) return NULL;
 
-  /* Check input first */
   if (nl == 1 && !cplx) pari_err_DIM("gtodblList");
-  for (i = 0; i < nl; i += cplx? 1: 2)
-  {
-    GEN x = gel(data,i+1), y = cplx? NULL: gel(data,i+2);
-    long lx = lg(x);
+  for (i = 1; i <= nl; i++)
+  { /* Check input first */
+    GEN x = gel(data,i);
     if (!is_vec_t(typ(x))) pari_err_TYPE("gtodblList",x);
-    if (y)
+  }
+  if (flags & PLOT_PARAMETRIC)
+  {
+    if (odd(nl))
+      pari_err_TYPE("gtodbllist [odd #components in parametric plot]", data);
+    for (i = 1; i < nl; i += 2)
     {
-      if (!is_vec_t(typ(y))) pari_err_TYPE("gtodblList",y);
-      if (lg(y) != lx || (!param && lx != lx1)) pari_err_DIM("gtodblList");
+      GEN x = gel(data,i), y = gel(data,i+1);
+      if (lg(y) != lg(x)) pari_err_DIM("gtodblList");
     }
   }
-  /* Now allocate memory, then convert coord. to double */
-  l = (dblPointList*)pari_malloc((cplx? 2*nl: nl)*sizeof(dblPointList));
-  L = &l[0];
-  for (i = 0; i < nl; i += cplx? 1: 2)
+  else if (!cplx)
   {
-    GEN x = gel(data,i+1), y = cplx? NULL: gel(data,i+2);
-    long lx = lg(x)-1;
-    l[i].d   = X = (double*)pari_malloc(lx*sizeof(double));
-    l[i+1].d = Y = (double*)pari_malloc(lx*sizeof(double));
-    for (j=1; j<=lx; j++) get_xy_from_vec2(cplx, x, y, j, X+(j-1), Y+(j-1));
-    l[i].nb = l[i+1].nb = lx;
+    long l1 = lg(gel(data,1)); if (l1 == 1) return NULL;
+    for (i = 2; i <= nl; i++)
+      if (lg(gel(data,i)) != l1) pari_err_DIM("gtodblList");
+  }
+
+  /* Now allocate memory and convert coord. to double */
+  if (cplx)
+  {
+    l = (dblPointList*)pari_malloc((2*nl)*sizeof(dblPointList));
+    for (i = 0; i < nl; i++)
+    {
+      pari_sp av = avma;
+      GEN x = gel(data,i+1);
+      dblV_from_RgV(&l[2*i],   real_i(x));
+      dblV_from_RgV(&l[2*i+1], imag_i(x)); set_avma(av);
+    }
+  }
+  else if (param)
+  {
+    l = (dblPointList*)pari_malloc(nl*sizeof(dblPointList));
+    for (i = 1; i < nl; i += 2)
+    {
+      dblV_from_RgV(&l[i-1], gel(data,i));
+      dblV_from_RgV(&l[i], gel(data,i+1));
+    }
+  }
+  else
+  {
+    l = (dblPointList*)pari_malloc(nl*sizeof(dblPointList));
+    dblV_from_RgV(&l[0], gel(data,1));
+    for (i = 2; i <= nl; i++) dblV_from_RgV(&l[i-1], gel(data, i));
   }
   /* Compute extremas */
+  L = &l[0];
   if (param)
   {
     L->nb = cplx? nl: nl/2;
