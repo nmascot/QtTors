@@ -367,7 +367,11 @@ hrec(ulong a, ulong b)
 /* exact Harmonic number H_n, n < 2^(BIL-1).
  * Could use H_n = sum_k 2^(-k) H^odd_{n \ 2^k} */
 GEN
-harmonic(ulong n) { pari_sp av = avma; return gerepileupto(av, hrec(1, n+1)); }
+harmonic(ulong n)
+{
+  pari_sp av = avma;
+  return n? gerepileupto(av, hrec(1, n+1)): gen_0;
+}
 
 /* 1/a^k + ... + 1/(b-1)^k; a < b */
 static GEN
@@ -390,7 +394,7 @@ harmonic0(ulong n, GEN k)
 {
   pari_sp av = avma;
   ulong r;
-  if (!n) pari_err_DOMAIN("harmonic", "n", "=", gen_0, gen_0);
+  if (!n) return gen_0;
   if (n & HIGHBIT) pari_err_OVERFLOW("harmonic");
   if (!k) return harmonic(n);
   if (typ(k) != t_INT) pari_err_TYPE("harmonic", k);
