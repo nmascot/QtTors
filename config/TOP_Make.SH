@@ -124,4 +124,6 @@ ctags:
 checkspaces:
 	config/checkspaces
 
+.NOTPARALLEL:
+
 EOT
