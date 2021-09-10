@@ -1342,9 +1342,9 @@ gerepileall(pari_sp av, int n, ...)
 INLINE GEN
 gc_all(pari_sp av, int n, ...)
 {
-  va_list a; va_start(a, n);
-  GEN *v[10];
   int i;
+  GEN *v[10];
+  va_list a; va_start(a, n);
   for (i=0; i<n; i++) { v[i] = va_arg(a,GEN*); *v[i] = (GEN)copy_bin(*v[i]); }
   set_avma(av);
   for (i=0; i<n; i++) *v[i] = bin_copy((GENbin*)*v[i]);
