@@ -2322,7 +2322,7 @@ RgXn_powu_i(GEN x, ulong m, long n)
 {
   struct modXn S;
   long v;
-  if (n == 1) return x;
+  if (n == 0) return x;
   v = RgX_valrem(x, &x);
   if (v) n -= m * v;
   S.v = varn(x); S.n = n;
@@ -2334,7 +2334,7 @@ GEN
 RgXn_powu(GEN x, ulong m, long n)
 {
   pari_sp av;
-  if (n == 1) return gcopy(x);
+  if (n == 0) return gcopy(x);
   av = avma; return gerepilecopy(av, RgXn_powu_i(x, m, n));
 }
 

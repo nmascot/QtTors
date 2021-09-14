@@ -769,6 +769,9 @@ ms=mfsymbol(mf,F);mfpetersson(ms)
 
 f=mfeisenstein(4,Mod(1,2),Mod(1,2)); vec(f)
 
+\\ #2314
+E=mfpow(mfeisenstein(4),3);mfcoef(E,0)
+
 getcache()[,1..4]
 
 \\ ERRORS, leave at end of bench
