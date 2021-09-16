@@ -304,6 +304,9 @@ zeta(s)*zeta(s-a)
 O(x)
 O(x^2)
 O(x^2)
+[0.90384905518988545678200390170972794465 - 2.372435185361247117269703583348
+5504030*I, 2.1076105368263265781937945304702732642 + 2.778690871419041003781
+6785866162988408*I]
   ***   at top-level: lfuntheta(1,0)
   ***                 ^--------------
   *** lfuntheta: domain error in lfunthetainit: t = 0
@@ -370,4 +373,4 @@ O(x^2)
   ***   at top-level: lfun([[],[""]],1)
   ***                 ^-----------------
   *** lfun: incorrect type in lfunmisc_to_ldata (t_VEC).
-Total time spent: 4598
+Total time spent: 5026

@@ -926,8 +926,8 @@ lfunchigen(GEN bnr, GEN CHI)
     GEN chi = gel(CHI,1), bnr0 = bnr, o = gen_1;
     GEN D = cyc_normalize(bnr_get_cyc(bnr));
     nchi = cgetg(l, t_VEC);
-    N = bnr_get_mod(bnr);
     bnr_char_sanitize(&bnr, &chi);
+    N = bnr_get_mod(bnr);
     map = (bnr != bnr0);
     for (i = 1; i < l; i++)
     {
