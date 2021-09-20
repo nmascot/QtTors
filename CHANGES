@@ -80,6 +80,7 @@ BA  60- (f(~v)=v[1]=1);(g(v) = f(~v)); my(V=[0]);g(V);V -> [1] instead of [0]
     65- bernvec entries were wrong from B_{2*4064} on [#2311]
     66- plotrecthraw for multi-curves
     67- RgXn_powu(,,1) wrong result [#2314]
+    68- erfc incorrect on negative imaginary axis [#2315]
 
   Added
 HC   1- new GP function eulerreal

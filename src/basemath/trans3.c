@@ -1409,10 +1409,12 @@ GEN
 gerfc(GEN x, long prec)
 {
   GEN z, xr, xi, res;
+  long s;
   pari_sp av;
 
   x = trans_fix_arg(&prec,&x,&xr,&xi, &av,&res);
-  if (signe(xr) >= 0) {
+  s = signe(xr);
+  if (s > 0 || (s == 0 && signe(xi) >= 0)) {
     if (cmprs(xr, 1) > 0) /* use numerical integration */
       z = cxerfc_r1(x, prec);
     else
