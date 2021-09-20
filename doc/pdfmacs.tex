@@ -87,6 +87,11 @@
 \def\putchapdest{\global\advance\pdfchapcntr by1%
  \pdfdest name {pdfchap@\number\pdfchapcntr} fitbh }
 
+\def\chapterskip{
+  \ifnum\chapno=0 \else \append0\numsectok \fi
+  \global\advance\chapno by 1
+}
+
 \def\chapter#1#2\par{
   \ifnum\chapno=0 \else \append{\the\secno}\numsectok \fi
   \secno=0\global\advance\chapno by 1
@@ -104,7 +109,7 @@
   \title{Appendix \applet:}{#1}\noindent\ignorespaces
   \ifsecondpass
    \pdfoutline goto name {pdfchap@\number\pdfchapcntr}
-    count -\numsecsapp\appno {\applet\ #1}
+    count -\numsecsapp\chapno {\applet\ #1}
    \fi}
 \def\section#1{
   \subsecno=0\global\advance\secno by 1

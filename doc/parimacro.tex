@@ -301,6 +301,7 @@
 % INSTALL.tex and gphelp-extracted bits).  Syntax requirement: After calling
 % \chapter{...} and possibly \label{...}  etc, an empty line _must_ follow
 % before the first paragraph of text or section heading begins. [GN]
+\def\chapterskip{\global\advance\chapno by 1}
 \def\chapter#1#2\par{
   \secno=0\global\advance\chapno by 1
   \title{Chapter \number\chapno:}{#1}#2\noindent\ignorespaces}
