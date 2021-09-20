@@ -99,7 +99,6 @@
 \def\appendix#1{
   \ifnum\appno=0 \append{\the\secno}\numsectok
    \else \append{\the\secno}\numsecapptok \fi
-  \chapno=0
   \global\secno=0\global\advance\appno by 1
   \def\applet{\ifcase\appno\or A\or B\or C\or D\or E\or F\or G\fi}
   \title{Appendix \applet:}{#1}\noindent\ignorespaces
