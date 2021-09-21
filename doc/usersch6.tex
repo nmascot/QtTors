@@ -2612,8 +2612,10 @@ want the true HNF, use \kbd{ZM\_hnfall(x, NULL, 0)}.
 determinant of $x$. This is usually faster than \tet{ZM_hnf} (and uses less
 memory) if the dimension is large, $> 50$ say.
 
-\fun{GEN}{ZM_hnfmodid}{GEN x, GEN d} returns the HNF of the matrix $(x \mid d
-\text{Id})$ (removing $0$ columns), for a \kbd{ZM} $x$ and a \typ{INT} $d$.
+\fun{GEN}{ZM_hnfmodid}{GEN x, GEN d} returns the HNF of the \kbd{ZM}
+$x$ concatenated with the diagonal matrix with diagonal $d$, where $d$ is a
+vector of integers of compatible dimension. Variant: if $d$ is a \typ{INT},
+then concatenate $d \text{Id}$.
 
 \fun{GEN}{ZM_hnfmodprime}{GEN x, GEN p} returns the HNF of the matrix $(x \mid p
 \text{Id})$ (removing $0$ columns), for a \kbd{ZM} $x$ and a prime number $p$.
