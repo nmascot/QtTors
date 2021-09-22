@@ -3176,7 +3176,7 @@ minval(GEN nf, GEN A, GEN pr)
   return a;
 }
 
-/* nf a true nf. Return NULL if power order if pr-maximal */
+/* nf a true nf. Return NULL if power order is pr-maximal */
 static GEN
 rnfmaxord(GEN nf, GEN pol, GEN pr, long vdisc)
 {
