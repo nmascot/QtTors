@@ -794,7 +794,7 @@ gen_ZpM_Newton(GEN x, GEN p, long n, void *E,
     x = FpM_sub(x, ZM_Z_mul(invd(E, V, v, qM, M), q2), q);
     if (gc_needed(av, 1))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"gen_ZpX_Newton");
+      if(DEBUGMEM>1) pari_warn(warnmem,"gen_ZpM_Newton");
       gerepileall(av, 2, &x, &q);
     }
   }
