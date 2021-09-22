@@ -16,6 +16,59 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #define DEBUGLEVEL DEBUGLEVEL_hensel
 
+
+/***********************************************************************/
+/**                                                                   **/
+/**                            Zp                                     **/
+/**                                                                   **/
+/***********************************************************************/
+
+GEN
+Zp_invlift(GEN a, GEN x, GEN p, long n)
+{
+  pari_sp ltop = avma, av;
+  ulong mask;
+  GEN q = p;
+  if (n == 1) return gcopy(x);
+  mask = quadratic_prec_mask(n);
+  av = avma;
+  while (mask > 1)
+  {
+    GEN v;
+    q = sqri(q);
+    if (mask & 1UL) q = diviiexact(q,p);
+    mask >>= 1;
+    v = Fp_sub(Fp_mul(x, modii(a, q), q), gen_1, q);
+    x = Fp_sub(x, Fp_mul(v,  x, q), q);
+    if (gc_needed(av, 1))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"gen_Zp_Newton");
+      gerepileall(av, 2, &x, &q);
+    }
+  }
+  return gerepileupto(ltop, x);
+}
+
+GEN
+Zp_inv(GEN a, GEN p, long e)
+{
+  pari_sp av=avma;
+  GEN ai;
+  if (lgefint(p)==3)
+  {
+    ulong pp = p[2];
+    ai = utoi(Fl_inv(umodiu(a,pp), pp));
+  } else
+    ai = Fp_inv(modii(a, p), p);
+  return gerepileupto(av, Zp_invlift(a, ai, p, e));
+}
+
+GEN
+Zp_div(GEN a, GEN b, GEN q, GEN p, long e)
+{
+  return Fp_mul(a, Zp_inv(b, p, e), q);
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**       QUADRATIC HENSEL LIFT (adapted from V. Shoup's NTL)         **/
