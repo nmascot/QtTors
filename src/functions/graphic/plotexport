@@ -16,6 +16,6 @@ Doc: draw list of rectwindows as in \kbd{plotdraw(list,flag)}, returning
   ? plotcolor(0, 2);
   ? plotbox(0, 30, 30);
   ? plotdraw(0); \\ watch result on screen
-  ? s = plotexport("svg, 0);
+  ? s = plotexport("svg", 0);
   ? write("graph.svg", s); \\ dump result to file
  @eprog
