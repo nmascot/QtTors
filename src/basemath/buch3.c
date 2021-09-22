@@ -1898,7 +1898,8 @@ GEN
 rnfconductor0(GEN bnf, GEN T, long flag)
 {
   pari_sp av = avma;
-  GEN D, nf, module, bnr, H, lim, Tr, MOD;
+  GEN P, E, D, nf, module, bnr, H, lim, Tr, MOD;
+  long i, l, degT = degpol(T);
 
   if (flag < 0 || flag > 2) pari_err_FLAG("rnfconductor");
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
@@ -1908,33 +1909,31 @@ rnfconductor0(GEN bnf, GEN T, long flag)
     D = rnfdisc_factored(nf, T, NULL);
   else
   {
-    GEN P, E, Ez;
-    long i, l, degT = degpol(T);
     D = nfX_disc(nf, Q_primpart(Tr));
     if (gequal0(D))
       pari_err_DOMAIN("rnfconductor","issquarefree(pol)","=",gen_0, Tr);
     D = idealfactor_partial(nf, D, lim);
-    P = gel(D,1); l = lg(P);
-    E = gel(D,2); Ez = ZV_to_zv(E);
-    if (l > 1 && vecsmall_max(Ez) > 1)
-    { /* cheaply update tame primes */
-      for (i = 1; i < l; i++)
-      { /* v_pr(f) = 1 + \sum_{0 < i < l} g_i/g_0
-                   <= 1 + max_{i>0} g_i/(g_i-1) \sum_{0 < i < l} g_i -1
-                   <= 1 + (p/(p-1)) * v_P(e(L/K, pr)), P | pr | p */
-        GEN pr = gel(P,i), p = pr_get_p(pr), e = gen_1;
-        long q, v = z_pvalrem(degT, p, &q);
-        if (v)
-        { /* e = e_tame * e_wild, e_wild | p^v */
-          long ee, pp = itou(p);
-          long t = ugcd(umodiu(subiu(pr_norm(pr),1), q), q); /* e_tame | t */
-          /* upper bound for 1 + p/(p-1) * v * e(L/Q,p) */
-          ee = 1 + (pp * v * pr_get_e(pr) * upowuu(pp,v) * t) / (pp-1);
-          e = utoi(minss(ee, Ez[i]));
-        }
-        gel(E,i) = e;
+  }
+  P = gel(D,1); l = lg(P);
+  E = gel(D,2);
+  for (i = 1; i < l; i++) /* cheaply update tame primes */
+  { /* v_pr(f) = 1 + \sum_{0 < i < l} g_i/g_0
+               <= 1 + max_{i>0} g_i/(g_i-1) \sum_{0 < i < l} g_i -1
+               <= 1 + (p/(p-1)) * v_P(e(L/K, pr)), P | pr | p */
+    GEN pr = gel(P,i), p = pr_get_p(pr), e = gen_1;
+    ulong q, e0 = itou(gel(E,i));
+    if (e0 > 1 && cmpiu(p, degT) <= 0)
+    {
+      long v, pp = itou(p);
+      if ((v = u_lvalrem(degT, pp, &q)))
+      { /* e = e_tame * e_wild, e_wild | p^v */
+        ulong t = ugcd(umodiu(subiu(pr_norm(pr),1), q), q); /* e_tame | t */
+        /* upper bound for 1 + p/(p-1) * v * e(L/Q,p) */
+        e0 = minuu(e0, 1 + (pp * v * pr_get_e(pr) * upowuu(pp,v) * t) / (pp-1));
+        e = utoipos(e0);
       }
     }
+    gel(E,i) = e;
   }
   module = mkvec2(D, identity_perm(nf_get_r1(nf)));
   MOD = flag? utoipos(degpol(T)): NULL;
