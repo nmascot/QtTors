@@ -2324,7 +2324,7 @@ RgXn_powu_i(GEN x, ulong m, long n)
   long v;
   if (n == 0) return x;
   v = RgX_valrem(x, &x);
-  if (v) n -= m * v;
+  if (v) { n -= m * v; if (n <= 0) return pol_0(varn(x)); }
   S.v = varn(x); S.n = n;
   x = gen_powu_i(x, m, (void*)&S,_sqrXn,_mulXn);
   if (v) x = RgX_shift_shallow(x, m * v);
