@@ -16,6 +16,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #define DEBUGLEVEL DEBUGLEVEL_hensel
 
+/* Assume n > 0. We want to go to accuracy n, starting from accuracy 1, using
+ * a quadratically convergent algorithm. Goal: 9 -> 1,2,3,5,9 instead of
+ * 1,2,4,8,9 (sequence of accuracies).
+ *
+ * Let a0 = 1, a1 = 2, a2, ... ak = n, the sequence of accuracies. To obtain
+ * it, work backwards:
+ *   a(k) = n, a(i-1) = (a(i) + 1) \ 2,
+ * but we do not want to store a(i) explicitly, even as a t_VECSMALL, since
+ * this would leave an object on the stack. We store a(i) implicitly in a
+ * MASK: let a(0) = 1, if the i-bit of MASK is set, set a(i+1) = 2 a(i) - 1,
+ * and 2a(i) otherwise.
+ *
+ * In fact, we do something a little more complicated to simplify the
+ * function interface and avoid returning k and MASK separately: we return
+ * MASK + 2^(k+1), so the highest bit of the mask indicates the length of the
+ * sequence, and the following ones are as above. */
+
+ulong
+quadratic_prec_mask(long n)
+{
+  long a = n, i;
+  ulong mask = 0;
+  for(i = 1;; i++, mask <<= 1)
+  {
+    mask |= (a&1); a = (a+1)>>1;
+    if (a==1) return mask | (1UL << i);
+  }
+}
 
 /***********************************************************************/
 /**                                                                   **/
@@ -67,6 +95,71 @@ GEN
 Zp_div(GEN a, GEN b, GEN q, GEN p, long e)
 {
   return Fp_mul(a, Zp_inv(b, p, e), q);
+}
+
+/* Same as ZpX_liftroot for the polynomial X^n-b*/
+GEN
+Zp_sqrtnlift(GEN b, GEN n, GEN a, GEN p, long e)
+{
+  pari_sp ltop=avma;
+  GEN q, w, n_1;
+  ulong mask;
+  long pis2 = equalii(n, gen_2)? 1: 0;
+  if (e == 1) return icopy(a);
+  n_1 = subiu(n,1);
+  mask = quadratic_prec_mask(e);
+  w = Fp_inv(pis2 ? shifti(a,1): Fp_mul(n,Fp_pow(a,n_1,p), p), p);
+  q = p;
+  for(;;)
+  {
+    q = sqri(q);
+    if (mask & 1) q = diviiexact(q, p);
+    mask >>= 1;
+    if (lgefint(q) == 3 && lgefint(n) == 3)
+    {
+      ulong Q = uel(q,2), N = uel(n,2);
+      ulong A = umodiu(a, Q);
+      ulong B = umodiu(b, Q);
+      ulong W = umodiu(w, Q);
+
+      A = Fl_sub(A, Fl_mul(W, Fl_sub(Fl_powu(A,N,Q), B, Q), Q), Q);
+      a = utoi(A);
+      if (mask == 1) break;
+      W = Fl_sub(Fl_add(W,W,Q),
+                 Fl_mul(Fl_sqr(W,Q), Fl_mul(N,Fl_powu(A, N-1, Q), Q), Q), Q);
+      w = utoi(W);
+    }
+    else
+    {
+      /* a -= w (a^n - b) */
+      a = modii(subii(a, mulii(w, subii(Fp_pow(a,n,q),b))), q);
+      if (mask == 1) break;
+      /* w += w - w^2 n a^(n-1)*/
+      w = subii(shifti(w,1), Fp_mul(Fp_sqr(w,q),
+                           pis2? shifti(a,1): mulii(n,Fp_pow(a,n_1,q)), q));
+    }
+  }
+  return gerepileuptoint(ltop,a);
+}
+
+/* Same as ZpX_liftroot for the polynomial X^2-b */
+GEN
+Zp_sqrtlift(GEN b, GEN a, GEN p, long e)
+{
+  return Zp_sqrtnlift(b, gen_2, a, p, e);
+}
+
+GEN
+Zp_sqrt(GEN x, GEN p, long e)
+{
+  pari_sp av;
+  GEN z;
+  if (absequaliu(p,2)) return Z2_sqrt(x,e);
+  av = avma;
+  z = Fp_sqrt(Fp_red(x, p), p);
+  if (!z) return NULL;
+  if (e > 1) z = Zp_sqrtlift(x, z, p, e);
+  return gerepileuptoint(av, z);
 }
 
 /***********************************************************************/
@@ -258,34 +351,6 @@ ZpXQ_RecTreeLift(GEN link, GEN v, GEN w, GEN Td, GEN T1, GEN pd, GEN p0, GEN p1,
   ZpXQ_HenselLift(v, w, j, f, Td,T1, pd, p0,p1, noinv);
   ZpXQ_RecTreeLift(link, v, w, Td,T1, pd, p0,p1, gel(v,j)  , link[j  ], noinv);
   ZpXQ_RecTreeLift(link, v, w, Td,T1, pd, p0,p1, gel(v,j+1), link[j+1], noinv);
-}
-
-/* Assume n > 0. We want to go to accuracy n, starting from accuracy 1, using
- * a quadratically convergent algorithm. Goal: 9 -> 1,2,3,5,9 instead of
- * 1,2,4,8,9 (sequence of accuracies).
- *
- * Let a0 = 1, a1 = 2, a2, ... ak = n, the sequence of accuracies. To obtain
- * it, work backwards:
- *   a(k) = n, a(i-1) = (a(i) + 1) \ 2,
- * but we do not want to store a(i) explicitly, even as a t_VECSMALL, since
- * this would leave an object on the stack. We store a(i) implicitly in a
- * MASK: let a(0) = 1, if the i-bit of MASK is set, set a(i+1) = 2 a(i) - 1,
- * and 2a(i) otherwise.
- *
- * In fact, we do something a little more complicated to simplify the
- * function interface and avoid returning k and MASK separately: we return
- * MASK + 2^(k+1), so the highest bit of the mask indicates the length of the
- * sequence, and the following ones are as above. */
-ulong
-quadratic_prec_mask(long n)
-{
-  long a = n, i;
-  ulong mask = 0;
-  for(i = 1;; i++, mask <<= 1)
-  {
-    mask |= (a&1); a = (a+1)>>1;
-    if (a==1) return mask | (1UL << i);
-  }
 }
 
 /* Lift to precision p^e0.
@@ -631,71 +696,6 @@ ZpXQX_liftroots(GEN f, GEN S, GEN T, GEN p, long e)
   for (i=1; i <= n; i++)
     gel(r,i) = ZpXQX_liftroot(f, gel(S,i), T, p, e);
   return r;
-}
-
-/* Same as ZpX_liftroot for the polynomial X^n-b*/
-GEN
-Zp_sqrtnlift(GEN b, GEN n, GEN a, GEN p, long e)
-{
-  pari_sp ltop=avma;
-  GEN q, w, n_1;
-  ulong mask;
-  long pis2 = equalii(n, gen_2)? 1: 0;
-  if (e == 1) return icopy(a);
-  n_1 = subiu(n,1);
-  mask = quadratic_prec_mask(e);
-  w = Fp_inv(pis2 ? shifti(a,1): Fp_mul(n,Fp_pow(a,n_1,p), p), p);
-  q = p;
-  for(;;)
-  {
-    q = sqri(q);
-    if (mask & 1) q = diviiexact(q, p);
-    mask >>= 1;
-    if (lgefint(q) == 3 && lgefint(n) == 3)
-    {
-      ulong Q = uel(q,2), N = uel(n,2);
-      ulong A = umodiu(a, Q);
-      ulong B = umodiu(b, Q);
-      ulong W = umodiu(w, Q);
-
-      A = Fl_sub(A, Fl_mul(W, Fl_sub(Fl_powu(A,N,Q), B, Q), Q), Q);
-      a = utoi(A);
-      if (mask == 1) break;
-      W = Fl_sub(Fl_add(W,W,Q),
-                 Fl_mul(Fl_sqr(W,Q), Fl_mul(N,Fl_powu(A, N-1, Q), Q), Q), Q);
-      w = utoi(W);
-    }
-    else
-    {
-      /* a -= w (a^n - b) */
-      a = modii(subii(a, mulii(w, subii(Fp_pow(a,n,q),b))), q);
-      if (mask == 1) break;
-      /* w += w - w^2 n a^(n-1)*/
-      w = subii(shifti(w,1), Fp_mul(Fp_sqr(w,q),
-                           pis2? shifti(a,1): mulii(n,Fp_pow(a,n_1,q)), q));
-    }
-  }
-  return gerepileuptoint(ltop,a);
-}
-
-/* Same as ZpX_liftroot for the polynomial X^2-b */
-GEN
-Zp_sqrtlift(GEN b, GEN a, GEN p, long e)
-{
-  return Zp_sqrtnlift(b, gen_2, a, p, e);
-}
-
-GEN
-Zp_sqrt(GEN x, GEN p, long e)
-{
-  pari_sp av;
-  GEN z;
-  if (absequaliu(p,2)) return Z2_sqrt(x,e);
-  av = avma;
-  z = Fp_sqrt(Fp_red(x, p), p);
-  if (!z) return NULL;
-  if (e > 1) z = Zp_sqrtlift(x, z, p, e);
-  return gerepileuptoint(av, z);
 }
 
 /* Compute (x-1)/(x+1)/p^k */
