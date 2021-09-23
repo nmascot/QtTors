@@ -424,23 +424,23 @@ FqX_numer_isog_abscissa(GEN h, GEN a4, GEN a6, GEN T, GEN p, long vx)
 }
 
 static GEN
-Zq_inv(GEN b, GEN T, GEN q, GEN p, long e)
+Zq_inv(GEN b, GEN T, GEN p, long e)
 {
   return e==1 ? Fq_inv(b, T, p):
-         typ(b)==t_INT ? Fp_inv(b, q):  ZpXQ_inv(b, T, p, e);
+         typ(b)==t_INT ? Zp_inv(b, p, e):  ZpXQ_inv(b, T, p, e);
 }
 
 static GEN
 Zq_div(GEN a, GEN b, GEN T, GEN q, GEN p, long e)
 {
-  if (e==1) return Fq_div(a, b, T, q);
-  return Fq_mul(a, Zq_inv(b, T, q, p, e), T, q);
+  if (e==1) return Fq_div(a, b, T, p);
+  return Fq_mul(a, Zq_inv(b, T, p, e), T, q);
 }
 
 static GEN
-Zq_sqrt(GEN b, GEN T, GEN q, GEN p, long e)
+Zq_sqrt(GEN b, GEN T, GEN p, long e)
 {
-  return e==1 ? Fq_sqrt(b, T, q):
+  return e==1 ? Fq_sqrt(b, T, p):
          typ(b)==t_INT ? Zp_sqrt(b, p, e):  ZpXQ_sqrt(b, T, p, e);
 }
 
@@ -904,7 +904,7 @@ find_isogenous_from_canonical(GEN a4, GEN a6, ulong ell, struct meqn *MEQN, GEN 
     E4l = Fq_div(E4, sqru(ell), T, p);
     jl  = Zq_div(Fq_powu(E4l, 3, T, p), deltal, T, p, pp, e);
     E6l = Zq_sqrt(Fq_mul(Fq_sub(jl, utoi(1728), T, p),
-                         deltal, T, p), T, p, pp, e);
+                         deltal, T, p), T, pp, e);
     p_1 = gen_0;
   }
   else
@@ -1089,7 +1089,7 @@ find_isogenous_from_J(GEN a4, GEN a6, ulong ell, struct meqn *MEQN, GEN g, GEN T
   jtp2 = Fq_sqr(jtp,T,p);
   jtp3 = Fq_mul(jtp,jtp2,T,p);
   den = Fq_mul(Fq_sqr(g,T,p),Fq_sub(g,utoi(1728),T,p),T, p);
-  D  =  Zq_inv(den,T,p,pp, e);
+  D  =  Zq_inv(den, T, pp, e);
   C4t = Fq_mul(jtp2,Fq_mul(g, D, T, p), T, p);
   C6t = Fq_mul(jtp3, D, T, p);
   s0 = Fq_mul(Fq_sqr(jp, T, p), Pxxj, T, p);

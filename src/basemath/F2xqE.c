@@ -725,7 +725,7 @@ Z2XQ_invnorm_pcyc(GEN a, GEN T, long e)
 {
   GEN q = int2n(e);
   GEN z = ZpXQ_norm_pcyc(a, T, q, gen_2);
-  return Fp_inv(z, q);
+  return Zp_inv(z, gen_2, e);
 }
 
 /* Assume a = 1 [4] */
@@ -735,7 +735,7 @@ Z2XQ_invnorm(GEN a, GEN T, long e)
   pari_timer ti;
   GEN pe = int2n(e), s;
   if (degpol(a)==0)
-    return Fp_inv(Fp_powu(gel(a,2), get_FpX_degree(T), pe), pe);
+    return Zp_inv(Fp_powu(gel(a,2), get_FpX_degree(T), pe), gen_2, e);
   if (DEBUGLEVEL>=3) timer_start(&ti);
   s = ZpXQ_log(a, T, gen_2, e);
   if (DEBUGLEVEL>=3) timer_printf(&ti,"Z2XQ_log");

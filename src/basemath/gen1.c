@@ -3147,7 +3147,7 @@ ginv(GEN x)
       z[1] = _evalprecp(precp(x)) | evalvalp(-valp(x));
       gel(z,2) = icopy(gel(x,2));
       gel(z,3) = icopy(gel(x,3));
-      gel(z,4) = Fp_inv(gel(x,4),gel(z,3)); return z;
+      gel(z,4) = Zp_inv(gel(x,4),gel(z,2),precp(x)); return z;
 
     case t_POLMOD: return inv_polmod(gel(x,1), gel(x,2));
     case t_FFELT: return FF_inv(x);

@@ -137,7 +137,7 @@ get_UV(GEN *U, GEN *V, GEN T, ulong p, long e)
   GEN R = polresultantext(T, dT);
   long v = varn(T);
   if (dvdiu(gel(R,3),p)) is_sing(T, p);
-  d = Fp_inv(gel(R,3), q);
+  d = Zp_inv(gel(R,3), utoi(p), e);
   *U = FpX_Fp_mul(FpX_red(to_ZX(gel(R,1),v),q),d,q);
   *V = FpX_Fp_mul(FpX_red(to_ZX(gel(R,2),v),q),d,q);
 }

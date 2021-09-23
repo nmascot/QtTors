@@ -585,7 +585,7 @@ zk_galoisapplymod(GEN nf, GEN z, GEN S, GEN p)
   {
     ulong e = Z_pvalrem(den, p, &den);
     if (e) { pe = powiu(p, e); pe1 = mulii(pe, p); }
-    denpe = Fp_inv(den, pe1);
+    denpe = Zp_inv(den, p, e+1);
   }
   R = FpX_FpC_nfpoleval(nf, FpX_red(z, pe1), FpC_red(S, pe1), pe1);
   if (denpe) R = FpC_Fp_mul(R, denpe, pe1);
