@@ -3463,14 +3463,15 @@ Flxn_mulhigh(GEN f, GEN g, long n2, long n, ulong p)
   return Flx_add(Flx_mulhigh_i(fl, g, n2, p), Flxn_mul(fh, g, n - n2, p), p);
 }
 
+/* g==NULL -> assume g==1 */
 GEN
-Flxn_inv(GEN f, long e, ulong p)
+Flxn_div(GEN g, GEN f, long e, ulong p)
 {
   pari_sp av = avma, av2;
   ulong mask;
   GEN W;
-  long n=1;
-  if (lg(f)==2) pari_err_INV("Flxn_inv",f);
+  long n = 1;
+  if (lg(f) <= 2) pari_err_INV("Flxn_inv",f);
   W = Fl_to_Flx(Fl_inv(uel(f,2),p), f[1]);
   mask = quadratic_prec_mask(e);
   av2 = avma;
@@ -3481,16 +3482,28 @@ Flxn_inv(GEN f, long e, ulong p)
     n<<=1; if (mask & 1) n--;
     mask >>= 1;
     fr = Flxn_red(f, n);
-    u = Flxn_mul(W, Flxn_mulhigh(fr, W, n2, n, p), n-n2, p);
-    W = Flx_sub(W, Flx_shift(u, n2), p);
+    if (mask>1 || !g)
+    {
+      u = Flxn_mul(W, Flxn_mulhigh(fr, W, n2, n, p), n-n2, p);
+      W = Flx_sub(W, Flx_shift(u, n2), p);
+    } else
+    {
+      GEN y = Flxn_mul(g, W, n, p), yt =  Flxn_red(y, n-n2);
+      u = Flxn_mul(yt, Flxn_mulhigh(fr,  W, n2, n, p), n-n2, p);
+      W = Flx_sub(y, Flx_shift(u, n2), p);
+    }
     if (gc_needed(av2,2))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"Flxn_inv, e = %ld", n);
+      if(DEBUGMEM>1) pari_warn(warnmem,"Flxn_div, e = %ld", n);
       W = gerepileupto(av2, W);
     }
   }
   return gerepileupto(av, W);
 }
+
+GEN
+Flxn_inv(GEN f, long e, ulong p)
+{ return Flxn_div(NULL, f, e, p); }
 
 GEN
 Flxn_expint(GEN h, long e, ulong p)
@@ -3544,7 +3557,7 @@ Flx_Newton(GEN P, long n, ulong p)
   pari_sp av = avma;
   long d = degpol(P);
   GEN dP = Flxn_recip(Flx_deriv(P, p), d);
-  GEN Q = Flxn_mul(Flxn_inv(Flxn_recip(P, d+1), n, p), dP, n, p);
+  GEN Q = Flxn_div(dP, Flxn_recip(P, d+1), n, p);
   return gerepileuptoleaf(av, Q);
 }
 

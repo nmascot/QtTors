@@ -447,6 +447,7 @@ GEN     FlxV_to_Flm(GEN v, long n);
 GEN     FlxV_to_FlxX(GEN x, long v);
 GEN     FlxV_to_ZXV(GEN x);
 void    FlxV_to_ZXV_inplace(GEN v);
+GEN     Flxn_div(GEN g, GEN f, long e, ulong p);
 GEN     Flxn_exp(GEN h, long e, ulong p);
 GEN     Flxn_expint(GEN h, long e, ulong p);
 GEN     Flxn_inv(GEN f, long e, ulong p);
