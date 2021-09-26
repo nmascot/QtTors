@@ -1617,64 +1617,33 @@ gsqrt(GEN x, long prec)
 /**                          N-th ROOT                             **/
 /**                                                                **/
 /********************************************************************/
-static void
-bug_logp(GEN p)
+
+static GEN
+Z_to_padic(GEN a, GEN p, long e)
 {
-  if (!BPSW_psp(p)) pari_err_PRIME("p-adic log",p);
-  pari_err_BUG("log_p");
+  if (signe(a)==0)
+    return zeropadic(p, e);
+  else
+  {
+    GEN z = cgetg(5, t_PADIC);
+    long v = Z_pvalrem(a, p, &a), d = e - v;
+    z[1] = evalprecp(d) | evalvalp(v);
+    gel(z,2) = icopy(p);
+    gel(z,3) = powiu(p, d);
+    gel(z,4) = a;
+    return z;
+  }
 }
+
 /* Let x = 1 mod p and y := (x-1)/(x+1) = 0 (p). Then
  * log(x) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / k.
  * palogaux(x) returns the last sum (not multiplied by 2) */
 static GEN
 palogaux(GEN x)
 {
-  long i, k, e, pp, t;
-  GEN y,s,y2, p = gel(x,2);
-  int is2 = absequaliu(p,2);
-
-  y = subiu(gel(x,4), 1);
-  if (!signe(y))
-  {
-    long v = valp(x)+precp(x);
-    if (is2) v--;
-    return zeropadic(p, v);
-  }
-  /* optimize t: log(x) = log(x^(p^t)) / p^t */
-  e = Z_pval(y, p); /* valp(y) = e >= 1; precp(y) = precp(x)-e */
-  if (!e) bug_logp(p);
-  if (is2)
-    t = sqrt( (double)(precp(x)-e) / e ); /* instead of (2*e) */
-  else
-    t = sqrt( (double)(precp(x)-e) / (e * (expi(p) + hammingweight(p))) );
-  for (i = 0; i < t; i++) x = gpow(x, p, 0);
-
-  y = gdiv(gaddgs(x,-1), gaddgs(x,1));
-  e = valp(y); /* > 0 */
-  if (e <= 0) bug_logp(p);
-  pp = precp(y) + e;
-  if (is2) pp--;
-  else
-  {
-    GEN p1;
-    for (p1=utoipos(e); abscmpui(pp,p1) > 0; pp++) p1 = mulii(p1, p);
-    pp -= 2;
-  }
-  k = pp/e; if (!odd(k)) k--;
-  if (DEBUGLEVEL>5)
-    err_printf("logp: [pp,k,e,t] = [%ld,%ld,%ld,%ld]\n",pp,k,e,t);
-  if (k > 1)
-  {
-    y2 = gsqr(y); s = gdivgs(gen_1,k);
-    while (k > 2)
-    {
-      k -= 2;
-      s = gadd(gmul(y2,s), gdivgs(gen_1,k));
-    }
-    y = gmul(s,y);
-  }
-  if (t) setvalp(y, valp(y) - t);
-  return y;
+  GEN p = gel(x,2), a = gel(x,4);
+  long e = precp(x);
+  return Z_to_padic(Zp_log(a, p, e), p, e);
 }
 
 GEN
@@ -1686,15 +1655,15 @@ Qp_log(GEN x)
   if (!signe(a)) pari_err_DOMAIN("Qp_log", "argument", "=", gen_0, x);
   y = leafcopy(x); setvalp(y,0);
   if (absequaliu(p,2))
-    y = palogaux(gsqr(y));
+    y = palogaux(y);
   else if (gequal1(modii(a, p)))
-    y = gmul2n(palogaux(y), 1);
+    y = palogaux(y);
   else
   { /* compute log(x^(p-1)) / (p-1) */
     GEN mod = gel(y,3), p1 = subiu(p,1);
     gel(y,4) = Fp_pow(a, p1, mod);
     p1 = diviiexact(subsi(1,mod), p1); /* 1/(p-1) */
-    y = gmul(palogaux(y), shifti(p1,1));
+    y = gmul(palogaux(y), p1);
   }
   return gerepileupto(av,y);
 }
@@ -2388,16 +2357,13 @@ Qp_exp_prec(GEN x)
 static GEN
 Qp_exp_safe(GEN x)
 {
-  long k;
-  pari_sp av;
-  GEN y;
-
+  pari_sp av = avma;
+  GEN p = gel(x,2), a = gel(x,4), z;
+  long d = precp(x), v = valp(x), e = d+v;
   if (gequal0(x)) return gaddgs(x,1);
-  k = Qp_exp_prec(x);
-  if (k < 0) return NULL;
-  av = avma;
-  for (y=gen_1; k; k--) y = gaddsg(1, gdivgs(gmul(y,x), k));
-  return gerepileupto(av, y);
+  if (v < (equaliu(p,2)? 2:1)) return NULL;
+  z = Zp_exp(mulii(a,powiu(p,v)), p, e);
+  return gerepileupto(av, Z_to_padic(z, p, e));
 }
 
 GEN
