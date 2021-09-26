@@ -2731,7 +2731,7 @@ FpXn_mulhigh(GEN f, GEN g, long n2, long n, GEN p)
 }
 
 GEN
-FpXn_inv(GEN f, long e, GEN p)
+FpXn_div(GEN g, GEN f, long e, GEN p)
 {
   pari_sp av = avma, av2;
   ulong mask;
@@ -2740,8 +2740,8 @@ FpXn_inv(GEN f, long e, GEN p)
 
   if (!signe(f)) pari_err_INV("FpXn_inv",f);
   a = Fp_inv(gel(f,2), p);
-  if (e == 1) return scalarpol(a, v);
-  else if (e == 2)
+  if (e == 1 && !g) return scalarpol(a, v);
+  else if (e == 2 && !g)
   {
     GEN b;
     if (degpol(f) <= 0) return scalarpol(a, v);
@@ -2761,8 +2761,17 @@ FpXn_inv(GEN f, long e, GEN p)
     n<<=1; if (mask & 1) n--;
     mask >>= 1;
     fr = FpXn_red(f, n);
-    u = FpXn_mul(W, FpXn_mulhigh(fr, W, n2, n, p), n-n2, p);
-    W = FpX_sub(W, FpX_shift(u, n2), p);
+    if (mask>1 || !g)
+    {
+      u = FpXn_mul(W, FpXn_mulhigh(fr, W, n2, n, p), n-n2, p);
+      W = FpX_sub(W, FpX_shift(u, n2), p);
+    }
+    else
+    {
+      GEN y = FpXn_mul(g, W, n, p), yt =  FpXn_red(y, n-n2);
+      u = FpXn_mul(yt, FpXn_mulhigh(fr,  W, n2, n, p), n-n2, p);
+      W = FpX_sub(y, FpX_shift(u, n2), p);
+    }
     if (gc_needed(av2,2))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"FpXn_inv, e = %ld", n);
@@ -2771,6 +2780,10 @@ FpXn_inv(GEN f, long e, GEN p)
   }
   return gerepileupto(av, W);
 }
+
+GEN
+FpXn_inv(GEN f, long e, GEN p)
+{ return FpXn_div(NULL, f, e, p); }
 
 GEN
 FpXn_expint(GEN h, long e, GEN p)
