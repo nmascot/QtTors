@@ -7463,10 +7463,9 @@ $A\*b \equiv 1 \mod p^e$.
 $p$ be a prime \typ{INT} and $b$ be a \typ{INT}
 Returns an \typ{INT} $A$ such that $A\*b \equiv 1 \mod p^e$.
 
-\fun{GEN}{Zp_div}{GEN a, GEN b, GEN q, GEN p, long e} let
+\fun{GEN}{Zp_div}{GEN a, GEN b, GEN p, long e} let
 $p$ be a prime \typ{INT} and $a$ and $b$ be a \typ{INT}
 Returns an \typ{INT} $c$ such that $c\*b \equiv a \mod p^e$.
-The parameter $q$ must be equal to $p^e$.
 
 \fun{GEN}{Zp_sqrt}{GEN b, GEN p, long e} $b$ and $p$ being \typ{INT}s, with $p$
 a prime (possibly $2$), returns a \typ{INT} $a$ such that $a^2 \equiv b \mod

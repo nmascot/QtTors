@@ -1050,7 +1050,7 @@ GEN     ZMV_to_FlmV(GEN z, ulong m);
 
 GEN     Flx_Teichmuller(GEN P, ulong p, long n);
 GEN     Z2_sqrt(GEN x, long e);
-GEN     Zp_div(GEN a, GEN b, GEN q, GEN p, long e);
+GEN     Zp_div(GEN a, GEN b, GEN p, long e);
 GEN     Zp_inv(GEN a, GEN p, long e);
 GEN     Zp_invlift(GEN b, GEN a, GEN p, long e);
 GEN     Zp_sqrt(GEN x, GEN p, long e);

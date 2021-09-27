@@ -51,8 +51,8 @@ quadratic_prec_mask(long n)
 /**                                                                   **/
 /***********************************************************************/
 
-GEN
-Zp_invlift(GEN a, GEN x, GEN p, long n)
+static GEN
+Zp_divlift(GEN b, GEN a, GEN x, GEN p, long n)
 {
   pari_sp ltop = avma, av;
   ulong mask;
@@ -62,12 +62,21 @@ Zp_invlift(GEN a, GEN x, GEN p, long n)
   av = avma;
   while (mask > 1)
   {
-    GEN v;
+    GEN v, q2 = q;
     q = sqri(q);
     if (mask & 1UL) q = diviiexact(q,p);
     mask >>= 1;
-    v = Fp_sub(Fp_mul(x, modii(a, q), q), gen_1, q);
-    x = Fp_sub(x, Fp_mul(v,  x, q), q);
+    if (mask > 1 || !b)
+    {
+      v = Fp_sub(Fp_mul(x, modii(a, q), q), gen_1, q);
+      x = Fp_sub(x, Fp_mul(v, x, q), q);
+    }
+    else
+    {
+      GEN y = Fp_mul(x, b, q), yt = modii(y, q2);
+      v = Fp_sub(Fp_mul(x, modii(a, q), q), gen_1, q);
+      x = Fp_sub(y, Fp_mul(v, yt, q), q);
+    }
     if (gc_needed(av, 1))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"gen_Zp_Newton");
@@ -76,6 +85,10 @@ Zp_invlift(GEN a, GEN x, GEN p, long n)
   }
   return gerepileupto(ltop, x);
 }
+
+GEN
+Zp_invlift(GEN a, GEN x, GEN p, long e)
+{ return Zp_divlift(NULL, a, x, p, e); }
 
 GEN
 Zp_inv(GEN a, GEN p, long e)
@@ -92,9 +105,17 @@ Zp_inv(GEN a, GEN p, long e)
 }
 
 GEN
-Zp_div(GEN a, GEN b, GEN q, GEN p, long e)
+Zp_div(GEN b, GEN a, GEN p, long e)
 {
-  return Fp_mul(a, Zp_inv(b, p, e), q);
+  pari_sp av=avma;
+  GEN ai;
+  if (lgefint(p)==3)
+  {
+    ulong pp = p[2];
+    ai = utoi(Fl_inv(umodiu(a,pp), pp));
+  } else
+    ai = Fp_inv(modii(a, p), p);
+  return gerepileupto(av, Zp_divlift(b, a, ai, p, e));
 }
 
 /* Same as ZpX_liftroot for the polynomial X^n-b*/
