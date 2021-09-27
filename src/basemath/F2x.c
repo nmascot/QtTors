@@ -769,15 +769,22 @@ F2xn_inv1(GEN v, long e)
   return mkvecsmall2(v[1],F2xn_inv_basecase1(uel(v,2))&mask);
 }
 
+static GEN
+F2xn_div1(GEN g, GEN f, long e)
+{
+  GEN fi = F2xn_inv1(f, e);
+  return g ? F2xn_mul(g, fi, e): fi;
+}
+
 GEN
-F2xn_inv(GEN f, long e)
+F2xn_div(GEN g, GEN f, long e)
 {
   pari_sp av = avma, av2;
   ulong mask;
   GEN W;
   long n=1;
-  if (lg(f)==2) pari_err_INV("Flxn_inv",f);
-  if (e <= BITS_IN_LONG) return F2xn_inv1(f, e);
+  if (lg(f)<=2) pari_err_INV("Flxn_inv",f);
+  if (e <= BITS_IN_LONG) return F2xn_div1(g, f, e);
   W = F2xn_inv1(f, BITS_IN_LONG);
   mask = quadratic_prec_mask(divsBIL(e+BITS_IN_LONG-1));
   n = BITS_IN_LONG;
@@ -789,8 +796,16 @@ F2xn_inv(GEN f, long e)
     n<<=1; if (mask & 1) n--;
     mask >>= 1;
     fr = F2xn_red(f, n);
-    u = F2x_shift(F2xn_mul(W, fr, n), -n2);
-    W = F2x_add(W, F2x_shift(F2xn_mul(u, W, n-n2), n2));
+    if (mask<1 || !g)
+    {
+      u = F2x_shift(F2xn_mul(W, fr, n), -n2);
+      W = F2x_add(W, F2x_shift(F2xn_mul(u, W, n-n2), n2));
+    } else
+    {
+      GEN y = F2xn_mul(g, W, n), yt =  F2xn_red(y, n-n2);
+      u = F2xn_mul(yt, F2xn_mul(fr,  W, n), n-n2);
+      W = F2x_add(y, F2x_shift(u, n2));
+    }
     if (gc_needed(av2,2))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"F2xn_inv, e = %ld", n);
@@ -799,6 +814,10 @@ F2xn_inv(GEN f, long e)
   }
   return gerepileupto(av, F2xn_red(W,e));
 }
+
+GEN
+F2xn_inv(GEN f, long e)
+{ return F2xn_div(NULL, f, e); }
 
 GEN
 F2x_get_red(GEN T)
