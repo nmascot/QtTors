@@ -37,13 +37,27 @@ fracB2k(GEN D)
   }
   return mkfrac(a,b);
 }
+/* replace 1 by quantity allowing enough guard bits */
+static long
+fudge(long N)
+{
+  if (N < 20000) return 4;
+  if (N < 35000) return 7;
+  if (N < 50000) return 10;
+  if (N < 80000) return 15;
+  if (N < 108000) return 20;
+  if (N < 142000) return 25;
+  if (N < 174000) return 30;
+  return 35;
+}
 /* precision needed to compute B_k for all k <= N */
 long
 bernbitprec(long N)
 { /* 1.612086 ~ log(8Pi) / 2 */
   const double log2PI = 1.83787706641;
-  double t = (N + 0.5) * log((double)N) - N*(1 + log2PI) + 1.612086;
-  return (long)ceil(t / M_LN2) + (N < 4000? 16: 32);
+  double logN = log((double)N);
+  double t = (N + fudge(N)) * logN - N*(1 + log2PI) + 1.612086;
+  return (long)ceil(t / M_LN2) + 16;
 }
 static long
 bernprec(long N) { return nbits2prec(bernbitprec(N)); }
@@ -160,6 +174,19 @@ constbern(long nb)
   if (DEBUGLEVEL) timer_printf(&T, "Bernoulli");
   swap(B, bernzone); guncloneNULL(B);
   set_avma(av);
+  if (nb > 200000)
+  {
+    const ulong p = 4294967291UL;
+    long n = 2 * nb + 2;
+    GEN t = const_vecsmall(n+1, 1);
+    t[1] = evalvarn(0); t[2] = 0;
+    t = Flx_shift(Flx_invLaplace(t, p), -1); /* t = (exp(x)-1)/x */
+    t = Flx_Laplace(Flxn_inv(t, n, p), p);
+    for (i = 1; i <= nb; i++)
+      if (Rg_to_Fl(bernfrac(2*i), p) != t[2*i+2])
+        pari_err_BUG(stack_sprintf("B_{2*%ld}", i));
+    set_avma(av);
+  }
 }
 /* Obsolete, kept for backward compatibility */
 void
