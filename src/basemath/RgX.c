@@ -2439,6 +2439,32 @@ RgXn_div_gen(GEN g, GEN f, long e)
 }
 
 static GEN
+RgXn_div_FpX(GEN x, GEN y, long e, GEN p)
+{
+  GEN r;
+  if (lgefint(p) == 3)
+  {
+    ulong pp = uel(p, 2);
+    if (pp == 2)
+      r = F2x_to_ZX(F2xn_div(RgX_to_F2x(x), RgX_to_F2x(y), e));
+    else
+      r = Flx_to_ZX_inplace(Flxn_div(RgX_to_Flx(x, pp), RgX_to_Flx(y, pp), e, pp));
+  }
+  else
+    r = FpXn_div(RgX_to_FpX(x, p), RgX_to_FpX(y, p), e, p);
+  return FpX_to_mod(r, p);
+}
+
+static GEN
+RgXn_div_FpXQX(GEN x, GEN y, long n, GEN pol, GEN p)
+{
+  GEN r, T = RgX_to_FpX(pol, p);
+  if (signe(T) == 0) pari_err_OP("/", x, y);
+  r = FpXQXn_div(RgX_to_FpXQX(x, T, p), RgX_to_FpXQX(y, T, p), n, T, p);
+  return FpXQX_to_mod(r, T, p);
+}
+
+static GEN
 RgXn_inv_FpX(GEN x, long e, GEN p)
 {
   GEN r;
@@ -2480,11 +2506,28 @@ RgXn_inv_fast(GEN x, long e)
     default:       return NULL;
   }
 }
+
+static GEN
+RgXn_div_fast(GEN x, GEN y, long e)
+{
+  GEN p, pol;
+  long pa;
+  long t = RgX_type2(x,y,&p,&pol,&pa);
+  switch(t)
+  {
+    case t_INTMOD: return RgXn_div_FpX(x, y, e, p);
+    case code(t_POLMOD, t_INTMOD):
+                   return RgXn_div_FpXQX(x, y, e, pol, p);
+    default:       return NULL;
+  }
+}
 #undef code
 
 GEN
 RgXn_div_i(GEN g, GEN f, long e)
 {
+  GEN h = RgXn_div_fast(g, f, e);
+  if (h) return h;
   return RgXn_div_gen(g, f, e);
 }
 
