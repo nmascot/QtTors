@@ -2489,6 +2489,13 @@ RgXn_div_i(GEN g, GEN f, long e)
 }
 
 GEN
+RgXn_div(GEN g, GEN f, long e)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, RgXn_div_i(g, f, e));
+}
+
+GEN
 RgXn_inv_i(GEN f, long e)
 {
   GEN h = RgXn_inv_fast(f, e);
