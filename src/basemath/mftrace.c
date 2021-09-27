@@ -858,7 +858,7 @@ RgV_div_RgXn(GEN a, GEN b)
   long n = lg(a)-1;
   GEN c;
   a = RgV_to_RgX(a,0);
-  b = RgV_to_RgX(b,0); c = RgXn_mul(a, RgXn_inv(b,n), n);
+  b = RgV_to_RgX(b,0); c = RgXn_div_i(a, b, n);
   c = RgX_to_RgC(c,n); settyp(c,t_VEC); return c;
 }
 /* a^b */

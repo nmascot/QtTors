@@ -1287,6 +1287,7 @@ long    RgXY_degreex(GEN bpol);
 GEN     RgXY_derivx(GEN x);
 GEN     RgXY_swap(GEN x, long n, long w);
 GEN     RgXY_swapspec(GEN x, long n, long w, long nx);
+GEN     RgXn_div_i(GEN g, GEN f, long e);
 GEN     RgXn_eval(GEN Q, GEN x, long n);
 GEN     RgXn_exp(GEN f, long e);
 GEN     RgXn_expint(GEN f, long e);

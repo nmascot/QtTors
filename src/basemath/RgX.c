@@ -2390,7 +2390,7 @@ RgXn_sqrhigh(GEN f, long n2, long n)
 }
 
 static GEN
-RgXn_inv_gen(GEN f, long e)
+RgXn_div_gen(GEN g, GEN f, long e)
 {
   pari_sp av;
   ulong mask;
@@ -2399,8 +2399,8 @@ RgXn_inv_gen(GEN f, long e)
 
   if (!signe(f)) pari_err_INV("RgXn_inv",f);
   a = ginv(gel(f,2));
-  if (e == 1) return scalarpol(a, v);
-  else if (e == 2)
+  if (e == 1 && !g) return scalarpol(a, v);
+  else if (e == 2 && !g)
   {
     GEN b;
     if (degpol(f) <= 0 || gequal0(b = gel(f,3))) return scalarpol(a, v);
@@ -2418,8 +2418,17 @@ RgXn_inv_gen(GEN f, long e)
     n<<=1; if (mask & 1) n--;
     mask >>= 1;
     fr = RgXn_red_shallow(f, n);
-    u = RgXn_mul(W, RgXn_mulhigh(fr, W, n2, n), n-n2);
-    W = RgX_sub(W, RgX_shift_shallow(u, n2));
+    if (mask>1 || !g)
+    {
+      u = RgXn_mul(W, RgXn_mulhigh(fr, W, n2, n), n-n2);
+      W = RgX_sub(W, RgX_shift_shallow(u, n2));
+    }
+    else
+    {
+      GEN y = RgXn_mul(g, W, n), yt =  RgXn_red_shallow(y, n-n2);
+      u = RgXn_mul(yt, RgXn_mulhigh(fr,  W, n2, n), n-n2);
+      W = RgX_sub(y, RgX_shift_shallow(u, n2));
+    }
     if (gc_needed(av,2))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"RgXn_inv, e = %ld", n);
@@ -2474,11 +2483,17 @@ RgXn_inv_fast(GEN x, long e)
 #undef code
 
 GEN
+RgXn_div_i(GEN g, GEN f, long e)
+{
+  return RgXn_div_gen(g, f, e);
+}
+
+GEN
 RgXn_inv_i(GEN f, long e)
 {
   GEN h = RgXn_inv_fast(f, e);
   if (h) return h;
-  return RgXn_inv_gen(f, e);
+  return RgXn_div_gen(NULL, f, e);
 }
 
 GEN
