@@ -2389,8 +2389,8 @@ RgXn_sqrhigh(GEN f, long n2, long n)
   return RgX_add(RgX_mulhigh_i(fl, f, n2), RgXn_mul(fh, f, n - n2));
 }
 
-GEN
-RgXn_inv_i(GEN f, long e)
+static GEN
+RgXn_inv_gen(GEN f, long e)
 {
   pari_sp av;
   ulong mask;
@@ -2432,7 +2432,6 @@ RgXn_inv_i(GEN f, long e)
 static GEN
 RgXn_inv_FpX(GEN x, long e, GEN p)
 {
-  pari_sp av = avma;
   GEN r;
   if (lgefint(p) == 3)
   {
@@ -2444,17 +2443,16 @@ RgXn_inv_FpX(GEN x, long e, GEN p)
   }
   else
     r = FpXn_inv(RgX_to_FpX(x, p), e, p);
-  return gerepileupto(av, FpX_to_mod(r, p));
+  return FpX_to_mod(r, p);
 }
 
 static GEN
 RgXn_inv_FpXQX(GEN x, long n, GEN pol, GEN p)
 {
-  pari_sp av = avma;
   GEN r, T = RgX_to_FpX(pol, p);
   if (signe(T) == 0) pari_err_OP("/", gen_1, x);
   r = FpXQXn_inv(RgX_to_FpXQX(x, T, p), n, T, p);
-  return gerepileupto(av, FpXQX_to_mod(r, T, p));
+  return FpXQX_to_mod(r, T, p);
 }
 
 #define code(t1,t2) ((t1 << 6) | t2)
@@ -2476,11 +2474,17 @@ RgXn_inv_fast(GEN x, long e)
 #undef code
 
 GEN
+RgXn_inv_i(GEN f, long e)
+{
+  GEN h = RgXn_inv_fast(f, e);
+  if (h) return h;
+  return RgXn_inv_gen(f, e);
+}
+
+GEN
 RgXn_inv(GEN f, long e)
 {
   pari_sp av = avma;
-  GEN h = RgXn_inv_fast(f, e);
-  if (h) return h;
   return gerepileupto(av, RgXn_inv_i(f, e));
 }
 
