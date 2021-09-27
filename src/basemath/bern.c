@@ -37,98 +37,88 @@ fracB2k(GEN D)
   }
   return mkfrac(a,b);
 }
-/* replace 1 by quantity allowing enough guard bits */
-static long
-fudge(long N)
-{
-  if (N < 20000) return 4;
-  if (N < 35000) return 7;
-  if (N < 50000) return 10;
-  if (N < 80000) return 15;
-  if (N < 108000) return 20;
-  if (N < 142000) return 25;
-  if (N < 174000) return 30;
-  return 35;
-}
 /* precision needed to compute B_k for all k <= N */
 long
 bernbitprec(long N)
 { /* 1.612086 ~ log(8Pi) / 2 */
   const double log2PI = 1.83787706641;
   double logN = log((double)N);
-  double t = (N + fudge(N)) * logN - N*(1 + log2PI) + 1.612086;
-  return (long)ceil(t / M_LN2) + 16;
+  double t = (N + 4) * logN - N*(1 + log2PI) + 1.612086;
+  return (long)ceil(t / M_LN2) + 10;
 }
 static long
 bernprec(long N) { return nbits2prec(bernbitprec(N)); }
 /* \sum_{k > M} k^(-n) <= M^(1-n) / (n-1) < 2^-b */
 static long
-zetamaxpow(long n, long b)
+zetamaxpow(long n)
 {
-  long M = (long)exp2((double)b / (n-1.0));
+  long M = (long)ceil(n / (2 * M_PI * M_E));
   return M | 1; /* make it odd */
 }
-/* zeta(k) using 'max' precomputed odd powers */
+/* v * zeta(k) using 'max' precomputed odd powers */
 static GEN
-bern_zeta(long k, GEN pow, long max, long bit)
+bern_zeta(GEN v, long k, GEN pow, long r, long p)
 {
-  GEN s = gel(pow, max);
+  GEN z, s = gel(pow, r);
   long j;
-  for (j = max - 2; j >= 3; j -= 2) s = addrr(s, gel(pow,j));
-  s = addrs(s, 1); /* divide by 1 - 2^(-k): s + s/2^k + s/2^(2k) + ... */
-  for (; k < bit; k <<= 1) s = addrr(s, shiftr(s, -k));
-  return s;
+  for (j = r - 2; j >= 3; j -= 2) s = addii(s, gel(pow,j));
+  z = s = itor(s, nbits2prec(p));
+  shiftr_inplace(s, -p); /* zeta(k)(1 - 2^(-k)) - 1*/
+  s = addrs(s, 1); shiftr_inplace(s, -k);
+  /* divide by 1 - 2^(-k): s + s/2^k + s/2^(2k) + ... */
+  for (; k < p; k <<= 1) s = addrr(s, shiftr(s, -k));
+  return addrr(v, mulrr(v, addrr(z, s)));
 }
 /* z * j^2 */
 static GEN
 mulru2(GEN z, ulong j)
-{ return (j | HIGHMASK)? mulru(mulru(z, j), j)
-                       : mulru(z, j*j); }
+{ return (j | HIGHMASK)? mulri(z, sqru(j)): mulru(z, j*j); }
+/* z * j^2 */
+static GEN
+muliu2(GEN z, ulong j)
+{ return (j | HIGHMASK)? mulii(z, sqru(j)): muliu(z, j*j); }
 /* 1 <= m <= n, set y[1] = B_{2m}, ... y[n-m+1] = B_{2n} in Q */
 static void
 bernset(GEN *y, long m, long n)
 {
-  long i, j, k, bit, prec, max, N = n << 1; /* up to B_N */
-  GEN A, C, pow;
-  bit = bernbitprec(N);
-  prec = nbits2prec(bit);
-  A = sqrr(Pi2n(1, prec)); /* (2Pi)^2 */
-  C = divrr(mpfactr(N, prec), powru(A, n)); shiftr_inplace(C,1);
-  max = zetamaxpow(N, bit);
-  pow = cgetg(max+1, t_VEC);
-  for (j = 3; j <= max; j += 2)
-  { /* fixed point, precision decreases with j */
-    long b = bit - N * log2(j), p = b <= 0? LOWDEFAULTPREC: nbits2prec(b);
-    gel(pow,j) = invr(rpowuu(j, N, p));
+  long i, j, k, p, prec, r, N = n << 1; /* up to B_N */
+  GEN u, B, v, t;
+  p = bernbitprec(N); prec = nbits2prec(p);
+  u = sqrr(Pi2n(1, prec)); /* (2Pi)^2 */
+  v = divrr(mpfactr(N, prec), powru(u, n)); shiftr_inplace(v,1);
+  r = zetamaxpow(N);
+  t = cgetg(r+1, t_VEC); B = int2n(p); /* fixed point */
+  for (j = 3; j <= r; j += 2)
+  {
+    GEN z = cgeti(prec);
+    pari_sp av2 = avma;
+    affii(divii(B, powuu(j, N)), z);
+    gel(t,j) = z; set_avma(av2);
   }
   y += n - m;
   for (i = n, k = N;; i--)
   { /* set B_n, k = 2i */
     pari_sp av2 = avma;
-    GEN B, z = fracB2k(divisorsu(i)), s = bern_zeta(k, pow, max, bit);
+    GEN z = fracB2k(divisorsu(i)), B = bern_zeta(v, k, t, r, p);
     long j;
-    /* s = zeta(k), C = 2*k! / (2Pi)^k */
-    B = mulrr(s, C); if (!odd(i)) setsigne(B, -1); /* B ~ B_n */
+    /* B = v * zeta(k), v = 2*k! / (2Pi)^k */
+    if (!odd(i)) setsigne(B, -1); /* B ~ B_n */
     B = roundr(addrr(B, fractor(z,LOWDEFAULTPREC))); /* B - z = B_n */
     *y-- = gclone(gsub(B, z));
     if (i == m) break;
-    affrr(divrunu(mulrr(C,A), k-1), C);
-    for (j = max; j >= 3; j -= 2) affrr(mulru2(gel(pow,j), j), gel(pow,j));
+    affrr(divrunu(mulrr(v,u), k-1), v);
+    for (j = r; j >= 3; j -= 2) affii(muliu2(gel(t,j), j), gel(t,j));
     set_avma(av2); k -= 2;
     if ((k & 0xf) == 0)
     { /* reduce precision if possible */
-      long prec2 = prec, max2;
-      bit = bernbitprec(k);
-      prec = nbits2prec(bit); if (prec2 == prec) continue;
-      setprec(C, prec);
-      max2 = zetamaxpow(k, bit); if (max2 > max) continue;
-      max = max2;
-      for (j = 3; j <= max; j += 2)
-      {
-        GEN P = gel(pow,j);
-        long b = bit + expo(P), p = b <= 0? LOWDEFAULTPREC: nbits2prec(b);
-        if (realprec(P) > p) setprec(P, p);
-      }
+      long p2 = p, prec2 = prec, r2;
+      p = bernbitprec(k);
+      prec = nbits2prec(p); if (prec2 == prec) continue;
+      setprec(v, prec);
+      r2 = zetamaxpow(k); if (r2 > r) continue;
+      r = r2;
+      for (j = 3; j <= r; j += 2) affii(shifti(gel(t,j), p - p2), gel(t,j));
+      set_avma(av2);
     }
   }
 }
@@ -174,7 +164,7 @@ constbern(long nb)
   if (DEBUGLEVEL) timer_printf(&T, "Bernoulli");
   swap(B, bernzone); guncloneNULL(B);
   set_avma(av);
-  if (nb > 200000)
+  if (nb > 100000)
   {
     const ulong p = 4294967291UL;
     long n = 2 * nb + 2;
@@ -183,7 +173,7 @@ constbern(long nb)
     t = Flx_shift(Flx_invLaplace(t, p), -1); /* t = (exp(x)-1)/x */
     t = Flx_Laplace(Flxn_inv(t, n, p), p);
     for (i = 1; i <= nb; i++)
-      if (Rg_to_Fl(bernfrac(2*i), p) != t[2*i+2])
+      if (Rg_to_Fl(bernfrac(2*i), p) != uel(t,2*i+2))
         pari_err_BUG(stack_sprintf("B_{2*%ld}", i));
     set_avma(av);
   }
