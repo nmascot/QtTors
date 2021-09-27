@@ -1889,7 +1889,7 @@ FpXQXn_exp(GEN h, long e, GEN T, GEN p)
 }
 
 GEN
-FpXQXn_inv(GEN f, long e, GEN T, GEN p)
+FpXQXn_div(GEN g, GEN f, long e, GEN T, GEN p)
 {
   pari_sp av = avma, av2;
   ulong mask;
@@ -1898,8 +1898,8 @@ FpXQXn_inv(GEN f, long e, GEN T, GEN p)
 
   if (!signe(f)) pari_err_INV("FpXXn_inv",f);
   a = Fq_inv(gel(f,2), T, p);
-  if (e == 1) return scalarpol(a, v);
-  else if (e == 2)
+  if (e == 1 && !g) return scalarpol(a, v);
+  else if (e == 2 && !g)
   {
     GEN b;
     if (degpol(f) <= 0) return scalarpol(a, v);
@@ -1919,8 +1919,17 @@ FpXQXn_inv(GEN f, long e, GEN T, GEN p)
     n<<=1; if (mask & 1) n--;
     mask >>= 1;
     fr = FpXXn_red(f, n);
-    u = FpXQXn_mul(W, FpXQXn_mulhigh(fr, W, n2, n, T, p), n-n2, T, p);
-    W = FpXX_sub(W, FpXX_shift(u, n2), p);
+    if (mask>1 || !g)
+    {
+      u = FpXQXn_mul(W, FpXQXn_mulhigh(fr, W, n2, n, T, p), n-n2, T, p);
+      W = FpXX_sub(W, FpXX_shift(u, n2), p);
+    }
+    else
+    {
+      GEN y = FpXQXn_mul(g, W, n, T, p), yt =  FpXXn_red(y, n-n2);
+      u = FpXQXn_mul(yt, FpXQXn_mulhigh(fr,  W, n2, n, T, p), n-n2, T, p);
+      W = FpXX_sub(y, FpXX_shift(u, n2), p);
+    }
     if (gc_needed(av2,2))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"FpXQXn_inv, e = %ld", n);
@@ -1929,3 +1938,7 @@ FpXQXn_inv(GEN f, long e, GEN T, GEN p)
   }
   return gerepileupto(av, W);
 }
+
+GEN
+FpXQXn_inv(GEN f, long e, GEN T, GEN p)
+{ return FpXQXn_div(NULL, f, e, T, p); }

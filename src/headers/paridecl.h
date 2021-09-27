@@ -923,6 +923,7 @@ GEN     FpXQXQ_autsum(GEN aut, long n, GEN S, GEN T, GEN p);
 GEN     FpXQXQ_auttrace(GEN aut, long n, GEN S, GEN T, GEN p);
 GEN     FpXQXV_FpXQX_fromdigits(GEN x, GEN B, GEN T, GEN p);
 GEN     FpXQXV_prod(GEN V, GEN Tp, GEN p);
+GEN     FpXQXn_div(GEN g, GEN f, long n, GEN T, GEN p);
 GEN     FpXQXn_exp(GEN x, long n, GEN T, GEN p);
 GEN     FpXQXn_expint(GEN x, long n, GEN T, GEN p);
 GEN     FpXQXn_inv(GEN x, long n, GEN T, GEN p);
