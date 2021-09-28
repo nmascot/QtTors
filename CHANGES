@@ -190,6 +190,8 @@ BA  22- [libpari] gen_factorback now take an extra parameter one.
     27- faster qfbclassno for non fundamental positive discriminants
         (use quadunitindex)
     28- removed appa.tex from users.dvi; inline the text in INSTALL.tex
+    29- divrunu, divgunu: use a single division in all cases (faster even if
+        denominator has 2 words)
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

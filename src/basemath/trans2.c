@@ -947,7 +947,7 @@ static GEN
 muliunu(GEN x, ulong i)
 {
   if (i & HIGHMASK) /* i(i+1) >= 2^BITS_IN_LONG*/
-    return muliu(muliu(x, i), i+1);
+    return mulii(x, muluu(i, i+1));
   else
     return muliu(x, i*(i+1));
 }
@@ -956,7 +956,7 @@ GEN
 divrunu(GEN x, ulong i)
 {
   if (i & HIGHMASK) /* i(i+1) >= 2^BITS_IN_LONG*/
-    return divru(divru(x, i), i+1);
+    return divri(x, muluu(i , i+1));
   else
     return divru(x, i*(i+1));
 }
@@ -971,7 +971,7 @@ divgunu(GEN x, ulong i)
 #endif
     return gdivgs(x, i*(i+1));
   else
-    return gdivgs(gdivgs(x, i), i+1);
+    return gdiv(x, muluu(i, i+1));
 }
 
 /* arg(s+it) */
