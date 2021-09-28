@@ -664,17 +664,12 @@ static int
 checkcondDL(GEN D2, GEN N, long ell, GEN *pP)
 {
   ulong N4;
-  if (equali1(N)) { *pP = cgetg(1,t_VEC); return 1; }
   if (!umodiu(D2, ell))
   {
-    long n = umodiu(N, ell * ell);
-    if (!n) return 0;
-    if (n % ell == 0)
-    {
-      if (equaliu(N, ell)) { *pP = cgetg(1,t_VEC); return 1; }
-      N = diviuexact(N, ell);
-    }
+    long v = Z_lvalrem(N, ell, &N);
+    if (v && v > 2) return 0;
   }
+  if (equali1(N)) { *pP = cgetg(1,t_VEC); return 1; }
   N4 = Mod4(N);
   return N4 && (N4 != 2 || ell == 3) && checkcondell_i(N, ell, D2, pP);
 }
@@ -1283,15 +1278,17 @@ P2Nfa(GEN P) { return mkvec2(ZV_prod(P), P2fa(P)); }
 static GEN
 Pell2prfa(GEN nf, GEN P, long ell, GEN f)
 {
-  long e = !umodiu(f, ell);
-  if (e) P = ZV_sort(vec_append(P, utoipos(ell)));
-  P = nf_pV_to_prV(nf, P); settyp(P, t_COL);
-  P = P2fa(P);
-  if (e)
-  { /* add pr^2 for all pr | ell */
+  long v = Z_lval(f, ell);
+  if (v) P = ZV_sort(vec_append(P, utoipos(ell)));
+  P = nf_pV_to_prV(nf, P); settyp(P, t_COL); P = P2fa(P);
+  if (v)
+  { /* add pr^{2e} for all pr | ell */
     long i, l = lg(gel(P,1));
     for (i = 1; i < l; i++)
-      if (equaliu(pr_get_p(gcoeff(P,i,1)), ell)) gcoeff(P,i,2) = gen_2;
+    {
+      GEN pr = gcoeff(P,i,1);
+      if (equaliu(pr_get_p(pr), ell)) gcoeff(P,i,2) = utoipos(v * pr_get_e(pr));
+    }
   }
   return P;
 }
