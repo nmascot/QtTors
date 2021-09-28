@@ -5030,13 +5030,13 @@ group_nTk(GEN g, long *t, int QT)
 
   if (lg(g) != 3 || !RgV_is_ZV(g)) { *t = 0; return 0; }
   n = itos(gel(g,1)); if (n <= 0) return 0;
-  if (n >= N) pari_err_IMPL(pari_sprintf("group nTk with n > %ld", N-1));
+  if (n >= N) pari_err_IMPL(stack_sprintf("group nTk with n > %ld", N-1));
   *t = k = itos(gel(g,2));
   if (k <= 0 || k > L[n])
   {
     char *s;
-    s = pari_sprintf("incorrect group %ldTk with k = %ld not in [1,%ld]",
-                     n, k, L[n]);
+    s = stack_sprintf("incorrect group %ldTk with k = %ld not in [1,%ld]",
+                      n, k, L[n]);
     pari_err(e_MISC, s);
   }
   if (!QT)
