@@ -130,26 +130,23 @@ typedef struct {
 #endif
 
 static ratpoints_bit_array *
-#if defined(__GNUC__)
-__attribute__((noinline))
-#endif
 sieve_init1(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
 {
   ratpoints_sieve_entry *se = se1;
   ratpoints_args *args = args1;
-  register int *isfs = se->is_f_square;
-  register long b = b1;
+  int *isfs = se->is_f_square;
+  long b = b1;
   long lmp = BITS_IN_LONG % p;
   long ldp = BITS_IN_LONG / p;
   long p1 = (ldp + 1) * p;
   long diff_shift = p1 & LONG_MASK;
   long diff = BITS_IN_LONG - diff_shift;
-  register ulong help0;
-  register long a;
-  register long d = se->inverses[b];
-  register long ab = 0; /* a/b mod p */
-  register ulong test = 1UL;
-  register ulong he0 = 0UL;
+  ulong help0;
+  long a;
+  long d = se->inverses[b];
+  long ab = 0; /* a/b mod p */
+  ulong test = 1UL;
+  ulong he0 = 0UL;
   for (a = 0; a < p; a++)
   {
     if (isfs[ab]) he0 |= test;
@@ -159,10 +156,10 @@ sieve_init1(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
   }
   help0 = he0;
   {
-    register ulong help1;
+    ulong help1;
      /* repeat bit pattern floor(BITS_IN_LONG/p) times */
-    register ulong pattern = help0;
-    register long i;
+    ulong pattern = help0;
+    long i;
     /* the p * (floor(BITS_IN_LONG/p) + 1) - BITS_IN_LONG
             = p - (BITS_IN_LONG mod p)
        upper bits into help[b][1] :
@@ -173,7 +170,7 @@ sieve_init1(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
     { /* fill the bit pattern from help0/help1 into sieve[b][].
           sieve[b][a0] has the same semantics as help0/help1,
           but here, a0 runs from 0 to p-1 and all bits are filled. */
-      register long a;
+      long a;
       ulong *si = (ulong *)args->ba_next;
 
       args->ba_next += p;
@@ -183,7 +180,7 @@ sieve_init1(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
          rotating it in help0/help1 */
       for (a = 1 ; a < p; a++)
       {
-        register ulong temp = help0 >> diff;
+        ulong temp = help0 >> diff;
         help0 = help1 | (help0 << diff_shift);
         si[a] = help0;
         help1 = temp;
@@ -198,15 +195,12 @@ sieve_init1(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
 
 /* This is for p > BITS_IN_LONG */
 static ratpoints_bit_array *
-#if defined(__GNUC__)
-__attribute__((noinline))
-#endif
 sieve_init2(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
 {
   ratpoints_sieve_entry *se = se1;
   ratpoints_args *args = args1;
-  register int *isfs = se->is_f_square;
-  register long b = b1;
+  int *isfs = se->is_f_square;
+  long b = b1;
   /* long ldp = 0;  = BITS_IN_LONG / p */
   /* long p1 = p; = (ldp + 1) * p; */
   long wp = p >> TWOPOTBITS_IN_LONG;
@@ -216,16 +210,16 @@ sieve_init2(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
 
   /* initialize help */
   {
-    register ulong *he = &help[0];
-    register ulong *he1 = &he[(p>>TWOPOTBITS_IN_LONG) + 2];
+    ulong *he = &help[0];
+    ulong *he1 = &he[(p>>TWOPOTBITS_IN_LONG) + 2];
     while (he1 != he) { he1--; *he1 = 0UL; }
   }
-  { register ulong work = 0UL;
-    register long a;
-    register long ab = 0; /* a/b mod p */
-    register long d = se->inverses[b];
-    register long n = 0;
-    register ulong test = 1UL;
+  { ulong work = 0UL;
+    long a;
+    long ab = 0; /* a/b mod p */
+    long d = se->inverses[b];
+    long n = 0;
+    ulong test = 1UL;
     for (a = 0; a < p; )
     {
       if (isfs[ab]) work |= test;
@@ -242,9 +236,9 @@ sieve_init2(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
   { /* fill the bit pattern from help[] into sieve[b][].
        sieve[b][a0] has the same semantics as help[b][a0],
        but here, a0 runs from 0 to p-1 and all bits are filled. */
-    register ulong *si = (ulong *)args->ba_next;
-    register long a1;
-    register long a;
+    ulong *si = (ulong *)args->ba_next;
+    long a1;
+    long a;
 
     args->ba_next += p;
     /* copy the first chunk from help[] into sieve[num][b][] */
@@ -252,7 +246,7 @@ sieve_init2(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
     /* now keep repeating the bit pattern, rotating it in help */
     for (a1 = a ; a < p; a++)
     {
-      register long t = (a1 == wp) ? 0 : a1+1;
+      long t = (a1 == wp) ? 0 : a1+1;
       help[a1] |= help[t]<<diff_shift;
       si[a] = help[a1];
       a1 = t;
@@ -492,22 +486,22 @@ _ratpoints_sift0(long b, long w_low, long w_high,
   for (n = 0; n < sp1; n++)
   {
     ratpoints_bit_array *sieve_n = sieves[n].ptr;
-    register long p = sieves[n].p;
+    long p = sieves[n].p;
     long r = mod(-w_low-sieves[n].offset, p);
-    register ratpoints_bit_array *surv = survivors;
+    ratpoints_bit_array *surv = survivors;
 
     if (w_high < w_low + r)
     { /* if we get here, r > 0, since w_high >= w_low always */
-      register ratpoints_bit_array *siv1 = &sieve_n[p-r];
-      register ratpoints_bit_array *siv0 = siv1 + range;
+      ratpoints_bit_array *siv1 = &sieve_n[p-r];
+      ratpoints_bit_array *siv0 = siv1 + range;
 
       while (siv1 != siv0) { *surv = AND(*surv, *siv1++); surv++; }
     }
     else
     {
-      register ratpoints_bit_array *siv1 = &sieve_n[p-r];
-      register ratpoints_bit_array *surv_end = &survivors[range - p];
-      register long i;
+      ratpoints_bit_array *siv1 = &sieve_n[p-r];
+      ratpoints_bit_array *surv_end = &survivors[range - p];
+      long i;
       for (i = r; i; i--) { *surv = AND(*surv, *siv1++); surv++; }
       siv1 -= p;
       while (surv <= surv_end)
@@ -523,13 +517,13 @@ _ratpoints_sift0(long b, long w_low, long w_high,
   surv0 = &survivors[0];
   for (i = w_low; i < w_high; i++)
   {
-    register ratpoints_bit_array nums = *surv0++;
+    ratpoints_bit_array nums = *surv0++;
     sieve_spec *ssp = &sieves[sp1];
-    register long n;
+    long n;
 
     for (n = sp2-sp1; n && TEST(nums); n--)
     {
-      register long p = ssp->p;
+      long p = ssp->p;
       nums = AND(nums, ssp->ptr[mod(i + ssp->offset, p)]);
       ssp++;
     }
