@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define DEBUGLEVEL DEBUGLEVEL_mt
 
 static THREAD int pari_MPI_size, pari_MPI_rank;
-static THREAD long nbreq = 0, mt_issingle = 0;
+static THREAD long nbreq = 0;
 
 enum PMPI_cmd { PMPI_close, PMPI_worker, PMPI_work, PMPI_parisizemax,
                 PMPI_parisize, PMPI_precreal, PMPI_primetab,
@@ -277,7 +277,7 @@ void
 mt_err_recover(long er)
 {
   if (pari_MPI_rank) longjmp(child_env,er);
-  else if (mt_issingle) mtsingle_err_recover(er);
+  else mtsingle_err_recover(er);
 }
 void mt_sigint_block(void) { }
 void mt_sigint_unblock(void) { }
@@ -292,7 +292,7 @@ mt_is_parallel(void)
 int
 mt_is_thread(void)
 {
-  return pari_MPI_rank ? 1 : mt_issingle ? mtsingle_is_thread(): 0;
+  return pari_MPI_rank ? 1 : mtsingle_is_thread();
 }
 
 long
@@ -429,11 +429,10 @@ mt_queue_start_lim(struct pari_mt *pt, GEN worker, long lim)
 {
   if (lim==0) lim = pari_mt_nbthreads;
   else        lim = minss(pari_mt_nbthreads, lim);
-  if (pari_mt || pari_MPI_rank || pari_MPI_size <= 2 || lim <= 1)
-  {
-    mt_issingle = 1;
+  if (pari_MPI_rank)
+    mtsequential_queue_start(pt, worker);
+  else if (pari_mt || pari_MPI_size <= 2 || lim <= 1)
     mtsingle_queue_start(pt, worker);
-  }
   else
   {
     struct mt_mstate *mt = &pari_mt_data;
@@ -441,7 +440,6 @@ mt_queue_start_lim(struct pari_mt *pt, GEN worker, long lim)
     long mtparisize = GP_DATA->threadsize? GP_DATA->threadsize: pari_mainstack->rsize;
     long mtparisizemax = GP_DATA->threadsizemax;
     pari_mt = mt;
-    mt_issingle = 0;
     mt->workid = (long*) pari_malloc(sizeof(long)*(n+1));
     for (i=1; i <= n; i++)
     {

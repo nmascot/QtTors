@@ -46,7 +46,7 @@ struct mt_pstate
   pthread_mutex_t pmut;
 };
 
-static THREAD long mt_thread_no = -1, mt_issingle = 0;
+static THREAD long mt_thread_no = -1;
 static struct mt_pstate *pari_mt;
 
 #define LOCK(x) pthread_mutex_lock(x); do
@@ -83,7 +83,7 @@ mt_err_recover(long er)
     } UNLOCK(mq->pmut);
     pthread_exit((void*)1);
   }
-  else if (mt_issingle) mtsingle_err_recover(er);
+  else mtsingle_err_recover(er);
 }
 
 void
@@ -101,7 +101,7 @@ mt_is_parallel(void)
 int
 mt_is_thread(void)
 {
-  return mt_thread_no>=0 ? 1: mt_issingle ? mtsingle_is_thread(): 0;
+  return mt_thread_no>=0 ? 1: mtsingle_is_thread();
 }
 
 long
@@ -131,7 +131,6 @@ void mt_broadcast(GEN code) {(void) code;}
 void pari_mt_init(void)
 {
   pari_mt = NULL;
-  mt_issingle = 0;
 #ifdef _SC_NPROCESSORS_CONF
   if (!pari_mt_nbthreads) pari_mt_nbthreads = sysconf(_SC_NPROCESSORS_CONF);
 #elif defined(_WIN32)
@@ -346,11 +345,10 @@ mt_queue_start_lim(struct pari_mt *pt, GEN worker, long lim)
 {
   if (lim==0) lim = pari_mt_nbthreads;
   else        lim = minss(pari_mt_nbthreads, lim);
-  if (pari_mt || lim <= 1)
-  {
-    mt_issingle = 1;
+  if (mt_thread_no >= 0)
+    mtsequential_queue_start(pt, worker);
+  else if (pari_mt || lim <= 1)
     mtsingle_queue_start(pt, worker);
-  }
   else
   {
     struct mt_pstate *mt =
@@ -392,7 +390,6 @@ mt_queue_start_lim(struct pari_mt *pt, GEN worker, long lim)
     for (i=0;i<lim;i++)
       pthread_create(&mt->th[i],NULL, &mt_queue_run, (void*)&mt->pth[i]);
     pari_mt = mt;
-    mt_issingle = 0;
     BLOCK_SIGINT_END
     pt->get=&mtpthread_queue_get;
     pt->submit=&mtpthread_queue_submit;

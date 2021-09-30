@@ -42,6 +42,25 @@ mtsingle_queue_submit(struct mt_state *mt, long workid, GEN work)
 static void
 mtsingle_queue_end(void) {  }
 
+static GEN
+mtsequential_queue_get(struct mt_state *mt, long *workid, long *pending)
+{
+  GEN done = mt->pending;
+  if (workid) *workid = mt->workid;
+  mt->pending = NULL; *pending = 0;
+  return done;
+}
+
+static void
+mtsequential_queue_submit(struct mt_state *mt, long workid, GEN work)
+{
+  mt->pending = work? closure_callgenvec(mt->worker, work): NULL;
+  mt->workid = workid;
+}
+
+static void
+mtsequential_queue_end(void) {  }
+
 int
 mtsingle_is_thread(void) { return single_is_thread; }
 
@@ -68,6 +87,16 @@ mtsingle_queue_start(struct pari_mt *pt, GEN worker)
 }
 
 void
+mtsequential_queue_start(struct pari_mt *pt, GEN worker)
+{
+  pt->get = mtsequential_queue_get;
+  pt->submit = mtsequential_queue_submit;
+  pt->end = mtsequential_queue_end;
+  pt->mt.worker = worker;
+  pt->mt.pending = NULL;
+}
+
+void
 mt_queue_end(struct pari_mt *pt) { pt->end(); }
 
 void
@@ -85,16 +114,27 @@ mt_queue_start(struct pari_mt *pt, GEN worker)
 void
 mtstate_save(struct pari_mtstate *mt)
 {
-  mt->is_thread = single_is_thread;
-  mt->trace_level = single_trace_level;
-  mt->pending_threads = mt_is_parallel();
+  if (mt_is_parallel())
+  {
+    mt->is_thread = 0;
+    mt->trace_level = 0;
+    mt->pending_threads = 1;
+  } else
+  {
+    mt->is_thread = single_is_thread;
+    mt->trace_level = single_trace_level;
+    mt->pending_threads = 0;
+  }
 }
 
 void
 mtstate_restore(struct pari_mtstate *mt)
 {
-  single_is_thread = mt->is_thread;
-  single_trace_level = mt->trace_level;
+  if (!mt_is_parallel())
+  {
+    single_is_thread = mt->is_thread;
+    single_trace_level = mt->trace_level;
+  }
   if (!mt->pending_threads && mt_is_parallel())
     mt_queue_reset();
 }
