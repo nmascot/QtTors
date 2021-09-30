@@ -32,9 +32,10 @@ static long single_trace_level = 0;
 static void
 mtsingle_queue_submit(struct mt_state *mt, long workid, GEN work)
 {
+  int is_thread = single_is_thread;
   single_is_thread = 1;
   mt->pending = work? closure_callgenvec(mt->worker, work): NULL;
-  single_is_thread = 0;
+  single_is_thread = is_thread;
   mt->workid = workid;
 }
 

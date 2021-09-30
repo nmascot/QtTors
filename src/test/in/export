@@ -14,3 +14,22 @@ parsum(i=1,10,f(i))
 f(i)=local(z=3);i^2+1;
 export(f);
 parsum(i=1,10,f(i))
+
+world="sequential";
+export(world="parallel");
+inline(prpar,prseq,prsin)
+prsin()=parfor(i=1,1,print1(world));
+prseq()=parfor(i=1,3,1,E,if(i==3,print1(world)));
+prpar()=parfor(i=1,3,if(i==3,print1(world)));
+
+prsin();print("-> parallel");
+prseq();print("-> sequential");
+prpar();print("-> parallel");
+print()
+parfor(i=1,3,if(i==3,prsin()));print("-> parallel");
+parfor(i=1,3,if(i==3,prseq()));print("-> parallel");
+parfor(i=1,3,if(i==3,prpar()));print("-> parallel");
+print()
+parfor(i=1,3,1,E,if(i==3,prsin()));print("-> parallel");
+parfor(i=1,3,1,E,if(i==3,prseq()));print("-> sequential");
+parfor(i=1,3,1,E,if(i==3,prpar()));print("-> parallel");
