@@ -21,7 +21,7 @@ static long LIMTRIV = 10000;
 
 /*******************************************************************/
 /*               NFHILBERT and LOCAL SOLUBILITY                    */
-/*     adapted from Denis Simon's original C limplementation       */
+/*       adapted from Denis Simon's original C implementation      */
 /*******************************************************************/
 /* p > 2, T ZX, p prime, x t_INT */
 static long
