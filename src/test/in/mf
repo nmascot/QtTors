@@ -472,6 +472,8 @@ mf=mfinit([72,2,Mod(11,72)],0);mfdim(mf)
 \\ division by 1 in mfheckematwt1
 mf=mfinit([283,1,-283],0); mfdim(mf)
 mfheckemat(mf,[2,3])
+mf=mfinit([765, 1, Mod(254, 765)], 0); mfgaloistype(mf)
+mf=mfinit([837, 1, -31], 0); mfgaloistype(mf)
 
 \\ Tests lfunmf
 E4=mfEk(4);E6=mfEk(6);D=mfDelta();

@@ -5994,12 +5994,15 @@ nf2_get_conj(GEN nf)
   GEN pol = nf_get_pol(nf);
   return deg1pol_shallow(gen_m1, negi(gel(pol,3)), varn(pol));
 }
+static int
+foo_stable(GEN foo)
+{ return lg(foo) != 3 || equalii(gel(foo,1), gel(foo,2)); }
 
 static long
 mfisdihedral(GEN vF, GEN DIH)
 {
-  GEN vG = gel(DIH,1), M = gel(DIH,2), v, G, bnr, w, gen, D, f, nf, con;
-  GEN f0, f0b, xin;
+  GEN vG = gel(DIH,1), M = gel(DIH,2), v, G, bnr, w, gen, D, f, nf, tau;
+  GEN bnr0 = NULL, f0, f0b, xin, foo;
   long i, l, e, j, L, n;
   if (lg(M) == 1) return 0;
   v = RgM_RgC_invimage(M, vF);
@@ -6013,17 +6016,24 @@ mfisdihedral(GEN vF, GEN DIH)
   w = gel(G,3);
   f = bnr_get_mod(bnr);
   nf = bnr_get_nf(bnr);
-  con = nf2_get_conj(nf);
-  f0 = gel(f,1); f0b = galoisapply(nf, con, f0);
+  tau = nf2_get_conj(nf);
+  f0 = gel(f,1); foo = gel(f,2);
+  f0b = galoisapply(nf, tau, f0);
   xin = zv_to_ZV(gel(w,2)); /* xi(bnr.gen[i]) = e(xin[i] / D) */
-  if (!gequal(f0,f0b))
-  { /* finite part of conductor not ambiguous */
-    GEN a = idealmul(nf, f0, idealdivexact(nf, f0b, idealadd(nf, f0, f0b)));
-    GEN bnr0 = bnr, S;
-    bnr = Buchray(bnr_get_bnf(bnr), mkvec2(a, gel(f,2)), nf_INIT | nf_GEN);
+  if (!foo_stable(foo)) { foo = mkvec2(gen_1, gen_1); bnr0 = bnr; }
+  if (!gequal(f0, f0b))
+  {
+    f0 = idealmul(nf, f0, idealdivexact(nf, f0b, idealadd(nf, f0, f0b)));
+    bnr0 = bnr;
+  }
+  if (bnr0)
+  { /* conductor not ambiguous */
+    GEN S;
+    bnr = Buchray(bnr_get_bnf(bnr), mkvec2(f0, foo), nf_INIT | nf_GEN);
     S = bnrsurjection(bnr, bnr0);
-    xin = RgV_RgM_mul(xin, gel(S,1));
-    /* still xi(gen[i]) = e(xin[i] / D), for the new generators */
+    xin = FpV_red(RgV_RgM_mul(xin, gel(S,1)), D);
+    /* still xi(gen[i]) = e(xin[i] / D), for the new generators; D stays
+     * the same, not exponent(bnr.cyc) ! */
   }
   gen = bnr_get_gen(bnr); L = lg(gen);
   for (j = 1, e = itou(D); j < L; j++)
@@ -6031,7 +6041,7 @@ mfisdihedral(GEN vF, GEN DIH)
     GEN Ng = idealnorm(nf, gel(gen,j));
     GEN a = shifti(gel(xin,j), 1); /* xi(g_j^2) = e(a/D) */
     GEN b = FpV_dotproduct(xin, isprincipalray(bnr,Ng), D);
-    GEN m = Fp_sub(a, b, D); /* xi(g_j/\bar{g_j}) = e(m/D) */
+    GEN m = Fp_sub(a, b, D); /* xi(g_j/g_j^\tau) = e(m/D) */
     e = ugcd(e, itou(m)); if (e == 1) break;
   }
   n = itou(D) / e;
