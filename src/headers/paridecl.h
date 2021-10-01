@@ -4003,6 +4003,7 @@ int     is_pth_power(GEN x, GEN *pt, forprime_t *T, ulong cutoffbits);
 long    ispowerful(GEN n);
 long    issquarefree(GEN x);
 long    istotient(GEN n, GEN *px);
+long    maxomegau(ulong x);
 long    moebius(GEN n);
 long    moebiusu(ulong n);
 long    moebiusu_fact(GEN f);

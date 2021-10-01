@@ -3849,26 +3849,42 @@ matsmalltrunc_init(long l)
   GEN E = vecsmalltrunc_init(l); return mkvec2(P,E);
 }
 
+/* return optimal N s.t. omega(b) <= N for all b <= x */
+long
+maxomegau(ulong x)
+{
+  if (x < 30030UL)/* rare trivial cases */
+  {
+    if (x < 2UL) return 0;
+    if (x < 6UL) return 1;
+    if (x < 30UL) return 2;
+    if (x < 210UL) return 3;
+    if (x < 2310UL) return 4;
+    return 5;
+  }
+  if (x < 510510UL) return 6; /* most frequent case */
+  if (x < 9699690UL) return 7;
+  if (x < 223092870UL) return 8;
+#ifdef LONG_IS_64BIT
+  if (x < 6469693230UL) return 9;
+  if (x < 200560490130UL) return 10;
+  if (x < 7420738134810UL) return 11;
+  if (x < 304250263527210UL) return 12;
+  if (x < 13082761331670030UL) return 13;
+  if (x < 614889782588491410UL) return 14;
+  return 15;
+#else
+  return 9;
+#endif
+}
 /* If a <= c <= b , factoru(c) = L[c-a+1] */
 GEN
 vecfactoru_i(ulong a, ulong b)
 {
-  ulong N, k, p, n = b-a+1;
+  ulong k, p, n = b-a+1, N = maxomegau(b) + 1;
   GEN v = const_vecsmall(n, 1);
   GEN L = cgetg(n+1, t_VEC);
   forprime_t T;
-  if (b < 510510UL) N = 7;
-  else if (b < 9699690UL) N = 8;
-  else if (b < 223092870UL) N = 9;
-#ifdef LONG_IS_64BIT
-  else if (b < 6469693230UL) N = 10;
-  else if (b < 200560490130UL) N = 11;
-  else if (b < 7420738134810UL) N = 12;
-  else if (b < 304250263527210UL) N = 13;
-  else N = 16; /* don't bother */
-#else
-  else N = 10;
-#endif
   for (k = 1; k <= n; k++) gel(L,k) = matsmalltrunc_init(N);
   u_forprime_init(&T, 2, usqrt(b));
   while ((p = u_forprime_next(&T)))
@@ -3958,22 +3974,10 @@ vecfactoroddu(ulong a, ulong b)
 GEN
 vecfactorsquarefreeu(ulong a, ulong b)
 {
-  ulong N, k, p, n = b-a+1;
+  ulong k, p, n = b-a+1, N = maxomegau(b) + 1;
   GEN v = const_vecsmall(n, 1);
   GEN L = cgetg(n+1, t_VEC);
   forprime_t T;
-  if (b < 510510UL) N = 7;
-  else if (b < 9699690UL) N = 8;
-  else if (b < 223092870UL) N = 9;
-#ifdef LONG_IS_64BIT
-  else if (b < 6469693230UL) N = 10;
-  else if (b < 200560490130UL) N = 11;
-  else if (b < 7420738134810UL) N = 12;
-  else if (b < 304250263527210UL) N = 13;
-  else N = 16; /* don't bother */
-#else
-  else N = 10;
-#endif
   for (k = 1; k <= n; k++) gel(L,k) = vecsmalltrunc_init(N);
   u_forprime_init(&T, 2, usqrt(b));
   while ((p = u_forprime_next(&T)))
@@ -3997,22 +4001,10 @@ vecfactorsquarefreeu(ulong a, ulong b)
 GEN
 vecfactorsquarefreeu_coprime(ulong a, ulong b, GEN P)
 {
-  ulong N, k, p, n = b-a+1, sqb = usqrt(b);
+  ulong k, p, n = b-a+1, sqb = usqrt(b), N = maxomegau(b) + 1;
   GEN v = const_vecsmall(n, 1);
   GEN L = cgetg(n+1, t_VEC);
   forprime_t T;
-  if (b < 510510UL) N = 7;
-  else if (b < 9699690UL) N = 8;
-  else if (b < 223092870UL) N = 9;
-#ifdef LONG_IS_64BIT
-  else if (b < 6469693230UL) N = 10;
-  else if (b < 200560490130UL) N = 11;
-  else if (b < 7420738134810UL) N = 12;
-  else if (b < 304250263527210UL) N = 13;
-  else N = 16; /* don't bother */
-#else
-  else N = 10;
-#endif
   for (k = 1; k <= n; k++) gel(L,k) = vecsmalltrunc_init(N);
   u_forprime_init(&T, 2, sqb);
   while ((p = u_forprime_next(&T)))
