@@ -3913,14 +3913,14 @@ vecfactoroddu_i(ulong a, ulong b)
   if (b < 255255UL) N = 6;
   else if (b < 4849845UL) N = 7;
   else if (b < 111546435UL) N = 8;
-#ifdef LONG_IS_64BIT
   else if (b < 3234846615UL) N = 9;
+#ifdef LONG_IS_64BIT
   else if (b < 100280245065UL) N = 10;
   else if (b < 3710369067405UL) N = 11;
   else if (b < 152125131763605UL) N = 12;
   else N = 16; /* don't bother */
 #else
-  else N = 9;
+  else N = 10;
 #endif
   for (k = 1; k <= n; k++) gel(L,k) = matsmalltrunc_init(N);
   u_forprime_init(&T, 3, usqrt(b));
