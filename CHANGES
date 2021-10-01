@@ -82,6 +82,7 @@ BA  60- (f(~v)=v[1]=1);(g(v) = f(~v)); my(V=[0]);g(V);V -> [1] instead of [0]
     66- plotrecthraw for multi-curves
     67- RgXn_powu(,,1) wrong result [#2314]
     68- erfc incorrect on negative imaginary axis [#2315]
+BA  69- [32bit] forfactored(n=223092868, 223092871, ) -> SEGV [#2318]
 
   Added
 HC   1- new GP function eulerreal

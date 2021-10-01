@@ -77,6 +77,7 @@ forfactored(x=0,2,print(x))
 forfactored(x=0,2, if (x[1]==0, break);print(x))
 forfactored(x=0,2, if (x[1]==1, break);print(x))
 forfactored(x=1,-1,print(x))
+forfactored(n=223092868, 223092871, print(n) )
 
 forsquarefree(N=-5,5,print(N))
 forsquarefree(N=10^5,10^5+10,print(N))

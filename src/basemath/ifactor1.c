@@ -3859,15 +3859,15 @@ vecfactoru_i(ulong a, ulong b)
   forprime_t T;
   if (b < 510510UL) N = 7;
   else if (b < 9699690UL) N = 8;
-#ifdef LONG_IS_64BIT
   else if (b < 223092870UL) N = 9;
+#ifdef LONG_IS_64BIT
   else if (b < 6469693230UL) N = 10;
   else if (b < 200560490130UL) N = 11;
   else if (b < 7420738134810UL) N = 12;
   else if (b < 304250263527210UL) N = 13;
   else N = 16; /* don't bother */
 #else
-  else N = 9;
+  else N = 10;
 #endif
   for (k = 1; k <= n; k++) gel(L,k) = matsmalltrunc_init(N);
   u_forprime_init(&T, 2, usqrt(b));
