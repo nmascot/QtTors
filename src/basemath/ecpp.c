@@ -310,15 +310,15 @@ ecpp_disclist_init(ulong maxdisc, GEN primelist)
   /* tuning paramaters blatantly copied from vecfactoru */
   if (maxdisc < 510510UL) N = 7;
   else if (maxdisc < 9699690UL) N = 8;
-  #ifdef LONG_IS_64BIT
     else if (maxdisc < 223092870UL) N = 9;
+  #ifdef LONG_IS_64BIT
     else if (maxdisc < 6469693230UL) N = 10;
     else if (maxdisc < 200560490130UL) N = 11;
     else if (maxdisc < 7420738134810UL) N = 12;
     else if (maxdisc < 304250263527210UL) N = 13;
     else N = 16; /* don't bother */
   #else
-    else N = 9;
+    else N = 10;
   #endif
 
   /* od[t] attached to discriminant 1-4*t, ev[t] attached to -4*t */
