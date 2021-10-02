@@ -55,7 +55,7 @@ zetamaxpow(long n)
   long M = (long)ceil(n / (2 * M_PI * M_E));
   return M | 1; /* make it odd */
 }
-/* v * zeta(k) using 'max' precomputed odd powers */
+/* v * zeta(k) using r precomputed odd powers */
 static GEN
 bern_zeta(GEN v, long k, GEN pow, long r, long p)
 {
@@ -71,10 +71,6 @@ bern_zeta(GEN v, long k, GEN pow, long r, long p)
 }
 /* z * j^2 */
 static GEN
-mulru2(GEN z, ulong j)
-{ return (j | HIGHMASK)? mulri(z, sqru(j)): mulru(z, j*j); }
-/* z * j^2 */
-static GEN
 muliu2(GEN z, ulong j)
 { return (j | HIGHMASK)? mulii(z, sqru(j)): muliu(z, j*j); }
 /* 1 <= m <= n, set y[1] = B_{2m}, ... y[n-m+1] = B_{2n} in Q */
@@ -82,17 +78,17 @@ static void
 bernset(GEN *y, long m, long n)
 {
   long i, j, k, p, prec, r, N = n << 1; /* up to B_N */
-  GEN u, B, v, t;
+  GEN u, b, v, t;
   p = bernbitprec(N); prec = nbits2prec(p);
   u = sqrr(Pi2n(1, prec)); /* (2Pi)^2 */
   v = divrr(mpfactr(N, prec), powru(u, n)); shiftr_inplace(v,1);
   r = zetamaxpow(N);
-  t = cgetg(r+1, t_VEC); B = int2n(p); /* fixed point */
+  t = cgetg(r+1, t_VEC); b = int2n(p); /* fixed point */
   for (j = 3; j <= r; j += 2)
   {
     GEN z = cgeti(prec);
     pari_sp av2 = avma;
-    affii(divii(B, powuu(j, N)), z);
+    affii(divii(b, powuu(j, N)), z);
     gel(t,j) = z; set_avma(av2);
   }
   y += n - m;
@@ -111,12 +107,9 @@ bernset(GEN *y, long m, long n)
     set_avma(av2); k -= 2;
     if ((k & 0xf) == 0)
     { /* reduce precision if possible */
-      long p2 = p, prec2 = prec, r2;
-      p = bernbitprec(k);
-      prec = nbits2prec(p); if (prec2 == prec) continue;
-      setprec(v, prec);
-      r2 = zetamaxpow(k); if (r2 > r) continue;
-      r = r2;
+      long p2 = p, prec2 = prec;
+      p = bernbitprec(k); prec = nbits2prec(p); if (prec2 == prec) continue;
+      setprec(v, prec); r = zetamaxpow(k);
       for (j = 3; j <= r; j += 2) affii(shifti(gel(t,j), p - p2), gel(t,j));
       set_avma(av2);
     }
@@ -436,74 +429,70 @@ static long
 eulerbitprec(long N)
 { /* 1.1605 ~ log(32/Pi) / 2 */
   const double logPIS2 = 0.4515827;
-  double t = (N + 0.5) * log((double)N) - N*(1 + logPIS2) + 1.1605;
-  return (long)ceil(t / M_LN2) + (N < 10000? 16: 128);
+  double t = (N + 1) * log((double)N) - N*(1 + logPIS2) + 1.1605;
+  return (long)ceil(t / M_LN2) + 10;
 }
 static long
 eulerprec(long N) { return nbits2prec(eulerbitprec(N)); }
 
 /* sum_{k > M, k odd} (-1)^((k-1)/2)k^(-n) < M^(-n) < 2^-b */
 static long
-lfun4maxpow(long n, long b)
+lfun4maxpow(long n)
 {
-  long M = (long)exp2((double)b/(n+0.));
+  long M = (long)ceil(2 * n / (M_E * M_PI));
   return M | 1; /* make it odd */
 }
 
-/* lfun4(k) using 'max' precomputed odd powers */
+/* lfun4(k) using r precomputed odd powers */
 static GEN
-euler_lfun4(GEN pow, long max)
+euler_lfun4(GEN v, GEN pow, long r, long p)
 {
-  GEN s = ((max & 3L) == 1) ? gel(pow, max) : negr(gel(pow, max));
+  GEN s = ((r & 3L) == 1)? gel(pow, r): negi(gel(pow, r));
   long j;
-  for (j = max - 2; j >= 3; j -= 2)
-    s = ((j & 3L) == 1) ? addrr(s, gel(pow,j)) : subrr(s, gel(pow,j));
-  return addrs(s, 1);
+  for (j = r - 2; j >= 3; j -= 2)
+    s = ((j & 3L) == 1)? addii(s, gel(pow,j)): subii(s, gel(pow,j));
+  s = mulri(v, s); shiftr_inplace(s, -p);
+  return addrr(v, s);
 }
 
 /* 1 <= m <= n, set y[1] = E_{2m}, ... y[n-m+1] = E_{2n} in Z */
 static void
 eulerset(GEN *y, long m, long n)
 {
-  long i, j, k, bit, prec, max, N = n << 1, N1 = N + 1; /* up to E_N */
-  GEN A, C, pow;
-  bit = eulerbitprec(N); prec = nbits2prec(bit);
-  A = sqrr(Pi2n(-1, prec)); /* (Pi/2)^2 */
-  C = divrr(mpfactr(N, prec), mulrr(powru(A, n), Pi2n(-2,prec)));
-  max = lfun4maxpow(N1, bit);
-  pow = cgetg(max+1, t_VEC);
-  for (j = 3; j <= max; j += 2)
-  { /* fixed point, precision decreases with j */
-    long b = bit - N1 * log2(j), p = b <= 0? LOWDEFAULTPREC: nbits2prec(b);
-    gel(pow,j) = invr(rpowuu(j, N1, p));
+  long i, j, k, p, prec, r, N = n << 1, N1 = N + 1; /* up to E_N */
+  GEN b, u, v, t;
+  p = eulerbitprec(N); prec = nbits2prec(p);
+  u = sqrr(Pi2n(-1, prec)); /* (Pi/2)^2 */
+  v = divrr(mpfactr(N, prec), mulrr(powru(u, n), Pi2n(-2,prec)));
+  r = lfun4maxpow(N1);
+  t = cgetg(r+1, t_VEC); b = int2n(p); /* fixed point */
+  for (j = 3; j <= r; j += 2)
+  {
+    GEN z = cgeti(prec);
+    pari_sp av2 = avma;
+    affii(divii(b, powuu(j, N+1)), z);
+    gel(t,j) = z; set_avma(av2);
   }
   y += n - m;
   for (i = n, k = N1;; i--)
   { /* set E_n, k = 2i + 1 */
     pari_sp av2 = avma;
-    GEN E, s = euler_lfun4(pow, max);
+    GEN E = euler_lfun4(v, t, r, p);
     long j;
-    /* s = lfun4(k), C = (4/Pi)*k! / (Pi/2)^k */
-    E = roundr(mulrr(s, C)); if (odd(i)) setsigne(E, -1); /* E ~ E_n */
+    /* E = v * lfun4(k), v = (4/Pi)*k! / (Pi/2)^k */
+    E = roundr(E); if (odd(i)) setsigne(E, -1); /* E ~ E_n */
     *y-- = gclone(E);
     if (i == m) break;
-    affrr(divrunu(mulrr(C,A), k-2), C);
-    for (j = max; j >= 3; j -= 2) affrr(mulru2(gel(pow,j), j), gel(pow,j));
+    affrr(divrunu(mulrr(v,u), k-2), v);
+    for (j = r; j >= 3; j -= 2) affii(muliu2(gel(t,j), j), gel(t,j));
     set_avma(av2); k -= 2;
-    if ((k & 0xf) == 0)
+    if ((k & 0x1f) == 1)
     { /* reduce precision if possible */
-      long prec2 = prec, max2;
-      bit = eulerbitprec(k);
-      prec = nbits2prec(bit); if (prec2 == prec) continue;
-      setprec(C, prec);
-      max2 = lfun4maxpow(k,bit); if (max2 > max) continue;
-      max = max2;
-      for (j = 3; j <= max; j += 2)
-      {
-        GEN P = gel(pow,j);
-        long b = bit + expo(P), p = b <= 0? LOWDEFAULTPREC: nbits2prec(b);
-        if (realprec(P) > p) setprec(P, p);
-      }
+      long p2 = p, prec2 = prec;
+      p = eulerbitprec(k); prec = nbits2prec(p); if (prec2 == prec) continue;
+      setprec(v, prec); r = lfun4maxpow(k);
+      for (j = 3; j <= r; j += 2) affii(shifti(gel(t,j), p - p2), gel(t,j));
+      set_avma(av2);
     }
   }
 }
