@@ -888,7 +888,7 @@ INLINE void
 mpqs_sieve_p(unsigned char *B, unsigned char *E, long p4, long p,
              unsigned char logp)
 {
-  register unsigned char *e = E - p4;
+  unsigned char *e = E - p4;
   /* Unrolled loop. It might be better to let the compiler worry about this
    * kind of optimization, based on its knowledge of whatever useful tricks the
    * machine instruction set architecture is offering */
@@ -918,7 +918,7 @@ INLINE void
 mpqs_sieve_p2(unsigned char *B, unsigned char *E, long p4, long s1, long s2,
              unsigned char logp)
 {
-  register unsigned char *e = E - p4;
+  unsigned char *e = E - p4;
   /* Unrolled loop. It might be better to let the compiler worry about this
    * kind of optimization, based on its knowledge of whatever useful tricks the
    * machine instruction set architecture is offering */
