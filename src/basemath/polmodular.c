@@ -3365,7 +3365,7 @@ modpoly_pickD_primes(
   double bits;
   long D, m, n, vcnt, pfilter, one_prime, inv;
   ulong maxp;
-  register ulong a1, a2, v, t, p, a1_start, a1_delta, L0, L1, L, absD;
+  ulong a1, a2, v, t, p, a1_start, a1_delta, L0, L1, L, absD;
   ulong FF_BITS = BITS_IN_LONG - 2; /* BITS_IN_LONG - NAIL_BITS */
 
   D = Dinfo->D1; absD = -D;
