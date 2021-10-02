@@ -3852,7 +3852,7 @@ matsmalltrunc_init(long l)
 /* return optimal N s.t. omega(b) <= N for all b <= x */
 long
 maxomegau(ulong x)
-{
+{ /* P=primes(15); for(i=1,15, print([i, vecprod(P[1..i])])) */
   if (x < 30030UL)/* rare trivial cases */
   {
     if (x < 2UL) return 0;
@@ -3877,6 +3877,35 @@ maxomegau(ulong x)
   return 9;
 #endif
 }
+/* return optimal N s.t. omega(b) <= N for all odd b <= x */
+long
+maxomegaoddu(ulong x)
+{ /* P=primes(15+1); for(i=1,15, print([i, vecprod(P[2..i+1])])) */
+  if (x < 255255UL)/* rare trivial cases */
+  {
+    if (x < 3UL) return 0;
+    if (x < 15UL) return 1;
+    if (x < 105UL) return 2;
+    if (x < 1155UL) return 3;
+    if (x < 15015UL) return 4;
+    return 5;
+  }
+  if (x < 4849845UL) return 6; /* most frequent case */
+  if (x < 111546435UL) return 7;
+  if (x < 3234846615UL) return 8;
+#ifdef LONG_IS_64BIT
+  if (x < 100280245065UL) return 9;
+  if (x < 3710369067405UL) return 10;
+  if (x < 152125131763605UL) return 11;
+  if (x < 6541380665835015UL) return 12;
+  if (x < 307444891294245705UL) return 13;
+  if (x < 16294579238595022365UL) return 14;
+  return 15;
+#else
+  return 9;
+#endif
+}
+
 /* If a <= c <= b , factoru(c) = L[c-a+1] */
 GEN
 vecfactoru_i(ulong a, ulong b)
@@ -3921,23 +3950,11 @@ vecfactoru(ulong a, ulong b)
 GEN
 vecfactoroddu_i(ulong a, ulong b)
 {
-  ulong N, k, p, n = ((b-a)>>1) + 1;
+  ulong k, p, n = ((b-a)>>1) + 1, N = maxomegaoddu(b) + 1;
   GEN v = const_vecsmall(n, 1);
   GEN L = cgetg(n+1, t_VEC);
   forprime_t T;
-  /* f(N)=my(a=primes(n+1));vecprod(a[2..#a]); */
-  if (b < 255255UL) N = 6;
-  else if (b < 4849845UL) N = 7;
-  else if (b < 111546435UL) N = 8;
-  else if (b < 3234846615UL) N = 9;
-#ifdef LONG_IS_64BIT
-  else if (b < 100280245065UL) N = 10;
-  else if (b < 3710369067405UL) N = 11;
-  else if (b < 152125131763605UL) N = 12;
-  else N = 16; /* don't bother */
-#else
-  else N = 10;
-#endif
+
   for (k = 1; k <= n; k++) gel(L,k) = matsmalltrunc_init(N);
   u_forprime_init(&T, 3, usqrt(b));
   while ((p = u_forprime_next(&T)))

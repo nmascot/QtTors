@@ -149,7 +149,7 @@ LGr 47- allow endpoints in solve() to by +oo or -oo
     52- [libpari] gc_all
 BA  53- [libpari] Zp_inv, Zp_invlift, Zp_div
 BA  54- [libpari] FpXn_div, Flxn_div, RgXn_div, RgXn_div_i, FpXQXn_div, F2xn_div
-    55- [libpari] maxomegau
+    55- [libpari] maxomegau, maxomegaoddu
 
   Changed
 HC   1- faster implementation of eulervec + cache result
