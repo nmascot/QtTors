@@ -164,7 +164,7 @@ constbern(long nb)
   if (DEBUGLEVEL) timer_printf(&T, "Bernoulli");
   swap(B, bernzone); guncloneNULL(B);
   set_avma(av);
-  if (nb > 100000)
+  if (nb > 200000)
   {
     const ulong p = 4294967291UL;
     long n = 2 * nb + 2;
