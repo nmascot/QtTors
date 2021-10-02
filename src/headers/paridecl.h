@@ -4004,6 +4004,7 @@ long    ispowerful(GEN n);
 long    issquarefree(GEN x);
 long    istotient(GEN n, GEN *px);
 long    maxomegau(ulong x);
+long    maxomegaoddu(ulong x);
 long    moebius(GEN n);
 long    moebiusu(ulong n);
 long    moebiusu_fact(GEN f);
