@@ -237,7 +237,7 @@ cgetr(long x)
 INLINE GEN
 leafcopy(GEN x)
 {
-  register long lx = lg(x);
+  long lx = lg(x);
   GEN y = new_chunk(lx); /* can't use cgetg_copy, in case x,y overlap */
   while (--lx > 0) y[lx] = x[lx];
   y[0] = x[0] & (TYPBITS|LGBITS); return y;
@@ -1015,7 +1015,7 @@ remlll_pre(ulong u2, ulong u1, ulong u0, ulong n, ulong ninv)
 INLINE ulong
 Fl_sqr_pre(ulong a, ulong p, ulong pi)
 {
-  register ulong x;
+  ulong x;
   LOCAL_HIREMAINDER;
   x = mulll(a,a);
   return remll_pre(hiremainder, x, p, pi);
@@ -1024,7 +1024,7 @@ Fl_sqr_pre(ulong a, ulong p, ulong pi)
 INLINE ulong
 Fl_mul_pre(ulong a, ulong b, ulong p, ulong pi)
 {
-  register ulong x;
+  ulong x;
   LOCAL_HIREMAINDER;
   x = mulll(a,b);
   return remll_pre(hiremainder, x, p, pi);
@@ -1164,7 +1164,7 @@ Fl_center(ulong u, ulong p, ulong ps2) { return (long) (u > ps2)? u - p: u; }
 INLINE ulong
 Fl_mul(ulong a, ulong b, ulong p)
 {
-  register ulong x;
+  ulong x;
   LOCAL_HIREMAINDER;
   x = mulll(a,b);
   if (!hiremainder) return x % p;
@@ -1173,7 +1173,7 @@ Fl_mul(ulong a, ulong b, ulong p)
 INLINE ulong
 Fl_sqr(ulong a, ulong p)
 {
-  register ulong x;
+  ulong x;
   LOCAL_HIREMAINDER;
   x = mulll(a,a);
   if (!hiremainder) return x % p;

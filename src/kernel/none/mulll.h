@@ -41,7 +41,7 @@ extern long addmul(ulong x, ulong y);
 
 #if defined(__GNUC__) && !defined(DISABLE_INLINE)
 #undef LOCAL_HIREMAINDER
-#define LOCAL_HIREMAINDER register ulong hiremainder
+#define LOCAL_HIREMAINDER ulong hiremainder
 
 #define mulll(x, y) \
 __extension__ ({ \

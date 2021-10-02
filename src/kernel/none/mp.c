@@ -331,7 +331,7 @@ shiftispec(GEN x, long nx, long n)
     if (!m) for (i=0; i<nx; i++) yd[i]=x[i];
     else
     {
-      register const ulong sh = BITS_IN_LONG - m;
+      const ulong sh = BITS_IN_LONG - m;
       shift_left(yd,x, 0,nx-1, 0,m);
       i = uel(x,0) >> sh;
       /* Extend y on the left? */
@@ -829,7 +829,7 @@ DIVIDE: /* quotient is nonzero */
   r1 = new_chunk(lx); sh = bfffo(y[2]);
   if (sh)
   { /* normalize so that highbit(y) = 1 (shift left x and y by sh bits)*/
-    register const ulong m = BITS_IN_LONG - sh;
+    const ulong m = BITS_IN_LONG - sh;
     r = new_chunk(ly);
     shift_left(r, y,2,ly-1, 0,sh); y = r;
     shift_left(r1,x,2,lx-1, 0,sh);
@@ -1088,7 +1088,7 @@ diviuexact_i(GEN x, ulong y)
     if (!q) continue;
     /* x := x - q * y */
     { /* update neither lowest word (could set it to 0) nor highest ones */
-      register GEN x1 = x0 - 1;
+      GEN x1 = x0 - 1;
       LOCAL_HIREMAINDER;
       (void)mulll(q,y);
       if (hiremainder)
@@ -1197,7 +1197,7 @@ diviiexact(GEN x, GEN y)
     /* x := x - q * y */
     (void)mulll(q,y[0]); limj = maxss(lx - lz, ii+3-ly);
     { /* update neither lowest word (could set it to 0) nor highest ones */
-      register GEN x0 = x + (ii - 1), y0 = y - 1, xlim = x + limj;
+      GEN x0 = x + (ii - 1), y0 = y - 1, xlim = x + limj;
       for (; x0 >= xlim; x0--, y0--)
       {
         *x0 = subll(*x0, addmul(q,*y0));

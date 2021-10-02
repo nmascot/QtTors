@@ -34,8 +34,8 @@ extern ulong invert_word(ulong);
 
 #define divll(x, y)                                      \
 __extension__ ({                                         \
-  register ulong _di, _x = (x), _y = (y), _q, _ql, _r;   \
-  register ulong _xh, _xl, _k, __hire;                   \
+  ulong _di, _x = (x), _y = (y), _q, _ql, _r;   \
+  ulong _xh, _xl, _k, __hire;                   \
                                                          \
   if (_y & 0x8000000000000000UL)                         \
       { _k = 0; __hire = hiremainder; }                  \
@@ -67,8 +67,8 @@ __extension__ ({                                         \
 static ulong
 divll(ulong x, ulong y)
 {
-  register ulong _di, _x = (x), _y = (y), _q, _ql, _r;
-  register ulong _xh, _xl, _k, __hire;
+  ulong _di, _x = (x), _y = (y), _q, _ql, _r;
+  ulong _xh, _xl, _k, __hire;
 
   if (_y & 0x8000000000000000UL)
       { _k = 0; __hire = hiremainder; }

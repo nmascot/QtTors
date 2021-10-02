@@ -31,7 +31,7 @@ extern long subllx(ulong x, ulong y);
 
 #if defined(__GNUC__) && !defined(DISABLE_INLINE)
 #undef LOCAL_OVERFLOW
-#define LOCAL_OVERFLOW register ulong overflow
+#define LOCAL_OVERFLOW ulong overflow
 
 #define addll(a, b)                                             \
 __extension__ ({                                                \

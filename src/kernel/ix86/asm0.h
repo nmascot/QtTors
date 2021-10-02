@@ -28,8 +28,8 @@ ASM addll mulll bfffo divll
    (It is included only if __GNUC__ is defined.) */
 
 /* Use local variables whenever possible. */
-#define LOCAL_HIREMAINDER  register ulong hiremainder
-#define LOCAL_OVERFLOW     register ulong overflow
+#define LOCAL_HIREMAINDER  ulong hiremainder
+#define LOCAL_OVERFLOW     ulong overflow
 
 #define addll(a,b) \
 __extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b); \

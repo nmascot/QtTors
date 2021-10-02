@@ -17,8 +17,8 @@ ASM mulll
 NOASM addll bfffo divll
 */
 #ifdef ASMINLINE
-#define LOCAL_HIREMAINDER  register ulong hiremainder
-#define LOCAL_OVERFLOW     register ulong overflow
+#define LOCAL_HIREMAINDER  ulong hiremainder
+#define LOCAL_OVERFLOW     ulong overflow
 
 #define mulll(a, b)                                         \
 __extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b); \

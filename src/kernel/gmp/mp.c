@@ -127,7 +127,7 @@ xmpn_zero(mp_ptr x, mp_size_t n)
 INLINE GEN
 icopy_ef(GEN x, long l)
 {
-  register long lx = lgefint(x);
+  long lx = lgefint(x);
   const GEN y = cgeti(l);
 
   while (--lx > 0) y[lx]=x[lx];
@@ -414,7 +414,7 @@ mantissa2nr(GEN x, long n)
     if (!m) for (i=2; i<lx; i++) y[i]=x[i];
     else
     {
-      register const ulong sh = BITS_IN_LONG - m;
+      const ulong sh = BITS_IN_LONG - m;
       shift_left(y,x, 2,lx-1, 0,m);
       i = uel(x,2) >> sh;
       /* Extend y on the left? */

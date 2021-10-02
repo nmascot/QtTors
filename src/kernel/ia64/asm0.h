@@ -20,7 +20,7 @@ NOASM addll divll
 
 #ifdef ASMINLINE
 /* Written by Guillaume Hanrot */
-#define LOCAL_HIREMAINDER  register ulong hiremainder
+#define LOCAL_HIREMAINDER  ulong hiremainder
 
 #define bfffo(a)                                                        \
 __extension__ ({ ulong __arg1 = (a), __tmp, _a, _c;                     \

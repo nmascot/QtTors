@@ -16,7 +16,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #undef  LOCAL_HIREMAINDER
 extern ulong hiremainder;
 #if defined(INLINE) && defined(__GNUC__) && !defined(DISABLE_INLINE)
-#define LOCAL_HIREMAINDER register ulong hiremainder
+#define LOCAL_HIREMAINDER ulong hiremainder
 #else
 #define LOCAL_HIREMAINDER
 #endif
