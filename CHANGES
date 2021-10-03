@@ -82,7 +82,9 @@ BA  60- (f(~v)=v[1]=1);(g(v) = f(~v)); my(V=[0]);g(V);V -> [1] instead of [0]
     66- plotrecthraw for multi-curves
     67- RgXn_powu(,,1) wrong result [#2314]
     68- erfc incorrect on negative imaginary axis [#2315]
-BA  69- [32bit] forfactored(n=223092868, 223092871, ) -> SEGV [#2318]
+    69- mfgalpoistype bug for dihedral types (when conductor at oo is not
+        stable under Galois) [#2293]
+BA  70- [32bit] forfactored(n=223092868, 223092871, ) -> SEGV [#2318]
 
   Added
 HC   1- new GP function eulerreal
@@ -194,8 +196,6 @@ BA  22- [libpari] gen_factorback now take an extra parameter one.
     28- removed appa.tex from users.dvi; inline the text in INSTALL.tex
     29- divrunu, divgunu: use a single division in all cases (faster even if
         denominator has 2 words)
-    30- mfgalpoistype bug for dihedral types (when conductor at oo is not
-        stable under Galois) [#2293]
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,
