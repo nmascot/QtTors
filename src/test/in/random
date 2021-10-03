@@ -32,9 +32,10 @@ v=vector(10,i,random());
 setrand(s);
 w=vector(10,i,random());
 if(v != w,error("setrand"));
+vector(10,i,random(-10))
+
+\\ ERRORS
 random("")
 setrand(2^65)
 setrand(-1)
-
-\\ ERRORS
 randomprime([3,100], Mod(0,2))

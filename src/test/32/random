@@ -28,6 +28,7 @@ Mod(5, 7)*x^3 + Mod(2, 7)*x^2 + Mod(1, 7)*x + Mod(6, 7)
 37
 37
 2
+[1, 6, 3, 4, 4, 2, -7, 7, 4, -8]
   ***   at top-level: random("")
   ***                 ^----------
   *** random: incorrect type in genrand (t_STR).
@@ -42,4 +43,4 @@ Mod(5, 7)*x^3 + Mod(2, 7)*x^2 + Mod(1, 7)*x + Mod(6, 7)
   *** randomprime: elements not coprime in randomprime:
     0
     2
-Total time spent: 3
+Total time spent: 1

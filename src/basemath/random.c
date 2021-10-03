@@ -292,8 +292,17 @@ genrand(GEN N)
   switch(typ(N))
   {
     case t_INT:
-      if (signe(N)<=0) pari_err_DOMAIN("random","N","<=",gen_0,gen_0);
-      return randomi(N);
+      switch(signe(N))
+      {
+        pari_sp av;
+        GEN d;
+        case 1:
+          return randomi(N);
+        case -1:
+          av = avma; N = addiu(N, 1); d = subui(1, shifti(N, 1));
+          return gerepileuptoint(av, addii(N, randomi(d)));
+        default: pari_err_DOMAIN("random","N","<=",gen_0,gen_0);
+      }
     case t_REAL:
       return randomr(realprec(N));
     case t_INTMOD:
