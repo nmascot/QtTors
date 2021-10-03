@@ -925,6 +925,7 @@ ellpadicbsd(GEN E, GEN p, long n, GEN D)
   if (n < 5) n = 5;
   for(;; n <<= 1)
   {
+    pari_sp av2 = avma;
     GEN v = ellpadicL_init(W, n);
     for (r = 0; r < MAXR; r++)
     {
@@ -932,6 +933,7 @@ ellpadicbsd(GEN E, GEN p, long n, GEN D)
       if (!gequal0(U)) break;
     }
     if (r < MAXR) break;
+    set_avma(av2);
   }
   apD = ellap(ED, p);
   if (typ(U) == t_COL)
