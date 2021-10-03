@@ -56,6 +56,7 @@ typedef struct {double low; double up;} ratpoints_interval;
 #define CEIL(a,b) (((a) <= 0) ? -(-(a) / (b)) : 1 + ((a)-1) / (b))
 
 /* Some Macros for working with SSE registers */
+#define HAS_VX
 #ifdef HAS_SSE2
 #include <emmintrin.h>
 
@@ -68,6 +69,12 @@ typedef __v2di ratpoints_bit_array;
 #define TEST(a) (EXT0(a) || EXT1(a))
 #define RBA(a) ((__v2di){((long) a), ((long) a)})
 #define RBA_SHIFT (7)
+#define MASKL(a,s) { unsigned long *survl = (unsigned long *)(a); long sh = (s); \
+                     if(sh >= BITS_IN_LONG) { survl[0] = 0UL; survl[1] &= (~0UL)<<(sh - BITS_IN_LONG); } \
+                     else { survl[0] &= ~(0UL)<<sh; } }
+#define MASKU(a,s) { unsigned long *survl = (unsigned long *)(a); long sh = (s); \
+                     if(sh >= BITS_IN_LONG) { survl[0] &= ~(0UL)>>(sh - BITS_IN_LONG); survl[1] = 0UL; } \
+                     else { survl[1] &= ~(0UL)>>sh; } }
 #else
 
 /* Use ulong for the bit arrays */
@@ -78,10 +85,20 @@ typedef ulong ratpoints_bit_array;
 #define TEST(a) (a)
 #define RBA(a) (a)
 #define RBA_SHIFT TWOPOTBITS_IN_LONG
+#define MASKL(a,s) { *(a) &= ~(0UL)<<(s); }
+#define MASKU(a,s) { *(a) &= ~(0UL)>>(s); }
+#undef HAS_VX
 #endif
 
 #define RBA_SIZE  (sizeof(ratpoints_bit_array))
 #define RBA_LENGTH  (RBA_SIZE<<3)
+#define RBA_PACK  (RBA_LENGTH>>TWOPOTBITS_IN_LONG)
+
+#ifdef HAS_VX
+#define CODE_INIT_SIEVE_COPY { long k;  for (a = 0; a < p; a++) for(k=1; k<RBA_PACK; k++) si[a+k*p] = si[a]; }
+#else
+#define CODE_INIT_SIEVE_COPY
+#endif
 
 typedef struct { long p; long offset; ratpoints_bit_array *ptr; } sieve_spec;
 
@@ -117,12 +134,6 @@ typedef struct {
   GEN inverses, offsets, den_info, divisors;
   ulong **sieves0;
 } ratpoints_args;
-
-#ifdef HAS_SSE2
-#define CODE_INIT_SIEVE_COPY for (a = 0; a < p; a++) si[a+p] = si[a];
-#else
-#define CODE_INIT_SIEVE_COPY
-#endif
 
 static ratpoints_bit_array *
 sieve_init1(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
@@ -305,20 +316,18 @@ gen_sieves0(GEN listprime)
 {
   long n;
   long nbprime = lg(listprime)-1;
-  ulong ** si = (ulong**) new_chunk(nbprime+1);
+  ulong ** w = (ulong**) new_chunk(nbprime+1);
   for (n = 1; n <= nbprime; n++)
   {
-    ulong i, p = uel(listprime,n);
-    ulong *w = (ulong *) stack_malloc_align(p*RBA_SIZE, RBA_SIZE);
-    for (i = 0; i < p; i++) uel(w,i) = ~0UL;
-    for (i = 0; i < BITS_IN_LONG; i++)
-      uel(w,(p*i)>>TWOPOTBITS_IN_LONG) &= ~(1UL<<((p*i) & LONG_MASK));
-#ifdef HAS_SSE2
-    for (i = 0; i < p; i++) uel(w,i+p) = uel(w,i);
-#endif
-    si[n] = w;
+    ulong a, p = uel(listprime,n);
+    ulong *si = (ulong *) stack_malloc_align(p*RBA_SIZE, RBA_SIZE);
+    for (a = 0; a < p; a++) si[a] = ~0UL;
+    for (a = 0; a < BITS_IN_LONG; a++)
+      uel(si,(p*a)>>TWOPOTBITS_IN_LONG) &= ~(1UL<<((p*a) & LONG_MASK));
+    CODE_INIT_SIEVE_COPY
+    w[n] = si;
   }
-  return si;
+  return w;
 }
 
 static void
@@ -529,7 +538,8 @@ _ratpoints_sift0(long b, long w_low, long w_high,
     if (TEST(nums))
     {
       long a0, a, d;
-           /* a will be the numerator corresponding to the selected bit */
+      ulong nums0 = EXT0(nums);
+      /* a will be the numerator corresponding to the selected bit */
       if (which_bits == num_all)
       {
         d = 1; a0 = i * RBA_LENGTH;
@@ -539,36 +549,33 @@ _ratpoints_sift0(long b, long w_low, long w_high,
         d = 2; a0 = i * 2 * RBA_LENGTH;
         if (which_bits == num_odd) a0++;
       }
-      {
-#ifdef HAS_SSE2
-        long da = d<<TWOPOTBITS_IN_LONG;
-        ulong nums0 = EXT0(nums);
-        ulong nums1 = EXT1(nums);
-#else
-        ulong nums0 = nums;
-#endif
-
-        for (a = a0; nums0; a += d, nums0 >>= 1)
-        { /* test one bit */
-          if (odd(nums0) && ugcd(labs(a), absb)==1)
-          {
-            if (!args->bc) set_bc(b, args);
-            nb += _ratpoints_check_point(a, b, args, quit, process, info);
-            if (*quit) return nb;
-          }
+      for (a = a0; nums0; a += d, nums0 >>= 1)
+      { /* test one bit */
+        if (odd(nums0) && ugcd(labs(a), absb)==1)
+        {
+          if (!args->bc) set_bc(b, args);
+          nb += _ratpoints_check_point(a, b, args, quit, process, info);
+          if (*quit) return nb;
         }
-#ifdef HAS_SSE2
-        for (a = a0 + da; nums1; a += d, nums1 >>= 1)
-        { /* test one bit */
-          if (odd(nums1) && ugcd(labs(a), absb)==1)
-          {
-            if (!args->bc) set_bc(b, args);
-            nb += _ratpoints_check_point(a, b, args, quit, process, info);
-            if (*quit) return nb;
-          }
-        }
-#endif
       }
+#ifdef HAS_VX
+      {
+        long k, da = d<<TWOPOTBITS_IN_LONG;
+        for (k = 1; k < RBA_PACK; k++)
+        {
+          ulong nums1 = nums[k];
+          for (a = a0 + k*da; nums1; a += d, nums1 >>= 1)
+          { /* test one bit */
+            if (odd(nums1) && ugcd(labs(a), absb)==1)
+            {
+              if (!args->bc) set_bc(b, args);
+              nb += _ratpoints_check_point(a, b, args, quit, process, info);
+              if (*quit) return nb;
+            }
+          }
+        }
+      }
+#endif
     }
   }
   return nb;
@@ -1155,39 +1162,9 @@ sift(long b, ratpoints_bit_array *survivors, ratpoints_args *args,
         for (i = range; i; i--) survivors[i-1] = bits16;
         /* boundary words */
         if (w_low0 == w_low)
-        {
-          long sh = low - RBA_LENGTH * w_low;
-          ulong *survl = (ulong *)survivors;
-
-#ifdef HAS_SSE2
-          if (sh >= BITS_IN_LONG)
-          {
-            survl[0] = 0UL;
-            survl[1] &= (~0UL)<<(sh - BITS_IN_LONG);
-          }
-          else
-            survl[0] &= ~(0UL)<<sh;
-#else
-          survl[0] &= ~(0UL)<<sh;
-#endif
-        }
+          MASKL(survivors,low - RBA_LENGTH * w_low)
         if (w_high0 == w_high)
-        {
-          long sh = RBA_LENGTH * w_high - high;
-          ulong *survl = (ulong *)&survivors[range-1];
-
-#ifdef HAS_SSE2
-          if (sh >= BITS_IN_LONG)
-          {
-            survl[0] &= ~(0UL)>>(sh - BITS_IN_LONG);
-            survl[1] = 0UL;
-          }
-          else
-            survl[1] &= ~(0UL)>>sh;
-#else
-          survl[0] &= ~(0UL)>>sh;
-#endif
-        }
+          MASKU(&survivors[range-1], RBA_LENGTH * w_high - high)
         nb += _ratpoints_sift0(b, w_low0, w_high0, args, which_bits,
                          survivors, &ssp[0], quit, process, info);
         if (*quit) return;
