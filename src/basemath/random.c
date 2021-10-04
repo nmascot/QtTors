@@ -301,7 +301,7 @@ genrand(GEN N)
         case -1:
           av = avma; N = addiu(N, 1); d = subui(1, shifti(N, 1));
           return gerepileuptoint(av, addii(N, randomi(d)));
-        default: pari_err_DOMAIN("random","N","<=",gen_0,gen_0);
+        default: pari_err_DOMAIN("random","N","=",gen_0,gen_0);
       }
     case t_REAL:
       return randomr(realprec(N));

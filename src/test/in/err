@@ -161,7 +161,7 @@ galoissubcyclo( [3, [3], [3]], Mat(3))
 galoissubcyclo(bnrinit(bnfinit(y^2+1),1), 2)
 polsubcyclo(-1,2);
 polsubcyclo(2,-1);
-random(-1)
+random(0)
 znprimroot(0)
 sqrtint(-1)
 sqrtnint(-1,2)

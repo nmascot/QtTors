@@ -341,9 +341,9 @@
   ***   at top-level: polsubcyclo(2,-1)
   ***                 ^-----------------
   *** polsubcyclo: domain error in polsubcyclo: d <= 0
-  ***   at top-level: random(-1)
-  ***                 ^----------
-  *** random: domain error in random: N <= 0
+  ***   at top-level: random(0)
+  ***                 ^---------
+  *** random: domain error in random: N = 0
   ***   at top-level: znprimroot(0)
   ***                 ^-------------
   *** znprimroot: domain error in znprimroot: argument = 0
@@ -650,4 +650,4 @@ INFINITY
   ***                                   ^-
   ***   incorrect value for plothsizes: [2,
   ***                                      ^
-Total time spent: 9
+Total time spent: 13
