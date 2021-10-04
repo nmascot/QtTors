@@ -2221,14 +2221,11 @@ FpXQ_issquare(GEN x, GEN T, GEN p)
   if (lg(x) == 2 || absequalui(2, p)) return 1;
   if (lg(x) == 3) return Fq_issquare(gel(x,2), T, p);
   av = avma; /* Ng = g^((q-1)/(p-1)) */
-  return gc_bool(av, kronecker(FpXQ_norm(x,T,p), p) == 1);
+  return gc_bool(av, kronecker(FpXQ_norm(x,T,p), p) != -1);
 }
 int
 Fp_issquare(GEN x, GEN p)
-{
-  if (absequalui(2, p)) return 1;
-  return kronecker(x, p) == 1;
-}
+{ return absequalui(2, p) || kronecker(x, p) != -1; }
 /* assume T irreducible mod p */
 int
 Fq_issquare(GEN x, GEN T, GEN p)
