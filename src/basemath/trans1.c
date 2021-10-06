@@ -1908,14 +1908,8 @@ sqrtnr_abs(GEN a, long n)
   if (n == 1) return mpabs(a);
   if (n == 2) return sqrtr_abs(a);
 
-  prec = realprec(a);
-  B = prec2nbits(prec);
-  eextra = expu(n)-1;
-  n1 = n+1;
-  n2 = 2*n; av = avma;
-  v = expo(a) / n;
+  prec = realprec(a); v = expo(a) / n; av = avma;
   if (v) a = shiftr(a, -n*v);
-
   b = rtor(a, DEFAULTPREC);
   x = mpexp(divru(logr_abs(b), n));
   if (prec == DEFAULTPREC)
@@ -1923,6 +1917,10 @@ sqrtnr_abs(GEN a, long n)
     if (v) shiftr_inplace(x, v);
     return gerepileuptoleaf(av, x);
   }
+  n1 = n+1;
+  n2 = 2*n;
+  B = prec2nbits(prec);
+  eextra = expu(n)-1;
   mask = cubic_prec_mask(B + 63);
   eold = 1;
   for(;;)
