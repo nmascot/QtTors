@@ -1635,37 +1635,23 @@ Z_to_padic(GEN a, GEN p, long e)
   }
 }
 
-/* Let x = 1 mod p and y := (x-1)/(x+1) = 0 (p). Then
- * log(x) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / k.
- * palogaux(x) returns the last sum (not multiplied by 2) */
-static GEN
-palogaux(GEN x)
-{
-  GEN p = gel(x,2), a = gel(x,4);
-  long e = precp(x);
-  return Z_to_padic(Zp_log(a, p, e), p, e);
-}
-
 GEN
 Qp_log(GEN x)
 {
   pari_sp av = avma;
   GEN y, p = gel(x,2), a = gel(x,4);
+  long e = precp(x);
 
   if (!signe(a)) pari_err_DOMAIN("Qp_log", "argument", "=", gen_0, x);
-  y = leafcopy(x); setvalp(y,0);
-  if (absequaliu(p,2))
-    y = palogaux(y);
-  else if (gequal1(modii(a, p)))
-    y = palogaux(y);
+  if (absequaliu(p,2) || equali1(modii(a, p)))
+    y = Zp_log(a, p, e);
   else
   { /* compute log(x^(p-1)) / (p-1) */
-    GEN mod = gel(y,3), p1 = subiu(p,1);
-    gel(y,4) = Fp_pow(a, p1, mod);
-    p1 = diviiexact(subsi(1,mod), p1); /* 1/(p-1) */
-    y = gmul(palogaux(y), p1);
+    GEN q = gel(x,3), t = subiu(p, 1);
+    a = Fp_pow(a, t, q);
+    y = Fp_mul(Zp_log(a, p, e), diviiexact(subsi(1, q), t), q);
   }
-  return gerepileupto(av,y);
+  return gerepileupto(av, Z_to_padic(y, p, e));
 }
 
 static GEN Qp_exp_safe(GEN x);
