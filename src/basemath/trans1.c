@@ -1241,8 +1241,7 @@ gpow(GEN x, GEN n, long prec)
         {
           z = powgi(z, a);
           if (Mod4(a) == 3) z = gneg(z);
-          return gerepilecopy(av, mkcomplex(gen_0, z))
-          ;
+          return gerepilecopy(av, mkcomplex(gen_0, z));
         }
         break;
       }
