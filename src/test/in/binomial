@@ -2,6 +2,8 @@ binomial(x,2)
 binomial(6,3)
 binomial(6)
 binomial(2^64-1,4)
+binomial(3,5)
+binomial(3,3)
 
 \\errors
 binomial(1,2.)

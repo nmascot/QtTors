@@ -976,24 +976,21 @@ binomial(GEN n, long k)
   {
     if (signe(n) > 0)
     {
-      GEN z = subiu(n,k);
-      if (cmpiu(z,k) < 0)
+      GEN z = subiu(n, k);
+      if (cmpiu(z, k) < 0)
       {
-        k = itou(z); set_avma(av);
-        if (k <= 1)
+        switch(signe(z))
         {
-          if (k < 0) return gen_0;
-          if (k == 0) return gen_1;
-          return icopy(n);
+          case -1: return gc_const(av, gen_0);
+          case 0: return gc_const(av, gen_1);
         }
+        k = z[2];
+        if (k == 1) { set_avma(av); return icopy(n); }
       }
+      set_avma(av);
+      if (lgefint(n) == 3) return binomialuu(n[2],(ulong)k);
     }
     /* k > 1 */
-    if (lgefint(n) == 3 && signe(n) > 0)
-    {
-      y = binomialuu(n[2],(ulong)k);
-      return gerepileuptoint(av, y);
-    }
     y = cgetg(k+1,t_VEC);
     for (i=1; i<=k; i++) gel(y,i) = subiu(n,i-1);
     y = diviiexact(ZV_prod(y), mpfact(k));
