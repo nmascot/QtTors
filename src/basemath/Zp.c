@@ -219,19 +219,19 @@ Zp_sqrt(GEN x, GEN p, long e)
  *      1 / a = (1 - a_0*p^v) (1 - a_1*p^(2*v) (1 - a_2*p^(4*v) ...
  *    with 0 <= a_i < p^(v*2^i).
  * 3. compute each log(1 - a_i*p^(v*2^i)) using Taylor expansion
- *    and binary spliting */
+ *    and binary splitting */
 GEN
-Zp_log(GEN arg, GEN p, ulong e)
+Zp_log(GEN a, GEN p, ulong e)
 {
   pari_sp av = avma;
   ulong v, N, Np, trunc, pp = itou_or_0(p);
   GEN pe, pv, trunc_mod, num, den, ans = gen_0;
 
-  if (equali1(arg)) return ans; /* very frequent! */
+  if (equali1(a)) return ans; /* very frequent! */
   /* First make the argument closer to 1 by raising it to the p^(v-1) */
   v = pp? ulogint(e, pp): 0;  /* v here is v-1 */
   pe = powiu(p,e); pv = powiu(p,v);
-  arg = Fp_pow(arg, pv, mulii(pe, pv));
+  a = Fp_pow(a, pv, mulii(pe, pv));
   e += v;
 
   /* Where do we truncate the Taylor expansion */
@@ -251,19 +251,18 @@ Zp_log(GEN arg, GEN p, ulong e)
   trunc_mod = powiu(p, trunc);
   while(1)
   { /* compute f = 1 - a_i*p^((v+1)*2^i); trunc_mod = p^((v+1)*2^(i+1)) */
-    GEN f = modii(arg, trunc_mod);
+    GEN f = modii(a, trunc_mod);
     if (!equali1(f))
     {
       ulong i, step = 1;
       GEN h, hpow;
 
       f = subui(2, f);
-      arg = mulii(arg, f);
+      a = mulii(a, f);
 
       /* compute the Taylor expansion of log(f), over Q for now */
       for (i = 1; i <= N; i++) { gel(num,i) = gen_1; gel(den,i) = utoipos(i); }
-      h = subui(1, f); /* write f = 1 - h, i.e. h = a_i*p^(2^i) */
-      hpow = h;
+      hpow = h = subui(1, f); /* h = a_i*p^(2^i) */
       while(1)
       {
         for (i = 1; i <= N - step; i += step << 1)
@@ -293,72 +292,53 @@ Zp_log(GEN arg, GEN p, ulong e)
   return gerepileuptoint(av, modii(ans, pe));
 }
 
-/* p-adic exponential */
-
-    /*  Compute the p-adic exponential of a, which is supposed
-         - to be congruent to 0 mod p if p > 2
-         - to be congruent to 0 mod 4 if p = 2
-
-        Algorithm:
-         1. we write a as a sum
-              a = a_0*p + a_1*p^2 + a_2*p^4 + ...
-            with 0 <= a_i < p^(2^i).
-         2. we compute each exp(a_i*p^(2^i)) using Taylor expansion
-            and a binary spliting strategy.                           */
-
+/* p-adic exponential of a = 0 (mod 2p)
+ * 1. write a as a sum a = a_0*p + a_1*p^2 + a_2*p^4 + ...
+ *    with 0 <= a_i < p^(2^i).
+ * 2. compute exp(a_i*p^(2^i)) using Taylor expansion and binary splitting */
 GEN
-Zp_exp(GEN arg, GEN p, ulong e)
+Zp_exp(GEN a, GEN p, ulong e)
 {
   pari_sp av = avma;
-  ulong i, N, trunc, step;
-  GEN trunc_mod, h, hpow;
-  GEN denominator = gen_1;
-  GEN num, den;
-  GEN ans = gen_1;
-  ulong pp = itou_or_0(p);
+  ulong trunc, N = e, pp = itou_or_0(p);
+  GEN num, den, trunc_mod = NULL, denominator = gen_1, ans = gen_1;
   GEN pe = powiu(p, e);
-  /* Where do we need to truncate the Taylor expansion */
-  if (equaliu(p,2))
-    N = e;
-  else
-    N = e + sdivsi(e,subis(p,2));
+  int pis2 = pp == 2;
 
-  /* We allocate memory and initialize variables */
+  /* Where do we truncate the Taylor expansion */
+  if (!pis2) N += sdivsi(e, subis(p,2));
   num = cgetg(N+2, t_VEC);
   den = cgetg(N+2, t_VEC);
-  if (equaliu(p, 2)) {
-    trunc = 4;
-    trunc_mod = utoipos(16);
-  } else {
+  if (pis2) trunc = 4;
+  else
+  {
     trunc = 2;
     trunc_mod = sqri(p);
   }
   while(1)
   {
-    GEN f = modii(arg, trunc_mod);
-    arg = subii(arg, f);
-    if (signe(f)) {
-
-      /* We compute the Taylor expansion of exp(f)
-         For now, computations are carried out over the rationals */
+    GEN h, hpow, f = pis2? remi2n(a, trunc): modii(a, trunc_mod);
+    a = subii(a, f);
+    if (signe(f))
+    {
+      ulong step = 1, i;
+      /* Taylor expansion of exp(f), over Q for now */
       gel(num,1) = gen_1;
       gel(den,1) = gen_1;
-      for (i = 2; i <= N+1; i++) {
+      for (i = 2; i <= N+1; i++)
+      {
         gel(num,i) = gen_1;
         gel(den,i) = utoipos(i-1);
       }
-      step = 1;
-      h = f;
-      hpow = h;
-
-      while(1) {
+      hpow = h = f;
+      while(1)
+      {
         for (i = 1; i <= N+1 - step; i += step << 1) {
           gel(num,i) = mulii(gel(num,i), gel(den,i+step));
           gel(num,i) = addii(gel(num,i), mulii(hpow, gel(num,i+step)));
           gel(den,i) = mulii(gel(den,i), gel(den,i+step));
         }
-        step <<= 1;
-        if (step > N) break;
+        step <<= 1; if (step > N) break;
         hpow = sqri(hpow);
       }
 
@@ -375,16 +355,10 @@ Zp_exp(GEN arg, GEN p, ulong e)
     }
 
     if (trunc > e) break;
-
-    /* We update the variables for the next step */
-    trunc_mod = sqri(trunc_mod);
-    trunc <<= 1;
-    N >>= 1;
+    if (!pis2) trunc_mod = sqri(trunc_mod);
+    trunc <<= 1; N >>= 1;
   }
-
-  /* We coerce the result from Q to Zp */
-  ans = Zp_div(ans, denominator, p, e);
-  return gerepileuptoint(av, ans);
+  return gerepileuptoint(av, Zp_div(ans, denominator, p, e));
 }
 
 /***********************************************************************/
