@@ -239,7 +239,7 @@ Zp_log(GEN a, GEN p, ulong e)
   Np = N;
   while(1)
   {
-    long e = Np;
+    ulong e = Np;
     if (pp) e += ulogint(N, pp) / v;
     if (e == N) break;
     N = e;
