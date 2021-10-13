@@ -579,9 +579,6 @@ _ratpoints_sift0(long b, long w_low, long w_high,
   return nb;
 }
 
-#define MAX_DIVISORS 512
- /* Maximal length of array for squarefree divisors of leading coefficient */
-
 typedef struct { double r; ratpoints_sieve_entry *ssp; } entry;
 
 static const int squares16[16] = {1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0};
