@@ -118,23 +118,48 @@ Zp_div(GEN b, GEN a, GEN p, long e)
   return gerepileupto(av, Zp_divlift(b, a, ai, p, e));
 }
 
+static GEN
+mul2n(void *E, GEN x, GEN y) { return remi2n(mulii(x, y), (long)E); }
+static GEN
+sqr2n(void *E, GEN x) { return remi2n(sqri(x), (long)E); }
+
+/* a^n mod 2^e using remi2n (result has the same sign as a) */
+static GEN
+Fp_pow2n(GEN a, GEN n, long e)
+{ return gen_pow(a, n, (void*)e, &sqr2n, &mul2n); }
+
 /* Same as ZpX_liftroot for the polynomial X^n-b*/
 GEN
 Zp_sqrtnlift(GEN b, GEN n, GEN a, GEN p, long e)
 {
-  pari_sp ltop=avma;
+  pari_sp av = avma;
+  int nis2, pis2;
   GEN q, w, n_1;
   ulong mask;
-  long pis2 = equalii(n, gen_2)? 1: 0;
+
   if (e == 1) return icopy(a);
-  n_1 = subiu(n,1);
+  nis2 = equaliu(n, 2); n_1 = nis2? NULL: subiu(n,1);
+  pis2 = equaliu(p, 2);
   mask = quadratic_prec_mask(e);
-  w = Fp_inv(pis2 ? shifti(a,1): Fp_mul(n,Fp_pow(a,n_1,p), p), p);
-  q = p;
+  w = nis2 ? shifti(a,1): Fp_mul(n, Fp_pow(a,n_1,p), p);
+  w = Fp_inv(w, p);
+  q = p; /* q = p^e; use e instead of q iff p = 2 */
+  e = 1;
   for(;;)
   {
-    q = sqri(q);
-    if (mask & 1) q = diviiexact(q, p);
+    if (pis2)
+    {
+      e <<= 1; if (mask & 1) e--;
+      mask >>= 1;
+      /* a -= w (a^n - b) */
+      a = remi2n(subii(a, mulii(w, subii(Fp_pow2n(a, n, e), b))), e);
+      if (mask == 1) break;
+      /* w += w - w^2 n a^(n-1)*/
+      w = subii(shifti(w,1), remi2n(mulii(remi2n(sqri(w), e),
+                                          mulii(n, Fp_pow2n(a, n_1, e))), e));
+      continue;
+    }
+    q = sqri(q); if (mask & 1) q = diviiexact(q, p);
     mask >>= 1;
     if (lgefint(q) == 3 && lgefint(n) == 3)
     {
@@ -146,29 +171,34 @@ Zp_sqrtnlift(GEN b, GEN n, GEN a, GEN p, long e)
       A = Fl_sub(A, Fl_mul(W, Fl_sub(Fl_powu(A,N,Q), B, Q), Q), Q);
       a = utoi(A);
       if (mask == 1) break;
-      W = Fl_sub(Fl_add(W,W,Q),
-                 Fl_mul(Fl_sqr(W,Q), Fl_mul(N,Fl_powu(A, N-1, Q), Q), Q), Q);
+      if (nis2)
+        W = Fl_double(Fl_sub(W, Fl_mul(Fl_sqr(W,Q), A, Q), Q), Q);
+      else
+        W = Fl_sub(Fl_double(W,Q),
+                   Fl_mul(Fl_sqr(W,Q), Fl_mul(N,Fl_powu(A, N-1, Q), Q), Q), Q);
       w = utoi(W);
     }
     else
     {
       /* a -= w (a^n - b) */
-      a = modii(subii(a, mulii(w, subii(Fp_pow(a,n,q),b))), q);
+      a = modii(subii(a, mulii(w, subii(Fp_pow(a,n,q), b))), q);
       if (mask == 1) break;
       /* w += w - w^2 n a^(n-1)*/
-      w = subii(shifti(w,1), Fp_mul(Fp_sqr(w,q),
-                           pis2? shifti(a,1): mulii(n,Fp_pow(a,n_1,q)), q));
+      if (nis2)
+        w = shifti(subii(w, Fp_mul(Fp_sqr(w,q), a, q)), 1);
+      else
+        w = subii(shifti(w,1), Fp_mul(Fp_sqr(w,q),
+                                      mulii(n, Fp_pow(a,n_1,q)), q));
     }
   }
-  return gerepileuptoint(ltop,a);
+  if (pis2 && signe(a) < 0) a = addii(a, int2n(e));
+  return gerepileuptoint(av, a);
 }
 
-/* Same as ZpX_liftroot for the polynomial X^2-b */
+/* ZpX_liftroot for the polynomial X^2-b */
 GEN
 Zp_sqrtlift(GEN b, GEN a, GEN p, long e)
-{
-  return Zp_sqrtnlift(b, gen_2, a, p, e);
-}
+{ return Zp_sqrtnlift(b, gen_2, a, p, e); }
 
 GEN
 Zp_sqrt(GEN x, GEN p, long e)
@@ -176,8 +206,7 @@ Zp_sqrt(GEN x, GEN p, long e)
   pari_sp av;
   GEN z;
   if (absequaliu(p,2)) return Z2_sqrt(x,e);
-  av = avma;
-  z = Fp_sqrt(Fp_red(x, p), p);
+  av = avma; z = Fp_sqrt(Fp_red(x, p), p);
   if (!z) return NULL;
   if (e > 1) z = Zp_sqrtlift(x, z, p, e);
   return gerepileuptoint(av, z);
