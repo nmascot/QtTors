@@ -173,7 +173,7 @@ member_pol(GEN x) /* polynomial */
     switch(t)
     {
       case typ_POL: return x;
-      case typ_Q  : return gel(x,1);
+      case typ_Q  : return deg1pol_shallow(gel(x,3), gel(x,2), varn(gel(x,1)));
       case typ_GAL: return gal_get_pol(x);
       case typ_RNF: return rnf_get_pol(x);
     }

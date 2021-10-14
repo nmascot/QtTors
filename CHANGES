@@ -86,6 +86,8 @@ BA  60- (f(~v)=v[1]=1);(g(v) = f(~v)); my(V=[0]);g(V);V -> [1] instead of [0]
         stable under Galois) [#2293]
 BA  70- [32bit] forfactored(n=223092868, 223092871, ) -> SEGV [#2318]
     71- Fp_issquare(0, p) would return 0
+    72- For z=x+wy a t_QUAD, z.pol returned the modulus z.mod instead of the
+        t_POL x+'w*y
 
   Added
 HC   1- new GP function eulerreal

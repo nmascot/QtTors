@@ -537,11 +537,18 @@ way and not be equal; however, \kbd{gp} will refuse to add or multiply them for
 example, so use different names for different discriminants.
 
 Since the order is $\Z + \kbd{w}\Z$, any other element can be input
-as \kbd{z = $x$+$y$*w} for some integers $x$ and $y$. In fact, you may work in
+as \kbd{a = $x$+$y$*w} for some integers $x$ and $y$. In fact, you may work in
 its fraction field $\Q(\sqrt{d})$ and use \typ{FRAC} values for $x$ and $y$.
 
-The member function \kbd{z.disc} retrieves the discriminant $d$; $x$ and $y$
-are obtained via \kbd{real(z)} and \kbd{imag(z)} respectively.
+The following member functions are defined:
+
+\kbd{a.disc} retrieves the discriminant $d$;
+
+\kbd{a.mod}: returns the minimal polynomial $T$ of \kbd{w};
+
+\kbd{a.pol}: returns the \typ{POL} $x + wy$. In particular
+\kbd{[x,y] = Vecrev(a.pol)} recovers $x$ and $y$. The components $x$
+and $y$ are also obtained via \kbd{real(a)} and \kbd{imag(z)} respectively.
 
 \subsec{Polmods (\typ{POLMOD})}%
 \sidx{polmod}\kbdsidx{t_POLMOD}

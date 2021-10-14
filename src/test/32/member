@@ -298,7 +298,7 @@ QUAD
 .disc: -4
 .fu: []
 .mod: w^2 + 1
-.pol: w^2 + 1
+.pol: w
 .tu: [4, w]
 .zk: [1, w]
 PRID
@@ -347,4 +347,4 @@ BID (nogen)
 MF
 .mod: t^2 + t + 1
 .mod: Mod(1, t^2 + t + 1)*y^2 + Mod(-2*t, t^2 + t + 1)
-Total time spent: 57
+Total time spent: 62
