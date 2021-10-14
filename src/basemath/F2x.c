@@ -213,6 +213,7 @@ Rg_to_F2xq(GEN x, GEN T)
 ulong
 F2x_eval(GEN P, ulong x)
 {
+  if (lgpol(P)==0) return 0;
   if (odd(x))
   {
     long i, lP = lg(P);
