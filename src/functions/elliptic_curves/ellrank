@@ -4,13 +4,16 @@ C-Name: ellrank
 Prototype: GD0,L,DGp
 Help: ellrank(E,{effort=0},{points}): if E is an elliptic curve over Q,
  attempt to compute the Mordell-Weil group attached to the curve.
- The output is [r,R,L] such that the rank is between r and R (both included)
+ The output is [r,R,s,L] such that the rank is between r and R (both included),
+ s gives informations on the Tate-Shafarevich group,
  and L is a list of independent, non-torsion rational points on the curve.
  E can also be given as the output of ellrankinit(E).
 Doc: if $E$ is an elliptic curve over $\Q$,
  attempt to compute the Mordell-Weil group attached to the curve.
- The output is $[r,R,L]$ such that the rank is between $r$ and $R$
- (both included) and $L$ is a list of independent, non-torsion rational points
+ The output is $[r,R,s,L]$ such that the rank is between $r$ and $R$
+ (both included),
+ $s$ gives informations on the Tate-Shafarevic group (see below)
+ and $L$ is a list of independent, non-torsion rational points
  on the curve.
  $E$ can also be given as the output of \kbd{ellrankinit(E)}.
  If \kbd{points} is present, it must be a vector of rational points on the
@@ -24,9 +27,9 @@ Doc: if $E$ is an elliptic curve over $\Q$,
  \bprog
  ? E = ellinit([-127^2,0]);
  ? ellrank(E)
- %2 = [1,1,[]] \\ rank is 1 but no point has been found.
+ %2 = [1, 1, 0, []] \\ rank is 1 but no point has been found.
  ? ellrank(E,4) \\ with more effort we find a point.
- %3 = [1,1,[[38902300445163190028032/305111826865145547009,
+ %3 = [1, 1, 0, [[38902300445163190028032/305111826865145547009,
       680061120400889506109527474197680/5329525731816164537079693913473]]]
  @eprog
 
@@ -35,12 +38,26 @@ Doc: if $E$ is an elliptic curve over $\Q$,
  points on $f$.
  Note that the \kbd{ellrankinit} initialization is independent of $f$!
 
- \misctitle{Technical explanation:}
+ \misctitle{Technical explanation}
  The algorithm, which computes the $2$-descent and the $2$-part of the Cassels
- pairings has an intrinsic limitation:
- $R$ is equal to the sum of the rank of $E$ and of the $4$-rank of the
- Tate-Shafarevich group (which is conjecturally even). In particular we can
- never have $r = R$ when the Tate-Shafarevic group has $4$-torsion.
+ pairings has an intrinsic limitation: We can never have $r = R$ when
+ the Tate-Shafarevic group $G$ has $4$-torsion.
+ More precisely, the algorithm computes (exactly) three quantities:
+
+ \item the rank of the $2$-Selmer ($C$)
+
+ \item the rank of the $2$-torsion subgroup ($T$)
+
+ \item the rank of $G[2]/2G[4]$ ($s$) (even).
+
+ Of interest are also
+
+ \item the rank of $E(\Q)$ ($R$)
+
+ \item the $2$-rank of $G$ ($S$) (conjecturally even).
+
+ The following formula holds $C = T + R + S$.
+ The value $s$ gives a minoration of $S$ while $r$ gives a minoration of $R$.
 
  When the conductor of $E$ is small, the BSD conjecture can be used
  to find the true rank:
@@ -49,16 +66,16 @@ Doc: if $E$ is an elliptic curve over $\Q$,
  ? ellrootno(E) \\ rank is even (parity conjecture)
  %2 = 1
  ? ellrank(E)
- %3 = [0, 2, []] \\ rank is either 0 or 2
+ %3 = [0, 2, 0, []] \\ rank is either 0 or 2, $2$-rank of $G$ is
  ? ellrank(E, 3) \\ try harder
- %4 = [0, 2, []] \\ no luck
+ %4 = [0, 2, 0, []] \\ no luck
  ? [r,L] = ellanalyticrank(E) \\ assume BSD
  %5 = [0, 3.9465...]
  ? L / ellbsd(E) \\ analytic rank is 0, compute Sha
  %6 = 16.0000000000000000000000000000000000000
  @eprog
  We find that the rank is $0$ and the cardinal of the Tate-Shafarevich group
- is $16$ (assuming BSD!).
+ is $16$ (assuming BSD!). Moreover, since $s=0$, it is isomorphic to $(\Z/4\Z)^2$.
 
  When the rank is $1$ and the conductor is small, \kbd{ellheegner} can be used
  to find the point.

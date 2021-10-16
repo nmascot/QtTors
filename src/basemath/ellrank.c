@@ -1829,7 +1829,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   GEN KP, pol, vnf, vpol, vcrt, sbase, LS2, factLS2, sqrtLS2, signs;
   GEN selmer, helpLS2, LS2chars, helpchars, newselmer, factdisc, badprimes;
   GEN helplist, listpoints, etors2, p, covers;
-  long i, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u;
+  long i, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u, sha2 = 0;
   forprime_t T;
 
   pol = ell2pol(ell);
@@ -1967,6 +1967,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
         gmael(M,j,i) = gmael(M,i,j) = Q;
       }
     selker = F2m_to_Flm(F2m_ker(matcassels(M)));
+    sha2 = dim - (lg(selker)-1);
     dim = lg(selker)-1;
     for (t=1, u=1; nbpoints < dim && effort > 0; t++)
     {
@@ -1993,7 +1994,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   listpoints = setminus(listpoints, etors2);
   listpoints = elltwistpoints(listpoints, K);
   listpoints = vecellabs(ellQ_genreduce(ell_K, listpoints, NULL, prec));
-  return mkvec3(utoi(mwrank), utoi(dim-tors2), listpoints);
+  return mkvec4(utoi(mwrank), utoi(dim-tors2), utoi(sha2), listpoints);
 }
 
 GEN
@@ -2079,8 +2080,8 @@ ellrank_flag(GEN e, long effort, GEN help, long flag, long prec)
   v = ell2selmer(e, eK, help, K, vbnf, effort, flag, prec);
   if (flag==0)
   {
-    if (et)   gel(v,3) = ellchangepoint(gel(v,3), urstK);
-    if (urst) gel(v,3) = ellchangepointinv(gel(v,3), urst);
+    if (et)   gel(v,4) = ellchangepoint(gel(v,4), urstK);
+    if (urst) gel(v,4) = ellchangepointinv(gel(v,4), urst);
   }
   else
   {
