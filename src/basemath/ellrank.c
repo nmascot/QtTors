@@ -800,6 +800,20 @@ cassels_Qp_solve(GEN q, GEN gam, GEN p)
 static GEN
 to_ZX(GEN a, long v) { return typ(a)==t_INT? scalarpol_shallow(a,v): a; }
 
+static GEN
+quartic_findunit(GEN q)
+{
+  GEN T = quarticinv_pol(quartic_IJ(q));
+  while(1)
+  {
+    pari_sp av = avma;
+    GEN z = quartic_cubic(q,0);
+    if (signe(QXQ_norm(z,T))) return q;
+    set_avma(av);
+    q = ZX_translate(RgX_recip(q), gen_1);
+  }
+}
+
 /* Crude implementation of
  * an algorithm by Tom Fisher
  * On binary quartics and the Cassels-Tate pairing
@@ -1811,20 +1825,6 @@ get_row(GEN vnf, GEN K)
 }
 
 static GEN
-findunit(GEN q)
-{
-  GEN T = quarticinv_pol(quartic_IJ(q));
-  while(1)
-  {
-    pari_sp av = avma;
-    GEN z = quartic_cubic(q,0);
-    if (signe(QXQ_norm(z,T))) return q;
-    set_avma(av);
-    q = ZX_translate(RgX_recip(q), gen_1);
-  }
-}
-
-static GEN
 ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
            long effort, long flag, long prec)
 {
@@ -1959,12 +1959,12 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
         if (isintzero(gel(covers,i)))
           Q = gen_0;
         else if (i==j)
-          Q = findunit(gel(covers,i));
+          Q = quartic_findunit(gel(covers,i));
         else
         {
           GEN e = Flv_add(gel(selmer,i), gel(selmer,j), 2);
           GEN b = liftselmerinit(e, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
-          Q = findunit(gel(liftselmer_cover(b, e, LS2, pol, K),1));
+          Q = quartic_findunit(gel(liftselmer_cover(b, e, LS2, pol, K),1));
         }
         gmael(M,j,i) = gmael(M,i,j) = Q;
       }
