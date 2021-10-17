@@ -11,6 +11,8 @@ polylog(2,1.1+I,1)
 polylog(1,2,3)
 polylog(-70,(sqrt(5)-1)/2)
 localbitprec(320);bitprecision(dilog(2.0))
+polylog(0,x)
+polylog(-1,x)
 
 \\errors
 polylog(3,2,5)

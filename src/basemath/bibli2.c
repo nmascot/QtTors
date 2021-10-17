@@ -625,8 +625,8 @@ eulerianpol(long N, long v)
   long n, n2, k = 0;
   GEN A;
   if (v < 0) v = 0;
-  if (N <= 0) pari_err_DOMAIN("eulerianpol", "index", "<=", gen_0, stoi(N));
-  if (N == 1) return pol_1(v);
+  if (N < 0) pari_err_DOMAIN("eulerianpol", "index", "<", gen_0, stoi(N));
+  if (N <= 1) return pol_1(v);
   if (N == 2) return deg1pol_shallow(gen_1, gen_1, v);
   A = cgetg(N+1, t_VEC);
   gel(A,1) = gen_1; gel(A,2) = gen_1; /* A_2 = x+1 */

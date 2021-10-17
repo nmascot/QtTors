@@ -88,6 +88,8 @@ BA  70- [32bit] forfactored(n=223092868, 223092871, ) -> SEGV [#2318]
     71- Fp_issquare(0, p) would return 0
     72- For z=x+wy a t_QUAD, z.pol returned the modulus z.mod instead of the
         t_POL x+'w*y
+    73- allow eulerianpol(0) (= 1)
+    74- allow polylog(0,x) (was broken when eulerianpol was introduced)
 
   Added
 HC   1- new GP function eulerreal
