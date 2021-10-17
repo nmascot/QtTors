@@ -25,6 +25,8 @@ zetahurwitz(x,2,1)
 zetahurwitz(4,2^20)
 zetahurwitz(4,2^100)
 zetahurwitz(4,2.^128)
+zetahurwitz(-1,1)
+zetahurwitz(-2,I)
 
 \\ ERRORS
 zetahurwitz(1,Pi)

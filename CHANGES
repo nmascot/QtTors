@@ -90,6 +90,7 @@ BA  70- [32bit] forfactored(n=223092868, 223092871, ) -> SEGV [#2318]
         t_POL x+'w*y
     73- allow eulerianpol(0) (= 1)
     74- allow polylog(0,x) (was broken when eulerianpol was introduced)
+    75- zetahurwitz(-1,1) -> wrong result (more generally s a negative integer)
 
   Added
 HC   1- new GP function eulerreal

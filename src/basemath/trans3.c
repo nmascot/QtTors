@@ -2374,7 +2374,7 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
   N2 = ginv(gsqr(Nx));
   if (typ(s0) == t_INT)
   {
-    S2 = bernreal(k, prec);
+    S2 = gdivgs(bernreal(k, prec), k);
     for (j = k - 2; j >= 2; j -= 2)
     {
       GEN t = gsubgs(a, j), u = gmul(t, gaddgs(t, 1));
