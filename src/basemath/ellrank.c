@@ -863,11 +863,11 @@ matcassels(GEN M, long prec)
   for (i = 1; i < l; i++)
   {
     GEN Mii = gcoeff(M,i,i);
+    int p0 = isintzero(Mii);
     for (j = 1; j < i; j++)
     {
       GEN Mjj = gcoeff(M,j,j);
-      long p = isintzero(Mii) || isintzero(Mjj) ? 0
-             : casselspairing(Mii, Mjj, gcoeff(M,i,j));
+      long p = p0 || isintzero(Mjj)? 0: casselspairing(Mii, Mjj, gcoeff(M,i,j));
       coeff(C,i,j) = coeff(C,j,i) = p;
     }
     coeff(C,i,i) = 0;
