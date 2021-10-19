@@ -518,7 +518,7 @@ interpretor in a program.
 
 \fun{void}{gp_embedded_init}{long rsize, long vsize}
 Initialize the GP interpretor (like \kbd{pari\_init} does) with
-\kbd{parisize=rsize} \kbd{rsize} and \kbd{parisizemax=vsize}.
+\kbd{parisize=rsize} and \kbd{parisizemax=vsize}.
 
 \fun{char *}{gp_embedded}{const char *s}
 Evaluate the string \kbd{s} with GP and return the result as a string,
@@ -612,6 +612,23 @@ gp_completion(char *text, int START, int END)
 
 \fun{void}{pari_thread_close_files}{}
 
+\section{Functions for GP2C}
+
+\subsec{Functions for safe access to components}
+
+These functions return the address of the requested component after checking
+it is actually valid. This is used by GP2C -C.
+
+\fun{GEN*}{safegel}{GEN x, long l}, safe version of \kbd{gel(x,l)} for \typ{VEC},
+\typ{COL} and \typ{MAT}.
+
+\fun{long*}{safeel}{GEN x, long l}, safe version of \kbd{x[l]} for \typ{VECSMALL}.
+
+\fun{GEN*}{safelistel}{GEN x, long l} safe access to \typ{LIST} component.
+
+\fun{GEN*}{safegcoeff}{GEN x, long a, long b} safe version of
+\kbd{gcoeff(x,a, b)} for \typ{MAT}.
+
 \newpage
 
 \chapter{Regression tests, benches}
@@ -682,10 +699,11 @@ This produces a combined output whereas the alternative
 \item By default, the test is run on both the \kbd{gp-sta} and \kbd{gp-dyn}
 binaries, making it twice as slow. If the test is somewhat long, it can
 be annoying; you can restrict to one binary only using the \kbd{statest-all}
-or \kbd{dyntest-all} targets. Both accept the \kbd{TESTS} argument seen above.
+or \kbd{dyntest-all} targets. Both accept the \kbd{TESTS} argument seen
+above; again, the alternative
 
 \bprog
-  make test-lfuntype test-lfun gamma
+  make test-lfuntype test-lfun test-gamma
 @eprog\noindent would not.
 
 \item Finally, the \kbd{get\_tests} script also defines the recipe for
@@ -694,23 +712,6 @@ included as \kbd{fun} or \kbd{fun\_$n$}, where $n$ is an integer $\leq 1000$;
 the latter means that the timing is weighted by a factor $n/1000$. (This was
 introduced a long time ago, when the \kbd{nfields} bench was so much slower
 than the others that it hid slowdowns elsewhere.)
-
-\section{Functions for GP2C}
-
-\subsec{Functions for safe access to components}
-
-These functions return the address of the requested component after checking
-it is actually valid. This is used by GP2C -C.
-
-\fun{GEN*}{safegel}{GEN x, long l}, safe version of \kbd{gel(x,l)} for \typ{VEC},
-\typ{COL} and \typ{MAT}.
-
-\fun{long*}{safeel}{GEN x, long l}, safe version of \kbd{x[l]} for \typ{VECSMALL}.
-
-\fun{GEN*}{safelistel}{GEN x, long l} safe access to \typ{LIST} component.
-
-\fun{GEN*}{safegcoeff}{GEN x, long a, long b} safe version of
-\kbd{gcoeff(x,a, b)} for \typ{MAT}.
 
 \newpage
 \chapter{Parallelism}
