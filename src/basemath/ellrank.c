@@ -854,23 +854,20 @@ casselspairing(GEN q1, GEN q2, GEN q3)
 }
 
 static GEN
-matcassels(GEN M, long prec)
+matcassels(GEN M)
 {
-  long i, j, l = lg(M);
-  GEN C = cgetg(l, t_MAT);
-  for (i = 1; i < l; i++)
-    gel(C, i) = cgetg(l, t_VECSMALL);
-  for (i = 1; i < l; i++)
+  long i, j, n = lg(M)-1;
+  GEN C = zero_F2m_copy(n,n);
+  for (i = 1; i <= n; i++)
   {
     GEN Mii = gcoeff(M,i,i);
-    int p0 = isintzero(Mii);
+    if (isintzero(Mii)) continue;
     for (j = 1; j < i; j++)
     {
       GEN Mjj = gcoeff(M,j,j);
-      long p = p0 || isintzero(Mjj)? 0: casselspairing(Mii, Mjj, gcoeff(M,i,j));
-      coeff(C,i,j) = coeff(C,j,i) = p;
+      if (!isintzero(Mjj) && casselspairing(Mii, Mjj, gcoeff(M,i,j)))
+      { F2m_set(C,i,j); F2m_set(C,j,i); }
     }
-    coeff(C,i,i) = 0;
   }
   return C;
 }
@@ -1971,7 +1968,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
         }
         gmael(M,j,i) = gmael(M,i,j) = Q;
       }
-    selker = Flm_ker(matcassels(M, prec), 2);
+    selker = F2m_to_Flm(F2m_ker(matcassels(M)));
     dim = lg(selker)-1;
     for (t=1, u=1; nbpoints < dim && effort > 0; t++)
     {
