@@ -467,27 +467,25 @@ ZX_affine(GEN P, GEN a, GEN b)
 static GEN
 hyperell_red(GEN q, GEN p)
 {
-  long v = ZX_pval(q, p), w = odd(v);
-  if (v-w)
-    q = ZX_Z_divexact(q, powiu(p, v-w));
-  return q;
+  GEN Q;
+  long v = ZX_pvalrem(q, p, &Q);
+  if (v == 1) return q;
+  return odd(v)? ZX_Z_mul(Q, p): Q;
 }
 
 static GEN
 hyperell_reg_point(GEN q, GEN p)
 {
-  long i, l, v = ZX_pval(q, p), w = odd(v);
-  GEN qp, F;
-  if (v-w)
-    q = ZX_Z_divexact(q, powiu(p, v-w));
-  if (w==0)
+  GEN Q, F;
+  long i, l, v = ZX_pvalrem(q, p, &Q);
+  if (v != 1) q = odd(v)? ZX_Z_mul(Q, p): Q;
+  if (!odd(v))
   {
     GEN qr = FpX_red(q, p);
     if (!FpX_issquare(qr,p) || Fp_issquare(leading_coeff(qr), p))
       return mkvec2s(0,1);
   }
-  qp = w ? ZX_Z_divexact(q, p): q;
-  F = FpX_roots(qp, p); l = lg(F);
+  F = FpX_roots(Q, p); l = lg(F);
   for (i = 1; i < l; i++)
   {
     GEN r = gel(F,i), s = hyperell_reg_point(ZX_affine(q, p, r), p);
