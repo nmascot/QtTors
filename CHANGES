@@ -157,7 +157,8 @@ LGr 47- allow endpoints in solve() to by +oo or -oo
     52- [libpari] gc_all
 BA  53- [libpari] Zp_inv, Zp_invlift, Zp_div, Zp_log, Zp_exp
 BA  54- [libpari] FpXn_div, Flxn_div, RgXn_div, RgXn_div_i, FpXQXn_div, F2xn_div
-    55- [libpari] maxomegau, maxomegaoddu
+    55- [libpari] maxomegau, maxomegaoddu, ZV_snf_rank, ZV_snf_rank_u,
+        zv_snf_rank
     56- new GP function snfrank
 
   Changed

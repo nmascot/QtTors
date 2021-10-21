@@ -2784,6 +2784,16 @@ $(v[i],N)$. Use case: if $v$ gives the cyclic components for some Abelian
 group $G$ of finite type, then this returns the structure of the finite
 groupe $G/G^N$.
 
+The following functions compute the $p^n$-rank of abelian groups given a
+vector of elementary divisors and underly \kbd{snfrank}:
+
+\fun{long}{ZV_snf_rank}{GEN D, GEN p} assume $D$ is a \kbd{ZV} and $p$ is a
+\typ{INT}.
+
+\fun{long}{ZV_snf_rank_u}{GEN D, ulong p} assume $D$ is a \kbd{ZV}.
+
+\fun{long}{zv_snf_rank}{GEN D, ulong p} assume $D$ is a \kbd{zv}.
+
 The following routines underly the various \tet{matrixqz} variants.
 In all case the $m\times n$ \typ{MAT} $x$ is assumed to have rational
 (\typ{INT} and \typ{FRAC}) coefficients
