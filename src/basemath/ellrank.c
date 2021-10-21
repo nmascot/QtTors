@@ -520,8 +520,8 @@ static GEN
 Qp_hyperell_solve_odd(GEN q, GEN p)
 {
   GEN qi = RgX_recip_shallow(q);
-  GEN r = hyperell_reg_point(q,  p), qr, qrp;
-  GEN s = hyperell_reg_point(qi, p), qs, qsp;
+  GEN r = hyperell_reg_point(q,  p), qr = NULL, qrp;
+  GEN s = hyperell_reg_point(qi, p), qs = NULL, qsp;
   if (!r && !s) return NULL;
   if (r)
   {
