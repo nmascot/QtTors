@@ -265,12 +265,15 @@ GEN     random_F2xqE(GEN a2, GEN a6, GEN T);
 
 /* F3v.c */
 
+GEN     F3c_to_mod(GEN x);
+GEN     F3c_to_ZC(GEN x);
 GEN     F3m_ker(GEN x);
 GEN     F3m_ker_sp(GEN x, long deplin);
 GEN     F3m_mul(GEN x, GEN y);
 GEN     F3m_row(GEN x, long j);
 GEN     F3m_to_Flm(GEN z);
 GEN     F3m_to_ZM(GEN z);
+GEN     F3m_to_mod(GEN x);
 GEN     F3m_transpose(GEN x);
 GEN     F3v_to_Flv(GEN x);
 ulong   F3v_coeff(GEN x,long v);

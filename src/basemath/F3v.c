@@ -179,26 +179,53 @@ RgM_to_F3m(GEN x) { pari_APPLY_same(RgV_to_F3v(gel(x,i))) }
 GEN
 F3v_to_Flv(GEN x)
 {
-  long l=x[1]+1;
-  GEN  z=cgetg(l, t_VECSMALL);
-  long i,j,k;
+  long l = x[1]+1, i, j, k;
+  GEN z = cgetg(l, t_VECSMALL);
   for (i=2,k=1; i<lg(x); i++)
     for (j=0; j<BITS_IN_LONG && k<l; j+=2,k++)
       z[k] = (uel(x,i)>>j)&3UL;
   return z;
 }
-
 GEN
-F3m_to_Flm(GEN z)
+F3c_to_ZC(GEN x)
 {
-  long i, l = lg(z);
-  GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) gel(x,i) = F3v_to_Flv(gel(z,i));
-  return x;
+  long l = x[1]+1, i, j, k;
+  GEN z = cgetg(l, t_COL);
+  for (i=2,k=1; i<lg(x); i++)
+    for (j=0; j<BITS_IN_LONG && k<l; j+=2,k++)
+      switch((uel(x,i)>>j)&3UL)
+      {
+      case 0: gel(z,k) = gen_0; break;
+      case 1: gel(z,k) = gen_1; break;
+      default:gel(z,k) = gen_2; break;
+      }
+  return z;
+}
+GEN
+F3c_to_mod(GEN x)
+{
+  long l = x[1]+1, i, j, k;
+  GEN z = cgetg(l, t_COL), N = utoipos(3);
+  GEN _0 = mkintmod(gen_0, N);
+  GEN _1 = mkintmod(gen_1, N);
+  GEN _2 = mkintmod(gen_2, N);
+  for (i=2,k=1; i<lg(x); i++)
+    for (j=0; j<BITS_IN_LONG && k<l; j+=2,k++)
+      switch((uel(x,i)>>j)&3UL)
+      {
+      case 0: gel(z,k) = _0; break;
+      case 1: gel(z,k) = _1; break;
+      default: gel(z,k)= _2; break;
+      }
+  return z;
 }
 
 GEN
-F3m_to_ZM(GEN x) { return Flm_to_ZM(F3m_to_Flm(x)); }
+F3m_to_ZM(GEN x) { pari_APPLY_same(F3c_to_ZC(gel(x,i))) }
+GEN
+F3m_to_mod(GEN x) { pari_APPLY_same(F3c_to_mod(gel(x,i))) }
+GEN
+F3m_to_Flm(GEN x) { pari_APPLY_same(F3v_to_Flv(gel(x,i))) }
 
 /* in place, destroy x */
 GEN

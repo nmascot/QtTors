@@ -1526,6 +1526,21 @@ FpM_init(GEN a, GEN p, ulong *pp)
   }
   *pp = 0; return a;
 }
+static GEN
+FpM_init3(GEN a, GEN p, ulong *pp)
+{
+  if (lgefint(p) == 3)
+  {
+    *pp = uel(p,2);
+    switch(*pp)
+    {
+      case 2: return ZM_to_F2m(a);
+      case 3: return ZM_to_F3m(a);
+      default:return ZM_to_Flm(a, *pp);
+    }
+  }
+  *pp = 0; return a;
+}
 GEN
 RgM_Fp_init(GEN a, GEN p, ulong *pp)
 {
@@ -1533,6 +1548,21 @@ RgM_Fp_init(GEN a, GEN p, ulong *pp)
   {
     *pp = uel(p,2);
     return (*pp==2)? RgM_to_F2m(a): RgM_to_Flm(a, *pp);
+  }
+  *pp = 0; return RgM_to_FpM(a,p);
+}
+static GEN
+RgM_Fp_init3(GEN a, GEN p, ulong *pp)
+{
+  if (lgefint(p) == 3)
+  {
+    *pp = uel(p,2);
+    switch(*pp)
+    {
+      case 2: return RgM_to_F2m(a);
+      case 3: return RgM_to_F3m(a);
+      default:return RgM_to_Flm(a, *pp);
+    }
   }
   *pp = 0; return RgM_to_FpM(a,p);
 }
@@ -1846,7 +1876,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   GEN y;
 
   if (lg(x)==1) return cgetg(1,t_MAT);
-  x = FpM_init(x, p, &pp);
+  x = FpM_init3(x, p, &pp);
   switch(pp)
   {
   case 0: return FpM_ker_gen(x,p,deplin);
@@ -1854,6 +1884,11 @@ FpM_ker_i(GEN x, GEN p, long deplin)
     y = F2m_ker_sp(x, deplin);
     if (!y) return gc_NULL(av);
     y = deplin? F2c_to_ZC(y): F2m_to_ZM(y);
+    return gerepileupto(av, y);
+  case 3:
+    y = F3m_ker_sp(x, deplin);
+    if (!y) return gc_NULL(av);
+    y = deplin? F3c_to_ZC(y): F3m_to_ZM(y);
     return gerepileupto(av, y);
   default:
     y = Flm_ker_sp(x, pp, deplin);
@@ -3571,7 +3606,7 @@ RgM_deplin_FpM(GEN x, GEN p)
 {
   pari_sp av = avma;
   ulong pp;
-  x = RgM_Fp_init(x, p, &pp);
+  x = RgM_Fp_init3(x, p, &pp);
   switch(pp)
   {
   case 0:
@@ -3583,6 +3618,10 @@ RgM_deplin_FpM(GEN x, GEN p)
     x = F2m_ker_sp(x,1);
     if (!x) return gc_NULL(av);
     x = F2c_to_ZC(x); break;
+  case 3:
+    x = F3m_ker_sp(x,1);
+    if (!x) return gc_NULL(av);
+    x = F3c_to_ZC(x); break;
   default:
     x = Flm_ker_sp(x,pp,1);
     if (!x) return gc_NULL(av);
@@ -3874,11 +3913,12 @@ RgM_ker_FpM(GEN x, GEN p)
 {
   pari_sp av = avma;
   ulong pp;
-  x = RgM_Fp_init(x, p, &pp);
+  x = RgM_Fp_init3(x, p, &pp);
   switch(pp)
   {
     case 0: x = FpM_to_mod(FpM_ker_gen(x,p,0),p); break;
     case 2: x = F2m_to_mod(F2m_ker_sp(x,0)); break;
+    case 3: x = F3m_to_mod(F3m_ker_sp(x,0)); break;
     default:x = Flm_to_mod(Flm_ker_sp(x,pp,0), pp); break;
   }
   return gerepileupto(av, x);

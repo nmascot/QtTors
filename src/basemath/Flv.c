@@ -654,19 +654,11 @@ Flm_ker_i(GEN x, ulong p, long deplin, long inplace) {
 }
 
 GEN
-Flm_ker_sp(GEN x, ulong p, long deplin) {
-  return Flm_ker_i(x, p, deplin, 1);
-}
-
+Flm_ker_sp(GEN x, ulong p, long deplin) { return Flm_ker_i(x, p, deplin, 1); }
 GEN
-Flm_ker(GEN x, ulong p) {
-  return Flm_ker_i(x, p, 0, 0);
-}
-
+Flm_ker(GEN x, ulong p) { return Flm_ker_i(x, p, 0, 0); }
 GEN
-Flm_deplin(GEN x, ulong p) {
-  return Flm_ker_i(x, p, 1, 0);
-}
+Flm_deplin(GEN x, ulong p) { return Flm_ker_i(x, p, 1, 0); }
 
 /* in place, destroy a, SMALL_ULONG(p) is TRUE */
 static ulong
