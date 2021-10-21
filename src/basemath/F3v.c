@@ -216,16 +216,13 @@ F3m_ker_sp(GEN x, long deplin)
   {
     GEN xk = gel(x,k);
     for (j=1; j<=m; j++)
-      if (F2v_coeff(c,j))
-        if (F3m_coeff(x,j,k)) break;
+      if (F2v_coeff(c,j) && F3m_coeff(x,j,k)) break;
     if (j>m)
     {
       if (deplin) {
-        GEN c = zero_F3v(n);
-        for (i=1; i<k; i++)
-          F3v_set(c, i, F3v_coeff(xk, d[i]));
-        F3v_set(c, k, 1);
-        return c;
+        GEN v = zero_F3v(n);
+        for (i=1; i<k; i++) F3v_set(v, i, F3v_coeff(xk, d[i]));
+        F3v_set(v, k, 1); return v;
       }
       r++; d[k] = 0;
     }
@@ -256,8 +253,7 @@ F3m_ker_sp(GEN x, long deplin)
     GEN C = gel(y,j);
     while (d[k]) k++;
     for (i=1; i<k; i++)
-      if (d[i])
-        F3v_set(C,i,F3m_coeff(x,d[i],k));
+      if (d[i]) F3v_set(C,i,F3m_coeff(x,d[i],k));
     F3v_set(C, k, 1);
   }
   return y;

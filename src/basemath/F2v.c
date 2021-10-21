@@ -400,12 +400,10 @@ F2m_ker_sp(GEN x, long deplin)
     if (j>m)
     {
       if (deplin) {
-        GEN c = zero_F2v(n);
+        GEN v = zero_F2v(n);
         for (i=1; i<k; i++)
-          if (F2v_coeff(xk, d[i]))
-            F2v_set(c, i);
-        F2v_set(c, k);
-        return c;
+          if (F2v_coeff(xk, d[i])) F2v_set(v, i);
+        F2v_set(v, k); return v;
       }
       r++; d[k] = 0;
     }
@@ -428,8 +426,7 @@ F2m_ker_sp(GEN x, long deplin)
   {
     GEN C = gel(y,j); while (d[k]) k++;
     for (i=1; i<k; i++)
-      if (d[i] && F2m_coeff(x,d[i],k))
-        F2v_set(C,i);
+      if (d[i] && F2m_coeff(x,d[i],k)) F2v_set(C,i);
     F2v_set(C, k);
   }
   return y;
