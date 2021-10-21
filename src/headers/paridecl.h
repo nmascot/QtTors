@@ -3937,6 +3937,8 @@ GEN     ZM_hnflll(GEN A, GEN *ptB, int remove);
 GEN     ZV_extgcd(GEN A);
 GEN     ZV_snfall(GEN D, GEN *pU, GEN *pV);
 GEN     ZV_snf_group(GEN d, GEN *newU, GEN *newUi);
+long    ZV_snf_rank(GEN D, GEN p);
+long    ZV_snf_rank_u(GEN D, ulong p);
 void    ZV_snf_trunc(GEN D);
 GEN     ZM_hnfmod(GEN x, GEN d);
 GEN     ZM_hnfmodall(GEN x, GEN dm, long flag);
@@ -3949,7 +3951,6 @@ GEN     ZM_snf(GEN x);
 GEN     ZM_snf_group(GEN H, GEN *newU, GEN *newUi);
 GEN     ZM_snfall(GEN x, GEN *ptU, GEN *ptV);
 GEN     ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, long flag);
-GEN     zlm_echelon(GEN x, long early_abort, ulong p, ulong pm);
 GEN     ZpM_echelon(GEN x, long early_abort, GEN p, GEN pm);
 GEN     gsmith(GEN x);
 GEN     gsmithall(GEN x);
@@ -3971,6 +3972,9 @@ GEN     matsnf0(GEN x, long flag);
 GEN     smith(GEN x);
 GEN     smithall(GEN x);
 GEN     smithclean(GEN z);
+long    snfrank(GEN D, GEN p);
+GEN     zlm_echelon(GEN x, long early_abort, ulong p, ulong pm);
+long    zv_snf_rank(GEN D, ulong p);
 
 /* ifactor1.c */
 

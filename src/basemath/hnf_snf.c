@@ -2890,3 +2890,81 @@ ZV_snf_trunc(GEN D)
   for (i = 1; i < l; i++)
     if (is_pm1(gel(D,i))) { setlg(D,i); break; }
 }
+
+long
+zv_snf_rank(GEN D, ulong p)
+{
+  long i, l = lg(D);
+  if (!p) return l - 1;
+  for (i = 1; i < l; i++)
+    if (D[i] % p) break;
+  return i - 1;
+}
+long
+ZV_snf_rank_u(GEN D, ulong p)
+{
+  long i, l = lg(D);
+  if (!p) return l - 1;
+  if (p == 2)
+  {
+    for (i = 1; i < l; i++)
+      if (mpodd(gel(D,i))) break;
+  }
+  else if (!(p & (p-1)))
+  { /* power of 2 */
+    long n = vals(p);
+    for (i = 1; i < l; i++)
+      if (umodi2n(gel(D,i), n)) break;
+  }
+  else
+  {
+    for (i = 1; i < l; i++)
+      if (umodiu(gel(D,i), p)) break;
+  }
+  return i - 1;
+}
+long
+ZV_snf_rank(GEN D, GEN p)
+{
+  long i, l;
+  switch(lgefint(p))
+  {
+    case 2: return lg(D) - 1;
+    case 3: return ZV_snf_rank_u(D, p[2]);
+  }
+  l = lg(D);
+  for (i = 1; i < l; i++)
+    if (!dvdii(gel(D,i), p)) break;
+  return i - 1;
+}
+long
+snfrank(GEN D, GEN p)
+{
+  long i, l;
+  if (typ(D) != t_VEC) pari_err_TYPE("snfrank", D);
+  l = lg(D);
+  if (l == 4 && typ(gel(D,3)) == t_MAT)
+  { /* from matsnf(,1) */
+    pari_sp av = avma;
+    long z;
+    GEN v;
+    D = gel(D,3); l = lg(D);
+    if (l == 1) return 0;
+    z = lgcols(D) - l; /* missing columns of 0s */
+    if (z < 0) pari_err_TYPE("snfrank", D);
+    v = cgetg(l, t_VEC);
+    for (i = 1; i < l; i++) gel(v, i) = gcoeff(D, i + z, i);
+    return gc_long(av, z + snfrank(v, p));
+  }
+  switch(typ(p))
+  {
+    case t_INT:
+      if (!RgV_is_ZV(D)) pari_err_TYPE("snfrank", D);
+      return ZV_snf_rank(D, p);
+    case t_POL: break;
+    default: pari_err_TYPE("snfrank", p);
+  }
+  for (i = 1; i < l; i++)
+    if (!gdvd(gel(D,i), p)) break;
+  return i - 1;
+}

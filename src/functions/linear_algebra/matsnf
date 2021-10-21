@@ -26,3 +26,50 @@ Doc: if $X$ is a (singular or nonsingular) matrix outputs the vector of
  that $U'XV' = D'$ holds. If this flag is set, $X$ is allowed to be of the
  form `vector of elementary divisors' or $[U,V,D]$ as would normally be
  output with the cleanup flag unset.
+
+ If $v$ is an output from \kbd{matsnf} and $p$ is a power of an irreducible
+ element, then \kbd{snfrank(v, p)} returns the $p$-rank of the attached
+ module.
+
+ \bprog
+ ? X = [27,0; 0,3; 1,1; 0,0]; matsnf(X)
+ %1 = [0, 0, 3, 1]
+ ? [U,V,D] = v = matsnf(X, 1); U*X*V == D
+ %2
+ ? U
+ %3 =
+ [0 0   0 1]
+
+ [1 9 -27 0]
+
+ [0 1   0 0]
+
+ [0 0   1 0]
+
+ ? V
+ %4 =
+ [-1 1]
+
+ [ 1 0]
+
+ ? snfrank(v, 3)
+ %5 = 3
+ @eprog\noindent Continuing the same example after cleanup:
+ \bprog
+ ? [U,V,D] = v = matsnf(X, 1+4); U*X*V == D
+ %6 = 1
+
+ ? D
+ %7 =
+ [0]
+
+ [0]
+
+ [3]
+
+ ? snfrank(v, 3)
+ %8 = 3
+
+ ? snfrank(v, 2)
+ %9 = 2
+ @eprog
