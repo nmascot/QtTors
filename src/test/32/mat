@@ -497,6 +497,7 @@ od(0, 18446744073709551629), Mod(1, 18446744073709551629), Mod(0, 1844674407
 68
 2
 68
+68
 
 [-6 -6]
 
@@ -667,4 +668,4 @@ matrix(0,2)
   ***   at top-level: matreduce([1,x;1,y])
   ***                 ^--------------------
   *** matreduce: incorrect type in matreduce (t_MAT).
-Total time spent: 461
+Total time spent: 494
