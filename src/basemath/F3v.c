@@ -329,18 +329,17 @@ F3m_row(GEN x, long j)
 {
   long i, l = lg(x);
   GEN V = zero_F3v(l-1);
-  for(i = 1; i < l; i++)
-    F3v_set(V,i,F3m_coeff(x,j,i));
+  for(i = 1; i < l; i++) F3v_set(V, i, F3m_coeff(x,j,i));
   return V;
 }
 
 GEN
 F3m_transpose(GEN x)
 {
-  long i, dx, lx = lg(x);
+  long i, l;
   GEN y;
-  if (lx == 1) return cgetg(1,t_MAT);
-  dx = coeff(x,1,1); y = cgetg(dx+1,t_MAT);
-  for (i=1; i<=dx; i++) gel(y,i) = F3m_row(x,i);
+  if (lg(x) == 1) return cgetg(1,t_MAT);
+  l = coeff(x,1,1) + 1; y = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++) gel(y,i) = F3m_row(x,i);
   return y;
 }
