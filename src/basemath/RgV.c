@@ -587,25 +587,20 @@ RgV_RgM_mul(GEN x, GEN y)
 }
 
 static GEN
-RgM_mul_FpM(GEN x, GEN y, GEN p)
+RgM_mul_FpM_i(GEN x, GEN y, GEN p)
 {
-  pari_sp av = avma;
-  GEN r;
   if (lgefint(p) == 3)
   {
     ulong pp = uel(p, 2);
-    if (pp==2)
-      r = F2m_to_ZM(F2m_mul(RgM_to_F2m(x), RgM_to_F2m(y)));
-    else if (pp==3)
-      r = F3m_to_ZM(F3m_mul(RgM_to_F3m(x), RgM_to_F3m(y)));
-    else
-      r = Flm_to_ZM_inplace(Flm_mul(RgM_to_Flm(x, pp),
-                                    RgM_to_Flm(y, pp), pp));
+    if (pp==2) return F2m_to_mod(F2m_mul(RgM_to_F2m(x), RgM_to_F2m(y)));
+    if (pp==3) return F3m_to_mod(F3m_mul(RgM_to_F3m(x), RgM_to_F3m(y)));
+    return Flm_to_mod(Flm_mul(RgM_to_Flm(x, pp), RgM_to_Flm(y, pp), pp), pp);
   }
-  else
-    r = FpM_mul(RgM_to_FpM(x, p), RgM_to_FpM(y, p), p);
-  return gerepileupto(av, FpM_to_mod(r, p));
+  return FpM_to_mod(FpM_mul(RgM_to_FpM(x,p), RgM_to_FpM(y,p), p), p);
 }
+static GEN
+RgM_mul_FpM(GEN x, GEN y, GEN p)
+{ pari_sp av = avma; return gerepileupto(av, RgM_mul_FpM_i(x, y, p)); }
 
 static GEN
 RgM_mul_FqM(GEN x, GEN y, GEN pol, GEN p)
