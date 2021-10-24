@@ -1,5 +1,5 @@
 default(parisize,"32M");
-mwrank(E) = setrand(1); ellrank(E);
+mwrank(E,e=0) = setrand(1); ellrank(E,e);
 
 {
 E=ellinit([1,0,1,34318214642441646362435632562579908747,
@@ -96,7 +96,7 @@ checkwomack()
 checkdujella()=
 {
   for(i=1,#dujella,
-    print("D:",i,":",setrand(1); ellrank(ellinit(dujella[i]),1)[1..2]));
+    print("D:",i,":",mwrank(ellinit(dujella[i]),2)[1..2]));
 }
 checkdujella()
 crv3(D)=[0,0,1,0,(-27*D-1)/4];
@@ -122,6 +122,7 @@ checktwist([66,-954,5454,-173907,-7341759],[28,-172,304,-4064,-20032]);
 checktwist([66,-954,5454,-173502,-7327179],[28,-172,304,-3744,-20032]);
 checktwist([-1,1],[-36,216]);
 checktwist([-289,1],[-289*5^2,-5^3],[[369/4,-2753/8]]);
+checktwist([1,3],[323761,552660027]);
 
 E=ellinit([-27^2,7]);
 [Q,P]=ell2cover(E)[1]

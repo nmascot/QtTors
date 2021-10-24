@@ -1143,25 +1143,25 @@ casselspairingt(GEN q1, GEN q2, GEN q3, GEN FD)
 }
 
 static long
-casselspairing(GEN q1, GEN q2, GEN q3)
+casselspairing(GEN D, GEN F, GEN q1, GEN q2, GEN q3)
 {
   pari_sp av = avma;
   GEN D1 = absi(quartic_disc(q1));
   GEN D2 = absi(quartic_disc(q2));
   GEN D3 = absi(quartic_disc(q3));
-  GEN L = ZV_lcm(mkvec3(D1, D2, D3));
-  GEN F = gel(Z_factor(L),1);
-  if (!equalii(L,D1))
-    q1 = gmul(q1, sqrtnint(diviiexact(L, D1), 6));
-  if (!equalii(L,D2))
-    q2 = gmul(q2, sqrtnint(diviiexact(L, D2), 6));
-  if (!equalii(L,D3))
-    q3 = gmul(q3, sqrtnint(diviiexact(L, D3), 6));
+  if (!dvdii(D,D1) || !dvdii(D,D2) || !dvdii(D,D3))
+    pari_err_BUG("cassels");
+  if (!equalii(D,D1))
+    q1 = gmul(q1, sqrtnint(diviiexact(D, D1), 6));
+  if (!equalii(D,D2))
+    q2 = gmul(q2, sqrtnint(diviiexact(D, D2), 6));
+  if (!equalii(D,D3))
+    q3 = gmul(q3, sqrtnint(diviiexact(D, D3), 6));
   return gc_long(av, casselspairingt(q1, q2, q3, F));
 }
 
 static GEN
-matcassels(GEN M)
+matcassels(GEN D, GEN F, GEN M)
 {
   long i, j, n = lg(M)-1;
   GEN C = zero_F2m_copy(n,n);
@@ -1172,7 +1172,7 @@ matcassels(GEN M)
     for (j = 1; j < i; j++)
     {
       GEN Mjj = gcoeff(M,j,j);
-      if (!isintzero(Mjj) && casselspairing(Mii, Mjj, gcoeff(M,i,j)))
+      if (!isintzero(Mjj) && casselspairing(D, F, Mii, Mjj, gcoeff(M,i,j)))
       { F2m_set(C,i,j); F2m_set(C,j,i); }
     }
   }
@@ -2132,7 +2132,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
 {
   GEN KP, pol, vnf, vpol, vcrt, sbase, LS2, factLS2, sqrtLS2, signs;
   GEN selmer, helpLS2, LS2chars, helpchars, newselmer, factdisc, badprimes;
-  GEN helplist, listpoints, etors2, p, covers;
+  GEN helplist, listpoints, etors2, p, covers, disc;
   long i, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u, sha2 = 0;
   forprime_t T;
 
@@ -2143,7 +2143,8 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   etors2 = vecslice(help,1, tors2);
   gtoset_inplace(etors2);
   KP = gel(absZ_factor(K), 1);
-  factdisc = mkvec3(KP, mkcol(gen_2), gel(absZ_factor(ZX_disc(pol)), 1));
+  disc = ZX_disc(pol);
+  factdisc = mkvec3(KP, mkcol(gen_2), gel(absZ_factor(disc), 1));
   factdisc = ZV_sort_uniq(shallowconcat1(factdisc));
   badprimes = cgetg(n+1, t_VEC);
   vnf = cgetg(n+1, t_VEC);
@@ -2251,7 +2252,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   if (nbpoints < dim)
   {
     long i, j;
-    GEN M = cgetg(dim+1, t_MAT), selker;
+    GEN M = cgetg(dim+1, t_MAT), selker, D;
     for (i = 1; i <= dim; i++)
       gel(M,i) = cgetg(dim+1, t_COL);
     for (i = 1; i <= dim; i++)
@@ -2270,7 +2271,8 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
         }
         gmael(M,j,i) = gmael(M,i,j) = Q;
       }
-    selker = F2m_to_Flm(F2m_ker(matcassels(M)));
+    D = mulii(muliu(absi(disc), 27*4096), powiu(K,6));
+    selker = F2m_to_Flm(F2m_ker(matcassels(D, factdisc, M)));
     sha2 = dim - (lg(selker)-1);
     dim = lg(selker)-1;
     for (t=1, u=1; nbpoints < dim && effort > 0; t++)
