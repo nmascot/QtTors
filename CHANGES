@@ -91,6 +91,7 @@ BA  70- [32bit] forfactored(n=223092868, 223092871, ) -> SEGV [#2318]
     73- allow eulerianpol(0) (= 1)
     74- allow polylog(0,x) (was broken when eulerianpol was introduced)
 BA  75- concat(t_LIST,t_LIST) was leaking memory
+    76- missing type checks in ellchangepoint (SEGV)
 
   Added
 HC   1- new GP function eulerreal

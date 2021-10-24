@@ -480,3 +480,4 @@ e=ellinit([0,-1,1,-2,2]);
 ellformalw(e,0)
 ellformalw(e,-1)
 elltwist([0,0])
+ellchangepoint([[1,1],1,1],[1,0,0,0])
