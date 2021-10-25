@@ -161,6 +161,7 @@ BA  54- [libpari] FpXn_div, Flxn_div, RgXn_div, RgXn_div_i, FpXQXn_div, F2xn_div
     55- [libpari] maxomegau, maxomegaoddu, ZV_snf_rank, ZV_snf_rank_u,
         zv_snf_rank, F3c_to_ZC, F3c_to_mod, F3m_to_mod
     56- new GP function snfrank
+HC  57- allow lngamma(t_PADIC of negative valuation)
 
   Changed
 HC   1- faster implementation of eulervec + cache result

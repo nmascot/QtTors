@@ -1507,6 +1507,22 @@ Qp_gamma(GEN x)
   return Qp_gamma_Dwork(x, itos(p));
 }
 
+static GEN
+Qp_lngamma(GEN x)
+{
+  GEN s, y, Y;
+  long v = valp(x), e, k, K;
+  if (v >= 0) return Qp_log(Qp_gamma(x));
+  e = precp(x) + v; K = (2 + (e + 4) / (-v)) >> 1;
+  s = gen_0; Y = y = ginv(x); y = gsqr(y); constbern(K);
+  for (k = 1; k <= K; k++)
+  {
+    s = gadd(s, gmul(divgunu(bernfrac(2*k), 2*k-1), Y));
+    if (k < K) Y = gmul(Y, y); /* x^(1-2k) */
+  }
+  return gadd(s, gsub(gmul(gsub(x, ghalf), Qp_log(x)), x));
+}
+
 /* gamma(1+x) - 1, |x| < 1 is "small" */
 GEN
 ggamma1m1(GEN x, long prec) { return gexpm1(lngamma1(x, prec), prec); }
@@ -1934,7 +1950,7 @@ glngamma(GEN x, long prec)
         t = gadd(t, glngamma(y0,prec));
       return gerepileupto(av, t);
 
-    case t_PADIC: return gerepileupto(av, Qp_log(Qp_gamma(x)));
+    case t_PADIC: return gerepileupto(av, Qp_lngamma(x));
   }
   return trans_eval("lngamma",glngamma,x,prec);
 }
