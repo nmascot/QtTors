@@ -1046,16 +1046,15 @@ enfsqrt(GEN T, GEN P)
   return liftpol(chinese1(vecnfsqrtmod(F,P)));
 }
 
+/* quartic q, quadratic g. There exist a real r s.t. q(r) > 0. Return sign(r) */
 static int
-cassels_oo_solve(GEN q, GEN g, GEN a)
+cassels_oo_solve(GEN q, GEN g)
 {
   pari_sp av = avma;
   GEN R;
   long i, lR;
-  if (signe(a) > 0)
-    return 1;
-  if (signe(leading_coeff(q)) > 0)
-    return gc_int(av, signe(leading_coeff(g)));
+
+  if (signe(leading_coeff(q)) > 0) return signe(leading_coeff(g));
   R = realroots(RgX_deriv(q), NULL, BIGDEFAULTPREC); lR = lg(R);
   for (i=1; i<lR; i++)
   {
@@ -1093,45 +1092,51 @@ cassels_Qp_solve(GEN q, GEN gam, GEN p)
 static GEN
 to_ZX(GEN a, long v) { return typ(a)==t_INT? scalarpol_shallow(a,v): a; }
 
+/* Q * (D/|disc(Q)|)^(1/6) checking divisibility */
 static GEN
-quartic_findunit(GEN q)
+quartic_fix(GEN D, GEN Q)
+{
+  GEN q, r, d = absi_shallow(quartic_disc(Q));
+  if (equalii(d, D)) return Q;
+  q = dvmdii(D, d, &r);
+  if (r != gen_0) pari_err_BUG("casselspairing");
+  return ZX_Z_mul(Q, sqrtnint(q, 6));
+}
+
+static GEN
+quartic_findunit(GEN D, GEN q)
 {
   GEN T = quarticinv_pol(quartic_IJ(q));
   while(1)
   {
     pari_sp av = avma;
     GEN z = quartic_cubic(q,0);
-    if (signe(QXQ_norm(z,T))) return q;
+    if (signe(QXQ_norm(z,T))) return quartic_fix(D, q);
     set_avma(av);
     q = ZX_translate(RgX_recip(q), gen_1);
   }
 }
 
-/* Crude implementation of
- * an algorithm by Tom Fisher
+/* Crude implementation of an algorithm by Tom Fisher
  * On binary quartics and the Cassels-Tate pairing
- * https://www.dpmms.cam.ac.uk/~taf1000/papers/bq-ctp.pdf
- */
+ * https://www.dpmms.cam.ac.uk/~taf1000/papers/bq-ctp.pdf */
 
-/* FD = gel(absZ_factor(D),1) */
-
+/* FD = gel(absZ_factor(D),1), q1,q2,q3 have discriminant D */
 static long
-casselspairingt(GEN q1, GEN q2, GEN q3, GEN FD)
+casselspairing(GEN FD, GEN q1, GEN q2, GEN q3)
 {
   pari_sp av = avma;
-  GEN IJ = quartic_IJ(q1);
-  GEN T = quarticinv_pol(IJ);
+  GEN IJ = quartic_IJ(q1), T = quarticinv_pol(IJ), H = quartic_H(q1);
   GEN z1 = quartic_cubic(q1, 0);
   GEN z2 = quartic_cubic(q2, 0);
   GEN z3 = quartic_cubic(q3, 0);
   GEN m = to_ZX(enfsqrt(T, QXQ_mul(QX_mul(z1,z2),z3,T)), 0);
-  GEN H = quartic_H(q1);
   GEN Hm = RgXQ_mul(QXQ_div(m, z1, T), H, T);
   GEN gam = degpol(Hm) < 2 ? pol_0(1): to_ZX(Q_remove_denom(gel(Hm,4), NULL),1);
   GEN a = leading_coeff(q2);
   GEN Fa = gel(absZ_factor(a),1);
   GEN F = ZV_sort_uniq(shallowconcat1(mkvec3(mkcol4s(2,3,5,7), Fa, FD)));
-  long e = cassels_oo_solve(q1, gam, a) < 0 ;
+  long e = signe(a) <= 0 && cassels_oo_solve(q1, gam) < 0 ;
   long i, lF = lg(F);
   for (i = 1; i< lF; i++)
   {
@@ -1142,29 +1147,12 @@ casselspairingt(GEN q1, GEN q2, GEN q3, GEN FD)
   return gc_long(av,e);
 }
 
-static long
-casselspairing(GEN D, GEN F, GEN q1, GEN q2, GEN q3)
-{
-  pari_sp av = avma;
-  GEN D1 = absi(quartic_disc(q1));
-  GEN D2 = absi(quartic_disc(q2));
-  GEN D3 = absi(quartic_disc(q3));
-  if (!dvdii(D,D1) || !dvdii(D,D2) || !dvdii(D,D3))
-    pari_err_BUG("cassels");
-  if (!equalii(D,D1))
-    q1 = gmul(q1, sqrtnint(diviiexact(D, D1), 6));
-  if (!equalii(D,D2))
-    q2 = gmul(q2, sqrtnint(diviiexact(D, D2), 6));
-  if (!equalii(D,D3))
-    q3 = gmul(q3, sqrtnint(diviiexact(D, D3), 6));
-  return gc_long(av, casselspairingt(q1, q2, q3, F));
-}
-
 static GEN
-matcassels(GEN D, GEN F, GEN M)
+matcassels(GEN F, GEN M)
 {
   long i, j, n = lg(M)-1;
   GEN C = zero_F2m_copy(n,n);
+  pari_sp av = avma;
   for (i = 1; i <= n; i++)
   {
     GEN Mii = gcoeff(M,i,i);
@@ -1172,11 +1160,11 @@ matcassels(GEN D, GEN F, GEN M)
     for (j = 1; j < i; j++)
     {
       GEN Mjj = gcoeff(M,j,j);
-      if (!isintzero(Mjj) && casselspairing(D, F, Mii, Mjj, gcoeff(M,i,j)))
+      if (!isintzero(Mjj) && casselspairing(F, Mii, Mjj, gcoeff(M,i,j)))
       { F2m_set(C,i,j); F2m_set(C,j,i); }
     }
   }
-  return C;
+  return gc_const(av, C);
 }
 
 /*******************************************************************/
@@ -2252,9 +2240,9 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   if (nbpoints < dim)
   {
     long i, j;
-    GEN M = cgetg(dim+1, t_MAT), selker, D;
-    for (i = 1; i <= dim; i++)
-      gel(M,i) = cgetg(dim+1, t_COL);
+    GEN M = cgetg(dim+1, t_MAT), selker;
+    GEN D = mulii(muliu(absi(disc), 27*4096), powiu(K,6));
+    for (i = 1; i <= dim; i++) gel(M,i) = cgetg(dim+1, t_COL);
     for (i = 1; i <= dim; i++)
       for (j = 1; j <= i; j++)
       {
@@ -2262,17 +2250,16 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
         if (isintzero(gel(covers,i)))
           Q = gen_0;
         else if (i==j)
-          Q = quartic_findunit(gel(covers,i));
+          Q = quartic_findunit(D, gel(covers,i));
         else
         {
           GEN e = Flv_add(gel(selmer,i), gel(selmer,j), 2);
           GEN b = liftselmerinit(e, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
-          Q = quartic_findunit(gel(liftselmer_cover(b, e, LS2, pol, K),1));
+          Q = quartic_findunit(D, gel(liftselmer_cover(b, e, LS2, pol, K),1));
         }
         gmael(M,j,i) = gmael(M,i,j) = Q;
       }
-    D = mulii(muliu(absi(disc), 27*4096), powiu(K,6));
-    selker = F2m_to_Flm(F2m_ker(matcassels(D, factdisc, M)));
+    selker = F2m_to_Flm(F2m_ker(matcassels(factdisc, M)));
     sha2 = dim - (lg(selker)-1);
     dim = lg(selker)-1;
     for (t=1, u=1; nbpoints < dim && effort > 0; t++)
