@@ -48,6 +48,14 @@ sqrtint(4,&r)
 r
 sqrtint(120938191237,&r)
 r
+sqrtint(Pi,&r)
+r
+sqrtint(1e40,&r)
+r
+sqrtint(quadgen(5),&r)
+r
+sqrtint(9/4,&r)
+r
 
 iferr(sqrt(3+O(2^2)),E,E)
 iferr(sqrt(3+O(2^3)),E,E)
@@ -79,3 +87,6 @@ check(ffgen([nextprime(2^100),3]));
 
 \\ ERRORS
 sqrtn(Mod(13,112),6) \\ #2242
+sqrtint(1e80)
+sqrtint(-1.0)
+sqrtint('x)

@@ -158,7 +158,31 @@ logint0(GEN B, GEN y, GEN *ptq)
 GEN
 sqrtint(GEN a)
 {
-  if (typ(a) != t_INT) pari_err_TYPE("sqrtint",a);
+  if (typ(a) != t_INT)
+  {
+    pari_sp av = avma;
+    if (typ(a) == t_REAL)
+    {
+      long e;
+      switch(signe(a))
+      {
+        case 0: return gen_0;
+        case -1: pari_err_DOMAIN("sqrtint", "argument", "<", gen_0,a);
+      }
+      e = expo(a); if (e < 0) return gen_0;
+      if (nbits2lg(e+1) > lg(a))
+        a = floorr(sqrtr(a)); /* try to avoid precision loss in truncation */
+      else
+        a = sqrti(truncr(a));
+    }
+    else
+    {
+      a = gfloor(a);
+      if (typ(a) != t_INT) pari_err_TYPE("sqrtint",a);
+      a = sqrti(a);
+    }
+    return gerepileuptoleaf(av, a);
+  }
   switch (signe(a))
   {
     case 1: return sqrti(a);
@@ -171,7 +195,12 @@ GEN
 sqrtint0(GEN a, GEN *r)
 {
   if (!r) return sqrtint(a);
-  if (typ(a) != t_INT) pari_err_TYPE("sqrtint",a);
+  if (typ(a) != t_INT)
+  {
+    GEN b = sqrtint(a);
+    pari_sp av = avma;
+    *r = gerepileupto(av, gsub(a, sqri(b))); return b;
+  }
   switch (signe(a))
   {
     case 1: return sqrtremi(a, r);

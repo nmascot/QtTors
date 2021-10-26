@@ -48,6 +48,14 @@
 0
 347761
 478116
+1
+2.1415926535897932384626433832795028842
+100000000000000000000
+0.E2
+1
+-1 + w
+1
+5/4
 error("not an n-th power residue in Qp_sqrt: 1 + 2 + O(2^2).")
 error("not an n-th power residue in Qp_sqrt: 1 + 2 + O(2^3).")
 error("not an n-th power residue in gsqrt: Mod(2, 11).")
@@ -68,4 +76,13 @@ error("not an n-th power residue in gsqrtn: Mod(3, 19).")
   ***   at top-level: sqrtn(Mod(13,112),6)
   ***                 ^--------------------
   *** sqrtn: not a prime number in sqrtn [modulus]: 112.
-Total time spent: 100
+  ***   at top-level: sqrtint(1e80)
+  ***                 ^-------------
+  *** sqrtint: precision too low in truncr (precision loss in truncation).
+  ***   at top-level: sqrtint(-1.0)
+  ***                 ^-------------
+  *** sqrtint: domain error in sqrtint: argument < 0
+  ***   at top-level: sqrtint('x)
+  ***                 ^-----------
+  *** sqrtint: incorrect type in sqrtint (t_POL).
+Total time spent: 97
