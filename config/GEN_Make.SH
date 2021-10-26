@@ -5,12 +5,6 @@ lnfile=Makefile
 echo Extracting $file
 rm -f $file $dir/$lnfile
 
-if test -z "$DLLD"; then static=y; fi
-case "$static" in
-  n) dft=dyn ;;
-  y) dft=sta ;;
-esac
-
 RUNPTH=
 if test -n "$runpathprefix"; then
   RUNPTH=`config/ldflags "$LDneedsWl" "$runpathprefix $runpath"`
@@ -23,13 +17,11 @@ cat > $file << EOT
 #  lost when Configure is run.
 #
 # make all will create
-#  extgcd-dyn (linked dynamically with libpari)
-#  extgcd-sta (linked statically)
+#  extgcd (linked with libpari)
 #  libextgcd.so (to be used by "install" under GP)
 #
-# Under GP: install("extgcd", "GG&&", "gcdex", "./libextgcd.so") enables
-# you to subsequently use gcdex to call extgcd (see the reference manual).
-#
+# Under GP: install("extgcd", "GG&&", "f", "./libextgcd.so") enables
+# you to subsequently use f(a,b) to call extgcd(a,b)
 
 # change this TARGET to compile your own programs
 TARGET = extgcd
@@ -39,18 +31,6 @@ DBGFLAGS   = $DBGFLAGS
 CFLAGS     = $OPTFLAGS
 EXTRACFLAGS=
 #CFLAGS    = \$(DBGFLAGS)
-
-# Various linkers use different flags to force static compilation. Choose
-# the one which is relevant for your installation.
-#
-# Solaris ld (global)
-#STATIC    = -dn
-
-# Solaris ld (toggle: no shared object accepted until -B dynamic is seen
-#STATIC    = -B static
-
-# gcc
-#STATIC    = -static
 
 CC         = $CC
 CPPFLAGS   = -I. -I$includedir
@@ -67,28 +47,18 @@ LIBS       = $LIBS -L$libdir -lpari
 
 RM = rm -f
 
-
 OBJS = \$(TARGET).o
 DYN = lib\$(TARGET).$DLSUFFIX
-ALL = \$(TARGET)-sta \$(TARGET)-dyn \$(DYN)
-
-dft: \$(TARGET)-$dft
+ALL = \$(TARGET) \$(DYN)
 
 all: \$(ALL)
-
-sta: \$(TARGET)-sta
-
-dyn: \$(TARGET)-dyn
 
 dynlib: \$(DYN)
 
 \$(DYN): \$(OBJS)
 	\$(MODLD) -o \$@ \$(MODLDFLAGS) \$(EXTRACFLAGS) \$(OBJS) \$(EXTRAMODLDFLAGS)
 
-\$(TARGET)-sta: \$(OBJS)
-	\$(LD) -o \$@ \$(LDFLAGS) \$(EXTRACFLAGS) \$< \$(EXTRALIBS) \$(STATIC) \$(LIBS)
-
-\$(TARGET)-dyn: \$(OBJS)
+\$(TARGET): \$(OBJS)
 	\$(LD) -o \$@ \$(LDFLAGS) \$(EXTRACFLAGS) \$< \$(EXTRALIBS) \$(RUNPTH) \$(LIBS)
 
 %.o: %.c
