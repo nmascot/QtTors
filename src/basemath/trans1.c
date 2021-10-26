@@ -1774,11 +1774,35 @@ Qp_sqrtn(GEN x, GEN n, GEN *zetan)
 GEN
 sqrtnint(GEN a, long n)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   GEN x, b, q;
   long s, k, e;
   const ulong nm1 = n - 1;
-  if (typ(a) != t_INT) pari_err_TYPE("sqrtnint",a);
+  if (n == 2) return sqrtint(a);
+  if (typ(a) != t_INT)
+  {
+    if (typ(a) == t_REAL)
+    {
+      long e;
+      switch(signe(a))
+      {
+        case 0: return gen_0;
+        case -1: pari_err_DOMAIN("sqrtnint", "argument", "<", gen_0,a);
+      }
+      e = expo(a); if (e < 0) return gen_0;
+      if (nbits2lg(e+1) > lg(a))
+        a = floorr(sqrtnr(a,n)); /* try to avoid precision loss in truncation */
+      else
+        a = sqrtnint(truncr(a),n);
+    }
+    else
+    {
+      a = gfloor(a);
+      if (typ(a) != t_INT) pari_err_TYPE("sqrtint",a);
+      a = sqrtnint(a, n);
+    }
+    return gerepileuptoint(av, a);
+  }
   if (n <= 0) pari_err_DOMAIN("sqrtnint", "n", "<=", gen_0, stoi(n));
   if (n == 1) return icopy(a);
   s = signe(a);
@@ -1789,8 +1813,8 @@ sqrtnint(GEN a, long n)
   if (k == 0)
   {
     long flag;
-    if (n > e) return gc_const(ltop, gen_1);
-    flag = cmpii(a, powuu(3, n)); set_avma(ltop);
+    if (n > e) return gc_const(av, gen_1);
+    flag = cmpii(a, powuu(3, n)); set_avma(av);
     return (flag < 0) ? gen_2: stoi(3);
   }
   if (e < n*BITS_IN_LONG - 1)
@@ -1815,7 +1839,7 @@ sqrtnint(GEN a, long n)
     x = subii(x, divis(addui(nm1, subii(x, q)), n));
     q = divii(a, powiu(x, nm1));
   }
-  return gerepileuptoleaf(ltop, x);
+  return gerepileuptoleaf(av, x);
 }
 
 ulong

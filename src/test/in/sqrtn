@@ -56,6 +56,9 @@ sqrtint(quadgen(5),&r)
 r
 sqrtint(9/4,&r)
 r
+sqrtnint(132/3, 4)
+sqrtnint(quadgen(17), 3)
+sqrtnint(8.1, 3)
 
 iferr(sqrt(3+O(2^2)),E,E)
 iferr(sqrt(3+O(2^3)),E,E)
@@ -90,3 +93,5 @@ sqrtn(Mod(13,112),6) \\ #2242
 sqrtint(1e80)
 sqrtint(-1.0)
 sqrtint('x)
+sqrtnint('x,3)
+sqrtnint(-1.0,3)

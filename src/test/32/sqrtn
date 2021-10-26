@@ -56,6 +56,9 @@
 -1 + w
 1
 5/4
+2
+1
+2
 error("not an n-th power residue in Qp_sqrt: 1 + 2 + O(2^2).")
 error("not an n-th power residue in Qp_sqrt: 1 + 2 + O(2^3).")
 error("not an n-th power residue in gsqrt: Mod(2, 11).")
@@ -85,4 +88,10 @@ error("not an n-th power residue in gsqrtn: Mod(3, 19).")
   ***   at top-level: sqrtint('x)
   ***                 ^-----------
   *** sqrtint: incorrect type in sqrtint (t_POL).
-Total time spent: 97
+  ***   at top-level: sqrtnint('x,3)
+  ***                 ^--------------
+  *** sqrtnint: incorrect type in sqrtint (t_POL).
+  ***   at top-level: sqrtnint(-1.0,3)
+  ***                 ^----------------
+  *** sqrtnint: domain error in sqrtnint: argument < 0
+Total time spent: 87
