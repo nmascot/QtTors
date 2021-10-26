@@ -352,7 +352,7 @@
   *** sqrtint: domain error in sqrtint: argument < 0
   ***   at top-level: sqrtnint(-1,2)
   ***                 ^--------------
-  *** sqrtnint: domain error in sqrtnint: x < 0
+  *** sqrtnint: domain error in sqrtint: argument < 0
   ***   at top-level: sqrtnint(2,-2)
   ***                 ^--------------
   *** sqrtnint: domain error in sqrtnint: n <= 0
@@ -650,4 +650,4 @@ INFINITY
   ***                                   ^-
   ***   incorrect value for plothsizes: [2,
   ***                                      ^
-Total time spent: 13
+Total time spent: 9
