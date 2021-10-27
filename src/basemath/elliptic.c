@@ -4829,6 +4829,28 @@ ellminimalmodel(GEN E, GEN *ptv)
   }
 }
 
+/* return a model minimal among b models */
+GEN
+ellminimalbmodel(GEN e, GEN *pv)
+{
+  pari_sp av = avma;
+  GEN f, a1, a3;
+
+  checkell(e); f = ellminimalmodel_i(e, pv, NULL);
+  a1 = ell_get_a1(f);
+  a3 = ell_get_a3(f);
+  if (!signe(a1) && !signe(a3))
+  { if (!*pv) *pv = init_ch(); }
+  else
+  {
+    GEN v = mkvec4(mpodd(a1) || mpodd(a3) ? ghalf : gen_1,
+                   gen_0, gdivgs(a1,-2), gdivgs(a3,-2));
+    gcomposev(pv, v); f = coordch(f, v);
+  }
+  if (f != e) ell_reset(f);
+  return gc_all(av, 2, &f, pv);
+}
+
 /* Reduction of a rational curve E to its standard minimal model, don't
  * update type-dependant components.
  * Set v = [u, r, s, t] = change of variable E -> minimal model, with u > 0

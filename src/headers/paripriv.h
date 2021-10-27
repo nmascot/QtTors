@@ -769,6 +769,7 @@ GEN hnaive_max(GEN ell, GEN ht);
 
 GEN  ellQ_genreduce(GEN E, GEN G, GEN M, long prec);
 GEN  ellQ_isdivisible(GEN E, GEN P, ulong l);
+GEN  ellminimalbmodel(GEN E, GEN *ptv);
 GEN  ellintegralbmodel(GEN e, GEN *pv);
 void ellprint(GEN e);
 

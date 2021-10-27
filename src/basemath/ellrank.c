@@ -1096,11 +1096,8 @@ to_ZX(GEN a, long v) { return typ(a)==t_INT? scalarpol_shallow(a,v): a; }
 static GEN
 quartic_fix(GEN D, GEN Q)
 {
-  GEN q, r, d = absi_shallow(quartic_disc(Q));
-  if (equalii(d, D)) return Q;
-  q = dvmdii(D, d, &r);
-  if (r != gen_0) pari_err_BUG("casselspairing");
-  return ZX_Z_mul(Q, sqrtnint(q, 6));
+  GEN d = absi_shallow(quartic_disc(Q));
+  return equalii(d, D) ? Q: ZX_shifti(Q, 2);
 }
 
 static GEN
@@ -1803,7 +1800,7 @@ ellrankinit(GEN ell, long prec)
 {
   pari_sp av = avma;
   GEN urst;
-  checkell_Q(ell); ell = ellintegralbmodel(ell, &urst);
+  checkell_Q(ell); ell = ellminimalbmodel(ell, &urst);
   return gerepilecopy(av, mkvec3(ell, urst, makevbnf(ell, prec)));
 }
 
@@ -2293,7 +2290,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
 GEN
 ell2selmer_basis(GEN ell, GEN *cb, long prec)
 {
-  GEN E = ellintegralbmodel(ell, cb);
+  GEN E = ellminimalbmodel(ell, cb);
   GEN S = ell2selmer(E, E, NULL, gen_1, makevbnf(E, prec), 0, 1, prec);
   obj_free(E); return S;
 }
@@ -2348,7 +2345,7 @@ ellrank_flag(GEN e, long effort, GEN help, long flag, long prec)
   else
   {
     checkell_Q(e);
-    e = ellintegralbmodel(e, &urst);
+    e = ellminimalbmodel(e, &urst);
     newell = 1;
     vbnf = makevbnf(e, prec);
   }
@@ -2356,7 +2353,7 @@ ellrank_flag(GEN e, long effort, GEN help, long flag, long prec)
   {
     checkell_Q(et);
     if (!gequal(ell_get_j(et),ell_get_j(e))) pari_err_TYPE("ellrank",et);
-    et = ellintegralbmodel(et, &urst);
+    et = ellminimalbmodel(et, &urst);
     ellrank_get_nudur(e, et, &nu, &du, &r);
     K = mulii(nu, du);
     urstK = mkvec4(nu, mulii(nu,r), gen_0, gen_0);
