@@ -164,7 +164,6 @@ member          @Member functions@2
 %               @\%
 <<              @shift
 >>              @shift
-min             @max
 emacs           @Using GP under GNU Emacs@2
 Emacs           @Using GP under GNU Emacs@2
 0               @Functions and Operations Available in PARI and GP

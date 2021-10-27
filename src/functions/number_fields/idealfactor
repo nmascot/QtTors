@@ -37,5 +37,5 @@ Doc: factors into prime ideal powers the ideal $x$ in the number field
  @eprog
 
 Variant: This function should only be used by the \kbd{gp} interface. Use
- directly \fun{GEN}{idealfactor}{GEN x} or
- \fun{GEN}{idealfactor_limit}{GEN x, ulong lim}.
+ directly \fun{GEN}{idealfactor}{GEN nf, GEN x} or
+ \fun{GEN}{idealfactor_limit}{GEN nf, GEN x, ulong lim}.
