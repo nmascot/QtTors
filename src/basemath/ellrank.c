@@ -670,12 +670,11 @@ hyperell_local_solve(GEN q, GEN p)
 /*******************************************************************/
 /*                         BINARY QUARTIC                          */
 /*******************************************************************/
-
 static int
 Qp_issquare(GEN a, GEN p)
 {
-  if (typ(a)==t_INT) return Zp_issquare(a, p);
-  return Zp_issquare(mulii(gel(a,1), gel(a,2)), p);
+  GEN b = typ(a) == t_INT? a: mulii(gel(a,1), gel(a,2));
+  return Zp_issquare(b, p);
 }
 
 static GEN
