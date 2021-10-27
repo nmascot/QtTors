@@ -2,15 +2,15 @@ Function: logint
 Section: number_theoretical
 C-Name: logint0
 Prototype: lGGD&
-Help: logint(x,b,{&z}): return the largest integer e so that b^e <= x, where the
- parameters b > 1 and x > 0 are both integers. If the parameter z is present,
- set it to b^e.
+Help: logint(x,b,{&z}): return the largest integer e so that b^e <= x, where
+ b > 1 is an integer and x is a positive real number. If the parameter z is
+ present, set it to b^e.
 Description:
  (gen,2):small        expi($1)
  (gen,gen,&int):small logint0($1, $2, &$3)
 Doc: Return the largest integer $e$ so that $b^e \leq x$, where the
- parameters $b > 1$ and $x > 0$ are both integers. If the parameter $z$ is
- present, set it to $b^e$.
+ $b > 1$ is an integer and $x$ is a positive real number. If the parameter $z$
+ is present, set it to $b^e$.
  \bprog
  ? logint(1000, 2)
  %1 = 9
@@ -20,7 +20,11 @@ Doc: Return the largest integer $e$ so that $b^e \leq x$, where the
  %3 = 9
  ? z
  %4 = 512
- @eprog\noindent The number of digits used to write $b$ in base $x$ is
+ ? logint(Pi^2, 2, &z)
+ %5 = 3
+ ? z
+ %6 = 8
+ @eprog\noindent The number of digits used to write $x$ in base $b$ is
  \kbd{1 + logint(x,b)}:
  \bprog
  ? #digits(1000!, 10)
