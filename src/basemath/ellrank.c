@@ -708,20 +708,20 @@ quartic_cubic(GEN g, long v)
 }
 
 static GEN
-quartic_H(GEN g)
-{
-  GEN a = gel(g, 6), b = gel(g, 5), c = gel(g, 4);
-  GEN I = gel(quartic_IJ(g), 1);
-  GEN ddh = quartic_hessiandd(g);
-  GEN ddg = deg2pol_shallow(gmulgs(a,12), gmulgs(b,6), gmulgs(c,2), 1);
-  return deg2pol_shallow(stoi(-8), gmul2n(ddg,2), gadd(ddh,gmul2n(I,3)),0);
-}
-
-static GEN
 quarticinv_pol(GEN IJ)
 {
   GEN I = gel(IJ,1), J = gel(IJ,2);
   return mkpoln(4, gen_1, gen_0, gmulgs(I,-3), J);
+}
+static GEN
+quartic_H(GEN g, GEN *pT)
+{
+  GEN a = gel(g, 6), b = gel(g, 5), c = gel(g, 4);
+  GEN IJ = quartic_IJ(g), I = gel(IJ, 1);
+  GEN ddh = quartic_hessiandd(g);
+  GEN ddg = deg2pol_shallow(gmulgs(a,12), gmulgs(b,6), gmulgs(c,2), 1);
+  *pT = quarticinv_pol(IJ);
+  return deg2pol_shallow(stoi(-8), gmul2n(ddg,2), gadd(ddh,gmul2n(I,3)),0);
 }
 
 static GEN
@@ -1116,7 +1116,7 @@ static long
 casselspairing(GEN FD, GEN q1, GEN q2, GEN q3)
 {
   pari_sp av = avma;
-  GEN IJ = quartic_IJ(q1), T = quarticinv_pol(IJ), H = quartic_H(q1);
+  GEN T, H = quartic_H(q1, &T);
   GEN z1 = quartic_cubic(q1, 0);
   GEN z2 = quartic_cubic(q2, 0);
   GEN z3 = quartic_cubic(q3, 0);
