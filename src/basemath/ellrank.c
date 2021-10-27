@@ -1092,14 +1092,6 @@ cassels_Qp_solve(GEN q, GEN gam, GEN p)
 static GEN
 to_ZX(GEN a, long v) { return typ(a)==t_INT? scalarpol_shallow(a,v): a; }
 
-/* Q * (D/|disc(Q)|)^(1/6) checking divisibility */
-static GEN
-quartic_fix(GEN D, GEN Q)
-{
-  GEN d = absi_shallow(quartic_disc(Q));
-  return equalii(d, D) ? Q: ZX_shifti(Q, 2);
-}
-
 static GEN
 quartic_findunit(GEN D, GEN q)
 {
@@ -1108,7 +1100,8 @@ quartic_findunit(GEN D, GEN q)
   {
     pari_sp av = avma;
     GEN z = quartic_cubic(q,0);
-    if (signe(QXQ_norm(z,T))) return quartic_fix(D, q);
+    if (signe(QXQ_norm(z,T)))
+      return absequalii(quartic_disc(q), D)? q: ZX_shifti(q, 2);
     set_avma(av);
     q = ZX_translate(RgX_recip(q), gen_1);
   }
