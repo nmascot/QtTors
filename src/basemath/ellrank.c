@@ -681,10 +681,12 @@ static GEN
 quartic_IJ(GEN g)
 {
   GEN a = gel(g, 6), b = gel(g, 5), c = gel(g, 4), d = gel(g, 3), e = gel(g, 2);
-  GEN ae = gmul(a,e), bd = gmul(b,d), c2 = gsqr(c), d2 = gsqr(d), b2 = gsqr(b);
+  GEN ae = gmul(a,e), bd = gmul(b,d), c2 = gsqr(c);
+  /* 12ae - 3bd + c^2 */
   GEN I = gadd(gsub(gmulsg(12, ae), gmulsg(3, bd)), c2);
-  GEN J = gsub(gsub(gmul(gsub(gadd(gmulsg(72, ae), gmulsg(9, bd)), gmulsg(2, c2)), c),
-            gmul(gmulsg(27, a), d2)), gmul(gmulsg(27, b2), e));
+  /* c(72ae + 9bd - 2c^2) - 27ad^2 - 27eb^2*/
+  GEN J = gsub(gmul(c, gsub(gadd(gmulsg(72,ae), gmulsg(9,bd)), gmul2n(c2,1))),
+               gmulsg(27, gadd(gmul(a, gsqr(d)), gmul(gsqr(b), e))));
   return mkvec2(I, J);
 }
 
@@ -692,10 +694,10 @@ static GEN
 quartic_hessiandd(GEN g)
 {
   GEN a = gel(g, 6), b = gel(g, 5), c = gel(g, 4), d = gel(g, 3), e = gel(g, 2);
-  GEN p4 = gsub(gmulsg(3, gsqr(b)), gmul(gmulsg(8, a), c));
-  GEN p3 = gsub(gmul(gmulsg(4, b), c), gmul(gmulsg(24, a), d));
-  GEN p2 = gsub(gsub(gmulsg(4, gsqr(c)), gmul(gmulsg(6, b), d)), gmul(gmulsg(48, a), e));
-  return deg2pol_shallow(gmulgs(p4,12), gmulgs(p3,6), gmulgs(p2,2), 1);
+  GEN a8 = gmul2n(a, 3), p4 = gsub(gmulsg(3, gsqr(b)), gmul(a8, c));
+  GEN p3 = gsub(gmul(b, c), gmul(gmulsg(6, a), d));
+  GEN p2 = gsub(gmulsg(8, gsqr(c)), gmulsg(12, gadd(gmul(b, d), gmul(a8, e))));
+  return deg2pol_shallow(gmulgs(p4,12), gmulgs(p3,24), p2, 1);
 }
 
 static GEN
