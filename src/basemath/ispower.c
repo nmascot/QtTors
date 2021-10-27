@@ -177,9 +177,10 @@ sqrtint(GEN a)
     }
     else
     {
-      a = gfloor(a);
-      if (typ(a) != t_INT) pari_err_TYPE("sqrtint",a);
-      a = sqrti(a);
+      GEN b = gfloor(a);
+      if (typ(b) != t_INT) pari_err_TYPE("sqrtint",a);
+      if (signe(b) < 0) pari_err_DOMAIN("sqrtint", "argument", "<", gen_0,a);
+      a = sqrti(b);
     }
     return gerepileuptoleaf(av, a);
   }

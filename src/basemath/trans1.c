@@ -1797,9 +1797,10 @@ sqrtnint(GEN a, long n)
     }
     else
     {
-      a = gfloor(a);
-      if (typ(a) != t_INT) pari_err_TYPE("sqrtint",a);
-      a = sqrtnint(a, n);
+      GEN b = gfloor(a);
+      if (typ(b) != t_INT) pari_err_TYPE("sqrtint",a);
+      if (signe(b) < 0) pari_err_DOMAIN("sqrtnint", "argument", "<", gen_0,b);
+      a = sqrtnint(b, n);
     }
     return gerepileuptoint(av, a);
   }
