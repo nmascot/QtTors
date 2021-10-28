@@ -867,7 +867,7 @@ quartic_minim_p(GEN P, GEN p, GEN m)
     if (pp==2 && Mod16(gel(P,2))) return mkvec(P);
     scale_x(m, p);
     scale_u(m, p2);
-    return ZX_Z_divexact(ZX_unscale(P, p), sqri(p2));
+    return ZX_unscale_divpow(P, p, 4);
   }
 
   if (dvdii(quartic_lead(P),p) && dvdii(gel(P,5),p))
@@ -909,7 +909,7 @@ quartic_minim_p(GEN P, GEN p, GEN m)
     shift_x(m, beta);
     scale_x(m, p2);
     scale_u(m, mulii(p,p2));
-    return ZX_Z_divexact(ZX_unscale_div(P,p2), sqri(p2));
+    return ZX_unscale_divpow(P, p2, 3);
   }
   else
   { /* quadruple root case */
@@ -926,7 +926,7 @@ quartic_minim_p(GEN P, GEN p, GEN m)
     if (pp==2 && !dvdiu(gel(P,2),16)) return mkvec(P);
     scale_x(m, p);
     scale_u(m, p2);
-    return ZX_Z_divexact(ZX_unscale(P,p), sqri(p2));
+    return ZX_unscale_divpow(P, p, 4);
   }
 }
 
@@ -1304,8 +1304,8 @@ projratpointxz2(GEN pol, long lim, GEN *py)
       GEN U = ZM2_mul(M, mkmat22(p, gel(r, j), gen_0, gen_1));
       if (equali1(content(U)))
       {
-        GEN t = ZX_unscale(ZX_translate(pol, gel(r,j)), p);
-        list = vec_append(list, mkvec4(ZX_Z_divexact(t,p), U, K, C));
+        GEN t = ZX_unscale_div(ZX_translate(pol, gel(r,j)), p);
+        list = vec_append(list, mkvec4(t, U, K, C));
       }
     }
     if (gc_needed(av, 1)) gerepileall(av, 2, &pol, &list);

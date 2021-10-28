@@ -1315,6 +1315,7 @@ GEN     ZX_translate(GEN P, GEN c);
 GEN     ZX_unscale2n(GEN P, long n);
 GEN     ZX_unscale(GEN P, GEN h);
 GEN     ZX_unscale_div(GEN P, GEN h);
+GEN     ZX_unscale_divpow(GEN P, GEN h, long k);
 GEN     ZX_z_unscale(GEN P, long h);
 GEN     ZXQ_powers(GEN x, long l, GEN T);
 GEN     ZXQ_powu(GEN x, ulong n, GEN T);

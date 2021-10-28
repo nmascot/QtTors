@@ -337,7 +337,7 @@ polymini(GEN H, GEN p)
     {
       GEN pe = powiu(p,e);
       /* H <- H(p^e X) / p^(e(6-lambda)) */
-      H = ZX_Z_divexact(ZX_unscale_div(H,pe), powiu(pe,5-lambda));
+      H = ZX_unscale_divpow(H, pe, 6-lambda);
       alpha = (alpha + lambda*e)&1;
       beta += e;
       t60 -= 60*e;
@@ -663,8 +663,7 @@ get_red(struct red *S, struct igusa_p *Ip, GEN polh, GEN p, long alpha, long r)
       S->g = cyclic(indice);
       return indice ? indice: 1;
     case 6:
-      if (alpha == 0) /* H(px) /p^3 */
-        polh = ZX_Z_divexact(ZX_unscale_div(polh,p), sqri(p));
+      if (alpha == 0) polh = ZX_unscale_divpow(polh, p, 3); /* H(px) /p^3 */
       indice = FpX_is_squarefree(FpX_red(polh,p), p)
                ? 0
                : val[6] - val[7] + val[8]/Ip->eps;
@@ -1654,8 +1653,7 @@ litredtp(long alpha, long alpha1, long t60, long t60_1, GEN polh, GEN polh1,
     if (Ip->tt == 6)
     {
       d = val[6] - val[7] + val[8]/Ip->eps;
-      if (Ip->r1 && alpha1 == 0) /* H(px) / p^3 */
-        polh1 = ZX_Z_divexact(ZX_unscale_div(polh1,p), sqri(p));
+      if (Ip->r1 && alpha1 == 0) polh1 = ZX_unscale_divpow(polh1, p, 3);
       if (FpX_is_squarefree(FpX_red(polh1,p),p))
       { indice = 0; condp = 3-Ip->r2/6; }
       else
@@ -1665,8 +1663,7 @@ litredtp(long alpha, long alpha1, long t60, long t60_1, GEN polh, GEN polh1,
     { /* Ip->tt == 7 */
       long d1;
       d = val[6] - 3*val[3] + val[8]/Ip->eps;
-      if (t60_1 == 60) /* H(px) / p^3 */
-        polh1 = ZX_Z_divexact(ZX_unscale_div(polh1,p), sqri(p));
+      if (t60_1 == 60) polh1 = ZX_unscale_divpow(polh1, p, 3);
       d1 = minss(val[7]-3*val[3],d/2);
       if (d == 2*d1) indice = d1;
       else

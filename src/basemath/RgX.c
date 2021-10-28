@@ -398,6 +398,21 @@ ZX_unscale_div(GEN P, GEN h)
   }
   return Q;
 }
+/* P(h*X) / h^k, assuming the result is a ZX */
+GEN
+ZX_unscale_divpow(GEN P, GEN h, long k)
+{
+  long i, j, l = lg(P);
+  GEN H, Q = cgetg(l, t_POL);
+  Q[1] = P[1]; if (l == 2) return Q;
+  H = gpowers(h, maxss(k, l - 3 - k));
+  for (i = 2, j = k+1; j > 1 && i < l; i++)
+    gel(Q, i) = diviiexact(gel(P, i), gel(H, j--));
+  if (i == l) return Q;
+  gel(Q, i) = gel(P, i); i++;
+  for (j = 2; i < l; i++) gel(Q, i) = mulii(gel(P, i), gel(H, j++));
+  return Q;
+}
 
 GEN
 RgXV_unscale(GEN v, GEN h)

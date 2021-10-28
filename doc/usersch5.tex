@@ -9735,6 +9735,10 @@ $P(x<<n)$. Not memory clean.
 \fun{GEN}{ZX_unscale_div}{GEN P, GEN h} given a \kbd{ZX} $P$ and a \typ{INT} $h$
 such that $h \mid P(0)$, returns $P(hx)/h$. Not memory clean.
 
+\fun{GEN}{ZX_unscale_divpow}{GEN P, GEN h, long k} given a \kbd{ZX} $P$,
+a \typ{INT} $h$ and $k > 0$, returns $P(hx)/h^k$ assuming the result has
+integral coefficients. Not memory clean.
+
 \fun{GEN}{ZX_eval1}{GEN P} returns the integer $P(1)$.
 
 \fun{GEN}{ZX_graeffe}{GEN p} returns the Graeffe transform of $p$, i.e. the
