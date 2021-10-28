@@ -1590,19 +1590,23 @@ c_mfeisen(long n, long d, GEN F)
   return gerepilecopy(av, v);
 }
 
+/* N^k * (D * B_k)(x/N), set D = denom(B_k) */
+static GEN
+bern_init(long N, long k, GEN *pD)
+{ return ZX_rescale(Q_remove_denom(bernpol(k, 0), pD), utoi(N)); }
+
 /* L(chi_D, 1-k) */
 static GEN
 lfunquadneg_naive(long D, long k)
 {
-  GEN B, dS, S = gen_0;
+  GEN B, dS, S;
   long r, N = labs(D);
   pari_sp av;
   if (k == 1 && N == 1) return gneg(ghalf);
-  /* B = N^k * denom(B) * B(x/N) */
-  B = ZX_rescale(Q_remove_denom(bernpol(k, 0), &dS), utoi(N));
+  B = bern_init(N, k, &dS);
   dS = mul_denom(dS, stoi(-N*k));
   av = avma;
-  for (r = 0; r < N; r++)
+  for (r = 0, S = gen_0; r < N; r++)
   {
     long c = kross(D, r);
     if (c)
@@ -9143,10 +9147,10 @@ charLFwtk(long N, long k, GEN CHI, long ord, long t)
 
   if (k == 1) return charLFwt1(N, CHI, ord, t);
   if (N == 1 && t == 1) return gdivgs(bernfrac(k),-2*k);
-  S = gen_0; vt = varn(mfcharpol(CHI));
-  P = ZX_rescale(Q_remove_denom(bernpol(k,0), &dS), utoi(N));
+  vt = varn(mfcharpol(CHI));
+  P = bern_init(N, k, &dS);
   dS = mul_denom(dS, stoi(-2*N*k));
-  for (r = 1; r < N; r++)
+  for (r = 1, S = gen_0; r < N; r++)
   { /* S += P(r)*chi(r) */
     long a;
     GEN C;
@@ -9162,21 +9166,21 @@ charLFwtk(long N, long k, GEN CHI, long ord, long t)
 static ulong
 charLFwtk_Fl(long k, GEN CHIvec, GEN vz, ulong p)
 {
-  GEN P;
+  GEN P, dS;
   long r, m;
-  ulong S;
+  ulong S, d;
   if (k == 1) return charLFwt1_Fl(CHIvec, vz, p);
   m = CHIvec_N(CHIvec);
   if (m == 1) return Rg_to_Fl(gdivgs(bernfrac(k),-2*k), p);
-  S = 0;
-  P = RgX_to_Flx(RgX_rescale(bernpol(k,0), utoi(m)), p);
-  for (r = 1; r < m; r++)
+  P = ZX_to_Flx(bern_init(m, k, &dS), p);
+  for (r = 1, S = 0; r < m; r++)
   { /* S += P(r)*chi(r) */
     long a = mycharexpo(CHIvec,r);
     if (a < 0) continue;
     S = Fl_add(S, Qab_Czeta_Fl(a, vz, Flx_eval(P,r,p), p), p);
   }
-  return Fl_div(Fl_neg(S,p), 2*k*m, p);
+  d = (2 * k * m) % p; if (dS) d = Fl_mul(d, umodiu(dS, p), p);
+  return Fl_div(Fl_neg(S,p), d, p);
 }
 
 static GEN
