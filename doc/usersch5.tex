@@ -9721,6 +9721,10 @@ its leading coefficient. Neither memory-clean nor suitable for
 \fun{GEN}{ZX_translate}{GEN P, GEN c} assume $P$ is a \kbd{ZX} and $c$ an
 integer. Returns $P(X + c)$ (optimized for $c = \pm 1$).
 
+\fun{GEN}{ZX_affine}{GEN P, GEN a, GEN b} $P$ is a \kbd{ZX}, $a$ and $b$
+are \typ{INT}. Return $P(aX + b)$ (optimized for $b = \pm 1$). Not memory
+clean.
+
 \fun{GEN}{ZX_Z_eval}{GEN P,GEN x} evaluate the \kbd{ZX} $P$ at the integer $x$.
 
 \fun{GEN}{ZX_unscale}{GEN P, GEN h} given a \kbd{ZX} $P$ and a \typ{INT} $h$,

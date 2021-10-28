@@ -2480,7 +2480,7 @@ ZX_Uspensky(GEN P, GEN ab, long flag, long bitprec)
     else
     { P = ZX_rescale(P, d); ad = gmul(a, d); bd = gmul(b, d); }
     diff = subii(bd, ad);
-    P = ZX_unscale(ZX_translate(P, ad), diff);
+    P = ZX_affine(P, diff, ad);
     res = usp(P, flag, bitprec);
     if (flag <= 1)
     {

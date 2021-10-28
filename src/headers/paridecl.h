@@ -1480,6 +1480,7 @@ GEN     ZX_Z_eval(GEN x, GEN y);
 GEN     ZX_Z_mul(GEN y,GEN x);
 GEN     ZX_Z_sub(GEN y, GEN x);
 GEN     ZX_add(GEN x, GEN y);
+GEN     ZX_affine(GEN P, GEN a, GEN b);
 GEN     ZX_copy(GEN x);
 GEN     ZX_deriv(GEN x);
 GEN     ZX_div_by_X_1(GEN a, GEN *r);

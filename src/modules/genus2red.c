@@ -389,7 +389,7 @@ polymini(GEN H, GEN p)
       rac = factmz(RgX_mulXn(Hp, -3), p, &maxord);
       if (maxord == 3)
       {
-        GEN T = ZX_unscale(ZX_translate(H,rac),p); /* H(rac + px) */
+        GEN T = ZX_affine(H, p, rac); /* H(rac + px) */
         if (ZX_pval(T,p)>= 3)
         {
           H = RgX_Rg_div(T, powiu(p,3));

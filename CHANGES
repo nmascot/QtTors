@@ -159,7 +159,8 @@ LGr 47- allow endpoints in solve() to by +oo or -oo
 BA  53- [libpari] Zp_inv, Zp_invlift, Zp_div, Zp_log, Zp_exp
 BA  54- [libpari] FpXn_div, Flxn_div, RgXn_div, RgXn_div_i, FpXQXn_div, F2xn_div
     55- [libpari] maxomegau, maxomegaoddu, ZV_snf_rank, ZV_snf_rank_u,
-        zv_snf_rank, F3c_to_ZC, F3c_to_mod, F3m_to_mod, ZX_unscale_divpow
+        zv_snf_rank, F3c_to_ZC, F3c_to_mod, F3m_to_mod, ZX_unscale_divpow,
+        ZX_affine
     56- new GP function snfrank
 HC  57- allow lngamma(t_PADIC of negative valuation)
 

@@ -459,12 +459,6 @@ FpX_issquare(GEN q, GEN p)
 }
 
 static GEN
-ZX_affine(GEN P, GEN a, GEN b)
-{
-  return ZX_unscale(ZX_translate(P, b), a);
-}
-
-static GEN
 hyperell_red(GEN q, GEN p)
 {
   GEN Q;
@@ -1332,8 +1326,7 @@ polrootsmodpn(GEN pol, GEN p)
 
     if (e >= vd) { i++; continue; }
     pe = gel(P, e);
-    pol2 = ZX_unscale(ZX_translate(pol, ro), pe);
-    (void)ZX_pvalrem(pol2, p, &pol2);
+    (void)ZX_pvalrem(ZX_affine(pol, pe, ro), p, &pol2);
     r = FpX_roots(pol2, p); l = lg(r);
     if (l == 1) { i++; continue; }
     for (j = 1; j < l; j++)
