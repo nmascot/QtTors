@@ -447,7 +447,11 @@ ZX_translate(GEN P, GEN c)
 
 /* P(ax + b) */
 GEN
-ZX_affine(GEN P, GEN a, GEN b) { return ZX_unscale(ZX_translate(P, b), a); }
+ZX_affine(GEN P, GEN a, GEN b)
+{
+  if (signe(b)) P = ZX_translate(P, b);
+  return ZX_unscale(P, a);
+}
 
 GEN
 ZX_Z_eval(GEN x, GEN y)
