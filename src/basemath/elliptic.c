@@ -4836,7 +4836,7 @@ ellminimalbmodel(GEN e, GEN *pv)
   pari_sp av = avma;
   GEN f, a1, a3;
 
-  checkell(e); f = ellminimalmodel_i(e, pv, NULL);
+  checkell(e); f = ellminimalmodel(e, pv);
   a1 = ell_get_a1(f);
   a3 = ell_get_a3(f);
   if (!signe(a1) && !signe(a3))
