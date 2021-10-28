@@ -730,48 +730,38 @@ static GEN
 quartic_lead(GEN P)
 { return degpol(P) < 4 ? gen_0: gel(P, 6); }
 
-/*
- Based on ECLIB, minim.cc by J.E. Cremona, and the paper
- Minimisation and reduction of 2-, 3- and 4-coverings of elliptic curves
- J.E. Cremona, T.A. Fisher, AND M. Stoll
- https://arxiv.org/pdf/0908.1741.pdf
-*/
-
+/* Based on ECLIB, minim.cc by J.E. Cremona, and "Minimisation and reduction of
+ * 2-, 3- and 4-coverings of elliptic curves", J.E. Cremona, T.A. Fisher, and
+ * M. Stoll; https://arxiv.org/pdf/0908.1741.pdf */
 static GEN
 quartic_root_p(GEN P0, GEN p)
 {
-  GEN P = FpX_red(P0, p);
-  GEN e = gel(P,2), d = gel(P,3), c = gel(P,4), b = gel(P,5), a = quartic_lead(P);
-  GEN b2, ac, p_seminv;
+  GEN P = FpX_red(P0, p), e = gel(P,2), d = gel(P,3), c = gel(P,4);
+  GEN b2, ac, p_seminv, b = gel(P,5), a = quartic_lead(P);
   ulong pp = itou_or_0(p);
+
   if (!signe(e) && !signe(d)) return gen_0;
   if (pp == 2) return gen_1;
-  if (pp == 3)
-  {
-    if (!signe(a))  return Fp_neg(mulii(b,e),p);
-    else            return Fp_neg(mulii(a,d),p);
-  }
-  b2 = sqri(b);
-  ac = mulii(a,c);
+  if (pp == 3) return Fp_neg(signe(a)? mulii(a,d): mulii(b,e), p);
+  b2 = sqri(b); ac = mulii(a,c);
   p_seminv = Fp_sub(muliu(b2,3),shifti(ac,3), p);
   if (signe(p_seminv)==0) /* quadruple root */
     return Fp_div(negi(b),shifti(a,2),p);
-  else /* triple root only */
+  /* triple root only */
+  if (!signe(a)) /* fourth root is at infinity */
+    return Fp_div(Fp_neg(c,p), muliu(b,3), p);
+  else
   {
-    if (!signe(a)) /* fourth root is at infinity */
-      return Fp_div(Fp_neg(c,p), muliu(b,3), p);
-    else
-    {
-      GEN t = Fp_inv(shifti(mulii(a,p_seminv),2), p);
-      GEN r_seminv = subii(addii(mulii(b,b2), shifti(mulii(sqri(a),d),3)),
-                           shifti(mulii(ac,b),2));
-      return Fp_mul(Fp_sub(muliu(r_seminv,3), mulii(b,p_seminv),p),t,p);
-    }
+    GEN t = Fp_inv(shifti(mulii(a,p_seminv),2), p);
+    GEN r_seminv = subii(addii(mulii(b,b2), shifti(mulii(sqri(a),d),3)),
+                         shifti(mulii(ac,b),2));
+    return Fp_mul(Fp_sub(muliu(r_seminv,3), mulii(b,p_seminv),p),t,p);
   }
 }
 
+/* M *= [0,1; -1,0] */
 static void
-m_invert(GEN M) /* multiples by [0,1; -1,0] */
+m_invert(GEN M)
 {
   GEN m = gel(M,2);
   GEN A = gcoeff(m,1,1), B = gcoeff(m,1,2);
@@ -781,8 +771,7 @@ m_invert(GEN M) /* multiples by [0,1; -1,0] */
 }
 
 static void
-scale_u(GEN M, GEN u)
-{ gel(M,1) = mulii(u, gel(M,1)); }
+scale_u(GEN M, GEN u) { gel(M,1) = mulii(u, gel(M,1)); }
 
 static void
 scale_x(GEN m, GEN c)
@@ -814,7 +803,7 @@ ZX_invtranslate(GEN P, GEN c)
 
 static GEN
 ZX_invert(GEN P)
-{ return RgX_unscale(RgX_recip_shallow(P),gen_m1); }
+{ return ZX_z_unscale(RgX_recip_shallow(P), -1); }
 
 /* assuming p^4|I, p^6|J (or stronger conditions when p=2 or p=3)
  * returns an equivalent quartic with invariants divided by p^4, p^6;
