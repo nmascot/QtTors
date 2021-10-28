@@ -58,7 +58,7 @@
 #define __Fp_POW_BARRETT_LIMIT           127
 #define __Fp_POW_REDC_LIMIT              17
 #define __GCD_HALFGCD_LIMIT              -1
-#define __HALFGCD_LIMIT                  3
+#define __HALFGCD_LIMIT                  12
 #define __INVMOD_GMP_LIMIT               3
 #define __INVNEWTON_LIMIT                75
 #define __LOGAGMCX_LIMIT                 22

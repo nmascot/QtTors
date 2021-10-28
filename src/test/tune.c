@@ -523,7 +523,7 @@ static tune_param param[] = {
 {PARI,var(SQRI_KARATSUBA_LIMIT),   t_INT, 4,0, speed_sqri,0,0,&SQRI_FFT_LIMIT},
 {PARI,var(MULII_FFT_LIMIT),        t_INT, 500,0, speed_mulii,0.02},
 {PARI,var(SQRI_FFT_LIMIT),         t_INT, 500,0, speed_sqri,0.02},
-{0,   var(HALFGCD_LIMIT),          t_INT, 3,0, speed_halfgcdii,0.02},
+{0,   var(HALFGCD_LIMIT),          t_INT, 6,0, speed_halfgcdii,0.02},
 {PARI,var(EXTGCD_HALFGCD_LIMIT),   t_INT, 5,0, speed_extgcdii,0.02},
 {PARI,var(GCD_HALFGCD_LIMIT),      t_INT, 5,0, speed_gcdii,0.02},
 {0,   var(MULRR_MULII_LIMIT),      t_REAL,4,0, speed_mulrr},
