@@ -390,17 +390,18 @@ polymini(GEN H, GEN p)
       if (maxord == 3)
       {
         GEN T = ZX_affine(H, p, rac); /* H(rac + px) */
-        if (ZX_pval(T,p)>= 3)
+        if (ZX_pval(T,p) >= 3)
         {
-          H = RgX_Rg_div(T, powiu(p,3));
+          H = ZX_Z_divexact(T, powiu(p,3));
           alpha = 0; beta++;
           t60 = theta_j(H,p,3);
           if (!t60)
           {
-            Hp = FpX_red(H, p);
-            if (!signe(FpX_disc(Hp,p)))
+            GEN v = FpX_factor_squarefree(FpX_red(H,p), p);
+            long m = lg(v)-1; /* maximal multiplicity */
+            if (m > 1)
             {
-              rac = FpX_oneroot(Hp, p);
+              rac = FpX_oneroot(gel(v,m), p); /* v[m] is linear */
               t60 = theta_j(ZX_translate(H,rac),p,3);
             }
           }
