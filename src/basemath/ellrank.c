@@ -816,28 +816,24 @@ shift_y(GEN m, GEN a)
 
 static GEN
 ZX_invtranslate(GEN P, GEN c)
-{
-  return RgX_recip_shallow(ZX_translate(RgX_recip_shallow(P), c));
-}
+{ return RgX_recip_shallow(ZX_translate(RgX_recip_shallow(P), c)); }
 
 static GEN
 ZX_invert(GEN P)
-{
-  return RgX_unscale(RgX_recip_shallow(P),gen_m1);
-}
+{ return RgX_unscale(RgX_recip_shallow(P),gen_m1); }
 
+/* assuming p^4|I, p^6|J (or stronger conditions when p=2 or p=3)
+ * returns an equivalent quartic with invariants divided by p^4, p^6;
+ * m holds the transformation matrix, must be initialized (say with identity)
+ * returns success, can be 0 only for p=2 */
 static GEN
 quartic_minim_p(GEN P, GEN p, GEN m)
-/* assuming p^4|I, p^6|J, (or stronger conditions when p=2 or p=3)
-   returns an equivalent quartic with invariants divided by p^4, p^6;
-   m holds the transformation matrix, must be initialized (say with identity)
-   returns success, can be 0 only for p=2 */
 {
   ulong pp = itou_or_0(p);
   long v = ZX_pval(P, p);
-  GEN p2 = sqri(p);
-  if (v >= 2) /* trivial case, all coeffs divisible by p^2 */
-  {
+  GEN a, p2 = sqri(p);
+  if (v >= 2)
+  { /* trivial case, all coeffs divisible by p^2 */
     scale_u(m, p);
     return  ZX_Z_divexact(P, p2);
   }
@@ -846,22 +842,18 @@ quartic_minim_p(GEN P, GEN p, GEN m)
   {
     GEN P0 = ZX_Z_divexact(P, p);
     GEN a0 = quartic_lead(P0), b0 = gel(P0,5), d0 = gel(P0,3), e0 = gel(P0,2);
-    if (dvdii(a0,p) && dvdii(b0,p))  /* mult root is at infty move to 0 */
-    {
+    if (dvdii(a0,p) && dvdii(b0,p))
+    { /* mult root is at infty move to 0 */
       m_invert(m);
       P = ZX_invert(P);
     }
-    else
-    {
-      if (!dvdii(e0,p) || !dvdii(d0,p)) /* mult root is finite and not zero */
-        /* find it and shift it to 0 */
-      {
-        GEN alpha = quartic_root_p(P0,p);
-        P = ZX_translate(P,alpha);
-        shift_x(m, alpha);
-        if (!dvdii(gel(P,2),p2) || !dvdii(gel(P,3),p2) || !dvdii(gel(P,4),p2))
-          pari_err_BUG("quartic_minim_p");
-      }
+    else if (!dvdii(e0,p) || !dvdii(d0,p))
+    { /* mult root is finite and not zero: find it and shift it to 0 */
+      GEN alpha = quartic_root_p(P0,p);
+      P = ZX_translate(P,alpha);
+      shift_x(m, alpha);
+      if (!dvdii(gel(P,2),p2) || !dvdii(gel(P,3),p2) || !dvdii(gel(P,4),p2))
+        pari_err_BUG("quartic_minim_p");
     }
     a0 = diviiexact(quartic_lead(P),p);
     b0 = diviiexact(gel(P,5),p);
@@ -871,32 +863,25 @@ quartic_minim_p(GEN P, GEN p, GEN m)
       P = ZX_invtranslate(P, gamma);
       shift_y(m, gamma);
     }
-    if (pp==2)
-    {
-      if (!dvdiu(gel(P,2),16))
-        /* failure (cannot happen if 2^6|I, 2^7|J or 2^5|I & Q_2-soluble) */
-        return mkvec(P);
-    }
+    /* failure (cannot happen if 2^6|I, 2^7|J or 2^5|I & Q_2-soluble) */
+    if (pp==2 && Mod16(gel(P,2))) return mkvec(P);
     scale_x(m, p);
     scale_u(m, p2);
     return ZX_Z_divexact(ZX_unscale(P, p), sqri(p2));
   }
 
-  if (dvdii(quartic_lead(P),p) && dvdii(gel(P,5),p)) /* mult root is at infty,  move it to 0 */
-  {
+  if (dvdii(quartic_lead(P),p) && dvdii(gel(P,5),p))
+  { /* mult root is at infty,  move it to 0 */
     m_invert(m);
     P = ZX_invert(P);
   }
-  else
-  {
-    if (!dvdii(gel(P,2),p) || !dvdii(gel(P,3),p)) /* mult root finite and not zero */
-    {
-      GEN alpha = quartic_root_p(P,p);
-      P = ZX_translate(P, alpha);
-      shift_x(m, alpha);
-      if (!dvdii(gel(P,4),p) || !dvdii(gel(P,3),p) || !dvdii(gel(P,2),p))
-        pari_err_BUG("quartic_minim_p");
-    }
+  else if (!dvdii(gel(P,2),p) || !dvdii(gel(P,3),p))
+  { /* mult root finite and not zero */
+    GEN alpha = quartic_root_p(P,p);
+    P = ZX_translate(P, alpha);
+    shift_x(m, alpha);
+    if (!dvdii(gel(P,4),p) || !dvdii(gel(P,3),p) || !dvdii(gel(P,2),p))
+      pari_err_BUG("quartic_minim_p");
   }
   if (!dvdii(quartic_lead(P), p) && !dvdii(gel(P,5), p))
   {
@@ -904,14 +889,15 @@ quartic_minim_p(GEN P, GEN p, GEN m)
     P = ZX_invtranslate(P, gamma);
     shift_y(m, gamma);
   }
-  if (dvdii(quartic_lead(P),p)) /* triple root case */
-  {
-    GEN beta = gen_0, p3;
-    GEN a = quartic_lead(P), b = gel(P,5), c = gel(P,4), d = gel(P,3), e = gel(P,2);
+  a = quartic_lead(P);
+  if (dvdii(a,p))
+  { /* triple root */
+    GEN beta = gen_0;
+    GEN b = gel(P,5), c = gel(P,4), d = gel(P,3), e = gel(P,2);
     if (pp==3)
     {
-      long vpi = Z_lval(addii(subii(muliu(mulii(a,e),12),muliu(mulii(b,d),3)),sqri(c)),3);
-      GEN tp = vpi==4 ? diviuexact(negi(e),27): diviuexact(negi(c),9);
+      GEN I = addii(subii(muliu(mulii(a,e),12),muliu(mulii(b,d),3)),sqri(c));
+      GEN tp = Z_lval(I,3)==4? diviuexact(negi(e),27): diviuexact(negi(c),9);
       if (!dvdiu(tp,3)) beta = muliu(Fp_div(tp,b,p), 3);
     }
     else
@@ -919,15 +905,14 @@ quartic_minim_p(GEN P, GEN p, GEN m)
       GEN tp = diviiexact(negi(c),p);
       if (!dvdii(tp,p)) beta = mulii(p, Fp_div(tp, muliu(b,3), p));
     }
-    p3 = mulii(p,p2);
     P = ZX_translate(P, beta);
     shift_x(m, beta);
     scale_x(m, p2);
-    scale_u(m, p3);
-    return ZX_Z_divexact(ZX_unscale(P,p2),sqri(p3));
+    scale_u(m, mulii(p,p2));
+    return ZX_Z_divexact(ZX_unscale_div(P,p2), sqri(p2));
   }
-  else  /* quadruple root case */
-  {
+  else
+  { /* quadruple root case */
     if (pp==3)
     {
       GEN b0 = diviuexact(gel(P,5),3);
@@ -938,11 +923,7 @@ quartic_minim_p(GEN P, GEN p, GEN m)
         shift_x(m,beta);
       }
     }
-    if (pp==2)
-    {
-      if (!dvdiu(gel(P,2),16))
-        return mkvec(P);
-    }
+    if (pp==2 && !dvdiu(gel(P,2),16)) return mkvec(P);
     scale_x(m, p);
     scale_u(m, p2);
     return ZX_Z_divexact(ZX_unscale(P,p), sqri(p2));
