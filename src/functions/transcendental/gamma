@@ -4,9 +4,20 @@ C-Name: ggamma
 Prototype: Gp
 Help: gamma(s): gamma function at s, a complex or p-adic number, or a series.
 Doc: For $s$ a complex number, evaluates Euler's gamma
- function \sidx{gamma-function}
- $$\Gamma(s)=\int_0^\infty t^{s-1}\exp(-t)\,dt.$$
- Error if $s$ is a nonpositive integer, where $\Gamma$ has a pole.
+ function\sidx{gamma-function}, which is the analytic continuation of
+ $$\Gamma(s)=\int_0^\infty t^{s-1}\exp(-t)\,dt,\quad \Re(s) > 0.$$
+ Error if $s$ is a nonpositive integer, where $\Gamma$ has a (simple) pole.
+ \bprog
+ ? gamma(5)  \\ @com $\Gamma(n) = (n-1)!$ for a positive integer $n$
+ %1 = 24.000000000000000000000000000000000000
+ ? gamma(0)
+  ***   at top-level: gamma(0)
+  ***                 ^--------
+  *** gamma: domain error in gamma: argument = nonpositive integer
+
+ ? gamma(x + O(x^3))
+ %2 = x^-1 - 0.57721566490153286060651209008240243104 + O(x)
+ @eprog
 
  For $s$ a \typ{PADIC}, evaluates the Morita gamma function at $s$, that
  is the unique continuous $p$-adic function on the $p$-adic integers
