@@ -1086,8 +1086,8 @@ casselspairing(GEN FD, GEN q1, GEN q2, GEN q3)
   GEN z2 = quartic_cubic(q2, 0);
   GEN z3 = quartic_cubic(q3, 0);
   GEN m = to_ZX(enfsqrt(T, QXQ_mul(QX_mul(z1,z2),z3,T)), 0);
-  GEN Hm = RgXQ_mul(QXQ_div(m, z1, T), H, T);
-  GEN gam = degpol(Hm) < 2 ? pol_0(1): to_ZX(Q_remove_denom(gel(Hm,4), NULL),1);
+  GEN Hm = RgXQ_mul(QXQ_div(m, z1, T), H, T); /* deg(Hm) >= 2 */
+  GEN gam = to_ZX(Q_remove_denom(gel(Hm,4), NULL),1);
   GEN a = leading_coeff(q2);
   GEN Fa = gel(absZ_factor(a),1);
   GEN F = ZV_sort_uniq(shallowconcat1(mkvec3(mkcol4s(2,3,5,7), Fa, FD)));
