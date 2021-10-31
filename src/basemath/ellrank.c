@@ -1914,7 +1914,7 @@ liftselmer_cover(GEN b, GEN expo, GEN LS2, GEN pol, GEN K)
   U = redquadric(b, q2, pol, QXQ_div(zc, polprime, pol));
   q2 = qf_apply_RgM(q2, U);
   newb = RgV_RgM_mul(b, U);
-  param = Q_primpart(qfparam(q2, qfsolve(q2), 0));
+  param = Q_primpart(qfparam(q2, qfsolve(q2), 1));
   param = RgM_to_RgXV_reverse(shallowtrans(param), 0);
   q1 = RgM_neg(tracematrix(QXQ_mul(zc, ttheta, pol), newb, pol));
   q1 = Q_remove_denom(qfeval(q1, param), &den);
@@ -1970,7 +1970,7 @@ liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry, GEN *
     q2 = qf_apply_RgM(q2, U);
     newb = RgV_RgM_mul(b, U);
 
-    param = Q_primpart(qfparam(q2, qfsolve(q2), 0));
+    param = Q_primpart(qfparam(q2, qfsolve(q2), 1));
     param = RgM_to_RgXV_reverse(shallowtrans(param), 0);
     q1 = RgM_neg(tracematrix(QXQ_mul(zc, ttheta, pol), newb, pol));
     q1 = Q_remove_denom(qfeval(q1, param), &den);
