@@ -1011,29 +1011,41 @@ enfsqrt(GEN T, GEN P)
   return liftpol(chinese1(vecnfsqrtmod(F,P)));
 }
 
-/* quartic q, quadratic g. There exist a real r s.t. q(r) > 0. Return sign(r) */
+/* quartic q, (at most) quadratic g. There exist a real r s.t. q(r) > 0.
+ * Return sign(r) < 0 */
+static int
+cassels_oo_solve_i(GEN q, GEN g)
+{
+  long dg = degpol(g), sg = signe(gel(g,dg+2));
+  GEN AB, t, u, D, a, b, c;
+
+  if (dg == 0) return sg < 0;
+  if (signe(leading_coeff(q)) > 0) return sg < 0;
+  c = gel(g,2);
+  if (signe(gel(q,2)) > 0) return sg < 0;
+  b = gel(g,3);
+  if (dg == 1) /* g = bx + c */
+  {
+    t = gdiv(negi(c), b);
+    AB = sg < 0? mkvec2(t, mkoo()): mkvec2(mkmoo(), t);
+    /* AB = interval where g is negative */
+    return ZX_sturmpart(q, AB)? 1: 0;
+  }
+  a = gel(g,4); /* g = ax^2 + bx + c */
+  D = subii(sqri(b), shifti(mulii(a,c), 2));
+  if (signe(D) <= 0) return sg < 0;
+  t = gdiv(negi(b), shifti(a,1));
+  u = gdiv(D, sqrti(shifti(a,1))); /* > 0 */
+  /* now g(x+t) = a(x^2 - u); check if q(x+t) vanishes between \pm sqrt(u);
+   * g has sign -sg there */
+  q = Q_remove_denom(RgX_translate(q, t), NULL);
+  if (ZX_sturmpart(ZX_graeffe(q), mkvec2(gen_0, u))
+      || signe(gel(q,2)) > 0) sg = -sg;
+  return sg < 0;
+}
 static int
 cassels_oo_solve(GEN q, GEN g)
-{
-  pari_sp av = avma;
-  GEN R;
-  long i, lR;
-
-  if (signe(leading_coeff(q)) > 0) return signe(leading_coeff(g));
-  R = realroots(RgX_deriv(q), NULL, BIGDEFAULTPREC); lR = lg(R);
-  for (i=1; i<lR; i++)
-  {
-    GEN r = gel(R,i);
-    if (signe(poleval(q, r)) > 0)
-    {
-      long s = signe(poleval(g, r));
-      if (s) return gc_int(av, s); /* FIXME: use rational arithmetic */
-      pari_err_BUG("cassels_oo_solve, loss of accuracy");
-    }
-  }
-  pari_err_BUG("cassels_oo_solve, q not soluble over R");
-  return 0;/*LCOV_EXCL_LINE*/
-}
+{ pari_sp av = avma; return gc_int(av, cassels_oo_solve_i(q, g)); }
 
 static GEN
 cassels_Qp_solve(GEN q, GEN gam, GEN p)
@@ -1091,7 +1103,7 @@ casselspairing(GEN FD, GEN q1, GEN q2, GEN q3)
   GEN a = leading_coeff(q2);
   GEN Fa = gel(absZ_factor(a),1);
   GEN F = ZV_sort_uniq(shallowconcat1(mkvec3(mkcol4s(2,3,5,7), Fa, FD)));
-  long e = signe(a) <= 0 && cassels_oo_solve(q1, gam) < 0 ;
+  long e = signe(a) <= 0 && cassels_oo_solve(q1, gam) ;
   long i, lF = lg(F);
   for (i = 1; i< lF; i++)
   {
