@@ -1019,7 +1019,8 @@ cassels_oo_solve_i(GEN q, GEN g)
   long dg = degpol(g), s = signe(gel(g,dg+2));
   GEN D, a, b, c;
 
-  if (dg == 0 || signe(gel(q,2)) > 0 || signe(leading_coeff(q)) > 0) return s;
+  if (dg == 0 || signe(leading_coeff(q)) > 0) return s;
+  if (signe(gel(q,2)) > 0) return signe(gel(g,2));
   c = gel(g,2); b = gel(g,3);
   if (dg == 1) /* g = bx + c */
   {
