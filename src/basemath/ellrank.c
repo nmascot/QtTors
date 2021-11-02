@@ -1016,30 +1016,28 @@ enfsqrt(GEN T, GEN P)
 static int
 cassels_oo_solve_i(GEN q, GEN g)
 {
-  long dg = degpol(g), sg = signe(gel(g,dg+2));
-  GEN AB, t, u, D, a2, a, b, c;
+  long dg = degpol(g), s = signe(gel(g,dg+2));
+  GEN D, a, b, c;
 
-  if (dg == 0 || signe(gel(q,2)) > 0 || signe(leading_coeff(q)) > 0) return sg;
+  if (dg == 0 || signe(gel(q,2)) > 0 || signe(leading_coeff(q)) > 0) return s;
   c = gel(g,2); b = gel(g,3);
   if (dg == 1) /* g = bx + c */
   {
-    t = gdiv(negi(c), b);
-    AB = sg < 0? mkvec2(t, mkoo()): mkvec2(mkmoo(), t);
-    /* AB = interval where g is negative: if q has a root there, we take
-     * r in AB. Else it has the sign of q(0) (< 0) on AB */
-    return ZX_sturmpart(q, AB)? -1: 1;
+    GEN t = gdiv(negi(c), b), I = s < 0? mkvec2(t, mkoo()): mkvec2(mkmoo(), t);
+    /* I = interval where g is negative: if q has a root there, we take
+     * r in AB. Else it has the sign of q(0) (< 0) on I*/
+    return ZX_sturmpart(q, I)? -1: 1;
   }
-  a = gel(g,4); a2 = shifti(a,1); /* g = ax^2 + bx + c */
-  D = subii(sqri(b), shifti(mulii(a,c), 2));
-  if (signe(D) <= 0) return sg; /* sign(g) = sg is constant */
-  t = gdiv(negi(b), a2); u = gdiv(D, sqri(a2)); /* > 0 */
-  /* Now g(x+t) = a(x^2 - u); g has sign -sg in I=[-sqrt(u),sqrt(u)] and sg
-   * elsewhere. Check if q(x+t) vanishes in I <=> if Graeffe(q(x+t)) vanishes
-   * on I. If so or if q(t) > 0 we take r in there; else r is outside of I */
-  q = Q_remove_denom(RgX_translate(q, t), NULL);
-  if (signe(gel(q,2)) > 0 || ZX_sturmpart(ZX_graeffe(q), mkvec2(gen_0, u)))
-     sg = -sg;
-  return sg;
+  a = gel(g,4); D = subii(sqri(b), shifti(mulii(a,c), 2)); /* g = ax^2+bx+c */
+  if (signe(D) <= 0) return s; /* sign(g) = s is constant */
+  /* Rescale q and g: x->(x - b)/2a; roots of new g are \pm sqrt(D) */
+  q = ZX_translate(ZX_rescale(q, shifti(a,1)), negi(b));
+  /* Now g has sign -s in I=[-sqrt(D),sqrt(D)] and s elsewhere.
+   * Check if q vanishes in I <=> Graeffe(q) vanishes on [0,D].
+   * If so or if q(0) > 0 we take r in there; else r is outside of I */
+  if (signe(gel(q,2)) > 0 || ZX_sturmpart(ZX_graeffe(q), mkvec2(gen_0, D)))
+    s = -s;
+  return s;
 }
 static int
 cassels_oo_solve(GEN q, GEN g)
