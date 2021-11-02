@@ -1011,16 +1011,15 @@ enfsqrt(GEN T, GEN P)
   return liftpol(chinese1(vecnfsqrtmod(F,P)));
 }
 
-/* quartic q, (at most) quadratic g. There exist a real r s.t. q(r) > 0.
- * Return true iff sign(r) < 0 */
+/* Quartic q, at most quadratic g. There exist a real r s.t. q(r) > 0 and
+ * g(r) != 0. Return sign(g(r)) */
 static int
 cassels_oo_solve_i(GEN q, GEN g)
 {
   long dg = degpol(g), sg = signe(gel(g,dg+2));
   GEN AB, t, u, D, a2, a, b, c;
 
-  if (dg == 0 || signe(gel(q,2)) > 0 || signe(leading_coeff(q)) > 0)
-    return sg < 0;
+  if (dg == 0 || signe(gel(q,2)) > 0 || signe(leading_coeff(q)) > 0) return sg;
   c = gel(g,2); b = gel(g,3);
   if (dg == 1) /* g = bx + c */
   {
@@ -1028,19 +1027,19 @@ cassels_oo_solve_i(GEN q, GEN g)
     AB = sg < 0? mkvec2(t, mkoo()): mkvec2(mkmoo(), t);
     /* AB = interval where g is negative: if q has a root there, we take
      * r in AB. Else it has the sign of q(0) (< 0) on AB */
-    return ZX_sturmpart(q, AB)? 1: 0;
+    return ZX_sturmpart(q, AB)? -1: 1;
   }
   a = gel(g,4); a2 = shifti(a,1); /* g = ax^2 + bx + c */
   D = subii(sqri(b), shifti(mulii(a,c), 2));
-  if (signe(D) <= 0) return sg < 0; /* sign(g) = sg is constant */
+  if (signe(D) <= 0) return sg; /* sign(g) = sg is constant */
   t = gdiv(negi(b), a2); u = gdiv(D, sqri(a2)); /* > 0 */
-  /* now g(x+t) = a(x^2 - u); check if q(x+t) vanishes in I=[-sqrt(u),sqrt(u)]:
-   * g has sign -sg there and sg elsewhere. This is the same as Graeffe(q(x+t))
-   * vanishing on I. If so or if q(t) > 0 we take r in there.  */
+  /* Now g(x+t) = a(x^2 - u); g has sign -sg in I=[-sqrt(u),sqrt(u)] and sg
+   * elsewhere. Check if q(x+t) vanishes in I <=> if Graeffe(q(x+t)) vanishes
+   * on I. If so or if q(t) > 0 we take r in there; else r is outside of I */
   q = Q_remove_denom(RgX_translate(q, t), NULL);
   if (signe(gel(q,2)) > 0 || ZX_sturmpart(ZX_graeffe(q), mkvec2(gen_0, u)))
      sg = -sg;
-  return sg < 0; /* else r is outside of I and g has sign sg */
+  return sg;
 }
 static int
 cassels_oo_solve(GEN q, GEN g)
@@ -1102,7 +1101,7 @@ casselspairing(GEN FD, GEN q1, GEN q2, GEN q3)
   GEN a = leading_coeff(q2);
   GEN Fa = gel(absZ_factor(a),1);
   GEN F = ZV_sort_uniq(shallowconcat1(mkvec3(mkcol4s(2,3,5,7), Fa, FD)));
-  long e = signe(a) <= 0 && cassels_oo_solve(q1, gam) ;
+  long e = signe(a) <= 0 && cassels_oo_solve(q1, gam) < 0;
   long i, lF = lg(F);
   for (i = 1; i< lF; i++)
   {
