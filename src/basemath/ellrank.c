@@ -1011,34 +1011,29 @@ enfsqrt(GEN T, GEN P)
   return liftpol(chinese1(vecnfsqrtmod(F,P)));
 }
 
-/* Quartic q, at most quadratic g. There exist a real r s.t. q(r) > 0 and
- * g(r) != 0. Return sign(g(r)) */
+/* Quartic q, at most quadratic g s.t. lc(g) > 0. There exist a real r s.t.
+ * q(r) > 0 and g(r) != 0. Return sign(g(r)) */
 static int
 cassels_oo_solve_i(GEN q, GEN g)
 {
-  long dg = degpol(g), s = signe(gel(g,dg+2));
+  long dg = degpol(g);
   GEN D, a, b, c;
 
-  if (dg == 0 || signe(leading_coeff(q)) > 0) return s;
+  if (dg == 0 || signe(leading_coeff(q)) > 0) return 1;
   if (signe(gel(q,2)) > 0) return signe(gel(g,2));
   c = gel(g,2); b = gel(g,3);
-  if (dg == 1) /* g = bx + c */
-  {
-    GEN t = gdiv(negi(c), b), I = s < 0? mkvec2(t, mkoo()): mkvec2(mkmoo(), t);
-    /* I = interval where g is negative: if q has a root there, we take
-     * r in AB. Else it has the sign of q(0) (< 0) on I*/
-    return ZX_sturmpart(q, I)? -1: 1;
-  }
+  /* g = bx+c, b>0, is negative on I=]-oo,-c/b[: if q has a root there,
+   * then g(r) < 0. Else it has the sign of q(0) < 0 on I */
+  if (dg == 1) return ZX_sturmpart(q, mkvec2(mkmoo(), gdiv(negi(c), b)))? -1: 1;
   a = gel(g,4); D = subii(sqri(b), shifti(mulii(a,c), 2)); /* g = ax^2+bx+c */
-  if (signe(D) <= 0) return s; /* sign(g) = s is constant */
+  if (signe(D) <= 0) return 1; /* sign(g) = 1 is constant */
   /* Rescale q and g: x->(x - b)/2a; roots of new g are \pm sqrt(D) */
   q = ZX_translate(ZX_rescale(q, shifti(a,1)), negi(b));
-  /* Now g has sign -s in I=[-sqrt(D),sqrt(D)] and s elsewhere.
+  /* Now g has sign -1 in I=[-sqrt(D),sqrt(D)] and 1 elsewhere.
    * Check if q vanishes in I <=> Graeffe(q) vanishes on [0,D].
    * If so or if q(0) > 0 we take r in there; else r is outside of I */
-  if (signe(gel(q,2)) > 0 || ZX_sturmpart(ZX_graeffe(q), mkvec2(gen_0, D)))
-    s = -s;
-  return s;
+  return (signe(gel(q,2)) > 0 ||
+          ZX_sturmpart(ZX_graeffe(q), mkvec2(gen_0, D)))? -1: 1;
 }
 static int
 cassels_oo_solve(GEN q, GEN g)
@@ -1096,12 +1091,15 @@ casselspairing(GEN FD, GEN q1, GEN q2, GEN q3)
   GEN z3 = quartic_cubic(q3, 0);
   GEN m = to_ZX(enfsqrt(T, QXQ_mul(QX_mul(z1,z2),z3,T)), 0);
   GEN Hm = RgXQ_mul(QXQ_div(m, z1, T), H, T); /* deg(Hm) >= 2 */
-  GEN gam = to_ZX(Q_remove_denom(gel(Hm,4), NULL),1);
-  GEN a = leading_coeff(q2);
-  GEN Fa = gel(absZ_factor(a),1);
+  GEN gam = to_ZX(Q_primpart(gel(Hm,4)),1);
+  GEN a = leading_coeff(q2), Fa = gel(absZ_factor(a),1);
   GEN F = ZV_sort_uniq(shallowconcat1(mkvec3(mkcol4s(2,3,5,7), Fa, FD)));
-  long e = signe(a) <= 0 && cassels_oo_solve(q1, gam) < 0;
-  long i, lF = lg(F);
+  long i, e = 0, lF = lg(F);
+  if (signe(a) <= 0)
+  {
+    if (signe(leading_coeff(gam)) < 0) gam = ZX_neg(gam);
+    if (cassels_oo_solve(q1, gam) < 0) e = 1;
+  }
   for (i = 1; i < lF; i++)
   {
     GEN p = gel(F, i);
