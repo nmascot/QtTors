@@ -154,6 +154,7 @@ mwrank(ellinit([1,0,1,54,-4676]));
 mwrank(ellinit([0,0,1,0,11864580]))
 mwrank(ellinit([0,-1,0,-877,-9662]))
 mwrank(ellinit([0, -1, 1, -616, -25561]))
+mwrank(ellinit([1, -1, 1, -3129930, -2196797303]))
 
 \\error
 checktwist([1,2],[1,3])
