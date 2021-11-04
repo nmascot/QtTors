@@ -1102,7 +1102,7 @@ casselspairing(GEN FD, GEN q1, GEN q2, GEN q3)
   GEN F = ZV_sort_uniq(shallowconcat1(mkvec3(mkcol4s(2,3,5,7), Fa, FD)));
   long e = signe(a) <= 0 && cassels_oo_solve(q1, gam) < 0;
   long i, lF = lg(F);
-  for (i = 1; i< lF; i++)
+  for (i = 1; i < lF; i++)
   {
     GEN p = gel(F, i);
     GEN c = cassels_Qp_solve(q1, gam, p);
