@@ -1598,7 +1598,7 @@ nf2selmer_quad(GEN nf, GEN S)
   {
     GEN v = cgetg(lHlist, t_VECSMALL);
     for (i = 1; i < lHlist; i++)
-      v[i] = hilbert(D, gel(QS2gen, j), gel(Hlist, i)) < 0;
+      v[i] = hilbertii(D, gel(QS2gen, j), gel(Hlist, i)) < 0;
     gel(H, j) = Flv_to_F2v(v);
   }
   KerH = F2m_ker(H); l = lg(KerH);
