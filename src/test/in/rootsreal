@@ -31,6 +31,7 @@ polrootsreal(T,[1,1])
 polrootsreal(T,[0,0])
 polsturm(T,[1,1])
 polsturm(T,[2,1])
+polsturm(-5500*x^4+440*x^3+21780*x^2-9680*x-29040,[-oo,-4])
 
 U=(x^2-1)*(x-2);
 polsturm(U)

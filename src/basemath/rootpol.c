@@ -2453,6 +2453,7 @@ ZX_Uspensky(GEN P, GEN ab, long flag, long bitprec)
     if (flag == 2) { nbz = j-1; sol = utoi(nbz); }
     else if (flag == 1) sol = RgC_gtofp(sol, nbits2prec(bitprec));
   }
+  else if (flag == 2) sol = gen_0;
   deg = degpol(P);
   if (deg == 0) return gerepilecopy(av, sol);
   if (typ(a) == t_INFINITY && typ(b) != t_INFINITY && gsigne(b))
