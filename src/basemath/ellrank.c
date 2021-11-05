@@ -1080,7 +1080,7 @@ quartic_findunit(GEN D, GEN q)
  * On binary quartics and the Cassels-Tate pairing
  * https://www.dpmms.cam.ac.uk/~taf1000/papers/bq-ctp.pdf */
 
-/* FD = gel(absZ_factor(D),1), q1,q2,q3 have discriminant D */
+/* FD = primes | 2*3*5*7*D, q1,q2,q3 have discriminant D */
 static long
 casselspairing(GEN FD, GEN q1, GEN q2, GEN q3)
 {
@@ -1093,7 +1093,7 @@ casselspairing(GEN FD, GEN q1, GEN q2, GEN q3)
   GEN Hm = RgXQ_mul(QXQ_div(m, z1, T), H, T); /* deg(Hm) >= 2 */
   GEN gam = to_ZX(Q_primpart(gel(Hm,4)),1);
   GEN a = leading_coeff(q2), Fa = gel(absZ_factor(a),1);
-  GEN F = ZV_sort_uniq(shallowconcat1(mkvec3(mkcol4s(2,3,5,7), Fa, FD)));
+  GEN F = ZV_sort_uniq(shallowconcat1(mkvec2(Fa, FD)));
   long i, e = 0, lF = lg(F);
   if (signe(a) <= 0)
   {
@@ -2210,6 +2210,8 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     long i, j;
     GEN M = cgetg(dim+1, t_MAT), selker;
     GEN D = mulii(muliu(absi(disc), 27*4096), powiu(K,6));
+    GEN FD = ZV_sort_uniq(shallowconcat1(mkvec2(mkcol3s(3,5,7), factdisc)));
+
     for (i = 1; i <= dim; i++) gel(M,i) = cgetg(dim+1, t_COL);
     for (i = 1; i <= dim; i++)
       for (j = 1; j <= i; j++)
@@ -2227,7 +2229,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
         }
         gmael(M,j,i) = gmael(M,i,j) = Q;
       }
-    selker = F2m_to_Flm(F2m_ker(matcassels(factdisc, M)));
+    selker = F2m_to_Flm(F2m_ker(matcassels(FD, M)));
     sha2 = dim - (lg(selker)-1);
     dim = lg(selker)-1;
     for (t=1, u=1; nbpoints < dim && effort > 0; t++)
