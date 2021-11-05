@@ -1026,7 +1026,7 @@ cassels_oo_solve_i(GEN q, GEN g)
   {
     GEN t = gdiv(negi(c), b), I = s < 0? mkvec2(t, mkoo()): mkvec2(mkmoo(), t);
     /* I = interval where g is negative: if q has a root there, we take
-     * r in AB. Else it has the sign of q(0) (< 0) on I*/
+     * r in AB. Else it has the sign of q(oo) (< 0) on I*/
     return ZX_sturmpart(q, I)? -1: 1;
   }
   a = gel(g,4); D = subii(sqri(b), shifti(mulii(a,c), 2)); /* g = ax^2+bx+c */
