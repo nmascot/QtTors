@@ -1079,7 +1079,7 @@ psi_sum(GEN a, long N)
 static GEN
 cxgamma(GEN s0, int dolog, long prec)
 {
-  GEN s, a, y, res, sig, tau, p1, nnx, pi, pi2, sqrtpi2;
+  GEN s, a, y, res, sig, tau, B, nnx, pi, pi2;
   long i, esig, et, lim, N = 1;
   pari_sp av, av2;
   int funeq = 0;
@@ -1219,7 +1219,6 @@ cxgamma(GEN s0, int dolog, long prec)
         }
       }
     }
-    if (dolog) y = logr_abs(y);
   }
   else
   { /* Compute lngamma mod 2 I Pi */
@@ -1235,82 +1234,76 @@ cxgamma(GEN s0, int dolog, long prec)
       }
     }
     if (!odd(N)) y = gmul(y, gaddsg(N - 1, s));
-    if (dolog)
-    {
-      if (typ(s) == t_REAL) y = logr_abs(y);
-      else
-      { /* fix imaginary part */
-        long prec0 = LOWDEFAULTPREC;
-        GEN s0 = gprec_w(s, prec0), y0 = s0, k;
-        y0 = garg(y0, prec0); /* Im log(s) at low accuracy */
-        for (i=1; i < N; i++) y0 = gadd(y0, garg(gaddgs(s0,i), prec0));
-        y = glog(y, prec);
-        k = ground( gdiv(gsub(y0, imag_i(y)), Pi2n(1,prec0)) );
-        if (signe(k)) y = gadd(y, mulcxI(mulir(k, Pi2n(1, prec))));
-      }
-    }
   }
   if (DEBUGLEVEL>5) timer_printf(&T,"product from 0 to N-1");
   constbern(lim);
   nnx = gaddgs(s, N); a = ginv(nnx);
-  p1 = gsub(gmul(gsub(nnx, ghalf), glog(nnx,prec)), nnx);
-  p1 = gadd(p1, gmul(a, lngamma_sum(gsqr(a), lim)));
+  B = gadd(gsub(gmul(gsub(nnx, ghalf), glog(nnx,prec)), nnx),
+           gmul(a, lngamma_sum(gsqr(a), lim)));
   if (DEBUGLEVEL>5) timer_printf(&T,"Bernoulli sum");
 
-  pi = mppi(prec); pi2 = shiftr(pi, 1); sqrtpi2 = sqrtr(pi2);
-
+  pi = mppi(prec); pi2 = shiftr(pi, 1);
   if (dolog)
   {
-    if (funeq)
-    { /* recall that s = 1 - s0 */
-      GEN T = shiftr(sqrtpi2,-1); /* sqrt(2Pi)/2 */
-      if (typ(s) != t_REAL)
+    if (typ(s) == t_REAL)
+    {
+      if (!funeq) y = logr_abs(divrr(sqrtr(pi2), y));
+      else
       {
-        /* We compute log(sin(Pi s0)) so that it has branch cuts along
-        * (-oo, 0] and [1, oo).  To do this in a numerically stable way
+        GEN T = shiftr(sqrtr(pi2),-1); /* sqrt(Pi/2) */
+        /* s0 < 0, step (*) simplifies: imag(lngamma(s0)) = - Pi * floor(s0) */
+        y = logr_abs(divrr(mulrr(y, T), mpsin(gmul(pi,s0))));
+        y = mkcomplex(y, mulri(pi, gfloor(s0)));
+        B = gneg(B);
+      }
+    }
+    else
+    { /* log(y), fixing imaginary part */
+      long prec2 = LOWDEFAULTPREC;
+      GEN k, s2 = gprec_w(s, prec2), y2 = garg(s2, prec2); /* ~ Im log(s) */
+      for (i=1; i < N; i++) y2 = gadd(y2, garg(gaddgs(s2,i), prec2));
+      y = glog(y, prec);
+      k = ground( gdiv(gsub(y2, imag_i(y)), Pi2n(1,prec2)) );
+      if (signe(k)) y = gadd(y, mulcxI(mulir(k, Pi2n(1, prec))));
+      if (!funeq) y = gsub(shiftr(logr_abs(pi2),-1), y); /* y -> sqrt(2Pi)/y */
+      else
+      { /* recall that s = 1 - s0 */
+        GEN T = shiftr(sqrtr(pi2),-1); /* sqrt(Pi/2) */
+        /* (*) Compute log(sin(Pi s0)) so that it has branch cuts along
+        * (-oo, 0] and [1, oo). To do this in a numerically stable way
         * we must compute the log first then mangle its imaginary part.
         * The rounding operation below is stable because we're rounding
         * a number which is already within 1/4 of an integer. */
 
-        /* z = log( sin(Pi s0) / (sqrt(2Pi)/2) ) */
+        /* z = log(sin(Pi s0) / sqrt(Pi/2)) */
         GEN z = glog(gdiv(gsin(gmul(pi,s0),prec), T), prec);
-        /* b = (2 Re(s) - 1) / 4 */
-        GEN b = shiftr(subrs(shiftr(sig, 1), 1), -2);
+        GEN b = shiftr(subrs(shiftr(sig, 1), 1), -2); /* (2 Re(s)-1) / 4 */
         y = gsub(y, z);
         if (gsigne(imag_i(s)) > 0) togglesign(b);
-        /* z = 2Pi round( Im(z)/2Pi - b ) */
-        z = gmul(roundr(gsub(gdiv(imag_i(z), pi2), b)), pi2);
+        z = roundr(gsub(gdiv(imag_i(z), pi2), b)); /* round( Im(z)/2Pi - b ) */
         if (signe(z)) { /* y += I*z, z a t_REAL */
-          if (typ(y) == t_COMPLEX)
-            gel(y,2) = gadd(gel(y,2), z);
-          else
-            y = mkcomplex(y, z);
+          z = mulir(z, pi2);
+          if (typ(y) == t_COMPLEX) gel(y,2) = gadd(gel(y,2), z);
+          else y = mkcomplex(y, z);
         }
+        B = gneg(B);
       }
-      else
-      { /* s0 < 0, formula simplifies: imag(lngamma(s0)) = - Pi * floor(s0) */
-        GEN z = logr_abs(divrr(mpsin(gmul(pi,s0)), T));
-        y = gsub(y, z);
-        y = mkcomplex(y, mulri(pi, gfloor(s0)));
-      }
-      p1 = gneg(p1);
     }
-    else /* y --> sqrt(2Pi) / y */
-      y = gsub(logr_abs(sqrtpi2), y);
-    y = gadd(p1, y);
+    y = gadd(B, y);
   }
   else
   {
+    GEN sqrtpi2 = sqrtr(pi2);
     if (funeq)
     { /* y --> y Pi/(sin(Pi s) * sqrt(2Pi)) = y sqrt(Pi/2)/sin(Pi s) */
       y = gdiv(gmul(shiftr(sqrtpi2,-1),y), gsin(gmul(pi,s0), prec));
       /* don't use s above: sin(pi s0) = sin(pi s) and the former is
        * more accurate, esp. if s0 ~ 0 */
-      p1 = gneg(p1);
+      B = gneg(B);
     }
     else /* y --> sqrt(2Pi) / y */
       y = gdiv(sqrtpi2, y);
-    y = gmul(gexp(p1, prec), y);
+    y = gmul(gexp(B, prec), y);
   }
   set_avma(av); return affc_fixlg(y, res);
 }
