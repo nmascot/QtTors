@@ -1080,7 +1080,7 @@ static GEN
 cxgamma(GEN s0, int dolog, long prec)
 {
   GEN s, a, y, res, sig, tau, p1, nnx, pi, pi2, sqrtpi2;
-  long i, lim, N, esig, et;
+  long i, esig, et, lim, N = 1;
   pari_sp av, av2;
   int funeq = 0;
   pari_timer T;
@@ -1128,10 +1128,8 @@ cxgamma(GEN s0, int dolog, long prec)
     if (signe(l2) > 0)
     {
       l2 = gsub(gsqrt(l2,3), sig);
-      if (signe(l2) > 0) N = itos( gceil(l2) ); else N = 1;
+      if (signe(l2) > 0) N = itos( gceil(l2) );
     }
-    else
-      N = 1;
   }
   else
   { /* |s| is moderate. Use floats  */
@@ -1186,11 +1184,8 @@ cxgamma(GEN s0, int dolog, long prec)
     if (l2 > 0)
     {
       double t = ceil(sqrt(l2) - ssig);
-      N = (t < 1)? 1: (long)t;
-      if (N < 1) N = 1;
+      if (t > 1) N = (long)t;
     }
-    else
-      N = 1;
   }
   if (DEBUGLEVEL>5) err_printf("lim, N: [%ld, %ld]\n",lim,N);
   incrprec(prec);
