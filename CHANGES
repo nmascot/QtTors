@@ -211,6 +211,7 @@ BA  22- [libpari] gen_factorback now take an extra parameter one.
     30- allow random(negative integer N) -> a random integer in [-n,n], n=|N|-1.
     31- allow sqrtint and sqrtnint for nonnegative real number argument
     32- allow logint for positive real number argument
+    33- improve gamma and lngamma for t_FRAC inputs
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,
