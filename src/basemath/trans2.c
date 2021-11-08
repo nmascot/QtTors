@@ -1076,6 +1076,45 @@ psi_sum(GEN a, long N)
   }
   return gmul(a,S);
 }
+static void
+gamma_optim(double ssig, double st, long prec, long *plim, long *pN)
+{
+  double la, l,l2,u,v, rlogs, ilogs;
+  long N = 1, lim;
+  dcxlog(ssig,st, &rlogs,&ilogs);
+  /* Re (s - 1/2) log(s) */
+  u = (ssig - 0.5)*rlogs - st * ilogs;
+  /* Im (s - 1/2) log(s) */
+  v = (ssig - 0.5)*ilogs + st * rlogs;
+  /* l2 = | (s - 1/2) log(s) - s + log(2Pi)/2 |^2 ~ |lngamma(s))|^2 */
+  u = u - ssig + log(2.*M_PI)/2;
+  v = v - st;
+  l2 = u*u + v*v;
+  if (l2 < 0.000001) l2 = 0.000001;
+  l = (prec2nbits_mul(prec, M_LN2) - log(l2)/2) / 2.;
+  if (l < 0) l = 0.;
+
+  if (st > 1 && l > 0)
+  {
+    double t = st * M_PI / l;
+    la = t * log(t);
+    if (la < 4.) la = 4.;
+    if (la > 150) la = t;
+  }
+  else
+    la = 4.; /* heuristic */
+  lim = (long)ceil(l / (1.+ log(la)));
+  if (lim == 0) lim = 1;
+
+  u = (lim-0.5) * la / M_PI;
+  l2 = u*u - st*st;
+  if (l2 > 0)
+  {
+    double t = ceil(sqrt(l2) - ssig);
+    if (t > 1) N = (long)t;
+  }
+  *plim = lim; *pN = N;
+}
 static GEN
 cxgamma(GEN s0, int dolog, long prec)
 {
@@ -1128,6 +1167,7 @@ cxgamma(GEN s0, int dolog, long prec)
     if (signe(l2) > 0)
     {
       l2 = gsub(gsqrt(l2,3), sig);
+
       if (signe(l2) > 0) N = itos( gceil(l2) );
     }
   }
@@ -1135,7 +1175,6 @@ cxgamma(GEN s0, int dolog, long prec)
   { /* |s| is moderate. Use floats  */
     double ssig = rtodbl(sig);
     double st = typ(s) == t_REAL? 0.0: rtodbl(imag_i(s));
-    double la, l,l2,u,v, rlogs, ilogs;
 
     if (fabs(ssig-1) + fabs(st) < 1e-16)
     { /* s ~ 1: loggamma(1+u) ~ - Euler * u, cancellation */
@@ -1154,38 +1193,7 @@ cxgamma(GEN s0, int dolog, long prec)
       }
       set_avma(av); return affc_fixlg(y, res);
     }
-    dcxlog(ssig,st, &rlogs,&ilogs);
-    /* Re (s - 1/2) log(s) */
-    u = (ssig - 0.5)*rlogs - st * ilogs;
-    /* Im (s - 1/2) log(s) */
-    v = (ssig - 0.5)*ilogs + st * rlogs;
-    /* l2 = | (s - 1/2) log(s) - s + log(2Pi)/2 |^2 ~ |lngamma(s))|^2 */
-    u = u - ssig + log(2.*M_PI)/2;
-    v = v - st;
-    l2 = u*u + v*v;
-    if (l2 < 0.000001) l2 = 0.000001;
-    l = (prec2nbits_mul(prec, M_LN2) - log(l2)/2) / 2.;
-    if (l < 0) l = 0.;
-
-    if (st > 1 && l > 0)
-    {
-      double t = st * M_PI / l;
-      la = t * log(t);
-      if (la < 4.) la = 4.;
-      if (la > 150) la = t;
-    }
-    else
-      la = 4.; /* heuristic */
-    lim = (long)ceil(l / (1.+ log(la)));
-    if (lim == 0) lim = 1;
-
-    u = (lim-0.5) * la / M_PI;
-    l2 = u*u - st*st;
-    if (l2 > 0)
-    {
-      double t = ceil(sqrt(l2) - ssig);
-      if (t > 1) N = (long)t;
-    }
+    gamma_optim(ssig, st, prec, &lim, &N);
   }
   if (DEBUGLEVEL>5) err_printf("lim, N: [%ld, %ld]\n",lim,N);
   incrprec(prec);
@@ -1769,13 +1777,7 @@ ggamma(GEN x, long prec)
       GEN a = gel(x,1), b = gel(x,2), c = gammafrac24(a, b, prec);
       if (c) return c;
       av = avma; c = subii(a,b);
-      if (expi(c) - expi(b) < -50)
-      { /* x = 1 + c/b is close to 1 */
-        x = mkfrac(c,b);
-        if (lgefint(b) >= prec) x = fractor(x,prec);
-        y = mpexp(lngamma1(x, prec));
-      }
-      else if (signe(a) < 0 || cmpii(shifti(a,1), b) < 0)
+      if (signe(a) < 0)
       { /* gamma will use functional equation x -> z = 1-x = -c/b >= 1/2.
          * Gamma(x) = Pi / (sin(Pi z) * Gamma(z)) */
         GEN z = mkfrac(negi(c), b), q = ground(z), r = gsub(z,q);
@@ -1783,12 +1785,27 @@ ggamma(GEN x, long prec)
         z = fractor(z, prec+EXTRAPRECWORD);
         y = divrr(pi, mulrr(mpsin(gmul(pi, r)), cxgamma(z, 0, prec)));
         if (mpodd(q)) togglesign(y);
+        return gerepileupto(av, y);
+      }
+      if (cmpii(shifti(a,1), b) < 0)
+      { /* 0 < x < 1/2 gamma would use funeq: adding 1 is cheaper. */
+        if (expi(a) - expi(b) < -3) /* close to 0 */
+        {
+          if (lgefint(b) >= prec) x = fractor(x,prec);
+          y = mpexp(lngamma1(x, prec));
+        }
+        else
+          y = cxgamma(fractor(mkfrac(addii(a,b), b), prec), 0, prec);
+        return gerepileupto(av, gdiv(y, x));
+      }
+      if (expi(c) - expi(b) < -3)
+      { /* x = 1 + c/b is close to 1 */
+        x = mkfrac(c,b);
+        if (lgefint(b) >= prec) x = fractor(x,prec);
+        y = mpexp(lngamma1(x, prec));
       }
       else
-      {
-        x = fractor(x, prec);
-        y = cxgamma(x, 0, prec);
-      }
+        y = cxgamma(fractor(x, prec), 0, prec);
       return gerepileupto(av, y);
     }
 
@@ -1902,20 +1919,32 @@ glngamma(GEN x, long prec)
       long e;
       if (c) return glog(c, prec);
       c = subii(a,b); e = expi(b) - expi(c);
-      if (e > 50)
-      {
-        x = mkfrac(c,b);
-        if (lgefint(b) >= prec) x = fractor(x,prec + nbits2nlong(e));
-        y = lngamma1(x, prec);
-      }
-      else if (signe(a) < 0 || cmpii(shifti(a,1), b) < 0)
+      if (signe(a) < 0)
       { /* gamma will use functional equation x -> z = 1-x = -c/b >= 1/2.
          * lngamma(x) = log |Pi / (sin(Pi z) * Gamma(z))| + I*Pi * floor(x) */
         GEN z = mkfrac(negi(c), b), q = ground(z), r = gsub(z,q);
         GEN pi = mppi(prec); /* |r| <= 1/2 */
         z = fractor(z, prec+EXTRAPRECWORD);
-        y = subrr(logr_abs(divrr(pi, mpsin(gmul(pi, r)))), cxgamma(z, 1, prec));
-        if (signe(a) < 0) y = gadd(y, mkcomplex(gen_0, mulri(pi, gfloor(x))));
+        y = subrr(logr_abs(divrr(pi, mpsin(gmul(pi,r)))), cxgamma(z, 1, prec));
+        y = gadd(y, mkcomplex(gen_0, mulri(pi, gfloor(x))));
+        return gerepileupto(av, y);
+      }
+      if (cmpii(shifti(a,1), b) < 0)
+      { /* 0 < x < 1/2 gamma would use funeq: adding 1 is cheaper. */
+        if (expi(a) - expi(b) < -3) /* close to 0 */
+        {
+          if (lgefint(b) >= prec) x = fractor(x,prec);
+          y = lngamma1(x, prec);
+        }
+        else
+          y = cxgamma(fractor(mkfrac(addii(a,b), b), prec), 1, prec);
+        return gerepileupto(av, gsub(y, glog(x, prec)));
+      }
+      if (e > 3)
+      {
+        x = mkfrac(c,b);
+        if (lgefint(b) >= prec) x = fractor(x,prec + nbits2nlong(e));
+        y = lngamma1(x, prec);
       }
       else
       {
