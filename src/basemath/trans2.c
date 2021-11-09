@@ -1014,7 +1014,7 @@ red_mod_2z(GEN x, GEN z)
 static GEN
 negeuler(long prec) { GEN g = mpeuler(prec); setsigne(g, -1); return g; }
 /* lngamma(1+z) = -Euler*z + sum_{i > 1} zeta(i)/i (-z)^i
- * at relative precision prec, |z| < 1 is small */
+ * at relative precision prec, |z| <= 1/2 is small */
 static GEN
 lngamma1(GEN z, long prec)
 { /* sum_{i > l} |z|^(i-1) = |z|^l / (1-|z|) < 2^-B
@@ -1115,6 +1115,18 @@ gamma_optim(double ssig, double st, long prec, long *plim, long *pN)
   }
   *plim = lim; *pN = N;
 }
+/* do we use lngamma1 instead of Euler-Maclaurin ? */
+static int
+gamma_use_1(double s, double t, long prec, long *plim, long *pN)
+{
+  double a = s-1, d = fabs(a) + fabs(t);
+  long k;
+  if (d < 1e-16) return 1;
+  gamma_optim(s, t, prec, plim, pN);
+  if (d >= 0.5) return 0;
+  k = bit_accuracy(prec) / -log2(dnorm(a, t)); /* 2k = lngamma1 bound */
+  return (t ? k: 1.5*k) < *plim + *pN;
+}
 static GEN
 cxgamma(GEN s0, int dolog, long prec)
 {
@@ -1167,7 +1179,6 @@ cxgamma(GEN s0, int dolog, long prec)
     if (signe(l2) > 0)
     {
       l2 = gsub(gsqrt(l2,3), sig);
-
       if (signe(l2) > 0) N = itos( gceil(l2) );
     }
   }
@@ -1176,7 +1187,7 @@ cxgamma(GEN s0, int dolog, long prec)
     double ssig = rtodbl(sig);
     double st = typ(s) == t_REAL? 0.0: rtodbl(imag_i(s));
 
-    if (fabs(ssig-1) + fabs(st) < 1e-16)
+    if (gamma_use_1(ssig, st, prec, &lim, &N))
     { /* s ~ 1: loggamma(1+u) ~ - Euler * u, cancellation */
       if (funeq) /* s0 ~ 0: use lngamma(s0)+log(s0) = lngamma(s0+1) */
         y = dolog? gsub(lngamma1(s0,prec), glog(s0,prec))
@@ -1193,7 +1204,6 @@ cxgamma(GEN s0, int dolog, long prec)
       }
       set_avma(av); return affc_fixlg(y, res);
     }
-    gamma_optim(ssig, st, prec, &lim, &N);
   }
   if (DEBUGLEVEL>5) err_printf("lim, N: [%ld, %ld]\n",lim,N);
   incrprec(prec);
