@@ -6459,7 +6459,14 @@ ellheightpairing(GEN E, GEN p, long n, GEN P, GEN Q)
 }
 GEN
 ellheight0(GEN e, GEN a, GEN b, long n)
-{ return b? ellheightpairing(e,NULL,n, a,b): a? ellheight(e,a,n): ellheightfaltings(e,n); }
+{
+  if (!a)
+  {
+    if (b) pari_err(e_MISC, "cannot omit P and set Q");
+    return ellheightfaltings(e,n);
+  }
+  return b? ellheightpairing(e,NULL,n, a,b): ellheight(e,a,n);
+}
 GEN
 ellpadicheight0(GEN e, GEN p, long n, GEN P, GEN Q)
 { return Q? ellheightpairing(e,p,n, P,Q): ellpadicheight(e,p,n, P); }

@@ -416,6 +416,9 @@
   ***   at top-level: ellheight(E,[2,2])
   ***                 ^------------------
   *** ellheight: domain error in ellheight: point not on E
+  ***   at top-level: ellheight(E,,[2,2])
+  ***                 ^-------------------
+  *** ellheight: cannot omit P and set Q.
   ***   at top-level: Qfb(0,0,0)
   ***                 ^----------
   *** Qfb: domain error in Qfb: issquare(disc) = 1
@@ -650,4 +653,4 @@ INFINITY
   ***                                   ^-
   ***   incorrect value for plothsizes: [2,
   ***                                      ^
-Total time spent: 9
+Total time spent: 16
