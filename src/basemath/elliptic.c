@@ -565,7 +565,7 @@ static long
 base_ring(GEN x, GEN *pp, long *prec)
 {
   long i, e = *prec, ep = LONG_MAX, imax = minss(lg(x), 6);
-  GEN p = NULL;
+  GEN p = NULL, pol = NULL;
   long t = t_FRAC;
   if (*pp) switch(t = typ(*pp))
   {
@@ -595,6 +595,7 @@ base_ring(GEN x, GEN *pp, long *prec)
       pari_err_TYPE("elliptic curve base_ring", *pp);
       return 0;
   }
+  if (t==t_VEC) pol = nf_get_pol(checknf(p));
   /* Possible cases:
    * t = t_VEC (p an nf or bnf)
    * t = t_FFELT (p t_FFELT)
@@ -647,9 +648,11 @@ base_ring(GEN x, GEN *pp, long *prec)
           default: pari_err_TYPE("elliptic curve base_ring", x);
         }
         break;
+      case t_POLMOD:
+        if (pol && !gequal(pol, gel(q,1)))
+          pari_err_MODULUS("ellinit",gel(q,1), pol);
       case t_COL:
       case t_POL:
-      case t_POLMOD:
         if (t == t_VEC) break;
       default: /* base ring too general */
         return t_COMPLEX;
