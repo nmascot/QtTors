@@ -381,6 +381,7 @@ gcosh(GEN x, long prec)
 {
   pari_sp av;
   GEN y, p1;
+  long v;
 
   switch(typ(x))
   {
@@ -394,6 +395,8 @@ gcosh(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y) && valp(y) == 0) return gerepilecopy(av, y);
+      v = valp(y);
+      if (v > 0) y = sertoser(y, lg(y) - 2 + v);
       p1 = gexp(y,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
   }
