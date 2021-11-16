@@ -642,7 +642,6 @@ void pari_init_parser(void);
 void pari_init_rand(void);
 void pari_init_paths(void);
 void pari_init_primetab(void);
-void pari_init_seadata(void);
 GEN pari_get_seadata(void);
 void pari_set_primetab(GEN global_primetab);
 void pari_set_seadata(GEN seadata);
