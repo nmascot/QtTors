@@ -6028,6 +6028,25 @@ ellQ_get_CM(GEN e)
   return CM;
 }
 
+/* E/Q or Qp, return cardinality including the (possible) ramified point */
+static GEN
+ellcard_ram(GEN E, GEN p, int *good_red)
+{
+  GEN a4, a6, D = Rg_to_Fp(ell_get_disc(E), p);
+  if (!signe(D))
+  {
+    pari_sp av = avma;
+    GEN ap = ellQap(E, p, good_red);
+    return gerepileuptoint(av, subii(addiu(p,1), ap));
+  }
+  *good_red = 1;
+  if (absequaliu(p,2)) return utoi(cardmod2(E));
+  if (absequaliu(p,3)) return utoi(cardmod3(E));
+  ell_to_a4a6(E,p,&a4,&a6);
+  return Fp_ellcard(a4, a6, p);
+}
+
+
 /* bad reduction at p */
 static void
 sievep_bad(ulong p, GEN an, ulong n)
@@ -6117,6 +6136,18 @@ ellanQ_zv(GEN e, long n0)
 }
 
 static GEN
+ellQ_eulerf(GEN e, GEN p)
+{
+  int good_red;
+  GEN card = ellcard_ram(e, p, &good_red);
+  GEN ap = subii(addiu(p, 1), card);
+  if (good_red)
+    return mkrfrac(gen_1,deg2pol_shallow(p, gneg(ap), gen_1, 0));
+  if (!signe(ap)) return pol_1(0);
+  return mkrfrac(gen_1,deg1pol_shallow(negi(ap), gen_1,0));
+}
+
+static GEN
 ellanQ(GEN e, long N)
 { return vecsmall_to_vec_inplace(ellanQ_zv(e,N)); }
 
@@ -6124,7 +6155,8 @@ static GEN
 ellnflocal(GEN E, GEN p, long n)
 {
   pari_sp av = avma;
-  GEN LP = idealprimedec_limit_f(ellnf_get_nf(E), p, n-1), T = NULL;
+  GEN nf = ellnf_get_nf(E);
+  GEN LP = idealprimedec_limit_f(nf, p, n ? n-1: nf_get_degree(nf)), T = NULL;
   long l = lg(LP), i;
   for (i = 1; i < l; i++)
   {
@@ -6143,6 +6175,7 @@ ellnflocal(GEN E, GEN p, long n)
     T = T? ZX_mul(T, T2): T2;
   }
   if (!T) { set_avma(av); return pol_1(0); }
+  if (n==0) return gerepilecopy(av, mkrfrac(gen_1,T));
   return gerepileupto(av, RgXn_inv_i(T, n));
 }
 
@@ -6166,6 +6199,20 @@ ellnfan(GEN E, long N)
 {
   GEN worker = snm_closure(is_entry("_direllnf_worker"), mkvec(E));
   return pardireuler(worker, gen_2, stoi(N), NULL, NULL);
+}
+
+GEN
+elleulerf(GEN E, GEN p)
+{
+  checkell(E);
+  switch(ell_get_type(E))
+  {
+    case t_ELL_Q: return ellQ_eulerf(E, p);
+    case t_ELL_NF: return ellnflocal(E, p, 0);
+    default:
+      pari_err_TYPE("elleulerf",E);
+      return NULL; /*LCOV_EXCL_LINE*/
+  }
 }
 
 GEN
@@ -6878,24 +6925,6 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
     t = FpE_tatepairing(P, Q, m, a4, p);
     return gerepileupto(av, Fp_to_mod(t, p));
   }
-}
-
-/* E/Q or Qp, return cardinality including the (possible) ramified point */
-static GEN
-ellcard_ram(GEN E, GEN p, int *good_red)
-{
-  GEN a4, a6, D = Rg_to_Fp(ell_get_disc(E), p);
-  if (!signe(D))
-  {
-    pari_sp av = avma;
-    GEN ap = ellQap(E, p, good_red);
-    return gerepileuptoint(av, subii(addiu(p,1), ap));
-  }
-  *good_red = 1;
-  if (absequaliu(p,2)) return utoi(cardmod2(E));
-  if (absequaliu(p,3)) return utoi(cardmod3(E));
-  ell_to_a4a6(E,p,&a4,&a6);
-  return Fp_ellcard(a4, a6, p);
 }
 
 GEN

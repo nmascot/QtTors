@@ -110,5 +110,7 @@ for(i=1,#VALL,
   b=lfuntheta(ldata,2);
   chk("lfuntheta",i,a,b);
   print(i," (lfunan): ",lfunan(ldata,10));
+  print(i," (lfuneuler): ",iferr(lfuneuler(ldata,3),E,E));
+  print(i," (lfuneuler): ",iferr(lfuneuler(ldata,7),E,E));
 )
 }

@@ -133,6 +133,13 @@ vecan_conj(GEN an, long n, long prec)
 }
 
 static GEN
+eulerf_conj(GEN an, GEN p, long prec)
+{
+  GEN p1 = ldata_eulerf(gel(an,1), p, prec);
+  return conj_i(p1);
+}
+
+static GEN
 vecan_mul(GEN an, long n, long prec)
 {
   GEN p1 = ldata_vecan(gel(an,1), n, prec);
@@ -140,6 +147,14 @@ vecan_mul(GEN an, long n, long prec)
   if (typ(p1) == t_VECSMALL) p1 = vecsmall_to_vec(p1);
   if (typ(p2) == t_VECSMALL) p2 = vecsmall_to_vec(p2);
   return dirmul(p1, p2);
+}
+
+static GEN
+eulerf_mul(GEN an, GEN p, long prec)
+{
+  GEN p1 = ldata_eulerf(gel(an,1), p, prec);
+  GEN p2 = ldata_eulerf(gel(an,2), p, prec);
+  return gmul(p1, p2);
 }
 
 static GEN
@@ -154,6 +169,14 @@ vecan_div(GEN an, long n, long prec)
   if (typ(p1) == t_VECSMALL) p1 = vecsmall_to_vec(p1);
   if (typ(p2) == t_VECSMALL) p2 = vecsmall_to_vec(p2);
   return dirdiv(p1, p2);
+}
+
+static GEN
+eulerf_div(GEN an, GEN p, long prec)
+{
+  GEN p1 = ldata_eulerf(gel(an,1), p, prec);
+  GEN p2 = ldata_eulerf(gel(an,2), p, prec);
+  return gdiv(p1, p2);
 }
 
 static GEN
@@ -195,6 +218,17 @@ vecan_twist(GEN an, long n, long prec)
 }
 
 static GEN
+eulerf_twist(GEN an, GEN p, long prec)
+{
+  GEN p1 = ldata_eulerf(gel(an,1), p, prec);
+  GEN p2 = ginv(ldata_eulerf(gel(an,2), p, prec));
+  if (typ(p2)!=t_POL || degpol(p2)==0)
+    return poleval(p1,pol_0(0));
+  if (degpol(p2)!=1) pari_err_IMPL("lfuneuler");
+  return poleval(p1,monomial(gneg(gel(p2,3)),1,0));
+}
+
+static GEN
 vecan_shift(GEN an, long n, long prec)
 {
   GEN p1 = ldata_vecan(gel(an,1), n, prec);
@@ -225,6 +259,14 @@ vecan_shift(GEN an, long n, long prec)
       gel(V, i) = gmul(gel(p1,i), gel(D,i));
   }
   return V;
+}
+
+static GEN
+eulerf_shift(GEN an, GEN p, long prec)
+{
+  GEN p1 = ldata_eulerf(gel(an,1), p, prec);
+  GEN s = gel(an,2);
+  return gsubst(p1, 0, monomial(gpow(p, s, prec), 1, 0));
 }
 
 static GEN
@@ -593,6 +635,38 @@ vecan_closure(GEN a, long L, long prec)
   pop_localprec(); return a;
 }
 
+static GEN
+eulerf_closure(GEN a, GEN p, long prec)
+{
+  long ta = typ(a);
+  GEN Sbad = NULL, f;
+
+  if (ta == t_VEC)
+  {
+    long l = lg(a);
+    if (l == 1) pari_err_TYPE("vecan_closure", a);
+    ta = typ(gel(a,1));
+    /* regular vector, return it */
+    if (ta != t_CLOSURE) return NULL;
+    if (l != 3) pari_err_TYPE("vecan_closure", a);
+    Sbad = gel(a,2);
+    if (typ(Sbad) != t_VEC) pari_err_TYPE("vecan_closure", a);
+    a = gel(a,1);
+  }
+  else if (ta != t_CLOSURE) pari_err_TYPE("vecan_closure", a);
+  push_localprec(prec);
+  switch(closure_arity(a))
+  {
+    case 2:
+      f = closure_callgen2(a, p, mkoo()); break;
+    case 1:
+      f = NULL; break;
+    default:
+      f = NULL; pari_err_TYPE("vecan_closure", a);
+  }
+  pop_localprec(); return f;
+}
+
 /*****************************************************************/
 /*  L-series of Dirichlet characters.                            */
 /*****************************************************************/
@@ -752,6 +826,18 @@ vecan_chiZ(GEN an, long n, long prec)
 }
 
 static GEN
+eulerf_chiZ(GEN an, GEN p, long prec)
+{
+  GEN G = gel(an,1);
+  GEN nchi = gel(an,2), gord = gel(nchi,1), chi = gel(nchi,2);
+  long multichi= (lg(chi) > 1 && is_vec_t(typ(gel(chi,1))));
+  GEN z = rootsof1_cx(gord, prec);
+  GEN N = znstar_get_N(G);
+  GEN ch = dvdii(N,p) ? gen_0: chigenevalvec(znconreylog(G, p), nchi, z, prec, multichi);
+  return mkrfrac(gen_1, deg1pol_shallow(gneg(ch), gen_1,0));
+}
+
+static GEN
 vecan_chigen(GEN an, long n, long prec)
 {
   forprime_t iter;
@@ -815,6 +901,45 @@ vecan_chigen(GEN an, long n, long prec)
     }
   }
   return v;
+}
+
+static GEN
+eulerf_chigen(GEN an, GEN p, long prec)
+{
+  GEN bnr = gel(an,1), nf = bnr_get_nf(bnr);
+  GEN nchi = gel(an,2), gord = gel(nchi,1), chi = gel(nchi,2), z;
+  GEN N = gel(bnr_get_mod(bnr), 1), NZ = gcoeff(N,1,1), f;
+  long multichi= (lg(chi) > 1 && is_vec_t(typ(gel(chi,1))));
+
+  z = rootsof1_cx(gord, prec);
+  if (nf_get_degree(nf) == 1)
+  {
+    GEN ch;
+    if (dvdii(NZ,p)) ch = gen_0;
+    else
+    {
+      ch = chigenevalvec(isprincipalray(bnr,p), nchi, z, prec, multichi);
+      if (typ(ch)==t_VEC) return NULL;
+    }
+    f = deg1pol_shallow(gneg(ch), gen_1, 0);
+  }
+  else
+  {
+    int check = dvdii(NZ,p);
+    GEN L = idealprimedec(nf, p);
+    long j, lL = lg(L);
+    f = pol_1(0);
+    for (j = 1; j < lL; j++)
+    {
+      GEN pr = gel(L, j), ch;
+      if (check && idealval(nf, N, pr)) ch = gen_0;
+      else
+      ch = chigenevalvec(isprincipalray(bnr,pr), nchi, z, prec, multichi);
+      if (typ(ch)==t_VEC) return NULL;
+      f = gmul(f, gsub(gen_1, monomial(ch, pr_get_f(pr), 0)));
+    }
+  }
+  return mkrfrac(gen_1,f);
 }
 
 static GEN
@@ -1091,6 +1216,21 @@ dirzetak0(GEN nf, ulong N)
   pari_free(c2); return c;
 }
 
+static GEN
+eulerf_zetak(GEN nf, GEN p)
+{
+  GEN vect, T = nf_get_pol(nf), index = nf_get_index(nf), f = pol_1(0);
+  long i, l;
+  if (dvdii(index, p)) /* p does not divide index */
+    vect = idealprimedec_degrees(nf,p);
+  else
+    vect = gel(FpX_degfact(T,p),1);
+  l = lg(vect);
+  for (i = 1; i < l; i++)
+    f = gmul(f, gsub(gen_1, monomial(gen_1, vect[i], 0)));
+  return gcopy(mkrfrac(gen_1, f));
+}
+
 GEN
 dirzetak(GEN nf, GEN b)
 {
@@ -1311,11 +1451,30 @@ direllsympow_worker(GEN P, ulong X, GEN E, ulong m)
 }
 
 static GEN
+eulerf_bad(GEN bad, GEN p)
+{
+  long i, l = lg(bad);
+  for (i = 1; i < l; i++)
+    if (equalii(gmael(bad,i,1), p))
+      return gmael(bad,i,2);
+  return NULL;
+}
+
+static GEN
 vecan_ellsympow(GEN an, long n)
 {
   GEN nn = utoi(n), crvm = gel(an,1), bad = gel(an,2);
   GEN worker = snm_closure(is_entry("_direllsympow_worker"), crvm);
   return pardireuler(worker, gen_2, nn, nn, bad);
+}
+
+static GEN
+eulerf_ellsympow(GEN an, GEN p)
+{
+  GEN crvm = gel(an,1), bad = gel(an,2), E = gel(crvm,1);
+  GEN f = eulerf_bad(bad, p);
+  if (f) return f;
+  retmkrfrac(gen_1,ellsympow_abelian(p, ellap(E, p), itos(gel(crvm,2)), 1));
 }
 
 static long
@@ -1875,6 +2034,16 @@ vecan_genus2(GEN an, long L)
   GEN Q = gel(an,1), bad = gel(an, 2);
   GEN worker = snm_closure(is_entry("_dirgenus2_worker"), mkvec(Q));
   return pardireuler(worker, gen_2, stoi(L), NULL, bad);
+}
+
+static GEN
+eulerf_genus2(GEN an, GEN p)
+{
+  GEN Q = gel(an,1), bad = gel(an, 2);
+  GEN f = eulerf_bad(bad, p);
+  if (f) return f;
+  f = RgX_recip(hyperellcharpoly(gmul(Q,gmodulo(gen_1, p))));
+  return mkrfrac(gen_1,f);
 }
 
 static GEN
@@ -2559,7 +2728,7 @@ dirartin(GEN nf, GEN G, GEN V, GEN aut, GEN p, long n)
     pr = idealprimedec_galois(nf,p);
     frob = idealfrobenius_hard(nf, G, aut, pr);
   }
-  set_avma(av); return RgXn_inv(gel(V, frob[1]), n);
+  set_avma(av); return n ? RgXn_inv(gel(V, frob[1]), n): gel(V, frob[1]);
 }
 
 GEN
@@ -2587,6 +2756,19 @@ vecan_artin(GEN an, long L, long prec)
   A = RgXV_RgV_eval(A, grootsof1(n, prec));
   if (isreal) A = real_i(A);
   return A;
+}
+
+static GEN
+eulerf_artin(GEN an, GEN p, long prec)
+{
+  GEN nf = gel(an,1), G = gel(an,2), V = gel(an,3), aut = gel(an,4);
+  GEN Sbad = gel(an,5);
+  long n = itos(gel(an,6)), isreal = lg(an)<8 ? 0: !itos(gel(an,7));
+  GEN f = eulerf_bad(Sbad, p);
+  if (!f) f = mkrfrac(gen_1,dirartin(nf, G, V, aut, p, 0));
+  f = gsubst(liftpol(f),1, rootsof1u_cx(n, prec));
+  if (isreal) f = real_i(f);
+  return f;
 }
 
 static GEN
@@ -2854,4 +3036,44 @@ ldata_newprec(GEN ldata, long prec)
     }
   }
   return ldata;
+}
+
+GEN
+ldata_eulerf(GEN van, GEN p, long prec)
+{
+  GEN an = gel(van, 2), f = gen_0;
+  long t = mael(van,1,1);
+  switch (t)
+  {
+    case t_LFUN_GENERIC:
+      f = eulerf_closure(an, p, prec); break;
+    case t_LFUN_CLOSURE0:
+      pari_err_BUG("ldata_vecan: please call ldata_newprec");/*LCOV_EXCL_LINE*/
+    case t_LFUN_ZETA: f = mkrfrac(gen_1,deg1pol(gen_m1, gen_1,0)); break;
+    case t_LFUN_NF:  f = eulerf_zetak(an, p); break;
+    case t_LFUN_ELL: f = elleulerf(an, p); break;
+    case t_LFUN_KRONECKER:
+      f = mkrfrac(gen_1, deg1pol_shallow(stoi(-kronecker(an, p)), gen_1, 0)); break;
+    case t_LFUN_CHIZ: f = eulerf_chiZ(an, p, prec); break;
+    case t_LFUN_CHIGEN: f = eulerf_chigen(an, p, prec); break;
+    case t_LFUN_ARTIN: f = eulerf_artin(an, p, prec); break;
+    case t_LFUN_DIV: f = eulerf_div(an, p, prec); break;
+    case t_LFUN_MUL: f = eulerf_mul(an, p, prec); break;
+    case t_LFUN_CONJ: f = eulerf_conj(an, p, prec); break;
+    case t_LFUN_SYMPOW_ELL: f = eulerf_ellsympow(an, p); break;
+    case t_LFUN_GENUS2: f = eulerf_genus2(an, p); break;
+    case t_LFUN_TWIST: f = eulerf_twist(an, p, prec); break;
+    case t_LFUN_SHIFT: f = eulerf_shift(an, p, prec); break;
+    default: f = NULL; break;
+  }
+  if (!f) pari_err_DOMAIN("lfuneuler", "L", "Euler product", strtoGENstr("unknown"), an);
+  return f;
+}
+
+GEN
+lfuneuler(GEN ldata, GEN p, long prec)
+{
+  pari_sp av = avma;
+  ldata = ldata_newprec(lfunmisc_to_ldata_shallow(ldata), prec);
+  return gerepilecopy(av, ldata_eulerf(ldata_get_an(ldata), p, prec));
 }
