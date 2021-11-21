@@ -31,6 +31,7 @@ besseli(I,1000)
 besselj(I,1000)
 besseln(I,1000)
 besseljh(100,I)
+besselj(80,66)
 
 besselk(0,O(x^3))
 

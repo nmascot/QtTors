@@ -37,7 +37,7 @@ _abs(GEN x)
 /* can we use asymptotic expansion ? */
 static int
 bessel_asymp(GEN z, long bit)
-{ return gcmpgs(_abs(z), (bit+4)/2) >= 0; }
+{ return gcmpgs(_abs(z), (bit+10)/2) >= 0; }
 
 /* Region I: 0 < Arg z <= Pi, II: -Pi < Arg z <= 0 */
 static int
