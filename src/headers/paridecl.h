@@ -3065,13 +3065,9 @@ void    forell(void *E, long call(void*, GEN), long a, long b, long flag);
 GEN     ellfromeqn(GEN s);
 
 /* elliptic.c */
+
 enum { t_ELL_Rg = 0, t_ELL_Q, t_ELL_Qp, t_ELL_Fp, t_ELL_Fq, t_ELL_NF };
-long    ellQ_get_CM(GEN e);
-int     ell_is_integral(GEN E);
-GEN     ellbasechar(GEN E);
 GEN     akell(GEN e, GEN n);
-GEN     ellan(GEN e, long n);
-GEN     ellanQ_zv(GEN e, long n);
 GEN     bilhell(GEN e, GEN z1, GEN z2, long prec);
 void    checkell(GEN e);
 void    checkell_Fq(GEN e);
@@ -3092,7 +3088,8 @@ GEN     ec_dFdy_evalQ(GEN E, GEN Q);
 GEN     ec_dmFdy_evalQ(GEN e, GEN Q);
 GEN     ec_half_deriv_2divpol_evalx(GEN E, GEN x);
 GEN     ec_phi2(GEN e);
-GEN     ellanal_globalred(GEN e, GEN *gr);
+int     ell_is_integral(GEN E);
+long    ellQ_get_CM(GEN e);
 GEN     ellQ_get_N(GEN e);
 void    ellQ_get_Nfa(GEN e, GEN *N, GEN *faN);
 GEN     ellQp_Tate_uniformization(GEN E, long prec);
@@ -3110,8 +3107,12 @@ GEN     ellR_eta(GEN E, long prec);
 GEN     ellR_omega(GEN x, long prec);
 GEN     ellR_roots(GEN E, long prec);
 GEN     elladd(GEN e, GEN z1, GEN z2);
+GEN     ellan(GEN e, long n);
+GEN     ellanQ_zv(GEN e, long n);
+GEN     ellanal_globalred(GEN e, GEN *gr);
 GEN     ellap(GEN e, GEN p);
 long    ellap_CM_fast(GEN E, ulong p, long CM);
+GEN     ellbasechar(GEN E);
 GEN     ellbsd(GEN e, long prec);
 GEN     ellcard(GEN E, GEN p);
 GEN     ellchangecurve(GEN e, GEN ch);
