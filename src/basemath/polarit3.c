@@ -1698,17 +1698,6 @@ FpXV_direct_compositum(GEN V, GEN p)
 
 /* 0, 1, -1, 2, -2, ... */
 #define next_lambda(a) (a>0 ? -a : 1-a)
-GEN
-FpX_compositum(GEN a, GEN b, GEN p)
-{
-  long k, v = fetch_var_higher();
-  for (k = 1;; k = next_lambda(k))
-  {
-    GEN x = deg1pol_shallow(gen_1, gmulsg(k, pol_x(v)), 0); /* x + k y */
-    GEN C = FpX_FpXY_resultant(a, poleval(b,x),p);
-    if (FpX_is_squarefree(C, p)) { (void)delete_var(); return C; }
-  }
-}
 
 /* Assume A in Z[Y], B in Q[Y][X], B squarefree in (Q[Y]/(A))[X] and
  * Res_Y(A, B) in Z[X]. Find a small lambda (start from *lambda, use
