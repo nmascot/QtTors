@@ -1183,6 +1183,11 @@ nfisisom(GEN a, GEN b)
   b = get_nfpol(b, &nfb);
   if (!nfa) { a = Q_primpart(a); RgX_check_ZX(a, "nfisisom"); }
   if (!nfb) { b = Q_primpart(b); RgX_check_ZX(b, "nfisisom"); }
+  if (ZX_equal(a, b))
+  {
+    y = galoisconj(nfb? nfb: b, NULL); settyp(y, t_VEC);
+    return gerepilecopy(av,y);
+  }
   if (nfa && !nfb) { swap(a,b); nfb = nfa; nfa = NULL; sw = 1; }
   if (!tests_OK(a, nfa, b, nfb, 1)) { set_avma(av); return gen_0; }
 
