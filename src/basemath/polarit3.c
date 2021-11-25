@@ -1316,8 +1316,50 @@ ZX_norml1(GEN x)
   s = gel(x, l-1); /* != 0 */
   for (i = l-2; i > 1; i--) {
     GEN xi = gel(x,i);
-    if (!signe(x)) continue;
+    if (!signe(xi)) continue;
     s = addii_sign(s,1, xi,1);
+  }
+  return s;
+}
+/* x >= 0, y != 0, return x + |y| */
+static GEN
+addii_abs(GEN x, GEN y)
+{
+  if (!signe(x)) return absi_shallow(y);
+  return addii_sign(x,1, y,1);
+}
+
+/* x a ZX, return sum_{i >= k} |x[i]| binomial(i, k) */
+static GEN
+ZX_norml1_1(GEN x, long k)
+{
+  long i, d = degpol(x);
+  GEN s, C; /* = binomial(i, k) */
+
+  if (!d || k > d) return gen_0;
+  s = absi_shallow(gel(x, k+2)); /* may be 0 */
+  C = gen_1;
+  for (i = k+1; i <= d; i++) {
+    GEN xi = gel(x,i+2);
+    if (k) C = diviuexact(muliu(C, i), i-k);
+    if (signe(xi)) s = addii_abs(s, mulii(C, xi));
+  }
+  return s;
+}
+/* x has non-negative real coefficients */
+static GEN
+RgX_norml1_1(GEN x, long k)
+{
+  long i, d = degpol(x);
+  GEN s, C; /* = binomial(i, k) */
+
+  if (!d || k > d) return gen_0;
+  s = gel(x, k+2); /* may be 0 */
+  C = gen_1;
+  for (i = k+1; i <= d; i++) {
+    GEN xi = gel(x,i+2);
+    if (k) C = diviuexact(muliu(C, i), i-k);
+    if (!gequal0(xi)) s = gadd(s, gmul(C, xi));
   }
   return s;
 }
@@ -1333,17 +1375,14 @@ L2_bound(GEN nf, GEN den, GEN *pt_roots)
   return RgM_fpnorml2(RgM_mul(tozk,M), DEFAULTPREC);
 }
 
-/* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
- *   bound = N_2(A)^degpol B N_2(B)^degpol(A),  where
- *     N_2(A) = sqrt(sum (N_1(Ai))^2)
- * Return e such that Res(A, B) < 2^e */
+/* N_2(A)^2 */
 static GEN
-RgX_RgXY_ResBound(GEN A, GEN B, long prec)
+sqrN2(GEN A, long prec)
 {
-  pari_sp av = avma, av2;
-  GEN a = gen_0, b = gen_0, bnd;
-  long i , lA = lg(A), lB = lg(B);
-  for (i=2; i<lA; i++)
+  pari_sp av = avma;
+  long i, l = lg(A);
+  GEN a = gen_0;
+  for (i = 2; i < l; i++)
   {
     a = gadd(a, gabs(gnorm(gel(A,i)), prec));
     if (gc_needed(av,1))
@@ -1352,7 +1391,18 @@ RgX_RgXY_ResBound(GEN A, GEN B, long prec)
       a = gerepileupto(av, a);
     }
   }
-  av2 = avma;
+  return a;
+}
+/* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
+ *   bound = N_2(A)^degpol B N_2(B)^degpol(A),  where
+ *     N_2(A) = sqrt(sum (N_1(Ai))^2)
+ * Return e such that Res(A, B) < 2^e */
+static GEN
+RgX_RgXY_ResBound(GEN A, GEN B, long prec)
+{
+  pari_sp av = avma;
+  GEN b = gen_0, bnd;
+  long i, lB = lg(B);
   for (i=2; i<lB; i++)
   {
     GEN t = gel(B,i);
@@ -1361,25 +1411,44 @@ RgX_RgXY_ResBound(GEN A, GEN B, long prec)
     if (gc_needed(av,1))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"RgX_RgXY_ResBound i = %ld",i);
-      b = gerepileupto(av2, b);
+      b = gerepileupto(av, b);
     }
   }
-  bnd = gsqrt(gmul(gpowgs(a, degpol(B)), gpowgs(b, degpol(A))), prec);
+  bnd = gsqrt(gmul(gpowgs(sqrN2(A,prec), degpol(B)),
+                   gpowgs(b, degpol(A))), prec);
+  return gerepileupto(av, bnd);
+}
+/* A,B in C[X] return RgX_RgXY_ResBound(A, B(x+y)) */
+static GEN
+RgX_RgXY_ResBound_1(GEN A, GEN B, long prec)
+{
+  pari_sp av = avma;
+  GEN b = gen_0, bnd;
+  long i, lB = lg(B);
+  B = shallowcopy(B);
+  for (i=2; i<lB; i++) gel(B,i) = gabs(gel(B,i), prec);
+  for (i=2; i<lB; i++)
+  {
+    b = gadd(b, gsqr(RgX_norml1_1(B, i-2)));
+    if (gc_needed(av,1))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgX_RgXY_ResBound i = %ld",i);
+      b = gerepileupto(av, b);
+    }
+  }
+  bnd = gsqrt(gmul(gpowgs(sqrN2(A,prec), degpol(B)),
+                   gpowgs(b, degpol(A))), prec);
   return gerepileupto(av, bnd);
 }
 
-/* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
- *   bound = N_2(A)^degpol B N_2(B)^degpol(A),  where
- *     N_2(A) = sqrt(sum (N_1(Ai))^2)
- * Return e such that Res(A, B) < 2^e */
-ulong
-ZX_ZXY_ResBound(GEN A, GEN B, GEN dB)
+/* log2 N_2(A)^2 */
+static double
+log2N2(GEN A)
 {
   pari_sp av = avma;
-  GEN a = gen_0, b = gen_0;
-  long i , lA = lg(A), lB = lg(B);
-  double loga, logb;
-  for (i=2; i<lA; i++)
+  long i, l = lg(A);
+  GEN a = gen_0;
+  for (i=2; i < l; i++)
   {
     a = addii(a, sqri(gel(A,i)));
     if (gc_needed(av,1))
@@ -1388,7 +1457,19 @@ ZX_ZXY_ResBound(GEN A, GEN B, GEN dB)
       a = gerepileupto(av, a);
     }
   }
-  loga = dbllog2(a); set_avma(av);
+  return gc_double(av, dbllog2(a));
+}
+/* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
+ *   bound = N_2(A)^degpol B N_2(B)^degpol(A),  where
+ *     N_2(A) = sqrt(sum (N_1(Ai))^2)
+ * Return e such that Res(A, B) < 2^e */
+ulong
+ZX_ZXY_ResBound(GEN A, GEN B, GEN dB)
+{
+  pari_sp av = avma;
+  GEN b = gen_0;
+  long i, lB = lg(B);
+  double logb;
   for (i=2; i<lB; i++)
   {
     GEN t = gel(B,i);
@@ -1401,7 +1482,26 @@ ZX_ZXY_ResBound(GEN A, GEN B, GEN dB)
     }
   }
   logb = dbllog2(b); if (dB) logb -= 2 * dbllog2(dB);
-  i = (long)((degpol(B) * loga + degpol(A) * logb) / 2);
+  i = (long)((degpol(B) * log2N2(A) + degpol(A) * logb) / 2);
+  return gc_ulong(av, (i <= 0)? 1: 1 + (ulong)i);
+}
+/* A,B ZX. Return ZX_ZXY_ResBound(A(x), B(x+y)) */
+static ulong
+ZX_ZXY_ResBound_1(GEN A, GEN B)
+{
+  pari_sp av = avma;
+  GEN b = gen_0;
+  long i, lB = lg(B);
+  for (i=2; i<lB; i++)
+  {
+    b = addii(b, sqri(ZX_norml1_1(B, i-2)));
+    if (gc_needed(av,1))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"ZX_ZXY_ResBound i = %ld",i);
+      b = gerepileupto(av, b);
+    }
+  }
+  i = (long)((degpol(B) * log2N2(A) + degpol(A) * dbllog2(b)) / 2);
   return gc_ulong(av, (i <= 0)? 1: 1 + (ulong)i);
 }
 /* special case B = A' */
@@ -2158,17 +2258,19 @@ ZXQX_resultant_worker(GEN P, GEN A, GEN B, GEN T, GEN dB)
 }
 
 static ulong
-ZXQX_resultant_bound(GEN nf, GEN A, GEN B)
+ZXQX_resultant_bound_i(GEN nf, GEN A, GEN B, GEN (*f)(GEN,GEN,long))
 {
   pari_sp av = avma;
   GEN r, M = L2_bound(nf, NULL, &r);
   long v = nf_get_varn(nf), i, l = lg(r);
   GEN a = cgetg(l, t_COL);
   for (i = 1; i < l; i++)
-    gel(a, i) =  RgX_RgXY_ResBound(gsubst(A, v, gel(r,i)),
-                                   gsubst(B, v, gel(r,i)), DEFAULTPREC);
+    gel(a, i) = f(gsubst(A, v, gel(r,i)), gsubst(B, v, gel(r,i)), DEFAULTPREC);
   return gc_ulong(av, (ulong) dbllog2(gmul(M,RgC_fpnorml2(a, DEFAULTPREC))));
 }
+static ulong
+ZXQX_resultant_bound(GEN nf, GEN A, GEN B)
+{ return ZXQX_resultant_bound_i(nf, A, B, &RgX_RgXY_ResBound); }
 
 /* Compute Res(A, B/dB) in Z[X]/T, assuming A,B in Z[X,Y], dB in Z or NULL (= 1)
  * If B=NULL, take B = A' and assume deg A > 1 */
@@ -2748,7 +2850,8 @@ ZX_direct_compositum(GEN A, GEN B, GEN lead)
   forprime_t S;
   ulong bound;
   GEN H, worker, mod;
-  bound = ZX_ZXY_ResBound(A, poleval(B,deg1pol(gen_1,pol_x(1),0)), NULL);
+  if (degpol(A) < degpol(B)) swap(A, B);
+  bound = ZX_ZXY_ResBound_1(A, B);
   worker = snm_closure(is_entry("_ZX_direct_compositum_worker"), mkvec2(A,B));
   init_modular_big(&S);
   H = gen_crt("ZX_direct_compositum", worker, &S, lead, bound, 0, &mod,
@@ -2851,17 +2954,7 @@ ZXQX_direct_compositum(GEN A, GEN B, GEN T, ulong bound)
 
 static long
 ZXQX_direct_compositum_bound(GEN nf, GEN A, GEN B)
-{
-  pari_sp av = avma;
-  GEN r, M = L2_bound(nf, NULL, &r);
-  long v = nf_get_varn(nf), i, l = lg(r);
-  GEN a = cgetg(l, t_COL);
-  for (i = 1; i < l; i++)
-    gel(a, i) =  RgX_RgXY_ResBound(gsubst(A, v, gel(r,i)),
-                 poleval(gsubst(B, v, gel(r,i)),
-                         deg1pol(gen_1, pol_x(1), 0)), DEFAULTPREC);
-  return gc_long(av, (long) dbllog2(gmul(M,RgC_fpnorml2(a, DEFAULTPREC))));
-}
+{ return ZXQX_resultant_bound_i(nf, A, B, &RgX_RgXY_ResBound_1); }
 
 GEN
 nf_direct_compositum(GEN nf, GEN A, GEN B)
