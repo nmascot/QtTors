@@ -11165,19 +11165,20 @@ c_F2TH4(long n, GEN *pF2, GEN *pTH4)
 static GEN
 mfEHcoef(long r, long N)
 {
-  long D0, f, i, l;
+  long D0, f, i, l, s;
   GEN S, Df;
 
   if (r == 1) return hclassno(utoi(N));
   if (N == 0) return gdivgs(bernfrac(2*r), -2*r);
-  if (r&1L)
+  s = N & 3L;
+  if (odd(r))
   {
-    long s = N&3L; if (s == 2 || s == 1) return gen_0;
+    if (s == 2 || s == 1) return gen_0;
     D0 = mycoredisc2neg(N,&f);
   }
   else
   {
-    long s = N&3L; if (s == 2 || s == 3) return gen_0;
+    if (s == 2 || s == 3) return gen_0;
     D0 = mycoredisc2pos(N,&f);
   }
   Df = mydivisorsu(u_pporad(f, D0)); l = lg(Df);
