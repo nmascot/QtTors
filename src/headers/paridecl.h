@@ -1235,6 +1235,7 @@ GEN     RgX_divrem(GEN x,GEN y,GEN *r);
 GEN     RgX_divs(GEN y, long x);
 long    RgX_equal(GEN x, GEN y);
 void    RgX_even_odd(GEN p, GEN *pe, GEN *po);
+GEN     RgX_homogenize(GEN P, long v);
 GEN     RgX_inflate(GEN x0, long d);
 GEN     RgX_mul(GEN x,GEN y);
 GEN     RgX_mul_i(GEN x,GEN y);

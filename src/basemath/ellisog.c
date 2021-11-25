@@ -1220,15 +1220,6 @@ ellnf_charpoly(GEN E, GEN pr)
 { return deg2pol_shallow(gen_1, negi(ellap(E,pr)), pr_norm(pr), 0); }
 
 static GEN
-RgX_homogenize(GEN P, long v)
-{
-  GEN Q = leafcopy(P);
-  long i, l = lg(P), d = degpol(P);
-  for (i = 2; i < l; i++) gel(Q,i) = monomial(gel(Q,i), d--, v);
-  return Q;
-}
-
-static GEN
 starlaw(GEN p, GEN q)
 {
   GEN Q = RgX_homogenize(RgX_recip(q), 1);

@@ -10225,6 +10225,11 @@ to $D x$ for some well-chosen integer $D$. More precisely, if the input is
 exact, $D$ is the denominator of $x$; else it is a power of $2$ chosen
 so that all inexact entries are correctly rounded to 1 ulp.
 
+\fun{GEN}{RgX_homogenize}{GEN P, long v} Return the homogenous polynomial
+associated to $P$ in the secondary variable $v$, that is $y^d*P(x/y)$ where $d$
+is the degree of $P$, $x$ is the variable of $P$, and  $y$ is the variable with
+number $v$.
+
 \fun{GEN}{RgXX_to_Kronecker}{GEN P, long n} Assuming $P(X,Y)$ is a polynomial
 of degree in $X$ strictly less than $n$, returns $P(X,X^{2*n-1})$, the
 Kronecker form of $P$. Shallow function.

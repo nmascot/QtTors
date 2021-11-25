@@ -745,15 +745,6 @@ fact(double x)
   return ft ;
 }
 
-static GEN
-RgX_homogenize(GEN P, long v)
-{
-  GEN Q = leafcopy(P);
-  long i, l = lg(P), d = degpol(P);
-  for (i = 2; i < l; i++) gel(Q,i) = monomial(gel(Q,i), d--, v);
-  return Q;
-}
-
 /* Compute all relevant constants needed to solve the equation P(x,y)=a given
  * the solutions of N_{K/Q}(x)=a (see inithue). */
 GEN
