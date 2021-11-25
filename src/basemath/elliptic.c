@@ -649,7 +649,7 @@ base_ring(GEN x, GEN *pp, long *prec)
         }
         break;
       case t_POLMOD:
-        if (pol && !gequal(pol, gel(q,1)))
+        if (pol && !RgX_equal(pol, gel(q,1)))
           pari_err_MODULUS("ellinit",gel(q,1), pol);
       case t_COL:
       case t_POL:
