@@ -5173,8 +5173,9 @@ GEN     qforbits(GEN G, GEN V);
 
 /* qfparam.c */
 
-GEN     qfsolve(GEN G);
+GEN     qfminimize(GEN G);
 GEN     qfparam(GEN G, GEN sol, long fl);
+GEN     qfsolve(GEN G);
 
 /* quad.c */
 

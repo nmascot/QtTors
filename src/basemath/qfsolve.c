@@ -404,7 +404,7 @@ prod_fm(GEN f, long i)
  * impossible because of local nonsolvability.
  * P,E = factor(+/- det(G)), "prime" -1 is ignored. Destroy E. */
 static GEN
-qfminimize(GEN G, GEN P, GEN E)
+qfminimize_fact(GEN G, GEN P, GEN E, long loc)
 {
   GEN U = NULL, Ker = NULL, faE, faP;
   long n = lg(G)-1, lP = lg(P), i;
@@ -539,7 +539,7 @@ qfminimize(GEN G, GEN P, GEN E)
 
       /* Minimization was not possible so far. */
       /* If n == 3 or 4, this proves the local nonsolubility at p. */
-      if (n == 3 || n == 4)
+      if (loc && (n == 3 || n == 4))
       {
         if (DEBUGLEVEL >= 1) err_printf(" no local solution at %Ps\n",p);
         return p;
@@ -558,6 +558,34 @@ qfminimize(GEN G, GEN P, GEN E)
     U = QM_mul(U, u);
   }
   return mkvec4(G, U, faP, faE);
+}
+
+/* assume G square integral */
+static void
+check_symmetric(GEN G)
+{
+  long i,j, l = lg(G);
+  for (i = 1; i < l; i++)
+    for(j = 1; j < i; j++)
+      if (!equalii(gcoeff(G,i,j), gcoeff(G,j,i)))
+        pari_err_TYPE("qfsolve [not symmetric]",G);
+}
+
+GEN
+qfminimize(GEN G)
+{
+  pari_sp av = avma;
+  GEN d, F, H;
+  long n = lg(G)-1;
+  if (typ(G) != t_MAT) pari_err_TYPE("qfminimize", G);
+  if (n == 0) pari_err_DOMAIN("qfminimize", "dimension" , "=", gen_0, G);
+  if (n != nbrows(G)) pari_err_DIM("qfminimize");
+  G = Q_primpart(G); RgM_check_ZM(G, "qfminimize");
+  check_symmetric(G);
+  d = ZM_det(G);
+  F = absZ_factor(d);
+  H = qfminimize_fact(G, gel(F,1),  ZV_to_zv(gel(F,2)), 0);
+  return gerepilecopy(av, mkvec2(gel(H,1), gel(H,2)));
 }
 
 /* CLASS GROUP COMPUTATIONS */
@@ -791,17 +819,6 @@ qfsolvemodp(GEN G, GEN p)
   return ZC_add(x1, ZC_lincomb(r,s,x2,x3));
 }
 
-/* assume G square integral */
-static void
-check_symmetric(GEN G)
-{
-  long i,j, l = lg(G);
-  for (i = 1; i < l; i++)
-    for(j = 1; j < i; j++)
-      if (!equalii(gcoeff(G,i,j), gcoeff(G,j,i)))
-        pari_err_TYPE("qfsolve [not symmetric]",G);
-}
-
 /* Given a square rational matrix G of dimension n >= 1, solves over Z the
  * quadratic equation X^tGX = 0. The solution is a t_VEC (a solution) or a
  * t_MAT (totally isotropic subspace). If no solution exists, returns an
@@ -864,7 +881,7 @@ qfsolve_i(GEN G)
   /* P,E = factor(|det(G)|) */
 
   /* Minimization and local solubility */
-  Min = qfminimize(G, P, E);
+  Min = qfminimize_fact(G, P, E, 1);
   if (typ(Min) == t_INT) return Min;
 
   M = QM_mul(M, gel(Min,2));
@@ -914,7 +931,7 @@ qfsolve_i(GEN G)
       signG[1]++;
     G1 = shallowmatconcat(diagonal_shallow(mkvec2(G,aux)));
     /* P,E = factor(|det G1|) */
-    Min = qfminimize(G1, P, E);
+    Min = qfminimize_fact(G1, P, E, 1);
     G1 = gel(Min,1);
     M1 = gel(Min,2);
     P = gel(Min,3);
@@ -976,7 +993,7 @@ qfsolve_i(GEN G)
     detG2 = mulii(d, ZM_det(Q));
     for (i = 1; i < lfactdP; i++) factdE[i] = Z_pval(detG2, gel(factdP,i));
     /* factdP,factdE = factor(|det G2|) */
-    Min = qfminimize(G2, factdP,factdE);
+    Min = qfminimize_fact(G2, factdP,factdE,1);
     M2 = gel(Min,2);
     G2 = gel(Min,1);
   }
