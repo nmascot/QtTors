@@ -1422,15 +1422,16 @@ RgX_RgXY_ResBound(GEN A, GEN B, long prec)
 static GEN
 RgX_RgXY_ResBound_1(GEN A, GEN B, long prec)
 {
-  pari_sp av = avma;
+  pari_sp av = avma, av2;
   GEN b = gen_0, bnd;
   long i, lB = lg(B);
   B = shallowcopy(B);
   for (i=2; i<lB; i++) gel(B,i) = gabs(gel(B,i), prec);
+  av2 = avma;
   for (i=2; i<lB; i++)
   {
     b = gadd(b, gsqr(RgX_norml1_1(B, i-2)));
-    if (gc_needed(av,1))
+    if (gc_needed(av2,1))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"RgX_RgXY_ResBound i = %ld",i);
       b = gerepileupto(av, b);
