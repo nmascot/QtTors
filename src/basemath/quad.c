@@ -206,7 +206,7 @@ prod_fm(GEN f, long i, long first)
     {
       GEN w = gel(f,k);
       if (typ(u) == t_INT) { update_f(w, u); u = first? gel(w,1): w; }
-      else u = first? ZM_ZC_mul(w, u): ZM2_mul(w, u);
+      else u = first? ZM_ZC_mul(w, gel(u,1)): ZM2_mul(w, u);
     }
   return u;
 }
