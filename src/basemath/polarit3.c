@@ -1434,7 +1434,7 @@ RgX_RgXY_ResBound_1(GEN A, GEN B, long prec)
     if (gc_needed(av2,1))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"RgX_RgXY_ResBound i = %ld",i);
-      b = gerepileupto(av, b);
+      b = gerepileupto(av2, b);
     }
   }
   bnd = gsqrt(gmul(gpowgs(sqrN2(A,prec), degpol(B)),
