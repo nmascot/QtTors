@@ -31,6 +31,7 @@ quadunitindex(5, [2,2;5,2])
 quadunitindex(5, 2^32)
 quadunitindex(28, 2^32)
 quadunit(74881)
+quadunit(511681)
 
 default(echo,1);
 
