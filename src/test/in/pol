@@ -23,6 +23,7 @@ poltomonic(9*x^2-1/2)
 U=poltomonic(9*x^2-1/2,&L);[U,L]
 poltomonic(x^2+4)
 U=poltomonic(x^2+4,&L);[U,L]
+poltomonic(2*x,&L); L
 
 norm(I*x+1)
 norm(Mod(0,x^0))
