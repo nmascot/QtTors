@@ -121,4 +121,7 @@ Mod(-6, y^2 - 2)*x^2 + Mod(48*z, y^2 - 2)*x + Mod(480*z + 600, y^2 - 2)
   ***   at top-level: (1/x)%x
   ***                      ^--
   *** _%_: impossible inverse in QXQ_inv: Mod(0, x).
+  ***   at top-level: poltomonic(Pol(0))
+  ***                 ^------------------
+  *** poltomonic: zero polynomial in poltomonic.
 Total time spent: 11

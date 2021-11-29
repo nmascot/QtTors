@@ -95,6 +95,7 @@ BA  75- concat(t_LIST,t_LIST) was leaking memory
     77- polsturm(-5500*x^4+440*x^3+21780*x^2-9680*x-29040,[-oo,-4])->corruption
     78- ellheight(E,,Q) -> SEGV
     79- besselj(80,66) -> oo loop
+    80- poltomonic(Pol(0)) -> SEGV [#2323]
 
   Added
 HC   1- new GP function eulerreal
