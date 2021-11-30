@@ -75,7 +75,10 @@ enum {
 #define PLOT_NO_TICK_Y    0x00400
 #define PLOT_NODOUBLETICK 0x00800
 #define PLOT_COMPLEX      0x01000
-#define PLOT_PARA         0x02000
+#define PLOT_NOMINMAX     0x02000
+
+#define PLOT_PARA         0x80000
+
 
 INLINE long
 DTOL(double t) { return (long)(t + 0.5); }
@@ -1506,8 +1509,14 @@ plotrecthrawin(GEN fmt, PARI_plot *W, long ne, dblPointList *data, long flags)
     long lm, rm, tm, bm;
     char YBIG[16], YSML[16], XSML[16], XBIG[16];
     /* left/right/top/bottom margin */
-    sprintf(YSML,"%.5g", ysml); sprintf(YBIG,"%.5g", ybig);
-    sprintf(XSML,"%.5g", xsml); sprintf(XBIG,"%.5g", xbig);
+    if (flags&PLOT_NOMINMAX)
+    {
+      YBIG[0]=0; YSML[0]=0; XSML[0]=0; XBIG[0]=0;
+    } else
+    {
+      sprintf(YSML,"%.5g", ysml); sprintf(YBIG,"%.5g", ybig);
+      sprintf(XSML,"%.5g", xsml); sprintf(XBIG,"%.5g", xbig);
+    }
     /* left margin has y labels with hgap on both sides of text */
     lm = maxss(strlen(YSML),strlen(YBIG))*W->fwidth + 2*W->hunit-1;
     rm = W->hunit-1;

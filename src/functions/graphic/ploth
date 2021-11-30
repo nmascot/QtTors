@@ -4,7 +4,7 @@ C-Name: ploth0
 Wrapper: (,,G)
 Description:
   (gen,gen,gen,?small,?small):gen:prec ploth(${3 cookie}, ${3 wrapper}, $1, $2, $4, $5, $prec)
-Prototype: V=GGED0,M,D0,L,p\nParametric|1; Recursive|2; no_Rescale|4; no_X_axis|8; no_Y_axis|16; no_Frame|32; no_Lines|64; Points_too|128; Splines|256; no_X_ticks|512; no_Y_ticks|1024; Same_ticks|2048; Complex|4096
+Prototype: V=GGED0,M,D0,L,p\nParametric|1; Recursive|2; no_Rescale|4; no_X_axis|8; no_Y_axis|16; no_Frame|32; no_Lines|64; Points_too|128; Splines|256; no_X_ticks|512; no_Y_ticks|1024; Same_ticks|2048; Complex|4096; No_MinMax|8192;
 Help: ploth(X=a,b,expr,{flag=0},{n=0}): plot of expression expr, X goes
  from a to b in high resolution. Both flag and n are optional. Binary digits
  of flag mean: 1=Parametric, 2=Recursive, 4=no_Rescale, 8=no_X_axis,
@@ -114,5 +114,7 @@ Doc: high precision plot of the function $y=f(x)$ represented by the expression
  ploth(X=0,2*Pi,[(1+I)*X,exp(I*X)], "Complex")
  @eprog\noindent will draw respectively a circle and a circle cut by the line
  $y=x$.
+
+\item $8192 = \kbd{no_MinMax}$: do not print the boundary numbers (in both directions).
 
  \synt{ploth}{void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long flag, long n, long prec},
