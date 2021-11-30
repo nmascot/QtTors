@@ -466,6 +466,9 @@ member_gen(GEN x)
     case typ_PRID: return mkvec2(gel(x,1), gel(x,2));
     case typ_GAL: return gal_get_gen(x);
     case typ_ELL: return ellgenerators(x);
+    case typ_NULL:
+      if (typ(x)==t_FFELT) return FF_gen(x);
+      break;
   }
   av = avma;
   x = _check_clgp(x,y,t);

@@ -2035,6 +2035,7 @@ ffgen(GEN T, long v)
   switch(typ(T))
   {
     case t_FFELT:
+      if (v < 0 || FF_var(T)==v) return FF_gen(T);
       p = FF_p_i(T); T = FF_mod(T); d = degpol(T);
       break;
     case t_POL:

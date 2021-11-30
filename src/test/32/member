@@ -276,14 +276,17 @@ ELLQp
 5), 6*11^2 + 9*11^3 + 2*11^4 + O(11^5), 10*11^4 + O(11^5)], 0]]
 FFELT
 .f: 3
+.gen: x
 .mod: x^3 + x^2 + 1
 .p: 2
 .pol: x
 .f: 3
+.gen: x
 .mod: x^3 + 2*x + 2
 .p: 3
 .pol: x
 .f: 2
+.gen: x
 .mod: x^2 + x + 1
 .p: 18446744073709551629
 .pol: x
@@ -347,4 +350,4 @@ BID (nogen)
 MF
 .mod: t^2 + t + 1
 .mod: Mod(1, t^2 + t + 1)*y^2 + Mod(-2*t, t^2 + t + 1)
-Total time spent: 62
+Total time spent: 47
