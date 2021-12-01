@@ -1397,9 +1397,8 @@ bnrclassfield_H(struct rnfkummer **vkum, GEN bnr, GEN bad, GEN H0, GEN fa, long 
     case 1:
       return pol_x(0);
     default: /* 2 */
-      res = gcopy(nf_get_pol(bnr_get_nf(bnr)));
-      setvarn(res,0);
-      return res;
+      res = shallowcopy(nf_get_pol(bnr_get_nf(bnr)));
+      setvarn(res,0); return res;
   }
   absolute = flag==2 && lPN==2 && !equali1(gel(EN,1)); /* one prime, exponent > 1 */
   res = cgetg(lPN, t_VEC);
@@ -1472,15 +1471,11 @@ bnrclassfield(GEN bnr, GEN subgroup, long flag, long prec)
   N = ZM_det_triangular(subgroup);
   if (equali1(N)) switch(flag)
   {
-    case 0:
-      return gerepilecopy(av, mkvec(pol_x(0)));
-    case 1:
-      set_avma(av);
-      return pol_x(0);
+    case 0: set_avma(av); retmkvec(pol_x(0));
+    case 1: set_avma(av); return pol_x(0);
     default: /* 2 */
-      P = gcopy(nf_get_pol(bnr_get_nf(bnr)));
-      setvarn(P,0);
-      return gerepilecopy(av,P);
+      P = shallowcopy(nf_get_pol(bnr_get_nf(bnr)));
+      setvarn(P,0); return gerepilecopy(av,P);
   }
   if (is_bigint(N)) pari_err_OVERFLOW("bnrclassfield [too large degree]");
   fa = Z_factor(N); P = disc_primes(bnr);
