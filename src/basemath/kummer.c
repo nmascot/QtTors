@@ -1390,7 +1390,17 @@ bnrclassfield_H(struct rnfkummer **vkum, GEN bnr, GEN bad, GEN H0, GEN fa, long 
   GEN PN = gel(fa,1), EN = gel(fa,2), res;
   long i, lPN = lg(PN), absolute;
 
-  if (lPN == 1) return pol_x(0);
+  if (lPN == 1) switch(flag)
+  {
+    case 0:
+      return mkvec(pol_x(0));
+    case 1:
+      return pol_x(0);
+    default: /* 2 */
+      res = gcopy(nf_get_pol(bnr_get_nf(bnr)));
+      setvarn(res,0);
+      return res;
+  }
   absolute = flag==2 && lPN==2 && !equali1(gel(EN,1)); /* one prime, exponent > 1 */
   res = cgetg(lPN, t_VEC);
   for (i = 1; i < lPN; i++)
@@ -1440,7 +1450,7 @@ bnrclassfieldvec(GEN bnr, GEN v, long flag, long prec)
   return w;
 }
 /* flag:
- * 0 list of polynomials whose compositum is the extension
+ * 0 t_VEC of polynomials whose compositum is the extension
  * 1 single polynomial
  * 2 single absolute polynomial */
 GEN
@@ -1460,7 +1470,18 @@ bnrclassfield(GEN bnr, GEN subgroup, long flag, long prec)
   }
   bnrclassfield_sanitize(&bnr, &subgroup);
   N = ZM_det_triangular(subgroup);
-  if (equali1(N)) { set_avma(av); return pol_x(0); }
+  if (equali1(N)) switch(flag)
+  {
+    case 0:
+      return gerepilecopy(av, mkvec(pol_x(0)));
+    case 1:
+      set_avma(av);
+      return pol_x(0);
+    default: /* 2 */
+      P = gcopy(nf_get_pol(bnr_get_nf(bnr)));
+      setvarn(P,0);
+      return gerepilecopy(av,P);
+  }
   if (is_bigint(N)) pari_err_OVERFLOW("bnrclassfield [too large degree]");
   fa = Z_factor(N); P = disc_primes(bnr);
   vkum = rnfkummer_initall(bnr, ZV_to_zv(gel(fa,1)), P, prec);

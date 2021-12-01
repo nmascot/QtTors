@@ -50,7 +50,7 @@
 [1, 1, 1, 1]
 sanitize
 25
-x
+[x]
 [x^2 - 2]
 hard DLs (#2228)
 [1, 2, 1624384359015881850161120870813]
@@ -257,6 +257,12 @@ y]]
 [[x^3 + 3*x + y]]
 1
 [x^3 + (1/10*y^3 - 1/2*y^2 + 1/2*y + 2/5)]
+[x]
+x
+x^3 - 2
+[[x], [x]]
+[x, x]
+[x^3 - 2, x^3 - 2]
 bad inputs
   ***   at top-level: bnrclassfield(y^2+6,Mat(2))
   ***                 ^---------------------------
@@ -291,4 +297,4 @@ bad inputs
   ***   at top-level: bnrclassfield(bnfinit(x))
   ***                 ^-------------------------
   *** bnrclassfield: incorrect priority in bnrclassfield: variable x = x
-Total time spent: 13746
+Total time spent: 10714

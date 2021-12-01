@@ -186,6 +186,15 @@ check(bnr,f[1],s,, 90)
 \\ test rnfkummersimple for ell > 2
 setrand(1);bnrclassfield(bnfinit(y^4 - y^3 - 5*y^2 - 6*y + 36))
 
+\\#2325
+bnf = bnfinit(a^3-2);
+bnrclassfield(bnf)
+bnrclassfield(bnf,,1)
+bnrclassfield(bnf,,2)
+bnrclassfield(bnf,[[],[]])
+bnrclassfield(bnf,[[],[]],1)
+bnrclassfield(bnf,[[],[]],2)
+
 print("bad inputs");
 bnrclassfield(y^2+6,Mat(2))
 K = bnfinit(y^2+6);
