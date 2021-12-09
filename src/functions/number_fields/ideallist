@@ -40,7 +40,7 @@ Doc: computes the list of all ideals of norm less or equal to \var{bound} in
  ? L[1]
  %3 = [[1, 0; 0, 1]]  \\@com A single ideal of norm 1
  ? #L[65]
- %4 = 4               \\@com There are 4 ideals of norm 4 in $\Z[i]$
+ %4 = 4               \\@com There are 4 ideals of norm 65 in $\Z[i]$
  @eprog
  If one wants more information:
  \bprog
