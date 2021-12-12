@@ -431,6 +431,7 @@ lfuncheckfeq(lfunshift(L,1/2))
 
 lfun(1, -2+O(x))
 lfun(1, -2+O(x^2))
+lfun(1, 0.)
 lfun(x^2+1, -1+O(x^2))
 
 K=bnfinit(y^2-17);

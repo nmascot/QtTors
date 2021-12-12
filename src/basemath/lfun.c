@@ -262,6 +262,7 @@ serextendifnegint(GEN s, GEN s0, long *ext)
     long l = lg(s);
     GEN t = cgetg(l+1, t_SER);
     gel(t, l) = s0; while (--l > 1) gel(t,l) = gel(s,l);
+    if (gequal0(gel(t,2))) gel(t,2) = gen_0;
     t[1] = s[1]; s = normalize(t); *ext = 1;
   }
   return s;
