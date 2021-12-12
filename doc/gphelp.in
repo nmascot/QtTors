@@ -34,7 +34,7 @@ $datadir= "@datadir@";
 #  -to_pod file		convert file to POD (should be the only args)
 #
 #  -to_dumb_pod file	same, but without nested formating
-#  -utf8  in detex mode, use UFT-8 encoding for output
+#  -utf8  in detex mode, use UTF-8 encoding for output
 #
 # Granted environment variables (override):
 #  GPTMPDIR: where temporary files will go (/tmp by default).
