@@ -2394,7 +2394,8 @@ ellQp_P2t(GEN E, GEN P, long prec)
   x = gel(P,1);
   r0 = get_r0(E, prec);
   c0 = gadd(x, gmul2n(r0,-1));
-  if (typ(c0) != t_PADIC) pari_err_TYPE("ellpointtoz",P);
+  if (typ(c0) != t_PADIC || !is_scalar_t(typ(gel(P,2))))
+    pari_err_TYPE("ellpointtoz",P);
   r = gsub(a,b);
   ar = gmul(a, r);
   if (gequal0(c0))
@@ -2409,7 +2410,14 @@ ellQp_P2t(GEN E, GEN P, long prec)
     if (!t) ellQp_P2t_err(E,P);
     x1 = gmul(gmul2n(c0,-1), gaddsg(1,t));
   }
-  y1 = gdiv(gmul2n(ec_dmFdy_evalQ(E,P), -1), gsubsg(1, gdiv(ar, gsqr(x1))));
+  y1 = gsubsg(1, gdiv(ar, gsqr(x1)));
+  if (gequal0(y1))
+  {
+    y1 = Qp_sqrt(gmul(x1, gmul(gadd(x1, a), gadd(x1, r))));
+    if (!y1) ellQp_P2t_err(E,P);
+  }
+  else
+    y1 = gdiv(gmul2n(ec_dmFdy_evalQ(E,P), -1), y1);
   Qp_descending_Landen(ellQp_AGM(E,prec), &x1,&y1);
 
   t = gmul(u, gmul2n(y1,1)); /* 2u y_oo */

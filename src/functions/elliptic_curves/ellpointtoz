@@ -54,7 +54,8 @@ Doc:
  \item If the reduction is \emph{not} split ($E.\kbd{tate[2]}$ is a
  \typ{POLMOD}), we only have an isomorphism $\phi: E(K) \simeq K^*/q^\Z$ over
  the unramified quadratic extension $K/\Q_p$. In this case, the output
- $\phi(P)\in K$ is a \typ{POLMOD}.
+ $\phi(P)\in K$ is a \typ{POLMOD}; the function is not fully implemented in
+ this case and may fail with a ``$u$ not in $\Q_p$'' exception:
  \bprog
  ? E = ellinit([0,-1,1,0,0], O(11^5)); P = [0,0];
  ? [u2,u,q] = E.tate; type(u) \\ split multiplicative reduction
@@ -69,4 +70,8 @@ Doc:
  ? z = ellpointtoz(E,[x,y]); \\ t_POLMOD of t_POL with t_PADIC coeffs
  ? liftint(z) \\ lift all p-adics
  %8 = Mod(8*u + 7, u^2 + 437)
+ ? x=33/4; y=ellordinate(E,x)[1]; z = ellpointtoz(E,[x,y])
+ ***   at top-level: ...;y=ellordinate(E,x)[1];z=ellpointtoz(E,[x,y])
+ ***                                             ^--------------------
+ *** ellpointtoz: sorry, ellpointtoz when u not in Qp is not yet implemented.
  @eprog
