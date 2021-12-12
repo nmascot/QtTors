@@ -3195,6 +3195,14 @@ RgX_rem(GEN x, GEN y)
   return z;
 }
 
+static GEN
+_RgX_mul(void* E, GEN x, GEN y)
+{ (void) E; return RgX_mul(x, y); }
+
+GEN
+RgXV_prod(GEN V)
+{ return gen_product(V, NULL, &_RgX_mul); }
+
 GEN
 RgXn_mul(GEN f, GEN g, long n)
 {

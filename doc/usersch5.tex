@@ -10346,6 +10346,9 @@ ring and use an appropriate algorithm.
 \fun{GEN}{RgX_sqr_i}{GEN x} squares the \typ{POL} \kbd{x}. Do not detect the
 coefficient ring.  Use a generic Karatsuba algorithm.
 
+\fun{GEN}{RgXV_prod}{GEN V}, \kbd{V} being a vector of \kbd{RgX},
+returns their product.
+
 \fun{GEN}{RgX_divrem}{GEN x, GEN y, GEN *r} by default, returns the Euclidean
 quotient and store the remainder in $r$. Three special values of $r$ change
 that behavior
