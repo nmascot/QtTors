@@ -99,9 +99,9 @@ O(3^3) + O(x)
 1 + O(x)
   *** _+_: Warning: normalizing a series with 0 leading term.
 1.0000000000000000000000000000000000000*x^-1 + O(x)
-[0, 1, 1]
-[0, 1, 1]
-[0, 1, 1]
+[0, 1, 1, 0, 1]
+[0, 1, 1, 0, 1]
+[0, 1, 1, 0, 1]
 Mod(0, 9)*x + O(x^2)
 0.E-38*x^-1 + O(x^0)
 O(x^0)
@@ -189,4 +189,4 @@ q^32000 + O(q^32001)
   ***   at top-level: O(y)/O(x)
   ***                     ^-----
   *** _/_: impossible inverse in RgXn_inv: 0.
-Total time spent: 7
+Total time spent: 6

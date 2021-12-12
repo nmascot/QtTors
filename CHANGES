@@ -97,6 +97,7 @@ BA  75- concat(t_LIST,t_LIST) was leaking memory
     79- besselj(80,66) -> oo loop
     80- poltomonic(Pol(0)) -> SEGV [#2323]
     81- lfun(1, 0.0) "normalizing a series with a 0 leading term" [#2329]
+    82- (0. + O(x) == 1) returned 'true'
 
   Added
 HC   1- new GP function eulerreal

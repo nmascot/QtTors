@@ -332,16 +332,12 @@ static int
 is_monomial_test(GEN x, long v, int(*test)(GEN))
 {
   long d, i, l;
-  if (!signe(x)) return (typ(x) == t_SER && v <= 0);
   if (v > 0) return 0;
-  l = lg(x); d = 2-v;
-  if (l <= d) return 0;
-  /* 2 <= d < l */
-  if (!test(gel(x,d))) return 0;
-  for (i = 2; i < d; i++)
-    if (!gequal0(gel(x,i))) return 0;
-  for (i = d+1; i < l; i++)
-    if (!gequal0(gel(x,i))) return 0;
+  l = lg(x);
+  if (!signe(x)) return typ(x) == t_SER && v + l - 2 <= 0;
+  d = 2-v; if (l <= d || !test(gel(x,d))) return 0;
+  for (i = 2; i < l; i++) /* 2 <= d < l */
+    if (i != d && !gequal0(gel(x,i))) return 0;
   return 1;
 }
 static int
