@@ -5455,7 +5455,7 @@ PicTorsBasis(GEN J, GEN l, GEN Chi)
     if(nwatch>2*nPhi)
     {
       avma = av;
-      return NULL;
+      return gen_0;
     }
   }
   res = cgetg(4,t_VEC);
@@ -5583,10 +5583,11 @@ PicTorsGalRep(GEN J, GEN l, GEN chi)
   }
   J1 = PicSetPrec(J,1);
   B = PicTorsBasis(J1,l,chi);
-  if(B==NULL) /* Got stuck and want to give up ? */
+  if(gequal0(B)) /* Got stuck and want to give up ? */
   {
     av = avma;
-    return NULL;
+    pari_err(e_MISC,"This Jacobian does not seem to contain the appropriate torsion");
+    return gen_0;
   }
   if(DEBUGLEVEL) timers_printf("pictorsgalrep","basis",&CPUT,&WT);
   R = PicTorsGalRep_from_basis(J,J1,l,B);
