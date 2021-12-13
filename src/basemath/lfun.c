@@ -254,14 +254,15 @@ isnegint(GEN s)
   if (signe(r) <= 0 && gequal(s, r)) return -itos(r);
   return -1;
 }
+/* if s = a + O(x^n), a <= 0 integer, replace by a + b*x^n + O(x^(n+1)) */
 static GEN
-serextendifnegint(GEN s, GEN s0, long *ext)
+serextendifnegint(GEN s, GEN b, long *ext)
 {
   if (!signe(s) || (serisscalar(s) && isnegint(gel(s,2)) >= 0))
-  { /* a + O(x^n) => a + x^n + O(x^(n+1)) */
+  {
     long l = lg(s);
     GEN t = cgetg(l+1, t_SER);
-    gel(t, l) = s0; while (--l > 1) gel(t,l) = gel(s,l);
+    gel(t, l) = b; while (--l > 1) gel(t,l) = gel(s,l);
     if (gequal0(gel(t,2))) gel(t,2) = gen_0;
     t[1] = s[1]; s = normalize(t); *ext = 1;
   }
