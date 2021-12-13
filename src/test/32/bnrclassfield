@@ -22,7 +22,7 @@
 11
 1
 12
-[1, 1]
+1
 13
 [1, 1]
 14
@@ -30,7 +30,7 @@
 15
 [x^2 - 7, x^2 - 3, x^2 + 7]
 16
-[1, 1]
+1
 17
 [1]
 18
@@ -297,4 +297,4 @@ bad inputs
   ***   at top-level: bnrclassfield(bnfinit(x))
   ***                 ^-------------------------
   *** bnrclassfield: incorrect priority in bnrclassfield: variable x = x
-Total time spent: 10714
+Total time spent: 21426
