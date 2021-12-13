@@ -2415,12 +2415,12 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M, GEN I,
   if (ZV_isscalar(gel(ideal,1))) /* probable */
   {
     skipfirst = 1;
-    BOUND = mindd(BMULT * B1, 2 * B2);
+    BOUND = maxdd(BMULT * B1, 2 * B2);
   }
   else
   {
-    BOUND = mindd(BMULT * B1, 2 * B2);
     skipfirst = 0;
+    BOUND = mindd(BMULT * B1, 2 * B2);
   }
   /* BOUND at most BMULT fp->x smallest known vector */
   if (DEBUGLEVEL>1)
