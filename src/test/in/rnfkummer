@@ -1,6 +1,16 @@
 default(realprecision,38);
 allocatemem(40*10^6)
 count = 0;
+
+nfisprobisom(P,Q,n)=
+{
+  forprime(p=2,oo,
+    my(FP=factormod(P,p,1),FQ=factormod(Q,p,1));
+    if(vecmax(FP[,2])>1 || vecmax(FQ[,2])>1, next());
+    if(FP[,1]!=FQ[,1], return(0));
+    n--;
+    if(!n,return(1)));
+}
 do(nf,f, H = 0, sol, expo = 32)=
 { my(T,K);
   setrand(1); print(count++);
@@ -10,7 +20,7 @@ do(nf,f, H = 0, sol, expo = 32)=
   sol=rnfequation(K,sol); T=rnfequation(K,T);
   if (exponent(T) >= exponent(sol)+expo,
     error(Str(exponent(T),">=",exponent(sol),"+",expo)));
-  if(nfisisom(sol,T)===0, error("Non isomorphic: ",T));
+  if(!nfisprobisom(sol,T,100), error("Non isomorphic: ",T));
   1;
 }
 
