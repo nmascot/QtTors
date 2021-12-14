@@ -1478,7 +1478,7 @@ gtrace(GEN x)
       if (ser_isexactzero(x)) return gcopy(x);
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = gtrace(gel(x,i));
-      return normalize(y);
+      return normalizeser(y);
 
     case t_POLMOD:
       y = gel(x,1); z = gel(x,2);

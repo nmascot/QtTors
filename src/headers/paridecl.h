@@ -3688,7 +3688,7 @@ GEN     mklist(void);
 GEN     mklist_typ(long t);
 GEN     mklistcopy(GEN x);
 GEN     mkmap(void);
-GEN     normalize(GEN x);
+GEN     normalizeser(GEN x);
 GEN     normalizepol(GEN x);
 GEN     normalizepol_approx(GEN x, long lx);
 GEN     normalizepol_lg(GEN x, long lx);

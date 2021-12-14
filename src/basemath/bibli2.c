@@ -830,7 +830,7 @@ convol(GEN x, GEN y)
   z = cgetg(lx - ex, t_SER);
   z[1] = evalvalp(ex) | evalvarn(vx);
   for (j = ex+2; j<lx; j++) gel(z,j-ex) = gmul(gel(x,j),gel(y,j));
-  return normalize(z);
+  return normalizeser(z);
 }
 
 /***********************************************************************/

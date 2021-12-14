@@ -3697,7 +3697,7 @@ bestappr_Q(GEN x, GEN k)
         gel(y,i) = a;
       }
       if (tx == t_POL) return normalizepol(y);
-      if (tx == t_SER) return normalize(y);
+      if (tx == t_SER) return normalizeser(y);
       return y;
   }
   pari_err_TYPE("bestappr_Q",x);

@@ -1214,7 +1214,7 @@ mod_r(GEN x, long v, GEN T)
       if (varncmp(v, w) < 0 || ser_isexactzero(x)) return x;
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i = 2; i < lx; i++) gel(y,i) = mod_r(gel(x,i),v,T);
-      return normalize(y);
+      return normalizeser(y);
     case t_POL:
       w = varn(x);
       if (w == v)
@@ -1835,7 +1835,7 @@ derivser(GEN x)
     y = cgetg(lx,t_SER); y[1] = evalsigne(1)|_evalvalp(0) | evalvarn(vx);
     for (i=2; i<lx; i++) gel(y,i) = gmulsg(i-1,gel(x,i+1));
   }
-  return normalize(y);
+  return normalizeser(y);
 }
 
 static GEN
@@ -1936,7 +1936,7 @@ deriv(GEN x, long v)
       if (ser_isexactzero(x)) return gcopy(x);
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (j=2; j<lx; j++) gel(y,j) = deriv(gel(x,j),v);
-      return normalize(y);
+      return normalizeser(y);
 
     case t_RFRAC:
       return rfrac_deriv(x,v);
@@ -1976,7 +1976,7 @@ derivnser(GEN x, long n)
     for (i=0; i<lx-2; i++)
       gel(y,i+2) = gmul(mulu_interval(i+1,i+n),gel(x,i+2+n-e));
   }
-  return normalize(y);
+  return normalizeser(y);
 }
 
 /* n-th derivative of t_POL x, n > 0 */
@@ -2057,7 +2057,7 @@ derivn(GEN x, long n, long v)
       if (ser_isexactzero(x)) return gcopy(x);
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (j=2; j<lx; j++) gel(y,j) = derivn(gel(x,j),n,v);
-      return normalize(y);
+      return normalizeser(y);
 
     case t_RFRAC:
       return rfrac_derivn(x, n, v);
@@ -2126,7 +2126,7 @@ diffop(GEN x, GEN v, GEN dv)
       {
         y = cgetg_copy(x, &lx); y[1] = x[1];
         for (i=2; i<lx; i++) gel(y,i) = diffop(gel(x,i),v,dv);
-        y = normalize(y); /* y is probably invalid */
+        y = normalizeser(y); /* y is probably invalid */
         y = gsubst(y, vx, pol_x(vx)); /* Fix that */
       }
       y = gadd(y, gmul(gel(dv,idx),derivser(x)));
@@ -2558,7 +2558,7 @@ ground(GEN x)
       if (ser_isexactzero(x)) return gcopy(x);
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = ground(gel(x,i));
-      return normalize(y);
+      return normalizeser(y);
     case t_RFRAC:
       av = avma;
       return gerepileupto(av, gdiv(ground(gel(x,1)), ground(gel(x,2))));
@@ -2625,7 +2625,7 @@ grndtoi(GEN x, long *e)
         gel(y,i) = grndtoi(gel(x,i),&e1);
         if (e1 > *e) *e = e1;
       }
-      return normalize(y);
+      return normalizeser(y);
     case t_RFRAC:
       y = cgetg(3,t_RFRAC);
       gel(y,1) = grndtoi(gel(x,1),&e1); if (e1 > *e) *e = e1;
@@ -3518,7 +3518,7 @@ _sercoef(GEN x, long n, long v)
   /* w < v */
   z = cgetg(lx, t_SER); z[1] = x[1];
   for (i = 2; i < lx; i++) gel(z,i) = polcoef_i(gel(x,i), n, v);
-  return normalize(z);
+  return normalizeser(z);
 }
 
 /* assume x a t_RFRAC(n) */
@@ -3751,7 +3751,7 @@ lift0(GEN x, long v)
       }
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
-      return normalize(y);
+      return normalizeser(y);
     case t_COMPLEX: case t_QUAD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
@@ -3778,7 +3778,7 @@ lift_shallow(GEN x)
       }
       y = cgetg_copy(x,&l); y[1] = x[1];
       for (i = 2; i < l; i++) gel(y,i) = lift_shallow(gel(x,i));
-      return normalize(y);
+      return normalizeser(y);
     case t_POL:
       y = cgetg_copy(x,&l); y[1] = x[1];
       for (i = 2; i < l; i++) gel(y,i) = lift_shallow(gel(x,i));
@@ -3818,7 +3818,7 @@ liftall_shallow(GEN x)
       }
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = liftall_shallow(gel(x,i));
-      return normalize(y);
+      return normalizeser(y);
     case t_COMPLEX: case t_QUAD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
@@ -3853,7 +3853,7 @@ liftint_shallow(GEN x)
       }
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = liftint_shallow(gel(x,i));
-      return normalize(y);
+      return normalizeser(y);
     case t_POLMOD: case t_COMPLEX: case t_QUAD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
@@ -3888,7 +3888,7 @@ liftpol_shallow(GEN x)
       }
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = liftpol_shallow(gel(x,i));
-      return normalize(y);
+      return normalizeser(y);
     case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = liftpol_shallow(gel(x,i));
@@ -3930,7 +3930,7 @@ centerlift(GEN x)
       if (ser_isexactzero(x)) return lift(x);
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = centerlift(gel(x,i));
-      return normalize(y);
+      return normalizeser(y);
    case t_COMPLEX: case t_QUAD: case t_RFRAC:
    case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
@@ -3978,7 +3978,7 @@ op_ReIm(GEN f(GEN), GEN x)
     case t_SER:
       z = cgetg_copy(x, &lx); z[1] = x[1];
       for (j=2; j<lx; j++) gel(z,j) = f(gel(x,j));
-      return normalize(z);
+      return normalizeser(z);
 
     case t_RFRAC: {
       GEN dxb, n, d;

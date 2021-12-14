@@ -702,7 +702,7 @@ genapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
   switch(tx) {
     case t_POL: y = normalizepol(vecapply2(E,f,x)); break;
     case t_SER:
-      y = ser_isexactzero(x)? gcopy(x): normalize(vecapply2(E,f,x));
+      y = ser_isexactzero(x)? gcopy(x): normalizeser(vecapply2(E,f,x));
       break;
     case t_LIST:
       {

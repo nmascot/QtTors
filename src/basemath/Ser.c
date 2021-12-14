@@ -53,7 +53,7 @@ RgX_to_ser_i(GEN x, long l, long v, int copy)
   else
     for (; i <lx; i++) gel(y,i) = gel(x,i);
   for (     ; i < l; i++) gel(y,i) = gen_0;
-  return normalize(y);
+  return normalizeser(y);
 }
 /* enlarge/truncate t_POL x to a t_SER with lg l */
 GEN
@@ -63,7 +63,7 @@ RgX_to_ser_inexact(GEN x, long l)
 {
   long i, lx = lg(x);
   int first = 1;
-  for (i = 2; i < lx && gequal0(gel(x,i)); i++) /* ~ RgX_valrem + normalize */
+  for (i = 2; i < lx && gequal0(gel(x,i)); i++) /* ~ RgX_valrem + normalizeser */
     if (first && !isexactzero(gel(x,i)))
     {
       pari_warn(warner,"normalizing a series with 0 leading term");
@@ -96,7 +96,7 @@ RgV_to_ser_i(GEN x, long v, long l, int copy)
   else
     for (j = 2; j <= lx; j++) gel(y,j) = gel(x,j);
   for (     ; j < l;   j++) gel(y,j) = gen_0;
-  return normalize(y);
+  return normalizeser(y);
 }
 GEN
 RgV_to_ser(GEN x, long v, long l) { return RgV_to_ser_i(x, v, l, 0); }

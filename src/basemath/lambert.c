@@ -380,7 +380,7 @@ serlambertW(GEN y, long branch, long prec)
     t = gmul(deg1pol_shallow(gdiv(y0,x), y0, vy), t);
     t = gadd(x, reverse(serchop0(t)));
   }
-  return normalize(gsubst(t, vy, y));
+  return normalizeser(gsubst(t, vy, y));
 }
 
 static GEN

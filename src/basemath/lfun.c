@@ -264,7 +264,7 @@ serextendifnegint(GEN s, GEN b, long *ext)
     GEN t = cgetg(l+1, t_SER);
     gel(t, l) = b; while (--l > 1) gel(t,l) = gel(s,l);
     if (gequal0(gel(t,2))) gel(t,2) = gen_0;
-    t[1] = s[1]; s = normalize(t); *ext = 1;
+    t[1] = s[1]; s = normalizeser(t); *ext = 1;
   }
   return s;
 }
@@ -1697,7 +1697,7 @@ static GEN
 lfununext(GEN L)
 {
   setlg(L, maxss(lg(L)-1, valp(L)? 2: 3));
-  return normalize(L);
+  return normalizeser(L);
 }
 static GEN
 lfununextvec(GEN x)
@@ -1785,7 +1785,7 @@ sersplit1(GEN s, GEN *head)
   y = cgetg(l-1, t_SER); y[1] = s[1];
   setvalp(y, 1);
   for (i=3; i < l; i++) gel(y,i-1) = gel(s,i);
-  return normalize(y);
+  return normalizeser(y);
 }
 
 /* order of pole of Lambda at s (0 if regular point) */

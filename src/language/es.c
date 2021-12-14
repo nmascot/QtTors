@@ -2789,7 +2789,7 @@ bruti_intern(GEN g, pariout_t *T, pari_str *S, int addsign)
       l = lg(g)-2;
       if (l)
       {
-        /* See normalize(): Mod(0,2)*x^i*(1+O(x)), has valp = i+1 */
+        /* See normalizeser(): Mod(0,2)*x^i*(1+O(x)), has valp = i+1 */
         if (l == 1 && !signe(g) && isexactzero(gel(g,2))) i--;
         /* hack: we want g[i] = coeff of degree i */
         l += i; g -= i-2;

@@ -781,7 +781,7 @@ add_ser_scal(GEN y, GEN x)
   for (; i<ly; i++) gel(z,i) = gcopy(gel(y,i));
   gel(z,2) = x;
   z[1] = evalsigne(1) | _evalvalp(0) | evalvarn(vy);
-  return gequal0(x)? normalize(z): z;
+  return gequal0(x)? normalizeser(z): z;
 }
 static long
 _serprec(GEN x) { return ser_isexactzero(x)? 2: lg(x); }
@@ -807,7 +807,7 @@ ser_add(GEN x, GEN y)
     z = cgetg(ly,t_SER);
     for (i=2; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
   }
-  z[1] = x[1]; return normalize(z);
+  z[1] = x[1]; return normalizeser(z);
 }
 /* typ(y) == RFRAC, x polynomial in same variable or "scalar" */
 static GEN
@@ -1342,7 +1342,7 @@ mul_ser_scal(GEN y, GEN x) {
                                : gmul(gel(y,2), x), varn(y), valp(y));
   z = cgetg_copy(y, &l); z[1] = y[1];
   for (i = 2; i < l; i++) gel(z,i) = gmul(gel(y,i), x);
-  return normalize(z);
+  return normalizeser(z);
 }
 /* (n/d) * x, x "scalar" or polynomial in the same variable as d
  * [n/d a valid RFRAC]  */
@@ -1800,7 +1800,7 @@ fill_ser(GEN z, GEN y)
     for (i = 2; i < ly; i++) gel(z,i) = gel(y,i);
     for (     ; i < lx; i++) gel(z,i) = gen_0;
   }
-  return normalize(z);
+  return normalizeser(z);
 }
 
 GEN
@@ -2198,7 +2198,7 @@ gsqr(GEN x)
         return z;
       }
       if (lx < 40)
-        return normalize( sqr_ser_part(x, 0, lx-3) );
+        return normalizeser( sqr_ser_part(x, 0, lx-3) );
       else
       {
         pari_sp av = avma;
@@ -2267,7 +2267,7 @@ div_ser_scal(GEN y, GEN x) {
                                : gdiv(gel(y,2), x), varn(y), valp(y));
   z = cgetg_copy(y, &l); z[1] = y[1];
   for (i = 2; i < l; i++) gel(z,i) = gdiv(gel(y,i), x);
-  return normalize(z);
+  return normalizeser(z);
 }
 GEN
 ser_normalize(GEN x)
@@ -2897,7 +2897,7 @@ gmulsg(long s, GEN y)
       if (!s) return Rg_get_0(y);
       z = cgetg_copy(y, &ly); z[1]=y[1];
       for (i=2; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
-      return normalize(z);
+      return normalizeser(z);
 
     case t_RFRAC:
       if (!s) return zeropol(varn(gel(y,2)));
@@ -3062,7 +3062,7 @@ gmul2n(GEN x, long n)
       if (ser_isexactzero(x)) return gcopy(x);
       z = cgetg_copy(x, &lx); z[1] = x[1];
       for (i=2; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
-      return normalize(z); /* needed if char = 2 */
+      return normalizeser(z); /* needed if char = 2 */
     case t_VEC: case t_COL: case t_MAT:
       z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
