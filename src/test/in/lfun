@@ -39,6 +39,8 @@ L2=lfuncreate(nf24217);
 lfunhardy(L2,5)
 lfunhardy(L2,-5)
 
+lfun(1,0.,2) \\ division by 0 due to unnormalized series
+
 /* higher precision */
 default("realprecision",54)
 /* Riemann */

@@ -3876,6 +3876,7 @@ GEN     scalarpol_shallow(GEN x, long v);
 GEN     ser_unscale(GEN P, GEN h);
 long    serprec(GEN x, long v);
 GEN     serreverse(GEN x);
+GEN     ser2pol_approx(GEN x, long l, long *v);
 GEN     simplify(GEN x);
 GEN     simplify_shallow(GEN x);
 GEN     tayl(GEN x, long v, long precdl);

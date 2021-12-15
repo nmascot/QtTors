@@ -1182,13 +1182,30 @@ ser2pol_i(GEN x, long lx)
 }
 
 GEN
+ser2pol_approx(GEN x, long l, long *v)
+{
+  long i = 2, j = l-1, k;
+  GEN y;
+  while (i < l && gequal0(gel(x,i))) i++;
+  if (i != 2) pari_warn(warner,"normalizing a series with 0 leading term");
+  *v = i - 2; if (i == l) return zeropol(varn(x));
+  while (j > i && gequal0(gel(x,j))) j--;
+  l = j - *v + 1;
+  y = cgetg(l, t_POL); y[1] = x[1] & ~VALPBITS;
+  k = l; while (k > 2) gel(y, --k) = gel(x,j--);
+  return y;
+}
+
+GEN
 ser_inv(GEN b)
 {
   pari_sp av = avma;
-  long l = lg(b), e = valp(b), prec = l-2;
-  GEN y = RgXn_inv_i(ser2pol_i(b, l), prec);
-  GEN x = RgX_to_ser(y, l);
-  setvalp(x, -e); return gerepilecopy(av, x);
+  long e, l = lg(b);
+  GEN x, y;
+  y = ser2pol_approx(b, l, &e);
+  y = RgXn_inv_i(y, l - 2 - e);
+  x = RgX_to_ser(y, l); setvalp(x, - valp(b) - e);
+  return gerepilecopy(av, x);
 }
 
 /* T t_POL in var v, mod out by T components of x which are t_POL/t_RFRAC in v.

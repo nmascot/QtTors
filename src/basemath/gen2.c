@@ -2654,7 +2654,6 @@ normalizeser(GEN x)
   long i, lx = lg(x), vx=varn(x), vp=valp(x);
   GEN y, z;
 
-  if (typ(x) != t_SER) pari_err_TYPE("normalizeser",x);
   if (lx == 2) { setsigne(x,0); return x; }
   if (lx == 3) {
     z = gel(x,2);

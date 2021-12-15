@@ -1847,6 +1847,7 @@ lfunderiv(GEN lmisc, long m, GEN s, long flag, long bitprec)
   {
     long ex = lfunlambdaord(linit, s);
     /* HACK: pretend lfuninit was done to right accuracy */
+    if (gequal0(s)) s = gen_0;
     s = deg1ser_shallow(gen_1, s, 0, m+1+ex);
   }
   res = flag ? lfunlambda_OK(linit, s, dom, bitprec):

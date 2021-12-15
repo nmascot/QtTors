@@ -2318,21 +2318,12 @@ div_scal_T(GEN x, GEN y, long ty) {
   return NULL; /* LCOV_EXCL_LINE */
 }
 
-static GEN
-ser2pol_ii(GEN x, long lx, long y1)
-{
-  GEN y = cgetg(lx, t_POL);
-  long i;
-  for (i = lx-1; i > 1; i--) gel(y,i) = gel(x,i);
-  y[1] = y1; return y;
-}
-
 /* assume tx = ty = t_SER, same variable vx */
 static GEN
 div_ser(GEN x, GEN y, long vx)
 {
-  long v = valp(x) - valp(y), lx = lg(x), ly = lg(y);
-  GEN y_lead, z;
+  long e, v = valp(x) - valp(y), lx = lg(x), ly = lg(y);
+  GEN y0 = y, z;
   pari_sp av = avma;
 
   if (!signe(y)) pari_err_INV("div_ser", y);
@@ -2341,29 +2332,18 @@ div_ser(GEN x, GEN y, long vx)
     if (lx == 2) return zeroser(vx, v);
     return scalarser(gmul(gel(x,2),Rg_get_0(y)), varn(x), v);
   }
-  y_lead = gel(y,2);
-  if (gequal0(y_lead)) /* normalize denominator if leading term is 0 */
+  if (lx < ly) ly = lx;
+  y = ser2pol_approx(y, ly, &e);
+  if (e) { v -= e; ly -= e; if (ly <= 2) pari_err_INV("div_ser", y0); }
+  z = cgetg(ly,t_SER); z[1] = evalvalp(v) | evalvarn(vx) | evalsigne(1);
+  if (ly == 3)
   {
-    GEN y0 = y;
-    pari_warn(warner,"normalizing a series with 0 leading term");
-    for (v--, ly--,y++; ly > 2; v--, ly--, y++)
-    {
-      y_lead = gel(y,2);
-      if (!gequal0(y_lead)) break;
-    }
-    if (ly <= 2) pari_err_INV("div_ser", y0);
+    gel(z,2) = gdiv(gel(x,2), gel(y,2));
+    return gerepileupto(av, z);
   }
-  if (ly < lx) lx = ly;
-  z = cgetg(lx,t_SER); z[1] = evalvalp(v) | evalvarn(vx) | evalsigne(1);
-  x = ser2pol_i(x, lx);
-  y = ser2pol_ii(y, lx, z[1] & ~VALPBITS);
-  if (lx == 3) gel(z,2) = gdiv(gel(x,2), gel(y,2));
-  else
-  {
-    y = RgXn_div_i(x, y, lx-2);
-    z = fill_ser(z,y);
-  }
-  return gerepilecopy(av, z);
+  x = ser2pol_i(x, ly);
+  y = RgXn_div_i(x, y, ly-2);
+  return gerepilecopy(av, fill_ser(z,y));
 }
 /* x,y compatible PADIC */
 static GEN
