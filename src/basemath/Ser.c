@@ -75,11 +75,7 @@ GEN
 rfrac_to_ser(GEN x, long l)
 {
   GEN d = gel(x,2);
-  if (l == 2)
-  {
-    long v = varn(d);
-    return zeroser(varn(d), gvaluation(x, pol_x(v)));
-  }
+  if (l == 2) { long v = varn(d); return zeroser(v, gvaluation(x, pol_x(v))); }
   return gdiv(gel(x,1), RgX_to_ser(d, l));
 }
 
