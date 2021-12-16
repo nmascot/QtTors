@@ -1183,7 +1183,7 @@ gadd(GEN x, GEN y)
         l = lg(x) + valp(x) - (vn - vd);
         if (l < 3) { set_avma(av); return gcopy(x); }
 
-        /* take advantage of y = t^n ! */
+        /* take advantage of d = c*t^i */
         if (degpol(d))
           y = gdiv(n, RgX_to_ser_inexact(d,l));
         else {
@@ -1789,6 +1789,13 @@ mulcxpowIs(GEN x, long k)
   return x;
 }
 
+static GEN
+init_ser(long l, long v, long e)
+{
+  GEN z = cgetg(l, t_SER);
+  z[1] = evalvalp(e) | evalvarn(v) | evalsigne(1); return z;
+}
+
 /* fill in coefficients of t_SER z from coeffs of t_POL y */
 static GEN
 fill_ser(GEN z, GEN y)
@@ -1808,7 +1815,7 @@ gmul(GEN x, GEN y)
 {
   long tx, ty, lx, ly, vx, vy, i, l;
   pari_sp av, tetpil;
-  GEN z, p1, p2;
+  GEN z, p1;
 
   if (x == y) return gsqr(x);
   tx = typ(x); ty = typ(y);
@@ -1865,8 +1872,7 @@ gmul(GEN x, GEN y)
       }
       lx = minss(lg(x), lg(y));
       if (lx == 2) return zeroser(vx, valp(x)+valp(y));
-      av = avma; z = cgetg(lx,t_SER);
-      z[1] = evalvalp(valp(x)+valp(y)) | evalvarn(vx) | evalsigne(1);
+      av = avma; z = init_ser(lx, vx, valp(x)+valp(y));
       x = ser2pol_i(x, lx);
       y = ser2pol_i(y, lx);
       y = RgXn_mul(x, y, lx-2);
@@ -2050,25 +2056,18 @@ gmul(GEN x, GEN y)
       switch (ty)
       {
         case t_SER:
-        {
-          long vn;
           if (lg(x) == 2) return zeropol(vx);
           if (lg(y) == 2) return zeroser(vx, valp(y)+RgX_val(x));
           av = avma;
-          vn = RgX_valrem(x, &x);
-          /* take advantage of x = t^n ! */
+          i = RgX_valrem(x, &x);
           if (degpol(x)) {
-            p1 = RgX_to_ser(x,lg(y));
-            if (vn) settyp(x, t_VECSMALL); /* *new* x left on stack */
-            p2 = gmul(p1,y);
-            settyp(p1, t_VECSMALL); /* p1 left on stack */
-          } else {
-            set_avma(av);
-            p2 = mul_ser_scal(y, gel(x,2));
+            ly = lg(y); z = init_ser(ly, vx, i + valp(y));
+            x = RgXn_mul(x, ser2pol_i(y, ly), ly-2);
+            return gerepilecopy(av, fill_ser(z, x));
           }
-          setvalp(p2, valp(p2) + vn);
-          return p2;
-        }
+          /* take advantage of x = c*t^i */
+          set_avma(av); y = mul_ser_scal(y, gel(x,2));
+          setvalp(y, i + valp(y)); return y;
 
         case t_RFRAC: return mul_rfrac_scal(gel(y,1),gel(y,2), x);
       }
@@ -2202,9 +2201,8 @@ gsqr(GEN x)
       else
       {
         pari_sp av = avma;
-        GEN z = cgetg(lx,t_SER);
-        z[1] = evalvalp(2*valp(x)) | evalvarn(varn(x)) | evalsigne(1);
-        x = ser2pol_i(x,lx);
+        GEN z = init_ser(lx, varn(x), 2*valp(x));
+        x = ser2pol_i(x, lx);
         x = RgXn_sqr(x, lx-2);
         return gerepilecopy(av, fill_ser(z,x));
       }
@@ -2335,7 +2333,7 @@ div_ser(GEN x, GEN y, long vx)
   if (lx < ly) ly = lx;
   y = ser2pol_approx(y, ly, &e);
   if (e) { v -= e; ly -= e; if (ly <= 2) pari_err_INV("div_ser", y0); }
-  z = cgetg(ly,t_SER); z[1] = evalvalp(v) | evalvarn(vx) | evalsigne(1);
+  z = init_ser(ly, vx, v);
   if (ly == 3)
   {
     gel(z,2) = gdiv(gel(x,2), gel(y,2));
@@ -2760,12 +2758,17 @@ gdiv(GEN x, GEN y)
       switch(ty)
       {
         case t_SER:
-          if (lg(y) == 2)
-            return zeroser(vx, RgX_val(x) - valp(y));
-          p1 = RgX_to_ser(x,lg(y));
-          p2 = div_ser(p1, y, vx);
-          settyp(p1, t_VECSMALL); /* p1 left on stack */
-          return p2;
+        {
+          long v = - valp(y);
+          GEN y0 = y;
+          ly = lg(y);
+          if (ly == 2) return zeroser(vx, v + RgX_val(x));
+          av = avma; v += RgX_valrem(x, &x);
+          y = ser2pol_approx(y, ly, &i); if (i) { ly -= i; v -= i; }
+          if (ly == 2) pari_err_INV("gdiv", y0);
+          z = init_ser(ly, vx, v);
+          return gerepilecopy(av, fill_ser(z, RgXn_div(x, y, ly-2)));
+        }
 
         case t_RFRAC:
         {
@@ -2782,12 +2785,16 @@ gdiv(GEN x, GEN y)
       switch(ty)
       {
         case t_POL:
-          if (lg(x) == 2)
-            return zeroser(vx, valp(x) - RgX_val(y));
-          p1 = RgX_to_ser_inexact(y,lg(x));
-          p2 = div_ser(x, p1, vx);
-          settyp(p1, t_VECSMALL); /* p1 left on stack */
-          return p2;
+        {
+          long v = valp(x);
+          lx = lg(x);
+          if (lx == 2) return zeroser(vx, v - RgX_val(y));
+          x = ser2pol_i(x, lx);
+          av = avma; v -= RgX_valrem_inexact(y, &y);
+          z = init_ser(lx, vx, v);
+          if (!signe(x)) setsigne(z,0);
+          return gerepilecopy(av, fill_ser(z, RgXn_div(x, y, lx - 2)));
+        }
         case t_RFRAC:
           av = avma;
           return gerepileupto(av, gdiv(gmul(x,gel(y,2)), gel(y,1)));
@@ -2799,8 +2806,8 @@ gdiv(GEN x, GEN y)
       {
         case t_POL: return div_rfrac_pol(gel(x,1),gel(x,2), y);
         case t_SER:
-          av = avma; z = RgX_to_ser_inexact(gel(x,2), lg(y));
-          return gerepileupto(av, gdiv(gel(x,1), gmul(z,y)));
+          av = avma;
+          return gerepileupto(av, gdiv(gel(x,1), gmul(gel(x,2), y)));
       }
       break;
   }

@@ -31,6 +31,7 @@ s = Mod(0,3) + x + O(x^2)
 serchop(s)
 serchop(Mod(0,3)+O(x^2))
 serchop(Mod(0,3)*x+O(x^2))
+s = Mod(0,3)+O(x); s * s
 
 Ser(Qfb(1,2,3))
 Ser(Qfb(1,2,3),, 5.5)

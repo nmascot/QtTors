@@ -1175,7 +1175,13 @@ ser2pol_i(GEN x, long lx)
 {
   long i = lx-1;
   GEN y;
-  while (i > 1 && isexactzero(gel(x,i))) i--;
+  while (i > 1 && isrationalzero(gel(x,i))) i--;
+  if (!signe(x))
+  { /* danger */
+    if (i == 1) return zeropol(varn(x));
+    y = cgetg(3,t_POL); y[1] = x[1] & ~VALPBITS;
+    gel(y,2) = gel(x,2); return y;
+  }
   y = cgetg(i+1, t_POL); y[1] = x[1] & ~VALPBITS;
   for ( ; i > 1; i--) gel(y,i) = gel(x,i);
   return y;
