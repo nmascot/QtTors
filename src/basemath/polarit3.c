@@ -1364,17 +1364,6 @@ RgX_norml1_1(GEN x, long k)
   return s;
 }
 
-static GEN
-L2_bound(GEN nf, GEN den, GEN *pt_roots)
-{
-  GEN M, L, prep, T = nf_get_pol(nf), tozk = nf_get_invzk(nf);
-  long prec = ZM_max_lg(tozk) + ZX_max_lg(T) + nbits2prec(degpol(T));
-  (void)initgaloisborne(nf, den? den: gen_1, prec, &L, &prep, NULL);
-  M = vandermondeinverse(L, RgX_gtofp(T,prec), den, prep);
-  *pt_roots = L;
-  return RgM_fpnorml2(RgM_mul(tozk,M), DEFAULTPREC);
-}
-
 /* N_2(A)^2 */
 static GEN
 sqrN2(GEN A, long prec)
@@ -2262,7 +2251,7 @@ static ulong
 ZXQX_resultant_bound_i(GEN nf, GEN A, GEN B, GEN (*f)(GEN,GEN,long))
 {
   pari_sp av = avma;
-  GEN r, M = L2_bound(nf, NULL, &r);
+  GEN r, M = nf_L2_bound(nf, NULL, &r);
   long v = nf_get_varn(nf), i, l = lg(r);
   GEN a = cgetg(l, t_COL);
   for (i = 1; i < l; i++)

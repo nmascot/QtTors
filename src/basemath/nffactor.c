@@ -833,13 +833,14 @@ nf_root_bounds(GEN nf, GEN P)
 /* return B such that, if x = sum x_i K.zk[i] in O_K, then ||x||_2^2 <= B T_2(x)
  * den = multiplicative bound for denom(x) [usually NULL, for 1, but when we
  * use nf_PARTIALFACT K.zk may not generate O_K] */
-static GEN
-L2_bound(GEN nf, GEN den)
+GEN
+nf_L2_bound(GEN nf, GEN den, GEN *pL)
 {
   GEN M, L, prep, T = nf_get_pol(nf), tozk = nf_get_invzk(nf);
   long prec = ZM_max_lg(tozk) + ZX_max_lg(T) + nbits2prec(degpol(T));
   (void)initgaloisborne(nf, den? den: gen_1, prec, &L, &prep, NULL);
   M = vandermondeinverse(L, RgX_gtofp(T,prec), den, prep);
+  if (pL) *pL = L;
   return RgM_fpnorml2(RgM_mul(tozk,M), DEFAULTPREC);
 }
 
@@ -1928,7 +1929,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   L.topowden = nf_get_zkden(nf);
   if (is_pm1(den)) den = NULL;
   L.dn = den;
-  T.ZC = L2_bound(nf, den);
+  T.ZC = nf_L2_bound(nf, den, NULL);
   T.Br = nf_root_bounds(nf, pol); if (lt) T.Br = gmul(T.Br, lt);
 
   /* C0 = bound for T_2(Q_i), Q | P */
