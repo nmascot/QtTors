@@ -141,6 +141,7 @@
 2510
 2
 6010/3
+[2, [2]~, 1, 1, 1]
 0
 0
 7
@@ -323,4 +324,4 @@ matrix(0,2)
   ***   at top-level: idealstar(K,[4,Vecsmall([1,1])])
   ***                 ^--------------------------------
   *** idealstar: incorrect type in Idealstar [incorrect archimedean component] (t_VECSMALL).
-Total time spent: 100
+Total time spent: 127

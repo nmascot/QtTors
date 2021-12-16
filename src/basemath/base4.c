@@ -1966,7 +1966,7 @@ idealismaximal_mat(GEN nf, GEN x)
   if (c)
   {
     if (typ(c) == t_FRAC || !equali1(p)) return NULL;
-    return idealismaximal_int(nf, p);
+    return idealismaximal_int(nf, c);
   }
   if (!BPSW_psp(p)) return NULL;
   l = lg(x); f = 1;
