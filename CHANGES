@@ -99,6 +99,7 @@ BA  75- concat(t_LIST,t_LIST) was leaking memory
     81- lfun(1, 0.0) "normalizing a series with a 0 leading term" [#2329]
     82- (0. + O(x) == 1) returned 'true'
     83- lfun(1, 0., 1) -> division by 0
+    84- fix lfuncost when root number is unknown (more a_n are needed)
 
   Added
 HC   1- new GP function eulerreal

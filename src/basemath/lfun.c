@@ -1378,15 +1378,18 @@ lfun_init_theta(GEN ldata, GEN eno, struct lfunp *S)
 }
 
 GEN
-lfuncost(GEN L, GEN dom, long der, long bitprec)
+lfuncost(GEN L, GEN dom, long der, long bit)
 {
   pari_sp av = avma;
   GEN ldata = lfunmisc_to_ldata_shallow(L);
-  GEN k = ldata_get_k(ldata);
+  GEN w, k = ldata_get_k(ldata);
   struct lfunp S;
 
   parse_dom(gtodouble(k), dom, &S);
-  lfunp_set(ldata, der, bitprec, &S);
+  lfunp_set(ldata, der, bit, &S);
+  w = ldata_get_rootno(ldata);
+  if (isintzero(w)) /* for lfunrootres */
+    S.nmax = maxss(S.nmax, lfunthetacost(ldata, dbltor(sqrt(0.5)), 0, bit+1));
   set_avma(av); return mkvecsmall2(S.nmax, S.Dmax);
 }
 GEN

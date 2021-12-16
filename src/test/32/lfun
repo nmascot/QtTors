@@ -248,6 +248,7 @@ zeta(s)*zeta(s-a)
 -189
 [[11, 195], [6, 195]]
 1
+[1171561, 3339]
 1
 4
 857
@@ -379,4 +380,4 @@ O(x^2)
   ***   at top-level: lfun([[],[""]],1)
   ***                 ^-----------------
   *** lfun: incorrect type in lfunmisc_to_ldata (t_VEC).
-Total time spent: 5195
+Total time spent: 4757

@@ -326,6 +326,11 @@ lfuncost(L)
 
 lfunconductor(1,1)
 
+K=bnfinit(y^2-4493);
+R0=bnrinit(K,[idealprimedec(K,1123)[1],[1,1]]);
+L=lfuncreate([R0,[7]]);
+localprec(1000); c=lfuncost(L,[0],1)
+
 /* lfunconductor */
 
 default(realprecision,38);
