@@ -1661,7 +1661,7 @@ gsubst(GEN x, long v, GEN y)
           av = avma;
           n *= ey;
           N = ex? n: maxss(n-ey,1);
-          y = (ty == t_RFRAC)? rfrac_to_ser(y, N+2): RgX_to_ser(y, N+2);
+          y = (ty == t_RFRAC)? rfrac_to_ser_i(y, N+2): RgX_to_ser(y, N+2);
           if (lg(y)-2 > n) setlg(y, n+2);
           x = ser2pol_i(x, lx);
           if (varncmp(vy,vx) > 0)

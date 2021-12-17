@@ -2207,7 +2207,7 @@ sumnumrat_i(GEN F, GEN F0, GEN vF, long prec)
   S1 = add_sumrfrac(S1, F, vF, N-1);
   if (F0) S1 = gadd(S1, F0);
   S = gmul(_1, gsubst(F, vx, gaddgs(pol_x(vx), N)));
-  S = rfrac_to_ser(S, k + 2);
+  S = rfrac_to_ser_i(S, k + 2);
   S2 = gen_0;
   for (j = 2; j <= k; j += 2)
     S2 = gadd(S2, gmul(gdivgs(bernfrac(j),j), sercoeff(S, j-1)));
@@ -2289,7 +2289,7 @@ prodnumrat(GEN F, long a, long prec)
   intf = intnumainfrat(gmul(pol_x(vx),G), N, r, prec);
   intf = gneg(gadd(intf, gmulsg(N, glog(gsubst(F, vx, stoi(N)), prec))));
   S = gmul(real_1(prec), gsubst(G, vx, gaddgs(pol_x(vx), N)));
-  S = rfrac_to_ser(S, k + 2);
+  S = rfrac_to_ser_i(S, k + 2);
   S1 = gsqrt(gsubst(F, vx, utoipos(N)), prec);
   for (m = 0; m < N; m++) S1 = gmul(S1, gsubst(F, vx, utoi(m)));
   S2 = gen_0;
@@ -2450,7 +2450,7 @@ prodeulerrat(GEN F, GEN s, long a, long prec)
   (void)rfracrecip(&NF, &DF); /* returned value is 0 */
   if (!RgX_is_ZX(DF) || !is_pm1(gel(DF,2))
       || lim * log2(r) > 4 * B) NF = gmul(NF, real_1(prec2));
-  ser = integser(rfrac_to_ser(rfrac_logderiv(NF,DF), lim+3));
+  ser = integser(rfrac_to_ser_i(rfrac_logderiv(NF,DF), lim+3));
   /* ser = log f, f = F(1/x) + O(x^(lim+1)) */
   P = primes_interval(gen_2, utoipos(N));
   z = gexp(sumlogzeta(ser, s, P, rs, lN, vF, lim, prec), prec);

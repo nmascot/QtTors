@@ -1174,24 +1174,14 @@ gadd(GEN x, GEN y)
     case t_SER:
       if (ty == t_RFRAC)
       {
-        GEN n, d;
         long vn, vd;
         av = avma;
-        n = gel(y,1); vn = gval(n, vy);
-        d = gel(y,2); vd = RgX_valrem(d, &d);
+        vn = gval(gel(y,1), vy);
+        vd = RgX_valrem_inexact(gel(y,2), NULL);
 
         l = lg(x) + valp(x) - (vn - vd);
         if (l < 3) { set_avma(av); return gcopy(x); }
-
-        /* take advantage of d = c*t^i */
-        if (degpol(d))
-          y = gdiv(n, RgX_to_ser_inexact(d,l));
-        else {
-          y = gdiv(n, gel(d,2));
-          if (gvar(y) == vy) y = RgX_to_ser(y,l); else y = scalarser(y, vy, l);
-        }
-        setvalp(y, valp(y) - vd);
-        return gerepileupto(av, gadd(y, x));
+        return gerepileupto(av, gadd(x, rfrac_to_ser_i(y, l)));
       }
       break;
   }

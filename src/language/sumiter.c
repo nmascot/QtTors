@@ -1737,7 +1737,7 @@ derivfunk(void *E, GEN (*eval)(void *, GEN, long), GEN x, GEN ind0, long prec)
     break;
   case t_RFRAC:
     ind = chk_ind(ind0,&M); if (!ind) return cgetg(1,t_VEC);
-    x = rfrac_to_ser(x, precdl+2 + M * (1+rfrac_val_deriv(x)));
+    x = rfrac_to_ser_i(x, precdl+2 + M * (1+rfrac_val_deriv(x)));
     xp = derivser(x);
     break;
   case t_SER:
@@ -1777,7 +1777,7 @@ derivfun(void *E, GEN (*eval)(void *, GEN, long), GEN x, long prec)
     x = RgX_to_ser(x, precdl+2+ (1 + RgX_val(xp)));
     break;
   case t_RFRAC:
-    x = rfrac_to_ser(x, precdl+2+ (1 + rfrac_val_deriv(x)));
+    x = rfrac_to_ser_i(x, precdl+2+ (1 + rfrac_val_deriv(x)));
     /* fall through */
   case t_SER:
     xp = derivser(x);

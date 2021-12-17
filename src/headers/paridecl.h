@@ -3720,6 +3720,7 @@ GEN     RgX_to_ser_inexact(GEN x, long l);
 GEN     gtoser(GEN x, long v, long d);
 GEN     gtoser_prec(GEN x, long v, long d);
 GEN     rfrac_to_ser(GEN x, long l);
+GEN     rfrac_to_ser_i(GEN x, long);
 GEN     rfracrecip_to_ser_absolute(GEN R, long l);
 long    rfracrecip(GEN *pn, GEN *pd);
 GEN     scalarser(GEN x, long v, long prec);

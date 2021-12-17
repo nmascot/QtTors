@@ -71,13 +71,35 @@ RgX_to_ser_inexact(GEN x, long l)
     }
   return RgX_to_ser_i(x, l, i - 2, 0);
 }
-GEN
-rfrac_to_ser(GEN x, long l)
+static GEN
+_rfrac_to_ser(GEN x, long l, long copy)
 {
-  GEN d = gel(x,2);
-  if (l == 2) { long v = varn(d); return zeroser(v, gvaluation(x, pol_x(v))); }
-  return gdiv(gel(x,1), RgX_to_ser(d, l));
+  GEN a = gel(x,1), d = gel(x,2);
+  long v = varn(d), e;
+  if (l == 2) return zeroser(v, gvaluation(x, pol_x(v)));
+  e = - RgX_valrem(d, &d);
+  if (gequal0(gel(d,2)))
+  { /* unnormalized */
+    GEN z = gel(d,2);
+    long E;
+    pari_warn(warner,"normalizing a series with 0 leading term");
+    E = RgX_valrem_inexact(d, &d);
+    e -= E; l -= E; gel(d,2) = gadd(gel(d,2), z); /* keep type information */
+  }
+  if (typ(a) != t_POL || varn(a) != v)
+    a = RgX_Rg_mul(RgXn_inv(d, l - 2), a);
+  else
+  {
+    e += RgX_valrem(a, &a);
+    a = RgXn_div(a, d, l - 2);
+  }
+  a = RgX_to_ser_i(a, l, 0, copy);
+  setvalp(a, valp(a) + e); return a;
 }
+GEN
+rfrac_to_ser(GEN x, long l) { return _rfrac_to_ser(x, l, 1); }
+GEN
+rfrac_to_ser_i(GEN x, long l) { return _rfrac_to_ser(x, l, 0); }
 
 static GEN
 RgV_to_ser_i(GEN x, long v, long l, int copy)
@@ -195,7 +217,7 @@ toser_i(GEN x)
   {
     case t_SER: return x;
     case t_POL: return RgX_to_ser_inexact(x, precdl+2);
-    case t_RFRAC: return rfrac_to_ser(x, precdl+2);
+    case t_RFRAC: return rfrac_to_ser_i(x, precdl+2);
   }
   return NULL;
 }
