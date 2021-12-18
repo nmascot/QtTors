@@ -71,7 +71,6 @@ typedef __v2di ratpoints_bit_array;
 #define RBA_LENGTH (128)
 #define RBA_SHIFT (7)
 #define RBA_ALIGN  (sizeof(ratpoints_bit_array))
-#define RBA_MASK (~(-(1UL<<RBA_SHIFT)))
 
 #else
 /* Use ulong for the bit arrays */
@@ -84,7 +83,6 @@ typedef ulong ratpoints_bit_array;
 #define RBA_LENGTH BITS_IN_LONG
 #define RBA_SHIFT TWOPOTBITS_IN_LONG
 #define RBA_ALIGN  (sizeof(long))
-#define RBA_MASK LONG_MASK
 
 #endif
 
