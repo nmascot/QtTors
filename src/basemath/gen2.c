@@ -383,7 +383,7 @@ gequal1(GEN x)
     case t_INTMOD:
       return is_pm1(gel(x,2)) || is_pm1(gel(x,1));
     case t_POLMOD:
-      return gequal1(gel(x,2)) || gequal1(gel(x,1));
+      return !degpol(gel(x,1)) || gequal1(gel(x,2));
 
     case t_FFELT:
       return FF_equal1(x);
@@ -395,7 +395,8 @@ gequal1(GEN x)
       return gequal1(gel(x,1)) && gequal0(gel(x,2));
 
     case t_PADIC:
-      return !valp(x) && gequal1(gel(x,4));
+      if (!signe(gel(x,4))) return valp(x) < 0;
+      return valp(x) == 0 && gequal1(gel(x,4));
 
     case t_QUAD:
       return gequal1(gel(x,2)) && gequal0(gel(x,3));
@@ -415,7 +416,7 @@ int
 gequalm1(GEN x)
 {
   pari_sp av;
-  GEN p1;
+  GEN t;
 
   switch(typ(x))
   {
@@ -444,11 +445,11 @@ gequalm1(GEN x)
       return gequalm1(gel(x,2)) && gequal0(gel(x,3));
 
     case t_PADIC:
-      av = avma; return gc_bool(av, equalii(addui(1,gel(x,4)), gel(x,3)));
+      t = gel(x,4); if (!signe(t)) return valp(x) < 0;
+      av = avma; return gc_bool(av, !valp(x) && equalii(addui(1,t), gel(x,3)));
 
     case t_POLMOD:
-      av = avma; p1 = gaddgs(gel(x,2), 1);
-      return gc_bool(av, gequal0(p1) || gequal(p1,gel(x,1)));
+      return !degpol(gel(x,1)) || gequalm1(gel(x,2));
 
     case t_POL: return is_monomial_test(x, 0, &gequalm1);
     case t_SER: return is_monomial_test(x, valp(x), &gequalm1);
