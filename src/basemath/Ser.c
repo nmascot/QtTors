@@ -154,7 +154,7 @@ rfracrecip_to_ser_absolute(GEN R, long N)
   GEN n = gel(R,1), d = gel(R,2);
   long v = rfracrecip(&n, &d); /* R(1/x) = x^v * n/d, val(n) = val(d) = 0 */
   if (N <= v) return zeroser(varn(d), N);
-  R = gdiv(n, RgX_to_ser(d, N-v+2));
+  R = rfrac_to_ser_i(mkrfrac(n, d), N-v+2);
   setvalp(R, v); return R;
 }
 
