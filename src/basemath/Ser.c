@@ -84,7 +84,7 @@ _rfrac_to_ser(GEN x, long l, long copy)
     long E;
     pari_warn(warner,"normalizing a series with 0 leading term");
     E = RgX_valrem_inexact(d, &d);
-    e -= E; l -= E; gel(d,2) = gadd(gel(d,2), z); /* keep type information */
+    e -= E; gel(d,2) = gadd(gel(d,2), z); /* keep type information */
   }
   if (typ(a) != t_POL || varn(a) != v)
     a = RgX_Rg_mul(RgXn_inv(d, l - 2), a);
