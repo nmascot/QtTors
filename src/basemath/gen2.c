@@ -395,7 +395,7 @@ gequal1(GEN x)
       return gequal1(gel(x,1)) && gequal0(gel(x,2));
 
     case t_PADIC:
-      if (!signe(gel(x,4))) return valp(x) < 0;
+      if (!signe(gel(x,4))) return valp(x) <= 0;
       return valp(x) == 0 && gequal1(gel(x,4));
 
     case t_QUAD:
@@ -445,7 +445,7 @@ gequalm1(GEN x)
       return gequalm1(gel(x,2)) && gequal0(gel(x,3));
 
     case t_PADIC:
-      t = gel(x,4); if (!signe(t)) return valp(x) < 0;
+      t = gel(x,4); if (!signe(t)) return valp(x) <= 0;
       av = avma; return gc_bool(av, !valp(x) && equalii(addui(1,t), gel(x,3)));
 
     case t_POLMOD:
