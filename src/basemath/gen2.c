@@ -334,7 +334,11 @@ is_monomial_test(GEN x, long v, int(*test)(GEN))
   long d, i, l;
   if (v > 0) return 0;
   l = lg(x);
-  if (!signe(x)) return typ(x) == t_SER && v + l - 2 <= 0;
+  if (!signe(x))
+  {
+    if (typ(x) == t_SER) return v + l - 2 <= 0;
+    return l > 2 && test(gel(x,2)); /* e.g. O(2^-1)*x^0 */
+  }
   d = 2-v; if (l <= d || !test(gel(x,d))) return 0;
   for (i = 2; i < l; i++) /* 2 <= d < l */
     if (i != d && !gequal0(gel(x,i))) return 0;
