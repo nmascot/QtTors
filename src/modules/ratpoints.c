@@ -530,9 +530,6 @@ _ratpoints_sift0(long b, long w_low, long w_high,
     if (TEST(nums))
     {
       long a0, a, d;
-#ifdef HAS_SSE2
-      long da = (which_bits == num_all) ? RBA_LENGTH/2 : RBA_LENGTH;
-#endif
            /* a will be the numerator corresponding to the selected bit */
       if (which_bits == num_all)
       {
@@ -545,6 +542,7 @@ _ratpoints_sift0(long b, long w_low, long w_high,
       }
       {
 #ifdef HAS_SSE2
+        long da = d<<TWOPOTBITS_IN_LONG;
         ulong nums0 = EXT0(nums);
         ulong nums1 = EXT1(nums);
 #else
