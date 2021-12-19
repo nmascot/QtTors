@@ -60,9 +60,10 @@ P=idealprimedec(K,23)[1];
 bnfisprincipal(K,P)
 
 \\ #2054
-D = 1460939943556665662782863549;
-K = nfinit([x^2-D,[3,7,1586327]]); setrand(426507128);
-bnfinit(K,,[0.132,0.15]);
+\\ Disabled, too slow
+\\D = 1460939943556665662782863549;
+\\K = nfinit([x^2-D,[3,7,1586327]]); setrand(426507128);
+\\bnfinit(K,,[0.132,0.15]);
 
 \\ #2164
 bnf = bnfinit(y^4-y-1);
