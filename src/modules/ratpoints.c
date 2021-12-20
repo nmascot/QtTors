@@ -312,11 +312,13 @@ gen_sieves0(GEN listprime)
   for (n = 1; n <= nbprime; n++)
   {
     ulong i, p = uel(listprime,n);
-    ulong *w = (ulong *) stack_malloc_align(2*p*sizeof(ulong), RBA_ALIGN);
+    ulong *w = (ulong *) stack_malloc_align(p*sizeof(ratpoints_bit_array), RBA_ALIGN);
     for (i = 0; i < p; i++) uel(w,i) = ~0UL;
     for (i = 0; i < BITS_IN_LONG; i++)
       uel(w,(p*i)>>TWOPOTBITS_IN_LONG) &= ~(1UL<<((p*i) & LONG_MASK));
+#ifdef HAS_SSE2
     for (i = 0; i < p; i++) uel(w,i+p) = uel(w,i);
+#endif
     si[n] = w;
   }
   return si;
