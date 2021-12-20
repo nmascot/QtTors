@@ -103,6 +103,7 @@ BA  75- concat(t_LIST,t_LIST) was leaking memory
     85- idealismaximal(nfinit(x),Mat(2)) -> 0 [#2333]
     86- O(29^(-1)) == 1 was FALSE (same for -1)
     87- Mod(0, 2*x^0)  == 1 was FALSE (same for -1)
+BA  88- [X11] resizing a window could keep traces of previous drawing
 
   Added
 HC   1- new GP function eulerreal

@@ -278,6 +278,7 @@ EXIT:
         /* recompute scale */
         xs = ((double)width)/T->width;
         ys = ((double)height)/T->height;
+        XClearWindow(display, win);
       }
       case Expose:
         gen_draw(&plotX, w, x, y, xs, ys);
