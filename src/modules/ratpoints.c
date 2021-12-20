@@ -70,7 +70,7 @@ typedef __v2di ratpoints_bit_array;
 
 #define RBA_LENGTH (128)
 #define RBA_SHIFT (7)
-#define RBA_ALIGN  (sizeof(ratpoints_bit_array))
+#define RBA_SIZE  (sizeof(ratpoints_bit_array))
 
 #else
 /* Use ulong for the bit arrays */
@@ -82,7 +82,7 @@ typedef ulong ratpoints_bit_array;
 
 #define RBA_LENGTH BITS_IN_LONG
 #define RBA_SHIFT TWOPOTBITS_IN_LONG
-#define RBA_ALIGN  (sizeof(long))
+#define RBA_SIZE  (sizeof(long))
 
 #endif
 
@@ -312,7 +312,7 @@ gen_sieves0(GEN listprime)
   for (n = 1; n <= nbprime; n++)
   {
     ulong i, p = uel(listprime,n);
-    ulong *w = (ulong *) stack_malloc_align(p*sizeof(ratpoints_bit_array), RBA_ALIGN);
+    ulong *w = (ulong *) stack_malloc_align(p*RBA_SIZE, RBA_SIZE);
     for (i = 0; i < p; i++) uel(w,i) = ~0UL;
     for (i = 0; i < BITS_IN_LONG; i++)
       uel(w,(p*i)>>TWOPOTBITS_IN_LONG) &= ~(1UL<<((p*i) & LONG_MASK));
@@ -616,7 +616,7 @@ find_points_init(ratpoints_args *args, long bit_primes)
     need += p*p;
   }
   args->ba_buffer = (ratpoints_bit_array*)
-     stack_malloc_align(need*sizeof(ratpoints_bit_array),RBA_ALIGN);
+     stack_malloc_align(need*RBA_SIZE,RBA_SIZE);
   args->ba_next = args->ba_buffer;
 
   /* allocate space for int_buffer */
@@ -1360,7 +1360,7 @@ find_points_work(ratpoints_args *args,
   /* now do the sieving */
   {
     ratpoints_bit_array *survivors = (ratpoints_bit_array *)
-      stack_malloc_align((args->array_size)*sizeof(ratpoints_bit_array), RBA_ALIGN);
+      stack_malloc_align((args->array_size)*RBA_SIZE, RBA_SIZE);
     if (args->flags & (RATPOINTS_USE_SQUARES | RATPOINTS_USE_SQUARES1))
     {
       if (args->flags & RATPOINTS_USE_SQUARES)
