@@ -59,32 +59,29 @@ typedef struct {double low; double up;} ratpoints_interval;
 #ifdef HAS_SSE2
 #include <emmintrin.h>
 
+/* Use SSE 128 bit registers for the bit arrays */
+typedef __v2di ratpoints_bit_array;
+
 #define AND(a,b) ((ratpoints_bit_array)__builtin_ia32_andps((__v4sf)(a), (__v4sf)(b)))
 #define EXT0(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 0))
 #define EXT1(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 1))
 #define TEST(a) (EXT0(a) || EXT1(a))
 #define RBA(a) ((__v2di){((long) a), ((long) a)})
-
-/* Use SSE 128 bit registers for the bit arrays */
-typedef __v2di ratpoints_bit_array;
-
-#define RBA_LENGTH (128)
 #define RBA_SHIFT (7)
-#define RBA_SIZE  (sizeof(ratpoints_bit_array))
-
 #else
+
 /* Use ulong for the bit arrays */
 typedef ulong ratpoints_bit_array;
+
 #define AND(a,b) ((a)&(b))
 #define EXT0(a) (a)
 #define TEST(a) (a)
 #define RBA(a) (a)
-
-#define RBA_LENGTH BITS_IN_LONG
 #define RBA_SHIFT TWOPOTBITS_IN_LONG
-#define RBA_SIZE  (sizeof(long))
-
 #endif
+
+#define RBA_SIZE  (sizeof(ratpoints_bit_array))
+#define RBA_LENGTH  (RBA_SIZE<<3)
 
 typedef struct { long p; long offset; ratpoints_bit_array *ptr; } sieve_spec;
 
