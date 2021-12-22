@@ -339,7 +339,7 @@ is_monomial_test(GEN x, long d, int(*test)(GEN))
     /* t_SER, v = 2-d <= 0 */
     if (!signe(x)) return 1;
   }
-  if (!test(gel(x,d))) return 0;
+  else if (!test(gel(x,d))) return 0;
   for (i = 2; i < l; i++) /* 2 <= d < l */
     if (i != d && !gequal0(gel(x,i))) return 0;
   return 1;
