@@ -760,7 +760,7 @@ add_ser_scal(GEN y, GEN x)
     for (i = 2; i <= 1-l; i++) gel(z,i) = gcopy(gel(y,i));
     gel(z,i) = gadd(x,gel(y,i)); i++;
     for (     ; i < ly; i++)   gel(z,i) = gcopy(gel(y,i));
-    return z;
+    return normalizeser(z);
   }
   vy = varn(y);
   if (l > 0)
