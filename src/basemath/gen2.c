@@ -325,21 +325,21 @@ gequal0(GEN x)
   return 0;
 }
 
-/* x a t_POL or t_SER, considered as having valuation v; let X(t) = t^(-v) x(t)
- * return 1 (true) if coeff(X,i) = 0 for all i != 0 and test(coeff(X, 0))
- * is true. Return 0 (false) otherwise, or if x == 0 */
+/* x a t_POL or t_SER, return 1 if test(coeff(X,d)) is true and
+ * coeff(X,i) = 0 for all i != d. Return 0 (false) otherwise */
 static int
-is_monomial_test(GEN x, long v, int(*test)(GEN))
+is_monomial_test(GEN x, long d, int(*test)(GEN))
 {
-  long d, i, l;
-  if (v > 0) return 0;
+  long i, l;
+  if (d < 2) return 0;
   l = lg(x);
-  if (!signe(x))
+  if (d >= l)
   {
-    if (typ(x) == t_SER) return v + l - 2 <= 0;
-    return l > 2 && test(gel(x,2)); /* e.g. O(2^-1)*x^0 */
+    if (typ(x) == t_POL) return 0; /* l = 2 */
+    /* t_SER, v = 2-d <= 0 */
+    if (!signe(x)) return 1;
   }
-  d = 2-v; if (l <= d || !test(gel(x,d))) return 0;
+  if (!test(gel(x,d))) return 0;
   for (i = 2; i < l; i++) /* 2 <= d < l */
     if (i != d && !gequal0(gel(x,i))) return 0;
   return 1;
@@ -405,8 +405,8 @@ gequal1(GEN x)
     case t_QUAD:
       return gequal1(gel(x,2)) && gequal0(gel(x,3));
 
-    case t_POL: return is_monomial_test(x, 0, &gequal1);
-    case t_SER: return is_monomial_test(x, valp(x), &gequal1);
+    case t_POL: return is_monomial_test(x, 2, &gequal1);
+    case t_SER: return is_monomial_test(x, 2 - valp(x), &gequal1);
 
     case t_RFRAC: return gequal(gel(x,1), gel(x,2));
     case t_COL: return col_test(x, &gequal1);
@@ -455,8 +455,8 @@ gequalm1(GEN x)
     case t_POLMOD:
       return !degpol(gel(x,1)) || gequalm1(gel(x,2));
 
-    case t_POL: return is_monomial_test(x, 0, &gequalm1);
-    case t_SER: return is_monomial_test(x, valp(x), &gequalm1);
+    case t_POL: return is_monomial_test(x, 2, &gequalm1);
+    case t_SER: return is_monomial_test(x, 2 - valp(x), &gequalm1);
 
     case t_RFRAC:
       av = avma; return gc_bool(av, gequal(gel(x,1), gneg_i(gel(x,2))));
