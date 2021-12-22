@@ -72,4 +72,7 @@
 [1, 1, 1, 1, 0, 0]
 [1, 1]
 [1, 1]
-Total time spent: 5
+  *** _+_: Warning: normalizing a series with 0 leading term.
+[0, 0]
+[1, 1]
+Total time spent: 6

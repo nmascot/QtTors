@@ -4248,7 +4248,7 @@ geval(GEN x) { return geval_gp(x,NULL); }
 GEN
 simplify_shallow(GEN x)
 {
-  long i, lx;
+  long i, v, lx;
   GEN y, z;
   if (!x) pari_err_BUG("simplify, NULL input");
 
@@ -4262,9 +4262,9 @@ simplify_shallow(GEN x)
     case t_QUAD:    return isintzero(gel(x,3))? gel(x,2): x;
 
     case t_POLMOD: y = cgetg(3,t_POLMOD);
-      z = simplify_shallow(gel(x,1));
-      if (typ(z) != t_POL) z = scalarpol(z, varn(gel(x,1)));
-      gel(y,1) = z; /* z must be a t_POL: invalid object otherwise */
+      z = gel(x,1); v = varn(z); z = simplify_shallow(z);
+      if (typ(z) != t_POL || varn(z) != v) z = scalarpol_shallow(z, v);
+      gel(y,1) = z;
       gel(y,2) = simplify_shallow(gel(x,2)); return y;
 
     case t_POL:
