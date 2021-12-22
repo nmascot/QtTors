@@ -1178,6 +1178,7 @@ gadd(GEN x, GEN y)
         av = avma;
         vn = gval(gel(y,1), vy);
         vd = RgX_valrem_inexact(gel(y,2), NULL);
+        if (vd == LONG_MAX) pari_err_INV("gadd", gel(y,2));
 
         l = lg(x) + valp(x) - (vn - vd);
         if (l < 3) { set_avma(av); return gcopy(x); }

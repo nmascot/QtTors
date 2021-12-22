@@ -71,28 +71,44 @@ RgX_to_ser_inexact(GEN x, long l)
     }
   return RgX_to_ser_i(x, l, i - 2, 0);
 }
+/* *pd t_POL normalized wrt exact zeros; normalize fully, keeping type
+ * information */
+static long
+RgX_valrem_type(GEN *pd, long *warn)
+{
+  GEN d = *pd, z = gel(d,2);
+  long v;
+  if (!gequal0(z)) return 0;
+  *warn = 1;
+  if (!signe(d)) { *pd = scalarpol_shallow(z, varn(d)); return degpol(d); }
+  v = RgX_valrem_inexact(d, &d);
+  if (lg(d) > 2)
+    gel(d,2) = gadd(gel(d,2), z);
+  else
+    d = scalarpol_shallow(z, varn(d));
+  *pd = d; return v;
+}
 static GEN
 _rfrac_to_ser(GEN x, long l, long copy)
 {
   GEN a = gel(x,1), d = gel(x,2);
-  long v = varn(d), e;
+  long warn = 0, v = varn(d), e;
   if (l == 2) return zeroser(v, gvaluation(x, pol_x(v)));
   e = - RgX_valrem(d, &d);
-  if (gequal0(gel(d,2)))
-  { /* unnormalized */
-    GEN z = gel(d,2);
-    long E;
-    pari_warn(warner,"normalizing a series with 0 leading term");
-    E = RgX_valrem_inexact(d, &d);
-    e -= E; gel(d,2) = gadd(gel(d,2), z); /* keep type information */
-  }
+  e -= RgX_valrem_type(&d, &warn);
+  if (!signe(d)) pari_err_INV("rfrac_to_ser", gel(x,2));
   if (typ(a) != t_POL || varn(a) != v)
+  {
     a = RgX_Rg_mul(RgXn_inv(d, l - 2), a);
+    e += RgX_valrem_type(&a, &warn);
+  }
   else
   {
     e += RgX_valrem(a, &a);
+    e += RgX_valrem_type(&a, &warn);
     a = RgXn_div(a, d, l - 2);
   }
+  if (warn) pari_warn(warner,"normalizing a series with 0 leading term");
   a = RgX_to_ser_i(a, l, 0, copy);
   setvalp(a, valp(a) + e); return a;
 }
@@ -162,19 +178,18 @@ rfracrecip_to_ser_absolute(GEN R, long N)
 GEN
 scalarser(GEN x, long v, long prec)
 {
-  long i, l;
+  long i, l, s;
   GEN y;
 
-  if (gequal0(x))
+  if (isexactzero(x))
   {
     if (isrationalzero(x)) return zeroser(v, prec);
-    if (!isexactzero(x)) prec--;
     y = cgetg(3, t_SER);
     y[1] = evalsigne(0) | _evalvalp(prec) | evalvarn(v);
     gel(y,2) = gcopy(x); return y;
   }
-  l = prec + 2; y = cgetg(l, t_SER);
-  y[1] = evalsigne(1) | _evalvalp(0) | evalvarn(v);
+  l = prec + 2; y = cgetg(l, t_SER); s = !gequal0(x);
+  y[1] = evalsigne(s) | _evalvalp(0) | evalvarn(v);
   gel(y,2) = gcopy(x); for (i=3; i<l; i++) gel(y,i) = gen_0;
   return y;
 }
