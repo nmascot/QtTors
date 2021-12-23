@@ -177,6 +177,7 @@ BA  54- [libpari] FpXn_div, Flxn_div, RgXn_div, RgXn_div_i, FpXQXn_div, F2xn_div
 HC  57- allow lngamma(t_PADIC of negative valuation)
     58- file LICENSE (for Software Heritage archiving)
 BA  59- [libpari] RgXV_prod
+BA  60- new GP function serdiffdep
 
   Changed
 HC   1- faster implementation of eulervec + cache result

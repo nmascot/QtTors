@@ -902,25 +902,11 @@ algdep(GEN x, long n)
   return algdep0(x,n,0);
 }
 
-GEN
-seralgdep(GEN s, long p, long r)
+static GEN
+sertomat(GEN S, long p, long r, long vy)
 {
-  pari_sp av = avma;
-  long vy, i, m, n, prec;
-  GEN S, v, D;
-
-  if (typ(s) != t_SER) pari_err_TYPE("seralgdep",s);
-  if (p <= 0) pari_err_DOMAIN("seralgdep", "p", "<=", gen_0, stoi(p));
-  if (r < 0) pari_err_DOMAIN("seralgdep", "r", "<", gen_0, stoi(r));
-  if (is_bigint(addiu(muluu(p, r), 1))) pari_err_OVERFLOW("seralgdep");
-  vy = varn(s);
-  if (!vy) pari_err_PRIORITY("seralgdep", s, ">", 0);
-  r++; p++;
-  prec = valp(s) + lg(s)-2;
-  if (r > prec) r = prec;
-  S = cgetg(p+1, t_VEC); gel(S, 1) = s;
-  for (i = 2; i <= p; i++) gel(S,i) = gmul(gel(S,i-1), s);
-  v = cgetg(r*p+1, t_VEC); /* v[r*n+m+1] = s^n * y^m */
+  long n, m;
+  GEN v = cgetg(r*p+1, t_VEC); /* v[r*n+m+1] = s^n * y^m */
   /* n = 0 */
   for (m = 0; m < r; m++) gel(v, m+1) = pol_xn(m, vy);
   for(n=1; n < p; n++)
@@ -934,12 +920,62 @@ seralgdep(GEN s, long p, long r)
       }
       gel(v, r*n + m + 1) = c;
     }
+  return v;
+}
+
+GEN
+seralgdep(GEN s, long p, long r)
+{
+  pari_sp av = avma;
+  long vy, i, n, prec;
+  GEN S, v, D;
+
+  if (typ(s) != t_SER) pari_err_TYPE("seralgdep",s);
+  if (p <= 0) pari_err_DOMAIN("seralgdep", "p", "<=", gen_0, stoi(p));
+  if (r < 0) pari_err_DOMAIN("seralgdep", "r", "<", gen_0, stoi(r));
+  if (is_bigint(addiu(muluu(p, r), 1))) pari_err_OVERFLOW("seralgdep");
+  vy = varn(s);
+  if (!vy) pari_err_PRIORITY("seralgdep", s, ">", 0);
+  r++; p++;
+  prec = valp(s) + lg(s)-2;
+  if (r > prec) r = prec;
+  S = cgetg(p+1, t_VEC); gel(S, 1) = s;
+  for (i = 2; i <= p; i++) gel(S,i) = gmul(gel(S,i-1), s);
+  v = sertomat(S, p, r, vy);
   D = lindep_Xadic(v);
   if (lg(D) == 1) { set_avma(av); return gen_0; }
   v = cgetg(p+1, t_VEC);
   for (n = 0; n < p; n++)
     gel(v, n+1) = RgV_to_RgX(vecslice(D, r*n+1, r*n+r), vy);
   return gerepilecopy(av, RgV_to_RgX(v, 0));
+}
+
+GEN
+serdiffdep(GEN s, long p, long r)
+{
+  pari_sp av = avma;
+  long vy, i, n, prec;
+  GEN P, S, v, D;
+
+  if (typ(s) != t_SER) pari_err_TYPE("serdiffdep",s);
+  if (p <= 0) pari_err_DOMAIN("serdiffdep", "p", "<=", gen_0, stoi(p));
+  if (r < 0) pari_err_DOMAIN("serdiffdep", "r", "<", gen_0, stoi(r));
+  if (is_bigint(addiu(muluu(p, r), 1))) pari_err_OVERFLOW("serdiffdep");
+  vy = varn(s);
+  if (!vy) pari_err_PRIORITY("serdiffdep", s, ">", 0);
+  r++; p++;
+  prec = valp(s) + lg(s)-2;
+  if (r > prec) r = prec;
+  S = cgetg(p+1, t_VEC); gel(S, 1) = s;
+  for (i = 2; i <= p; i++) gel(S,i) = deriv(gel(S,i-1), vy);
+  v = sertomat(S, p, r, vy);
+  D = lindep_Xadic(v);
+  if (lg(D) == 1) { set_avma(av); return gen_0; }
+  P = RgV_to_RgX(vecslice(D, 1, r), vy);
+  v = cgetg(p, t_VEC);
+  for (n = 1; n < p; n++)
+    gel(v, n) = RgV_to_RgX(vecslice(D, r*n+1, r*n+r), vy);
+  return gerepilecopy(av, mkvec2(RgV_to_RgX(v, 0), gneg(P)));
 }
 
 /* FIXME: could precompute ZM_lll attached to V[2..] */

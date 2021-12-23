@@ -2625,6 +2625,7 @@ GEN     qfminim0(GEN a, GEN borne, GEN stockmax,long flag, long prec);
 GEN     qfperfection(GEN a);
 GEN     qfrep0(GEN a, GEN borne, long flag);
 GEN     seralgdep(GEN s, long p, long r);
+GEN     serdiffdep(GEN s, long p, long r);
 GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 GEN     vandermondeinverseinit(GEN L);
 GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B);
