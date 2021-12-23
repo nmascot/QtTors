@@ -331,6 +331,8 @@ static int
 is_monomial_test(GEN x, long d, int(*test)(GEN))
 {
   long i, l;
+  if (typ(x) == t_SER && lg(x) == 3 && isexactzero(gel(x,2)))
+    return test(gel(x,2)); /* Mod(0,1) * x^v * (1+O(x)) ? */
   if (d < 2) return 0;
   l = lg(x);
   if (d >= l)
