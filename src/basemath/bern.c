@@ -105,7 +105,7 @@ bernset(GEN *y, long m, long n)
     affrr(divrunu(mulrr(v,u), k-1), v);
     for (j = r; j >= 3; j -= 2) affii(muliu2(gel(t,j), j), gel(t,j));
     set_avma(av2); k -= 2;
-    if ((k & 0xf) == 0)
+    if ((k & 0x7f) == 0)
     { /* reduce precision if possible */
       long p2 = p, prec2 = prec;
       p = bernbitprec(k); prec = nbits2prec(p); if (prec2 == prec) continue;
@@ -157,7 +157,9 @@ constbern(long nb)
   if (DEBUGLEVEL) timer_printf(&T, "Bernoulli");
   swap(B, bernzone); guncloneNULL(B);
   set_avma(av);
+#if 0
   if (nb > 200000)
+#endif
   {
     const ulong p = 4294967291UL;
     long n = 2 * nb + 2;
@@ -486,7 +488,7 @@ eulerset(GEN *y, long m, long n)
     affrr(divrunu(mulrr(v,u), k-2), v);
     for (j = r; j >= 3; j -= 2) affii(muliu2(gel(t,j), j), gel(t,j));
     set_avma(av2); k -= 2;
-    if ((k & 0x1f) == 1)
+    if ((k & 0x7f) == 1)
     { /* reduce precision if possible */
       long p2 = p, prec2 = prec;
       p = eulerbitprec(k); prec = nbits2prec(p); if (prec2 == prec) continue;
