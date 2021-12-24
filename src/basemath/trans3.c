@@ -2263,7 +2263,7 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
       if (gequal1(s)) pari_err_DOMAIN("zetahurwitz", "s", "=", gen_1, s0);
       s = deg1ser_shallow(gen_1, s, 0, der+2);
       z = zetahurwitz(s, x, 0, bitprec + der * log2(der));
-      z = gmul(mpfact(der), polcoef(z, der, -1));
+      z = gmul(mpfact(der), polcoef_i(z, der, -1));
     }
     return gerepileupto(av,z);
   }
@@ -2705,7 +2705,7 @@ gpolylog_i(void *E, GEN x, long prec)
           a = gmul(y, gadd(a, powis(utoipos(i),-m)));
       } else { /* v == 0 */
         long vy = varn(y);
-        GEN a0 = polcoef(y, 0, -1), t = gdiv(derivser(y), y);
+        GEN a0 = polcoef_i(y, 0, -1), t = gdiv(derivser(y), y);
         a = Li1(y, prec);
         for (i=2; i<=m; i++)
           a = gadd(gpolylog(i, a0, prec), integ(gmul(t, a), vy));

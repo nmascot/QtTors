@@ -1267,7 +1267,7 @@ intnum(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab, long prec)
     long v = gvar(gel(a,1));
     if (v != NO_VARIABLE) {
       na = cgetg(3,t_VEC);
-      gel(na,1) = polcoef(gel(a,1),0,v);
+      gel(na,1) = polcoef_i(gel(a,1),0,v);
       gel(na,2) = gel(a,2);
     }
     a = gel(a,1);
@@ -1276,7 +1276,7 @@ intnum(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab, long prec)
     long v = gvar(gel(b,1));
     if (v != NO_VARIABLE) {
       nb = cgetg(3,t_VEC);
-      gel(nb,1) = polcoef(gel(b,1),0,v);
+      gel(nb,1) = polcoef_i(gel(b,1),0,v);
       gel(nb,2) = gel(b,2);
     }
     b = gel(b,1);

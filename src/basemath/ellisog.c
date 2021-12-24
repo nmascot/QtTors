@@ -61,7 +61,8 @@ ellcompisog(GEN F, GEN G)
   checkellisog(G);
   get_isog_vars(F, &vx, &vy);
   Gh = gel(G,3); Gh2 = gsqr(Gh); Gh3 = gmul(Gh, Gh2);
-  F0 = polcoef(gel(F,2), 0, vy); F1 = polcoef(gel(F,2), 1, vy);
+  F0 = polcoef_i(gel(F,2), 0, vy);
+  F1 = polcoef_i(gel(F,2), 1, vy);
   d = maxss(maxss(degpol(gel(F,1)),_degree(gel(F,3))),
             maxss(_degree(F0),_degree(F1)));
   Gp = gpowers(Gh2, d);
@@ -120,10 +121,10 @@ ellnfcompisog(GEN nf, GEN F, GEN G)
   checkellisog(G); G = liftpol_shallow(G);
   get_isog_vars(F, &vx, &vy);
   Gh = to_RgX(gel(G,3),vx); Gh2 = QXQX_sqr(Gh, T); Gh3 = QXQX_mul(Gh, Gh2, T);
-  F0 = to_RgX(polcoef(gel(F,2), 0, vy), vx);
-  F1 = to_RgX(polcoef(gel(F,2), 1, vy), vx);
-  G0 = to_RgX(polcoef(gel(G,2), 0, vy), vx);
-  G1 = to_RgX(polcoef(gel(G,2), 1, vy), vx);
+  F0 = to_RgX(polcoef_i(gel(F,2), 0, vy), vx);
+  F1 = to_RgX(polcoef_i(gel(F,2), 1, vy), vx);
+  G0 = to_RgX(polcoef_i(gel(G,2), 0, vy), vx);
+  G1 = to_RgX(polcoef_i(gel(G,2), 1, vy), vx);
   d = maxss(maxss(degpol(gel(F,1)),degpol(gel(F,3))),maxss(degpol(F0),degpol(F1)));
   Gp = QXQX_powers(Gh2, d, T);
   f  = QXQX_homogenous_evalpow(to_RgX(gel(F,1),vx), gel(G,1), Gp, T);
