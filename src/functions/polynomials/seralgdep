@@ -1,5 +1,5 @@
 Function: seralgdep
-Section: linear_algebra
+Section: polynomials
 C-Name: seralgdep
 Prototype: GLL
 Help: seralgdep(s,p,r): find a linear relation between powers (1,s, ..., s^p)
