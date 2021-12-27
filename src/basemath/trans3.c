@@ -2339,20 +2339,20 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
     /* need |N + re(x) - 1| > C */
     C = gceil(gadd(C, gsubsg(1, rx)));
     if (typ(C) != t_INT) pari_err_TYPE("zetahurwitz",s);
-    if (signe(C) > 0) N = itos(C);
-    else
-    { /* Need 2 |x^(-K) (B_K/K) binom(a, K-1)| < 2^-bit |x|^-rs |zeta(s,x)|
+    N = signe(C) > 0? itos(C) : 1;
+    if (N == 1 && signe(a) > 0)
+    { /* May reduce k if 2Pix > a */
+      /* Need 2 |x^(-K) (B_K/K) binom(a, K-1)| < 2^-bit |x|^-rs |zeta(s,x)|
        * with K = k+2; N = 1; |zeta(s,x)| ~ |x|^(rs-1);
-       * (B_K/K) binom(a, K-1) ~ 2 |a / 2Pi|^K */
-      double dx = dbllog2(x0), d = dx + log2(M_PI) - dbllog2(s0);
+       * if a > 0, (B_K/K) binom(a, K-1) < 2 |a / 2Pi|^K */
+      double dx = dbllog2(x0), d = 1 + dx + log2(M_PI) - dbllog2(s0);
       if (d > 0)
       { /* d ~ log2 |2Pi x / a| */
-        long K = (long)ceil((bitprec + 2 + dx) / d);
+        long K = (long)ceil((bitprec + 1 + dx) / d);
         K = maxss(k0, K);
         if (odd(K)) K++;
         if (K < k) k = K;
       }
-      N = 1;
     }
   }
   if (gsigne(rx) < 0) N = maxss(N, 1 - itos(rx));
