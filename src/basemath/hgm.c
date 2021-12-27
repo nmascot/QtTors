@@ -320,7 +320,8 @@ sumbinom(GEN v, GEN x, long m0, long N, ulong pD)
 static GEN
 umultop(ulong x, ulong y, GEN gp, GEN gpD, long D)
 {
-  long v, pD = gpD[2];
+  ulong pD = gpD[2];
+  long v;
   GEN z;
   if (!x) return zeropadic(gp, D);
   v = u_lvalrem(x, gp[2], &x);
@@ -1973,7 +1974,7 @@ listcond(GEN BAD, GEN achi, ulong min, ulong max)
   {
     l = lg(z);
     for (i = j = 1; i < l; i++)
-      if (z[i] >= min) z[j++] = z[i];
+      if ((ulong)z[i] >= min) z[j++] = z[i];
     setlg(z, j);
   }
   vecsmall_sort(z); return z;
