@@ -967,7 +967,7 @@ serdiffdep(GEN s, long p, long r)
   prec = valp(s) + lg(s)-2;
   if (r > prec) r = prec;
   S = cgetg(p+1, t_VEC); gel(S, 1) = s;
-  for (i = 2; i <= p; i++) gel(S,i) = deriv(gel(S,i-1), vy);
+  for (i = 2; i <= p; i++) gel(S,i) = derivser(gel(S,i-1));
   v = sertomat(S, p, r, vy);
   D = lindep_Xadic(v);
   if (lg(D) == 1) { set_avma(av); return gen_0; }
