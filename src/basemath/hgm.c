@@ -2016,6 +2016,7 @@ lfunhgmwild(GEN L, GEN H, GEN t, GEN BAD, long pole, long limdeg, long bitprec)
 {
   GEN v, K, t0, t0r, t0ir, t0i, t0k, N0, vM, vD, val, PPOL, vF, achi;
   long d, lM, iN, iM, i, k, k2, prec = nbits2prec(bitprec), lB = lg(BAD);
+  long BADprod;
   ulong minN = 1, maxN = 2048;
 
   v = cgetg(lB, t_VECSMALL); PPOL = cgetg(lB, t_VEC);
@@ -2025,6 +2026,7 @@ lfunhgmwild(GEN L, GEN H, GEN t, GEN BAD, long pole, long limdeg, long bitprec)
     gel(PPOL,i) = shallowcopy(gel(BAD,i));
   }
   BAD = v;
+  BADprod = zv_prod(BAD);
   achi = get_achi(H, t, BAD);
   if (pole) L = lfundivraw(L);
   d = ldata_get_degree(L);
@@ -2074,10 +2076,8 @@ lfunhgmwild(GEN L, GEN H, GEN t, GEN BAD, long pole, long limdeg, long bitprec)
     if (pole)
     {
       GEN w = vecpowuu(lim, k2);
-      long pb = 1;
-      for (i = 1; i < lB; i++) pb = BAD[i] * pb;
       for (i = 1; i <= lim; i++)
-        if (cgcd(i, pb) > 1) gel(w, i) = gen_0;
+        if (cgcd(i, BADprod) > 1) gel(w, i) = gen_0;
       an0 = dirdiv(an0, w);
     }
     for (iN = 1; iN < lN; iN++)
