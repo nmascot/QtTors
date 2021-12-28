@@ -160,4 +160,13 @@ x^-1 + O(x^0)]]]]
   ***   at top-level: hgminit([1/2],[0.])
   ***                 ^-------------------
   *** hgminit: incorrect type in hgminit [not rational params] (t_REAL).
-Total time spent: 2361
+  ***   at top-level: hgminit([1],[1])
+  ***                 ^----------------
+  *** hgminit: incorrect type in hgminit [nonempty intersection] (t_VEC).
+  ***   at top-level: hgminit([])
+  ***                 ^-----------
+  *** hgminit: incorrect type in hgminit [#al = 0] (t_VEC).
+  ***   at top-level: hgminit([],[])
+  ***                 ^--------------
+  *** hgminit: incorrect type in hgminit [#al = 0] (t_VEC).
+Total time spent: 2897

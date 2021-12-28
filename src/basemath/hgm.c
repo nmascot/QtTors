@@ -194,21 +194,23 @@ static long
 get_b1(GEN CYCLOE) { return gel(CYCLOE,2)[1]; }
 
 static GEN get_u(GEN al, GEN be, GEN CYCLOE, GEN VPOLGA, long DEG, long WT);
+/* [a,b] = alpha, beta */
 static GEN
-initalbe(GEN val, GEN vbe)
+initab(GEN a, GEN b)
 {
   GEN VALNUM, VALDEN, VBENUM, VBEDEN, CYCLOE, SIGNPAR;
   GEN BAD, HODGE, VPOLGA, res;
-  long j, WT, TT, OFFMPOL, l = lg(val), DEG = l-1, SWAP = 0;
+  long j, WT, TT, OFFMPOL, l = lg(a), DEG = l-1, SWAP = 0;
 
-  if (lg(vbe) != l) pari_err_TYPE("hgminit [#al != #be]", mkvec2(val,vbe));
-  val = QV_normalize(val);
-  vbe = QV_normalize(vbe);
-  if (RgV_isin(val, gen_0))
+  if (lg(b) != l) pari_err_TYPE("hgminit [#al != #be]", mkvec2(a,b));
+  if (l == 1) pari_err_TYPE("hgminit [#al = 0]", mkvec2(a,b));
+  a = QV_normalize(a);
+  b = QV_normalize(b);
+  if (isintzero(gel(a,1)))
   {
-    if (RgV_isin(vbe, gen_0))
-      pari_err_TYPE("hgminit [nonempty intersection]", mkvec2(val,vbe));
-    swap(val, vbe); SWAP = 1;
+    if (isintzero(gel(b,1)))
+      pari_err_TYPE("hgminit [nonempty intersection]", mkvec2(a,b));
+    swap(a, b); SWAP = 1;
   }
   VALNUM = cgetg(l, t_VECSMALL);
   VALDEN = cgetg(l, t_VECSMALL);
@@ -216,19 +218,19 @@ initalbe(GEN val, GEN vbe)
   VBEDEN = cgetg(l, t_VECSMALL);
   for (j = 1; j < l; j++)
   {
-    Qtoss(gel(val,j), &VALNUM[j], &VALDEN[j]);
-    Qtoss(gel(vbe,j), &VBENUM[j], &VBEDEN[j]);
+    Qtoss(gel(a,j), &VALNUM[j], &VALDEN[j]);
+    Qtoss(gel(b,j), &VBENUM[j], &VBEDEN[j]);
   }
   BAD = negi(lcmii(ZV_lcm(zv_to_ZV(VALDEN)), ZV_lcm(zv_to_ZV(VBEDEN))));
-  HODGE = hodge(val, vbe, &TT);
+  HODGE = hodge(a, b, &TT);
   WT = degpol(HODGE);
-  CYCLOE = get_CYCLOE(val, vbe);
+  CYCLOE = get_CYCLOE(a, b);
   VPOLGA = get_VPOLGA(CYCLOE);
   SIGNPAR = odd(WT)? gen_1: discprod(gel(CYCLOE, odd(DEG)? 2: 1));
   OFFMPOL = (get_b1(CYCLOE) - zv_sum(VPOLGA)) >> 1;
   res = cgetg(13, t_VEC);
-  gel(res, 1) = val;
-  gel(res, 2) = vbe;
+  gel(res, 1) = a;
+  gel(res, 2) = b;
   gel(res, 3) = CYCLOE;
   gel(res, 4) = VBENUM;
   gel(res, 5) = VBEDEN;
@@ -236,7 +238,7 @@ initalbe(GEN val, GEN vbe)
   gel(res, 7) = VPOLGA;
   gel(res, 8) = BAD;
   gel(res, 9) = HODGE;
-  gel(res, 10) = get_u(val, vbe, CYCLOE, VPOLGA, DEG, WT);
+  gel(res, 10) = get_u(a, b, CYCLOE, VPOLGA, DEG, WT);
   gel(res, 11) = SIGNPAR;
   gel(res, 12) = mkvecsmall3(OFFMPOL, TT, SWAP);
   return res;
@@ -1510,15 +1512,15 @@ zv_sumeuler(GEN v)
 static GEN
 hgminit_i(GEN a, GEN b)
 {
-  long ta = typ(a);
+  long ta = typ(a), l = lg(a);
   if (ta != t_VEC && ta != t_VECSMALL) pari_err_TYPE("hgminit", a);
   if (!b)
   {
+    if (l == 1) initab(a, a); /* error */
     if (ta == t_VECSMALL || RgV_is_ZV(a))
     {
-      long i, l;
+      long i;
       if (ta != t_VECSMALL) a = vec_to_vecsmall(a);
-      l = lg(a);
       for (i = 1; i < l; i++)
         if (a[i] <= 0) break;
       if (i != l)
@@ -1530,15 +1532,15 @@ hgminit_i(GEN a, GEN b)
       }
     }
     else /* alpha */
-      b = zerovec(lg(a) - 1);
+      b = zerovec(l - 1);
   }
   else
   {
     if (typ(b) != ta) pari_err_TYPE("hgminit", b);
-    if (ta == t_VECSMALL || (RgV_is_ZV(a) && RgV_is_ZV(b)))
+    if (l > 1 && (ta == t_VECSMALL || (RgV_is_ZV(a) && RgV_is_ZV(b))))
       hgmcyclotoalpha(&a, &b); /* cyclo */
   }
-  return initalbe(a, b);
+  return initab(a, b);
 }
 GEN
 hgminit(GEN val, GEN vbe)
@@ -1583,7 +1585,7 @@ hgmtwist(GEN hgm)
   if (hgm_get_SWAP(hgm)) swap(val, vbe);
   val = sort(RgV_addhalf(val));
   vbe = sort(RgV_addhalf(vbe));
-  return gerepilecopy(av, initalbe(val, vbe));
+  return gerepilecopy(av, initab(val, vbe));
 }
 
 GEN
