@@ -974,7 +974,7 @@ frobpoltrunc(GEN hgm, GEN t, GEN C, long p, long B, GEN* pF)
   vp = vp1 = NULL;
   for (i = 1; i < lt; i++)
   {
-    GEN E, s = RgV_to_RgX(gel(S,i), 0);;
+    GEN E, s = RgV_to_RgX(gel(S,i), 0);
     long minew = (mi == DEGNEW && C[i] == C_TAME1 && !odd(DEG))? mi: mi+1;
     s = RgXn_expint(s, minew);
     if (mi == DEGNEW) { gel(S,i) = s; continue; }
