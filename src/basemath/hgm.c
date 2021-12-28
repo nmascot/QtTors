@@ -409,7 +409,7 @@ get_pad(long p)
     case 5: return  8;
     default:return  6; }}
 
-GEN
+static GEN
 Flv_red(GEN z, ulong p)
 {
   long i, l = lg(z);
