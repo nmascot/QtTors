@@ -1,7 +1,7 @@
+default(realprecision,38);
 hgmdegree(h)=hgmparams(h)[1];
 hgmmvalue(h)=h[6];
 hgmweight(h)=hgmparams(h)[2];
-default(parisize,"200M");
 val=[1,2,3,4]/5;
 m=hgminit(val);
 if (m != hgminit([5]), error(1));

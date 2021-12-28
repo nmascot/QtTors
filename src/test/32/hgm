@@ -1,4 +1,3 @@
-  ***   Warning: new stack size = 200000000 (190.735 Mbytes).
 1061520150601*x^4 - 1163209829*x^3 + 985356*x^2 - 1129*x + 1
 832972004929*x^4 - 1428333245*x^3 + 2086470*x^2 - 1565*x + 1
 [1, -1, -5, -5, 0, 5, -25, -5, -20, 0, 14, 25, 15, 25, 0, 51, -15, 20, 120, 
@@ -152,4 +151,4 @@ x^-1 + O(x^0)]]]]
   ***   at top-level: hgmeulerfactor(H,1.,3)
   ***                 ^----------------------
   *** hgmeulerfactor: incorrect type in hgmeulerfactor (t_REAL).
-Total time spent: 2860
+Total time spent: 3066
