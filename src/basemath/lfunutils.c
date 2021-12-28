@@ -270,6 +270,16 @@ eulerf_shift(GEN an, GEN p, long prec)
 }
 
 static GEN
+eulerf_hgm(GEN an, GEN p)
+{
+  GEN H = gel(an,1), t = gmael(an,2,1), L = gmael(an,2,2);
+  long i, l = lg(L);
+  for (i = 1; i < l; i++) /* wild primes */
+    if (equalii(p, gmael(L, i, 1))) break;
+  return ginv(i == l? hgmeulerfactor(H, t, itos(p), NULL): gmael(L,i,2));
+}
+
+static GEN
 deg1ser_shallow(GEN a1, GEN a0, long e)
 { return RgX_to_ser(deg1pol_shallow(a1, a0, 0), e+2); }
 static GEN
@@ -3064,6 +3074,7 @@ ldata_eulerf(GEN van, GEN p, long prec)
     case t_LFUN_GENUS2: f = eulerf_genus2(an, p); break;
     case t_LFUN_TWIST: f = eulerf_twist(an, p, prec); break;
     case t_LFUN_SHIFT: f = eulerf_shift(an, p, prec); break;
+    case t_LFUN_HGM: f = eulerf_hgm(an, p); break;
     default: f = NULL; break;
   }
   if (!f) pari_err_DOMAIN("lfuneuler", "L", "Euler product", strtoGENstr("unknown"), an);

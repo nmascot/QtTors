@@ -44,13 +44,17 @@ Doc:
  a \emph{Tate twist} $T$, and a normalizing M-factor
  $M = \prod_n n^{n\gamma_n}$. The \kbd{hgmparams} function returns
  $$[d,w,[P,T],M]\;.$$
- Example with cyclotomic parameters $[[5],[1,1,1,1]$:
+ Example with cyclotomic parameters $[5],[1,1,1,1]$:
  \bprog
- ? H = hgminit([5], [1,1,1,1]);
+ ? H = hgminit([5]); \\ [1,1,1,1] can be omitted
  ? hgmparams(H)
  %2 = [4, 3, [x^3+x^2+x+1,0], 3125]
+ ? hgmalpha(H)
+ %3 = [[1/5, 2/5, 3/5, 4/5], [0, 0, 0, 0]]
+ ? hgmcyclo(H)
+ %4 = [Vecsmall([5]), Vecsmall([1, 1, 1, 1])]
  ? hgmgamma(H)
- %3 = Vecsmall([-5,0,0,0,1]) \\ A/B = (x^5-1) / (x-1)^5
+ %5 = Vecsmall([-5,0,0,0,1]) \\ A/B = (x^5-1) / (x-1)^5
  @eprog
 
  \subsec{Motives} %GPHELPskip
@@ -87,7 +91,7 @@ Doc:
  ? hgmeulerfactor(H,-1,5) \\ wild primes not implemented
  %6 = 0
  @eprog\noindent
- To obtain the Euler factor at wild primes, use \kbd{1/lfuneulerfactor} once
+ To obtain the Euler factor at wild primes, use \kbd{lfuneuler} once
  the global $L$-function is computed.
 
  \subsec{The Global $L$-function} %GPHELPskip
@@ -102,9 +106,28 @@ Doc:
 
  In our example, \kbd{L = lfunhgm(H,1/64)} takes about 30 seconds to
  finish; this $L$-function can then be used with all the functions of the
- \kbd{lfun} package. For instance by writing \kbd{1/lfuneulerfactor(L,5)}
- we can now check that the Euler factor at the wild prime $p=5$ is trivial
- (equal to~$1$).
+ \kbd{lfun} package. For instance we can now check the Euler factors at
+ the bad primes:
+ \bprog
+ ? factor(L[5])  \\ the conductor
+ %7 =
+ [2 3]
+
+ [3 1]
+
+ [5 5]
+
+ [7 1]
+
+ ? lfuneuler(L,2)
+ %8 = 1/(-x + 1)
+ ? lfuneuler(L,3)
+ %9 = 1/(81*x^3 + 6*x^2 - 4*x + 1)
+ ? lfuneuler(L,5)
+ %10 = 1
+ ? lfuneuler(L,7)
+ %11 = 1/(2401*x^3 + 301*x^2 + x + 1)
+ @eprog
 
  Two additional functions related to the global $L$-function are available
  which do \emph{not} require its full initialization:

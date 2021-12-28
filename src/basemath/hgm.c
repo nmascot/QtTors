@@ -2000,34 +2000,15 @@ lfundivraw(GEN L)
   setlg(L, 7); return L;
 }
 
-static long
-zv_max(GEN v)
-{
-  long m = -1, i;
-  for (i = 1; i < lg(v); i++) m = maxss(m, v[i]);
-  return m;
-}
-
-/* Compute forvec vectors from v only with entries <= ctmax (no limit if
- * ctmax = 0) and max entries >= ctmin. */
+/* Compute forvec vectors from v, sorted by increasing total degree */
 static GEN
-forvectrunc(GEN vF, GEN v, long ctmin, long ctmax)
+forvecsort(GEN vF, GEN v)
 {
-  long i, lE, lM, lv = lg(v);
-  GEN vM, w, E;
-
-  if (ctmax)
-  {
-    w = cgetg(lv, t_VECSMALL);
-    for (i = 1; i < lv; i++) w[i] = minss(v[i], ctmax);
-    v = w;
-  }
-  E = cyc2elts(v); lE = lg(E); vM = cgetg(lE, t_VEC);
-  for (i = lM = 1; i < lE; i++)
-    if (zv_max(gel(E,i)) >= ctmin) gel(vM, lM++) = gel(E,i);
-  setlg(vM, lM); w = cgetg(lM, t_VECSMALL);
-  for (i = 1; i < lM; i++) w[i] = sumdeg(vF, gel(vM, i));
-  return vecpermute(vM, vecsmall_indexsort(w)); /* by increasing total degree */
+  GEN w, E = cyc2elts(v);
+  long i, l = lg(E);
+  w = cgetg(l, t_VECSMALL);
+  for (i = 1; i < l; i++) w[i] = sumdeg(vF, gel(E, i));
+  return vecpermute(E, vecsmall_indexsort(w)); /* by increasing total degree */
 }
 
 static GEN
@@ -2058,11 +2039,12 @@ lfunhgmwild(GEN L, GEN H, GEN t, GEN BAD, long pole, long limdeg, long bitprec)
   vF = cgetg(lB, t_VEC);
   vD = cgetg(lB, t_VEC); /* vD[k][l] = sum_j deg Fj * nj for F = vF[k][l] */
   v = cgetg(lB, t_VECSMALL);
+  if (limdeg < 0) limdeg = d;
   for (i = 1; i < lB; i++)
   {
-    GEN W = cgetg(d+2, t_VEC), D;
+    GEN W = cgetg(limdeg+2, t_VEC), D;
     long p = BAD[i], j, lW;
-    for (j = 0; j <= d; j++) gel(W,j+1) = listweilallw_i(j, p, k-1);
+    for (j = 0; j <= limdeg; j++) gel(W,j+1) = listweilallw_i(j, p, k-1);
     gel(vF, i) = W = shallowconcat1(W);
     lW = lg(W); v[i] = lW-1;
     gel(vD,i) = D = cgetg(lW, t_VEC);
@@ -2072,7 +2054,7 @@ lfunhgmwild(GEN L, GEN H, GEN t, GEN BAD, long pole, long limdeg, long bitprec)
       D[j] = degpol(F) * k - 2 * Z_lval(leading_coeff(F), p);
     }
   }
-  vM = forvectrunc(vF, v, 0, limdeg); lM = lg(vM);
+  vM = forvecsort(vF, v); lM = lg(vM);
   if (DEBUGLEVEL) { err_printf(" lM = %ld ", lM); err_flush(); }
   L = shallowcopy(L);
   val = cgetg(lB, t_VECSMALL);
