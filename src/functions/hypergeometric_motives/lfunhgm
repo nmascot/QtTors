@@ -7,8 +7,8 @@ Help: lfunhgm(H,t,{lim}): (H,t) being a hypergeometric motive, returns the
 Doc: $(H,t)$ being a hypergeometric motive, returns the corresponding
  \kbd{lfuncreate} data for use with the $L$-function package. This function
  needs to guess local conductors and euler factors at wild primes and
- will be very costly if there are many such primes (all the more so as the
- valuation of the conductor increases). The optional parameter \kbd{lim}
+ will be very costly if there are many such primes: the complexity is roughly
+ proportional to the conductor. The optional parameter \kbd{lim}
  allows the function to assume that Euler factors at wild primes have degree
  less than \kbd{lim}, which may speed it up a little. If your guess is wrong,
  the function will enter an infinite loop.

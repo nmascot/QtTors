@@ -154,20 +154,19 @@ discprod(GEN E)
   setlg(P,j); return ZV_prod(P);
 }
 
-/* Fundamental initialization of hgm independent of t */
 static GEN
-normalizeval(GEN val)
+QV_normalize(GEN a)
 {
-  long l = lg(val), i;
+  long l = lg(a), i;
   GEN v = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
   {
-    GEN c = gel(val, i);
+    GEN c = gel(a, i);
     if (!is_rational_t(typ(c)))
       pari_err_TYPE("hgminit [not rational params]",c);
     gel(v, i) = gfrac(c);
   }
-  return v;
+  return sort(v);
 }
 
 static GEN
@@ -203,8 +202,8 @@ initalbe(GEN val, GEN vbe)
   long j, WT, TT, OFFMPOL, l = lg(val), DEG = l-1, SWAP = 0;
 
   if (lg(vbe) != l) pari_err_TYPE("hgminit [#al != #be]", mkvec2(val,vbe));
-  val = normalizeval(val);
-  vbe = normalizeval(vbe);
+  val = QV_normalize(val);
+  vbe = QV_normalize(vbe);
   if (RgV_isin(val, gen_0))
   {
     if (RgV_isin(vbe, gen_0))
@@ -1380,7 +1379,7 @@ zv_to_prims(GEN D, GEN cache)
     if (D[i] <= 0) pari_err_TYPE("hgmcyclotoalpha", D);
     gel(v, i) = allprims(D[i], cache);
   }
-  return sort(shallowconcat1(v));
+  return shallowconcat1(v);
 }
 static void
 hgmcyclotoalpha(GEN *pA, GEN *pB)
@@ -1429,10 +1428,7 @@ hgmgammatocyclo(GEN VPOLGA, GEN *pD, GEN *pE)
 
 static void
 hgmgammatoalpha(GEN VPOLGA, GEN *pA, GEN *pB)
-{
-  hgmgammatocyclo(VPOLGA, pA, pB);
-  hgmcyclotoalpha(pA, pB);
-}
+{ hgmgammatocyclo(VPOLGA, pA, pB); hgmcyclotoalpha(pA, pB); }
 
 /* A and B sorted */
 static long
@@ -1481,14 +1477,14 @@ get_u(GEN al, GEN be, GEN CYCLOE, GEN VPOLGA, long DEG, long WT)
   long b1 = get_b1(CYCLOE);
   if (odd(DEG))
   {
-    be = sort(normalizeval(RgV_addhalf(be)));
+    be = QV_normalize(RgV_addhalf(be));
     u = albe2u(al, be);
     if ((DEG & 3) == 3) u = negi(u);
   }
   else if (odd(WT)) { u = u0; if ((b1 & 3) == 2) u = negi(u); }
   else
   {
-    al = sort(normalizeval(RgV_addhalf(al)));
+    al = QV_normalize(RgV_addhalf(al));
     u = shifti(albe2u(al, be), 1);
     if (((DEG + b1) & 3) == 1) u = negi(u);
   }
@@ -1541,8 +1537,6 @@ hgminit_i(GEN a, GEN b)
     if (typ(b) != ta) pari_err_TYPE("hgminit", b);
     if (ta == t_VECSMALL || (RgV_is_ZV(a) && RgV_is_ZV(b)))
       hgmcyclotoalpha(&a, &b); /* cyclo */
-    else
-    { a = sort(a); b = sort(b); } /* alpha */
   }
   return initalbe(a, b);
 }
@@ -1587,8 +1581,8 @@ hgmtwist(GEN hgm)
   val = hgm_get_VAL(hgm);
   vbe = hgm_get_VBE(hgm);
   if (hgm_get_SWAP(hgm)) swap(val, vbe);
-  val = RgV_addhalf(val);
-  vbe = RgV_addhalf(vbe);
+  val = sort(RgV_addhalf(val));
+  vbe = sort(RgV_addhalf(vbe));
   return gerepilecopy(av, initalbe(val, vbe));
 }
 
@@ -1606,7 +1600,7 @@ hgmparams(GEN hgm)
                                  mkvec2(H,stoi(TT)), M));
 }
 
-/* symmetry at one ? */
+/* symmetry at 1? */
 long
 hgmissymmetrical(GEN hgm)
 {

@@ -43,6 +43,7 @@ H=hgminit([1/2],[0]);H2=hgmtwist(H);hgmalpha(H2)
 hgmgamma(H2)
 hgmtwist(H2)==H
 H=hgminit([6],[1,2]);H2=hgmtwist(H);hgmcyclo(H2)
+hgmalpha(H2)
 hgmgamma(H2)
 H=hgminit([1/2,1/2,1/2,1/2],[0,0,0,0]);
 H1=hgminit([1,1,1],[6,2]);

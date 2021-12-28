@@ -33,6 +33,7 @@ x^8 + x^5 + x^3 + 1
 Vecsmall([2, -1])
 1
 [Vecsmall([3]), Vecsmall([1, 2])]
+[[1/3, 2/3], [0, 1/2]]
 Vecsmall([-1, -1, 1])
 [2, 3]
 [2, 4]
@@ -151,4 +152,4 @@ x^-1 + O(x^0)]]]]
   ***   at top-level: hgmeulerfactor(H,1.,3)
   ***                 ^----------------------
   *** hgmeulerfactor: incorrect type in hgmeulerfactor (t_REAL).
-Total time spent: 2833
+Total time spent: 2860

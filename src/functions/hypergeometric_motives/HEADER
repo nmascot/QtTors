@@ -27,9 +27,9 @@ Doc:
  (where the $a_i$ range in $(\Z/D\Z)^*$) to $[D]$. We thus have two possible
  ways of giving a hypergeometric template: either by the two vectors
  $[\alpha_1,\dots,\alpha_d]$ and $[\beta_1,\dots,\beta_d]$, or by their
- denominators $[D_1,\dots,D_m]$ and $[E_1,\dots,E_n]$ (so that
- $\sum_j\phi(D_j)=\sum_k\phi(E_k)=d$), which are called the \emph{cyclotomic
- parameters}. A third way is to give the \emph{gamma vector} $(\gamma_n)$
+ denominators $[D_1,\dots,D_m]$ and $[E_1,\dots,E_n]$ , which are called the
+ \emph{cyclotomic parameters}; note that $\sum_j\phi(D_j) = \sum_k\phi(E_k)=d$.
+ A third way is to give the \emph{gamma vector} $(\gamma_n)$
  defined by $A(X)/B(X)=\prod_n(X^n-1)^{\gamma_n}$, which satisfies
  $\sum_n n\gamma_n=0$. To any such data we associate a hypergeometric template
  using the function \kbd{hgminit}; then the $\alpha_j$ and $\beta_k$
@@ -40,7 +40,7 @@ Doc:
  parameters, for which we do not give the definition but refer to the survey
  \emph{Hypergeometric Motives} by Roberts and Villegas,
  \kbd{https://arxiv.org/abs/2109.00027}:
- the degree $d$, the \emph{weight} $w$, a \emph{Hodge polynomial} $P$,
+ the degree $d$, the \emph{weight} $w$, a \emph{Hodge polynomial}~$P$,
  a \emph{Tate twist} $T$, and a normalizing M-factor
  $M = \prod_n n^{n\gamma_n}$. The \kbd{hgmparams} function returns
  $$[d,w,[P,T],M]\;.$$
@@ -84,11 +84,11 @@ Doc:
  implemented by a formula but can be guessed via the global functional
  equation (see the next section). Continuing the previous example, we find
  \bprog
- ? hgmeulerfactor(H,-1,3) \\ good prime
+ ? hgmeulerfactor(H, -1, 3) \\ good prime
  %4 = 729*x^4 + 135*x^3 + 45*x^2 + 5*x + 1
- ? hgmeulerfactor(H,-1,2) \\ tame prime
+ ? hgmeulerfactor(H, -1, 2) \\ tame prime
  %5 = 16*x^3 + 6*x^2 + x + 1
- ? hgmeulerfactor(H,-1,5) \\ wild primes not implemented
+ ? hgmeulerfactor(H, -1, 5) \\ wild primes not implemented
  %6 = 0
  @eprog\noindent
  To obtain the Euler factor at wild primes, use \kbd{lfuneuler} once
@@ -98,19 +98,23 @@ Doc:
 
  A theorem of Katz tells us that if one suitably defines $P_p(T)$ for
  all primes $p$ including the wild ones, then the $L$-function defined
- by $L(H,s)=\prod_p P_p(p^{-s})^{-1}$ is a motivic $L$-function
+ by $L(H,s)=\prod_p P_p(p^{-s})^{-1}$ is motivic,
  with analytic continuation and functional equation,
  as used in the $L$-function package of \kbd{Pari/GP}. The command
  \kbd{L = lfunhgm(H,t)} creates such an $L$-function. In particular it must
- guess the local Euler factors at wild primes, which can be very expensive.
+ guess the local Euler factors at wild primes, which can be very expensive
+ when the conductor \kbd{lfunparams}$(L)[1]$ is large.
 
- In our example, \kbd{L = lfunhgm(H,1/64)} takes about 30 seconds to
- finish; this $L$-function can then be used with all the functions of the
- \kbd{lfun} package. For instance we can now check the Euler factors at
- the bad primes:
+ In our example, \kbd{L = lfunhgm(H,1/64)} finishes in about 20 seconds
+ (the conductor is only 525000);
+ this $L$-function can then be used with all the functions of the
+ \kbd{lfun} package. For instance we can now obtain the global conductor and
+ check the Euler factors at all bad primes:
  \bprog
- ? factor(L[5])  \\ the conductor
- %7 =
+ ? [N] = lfunparams(L); N \\ the conductor
+ %7 = 525000
+ ? factor(N)
+ %8 =
  [2 3]
 
  [3 1]
@@ -120,22 +124,22 @@ Doc:
  [7 1]
 
  ? lfuneuler(L,2)
- %8 = 1/(-x + 1)
+ %9 = 1/(-x + 1)
  ? lfuneuler(L,3)
- %9 = 1/(81*x^3 + 6*x^2 - 4*x + 1)
+ %10 = 1/(81*x^3 + 6*x^2 - 4*x + 1)
  ? lfuneuler(L,5)
- %10 = 1
+ %11 = 1
  ? lfuneuler(L,7)
- %11 = 1/(2401*x^3 + 301*x^2 + x + 1)
+ %12 = 1/(2401*x^3 + 301*x^2 + x + 1)
  @eprog
 
  Two additional functions related to the global $L$-function are available
  which do \emph{not} require its full initialization:
  \kbd{hgmcoefs(H,t,n)} computes
- the first $n$ coefficients of the $L$-function by setting all bad Euler
+ the first $n$ coefficients of the $L$-function by setting all wild Euler
  factors to $1$; this will be identical to \kbd{lfunan(L,n)} when this is
- indeed the case (as in the above example), otherwise all coefficients
- divisible by a wild prime will be wrong.
+ indeed the case (as in the above example: only $5$ is wild), otherwise all
+ coefficients divisible by a wild prime will be wrong.
 
  The second is the function \kbd{hgmcoef(H,t,n)} which only computes the
  $n$th coefficient of the global $L$-function. It gives an error if $n$
