@@ -120,5 +120,30 @@ $A = [a_1,\dots,a_d]$.\hfil\break
 \li{$G^{(k)}(t)$}{gammamellininv$(G,t,\{k=0\})$}
 \li{asymp. expansion of $G^{(k)}(t)$}
    {gammamellininvasymp$(A,n,\{k=0\})$}
+
+\section{Hypergeometric motives}
+
+\subsec{Hypergeometric templates}
+Below, $H$ denotes an hypergeometric template from \kbd{hgminit}.\hfil\break
+\li{hgm template from $A=(\alpha_j), B=(\beta_k)$}{hgminit$(A,\{B\})$}
+\li{\dots from cyclotomic parameters $D,E$}{hgminit$(D,\{E\})$}
+\li{\dots from gamma vector}{hgminit$(G)$}
+\li{$\alpha$ and $\beta$ parameters for $H$}{hgmalpha$(H)$}
+\li{cyclotomic parameters $(D,E)$ of $H$}{hgmcyclo$(H)$}
+\li{\dots for all $H$ of degree $n$}{hgmbydegree$(n)$}
+\li{gamma vector for $H$}{hgmgamma$(H)$}
+\li{twist $A$ and $B$ by $1/2$}{hgmtwist$(H)$}
+\li{is $H$ symmetrical at $t = 1$?}{hgmissymmetrical$(H)$}
+\li{parameters $[d,w,[P,T],M]$ for $H$}{hgmparams$(H)$}
+
+\subsec{$L$-function}
+Let $L$ be the $L$-function attached to the hypergeometric motive
+$(H,t)$.\hfil\break
+\li{coefficient $a_n$ of $L$}{hgmcoef$(H,t,n)$}
+\li{coefficients $[a_1,\dots,a_n]$ of $L$}{hgmcoefs$(H,t,n)$}
+\li{Euler factor at $p$}{hgmeulerfactor$(H,t,p)$}
+\li{\dots and valuation of local conductor}{hgmeulerfactor$(H,t,p,\&e)$}
+\li{return $L$ as an \kbd{Ldata}}{lfunhgm$(H,t)$}
+
 \copyrightnotice
 \bye

@@ -179,6 +179,10 @@ HC  57- allow lngamma(t_PADIC of negative valuation)
     58- file LICENSE (for Software Heritage archiving)
 BA  59- [libpari] RgXV_prod
 BA  60- new GP function serdiffdep
+    61- new module for hypergeometric motives, see ??hgm. GP functions
+        hgmalpha     hgmbydegree     hgmcyclo          hgminit
+        hgmtwist     hgmcoef         hgmeulerfactor    hgmissymmetrical
+        lfunhgm      hgmcoefs        hgmgamma        hgmparams
 
   Changed
 HC   1- faster implementation of eulervec + cache result

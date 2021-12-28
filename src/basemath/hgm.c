@@ -1382,25 +1382,25 @@ zv_to_prims(GEN D, GEN cache)
   }
   return sort(shallowconcat1(v));
 }
-static GEN
-hgmcyclotoalpha(GEN D, GEN E)
+static void
+hgmcyclotoalpha(GEN *pA, GEN *pB)
 {
-  GEN v, VD, VE;
+  GEN v, D = *pA, E = *pB;
   if (typ(D) != t_VECSMALL) D = gtovecsmall(D);
   if (typ(E) != t_VECSMALL) E = gtovecsmall(E);
   v = const_vec(maxss(vecsmall_max(D), vecsmall_max(E)), NULL);
   gel(v,1) = mkvec(gen_0);
-  VD = zv_to_prims(D, v);
-  VE = zv_to_prims(E, v);
-  if (lg(VD) != lg(VE)) pari_err(e_MISC, "incorrect lengths");
-  return mkvec2(VD, VE);
+  *pA = zv_to_prims(D, v);
+  *pB = zv_to_prims(E, v);
+  if (lg(*pA) != lg(*pB))
+    pari_err_TYPE("hgminit [incorrect lengths]", mkvec2(D,E));
 }
 
 static GEN
 hgmalphatogamma(GEN val, GEN vbe) { return get_VPOLGA(get_CYCLOE(val, vbe)); }
 
-static GEN
-hgmgammatocyclo(GEN VPOLGA)
+static void
+hgmgammatocyclo(GEN VPOLGA, GEN *pD, GEN *pE)
 {
   long i, cn, cd, l = lg(VPOLGA);
   GEN d, n, v = zero_zv(l - 1);
@@ -1423,25 +1423,16 @@ hgmgammatocyclo(GEN VPOLGA)
     if (e < 0) for (j = 1; j <= -e; j++) d[cd++] = i;
     else if (e > 0) for (j = 1; j <= e; j++) n[cn++] = i;
   }
-  setlg(d, cd);
-  setlg(n, cn); return mkvec2(n, d);
+  setlg(d, cd); *pD = d;
+  setlg(n, cn); *pE = n;
 }
 
-static GEN
-hgmgammatoalpha(GEN VPOLGA)
+static void
+hgmgammatoalpha(GEN VPOLGA, GEN *pA, GEN *pB)
 {
-  GEN v = hgmgammatocyclo(VPOLGA);
-  return hgmcyclotoalpha(gel(v,1), gel(v,2));
+  hgmgammatocyclo(VPOLGA, pA, pB);
+  hgmcyclotoalpha(pA, pB);
 }
-
-#if 0
-static GEN
-hgmcyclotogamma(GEN D, GEN E)
-{
-  GEN AB = hgmcyclotoalpha(D, E);
-  return hgmalphatogamma(gel(AB,1), gel(AB,2));
-}
-#endif
 
 /* A and B sorted */
 static long
@@ -1505,36 +1496,55 @@ get_u(GEN al, GEN be, GEN CYCLOE, GEN VPOLGA, long DEG, long WT)
   return mkvec2(coredisc(u), u0);
 }
 
-/* (val, vbe): format (1) if denominator, format (2) if no denominator,
- * format (3) if vbe not vector. */
-static GEN
-hgminit_i(GEN val, GEN vbe)
+static long
+zv_sumeuler(GEN v)
 {
-  GEN valbe = gen_0;
-  long ta = typ(val);
-  if (!vbe)
+  long i, l = lg(v);
+  GEN s = gen_0;
+  for (i = 1; i < l; i++)
   {
-    if (ta != t_VEC && ta != t_VECSMALL) pari_err_TYPE("hgminit", val);
-    valbe = hgmgammatoalpha(val);
-    val = gel(valbe,1);
-    vbe = gel(valbe,2);
+    if (v[i] <= 0) pari_err_TYPE("hgminit", v);
+    s = addiu(s, eulerphiu(v[i]));
+  }
+  return itou(s);
+}
+
+/* (a, b): format (1) if denominator, format (2) if no denominator,
+ * format (3) if b not vector. */
+static GEN
+hgminit_i(GEN a, GEN b)
+{
+  long ta = typ(a);
+  if (ta != t_VEC && ta != t_VECSMALL) pari_err_TYPE("hgminit", a);
+  if (!b)
+  {
+    if (ta == t_VECSMALL || RgV_is_ZV(a))
+    {
+      long i, l;
+      if (ta != t_VECSMALL) a = vec_to_vecsmall(a);
+      l = lg(a);
+      for (i = 1; i < l; i++)
+        if (a[i] <= 0) break;
+      if (i != l)
+        hgmgammatoalpha(a, &a, &b); /* gamma */
+      else
+      { /* cyclo */
+        b = const_vecsmall(zv_sumeuler(a), 1);
+        hgmcyclotoalpha(&a, &b);
+      }
+    }
+    else /* alpha */
+      b = zerovec(lg(a) - 1);
   }
   else
   {
-    if (typ(vbe) != ta) pari_err_TYPE("hgminit", vbe);
-    if (ta == t_VECSMALL || (RgV_is_ZV(val) && RgV_is_ZV(vbe)))
-    {
-      valbe = hgmcyclotoalpha(val, vbe);
-      val = gel(valbe,1);
-      vbe = gel(valbe,2);
-    }
+    if (typ(b) != ta) pari_err_TYPE("hgminit", b);
+    if (ta == t_VECSMALL || (RgV_is_ZV(a) && RgV_is_ZV(b)))
+      hgmcyclotoalpha(&a, &b); /* cyclo */
     else
-    {
-      val = sort(val);
-      vbe = sort(vbe);
-    }
+    { a = sort(a); b = sort(b); } /* alpha */
   }
-  return initalbe(val, vbe);
+  return initalbe(a, b);
 }
 GEN
 hgminit(GEN val, GEN vbe)
@@ -1545,7 +1555,7 @@ hgmalpha(GEN hgm)
 {
   GEN al = hgm_get_VAL(hgm), be = hgm_get_VBE(hgm);
   if (hgm_get_SWAP(hgm)) swap(al, be);
-  return mkvec2(al, be);
+  retmkvec2(gcopy(al), gcopy(be));
 }
 GEN
 hgmgamma(GEN hgm)
@@ -1592,8 +1602,8 @@ hgmparams(GEN hgm)
   H = zx_to_ZX(hgm_get_HODGE(hgm));
   TT = hgm_get_TT(hgm); DEG = hgm_get_DEG(hgm);
   WT = hgm_get_WT(hgm); M = hgm_get_MVALUE(hgm);
-  return gerepilecopy(av, mkvec5(utoipos(DEG), utoi(WT),
-                                 hgmalpha(hgm), mkvec2(H,stoi(TT)), M));
+  return gerepilecopy(av, mkvec4(utoipos(DEG), utoi(WT),
+                                 mkvec2(H,stoi(TT)), M));
 }
 
 /* symmetry at one ? */
@@ -1724,12 +1734,12 @@ mkalbe(long n)
 }
 
 static long
-cyclowt(GEN z)
+cyclowt(GEN a, GEN b)
 {
   pari_sp av = avma;
-  GEN valbe = hgmcyclotoalpha(gel(z,1), gel(z,2));
   long TT;
-  return gc_long(av, degpol(hodge(gel(valbe, 1), gel(valbe, 2), &TT)));
+  hgmcyclotoalpha(&a, &b);
+  return gc_long(av, degpol(hodge(a, b, &TT)));
 }
 
 GEN
@@ -1742,7 +1752,7 @@ hgmbydegree(long n)
   for (i = 1; i < l; i++)
   {
     GEN z = gel(v,i);
-    long k = cyclowt(z) + 1;
+    long k = cyclowt(gel(z,1), gel(z,2)) + 1;
     gmael(w, k, c[k]++) = z;
   }
   for (i = 1; i <= n; i++) setlg(gel(w,i), c[i]);

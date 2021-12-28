@@ -1,0 +1,8 @@
+Function: hgmalpha
+Section: hypergeometric_motives
+C-Name: hgmalpha
+Prototype: G
+Help: hgmalpha(H): returns the alpha and beta parameters of the hypergeometric
+ motive template H.
+Doc:  returns the alpha and beta parameters of the hypergeometric motive
+ template $H$.

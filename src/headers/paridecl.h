@@ -3718,6 +3718,7 @@ long    zx_lval(GEN f, long p);
 /* hgm.c */
 
 GEN hgmcyclo(GEN hgm);
+GEN hgmalpha(GEN hgm);
 GEN hgmgamma(GEN hgm);
 GEN hgminit(GEN val, GEN vbe);
 GEN hgmparams(GEN hgm);

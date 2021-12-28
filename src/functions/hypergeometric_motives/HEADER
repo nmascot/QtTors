@@ -32,7 +32,8 @@ Doc:
  parameters}. A third way is to give the \emph{gamma vector} $(\gamma_n)$
  defined by $A(X)/B(X)=\prod_n(X^n-1)^{\gamma_n}$, which satisfies
  $\sum_n n\gamma_n=0$. To any such data we associate a hypergeometric template
- using the function \kbd{hgminit}; then cyclotomic parameters are obtained
+ using the function \kbd{hgminit}; then the $\alpha_j$ and $\beta_k$
+ are obtained using \kbd{hgmalpha}, cyclotomic parameters
  using \kbd{hgmcyclo} and the gamma vectors using \kbd{hgmgamma}.
 
  To such a hypergeometric template is associated a number of additional
@@ -42,12 +43,12 @@ Doc:
  the degree $d$, the \emph{weight} $w$, a \emph{Hodge polynomial} $P$,
  a \emph{Tate twist} $T$, and a normalizing M-factor
  $M = \prod_n n^{n\gamma_n}$. The \kbd{hgmparams} function returns
- $$[d,w,[[\alpha_j],[\beta_k]],[P,T],M]\;.$$
+ $$[d,w,[P,T],M]\;.$$
  Example with cyclotomic parameters $[[5],[1,1,1,1]$:
  \bprog
  ? H = hgminit([5], [1,1,1,1]);
  ? hgmparams(H)
- %2 = [4, 3, [[1/5,2/5,3/5,4/5],[0,0,0,0]], [x^3+x^2+x+1,0], 3125]
+ %2 = [4, 3, [x^3+x^2+x+1,0], 3125]
  ? hgmgamma(H)
  %3 = Vecsmall([-5,0,0,0,1]) \\ A/B = (x^5-1) / (x-1)^5
  @eprog
