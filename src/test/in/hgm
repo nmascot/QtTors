@@ -132,6 +132,7 @@ hgmeulerfactor(H,-1,79)
 hgmeulerfactor(H,-1,107)
 H=hgminit([7]);
 hgmeulerfactor(H,1/3,2)
+H=hgminit([-17, -1, 1, 1, 1, 0, 1])
 
 H=hgminit([5],[1,1,1,1]);
 hgmeulerfactor(H,1,11)

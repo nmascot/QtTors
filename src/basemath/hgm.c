@@ -427,13 +427,13 @@ block0(long l)
   return v;
 }
 
-/* f > 0, p prime */
+/* f > 0, p prime, need result mod p^dfp */
 static GEN
 doprecomp(long p, long f, long dfp)
 {
   GEN t, T;
-  long m, q, F;
-  if (f > 3 || (F = get_pad(p)) > dfp) return precomp(p, f, dfp);
+  long m, q, F; /* can compute cache mod p^F < 2^BIL */
+  if (f > 3 || (F = get_pad(p)) < dfp) return precomp(p, f, dfp);
   if (f == 3)
   {
     T = HGMDATA3; if (!T) T = HGMDATA3 = block0(100);
@@ -452,7 +452,7 @@ doprecomp(long p, long f, long dfp)
     if (f == 1) return precomp(p, f, dfp);
     t = gel(T,p) = gclone(precomp(p, f, F));
   }
-  /* t = precomp(p, 2, dfp) = HGMDATA2[p] */
+  /* t = precomp(p, 2, F) = HGMDATA2[p] */
   if (f == 2)
   {
     if (F == dfp) return t;
@@ -1414,16 +1414,19 @@ hgmgammatocyclo(GEN VPOLGA, GEN *pD, GEN *pE)
       for (j = 1; j < lD; j++) v[ D[j] ] += e;
     }
   }
-  n = cgetg(l, t_VECSMALL);
-  d = cgetg(l, t_VECSMALL);
+  for (i = 1, cn = cd = 0; i < l; i++)
+  {
+    long e = v[i];
+    if (e > 0) cn += e; else cd -= e;
+  }
+  *pE = n = cgetg(cn+1, t_VECSMALL);
+  *pD = d = cgetg(cd+1, t_VECSMALL);
   for (i = cn = cd = 1; i < l; i++)
   {
     long e = v[i], j;
     if (e < 0) for (j = 1; j <= -e; j++) d[cd++] = i;
     else if (e > 0) for (j = 1; j <= e; j++) n[cn++] = i;
   }
-  setlg(d, cd); *pD = d;
-  setlg(n, cn); *pE = n;
 }
 
 static void
