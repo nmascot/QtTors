@@ -151,4 +151,13 @@ x^-1 + O(x^0)]]]]
   ***   at top-level: hgmeulerfactor(H,1.,3)
   ***                 ^----------------------
   *** hgmeulerfactor: incorrect type in hgmeulerfactor (t_REAL).
-Total time spent: 3066
+  ***   at top-level: hgminit([1/2],[1/2])
+  ***                 ^--------------------
+  *** hgminit: incorrect type in hgminit [not a Q motive] (t_VEC).
+  ***   at top-level: hgminit([1.0],[1/2])
+  ***                 ^--------------------
+  *** hgminit: incorrect type in hgminit [not rational params] (t_REAL).
+  ***   at top-level: hgminit([1/2],[0.])
+  ***                 ^-------------------
+  *** hgminit: incorrect type in hgminit [not rational params] (t_REAL).
+Total time spent: 2361
