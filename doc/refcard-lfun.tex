@@ -68,7 +68,8 @@ k/2$); or $R = [h]$ (for $c = k/2$, $w = 0$).
    {lfunetaquo$(M)$}
 \li{$L(E,s)$, $E$ elliptic curve}{E = ellinit(\dots)}
 \li{$L(Sym^m E,s)$, $E$ elliptic curve}{lfunsympow(E, m)}
-\li{genus $2$ curve, $y^2+xQ = P$}{lfungenus2$([P,Q])$}
+\li{Genus $2$ curve, $y^2+xQ = P$}{lfungenus2$([P,Q])$}
+\li{Hypergeometric motive $H(a,b; t)$}{lfunhgm(hgminit(a,b), t)}
 \smallskip
 
 \li{dual $L$ function $\hat{L}$}{lfundual$(L)$}
@@ -95,8 +96,8 @@ k/2$); or $R = [h]$ (for $c = k/2$, $w = 0$).
 \newcolumn
 
 \section{L-functions}
-$L$ is either an \kbd{Ldata} or an \kbd{Linit} (more efficient for many
-values).\hfil\break
+$L$ is an \kbd{Ldata} or an \kbd{Linit} (more efficient for many
+values).
 \subsec{Evaluate}
 \li{$L^{(k)}(s)$}{lfun$(L,s,\{k=0\})$}
 \li{$\Lambda^{(k)}(s)$}{lfunlambda$(L,s,\{k=0\})$}
