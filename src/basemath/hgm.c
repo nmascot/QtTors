@@ -802,10 +802,8 @@ hgmCallmodp2(GEN hgm, long p)
 
 static GEN
 hgmCallboth(GEN hgm, long p, long f, GEN V)
-{
-  long fl = (f == 1 && get_dfp(hgm, p, f) <= 2);
-  return fl ? hgmCallmodp2(hgm, p) : hgmCall(hgm, p, f, V);
-}
+{ return (f == 1 && get_dfp(hgm, p, f) <= 2)? hgmCallmodp2(hgm, p)
+                                            : hgmCall(hgm, p, f, V); }
 
 static GEN
 hgmHmodp2(GEN Callmodp2, GEN t)
