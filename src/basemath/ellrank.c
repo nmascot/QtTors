@@ -936,10 +936,11 @@ is_nonmin(int smallp, long vpi, long vpj, long vpd)
 }
 
 static GEN
-quartic_minim_all(GEN P)
+quartic_minim_all(GEN P, GEN discF)
 {
   GEN IJ = quartic_IJ(P), I = gel(IJ,1), J = gel(IJ,2);
-  GEN plist = gel(Z_factor(gcdii(I,J)),1);
+  GEN g = Z_ppo(gcdii(I,J), gel(discF,1));
+  GEN plist = ZV_sort(shallowconcat(gel(absZ_factor(g),1), gel(discF,2)));
   long i, l = lg(plist);
   GEN m = mkvec2(gen_1, matid(2));
   for (i = 1; i < l; i++)
@@ -1907,7 +1908,7 @@ liftselmerinit(GEN expo, GEN vnf, GEN sqrtLS2, GEN factLS2,
 }
 
 static GEN
-liftselmer_cover(GEN b, GEN expo, GEN LS2, GEN pol, GEN K)
+liftselmer_cover(GEN b, GEN expo, GEN LS2, GEN pol, GEN discF, GEN K)
 {
   GEN P, Q, Q4, R, den, q0, q1, q2, xz, x, y, y2m, U, param, newb;
   GEN ttheta, tttheta, zc, polprime;
@@ -1927,7 +1928,7 @@ liftselmer_cover(GEN b, GEN expo, GEN LS2, GEN pol, GEN K)
   q1 = Q_remove_denom(qfeval(q1, param), &den);
   if (den) q1 = ZX_Z_mul(q1, den);
   if (!equali1(K)) q1 = RgX_Rg_mul(q1, K);
-  QM = quartic_minim_all(q1);
+  QM = quartic_minim_all(q1, discF);
   q1 = gel(QM,1);
   zden = gmael(QM,2,1);
   Q = hyperellreduce(q1, &R);
@@ -1949,7 +1950,7 @@ liftselmer_cover(GEN b, GEN expo, GEN LS2, GEN pol, GEN K)
 }
 
 static GEN
-liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry, GEN *pt_Q)
+liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN discF, GEN K, long ntry, GEN *pt_Q)
 {
   pari_sp av = avma, av2;
   long t, lim = ntry * LIM1;
@@ -1983,7 +1984,7 @@ liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN K, long ntry, GEN *
     q1 = Q_remove_denom(qfeval(q1, param), &den);
     if (den) q1 = ZX_Z_mul(q1, den);
     if (!equali1(K)) q1 = RgX_Rg_mul(q1, K);
-    QM = quartic_minim_all(q1);
+    QM = quartic_minim_all(q1, discF);
     q1 = gel(QM,1);
     zden = gmael(QM,2,1);
     Q = hyperellreduce(q1, &R);
@@ -2088,7 +2089,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
 {
   GEN KP, pol, vnf, vpol, vcrt, sbase, LS2, factLS2, sqrtLS2, signs;
   GEN selmer, helpLS2, LS2chars, helpchars, newselmer, factdisc, badprimes;
-  GEN helplist, listpoints, etors2, p, covers, disc;
+  GEN helplist, listpoints, etors2, p, covers, disc, discF;
   long i, k, n, tors2, mwrank, dim, nbpoints, lfactdisc, t, u, sha2 = 0;
   forprime_t T;
 
@@ -2102,6 +2103,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   disc = ZX_disc(pol);
   factdisc = mkvec3(KP, mkcol(gen_2), gel(absZ_factor(disc), 1));
   factdisc = ZV_sort_uniq(shallowconcat1(factdisc));
+  discF = mkvec2(gmul(K,disc), factdisc);
   badprimes = cgetg(n+1, t_VEC);
   vnf = cgetg(n+1, t_VEC);
   vpol = cgetg(n+1, t_VEC);
@@ -2185,7 +2187,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     for (i = 1; i < l; i++)
     {
       b = liftselmerinit(gel(u,i), vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
-      gel(P,i) = liftselmer_cover(b, gel(u,i), LS2, pol, K);
+      gel(P,i) = liftselmer_cover(b, gel(u,i), LS2, pol, discF, K);
     }
     return P;
   }
@@ -2197,7 +2199,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     if (Flm_Flc_invimage(newselmer, vec, 2)) continue;
     expo = Flm_Flc_mul(selmer, vec, 2);
     b = liftselmerinit(expo, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
-    P = liftselmer(b, expo, sbase, LS2, pol, K, 1, &gel(covers,i));
+    P = liftselmer(b, expo, sbase, LS2, pol, discF, K, 1, &gel(covers,i));
     if (P)
     {
       gel(listpoints, ++nbpoints) = P; /* new point on ell */
@@ -2225,7 +2227,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
         {
           GEN e = Flv_add(gel(selmer,i), gel(selmer,j), 2);
           GEN b = liftselmerinit(e, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
-          Q = quartic_findunit(D, gel(liftselmer_cover(b, e, LS2, pol, K),1));
+          Q = quartic_findunit(D, gel(liftselmer_cover(b, e, LS2, pol, discF, K),1));
         }
         gmael(M,j,i) = gmael(M,i,j) = Q;
       }
@@ -2240,7 +2242,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
       while (zv_equal0(vec) || Flm_Flc_invimage(newselmer, vec, 2));
       expo = Flm_Flc_mul(selmer, vec, 2);
       b = liftselmerinit(expo, vnf, sqrtLS2, factLS2, badprimes, vcrt, pol);
-      P = liftselmer(b, expo, sbase, LS2, pol, K, u, NULL);
+      P = liftselmer(b, expo, sbase, LS2, pol, discF, K, u, NULL);
       if (P)
       {
         gel(listpoints, ++nbpoints) = P;
