@@ -719,17 +719,16 @@ get_dfp(GEN hgm, long p, long f)
 }
 /* V being a vecsmall, compute all p^TT*hgmC(m)/hgmC(0) for indices in V */
 static GEN
-hgmCall(GEN hgm, long p, long f, GEN V)
+hgmCall(GEN hgm, long p, long f, long dfp, GEN ZP, GEN V)
 {
   GEN v, c, GPV, VL0, VL1, TEICH;
-  GEN VPOLGA = hgm_get_VPOLGA(hgm), ZP;
+  GEN VPOLGA = hgm_get_VPOLGA(hgm);
   long i, L, l0, PFM1 = upowuu(p, f) - 1, lV = V? lg(V): PFM1+1;
-  long fTT = f * hgm_get_TT(hgm), dfp = get_dfp(hgm, p, f);
+  long fTT = f * hgm_get_TT(hgm);
 
   GPV = doprecomp(p, f, dfp);
   VL0 = (V && f == 1)? get_L0(hgm, PFM1): NULL;
   VL1 = get_L1(hgm, PFM1, f);
-  ZP = zeropadic(utoipos(p), dfp);
   TEICH = get_teich(VPOLGA, ZP, p, f, PFM1);
   l0 = hgm_get_OFFMPOL(hgm) * f;
   v = cgetg(lV, t_VEC); i = 1; /* m = 0 */
@@ -749,38 +748,20 @@ hgmCall(GEN hgm, long p, long f, GEN V)
     }
     gel(v,i) = c;
   }
-  return mkvec5(v, ZP, utoipos(p), utoipos(f), V? V : gen_0);
-}
-
-/* General H function */
-static GEN
-hgmH(GEN Call, GEN t)
-{
-  GEN C = gel(Call, 1), ZP = gel(Call, 2), v, c0;
-  long p = itos(gel(Call, 3)), f = itos(gel(Call, 4));
-  long l = lg(t), j;
-  v = cgetg(l, t_VEC);
-  c0 = ginv(gaddsg(1 - (long)upowuu(p, f), ZP));
-  for (j = 1; j < l; j++)
-  {
-    GEN z = poleval(C, teich(gadd(gel(t, j), ZP)));
-    gel(v,j) = centerlift(gmul(z, c0));
-  }
   return v;
 }
-
 /* Same mod p^2, f = 1 */
 static GEN
 hgmCallmodp2(GEN hgm, long p)
 {
   GEN C, GPV, VL0, VL1, W1, Wm, VPOLGA = hgm_get_VPOLGA(hgm);
-  long m, l = lg(VPOLGA), PSQ = p * p, PFM1 = p - 1, TT = hgm_get_TT(hgm);
+  long m, l = lg(VPOLGA), p2 = p * p, PFM1 = p - 1, TT = hgm_get_TT(hgm);
 
   VL0 = get_L0(hgm, PFM1);
   VL1 = get_L1(hgm, PFM1, 1);
-  W1 = teichmodp2(VPOLGA, p, PSQ);
+  W1 = teichmodp2(VPOLGA, p, p2);
   Wm = shallowcopy(W1);
-  GPV = doprecompmodp2(p, PSQ);
+  GPV = doprecompmodp2(p, p2);
   C = cgetg(PFM1+2, t_VECSMALL); C[1] = evalvarn(0);
   C[2] = TT > 1? 0: (TT == 1? p : 1); /* m = 0 */
   for (m = 1; m < PFM1; m++)
@@ -789,30 +770,35 @@ hgmCallmodp2(GEN hgm, long p)
     if (e >= 2) c = 0;
     else
     {
-      c = hgmCmodp2(VPOLGA, Wm, GPV, PFM1, m, PSQ);
-      if (odd(VL0[m + 1] ^ VL0[1])) c = Fl_neg(c, PSQ);
+      c = hgmCmodp2(VPOLGA, Wm, GPV, PFM1, m, p2);
+      if (odd(VL0[m + 1] ^ VL0[1])) c = Fl_neg(c, p2);
       if (e == 1) c = (c % p) * p;
     }
     C[m + 2] = c;
     for (j = 2; j < l; j++)
-      if (VPOLGA[j]) Wm[j] = Fl_mul(Wm[j], W1[j], PSQ);
+      if (VPOLGA[j]) Wm[j] = Fl_mul(Wm[j], W1[j], p2);
   }
-  return mkvec4(C, gen_0, utoipos(p), gen_1);
+  return C;
 }
 
+/* General H function */
 static GEN
-hgmCallboth(GEN hgm, long p, long f, GEN V)
-{ return (f == 1 && get_dfp(hgm, p, f) <= 2)? hgmCallmodp2(hgm, p)
-                                            : hgmCall(hgm, p, f, V); }
-
-static GEN
-hgmHmodp2(GEN Callmodp2, GEN t)
+hgmH(GEN C, long p, long f, GEN ZP, GEN t)
 {
-  GEN C = gel(Callmodp2, 1), v;
-  long p = itos(gel(Callmodp2, 3)), p2 = p * p, ph = p2 >> 1, c0 = 1 + p;
   long l = lg(t), j;
-
-  v = cgetg(l, t_VEC);
+  GEN v = cgetg(l, t_VEC), c0 = ginv(gaddsg(1 - (long)upowuu(p, f), ZP));
+  for (j = 1; j < l; j++)
+  {
+    GEN z = poleval(C, teich(gadd(gel(t, j), ZP)));
+    gel(v,j) = centerlift(gmul(z, c0));
+  }
+  return v;
+}
+static GEN
+hgmHmodp2(GEN C, long p, GEN t)
+{
+  long p2 = p * p, ph = p2 >> 1, c0 = 1 + p, l = lg(t), j;
+  GEN v = cgetg(l, t_VEC);
   for (j = 1; j < l; j++)
   {
     ulong wt = Fl_powu(Rg_to_Fl(gel(t, j), p2), p, p2);
@@ -825,11 +811,14 @@ enum { C_OK = 0, C_FAKE, C_BAD, C_TAME0, C_TAME1};
 static GEN hgmU(GEN hgm, long p, long f, GEN t, long dfp);
 static long hgmclass(GEN hgm, long p, GEN t);
 static GEN
-hgmtrace(GEN hgm, GEN Call, GEN t, GEN C)
+hgmtrace(GEN hgm, long p, long f, GEN t, long c)
 {
-  long p = itos(gel(Call, 3)), f = itos(gel(Call, 4)), dfp = get_dfp(hgm, p, f);
-  if (C[1] == C_FAKE) return hgmU(hgm, p, f, t, dfp);
-  return (f == 1 && dfp <= 2)? hgmHmodp2(Call, t): hgmH(Call, t);
+  long dfp = get_dfp(hgm, p, f);
+  GEN ZP;
+  if (c == C_FAKE) return hgmU(hgm, p, f, t, dfp);
+  if (f == 1 && dfp <= 2) return hgmHmodp2(hgmCallmodp2(hgm, p), p, t);
+  ZP = zeropadic(utoipos(p), dfp);
+  return hgmH(hgmCall(hgm, p, f, dfp, ZP, NULL), p, f, ZP, t);
 }
 
 static GEN
@@ -951,8 +940,7 @@ hgmadditive(long c) { return (c == C_BAD || c == C_TAME0); }
 
 /* p good or Tame1; return local factor at p: 1/E + O(x^(B+1)); t a t_VEC,
  * C a t_VECSMALL giving their class. FIXME: t a vector of values now
- * useless: can call hgmCall or hgmQ[all] which do not depend on t; then
- * evaluate polynomial at t */
+ * useless */
 static GEN
 frobpoltrunc(GEN hgm, GEN t, GEN C, long p, long B, GEN* pF)
 {
@@ -968,7 +956,7 @@ frobpoltrunc(GEN hgm, GEN t, GEN C, long p, long B, GEN* pF)
   for (i = 1; i < lt; i++) gel(S,i) = cgetg(mi+1, t_VEC);
   for (f = 1; f <= mi; f++)
   { /* FIXME: f = mi unused if C_TAME1 and even DEG */
-    GEN Call = hgmCallboth(hgm, p, f, NULL), co = hgmtrace(hgm, Call, t, C);
+    GEN co = hgmtrace(hgm, p, f, t, C[1]);
     for (i = 1; i < lt; i++) gmael(S, i, f) = negi(gel(co, i));
   }
   vp = vp1 = NULL;
@@ -1014,7 +1002,7 @@ frobpoltrunc(GEN hgm, GEN t, GEN C, long p, long B, GEN* pF)
       if (!vp) vp = mkpowers(p,DEG,WT);
       E = Efuneq(s, vp, DEG, SIGN, B);
     }
-    gel(S, i) = E;
+    gel(S,i) = E;
   }
   if (pF) *pF = F;
   return S;
@@ -1116,11 +1104,15 @@ eulfacbadnew(GEN hgm, GEN t, long p, long *pe)
   return RgX_unscale(F, powis(gp, w / 2 - v / d));
 }
 #endif
-static GEN eulfactame(GEN hgm, GEN t, long p, long *pe);
+static GEN Jordantameexpo(GEN hgm, long v, GEN t0, long p, long *pe);
 static GEN
 eulfacspec(GEN hgm, GEN t, long p, long cla, long flag, long *pe)
 {
-  if (cla == C_TAME0) return eulfactame(hgm, t, p, pe);
+  if (cla == C_TAME0)
+  {
+    long v = Q_lvalrem(t, p, &t);
+    return Jordantameexpo(hgm, v, t, p, pe);
+  }
   if (cla == C_BAD)
   {
     if (flag) { *pe = -1; return gen_0; }
@@ -1205,8 +1197,8 @@ RgXn_sqrtnu(GEN h, long f, long e)
 static GEN
 Jordantame(GEN hgm, GEN t0, long m, long p)
 {
-  GEN P, T, C, ZP, V, Call;
-  long d, phim, f, j, c, q, qm;
+  GEN P, T, C, ZP, V;
+  long d, phim, f, j, c, q, qm, dfp;
 
   if (m == 1)
   {
@@ -1219,7 +1211,9 @@ Jordantame(GEN hgm, GEN t0, long m, long p)
   V = cgetg(phim + 1, t_VECSMALL);
   for (j = c = 1; j < m; j++)
     if (cgcd(j, m) == 1) V[c++] = j * qm;
-  Call = hgmCall(hgm, p, f, V); C = gel(Call, 1); ZP = gel(Call, 2);
+  dfp = get_dfp(hgm, p, f);
+  ZP = zeropadic(utoipos(p), dfp);
+  C = hgmCall(hgm, p, f, dfp, ZP, V);
   T = teich(gadd(t0, ZP)); P = pol_1(0);
   for (j = 1; j < lg(V); j++)
   {
@@ -1259,13 +1253,6 @@ Jordantameexpo(GEN hgm, long v, GEN t0, long p, long *pe)
       e += eulerphiu(m);
     }
   *pe = hgm_get_DEG(hgm) - e; return P;
-}
-
-static GEN
-eulfactame(GEN hgm, GEN t, long p, long *pe)
-{
-  long v = Q_lvalrem(t, p, &t);
-  return Jordantameexpo(hgm, v, t, p, pe);
 }
 
 /***************************************************************/
