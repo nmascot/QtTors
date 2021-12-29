@@ -2168,46 +2168,6 @@ hgmmoments(GEN H, GEN t, GEN M, long nb)
   return gerepileupto(av, gdivgs(S, ct));
 }
 
-#if 0
-/* Vector version: does not use parallelism since uses hgmTrace, useful
- * if vect long. */
-static GEN
-hgmmomentsvec(GEN H, GEN vect, GEN M, GEN P)
-{
-  pari_sp av = avma;
-  GEN S, L = hgmlfuninfty(H, gen_m1), BAD = BAD2small(gel(L, 3)), C;
-  GEN k2 = gmul2n(gsubgs(gel(L, 2), 1), -1);
-  long ct = 0, i, k, lP, lm, tm = typ(M), lt = lg(vect);
-
-  if (typ(vect) != t_VEC) { vect = mkvec(vect); lt = 2; }
-  if (!P) P = primes_zv(1000);
-  if (typ(P) != t_VECSMALL) P = gtovecsmall(P);
-  lP = lg(P);
-  if (tm != t_VEC) M = gtovec(M);
-  lm = lg(M);
-  S = cgetg(lt, t_VEC);
-  for (k = 1; k < lt; k++) gel(S, k) = const_vec(lm - 1, real_0(DEFAULTPREC));
-  C = zero_zv(lt - 1);
-  for (i = 1; i < lP; i++)
-  {
-    long p = P[i], j;
-    if (!zv_search(BAD, p))
-    {
-      GEN Call = hgmCall(H, p, 1, NULL);
-      GEN T = gdiv(hgmtrace(H, Call, vect, C), gpow(utoipos(p), k2, DEFAULTPREC));
-      ct++;
-      for (j = 1; j < lm; j++)
-        for (k = 1; k < lt; k++)
-          gmael(S, k, j) = gadd(gmael(S, k, j),
-                                gpow(gel(T, k), gel(M, j), DEFAULTPREC));
-    }
-  }
-  if (tm != t_VEC && tm != t_COL && tm != t_VECSMALL)
-    for (k = 1; k < lt; k++) gel(S, k) = gmael(S, k, 1);
-  return gerepileupto(av, gdivgs(S, ct));
-}
-#endif
-
 /* Heuristic guess: is there a pole ? */
 static long
 lfunhgmispole(GEN H, GEN t, long nb)
