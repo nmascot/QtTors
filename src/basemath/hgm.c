@@ -873,24 +873,6 @@ get_achi(GEN hgm, GEN t, GEN BAD)
   return v;
 }
 
-/* complete local factor E (of degree d) at p using functional equation
- * E(T) = SIGN p^(WT*d)/2 T^d E(1/(p^WT*T)) */
-static GEN
-Efuneq(GEN E, GEN vp, long d, long SIGN, long B)
-{
-  long j = maxss(d - B, 0), k = d + 1 - j, nE = lg(E)-1, l = (d + 1) >> 1;
-  GEN T = cgetg(k + 1, t_VEC);
-  for (; j < l; j++, k--)
-  {
-    GEN q = gel(vp,l-j);
-    if (SIGN < 0) q = negi(q); /* q = SIGN * p^(WT(d-2*j) / 2) */
-    gel(T, k) = gmul(q, RgX_coeff(E, j));
-  }
-  for (; k >= nE; k--) gel(T, k) = gen_0;
-  for (; k > 0; k--) gel(T, k) = gel(E, k+1);
-  return RgV_to_RgX(T,0);
-}
-
 /* [a,a*r, ..., a*r^n] */
 static GEN
 upowers_u(ulong r, long n, ulong a)
@@ -909,14 +891,32 @@ powers_u(ulong r, long n, ulong a)
   return v;
 }
 static GEN
-mkpowers(long p, long DEG, long WT)
+mkpowers(long p, long d, long WT)
 {
   ulong q, r;
   if (WT == 0) q = r = 1;
-  else if (!odd(DEG)) q = r = upowuu(p, WT);
+  else if (!odd(d)) q = r = upowuu(p, WT);
   else if (WT == 1) { q = 1; r = p; }
   else { q = upowuu(p, WT >> 1); r = q*q; if (odd(WT)) r *= p; }
-  return powers_u(r, (DEG-1)>>1, q);
+  return powers_u(r, (d-1)>>1, q);
+}
+
+/* complete local factor E (of degree d) at p using functional equation
+ * E(T) = SIGN p^(WT*d)/2 T^d E(1/(p^WT*T)) */
+static GEN
+Efuneq(GEN E, long p, long d, long WT, long SIGN, long B)
+{
+  long j = maxss(d - B, 0), k = d + 1 - j, nE = lg(E)-1, l = (d + 1) >> 1;
+  GEN T = cgetg(k + 1, t_VEC), vp = mkpowers(p, d, WT);
+  for (; j < l; j++, k--)
+  {
+    GEN q = gel(vp,l-j);
+    if (SIGN < 0) q = negi(q); /* q = SIGN * p^(WT(d-2*j) / 2) */
+    gel(T, k) = gmul(q, RgX_coeff(E, j));
+  }
+  for (; k >= nE; k--) gel(T, k) = gen_0;
+  for (; k > 0; k--) gel(T, k) = gel(E, k+1);
+  return RgV_to_RgX(T,0);
 }
 
 static long
@@ -954,10 +954,10 @@ frobpoltrunc(GEN hgm, GEN t, long c, long p, long B, long *pF)
 {
   long DEG = hgm_get_DEG(hgm), WT = hgm_get_WT(hgm);
   long D = isint1(t)? (odd(WT) ? DEG - 2 : DEG - 1): DEG;
-  long f, mi, m, D2 = D >> 1, q = upowuu(p, WT >> 1);
-  GEN E, s, vp;
+  long f, mi, m, q = upowuu(p, WT >> 1);
+  GEN E, s;
 
-  mi = minss(B, (c == C_FAKE)? D: D2);
+  mi = minss(B, (c == C_FAKE)? D: D >> 1);
   m = (mi == D && c == C_TAME1 && !odd(DEG))? mi: mi+1;
   s = cgetg(m+1, t_POL); s[1] = evalsigne(1)|evalvarn(0);
   for (f = 1; f < m; f++) gel(s, f+1) = negi( hgmtrace(hgm, p, f, t, c) );
@@ -967,16 +967,12 @@ frobpoltrunc(GEN hgm, GEN t, long c, long p, long B, long *pF)
   {
     long SIGN = kroiu(hgm_get_U(hgm), p);
     if (odd(DEG))
-    {
-      vp = mkpowers(p,DEG-1,WT);
-      E = Efuneq(s, vp, DEG-1, SIGN, B);
-    }
+      E = Efuneq(s, p, DEG-1, WT, SIGN, B);
     else
     {
       GEN T = deg1pol_shallow(stoi(- SIGN * q), gen_1, 0);
       E = RgXn_mul(s, RgXn_inv(T, m), m);
-      vp = mkpowers(p,DEG,WT);
-      E = Efuneq(E, vp, DEG - 2, 1, B);
+      E = Efuneq(E, p, DEG - 2, WT, 1, B);
       if (!gequal1(t) || !odd(WT)) E = gmul(E, T);
     }
     *pF = 1;
@@ -996,8 +992,7 @@ frobpoltrunc(GEN hgm, GEN t, long c, long p, long B, long *pF)
   else
   {
     long SIGN = hgmsign(hgm, p, t);
-    vp = mkpowers(p,DEG,WT);
-    E = Efuneq(s, vp, DEG, SIGN, B);
+    E = Efuneq(s, p, DEG, WT, SIGN, B);
   }
   return E;
 }
