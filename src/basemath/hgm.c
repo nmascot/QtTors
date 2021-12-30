@@ -883,7 +883,7 @@ Efuneq(GEN E, GEN vp, long d, long SIGN, long B)
   for (; j < l; j++, k--)
   {
     GEN q = gel(vp,l-j);
-    if (SIGN < 0) q = negi(q); /* q = SIGN * p^(WT(d-2*j) >> 1) */
+    if (SIGN < 0) q = negi(q); /* q = SIGN * p^(WT(d-2*j) / 2) */
     gel(T, k) = gmul(q, RgX_coeff(E, j));
   }
   for (; k >= nE; k--) gel(T, k) = gen_0;
@@ -952,34 +952,30 @@ hgmclass(GEN hgm, long p, GEN t)
 static GEN
 frobpoltrunc(GEN hgm, GEN t, long c, long p, long B, long *pF)
 {
-  GEN S, vp, vp1, E, s;
-  long DEG = hgm_get_DEG(hgm), DEG2, WT = hgm_get_WT(hgm);
-  long f, mi, minew, q = upowuu(p, WT >> 1), DEGNEW = DEG;
+  long DEG = hgm_get_DEG(hgm), WT = hgm_get_WT(hgm);
+  long D = isint1(t)? (odd(WT) ? DEG - 2 : DEG - 1): DEG;
+  long f, mi, m, D2 = D >> 1, q = upowuu(p, WT >> 1);
+  GEN E, s, vp;
 
-  if (gequal1(t)) { DEGNEW = odd(WT) ? DEG - 2 : DEG - 1; }
-  DEG2 = DEGNEW >> 1;
-  mi = minss(B, (c == C_FAKE)? DEGNEW: DEG2); /* if one is fake, all are */
-  S = cgetg(mi+1, t_VEC); /* FIXME: f = mi unused if C_TAME1 and even DEG */
-  for (f = 1; f <= mi; f++) gel(S, f) = negi( hgmtrace(hgm, p, f, t, c) );
-  vp = vp1 = NULL;
-  s = RgV_to_RgX(S, 0);
-  minew = (mi == DEGNEW && c == C_TAME1 && !odd(DEG))? mi: mi+1;
-  s = RgXn_expint(s, minew);
-  *pF = 0;
-  if (mi == DEGNEW) return s;
+  mi = minss(B, (c == C_FAKE)? D: D2);
+  m = (mi == D && c == C_TAME1 && !odd(DEG))? mi: mi+1;
+  s = cgetg(m+1, t_POL); s[1] = evalsigne(1)|evalvarn(0);
+  for (f = 1; f < m; f++) gel(s, f+1) = negi( hgmtrace(hgm, p, f, t, c) );
+  *pF = 0; s = RgXn_expint(s, m);
+  if (mi == D) return s;
   if (c == C_TAME1)
   {
     long SIGN = kroiu(hgm_get_U(hgm), p);
     if (odd(DEG))
     {
-      if (!vp1) vp1 = mkpowers(p,DEG-1,WT);
-      E = Efuneq(s, vp1, DEG-1, SIGN, B);
+      vp = mkpowers(p,DEG-1,WT);
+      E = Efuneq(s, vp, DEG-1, SIGN, B);
     }
     else
     {
       GEN T = deg1pol_shallow(stoi(- SIGN * q), gen_1, 0);
-      E = RgXn_mul(s, RgXn_inv(T, minew), minew);
-      if (!vp) vp = mkpowers(p,DEG,WT);
+      E = RgXn_mul(s, RgXn_inv(T, m), m);
+      vp = mkpowers(p,DEG,WT);
       E = Efuneq(E, vp, DEG - 2, 1, B);
       if (!gequal1(t) || !odd(WT)) E = gmul(E, T);
     }
@@ -1000,7 +996,7 @@ frobpoltrunc(GEN hgm, GEN t, long c, long p, long B, long *pF)
   else
   {
     long SIGN = hgmsign(hgm, p, t);
-    if (!vp) vp = mkpowers(p,DEG,WT);
+    vp = mkpowers(p,DEG,WT);
     E = Efuneq(s, vp, DEG, SIGN, B);
   }
   return E;
