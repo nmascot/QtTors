@@ -432,7 +432,7 @@ static GEN
 doprecomp(long p, long f, long dfp)
 {
   GEN t, T;
-  long m, q, F; /* can compute cache mod p^F < 2^BIL */
+  long m, n, q, F; /* can compute cache mod p^F < 2^BIL */
   if (f > 3 || (F = get_pad(p)) < dfp) return precomp(p, f, dfp);
   if (f == 3)
   {
@@ -440,8 +440,7 @@ doprecomp(long p, long f, long dfp)
     if (p >= lg(T)) return precomp(p, f, dfp);
     t = gel(T,p);
     if (typ(t) == t_INT) t = gel(T,p) = gclone(precomp(p, f, F));
-    if (F == dfp) return t;
-    return Flv_red(t, upowuu(p, dfp));
+    return (F == dfp)? t: Flv_red(t, upowuu(p, dfp));
   }
   /* f <= 2, dfp <= F */
   T = HGMDATA2; if (!T) T = HGMDATA2 = block0(1000);
@@ -454,13 +453,10 @@ doprecomp(long p, long f, long dfp)
   }
   /* t = precomp(p, 2, F) = HGMDATA2[p] */
   if (f == 2)
-  {
-    if (F == dfp) return t;
-    return Flv_red(t, upowuu(p, dfp));
-  }
+    return (F == dfp)? t: Flv_red(t, upowuu(p, dfp));
   /* f = 1 */
   T = cgetg(p, t_VECSMALL); q = upowuu(p, dfp);
-  for (m = 1; m < p; m++) T[m] = uel(t, (m-1)*(p+1) + 1) % q;
+  for (m = n = 1; m < p; m++, n += p+1) T[m] = uel(t, n) % q;
   return T;
 }
 
