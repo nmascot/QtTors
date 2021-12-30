@@ -324,7 +324,7 @@ umultop(ulong x, ulong y, GEN gp, GEN gpD, long D)
   ulong pD = gpD[2];
   long v;
   GEN z;
-  if (!x) return zeropadic(gp, D);
+  if (!x) return zeropadic_shallow(gp, D);
   v = u_lvalrem(x, gp[2], &x);
   if (x >= pD) x %= pD;
   z = cgetg(5, t_PADIC);
@@ -731,8 +731,17 @@ hgmCall(GEN hgm, long p, long f, long dfp, GEN ZP, GEN V)
   VL1 = get_L1(hgm, PFM1, f);
   TEICH = get_teich(VPOLGA, ZP, p, f, PFM1);
   l0 = hgm_get_OFFMPOL(hgm) * f;
-  v = cgetg(lV, t_VEC); i = 1; /* m = 0 */
-  if (!V) { gel(v,i++) = c = gadd(gen_1, ZP); setvalp(c, valp(c) + fTT); }
+  if (V)
+  {
+    v = cgetg(lV, t_VEC);
+    i = 1;
+  }
+  else
+  {
+    v = cgetg(lV+1, t_POL); v[1] = evalsigne(1)|evalvarn(0);
+    gel(v,2) = c = powuu(p, fTT); /* m = 0 */
+    i = 2;
+  }
   for (; i < lV; i++)
   {
     long e, m = V? V[i]: i-1;
@@ -744,9 +753,9 @@ hgmCall(GEN hgm, long p, long f, long dfp, GEN ZP, GEN V)
       pari_sp av = avma;
       c = hgmC(VPOLGA, GPV, TEICH, p, f, PFM1, m, dfp);
       setvalp(c, e); if (odd(L ^ l0)) c = gneg(c);
-      c = gerepileupto(av, c);
+      c = gerepileupto(av, padic_to_Q(c));
     }
-    gel(v,i) = c;
+    gel(v, V? i: i+1) = c;
   }
   return v;
 }
@@ -781,13 +790,27 @@ hgmCallmodp2(GEN hgm, long p)
   return C;
 }
 
-/* General H function */
-static GEN
-hgmH(GEN C, long p, long f, GEN ZP, GEN t)
+/* 1 / (1-q) ~ 1 + q + ... + q^n; n >= 1 */
+static ulong
+inv(ulong q, long n)
 {
-  GEN z = poleval(C, teich(gadd(t, ZP)));
-  long q = upowuu(p, f);
-  return centerlift(gdivgs(z, 1 - q));
+  ulong z = q + 1;
+  long i;
+  for (i = 1; i < n; i++) z = z * q + 1;
+  return z;
+}
+
+/* General H function: C(teich(f + O(p^dfp))) / (1 - p^f) */
+static GEN
+hgmH(GEN C, long p, long f, long dfp, GEN t)
+{
+  GEN q = powuu(p, dfp), z = Rg_to_Fp(t, q);
+  long n;
+  z = Zp_teichmuller(z, utoipos(p), dfp, q);
+  z = FpX_eval(C, z, q);
+  n = dfp / f; if (!(dfp % f)) n--;
+  z = Fp_mulu(z, inv(upowuu(p,f), n), q);
+  return Fp_center(z, q,  shifti(q,-1));
 }
 static GEN
 hgmHmodp2(GEN C, long p, GEN t)
@@ -807,8 +830,8 @@ hgmtrace(GEN hgm, long p, long f, GEN t, long c)
   GEN ZP;
   if (c == C_FAKE) return hgmU(hgm, p, f, t, dfp);
   if (f == 1 && dfp <= 2) return hgmHmodp2(hgmCallmodp2(hgm, p), p, t);
-  ZP = zeropadic(utoipos(p), dfp);
-  return hgmH(hgmCall(hgm, p, f, dfp, ZP, NULL), p, f, ZP, t);
+  ZP = zeropadic_shallow(utoipos(p), dfp);
+  return hgmH(hgmCall(hgm, p, f, dfp, ZP, NULL), p, f, dfp, t);
 }
 
 static GEN
@@ -1128,7 +1151,7 @@ Jordantame(GEN hgm, GEN t0, long m, long p)
   for (j = c = 1; j < m; j++)
     if (cgcd(j, m) == 1) V[c++] = j * qm;
   dfp = get_dfp(hgm, p, f);
-  ZP = zeropadic(utoipos(p), dfp);
+  ZP = zeropadic_shallow(utoipos(p), dfp);
   C = hgmCall(hgm, p, f, dfp, ZP, V);
   T = teich(gadd(t0, ZP)); P = pol_1(0);
   for (j = 1; j < lg(V); j++)
@@ -1223,19 +1246,20 @@ hgmQ(GEN hgm, long p, long f, GEN vp, long r, GEN ZP)
   long q = vp[f+1], m0 = hgmmulti(B, q, 0), m1 = hgmmulti(B, q, r);
   GEN c = powis(utoipos(q), hgm_get_TT(hgm) + m0 - m1);
   if (odd(m0)) c = negi(c);
-  return gerepileupto(av, gmul(c, hgmG(hgm, p, f, vp, r, ZP)));
+  return gerepileupto(av, padic_to_Q(gmul(c, hgmG(hgm, p, f, vp, r, ZP))));
 }
 
 static GEN
 hgmU(GEN hgm, long p, long f, GEN t, long dfp)
 {
   pari_sp av = avma;
-  GEN ZP = zeropadic(utoipos(p), dfp), vp = upowers_u(p, f, 1);
+  GEN ZP = zeropadic_shallow(utoipos(p), dfp), vp = upowers_u(p, f, 1);
   long q = vp[f+1], i;
-  GEN Q = cgetg(q, t_VEC);
-  for (i = 1; i < q; i++) gel(Q, i) = hgmQ(hgm, p, f, vp, i-1, ZP);
+  GEN Q = cgetg(q+1, t_POL);
+  Q[1] = evalsigne(1)|evalvarn(0);
+  for (i = 2; i <= q; i++) gel(Q, i) = hgmQ(hgm, p, f, vp, i, ZP);
   t = p == 2? gen_1: gmul(hgm_get_MVALUE(hgm), t);
-  return gerepileupto(av, hgmH(Q, p, f, ZP, t));
+  return gerepileupto(av, hgmH(Q, p, f, dfp, t));
 }
 
 /***************************************************************/
