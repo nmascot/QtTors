@@ -785,26 +785,16 @@ hgmCallmodp2(GEN hgm, long p)
 static GEN
 hgmH(GEN C, long p, long f, GEN ZP, GEN t)
 {
-  long l = lg(t), j;
-  GEN v = cgetg(l, t_VEC), c0 = ginv(gaddsg(1 - (long)upowuu(p, f), ZP));
-  for (j = 1; j < l; j++)
-  {
-    GEN z = poleval(C, teich(gadd(gel(t, j), ZP)));
-    gel(v,j) = centerlift(gmul(z, c0));
-  }
-  return v;
+  GEN z = poleval(C, teich(gadd(t, ZP)));
+  long q = upowuu(p, f);
+  return centerlift(gdivgs(z, 1 - q));
 }
 static GEN
 hgmHmodp2(GEN C, long p, GEN t)
 {
-  long p2 = p * p, ph = p2 >> 1, c0 = 1 + p, l = lg(t), j;
-  GEN v = cgetg(l, t_VEC);
-  for (j = 1; j < l; j++)
-  {
-    ulong wt = Fl_powu(Rg_to_Fl(gel(t, j), p2), p, p2);
-    gel(v,j) = stoi( Fl_center(Fl_mul(Flx_eval(C, wt, p2), c0, p2), p2, ph) );
-  }
-  return v;
+  long p2 = p * p, ph = p2 >> 1, c0 = 1 + p;
+  ulong wt = Fl_powu(Rg_to_Fl(t, p2), p, p2);
+  return stoi( Fl_center(Fl_mul(Flx_eval(C, wt, p2), c0, p2), p2, ph) );
 }
 
 enum { C_OK = 0, C_FAKE, C_BAD, C_TAME0, C_TAME1};
@@ -935,94 +925,76 @@ hgmclass(GEN hgm, long p, GEN t)
   }
   return ap == bp? C_TAME1 : C_OK;
 }
-static int
-hgmadditive(long c) { return (c == C_BAD || c == C_TAME0); }
 
 /* p good or Tame1; return local factor at p: 1/E + O(x^(B+1)); t a t_VEC,
- * C a t_VECSMALL giving their class. FIXME: t a vector of values now
- * useless */
+ * C a t_VECSMALL giving their class. */
 static GEN
-frobpoltrunc(GEN hgm, GEN t, GEN C, long p, long B, GEN* pF)
+frobpoltrunc(GEN hgm, GEN t, long c, long p, long B, long *pF)
 {
-  GEN S, vp, vp1, F;
+  GEN S, vp, vp1, E, s;
   long DEG = hgm_get_DEG(hgm), DEG2, WT = hgm_get_WT(hgm);
-  long f, i, mi, lt = lg(t), q = upowuu(p, WT >> 1), DEGNEW = DEG;
+  long f, mi, minew, q = upowuu(p, WT >> 1), DEGNEW = DEG;
 
-  /* FIXME: what if not first ? */
-  if (gequal1(gel(t, 1))) { DEGNEW = odd(WT) ? DEG - 2 : DEG - 1; }
+  if (gequal1(t)) { DEGNEW = odd(WT) ? DEG - 2 : DEG - 1; }
   DEG2 = DEGNEW >> 1;
-  mi = minss(B, (C[1] == C_FAKE)? DEGNEW: DEG2); /* if one is fake, all are */
-  S = cgetg(lt, t_VEC); F = zero_zv(lt - 1);
-  for (i = 1; i < lt; i++) gel(S,i) = cgetg(mi+1, t_VEC);
-  for (f = 1; f <= mi; f++)
-  { /* FIXME: f = mi unused if C_TAME1 and even DEG */
-    GEN co = hgmtrace(hgm, p, f, t, C[1]);
-    for (i = 1; i < lt; i++) gmael(S, i, f) = negi(gel(co, i));
-  }
+  mi = minss(B, (c == C_FAKE)? DEGNEW: DEG2); /* if one is fake, all are */
+  S = cgetg(mi+1, t_VEC); /* FIXME: f = mi unused if C_TAME1 and even DEG */
+  for (f = 1; f <= mi; f++) gel(S, f) = negi( hgmtrace(hgm, p, f, t, c) );
   vp = vp1 = NULL;
-  for (i = 1; i < lt; i++)
+  s = RgV_to_RgX(S, 0);
+  minew = (mi == DEGNEW && c == C_TAME1 && !odd(DEG))? mi: mi+1;
+  s = RgXn_expint(s, minew);
+  *pF = 0;
+  if (mi == DEGNEW) return s;
+  if (c == C_TAME1)
   {
-    GEN E, s = RgV_to_RgX(gel(S,i), 0);
-    long minew = (mi == DEGNEW && C[i] == C_TAME1 && !odd(DEG))? mi: mi+1;
-    s = RgXn_expint(s, minew);
-    if (mi == DEGNEW) { gel(S,i) = s; continue; }
-    if (C[i] == C_TAME1)
+    long SIGN = kroiu(hgm_get_U(hgm), p);
+    if (odd(DEG))
     {
-      long SIGN = kroiu(hgm_get_U(hgm), p);
-      if (odd(DEG))
-      {
-        if (!vp1) vp1 = mkpowers(p,DEG-1,WT);
-        E = Efuneq(s, vp1, DEG-1, SIGN, B);
-      }
-      else
-      {
-        GEN T = deg1pol_shallow(stoi(- SIGN * q), gen_1, 0);
-        E = RgXn_mul(s, RgXn_inv(T, minew), minew);
-        if (!vp) vp = mkpowers(p,DEG,WT);
-        E = Efuneq(E, vp, DEG - 2, 1, B);
-        if (!gequal1(gel(t, i)) || !odd(WT)) E = gmul(E, T);
-      }
-      F[i] = 1;
-      if (!odd(WT))
-      {
-        GEN T, u, t0;
-        long v = Q_lvalrem(gsubgs(gel(t,i), 1), p, &t0);
-        if (!odd(v))
-        {
-          if (typ(t0) == t_FRAC) t0 = mulii(gel(t0,1), gel(t0,2));
-          u = coredisc(mulii(t0, hgm_get_U0(hgm)));
-          T = deg1pol_shallow(stoi(-kroiu(u, p) * q), gen_1, 0);
-          E = gmul(E, T); F[i] = 0;
-        }
-      }
+      if (!vp1) vp1 = mkpowers(p,DEG-1,WT);
+      E = Efuneq(s, vp1, DEG-1, SIGN, B);
     }
     else
     {
-      long SIGN = hgmsign(hgm, p, gel(t,i));
+      GEN T = deg1pol_shallow(stoi(- SIGN * q), gen_1, 0);
+      E = RgXn_mul(s, RgXn_inv(T, minew), minew);
       if (!vp) vp = mkpowers(p,DEG,WT);
-      E = Efuneq(s, vp, DEG, SIGN, B);
+      E = Efuneq(E, vp, DEG - 2, 1, B);
+      if (!gequal1(t) || !odd(WT)) E = gmul(E, T);
     }
-    gel(S,i) = E;
+    *pF = 1;
+    if (!odd(WT))
+    {
+      GEN T, u, t0;
+      long v = Q_lvalrem(gsubgs(t, 1), p, &t0);
+      if (!odd(v))
+      {
+        if (typ(t0) == t_FRAC) t0 = mulii(gel(t0,1), gel(t0,2));
+        u = coredisc(mulii(t0, hgm_get_U0(hgm)));
+        T = deg1pol_shallow(stoi(-kroiu(u, p) * q), gen_1, 0);
+        E = gmul(E, T); *pF = 0;
+      }
+    }
   }
-  if (pF) *pF = F;
-  return S;
+  else
+  {
+    long SIGN = hgmsign(hgm, p, t);
+    if (!vp) vp = mkpowers(p,DEG,WT);
+    E = Efuneq(s, vp, DEG, SIGN, B);
+  }
+  return E;
 }
 
 GEN
 hgmcoef(GEN hgm, GEN t, GEN n)
 {
   pari_sp av = avma;
-  GEN C, T, P, E, F = check_arith_all(n, "hgmcoef");
-  long flag = 0, i, lt, lP;
+  GEN T, P, E, F = check_arith_all(n, "hgmcoef");
+  long i, lP;
 
   if (!checkhgm(hgm)) pari_err_TYPE("hgmcoef", hgm);
-  switch(typ(t))
-  {
-    case t_INT: case t_FRAC: t = mkvec(t); flag = 1; break;
-    case t_VEC: if (RgV_is_QV(t)) break;
-    default: pari_err_TYPE("hgmcoef",t);
-  }
-  if (hgm_get_SWAP(hgm)) t = vecinv(t);
+  if (!is_rational_t(typ(t))) pari_err_TYPE("hgmcoef",t);
+  if (hgm_get_SWAP(hgm)) t = ginv(t);
   if (!F) { F = Z_factor(n); P = gel(F,1); }
   else
   {
@@ -1032,22 +1004,16 @@ hgmcoef(GEN hgm, GEN t, GEN n)
   }
   if (signe(n) <= 0) pari_err_DOMAIN("hgmcoef", "n", "<=", gen_0, n);
   E = gel(F,2); lP = lg(P); T = gen_1;
-  lt = lg(t); C = cgetg(lt, t_VECSMALL);
-  T = const_vec(lt-1, gen_1);
+  T = gen_1;
   for (i = 1; i < lP; i++)
   {
-    long j, p = itos(gel(P, i)), f = itos(gel(E, i));
+    long e, p = itos(gel(P, i)), f = itos(gel(E, i)), c = hgmclass(hgm, p, t);
     GEN A;
-    for (j = 1; j < lt; j++)
-    {
-      C[j] = hgmclass(hgm, p, gel(t, j));
-      if (C[j] == C_BAD) pari_err_IMPL("hgmcoef for bad primes");
-    }
-    A = frobpoltrunc(hgm, t, C, p, f, NULL);
-    for (j = 1; j < lt; j++) gel(A,j) = RgX_coeff(RgXn_inv(gel(A,j), f+1), f);
-    T = vecmul(T, A);
+    if (c == C_BAD) pari_err_IMPL("hgmcoef for bad primes");
+    A = frobpoltrunc(hgm, t, c, p, f, &e);
+    T = gmul(T, RgX_coeff(RgXn_inv(A, f+1), f));
   }
-  return gerepilecopy(av, flag? gel(T, 1): T);
+  return gerepilecopy(av, T);
 }
 
 static GEN
@@ -1106,81 +1072,31 @@ eulfacbadnew(GEN hgm, GEN t, long p, long *pe)
 #endif
 static GEN Jordantameexpo(GEN hgm, long v, GEN t0, long p, long *pe);
 static GEN
-eulfacspec(GEN hgm, GEN t, long p, long cla, long flag, long *pe)
+hgmeulerfactorlimit(GEN hgm, GEN t, long p, long d, long flag, long *pe)
 {
-  if (cla == C_TAME0)
+  long c = hgmclass(hgm, p, t);
+  if (c == C_TAME0)
   {
     long v = Q_lvalrem(t, p, &t);
     return Jordantameexpo(hgm, v, t, p, pe);
   }
-  if (cla == C_BAD)
-  {
-    if (flag) { *pe = -1; return gen_0; }
-    else      { *pe = 0; return pol_1(0); }
-  }
-  return NULL; /* LCOV_EXCL_LINE */
+  if (c != C_BAD) return frobpoltrunc(hgm, t, c, p, d, pe);
+  if (flag) { *pe = -1; return gen_0; } else { *pe = 0; return pol_1(0); }
 }
-
-static GEN
-hgmeulerfactorlimit_i(GEN hgm, GEN t, long p, long d, long flag, GEN *pE)
-{
-  GEN P, E, F;
-  long e;
-
-  if (typ(t) != t_VEC)
-  {
-    long c = hgmclass(hgm, p, t);
-    if (hgmadditive(c)) P = eulfacspec(hgm, t, p, c, flag, &e);
-    else
-    {
-      P = gel(frobpoltrunc(hgm, mkvec(t), mkvecsmall(c), p, d, &F), 1);
-      e = F[1];
-    }
-    E = e? stoi(e): gen_0;
-  }
-  else
-  {
-    long ct, j, l = lg(t);
-    GEN T = cgetg(l,t_VEC), C = cgetg(l,t_VECSMALL), perm = cgetg(l,t_VECSMALL);
-    P = cgetg(l, t_VEC); E = zero_zv(l - 1);
-    for (j = ct = 1; j < l; j++)
-    {
-      GEN tj = gel(t, j);
-      long c = hgmclass(hgm, p, tj);
-      if (hgmadditive(c)) gel(P, j) = eulfacspec(hgm, tj, p, c, flag, &E[j]);
-      else { perm[ct] = j; gel(T, ct) = tj; C[ct++] = c; }
-    }
-    setlg(T, ct);
-    if (ct > 1)
-    {
-      GEN Q = frobpoltrunc(hgm, T, C, p, d, &F);
-      for (j = 1; j < ct; j++) {gel(P, perm[j]) = gel(Q,j); E[perm[j]] = F[j];}
-    }
-  }
-  if (pE) *pE = E;
-  return P;
-}
-GEN
-hgmeulerfactorlimit(GEN hgm, GEN t, long p, long d, GEN *pE)
-{ return hgmeulerfactorlimit_i(hgm, t, p, d, 0, pE); }
 
 GEN
 hgmeulerfactor(GEN hgm, GEN t, long p, GEN* pE)
 {
   pari_sp av = avma;
-  long B;
-  GEN v;
+  long e, B;
+  GEN P;
   if (!checkhgm(hgm)) pari_err_TYPE("hgmeulerfactor", hgm);
-  switch(typ(t))
-  {
-    case t_INT: case t_FRAC: break;
-    case t_VEC: if (RgV_is_QV(t)) break;
-    default: pari_err_TYPE("hgmeulerfactor",t);
-  }
-  if (hgm_get_SWAP(hgm)) t = vecinv(t);
+  if (!is_rational_t(typ(t))) pari_err_TYPE("hgmeulerfactor",t);
+  if (hgm_get_SWAP(hgm)) t = ginv(t);
   B = (long)(hgm_get_DEG(hgm) * log(p)) + 1;
-  v = hgmeulerfactorlimit_i(hgm, t, p, B, 1, pE);
-  gerepileall(av, pE? 2: 1, &v, pE); return v;
+  P = gerepilecopy(av, hgmeulerfactorlimit(hgm, t, p, B, 1, &e));
+  if (pE) *pE = stoi(e);
+  return P;
 }
 
 /***********************************************************************/
@@ -1310,27 +1226,16 @@ hgmQ(GEN hgm, long p, long f, GEN vp, long r, GEN ZP)
   return gerepileupto(av, gmul(c, hgmG(hgm, p, f, vp, r, ZP)));
 }
 
-/* not suitable for gerepileupto if p = 2 */
 static GEN
-hgmU(GEN hgm, long p, long f, GEN vt, long dfp)
+hgmU(GEN hgm, long p, long f, GEN t, long dfp)
 {
   pari_sp av = avma;
-  GEN v, ZP = zeropadic(utoipos(p), dfp), vp = upowers_u(p, f, 1);
-  long q = vp[f+1], lt = lg(vt), i;
+  GEN ZP = zeropadic(utoipos(p), dfp), vp = upowers_u(p, f, 1);
+  long q = vp[f+1], i;
   GEN Q = cgetg(q, t_VEC);
   for (i = 1; i < q; i++) gel(Q, i) = hgmQ(hgm, p, f, vp, i-1, ZP);
-  if (p == 2)
-  {
-    v = gerepileupto(av, centerlift(gdivgs(RgV_sum(Q), 1 - q)));
-    return const_vec(lt-1, v);
-  }
-  v = cgetg(lt, t_VEC);
-  for (i = 1; i < lt; i++)
-  {
-    GEN Mt = gmul(hgm_get_MVALUE(hgm), gel(vt,i));
-    gel(v, i) = poleval(Q, teich(gadd(Mt, ZP)));
-  }
-  return gerepileupto(av, centerlift(gdivgs(v, 1 - q)));
+  t = p == 2? gen_1: gmul(hgm_get_MVALUE(hgm), t);
+  return gerepileupto(av, hgmH(Q, p, f, ZP, t));
 }
 
 /***************************************************************/
@@ -2225,8 +2130,8 @@ dirhgm_worker(GEN P, ulong X, GEN hgm, GEN t)
   for(i = 1; i < l; i++)
   {
     ulong p = uel(P,i);
-    long d = ulogint(X, p) + 1; /* minimal d such that p^d > X */
-    gel(W,i) = RgXn_inv(hgmeulerfactorlimit(hgm, t, p, d-1, NULL), d);
+    long e, d = ulogint(X, p) + 1; /* minimal d such that p^d > X */
+    gel(W,i) = RgXn_inv(hgmeulerfactorlimit(hgm, t, p, d-1, 0, &e), d);
   }
   return gerepilecopy(av, mkvec2(P,W));
 }
@@ -2237,12 +2142,7 @@ hgmcoefs(GEN hgm, GEN t, long n)
   GEN worker, bad = NULL;
   if (!checkhgm(hgm)) pari_err_TYPE("hgmcoefs", hgm);
   if (typ(t) == t_VEC && lg(t) == 3) { bad = gel(t,2); t = gel(t,1); }
-  switch(typ(t))
-  {
-    case t_INT: case t_FRAC: break;
-    case t_VEC: if (RgV_is_QV(t)) break;
-    default: pari_err_TYPE("hgmcoefs",t);
-  }
+  if (!is_rational_t(typ(t))) pari_err_TYPE("hgmcoefs",t);
   worker = snm_closure(is_entry("_dirhgm_worker"), mkvec2(hgm, t));
   return pardireuler(worker, gen_2, stoi(n), NULL, bad);
 }

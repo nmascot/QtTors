@@ -3728,7 +3728,6 @@ GEN hgmcoefs(GEN hgm, GEN t, long n);
 GEN hgmtwist(GEN hgm);
 long hgmissymmetrical(GEN hgm);
 GEN hgmbydegree(long n);
-GEN hgmeulerfactorlimit(GEN hgm, GEN t, long p, long d, GEN* ptcondexpo);
 GEN lfunhgm(GEN hgm, GEN t, long lim, long bit);
 
 /* Ser.c */
