@@ -719,9 +719,9 @@ get_dfp(GEN hgm, long p, long f)
 }
 /* V being a vecsmall, compute all p^TT*hgmC(m)/hgmC(0) for indices in V */
 static GEN
-hgmCall(GEN hgm, long p, long f, long dfp, GEN ZP, GEN V)
+hgmCall(GEN hgm, long p, long f, long dfp, GEN V)
 {
-  GEN v, c, GPV, VL0, VL1, TEICH;
+  GEN v, c, GPV, VL0, VL1, TEICH, ZP = zeropadic_shallow(utoipos(p), dfp);
   GEN VPOLGA = hgm_get_VPOLGA(hgm);
   long i, L, l0, PFM1 = upowuu(p, f) - 1, lV = V? lg(V): PFM1+1;
   long fTT = f * hgm_get_TT(hgm);
@@ -827,11 +827,9 @@ static GEN
 hgmtrace(GEN hgm, long p, long f, GEN t, long c)
 {
   long dfp = get_dfp(hgm, p, f);
-  GEN ZP;
   if (c == C_FAKE) return hgmU(hgm, p, f, t, dfp);
   if (f == 1 && dfp <= 2) return hgmHmodp2(hgmCallmodp2(hgm, p), p, t);
-  ZP = zeropadic_shallow(utoipos(p), dfp);
-  return hgmH(hgmCall(hgm, p, f, dfp, ZP, NULL), p, f, dfp, t);
+  return hgmH(hgmCall(hgm, p, f, dfp, NULL), p, f, dfp, t);
 }
 
 static GEN
@@ -1151,8 +1149,8 @@ Jordantame(GEN hgm, GEN t0, long m, long p)
   for (j = c = 1; j < m; j++)
     if (cgcd(j, m) == 1) V[c++] = j * qm;
   dfp = get_dfp(hgm, p, f);
+  C = hgmCall(hgm, p, f, dfp, V);
   ZP = zeropadic_shallow(utoipos(p), dfp);
-  C = hgmCall(hgm, p, f, dfp, ZP, V);
   T = teich(gadd(t0, ZP)); P = pol_1(0);
   for (j = 1; j < lg(V); j++)
   {
