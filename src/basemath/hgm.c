@@ -470,26 +470,27 @@ doprecomp(long p, long f, long dfp)
 
 /* W[N] = teich(N ^ (N * sign(VPOLGA[N]))) mod p^2 */
 static GEN
-teichmodp2(GEN VPOLGA, long p, long PSQ)
+teichmodp2(GEN VPOLGA, ulong p, ulong p2)
 {
-  long c, l, N, pN;
+  ulong pN;
+  long c, l, N;
   GEN W = cgetg_copy(VPOLGA,&l); /* W[N] = teich(N)^N */
   for (N = 1, pN = p; N < l; N++, pN += p)
     if ((c = VPOLGA[N]))
     {
       long N0; (void)z_lvalrem(N, p, &N0);
       if (c < 0) N0 = Fl_inv(N0 % p, p);
-      W[N] = Fl_powu(N0, pN, PSQ);
+      W[N] = Fl_powu(N0, pN, p2);
     }
   return W;
 }
 /* GF[i] = i! mod p^2 */
 static GEN
-get_GF(long p, long PSQ)
+get_GF(ulong p, ulong p2)
 {
   GEN F = cgetg(p, t_VECSMALL);
   long i;
-  F[1] = 1; F[2] = 2; for (i = 3; i < p; i++) F[i] = Fl_mul(F[i-1], i, PSQ);
+  F[1] = 1; F[2] = 2; for (i = 3; i < p; i++) F[i] = Fl_mul(F[i-1], i, p2);
   return F;
 }
 
@@ -497,28 +498,28 @@ get_GF(long p, long PSQ)
 static GEN
 Flv_inv_p2(ulong p)
 {
-  long i, g = pgener_Fl(p), p2 = (p >> 1);
-  GEN v = cgetg(p2 + 1, t_VECSMALL);
+  long i, g = pgener_Fl(p), ph = (p >> 1);
+  GEN v = cgetg(ph + 1, t_VECSMALL);
   pari_sp av = avma;
-  GEN w = cgetg(p2, t_VECSMALL);
+  GEN w = cgetg(ph, t_VECSMALL);
   w[1] = g;
-  for (i = 2; i < p2; i++) w[i] = Fl_mul(w[i-1], g, p); /* w[i]=g^i */
-  for (i = 1; i < p2; i++)
+  for (i = 2; i < ph; i++) w[i] = Fl_mul(w[i-1], g, p); /* w[i]=g^i */
+  for (i = 1; i < ph; i++)
   {
-    long x = w[i], y = w[p2 - i]; /* g^(-i) = - g^(p2 - i) */
-    if (x > p2) v[p - x] = y; else v[x] = p - y; /* 1/(-x) = y, 1/x = -y */
+    long x = w[i], y = w[ph - i]; /* g^(-i) = - g^(ph - i) */
+    if (x > ph) v[p - x] = y; else v[x] = p - y; /* 1/(-x) = y, 1/x = -y */
   }
   v[1] = 1; return gc_const(av, v);
 }
 
 /* H[i] = i * (H_i - ((p-1)! + 1) / p) mod p */
 static GEN
-get_GH(GEN F, long p)
+get_GH(GEN F, ulong p)
 {
-  long i, g, p2 = p >> 1;
+  long i, g, ph = p >> 1;
   GEN H = cgetg(p, t_VECSMALL), v = Flv_inv_p2(p);
   H[p-1] = (F[p-1] + 1) / p; g = p - H[p-1];
-  for (i = 1; i <= p2; i++)
+  for (i = 1; i <= ph; i++)
   {
     long c = g = Fl_add(g, v[i], p);
     H[i] = c = Fl_mul(c, i, p);
@@ -528,14 +529,14 @@ get_GH(GEN F, long p)
 }
 /* p odd, GPB[m+1] = Gamma_p(m/(p-1)) mod p^2 */
 static GEN
-doprecompmodp2(long p, long PSQ)
+doprecompmodp2(ulong p, ulong p2)
 {
-  GEN F = get_GF(p, PSQ), H = get_GH(F, p), GPV = cgetg(p, t_VECSMALL);
-  long r;
+  GEN F = get_GF(p, p2), H = get_GH(F, p), GPV = cgetg(p, t_VECSMALL);
+  ulong r;
   for (r = 1; r < p; r++)
   {
-    long t = Fl_mul(F[r], 1 + p * H[r], PSQ);
-    GPV[p - r] = odd(r)? t: PSQ-t;
+    long t = Fl_mul(F[r], 1 + p * H[r], p2);
+    GPV[p - r] = odd(r)? t: p2 - t;
   }
   return GPV;
 }
@@ -683,7 +684,7 @@ hgmC(GEN VPOLGA, GEN GPV, GEN TEICH, long p, long f, long PFM1, long m, long dfp
 
 /* Same modulo p^2, Wm[N] = teich(N^(sign(VPOLGA[N]) * m)) */
 static ulong
-hgmCmodp2(GEN VPOLGA, GEN Wm, GEN GPV, long PFM1, long m, long PSQ)
+hgmCmodp2(GEN VPOLGA, GEN Wm, GEN GPV, long PFM1, long m, ulong p2)
 {
   long l = lg(VPOLGA), c, N;
   ulong res = 1, Nm;
@@ -699,13 +700,13 @@ hgmCmodp2(GEN VPOLGA, GEN Wm, GEN GPV, long PFM1, long m, long PSQ)
         else
         {
           z = GPV[PFM1 + 1 - Nm];
-          if (!odd(Nm)) z = PSQ - z; /* GPV[Nm+1]^(-1) by reflection formula */
+          if (!odd(Nm)) z = p2 - z; /* GPV[Nm+1]^(-1) by reflection formula */
         }
       }
-      if (N > 1) z = Fl_mul(z, Wm[N], PSQ);
-      z = Fl_powu(z, c, PSQ);
+      if (N > 1) z = Fl_mul(z, Wm[N], p2);
+      z = Fl_powu(z, c, p2);
       /* z = (GPV[Nm+1] * teich(N^m))^VPOLGA[N] */
-      res = res == 1? z: Fl_mul(res, z, PSQ);
+      res = res == 1? z: Fl_mul(res, z, p2);
     }
   return res;
 }
@@ -765,11 +766,13 @@ hgmCall(GEN hgm, long p, long f, long dfp, GEN V)
 }
 /* Same mod p^2, f = 1 */
 static GEN
-hgmCallmodp2(GEN hgm, long p)
+hgmCallmodp2(GEN hgm, ulong p)
 {
   GEN C, GPV, VL0, VL1, W1, Wm, VPOLGA = hgm_get_VPOLGA(hgm);
-  long m, l = lg(VPOLGA), p2 = p * p, PFM1 = p - 1, TT = hgm_get_TT(hgm);
+  long m, l = lg(VPOLGA), TT = hgm_get_TT(hgm);
+  ulong PFM1 = p - 1, p2 = p * p;
 
+  if (p & HIGHMASK) pari_err_OVERFLOW("hgmCallmodp2");
   VL0 = get_L0(hgm, PFM1);
   VL1 = get_L1(hgm, PFM1, 1);
   W1 = teichmodp2(VPOLGA, p, p2);
@@ -779,7 +782,8 @@ hgmCallmodp2(GEN hgm, long p)
   C[2] = TT > 1? 0: (TT == 1? p : 1); /* m = 0 */
   for (m = 1; m < PFM1; m++)
   {
-    long e = VL0[m + 1] + VL1[m + 1], c, j;
+    long e = VL0[m + 1] + VL1[m + 1], j;
+    ulong c;
     if (e >= 2) c = 0;
     else
     {
@@ -817,11 +821,10 @@ hgmH(GEN C, long p, long f, long dfp, GEN t)
   return Fp_center(z, q,  shifti(q,-1));
 }
 static GEN
-hgmHmodp2(GEN C, long p, GEN t)
+hgmHmodp2(GEN C, ulong p, GEN t)
 {
-  long p2 = p * p, ph = p2 >> 1, c0 = 1 + p;
-  ulong wt = Fl_powu(Rg_to_Fl(t, p2), p, p2);
-  return stoi( Fl_center(Fl_mul(Flx_eval(C, wt, p2), c0, p2), p2, ph) );
+  ulong p2 = p * p, wt = Fl_powu(Rg_to_Fl(t, p2), p, p2);
+  return stoi( Fl_center(Fl_mul(Flx_eval(C, wt, p2), 1+p, p2), p2, p2 >> 1) );
 }
 
 enum { C_OK = 0, C_FAKE, C_BAD, C_TAME0, C_TAME1};
