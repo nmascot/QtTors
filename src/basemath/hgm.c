@@ -340,9 +340,9 @@ precomp(long p, long f, long D)
 {
   pari_sp av, av2;
   GEN vall, gp, gpD, vres, x, l2;
-  long m, m0, m1, M, q, v, vpo, vva, vpowv, pf1;
-  long N = ceildivuu(D * p, p-1), pf = upowuu(p,f), pD = upowuu(p, D), pM;
-  long ga12, S, Q = pf - 1, iQ = D <= f? pD - 1: Fl_inv(Q, pD);
+  ulong m, m0, m1, M, q, v, vpo, vva, vpowv, pf1;
+  ulong N = ceildivuu(D * p, p-1), pf = upowuu(p,f), pD = upowuu(p, D), pM;
+  ulong ga12, S, Q = pf - 1, iQ = D <= f? pD - 1: Fl_inv(Q, pD);
 
   vres = cgetg(pf, t_VECSMALL); vres[1] = 1; av = avma;
   gp = utoipos(p); gpD = utoipos(pD);
@@ -403,11 +403,17 @@ precomp(long p, long f, long D)
 
 static long
 get_pad(long p)
-{ switch(p) {
+{
+  switch(p) {
     case 2: return 18;
     case 3: return 11;
     case 5: return  8;
-    default:return  6; }}
+  }
+  if (p <= 37) return 6;
+  if (p <= 251) return 4;
+  if (p <= 65521) return 2;
+  return 1;
+}
 
 static GEN
 Flv_red(GEN z, ulong p)
