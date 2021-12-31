@@ -342,8 +342,10 @@ precomp(ulong p, long f, long D)
   GEN vall, gp, gpD, vres, x, l2;
   ulong m, m0, m1, M, q, v, vpo, vva, vpowv, pf1;
   ulong N = ceildivuu(D * p, p-1), pf = upowuu(p,f), pD = upowuu(p, D), pM;
-  ulong ga12, S, Q = pf - 1, iQ = D <= f? pD - 1: Fl_inv(Q, pD);
+  ulong ga12, S, iQ, Q = pf - 1;
 
+  if (!pD || !pf) pari_err_OVERFLOW("hgmprecomp");
+  iQ = D <= f? pD - 1: Fl_inv(Q, pD);
   vres = cgetg(pf, t_VECSMALL); vres[1] = 1; av = avma;
   gp = utoipos(p); gpD = utoipos(pD);
   vall = compu(N, p, D);
