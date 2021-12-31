@@ -336,7 +336,7 @@ umultop(ulong x, ulong y, GEN gp, GEN gpD, long D)
 
 /* Compute all gamma(m/(p^f-1)) mod p^D for 0 <= m < p^f-1 */
 static GEN
-precomp(long p, long f, long D)
+precomp(ulong p, long f, long D)
 {
   pari_sp av, av2;
   GEN vall, gp, gpD, vres, x, l2;
@@ -378,7 +378,7 @@ precomp(long p, long f, long D)
     if (!odd(m0)) S = pD - S;
     vres[pf - m] = Fl_inv(S, pD);
   }
-  l2 = gmulsg(p - 1, Qp_log(cvtop(gen_2, gp, D)));
+  l2 = gmulgs(Qp_log(cvtop(gen_2, gp, D)), p - 1);
   ga12 = Fl_inv(Rg_to_Fl(Qp_gamma(cvtop(ghalf, gp, D)), pD), pD);
   pM = maxuu(pD, pf); av2 = avma;
   for (v = 1, vpo = 2; vpo < Q; v++, vpo <<= 1)
@@ -386,13 +386,13 @@ precomp(long p, long f, long D)
     if (v == vva) continue;
     for (m = vpo; m <= q; m += 2*vpo, set_avma(av2))
     {
-      long ms2 = (m >> 1) + 1;
-      long t = Fl_mul(Fl_mul(vres[ms2], vres[ms2+q], pD), ga12, pD);
+      ulong ms2 = (m >> 1) + 1;
+      ulong t = Fl_mul(Fl_mul(vres[ms2], vres[ms2+q], pD), ga12, pD);
       GEN mp;
       /* - m  = -m1 * p + m0, 1 <= m0 <= p */
       m0 = p - m%p; m1 = m/p + 1; M = pM + m1 - m0 * pf1;
       mp = umultop(M, iQ, gp, gpD, D);
-      S = Rg_to_Fl(gmul2n(gmulgs(Qp_exp(gmul(mp, l2)), t), m0-1), pD);
+      S = Rg_to_Fl(gmul(Qp_exp(gmul(mp, l2)), shifti(utoi(t), m0-1)), pD);
       vres[m+1] = S;
       if (odd(m0)) S = pD - S;
       vres[pf - m] = Fl_inv(S, pD);
