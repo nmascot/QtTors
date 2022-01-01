@@ -2,7 +2,7 @@ Function: subcyclopclgp
 Section: number_fields
 C-Name: subcyclopclgp
 Prototype: GGD0,L,
-Help: subcyclopclgp(fH, p, {flag=3}): Let F be the abelian
+Help: subcyclopclgp(fH, p, {flag=0}): Let F be the abelian
  number field contained in Q(zeta_f) corresponding to the subgroup H of
  (Z/fZ)^*. Returns the minus part of Iwasawa polynomials attached to the
  ideal class group of F.
@@ -48,16 +48,15 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  $v[6]$ is the number of $\Q_p$-conjugacy classes of injective
  characters $\chi:\text{Gal}(K/\Q)\rightarrow\overline{\Q}_p^{\times}$.
 
- \noindent A vector of $p$ is also accepted and the result is then a vector
- of vectors as above, in the same order as the primes.
+ \noindent A vector of primes $p$ is also accepted and the result is then a
+ vector of vectors as above, in the same order as the primes.
 
- The group $A_F$ is a direct sum $A_F^+$ and $A_F^-$; each of $A_F^+$
+ The group $A_F$ is the direct sum of $A_F^+$ and $A_F^-$; each of $A_F^+$
  and $A_F^-$ is decomposed into $\chi$-parts $A_\chi$.
  By default, the function computes only $|A_F^-|$ and an upper bound
  for $|A_F^+|$ (expected to be equal to $|A_F^+|$) separately with
- different algorithms. This is expected to be fast.
-
- The behavior is controled by the binary digits of \fl:
+ different algorithms. This is expected to be fast. The behavior is controled
+ by the binary digits of \fl:
 
  1: if $|A_F^+|$ or $|A_F^-|$ is computed, also determines its group structure
  and guarantees informations about $A_F^+$. This last part is usually
@@ -83,7 +82,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  default parameters.
 
  16: when this bit is set, the function tries to save memory, sacrificing
- speed; this typically uses twice less memory for a slowdown of a factor $2$.
+ speed; this typically uses half the memory for a slowdown of a factor $2$.
 
  32: likely to speed up the algorithm when the rank of $A_\chi$ is large and
  to create a minor slowdown otherwise. Though the effect is restricted, the
@@ -106,8 +105,9 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  @eprog\noindent
  This computes the 101-part $A_F$ of the ideal class group of
  $F=\Q(\zeta_{22220})$.
- The output says $A_F^+=0$ which is rigorous and $|A_F^-|=101^{41}$,
- $A_F^-\cong(\Z/101\Z)^{41}$ which is also rigorous. The Galois group
+ The output says that $A_F^+=0$, which is rigorous (since trivial),
+ and $|A_F^-|=101^{41}$, $A_F^-\cong(\Z/101\Z)^{41}$ which is also rigorous
+ (since the description of $A_F^-$ is always rigorous). The Galois group
  $\text{Gal}(F/\Q)$ is $\Z/100\Z\oplus\Z/20\Z\oplus\Z/2\Z\oplus\Z/2\Z$.
  The field $F$ has 479 cyclic subfields different from $\Q$ and
  there are 7999 $\Q_{101}$-conjugacy classes of injective characters
