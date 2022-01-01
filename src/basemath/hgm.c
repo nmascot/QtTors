@@ -404,7 +404,7 @@ precomp(ulong p, long f, long D)
 }
 
 static long
-get_pad(long p)
+get_pad(ulong p)
 {
   switch(p) {
     case 2: return 18;
@@ -437,22 +437,23 @@ block0(long l)
 
 /* f > 0, p prime, need result mod p^dfp */
 static GEN
-doprecomp(long p, long f, long dfp)
+doprecomp(ulong p, long f, long dfp)
 {
   GEN t, T;
-  long m, n, q, F; /* can compute cache mod p^F < 2^BIL */
+  long F; /* can compute cache mod p^F < 2^BIL */
+  ulong m, n, q;
   if (f > 3 || (F = get_pad(p)) < dfp) return precomp(p, f, dfp);
   if (f == 3)
   {
     T = HGMDATA3; if (!T) T = HGMDATA3 = block0(100);
-    if (p >= lg(T)) return precomp(p, f, dfp);
+    if (p >= (ulong)lg(T)) return precomp(p, f, dfp);
     t = gel(T,p);
     if (typ(t) == t_INT) t = gel(T,p) = gclone(precomp(p, f, F));
     return (F == dfp)? t: Flv_red(t, upowuu(p, dfp));
   }
   /* f <= 2, dfp <= F */
   T = HGMDATA2; if (!T) T = HGMDATA2 = block0(1000);
-  if (p >= lg(T)) return precomp(p, f, dfp);
+  if (p >= (ulong)lg(T)) return precomp(p, f, dfp);
   t = gel(T,p);
   if (typ(t) == t_INT)
   {
@@ -489,7 +490,7 @@ static GEN
 get_GF(ulong p, ulong p2)
 {
   GEN F = cgetg(p, t_VECSMALL);
-  long i;
+  ulong i;
   F[1] = 1; F[2] = 2; for (i = 3; i < p; i++) F[i] = Fl_mul(F[i-1], i, p2);
   return F;
 }
@@ -564,7 +565,7 @@ get_L1(GEN hgm, long PFM1, long f)
  * = f * OFFMPOL - sum_{e < f, N < l} gamma_N [N p^e m / (p^f-1)]*/
 /* 1) amortized (all m < p^f-1), good when p >> N log N. Assume f=1 */
 static GEN
-get_L0(GEN hgm, long PM1)
+get_L0(GEN hgm, ulong PM1)
 {
   GEN perm, vt, vc, VL0, VPOLGA = hgm_get_VPOLGA(hgm);
   long w, S, c, d, j, N, m, l = lg(VPOLGA), D = (l * (l-1)) >> 1;
@@ -573,7 +574,8 @@ get_L0(GEN hgm, long PM1)
   for (N = 2, c = 1; N < l; N++)
     if (VPOLGA[N])
     {
-      long q, Q;
+      ulong Q;
+      long q;
       for (q = 1, Q = 0; q <= N; q++, Q += PM1, c++)
       {
         vt[c] = ceildivuu(Q, N);
@@ -603,22 +605,24 @@ get_L0(GEN hgm, long PM1)
 }
 /* 2) direct computation (single m), good when p << N log N */
 static long
-L0(GEN hgm, long p, long f, long PFM1, long m)
+L0(GEN hgm, ulong p, long f, long PFM1, long m)
 {
   GEN VPOLGA = hgm_get_VPOLGA(hgm);
-  long e, pem, S = hgm_get_OFFMPOL(hgm) * f, l = lg(VPOLGA);
+  long e, S = hgm_get_OFFMPOL(hgm) * f, l = lg(VPOLGA);
+  ulong pem;
   for (e = 0, pem = m; e < f; e++, pem *= p)
   {
-    long N, Npem, s = 0;
+    long N, s = 0;
+    ulong Npem;
     for (N = 1, Npem = pem; N < l; N++, Npem += pem)
-      if (VPOLGA[N]) s += VPOLGA[N] * (Npem / PFM1);
+      if (VPOLGA[N]) s += VPOLGA[N] * (long)(Npem / PFM1);
     S -= s;
   }
   return S;
 }
 
 static GEN
-get_teich1(GEN VPOLGA, GEN ZP, long p)
+get_teich1(GEN VPOLGA, GEN ZP, ulong p)
 {
   long l = lg(VPOLGA), N;
   GEN v = zerovec(l - 1);
@@ -631,7 +635,7 @@ get_teich1(GEN VPOLGA, GEN ZP, long p)
   return v;
 }
 static GEN
-get_teich(GEN VPOLGA, GEN ZP, long p, long f, long PFM1)
+get_teich(GEN VPOLGA, GEN ZP, ulong p, long f, long PFM1)
 {
   GEN v, Q;
   long l, N;
@@ -665,10 +669,11 @@ gapnpow(GEN T, long p, long f, long PFM1, long N, ulong Nmpe)
  *   gamma_p({p^e * (VAL[j] + m/(p^f-1))}) /
  *   gamma_p({p^e * (VBE[j] + m/(p^f-1))}), a p-unit. 0 <= m < p^f-1 */
 static GEN
-hgmC(GEN VPOLGA, GEN GPV, GEN TEICH, long p, long f, long PFM1, long m, long dfp)
+hgmC(GEN VPOLGA, GEN GPV, GEN TEICH, ulong p, long f, ulong PFM1, ulong m, long dfp)
 {
   GEN r = gen_1;
-  long c, Nmpe, mpe, e, N, l = lg(VPOLGA);
+  long c, e, N, l = lg(VPOLGA);
+  ulong Nmpe, mpe;
   for (e = 0, mpe = m; e < f; e++, mpe = Fl_mul(mpe, p, PFM1))
     for (N = 1, Nmpe = mpe; N < l; N++, Nmpe = Fl_add(Nmpe, mpe, PFM1))
       if ((c = VPOLGA[N]))
@@ -684,7 +689,7 @@ hgmC(GEN VPOLGA, GEN GPV, GEN TEICH, long p, long f, long PFM1, long m, long dfp
 
 /* Same modulo p^2, Wm[N] = teich(N^(sign(VPOLGA[N]) * m)) */
 static ulong
-hgmCmodp2(GEN VPOLGA, GEN Wm, GEN GPV, long PFM1, long m, ulong p2)
+hgmCmodp2(GEN VPOLGA, GEN Wm, GEN GPV, ulong PFM1, ulong m, ulong p2)
 {
   long l = lg(VPOLGA), c, N;
   ulong res = 1, Nm;
@@ -724,12 +729,12 @@ get_dfp(GEN hgm, long p, long f)
 }
 /* V being a vecsmall, compute all p^TT*hgmC(m)/hgmC(0) for indices in V */
 static GEN
-hgmCall(GEN hgm, long p, long f, long dfp, GEN V)
+hgmCall(GEN hgm, ulong p, long f, long dfp, GEN V)
 {
   GEN v, c, GPV, VL0, VL1, TEICH, ZP = zeropadic_shallow(utoipos(p), dfp);
   GEN VPOLGA = hgm_get_VPOLGA(hgm);
-  long i, L, l0, PFM1 = upowuu(p, f) - 1, lV = V? lg(V): PFM1+1;
-  long fTT = f * hgm_get_TT(hgm);
+  ulong i, PFM1 = upowuu(p, f) - 1, lV = V? lg(V): PFM1+1;
+  long l0, fTT = f * hgm_get_TT(hgm);
 
   GPV = doprecomp(p, f, dfp);
   VL0 = (V && f == 1)? get_L0(hgm, PFM1): NULL;
@@ -749,9 +754,9 @@ hgmCall(GEN hgm, long p, long f, long dfp, GEN V)
   }
   for (; i < lV; i++)
   {
-    long e, m = V? V[i]: i-1;
-    L = VL0? VL0[m+1]: L0(hgm, p, f, PFM1, m);
-    e = L + VL1[m+1];
+    long m = V? V[i]: i-1;
+    long L = VL0? VL0[m+1]: L0(hgm, p, f, PFM1, m);
+    long e = L + VL1[m+1];
     if (!V && e >= dfp) c = gen_0;
     else
     { /* FIXME: dfp is fishy in Jordantame, don't trust if V = NULL */
@@ -769,8 +774,8 @@ static GEN
 hgmCallmodp2(GEN hgm, ulong p)
 {
   GEN C, GPV, VL0, VL1, W1, Wm, VPOLGA = hgm_get_VPOLGA(hgm);
-  long m, l = lg(VPOLGA), TT = hgm_get_TT(hgm);
-  ulong PFM1 = p - 1, p2 = p * p;
+  long l = lg(VPOLGA), TT = hgm_get_TT(hgm);
+  ulong m, PFM1 = p - 1, p2 = p * p;
 
   if (p & HIGHMASK) pari_err_OVERFLOW("hgmCallmodp2");
   VL0 = get_L0(hgm, PFM1);
