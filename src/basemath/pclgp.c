@@ -3793,15 +3793,14 @@ ber_norm_by_val(GEN K, GEN B, GEN p)
   GEN vfac = gel(K, 3), fac = gel(vfac, 1), cofac = gel(vfac, 2);
   long d_chi = Kdata[1], n_conj = Kdata[2], d_K = H1data[1];
   long i, r, n_done = 0, x = 0, dcofac = degpol(cofac);
-  GEN polr, pr, Done;
+  GEN pr, Done;
 
   Done = const_vecsmall(n_conj, 0);
-  /* mark trivial chi-part by pre-calculation */
   if (lgefint(p)==3)
-  {
+  { /* mark trivial chi-part by pre-calculation */
     ulong up = itou(p);
     GEN facs = ZX_to_Flx(fac, up);
-    for (i=1; i<=n_conj; i++)
+    for (i = 1; i <= n_conj; i++)
     {
       pari_sp av2 = avma;
       GEN B_conj = Flx_rem(Flx_ber_conj(B, C[i], d_K, up), facs, up);
@@ -3812,7 +3811,7 @@ ber_norm_by_val(GEN K, GEN B, GEN p)
   }
   else
   {
-    for (i=1; i<=n_conj; i++)
+    for (i = 1; i <= n_conj; i++)
     {
       pari_sp av2 = avma;
       GEN B_conj = FpX_rem(FpX_ber_conj(B, C[i], d_K, p), fac, p);
@@ -3821,13 +3820,13 @@ ber_norm_by_val(GEN K, GEN B, GEN p)
       Done[i] = 1; if (++n_done == n_conj) return gc_long(av, x);
     }
   }
-
-  for (r = 2; r; r <<= 1)
+  for (pr = p, r = 2; r; r <<= 1)
   {
-    pr = powiu(p, r);
-    polr = (dcofac==0)?FpX_red(MinPol, pr)
-      :gel(ZpX_liftfact(MinPol, vfac, pr, p, r), 1);
-    for (i=1; i<=n_conj; i++)
+    GEN polr;
+    pr = sqri(pr); /* p^r */
+    polr = (dcofac==0)? FpX_red(MinPol, pr)
+                      : gel(ZpX_liftfact(MinPol, vfac, pr, p, r), 1);
+    for (i = 1; i <= n_conj; i++)
     {
       pari_sp av2 = avma;
       GEN B_conj;
@@ -3836,7 +3835,7 @@ ber_norm_by_val(GEN K, GEN B, GEN p)
       B_conj = FpX_rem(FpX_ber_conj(B, C[i], d_K, pr), polr, pr);
       degB = degpol(B_conj);
       set_avma(av2); if (degB < 0) continue;
-      x += d_chi*ZX_pval(B_conj, p);
+      x += d_chi * ZX_pval(B_conj, p);
       Done[i] = 1; if (++n_done == n_conj) return gc_long(av, x);
     }
   }
@@ -3863,7 +3862,7 @@ ber_norm_with_val(GEN x, long n, ulong p, ulong e)
 {
   pari_sp av = avma;
   long i, j, r, degx, pe = upowuu(p, e), d = n*pe;
-  GEN z, gr, gen, y = cgetg(pe+2, t_POL);
+  GEN z, gr, gen, y = cgetg(pe+2, t_POL), MinPol = polcyclo(n, 0);
   y[1] = evalsigne(1) | evalvarn(0);
   z = znstar_subgr(n, pe, d);
   gr = gel(z, 1); gen = gel(z, 2); r = lg(gr)-1;
@@ -3880,7 +3879,7 @@ ber_norm_with_val(GEN x, long n, ulong p, ulong e)
       gel(t, 2+a%n) = gel(x, 2+a);
       a += pe;
     }
-    z = ZX_rem(ZX_renormalize(t, 2+n), polcyclo(n, 0));
+    z = ZX_rem(ZX_renormalize(t, 2+n), MinPol);
     if (degpol(z)<0) gel(y, 2+j) = gen_0;
     else if (degpol(z)==0) gel(y, 2+j) = gel(z, 2);
     else pari_err_BUG("ber_norm_subgr");
