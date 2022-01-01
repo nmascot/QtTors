@@ -1492,11 +1492,11 @@ is_cyclic(GEN x)
 }
 
 static GEN
-make_p_part(GEN y, GEN p0, long d_pow)
+make_p_part(GEN y, ulong p, long d_pow)
 {
   long i, l = lg(y);
   GEN z = cgetg(l, t_VECSMALL);
-  for (i = 1; i < l; i++) z[i] = signe(gel(y,i))? Z_pval(gel(y,i), p0): d_pow;
+  for (i = 1; i < l; i++) z[i] = signe(gel(y,i))? Z_lval(gel(y,i), p): d_pow;
   return z;
 }
 
@@ -2868,7 +2868,7 @@ cyc_real_MLL(GEN K, long p, long d_pow, long j0, long flag)
   GEN H1 = gel(K, 1), H1data = gel(H1, 2);
   ulong d_K = H1data[1], f = H1data[2], d_chi = gel(K, 6)[1];
   ulong i, n, n0 = 1, f0, n_el = d_pow, d = upowuu(p, d_pow), rank = n_el*d_chi;
-  GEN velg = const_vec(n_el, NULL), vellg = NULL, z, p0 = utoi(p);
+  GEN velg = const_vec(n_el, NULL), vellg = NULL, z;
   GEN str = nullvec(), oldgr = mkvec2(gen_0, NULL), newgr = mkvec2(gen_0, NULL);
   long *y0 = (long*)stack_calloc(sizeof(long)*rank*rank);
 
@@ -2918,7 +2918,7 @@ cyc_real_MLL(GEN K, long p, long d_pow, long j0, long flag)
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
     y=ZM_snf(y);
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
-    y=make_p_part(y, p0, d_pow);
+    y=make_p_part(y, p, d_pow);
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
     newgr = structure_MLL(y, d_pow);
     if (DEBUGLEVEL>3)
@@ -2949,7 +2949,7 @@ cyc_buch(GEN K, GEN p0, long d_pow, long flag)
   z = Buchquad(D, 0.0, 0.0, 0);
   h = gel(z, 1);
   gr = gel(z, 2);
-  if (Z_pval(h, p0) != d_pow) pari_err_BUG("subcclopclgp [Buchquad]");
+  if (Z_pval(h, p0) != d_pow) pari_err_BUG("subcyclopclgp [Buchquad]");
   rank = lg(gr)-1;
   for (i=1; i<=rank; i++)
   {
@@ -3339,12 +3339,12 @@ gauss_el_vell(ulong f, GEN elg, GEN vellg, GEN vz_2f)
 }
 
 static GEN
-norm_chi(GEN K, GEN TAU, GEN p0, long d_pow, GEN ell, long j0)
+norm_chi(GEN K, GEN TAU, ulong p, long d_pow, GEN ell, long j0)
 {
   pari_sp av = avma;
   GEN TR = gel(K, 4)+2, H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
   long d_K = H1data[1], f_K = H1data[2], h = H1data[3], g_K = H1data[5];
-  long i, j, gi, pd = upowuu(itou(p0), d_pow), d_chi = gel(K, 6)[1];
+  long i, j, gi, pd = upowuu(p, d_pow), d_chi = gel(K, 6)[1];
   GEN z = const_vec(d_chi, gen_1);
   GEN e_chi = cgetg(d_K+1, t_VECSMALL)+1;
 
@@ -3365,12 +3365,12 @@ norm_chi(GEN K, GEN TAU, GEN p0, long d_pow, GEN ell, long j0)
 }
 
 static void
-imag_MLLn(long *y, GEN K, GEN p0, long d_pow, long n,
+imag_MLLn(long *y, GEN K, ulong p, long d_pow, long n,
     GEN velg, GEN vellg, long j0)
 {
   pari_sp av = avma;
   GEN H1data = gmael(K, 1, 2);
-  long f = H1data[2], d = upowuu(itou(p0), d_pow), row = lg(vellg)-1;
+  long f = H1data[2], d = upowuu(p, d_pow), row = lg(vellg)-1;
   long i, j, k, lz;
   GEN g, z, M, vz_2f = vz_2f_vell(f, vellg, &M);
   for (i=1; i<=n; i++)
@@ -3379,7 +3379,7 @@ imag_MLLn(long *y, GEN K, GEN p0, long d_pow, long n,
     GEN elg = gel(velg, i);
     if (DEBUGLEVEL>1) err_printf("(f,el-1)=(%ld,%ld*%ld)\n", f,(elg[1]-1)/f,f);
     g = gauss_el_vell(f, elg, vellg, vz_2f);
-    z = norm_chi(K, g, p0, d_pow, M, j0);
+    z = norm_chi(K, g, p, d_pow, M, j0);
     lz = lg(z)-1;
     for (k=1; k<=lz; k++)
       for (j=1; j<=row; j++)
@@ -3390,28 +3390,28 @@ imag_MLLn(long *y, GEN K, GEN p0, long d_pow, long n,
 }
 
 static void
-imag_MLL1(long *y, GEN K, GEN p0, long d_pow, GEN velg, GEN vellg, long j0)
+imag_MLL1(long *y, GEN K, ulong p, long d_pow, GEN velg, GEN vellg, long j0)
 {
   pari_sp av = avma;
   GEN H1data = gmael(K, 1, 2);
-  long f = H1data[2], d = upowuu(itou(p0), d_pow);
+  long f = H1data[2], d = upowuu(p, d_pow);
   GEN elg = gel(velg, 1), ellg = gel(vellg, 1), ell = gel(ellg, 1), g, z;
 
   if (DEBUGLEVEL>1) err_printf("(f,el-1)=(%ld,%ld*%ld)\n", f, (elg[1]-1)/f, f);
   g = (lgefint(ell)<=3) ? gauss_Flx_mul(f, elg, ellg)
     : gauss_ZX_mul(f, elg, ellg);
-  z = norm_chi(K, g, p0, d_pow, ell, j0);
+  z = norm_chi(K, g, p, d_pow, ell, j0);
   y[0] = get_y(gel(z, 1), ellg, d);
   set_avma(av);
 }
 
 static void
-imag_MLL(long *y, GEN K, GEN p0, long d_pow, long n, GEN velg, GEN vellg,
+imag_MLL(long *y, GEN K, ulong p, long d_pow, long n, GEN velg, GEN vellg,
     long j0)
 {
   pari_sp av = avma;
   GEN H1data = gmael(K, 1, 2);
-  long i, j, f = H1data[2], d = upowuu(itou(p0), d_pow), row = lg(vellg)-1;
+  long i, j, f = H1data[2], d = upowuu(p, d_pow), row = lg(vellg)-1;
 
   for (j=1; j<=row; j++)
   {
@@ -3424,7 +3424,7 @@ imag_MLL(long *y, GEN K, GEN p0, long d_pow, long n, GEN velg, GEN vellg,
       if (DEBUGLEVEL>1) err_printf("(f,el-1)=(%ld,%ld*%ld)\n",f,(elg[1]-1)/f,f);
       g = (lgefint(ell)<=3) ? gauss_Flx_mul(f, elg, ellg)
         : gauss_ZX_mul(f, elg, ellg);
-      z = norm_chi(K, g, p0, d_pow, ell, j0);
+      z = norm_chi(K, g, p, d_pow, ell, j0);
       lz = lg(z)-1;
       for (k=1; k<=lz; k++)
         y[(j-1)*row+(i-1)*lz+k-1] = get_y(gel(z, k), ellg, d);
@@ -3450,11 +3450,11 @@ delete_el_imag(GEN velg, long n, long f)
  * set chi-part to be (1) if chi is Teichmuller character.
  * B_{1,omega^(-1)} is not p-adic integer. */
 static GEN
-cyc_imag_MLL(GEN K, GEN p0, long d_pow, long j, long flag)
+cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
 {
   pari_sp av = avma;
   GEN H1data = gmael(K, 1, 2);
-  long f = H1data[2], d_chi = gel(K, 6)[1], p = itou(p0);
+  long f = H1data[2], d_chi = gel(K, 6)[1];
   long i, n, n0 = 1, n_el = d_pow, d = upowuu(p, d_pow), rank = n_el*d_chi;
   GEN df0, velg = const_vec(n_el, NULL), vellg = NULL, z;
   GEN str = nullvec(), oldgr = mkvec2(gen_0, NULL), newgr = mkvec2(gen_0, NULL);
@@ -3480,17 +3480,17 @@ cyc_imag_MLL(GEN K, GEN p0, long d_pow, long j, long flag)
     if (DEBUGLEVEL>2) err_printf("velg=%Ps\nvellg=%Ps\n", velg, vellg);
     if (DEBUGLEVEL>2) timer_start(&ti);
     if (n_ell==1)
-      imag_MLL1(y0, K, p0, d_pow, velg, vellg, j);
+      imag_MLL1(y0, K, p, d_pow, velg, vellg, j);
     else if (lgefint(gmael(vellg, n, 1))<=3 || (flag&SAVE_MEMORY))
-      imag_MLL(y0, K, p0, d_pow, n, velg, vellg, j);
+      imag_MLL(y0, K, p, d_pow, n, velg, vellg, j);
     else
-      imag_MLLn(y0, K, p0, d_pow, n, velg, vellg, j);
+      imag_MLLn(y0, K, p, d_pow, n, velg, vellg, j);
     if (DEBUGLEVEL>2) timer_printf(&ti, "gauss sum");
     y=ary2mat(y0, n_ell);
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
     y=ZM_snf(y);
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
-    y=make_p_part(y, p0, d_pow);
+    y=make_p_part(y, p, d_pow);
     if (DEBUGLEVEL>3)  err_printf("y=%Ps\n", y);
     newgr = structure_MLL(y, d_pow);
     if (DEBUGLEVEL>3)
@@ -3542,7 +3542,7 @@ cyc_imag(GEN K, GEN B, GEN p, long j, GEN powp, long flag)
   if (x==0) return mkvec3(gen_0, onevec(0), gen_1); /* trivial */
   else if (x==1) return mkvec3(utoi(d_chi), onevec(d_chi), gen_1);
   else if ((flag&USE_MLL)==0) return mkvec3(utoi(x*d_chi), onevec(0), gen_1);
-  return (d_K==2)?cyc_buch(K, p, x, 1):cyc_imag_MLL(K, p, x, j, flag);
+  return (d_K==2)?cyc_buch(K, p, x, 1):cyc_imag_MLL(K, itou(p), x, j, flag);
 }
 
 /* handle representatives of all injective characters, d_chi=[Q_p(zeta_d):Q_p],
