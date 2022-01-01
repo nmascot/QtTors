@@ -1711,7 +1711,6 @@ fplll(GEN *pG, GEN *pB, GEN *pU, GEN *pr, double DELTA, double ETA,
   } while (!signe(gmael(G,i,i)) && ++i <= d);
   zeros = i-1; /* all basis vectors b_i with i <= zeros are zero vectors */
   kappa = i;
-  if (zeros < d) affir(gmael(G,zeros+1,zeros+1), gmael(r,zeros+1,zeros+1));
   for (i=zeros+1; i<=d; i++) alpha[i]=1;
 
   while (++kappa <= d)
