@@ -183,6 +183,7 @@ BA  60- new GP function serdiffdep
         hgmalpha     hgmbydegree     hgmcyclo          hgminit
         hgmtwist     hgmcoef         hgmeulerfactor    hgmissymmetrical
         lfunhgm      hgmcoefs        hgmgamma        hgmparams
+BA  62- new GP function lfuneuler
 
   Changed
 HC   1- faster implementation of eulervec + cache result
