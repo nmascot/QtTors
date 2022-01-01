@@ -9,7 +9,7 @@ Help: subcyclohminus(fH, {p=0}):
  [h, Q]; else return [2h/Q, 0].
 Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  corresponding to the subgroup $H$ of $(\Z/f\Z)^*$.
- Computes the relative class number $h^-(F)=h(F)/h(F^+)$ of $F$
+ Computes the relative class number $h^-(F)=h(F)/h(F^+)$ of $F$.
  The argument \kbd{fH} encodes $F$ and the data $[f,H]$ as follows:
 
  \item $\kbd{fH} = [f, H]$, where $H$ is given by a vector of
@@ -48,12 +48,14 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  \item If $f=4p^a$ or $p^aq^b$ with odd prime numbers $p,\,q$,
  then $Q=1 \Longleftrightarrow [\Q(\zeta_f):F]$ is even.
 
- Finally, the (optional) parameter $p$ is an odd prime number.
+ Finally, the optional parameter $p$ is an \emph{odd} prime number.
  If $p$ is given, then \kbd{subcyclohminus} outputs the valuation at $p$ of
- $h^-(F)$ maximal integer $e$ such that
- $p^e\,||\,h^-(F)$ by evaluating $p$-adic valuations of Bernoulli numbers.
- This is same as \kbd{valuation(subcyclohminus(f,H)[1], p)} but faster when
- $p$ does not divide $[F:\Q]$ or a high power of $p$ divides $[F:\Q]$.
+ $h^-(F)$, in other words the maximal integer $e$ such that
+ $p^e\,|\,h^-(F)$ by evaluating $p$-adic valuations of Bernoulli numbers.
+ Since $p$ is odd and $Q\in \{1,2\}$, the latter can be disregarded and
+ the result is the same as \kbd{valuation(subcyclohminus(f,H)[1], p)}, but
+ adding this argument $p$ can be much faster when $p$ does not divide $[F:\Q]$
+ or if a high power of $p$ divides $[F:\Q]$.
  \bprog
  ? [a,b] = subcyclohminus(22220); b
  %1 = 2 \\ = Q

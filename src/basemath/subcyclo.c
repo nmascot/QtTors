@@ -315,11 +315,11 @@ lift_check_modulus(GEN H, long n)
     case t_INTMOD:
       if (!equalsi(n, gel(H,1)))
         pari_err_MODULUS("galoissubcyclo", stoi(n), gel(H,1));
-      H = gel(H,2);
+      H = gel(H,2); /* fall through */
     case t_INT:
       h = smodis(H,n);
       if (ugcd(h,n) != 1) pari_err_COPRIME("galoissubcyclo", H,stoi(n));
-      return h;
+      return h ? h: 1;
   }
   pari_err_TYPE("galoissubcyclo [subgroup]", H);
   return 0;/*LCOV_EXCL_LINE*/
