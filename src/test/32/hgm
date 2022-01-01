@@ -192,10 +192,10 @@ x^-1 + O(x^0)]]]]
   ***   at top-level: hgminit([],[])
   ***                 ^--------------
   *** hgminit: incorrect type in hgminit [#al = 0] (t_VEC).
-  ***   at top-level: ...t([2,2,2,2,2,2,2,2,2,2]);hgmeulerfactor(H,1,2^
+  ***   at top-level: ...t([2,2,2,2,2,2,2,2,2,2]);hgmeulerfactor(H,1,p)
   ***                                             ^---------------------
   *** hgmeulerfactor: overflow in hgmprecomp.
-  ***   at top-level: hgmeulerfactor(HCAN,1,2^32+15)
-  ***                 ^------------------------------
+  ***   at top-level: hgmeulerfactor(HCAN,1,p)
+  ***                 ^------------------------
   *** hgmeulerfactor: overflow in hgmCallmodp2.
-Total time spent: 2921
+Total time spent: 2448

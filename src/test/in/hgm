@@ -180,5 +180,6 @@ hgminit([1/2],[0.])
 hgminit([1],[1])
 hgminit([])
 hgminit([],[])
-H=hgminit([2,2,2,2,2,2,2,2,2,2]); hgmeulerfactor(H,1,2^32+15)
-hgmeulerfactor(HCAN,1,2^32+15)
+p=if(sizebyte(0)==16, 2^32+15, 2^16+1);
+H=hgminit([2,2,2,2,2,2,2,2,2,2]); hgmeulerfactor(H,1,p)
+hgmeulerfactor(HCAN,1,p)
