@@ -232,6 +232,14 @@ $\var{bnr},H$ (congruence subgroup) or $\var{bnr},\chi$ (character on
 \li{is $a$ an $n$-th power in $K_v$ ?}{nfislocalpower$(\var{nf},v,a,n)$}
 \li{cyclic $L/K$ satisf. local conditions}
    {nfgrunwaldwang$(\var{nf},P,D,\var{pl})$}
+\subsec{Cyclotomic and Abelian fields theory}
+An Abelian field $F$ given by a subgroup $H\subset (\Z/f\Z)^*$ is described
+by an argument $F$, e.g. $f$ (for $H = 1$, i.e. $\Q(\zeta_f)$) or $[G,H]$,
+where $G$ is \kbd{idealstar}$(f, 1)$, or a minimal polynomial.\hfil\break
+\li{minus class number $h^-(F)$}{subcyclohminus$(F)$}
+\li{\dots $p$-part}{subcyclohminus$(F, p)$}
+\li{minus part of Iwasawa polynomials}{subcycloiwasawa$(F, p)$}
+\li{$p$-Sylow of $\text{Cl}(F)$}{subcyclopclgp$(F, p)$}
 \subsec{Logarithmic class group}
 \li{logarithmic $\ell$-class group}{bnflog$(\var{bnf},\ell)$}
 \li{$[\tilde{e}(F_v/\Q_p),\tilde{f}(F_v/\Q_p)]$}
@@ -290,6 +298,13 @@ $\var{bnr},H$ (congruence subgroup) or $\var{bnr},\chi$ (character on
 \li{apply Galois automorphism $s$ to $x$}{nfgaloisapply$(\var{nf},s,x)$}
 \li{Galois group of field $\QQ[x]/(f)$}{polgalois$(f)$}
 \li{resolvent field of $\QQ[x]/(f)$}{nfresolvent$(f)$}
+
+\newcolumn
+\title{\TITLE}
+\centerline{(PARI-GP version \PARIversion)}
+
+\medskip
+
 \li{initializes a Galois group structure $G$}{galoisinit$(\var{pol},\{den\})$}
 \li{\dots for the splitting field of \var{pol}}{galoissplittinginit$(\var{pol},\{d\})$}
 \li{character table of $G$}{galoischartable$(G)$}
@@ -301,12 +316,6 @@ $\var{bnr},H$ (congruence subgroup) or $\var{bnr},\chi$ (character on
 \li{action of $p$ in nfgaloisconj form}{galoispermtopol$(G,\{p\})$}
 \li{identify as abstract group}{galoisidentify$(G)$}
 \li{export a group for GAP/MAGMA}{galoisexport$(G,\{\fl\})$}
-
-\newcolumn
-\title{\TITLE}
-\centerline{(PARI-GP version \PARIversion)}
-
-\medskip
 
 \li{subgroups of the Galois group $G$}{galoissubgroups$(G)$}
 \li{is subgroup $H$ normal?}{galoisisnormal$(G,H)$}
@@ -383,9 +392,6 @@ Extension $L/K$ is defined by $T\in K[x]$.
 \li{reduced basis for $M$}{rnflllgram$(\var{nf},T,M)$}
 \li{determinant of pseudo-matrix $M$}{rnfdet$(\var{nf},M)$}
 \li{Steinitz class of $M$}{rnfsteinitz$(\var{nf},M)$}
-\newcolumn
-
-
 \li{$\ZZ_K$-basis of $M$ if $\ZZ_K$-free, or $0$}{rnfhnfbasis$(\var{bnf},M)$}
 \li{$n$-basis of $M$, or $(n+1)$-generating set}{rnfbasis$(\var{bnf},M)$}
 \li{is $M$ a free $\ZZ_K$-module?}{rnfisfree$(\var{bnf},M)$}
@@ -437,6 +443,9 @@ $A$ is a general associative algebra given by a multiplication table \var{mt}
 \li{$\{x\in al\mid lat1\cdot x\subset lat2\}$}{alglatrighttransporter$(\var{al},\var{lat1},\var{lat2})$}
 \li{test~$x\in lat$ (set~$c =$ coord. of~$x$)}{alglatcontains$(\var{al},\var{lat},x,\{\& c\})$}
 \li{element of~$lat$ with coordinates~$c$}{alglatelement$(\var{al},\var{lat},c)$}
+
+\copyrightnotice
+
 \subsec{Operations on elements}
 \li{$a+b$, $a-b$, $-a$}{algadd$(\var{al},a,b)${\rm, }algsub{\rm, }algneg}
 \li{$a\times b$, $a^2$}{algmul$(\var{al},a,b)${\rm, }algsqr}
@@ -453,9 +462,6 @@ $A$ is a general associative algebra given by a multiplication table \var{mt}
 \li{given $a\in A$ and polynomial $T$, return $T(a)$}
    {algpoleval$(\var{al},T,a)$}
 \li{random element in a box}{algrandom$(\var{al}, b)$}
-\vfill
-\copyrightnotice
-\newcolumn
 
 \section{Central Simple Algebras}
 $A$ is a central simple algebra over a number field $K$; represented by

@@ -2,7 +2,7 @@ Function: subcyclopclgp
 Section: number_fields
 C-Name: subcyclopclgp
 Prototype: GGD0,L,
-Help: subcyclopclgp(p, fH, {flag=3}): Let F be the abelian
+Help: subcyclopclgp(fH, p, {flag=3}): Let F be the abelian
  number field contained in Q(zeta_f) corresponding to the subgroup H of
  (Z/fZ)^*. Returns the minus part of Iwasawa polynomials attached to the
  ideal class group of F.
@@ -98,7 +98,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  $A_F^+$ (slow).
 
  \bprog
- ? subcyclopclgp(101, 22220)
+ ? subcyclopclgp(22220, 101)
  time = 93 ms.
  %1 = [101, [0, []], [41, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
@@ -114,7 +114,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  $\chi:\text{Gal}(K/\Q)\rightarrow\overline{\Q}_{101}^{\times}$.
 
  \bprog
- ? subcyclopclgp(11, 22220)
+ ? subcyclopclgp(22220, 11)
  time = 70 ms.
  %2 = [11, [2, [1, 1]], [16, []], [100, 20, 2, 2], 479, 1799]
  @eprog\noindent
@@ -124,7 +124,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  The group structure of $A_F^-$ is unknown.
 
  \bprog
- ? subcyclopclgp(11, 22220, 1)
+ ? subcyclopclgp(22220, 11, 1)
  time = 165 ms.
  %3 = [11, [2, [1, 1]], [16, [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
  [100, 20, 2, 2], 479, 1799]
@@ -137,19 +137,19 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  We will use a defining polynomial instead:
  \bprog
  ? T = polcompositum(x^2-36322, polcyclo(5), 2);
- ? subcyclopclgp(5, T) \\ fast when non rigorous for A^+
+ ? subcyclopclgp(T, 5) \\ fast when non rigorous for A^+
  time = 79 ms.
  %4 = [5, [1, [1]], [4, []], [4, 2], 5, 7]
  \\ try to certify; requires about 2.5GB of memory
- ? subcyclopclgp(5, T, 1)
+ ? subcyclopclgp(T, 5, 1)
  *** subcyclopclgp: the PARI stack overflows !
   current stack size: 2000003072 (1907.352 Mbytes)
  ? default(parisizemax,"3G");
- ? subcyclopclgp(5, T, 1) \\ with more memory, we get an answer
+ ? subcyclopclgp(T, 5, 1) \\ with more memory, we get an answer
  time = 39,028 ms.
  %6 = [5, [1, [1]], [4, [3, 1]], [4, 2], 5, 7]
  \\ trying to reduce memory use does not work (still need 2.5GB); slower
- ? subcyclopclgp(5, T, 1+16)
+ ? subcyclopclgp(T, 5, 1+16)
  time = 46,794 ms.
  @eprog\noindent This shows that $A_F^+\cong\Z/5\Z$ and
  $A_F^-\cong\Z/5^3\Z\oplus\Z/5\Z$ for $p=5$. For this example, trying to
@@ -161,27 +161,27 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  let $F = \Q(\sqrt{15338}, \zeta_5)$.
  \bprog
  ? T = polcompositum(x^2-15338, polcyclo(5), 2);
- ? subcyclopclgp(3, T)
+ ? subcyclopclgp(T, 3)
  time = 110 ms.
  %2 = [3, [1, [1]], [4, []], [4, 2], 5, 5]
- ? subcyclopclgp(3, T, 1) \\ requires a stack of 10GB
+ ? subcyclopclgp(T, 3, 1) \\ requires a stack of 10GB
  time = 5min, 9,717 ms.
  %3 = [3, [1, [1]], [4, [1, 1, 1, 1]], [4, 2], 5, 5]
- ? subcyclopclgp(3, T, 1+16);
+ ? subcyclopclgp(T, 3, 1+16);
  time = 10min, 25,967 ms. \\ works with 5GB, but twice slower
- ? subcyclopclgp(3, T, 1+32);
+ ? subcyclopclgp(T, 3, 1+32);
  time = 1min, 16,810 ms. \\ also works with 5GB, 4 times faster
- ? subcyclopclgp(3, T, 1+16+32);
+ ? subcyclopclgp(T, 3, 1+16+32);
  time = 2min, 14,969 ms. \\ now works with 2.5GB
  @eprog
 
  Let $F = \Q(106)$ defined as above; namely, $F$ is the composite field
  of $\Q(\sqrt{2})$ and the subfield of $\Q(\zeta_{53^2})$ with degree 53.
  \bprog
- ? subcyclopclgp(107, [8*53^2, [16855, 1009]])
+ ? subcyclopclgp([8*53^2, [16855, 1009]], 107)
  time = 10 ms.
  %1 = [107, [1, [1]], [0, []], [106], 3, 105]
- ? subcyclopclgp(107, [8*53^2, [16855, 1009]], 1) \\ requires 2.5GB
+ ? subcyclopclgp([8*53^2, [16855, 1009]], 107, 1) \\ requires 2.5GB
  time = 20min, 45,602 ms.
  %2 = [107, [1, [1]], [0, []], [106], 3, 105]
  @eprog\noindent Both results are identical (and they were expected to be),

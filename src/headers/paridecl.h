@@ -4793,8 +4793,8 @@ void    pari_mt_close(void);
 
 /* pclgp.c */
 
-GEN     subcyclopclgp(GEN p, GEN fH, long flag);
-GEN     subcycloiwasawa(GEN p, GEN fH, long n);
+GEN     subcyclopclgp(GEN fH, GEN p, long flag);
+GEN     subcycloiwasawa(GEN fH, GEN p, long n);
 GEN     subcyclohminus(GEN fH, GEN p);
 GEN     znsubgroupgenerators(GEN H, long flag);
 

@@ -184,6 +184,9 @@ BA  60- new GP function serdiffdep
         hgmtwist     hgmcoef         hgmeulerfactor    hgmissymmetrical
         lfunhgm      hgmcoefs        hgmgamma        hgmparams
 BA  62- new GP function lfuneuler
+TF  63- new GP functions znsubgroupgenerators, subcyclohminus,
+        subcycloiwasawa, subcyclopclgp
+
 
   Changed
 HC   1- faster implementation of eulervec + cache result

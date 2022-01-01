@@ -4123,7 +4123,7 @@ subcyclo_init(const char *fun, GEN FH, long *pdegF, GEN *pH, long flag)
 }
 
 GEN
-subcyclopclgp(GEN p, GEN FH, long flag)
+subcyclopclgp(GEN FH, GEN p, long flag)
 {
   pari_sp av = avma;
   GEN H;
@@ -4144,7 +4144,7 @@ subcyclopclgp(GEN p, GEN FH, long flag)
 }
 
 static GEN
-subcycloiwasawa_i(GEN P, GEN FH, long n)
+subcycloiwasawa_i(GEN FH, GEN P, long n)
 {
   long B, p, f, degF;
   GEN H;
@@ -4173,10 +4173,10 @@ subcycloiwasawa_i(GEN P, GEN FH, long n)
   return abeliwasawa(p, f, H, degF, n);
 }
 GEN
-subcycloiwasawa(GEN P, GEN FH, long n)
+subcycloiwasawa(GEN FH, GEN P, long n)
 {
   pari_sp av = avma;
-  GEN z = subcycloiwasawa_i(P, FH, n);
+  GEN z = subcycloiwasawa_i(FH, P, n);
   if (!z) { set_avma(av); return n? nullvec(): mkvec(gen_0); }
   return gerepilecopy(av, z);
 }
