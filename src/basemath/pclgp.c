@@ -131,7 +131,7 @@ set_A(GEN B, int *chi)
  * gam[1+a]=k, k<0  ==> g_n(a)=0
  *             k>=0 ==> g_n(a)^(-1)=gamma^k, gamma=g_n(1+q0) */
 static GEN
-set_gam2(long q01, long p, long n)
+set_gam2(long q01, long n)
 {
   long i, x, x1, pn, pn2;
   GEN gam;
@@ -370,7 +370,7 @@ quadstk2(long m, long n, int *chi)
   q0 = (f&1)?f*4:f;
   f0 = (f&1)?f:f/4;
   x = const_vecsmall(pn+1, 0); x2 = x+2;
-  gam = set_gam2((1+q0)%pn2, 2, n);
+  gam = set_gam2((1+q0)%pn2, n);
   for (j=1; j<pn2; j++)
   {
     long ipn2;
@@ -1501,7 +1501,7 @@ make_p_part(GEN y, GEN p0, long d_pow)
 }
 
 static GEN
-structure_MLL(GEN y, GEN p0, long d_pow)
+structure_MLL(GEN y, long d_pow)
 {
   long y0, i, l = lg(y);
   GEN x = gen_0, E = cgetg(l, t_VEC);
@@ -1515,7 +1515,7 @@ structure_MLL(GEN y, GEN p0, long d_pow)
 }
 
 static GEN
-find_del_el(GEN oldgr, GEN newgr, long n, long n_el, long d_chi, long flag)
+find_del_el(GEN oldgr, GEN newgr, long n, long n_el, long d_chi)
 {
   if (n_el==1) return mkvec2(gen_1, oldgr);
   if (cmpis(gmael(newgr, 2, 1), n_el)==0) return mkvec2(utoi(n), oldgr);
@@ -2239,8 +2239,7 @@ next_ell_real(GEN K, GEN ellg, long d2, GEN df0l, long j0)
 }
 
 static void
-delete_el_real(GEN K, long p, long d_pow, GEN velg,
-    long n, long f, long j0, long flag)
+delete_el_real(GEN K, long p, long d_pow, GEN velg, long n, long j0, long flag)
 {
   long i, l;
   GEN elg;
@@ -2773,7 +2772,7 @@ get_y(GEN z, GEN ellg, long d)
 
 static void
 real_MLLn(long *y, GEN K, ulong p, ulong d_pow, ulong n,
-    GEN velg, GEN vellg, GEN vG_K, ulong j0, long flag)
+    GEN velg, GEN vellg, GEN vG_K, ulong j0)
 {
   pari_sp av = avma;
   ulong i, j, k, d = upowuu(p, d_pow), h = gmael(K, 1, 2)[3];
@@ -2801,8 +2800,7 @@ real_MLLn(long *y, GEN K, ulong p, ulong d_pow, ulong n,
 }
 
 static void
-real_MLL1(long *y, GEN K, ulong p, ulong d_pow,
-    GEN velg, GEN vellg, ulong j0, long flag)
+real_MLL1(long *y, GEN K, ulong p, ulong d_pow, GEN velg, GEN vellg, ulong j0)
 {
   pari_sp av = avma;
   ulong h = gmael(K, 1, 2)[3], d = upowuu(p, d_pow);
@@ -2824,7 +2822,7 @@ real_MLL1(long *y, GEN K, ulong p, ulong d_pow,
 
 static void
 real_MLL(long *y, GEN K, long p, long d_pow, long n,
-    GEN velg, GEN vellg, GEN vG_K, long j0, long flag)
+    GEN velg, GEN vellg, GEN vG_K, long j0)
 {
   pari_sp av = avma;
   long i, j, row = lg(vellg)-1;
@@ -2904,7 +2902,7 @@ cyc_real_MLL(GEN K, long p, long d_pow, long j0, long flag)
     if (DEBUGLEVEL>2) timer_printf(&ti, "set_ell_real");
     if (DEBUGLEVEL>3) err_printf("vel=%Ps\nvell=%Ps\n", velg, vellg);
     if (n_ell==1)
-      real_MLL1(y0, K, p, d_pow, velg, vellg, j0, flag);
+      real_MLL1(y0, K, p, d_pow, velg, vellg, j0);
     else
     {
       GEN vG_K;
@@ -2912,9 +2910,9 @@ cyc_real_MLL(GEN K, long p, long d_pow, long j0, long flag)
       vG_K = make_G_K(K, vellg);
       if (DEBUGLEVEL>2) timer_printf(&ti, "make_G_K");
       if (lgefint(gmael(vellg, n_ell, 1))<=3 || (flag&SAVE_MEMORY))
-        real_MLL(y0, K, p, d_pow, n, velg, vellg, vG_K, j0, flag);
+        real_MLL(y0, K, p, d_pow, n, velg, vellg, vG_K, j0);
       else
-        real_MLLn(y0, K, p, d_pow, n, velg, vellg, vG_K, j0, flag);
+        real_MLLn(y0, K, p, d_pow, n, velg, vellg, vG_K, j0);
     }
     y=ary2mat(y0, n_ell);
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
@@ -2922,13 +2920,13 @@ cyc_real_MLL(GEN K, long p, long d_pow, long j0, long flag)
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
     y=make_p_part(y, p0, d_pow);
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
-    newgr = structure_MLL(y, p0, d_pow);
+    newgr = structure_MLL(y, d_pow);
     if (DEBUGLEVEL>3)
       err_printf("d_pow=%ld d_chi=%ld old=%Ps new=%Ps\n",d_pow,d_chi,oldgr,newgr);
     if (cmpsi(d_pow*d_chi, gel(newgr, 1))==0) break;
-    if ((m = find_del_el(oldgr, newgr, n, n_el, d_chi, flag)))
+    if ((m = find_del_el(oldgr, newgr, n, n_el, d_chi)))
     {
-      delete_el_real(K, p, d_pow, velg, itou(gel(m, 1)), f, j0, flag);
+      delete_el_real(K, p, d_pow, velg, itou(gel(m, 1)), j0, flag);
       n--; newgr = gel(m, 2);
     }
     else
@@ -3392,8 +3390,7 @@ imag_MLLn(long *y, GEN K, GEN p0, long d_pow, long n,
 }
 
 static void
-imag_MLL1(long *y, GEN K, GEN p0, long d_pow, long n,
-    GEN velg, GEN vellg, long j0)
+imag_MLL1(long *y, GEN K, GEN p0, long d_pow, GEN velg, GEN vellg, long j0)
 {
   pari_sp av = avma;
   GEN H1data = gmael(K, 1, 2);
@@ -3483,7 +3480,7 @@ cyc_imag_MLL(GEN K, GEN p0, long d_pow, long j, long flag)
     if (DEBUGLEVEL>2) err_printf("velg=%Ps\nvellg=%Ps\n", velg, vellg);
     if (DEBUGLEVEL>2) timer_start(&ti);
     if (n_ell==1)
-      imag_MLL1(y0, K, p0, d_pow, n, velg, vellg, j);
+      imag_MLL1(y0, K, p0, d_pow, velg, vellg, j);
     else if (lgefint(gmael(vellg, n, 1))<=3 || (flag&SAVE_MEMORY))
       imag_MLL(y0, K, p0, d_pow, n, velg, vellg, j);
     else
@@ -3495,11 +3492,11 @@ cyc_imag_MLL(GEN K, GEN p0, long d_pow, long j, long flag)
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
     y=make_p_part(y, p0, d_pow);
     if (DEBUGLEVEL>3)  err_printf("y=%Ps\n", y);
-    newgr = structure_MLL(y, p0, d_pow);
+    newgr = structure_MLL(y, d_pow);
     if (DEBUGLEVEL>3)
       err_printf("d_pow=%ld d_chi=%ld old=%Ps new=%Ps\n",d_pow,d_chi,oldgr,newgr);
     if (cmpsi(d_pow*d_chi, gel(newgr, 1))==0) break;
-    if ((m = find_del_el(oldgr ,newgr, n, n_el, d_chi, flag)))
+    if ((m = find_del_el(oldgr ,newgr, n, n_el, d_chi)))
     {
       delete_el_imag(velg, itou(gel(m, 1)), f);
       n--; newgr = gel(m, 2);
