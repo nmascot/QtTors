@@ -3597,25 +3597,24 @@ static GEN
 gather_part(GEN g, long sgn)
 {
   long i, j, l = lg(g), ord = 0, flag = 1;
-  GEN z, z2;
-  for (i=1; i<l; i++)
+  GEN z2 = cgetg(l, t_VEC);
+  for (i = j = 1; i < l; i++)
   {
-    if ( !equaliu(gmael(g, i, 3), sgn) ) continue;
-    ord += itou(gmael(g, i, 1));
-    if (lg(gmael(g, i, 2))==1) flag = 0;
+    GEN t = gel(g,i);
+    if (equaliu(gel(t, 3), sgn))
+    {
+      ord += itou(gel(t, 1));
+      if (lg(gel(t, 2)) == 1) flag = 0;
+      gel(z2, j++) = gel(t, 2);
+    }
   }
-  if (flag==0 || ord==0) return mkvec2(utoi(ord), nullvec());
-  z = cgetg(3,t_VEC);
-  gel(z, 1) = utoi(ord);
-  z2 = cgetg(l, t_VEC);
-  for (i=1, j=1; i<l; i++)
-    if ( equaliu(gmael(g, i, 3), sgn) ) gel(z2, j++) = gmael(g, i, 2);
-  setlg(z2, j);
-  z2 = shallowconcat1(z2); /* needed */
-  ZV_sort_inplace(z2);
-  vecreverse_inplace(z2);
-  gel(z, 2) = z2;
-  return z;
+  if (flag==0 || ord==0) z2 = nullvec();
+  else
+  {
+    setlg(z2, j); z2 = shallowconcat1(z2);
+    ZV_sort_inplace(z2); vecreverse_inplace(z2);
+  }
+  return mkvec2(utoi(ord), z2);
 }
 
 #ifdef DEBUG
