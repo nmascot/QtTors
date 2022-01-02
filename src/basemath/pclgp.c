@@ -2224,9 +2224,9 @@ static GEN
 next_ell_real(GEN K, GEN ellg, long d2, GEN df0l, long j0)
 {
   GEN ell = gel(ellg, 1);
-  for (ell = addii(ell, df0l); ell; ell = addii(ell, df0l))
-    if (isprime(ell) && chk_ell_real(K, d2, ell, j0)) break;
-  return mkvec2(ell, pgener_Fp(ell));
+  for (ell = addii(ell, df0l);; ell = addii(ell, df0l))
+    if (BPSW_psp(ell) && chk_ell_real(K, d2, ell, j0))
+      return mkvec2(ell, pgener_Fp(ell));
 }
 
 static void
