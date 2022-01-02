@@ -214,8 +214,7 @@ ediff(ulong p, long m, ulong n, int *chi)
   }
   cs = zx_renormalize(cs, lg(cs));
   y = (lg(cs)==3) ? phipn*z_lval(cs[2], p) : zx_p_val(cs, p, n);
-  avma=av;
-  return y;
+  return gc_long(av, y);
 }
 
 static GEN
@@ -3050,8 +3049,7 @@ cyc_real_pre(GEN K, GEN xi, long p, long j, long el)
   for (i=0; i<d_K; i++) e_chi[1+i]=umodiu(gel(TR, Fl_mul(i, j, d_K)), p);
   for (i=1; i<=d_K; i++) x = Fl_mul(x, Fl_powu(xi[i], e_chi[i], el), el);
   x = Fl_powu(x, (el-1)/p, el);
-  avma  = av;
-  return (x==1)?0:1;
+  return gc_long(av, (x==1)?0:1);
 }
 
 static GEN
