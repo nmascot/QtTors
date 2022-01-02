@@ -1505,16 +1505,16 @@ structure_MLL(GEN y, long d_pow)
   return mkvec2(x, E);
 }
 
-static GEN
-find_del_el(GEN oldgr, GEN newgr, long n, long n_el, long d_chi)
+static long
+find_del_el(GEN *oldgr, GEN newgr, long n, long n_el, long d_chi)
 {
-  if (n_el==1) return mkvec2(gen_1, oldgr);
-  if (equalis(gmael(newgr, 2, 1), n_el)) return mkvec2(utoi(n), oldgr);
-  if (cmpii(gel(oldgr, 1), gel(newgr, 1))>=0) return mkvec2(utoi(n), oldgr);
-  else if (n>1 && is_cyclic(newgr)) return mkvec2(utoi(n-1), newgr);
-  else if (n==n_el) return mkvec2(utoi(n), oldgr);
-  if (cmpis(gel(newgr, 1), n*d_chi)<0) return mkvec2(utoi(n), oldgr);
-  else return NULL;
+  if (n_el==1) return 1;
+  if (equalis(gmael(newgr, 2, 1), n_el)) return n;
+  if (cmpii(gel(*oldgr, 1), gel(newgr, 1)) >= 0) return n;
+  if (n > 1 && is_cyclic(newgr)) { *oldgr = newgr; return n-1; }
+  if (n == n_el) return n;
+  if (cmpis(gel(newgr, 1), n*d_chi) < 0) return n;
+  return 0;
 }
 
 static GEN
@@ -2884,8 +2884,8 @@ cyc_real_MLL(GEN K, long p, long d_pow, long j0, long flag)
 
   for (n=n0; n<=n_el; n++) /* loop while structure is unknown */
   {
-    long n_ell;
-    GEN y, m;
+    long n_ell, m;
+    GEN y;
     pari_timer ti;
     if (DEBUGLEVEL>2) timer_start(&ti);
     vellg = set_ell_real(K, velg, n, d_chi, d*d, f0, j0);
@@ -2915,14 +2915,10 @@ cyc_real_MLL(GEN K, long p, long d_pow, long j0, long flag)
     if (DEBUGLEVEL>3)
       err_printf("d_pow=%ld d_chi=%ld old=%Ps new=%Ps\n",d_pow,d_chi,oldgr,newgr);
     if (equalsi(d_pow*d_chi, gel(newgr, 1))) break;
-    if ((m = find_del_el(oldgr, newgr, n, n_el, d_chi)))
-    {
-      delete_el_real(K, p, d_pow, velg, itou(gel(m, 1)), j0, flag);
-      n--; newgr = gel(m, 2);
-    }
+    if ((m = find_del_el(&oldgr, newgr, n, n_el, d_chi)))
+    { delete_el_real(K, p, d_pow, velg, m, j0, flag); n--; }
     else
       gel(velg, n+1) = next_el_real(K, p, d_pow, gel(velg, n), j0, flag);
-    oldgr=newgr;
   }
   z = gel(newgr, 2); n = lg(vellg)-1;
   for (i=1; i<=n; i++) if (lgefint(gel(z, i))>2) str = vec_append(str, gel(z, i));
@@ -3464,8 +3460,8 @@ cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
   for (n=n0; n<=n_el; n++) /* loop while structure is unknown */
   {
     pari_timer ti;
-    long n_ell;
-    GEN y, m;
+    long n_ell, m;
+    GEN y;
     vellg = set_ell_imag(velg, n, d_chi, df0);
     n_ell = lg(vellg)-1;  /* equal to n*d_chi */
     if (DEBUGLEVEL>2) err_printf("velg=%Ps\nvellg=%Ps\n", velg, vellg);
@@ -3487,14 +3483,10 @@ cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
     if (DEBUGLEVEL>3)
       err_printf("d_pow=%ld d_chi=%ld old=%Ps new=%Ps\n",d_pow,d_chi,oldgr,newgr);
     if (equalsi(d_pow*d_chi, gel(newgr, 1))) break;
-    if ((m = find_del_el(oldgr ,newgr, n, n_el, d_chi)))
-    {
-      delete_el_imag(velg, itou(gel(m, 1)), f);
-      n--; newgr = gel(m, 2);
-    }
+    if ((m = find_del_el(&oldgr, newgr, n, n_el, d_chi)))
+    { delete_el_imag(velg, m, f); n--; }
     else
       gel(velg, n+1) = next_el_imag(gel(velg, n), f);
-    oldgr=newgr;
   }
   z = gel(newgr, 2); n = lg(vellg)-1;
   for (i=1; i<=n; i++) if (lgefint(gel(z, i))>2) str = vec_append(str, gel(z, i));
