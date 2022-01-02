@@ -87,12 +87,9 @@ static long
 zx_p_val(GEN f, ulong p, ulong n)
 {
   pari_sp av = avma;
-  ulong x, px;
-  GEN g;
-  x = zx_lval(f, p); px = upowuu(p, x);
-  g = zx_to_Flx(zx_z_divexact(f, px), p);
-  if (x) x *= (p-1)*upowuu(p, n-1);
-  x += Flx_val(Flx_translate1(g, p));
+  ulong x = zx_lval(f, p);
+  if (x) { f = zx_z_divexact(f, upowuu(p, x)); x *= (p-1)*upowuu(p, n-1); }
+  x += Flx_val(Flx_translate1(zx_to_Flx(f, p), p));
   return gc_long(av, x);
 }
 
@@ -100,12 +97,9 @@ static long
 ZX_p_val(GEN f, ulong p, ulong n)
 {
   pari_sp av = avma;
-  ulong x;
-  GEN px, g;
-  x = ZX_lval(f, p); px = powuu(p, x);
-  g = ZX_to_Flx(ZX_Z_divexact(f, px), p);
-  if (x) x *= (p-1)*upowuu(p, n-1);
-  x += Flx_val(Flx_translate1(g, p));
+  ulong x = ZX_lval(f, p);
+  if (x) { f = ZX_Z_divexact(f, powuu(p, x)); x *= (p-1)*upowuu(p, n-1); }
+  x += Flx_val(Flx_translate1(ZX_to_Flx(f, p), p));
   return gc_long(av, x);
 }
 
