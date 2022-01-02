@@ -3063,7 +3063,6 @@ cyc_real_pre(GEN K, GEN xi, long p, long j, long el)
 static GEN
 pclgp_cyc_real(GEN K, GEN p, long max_pow, long flag)
 {
-  pari_sp av = avma;
   const long NUM_EL = 20;
   GEN H1 = gel(K, 1), C = gel(K, 5);
   long f_K = gel(H1, 2)[2], n_conj = gel(K, 6)[2];
@@ -3088,7 +3087,7 @@ pclgp_cyc_real(GEN K, GEN p, long max_pow, long flag)
           {
             if (cyc_real_pre(K, xi, itou(p), C[i], uel)==0) continue;
             Done[i] = 1;
-            if (++n_done == n_conj) return gerepilecopy(av, gr);
+            if (++n_done == n_conj) return gr;
           }
           flag_1st = 0;
           /* pari_printf("%ld/%ld\n",n_done,n_conj); */
@@ -3108,12 +3107,12 @@ pclgp_cyc_real(GEN K, GEN p, long max_pow, long flag)
         if (equalim1(gel(z, 1))) continue;
         Done[i]=1;
         if (!isintzero(gel(z, 1))) gr=vec_append(gr, z);
-        if (++n_done == n_conj) return gerepilecopy(av, gr);
+        if (++n_done == n_conj) return gr;
       }
     }
   }
   pari_err_BUG("pclgp_cyc_real: max_pow is not enough");
-  return gen_0; /* dummy */
+  return NULL; /*LCOV_EXCL_LINE*/
 }
 
 /* return (el, g_el) */
@@ -3522,7 +3521,6 @@ cyc_imag(GEN K, GEN B, GEN p, long j, GEN powp, long flag)
 static GEN
 pclgp_cyc_imag(GEN K, GEN p, long start_pow, long max_pow, long flag)
 {
-  pari_sp av = avma;
   GEN C = gel(K, 5), Chi = gel(K, 2), H1data = gmael(K, 1, 2);
   long n_conj = gel(K, 6)[2], d_K = H1data[1], f_K = H1data[2];
   long i, pow, n_done = 0;
@@ -3542,7 +3540,7 @@ pclgp_cyc_imag(GEN K, GEN p, long start_pow, long max_pow, long flag)
       set_avma(av);
       if (degB<0) continue;
       Done[i] = 1;
-      if (++n_done == n_conj) return gerepilecopy(av, gr);
+      if (++n_done == n_conj) return gr;
     }
     /* pari_printf("%ld/%ld\n",n_done,n_conj); */
   }
@@ -3558,11 +3556,11 @@ pclgp_cyc_imag(GEN K, GEN p, long start_pow, long max_pow, long flag)
       if (equalim1(gel(z, 1))) continue;
       Done[i] = 1;
       if (!isintzero(gel(z, 1))) gr = vec_append(gr, z);
-      if (++n_done == n_conj) return gerepilecopy(av, gr);
+      if (++n_done == n_conj) return gr;
     }
   }
   pari_err_BUG("pclgp_cyc_imag: max_pow is not enough");
-  return gen_0; /* dummy */
+  return NULL; /*LCOV_EXCL_LINE*/
 }
 
 static GEN
@@ -3690,7 +3688,8 @@ pclgp(GEN p0, long f, GEN HH, long degF, long flag)
         z1 = pclgp_cyc_imag(K, p, start_pow, max_pow, flag);
       else { set_avma(av2); continue; }
       n_sub++; n_chi += gmael(vData, d_K, 4)[2]; /* += n_conj */
-      if (lg(z1) > 1) gr = gerepilecopy(av2, shallowconcat(gr, z1));
+      if (lg(z1) == 1) set_avma(av2);
+      else gr = gerepilecopy(av2, shallowconcat(gr, z1));
     }
     zi = mkcol(p);
     zi = vec_append(zi, (flag&NO_PLUS_PART)?nullvec():gather_part(gr, 0));
