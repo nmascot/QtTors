@@ -1509,7 +1509,7 @@ static GEN
 find_del_el(GEN oldgr, GEN newgr, long n, long n_el, long d_chi)
 {
   if (n_el==1) return mkvec2(gen_1, oldgr);
-  if (cmpis(gmael(newgr, 2, 1), n_el)==0) return mkvec2(utoi(n), oldgr);
+  if (equalis(gmael(newgr, 2, 1), n_el)) return mkvec2(utoi(n), oldgr);
   if (cmpii(gel(oldgr, 1), gel(newgr, 1))>=0) return mkvec2(utoi(n), oldgr);
   else if (n>1 && is_cyclic(newgr)) return mkvec2(utoi(n-1), newgr);
   else if (n==n_el) return mkvec2(utoi(n), oldgr);
@@ -2914,7 +2914,7 @@ cyc_real_MLL(GEN K, long p, long d_pow, long j0, long flag)
     newgr = structure_MLL(y, d_pow);
     if (DEBUGLEVEL>3)
       err_printf("d_pow=%ld d_chi=%ld old=%Ps new=%Ps\n",d_pow,d_chi,oldgr,newgr);
-    if (cmpsi(d_pow*d_chi, gel(newgr, 1))==0) break;
+    if (equalsi(d_pow*d_chi, gel(newgr, 1))) break;
     if ((m = find_del_el(oldgr, newgr, n, n_el, d_chi)))
     {
       delete_el_real(K, p, d_pow, velg, itou(gel(m, 1)), j0, flag);
@@ -3486,7 +3486,7 @@ cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
     newgr = structure_MLL(y, d_pow);
     if (DEBUGLEVEL>3)
       err_printf("d_pow=%ld d_chi=%ld old=%Ps new=%Ps\n",d_pow,d_chi,oldgr,newgr);
-    if (cmpsi(d_pow*d_chi, gel(newgr, 1))==0) break;
+    if (equalsi(d_pow*d_chi, gel(newgr, 1))) break;
     if ((m = find_del_el(oldgr ,newgr, n, n_el, d_chi)))
     {
       delete_el_imag(velg, itou(gel(m, 1)), f);
