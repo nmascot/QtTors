@@ -737,7 +737,7 @@ Flxn_translate1(GEN g, long p, long n)
     z = Flx_renormalize(z, d+2);
     if (Flx_weier_deg(z, p) <= lam) return z;
   }
-  return NULL; /* dummy */
+  return NULL; /*LCOV_EXCL_LINE*/
 }
 
 static GEN
@@ -762,7 +762,7 @@ FlxXn_translate1(GEN g, long p, long n)
     z = FlxX_renormalize(z, d+2);
     if (FlxX_weier_deg(z, p) <= lam) return z;
   }
-  return NULL; /* dummy */
+  return NULL; /*LCOV_EXCL_LINE*/
 }
 
 /* lam < 0 => error (lambda can't be determined)
