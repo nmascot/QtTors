@@ -1381,9 +1381,9 @@ GHinit(long f, GEN HH, GEN *pcycGH)
     chiG = zncharlift(chi, ncycGH, U, cycG);
     H1 =  charker(cycG, chiG); /* H1 < G with G/H1 cyclic */
     e = itou( zncharconductor(G, chiG) ); /* cond H1 = cond chi */
-    H1 = Flv_FlvV_factorback(gG, ZM_to_Flm(H1, expG), e);
-    gen = Flv_factorback(gGH, E, e); /* G/H1 = <gen>, chi(gen) = e(1/d) */
-    H1 = znstar_generate(e, H1);
+    H1 = Flv_FlvV_factorback(zv_to_Flv(gG, e), ZM_to_Flm(H1, expG), e);
+    gen = Flv_factorback(zv_to_Flv(gGH, e), E, e);
+    H1 = znstar_generate(e, H1); /* G/H1 = <gen>, chi(gen) = e(1/d) */
     he = eulerphiu(e) / d;
     /* G/H1 = <gen> cyclic of index d, e = cond(H1) */
     gel(vH1,i) = mkvec3(H1, mkvecsmall5(d,e,he,srh_1(H1), gen),
