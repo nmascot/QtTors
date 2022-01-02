@@ -2229,16 +2229,15 @@ next_ell_real(GEN K, GEN ellg, long d2, GEN df0l, long j0)
       return mkvec2(ell, pgener_Fp(ell));
 }
 
-static void
-delete_el_real(GEN K, long p, long d_pow, GEN velg, long n, long j0, long flag)
+/* #velg >= n */
+static long
+delete_el(GEN velg, long n)
 {
   long i, l;
-  GEN elg;
   if (DEBUGLEVEL>1) err_printf("deleting %ld ...\n", gmael(velg, n, 1));
-  for (l=lg(velg)-1; l>=1; l--) if (gel(velg, l)) break;
-  elg = next_el_real(K, p, d_pow, gel(velg, l), j0, flag);
-  for (i=n; i<l; i++) gel(velg, i) = gel(velg, i+1);
-  gel(velg, l) = elg;
+  for (l = lg(velg)-1; l >= 1; l--) if (gel(velg, l)) break;
+  for (i = n; i < l; i++) gel(velg, i) = gel(velg, i+1);
+  return l;
 }
 
 /* velg has n components */
@@ -2884,7 +2883,7 @@ cyc_real_MLL(GEN K, long p, long d_pow, long j0, long flag)
 
   for (n=n0; n<=n_el; n++) /* loop while structure is unknown */
   {
-    long n_ell, m;
+    long n_ell, m, M;
     GEN y;
     pari_timer ti;
     if (DEBUGLEVEL>2) timer_start(&ti);
@@ -2916,9 +2915,10 @@ cyc_real_MLL(GEN K, long p, long d_pow, long j0, long flag)
       err_printf("d_pow=%ld d_chi=%ld old=%Ps new=%Ps\n",d_pow,d_chi,oldgr,newgr);
     if (equalsi(d_pow*d_chi, gel(newgr, 1))) break;
     if ((m = find_del_el(&oldgr, newgr, n, n_el, d_chi)))
-    { delete_el_real(K, p, d_pow, velg, m, j0, flag); n--; }
+    { M = m = delete_el(velg, m); n--; }
     else
-      gel(velg, n+1) = next_el_real(K, p, d_pow, gel(velg, n), j0, flag);
+    { M = n+1; m = n; }
+    gel(velg, M) = next_el_real(K, p, d_pow, gel(velg, m), j0, flag);
   }
   z = gel(newgr, 2); n = lg(vellg)-1;
   for (i=1; i<=n; i++) if (lgefint(gel(z, i))>2) str = vec_append(str, gel(z, i));
@@ -3421,18 +3421,6 @@ imag_MLL(long *y, GEN K, ulong p, long d_pow, long n, GEN velg, GEN vellg,
   set_avma(av);
 }
 
-static void
-delete_el_imag(GEN velg, long n, long f)
-{
-  long i, l;
-  GEN elg;
-  if (DEBUGLEVEL>1) err_printf("deleting %ld ...\n", gmael(velg ,n, 1));
-  for (l=lg(velg)-1; l>=1; l--) if (gel(velg, l)) break;
-  elg = next_el_imag(gel(velg, l), f);
-  for (i=n; i<l; i++) gel(velg, i) = gel(velg, i+1);
-  gel(velg, i) = elg;
-}
-
 /* return an upper bound >= 0 if one was found, otherwise return -1.
  * set chi-part to be (1) if chi is Teichmuller character.
  * B_{1,omega^(-1)} is not p-adic integer. */
@@ -3460,7 +3448,7 @@ cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
   for (n=n0; n<=n_el; n++) /* loop while structure is unknown */
   {
     pari_timer ti;
-    long n_ell, m;
+    long n_ell, m, M;
     GEN y;
     vellg = set_ell_imag(velg, n, d_chi, df0);
     n_ell = lg(vellg)-1;  /* equal to n*d_chi */
@@ -3484,9 +3472,10 @@ cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
       err_printf("d_pow=%ld d_chi=%ld old=%Ps new=%Ps\n",d_pow,d_chi,oldgr,newgr);
     if (equalsi(d_pow*d_chi, gel(newgr, 1))) break;
     if ((m = find_del_el(&oldgr, newgr, n, n_el, d_chi)))
-    { delete_el_imag(velg, m, f); n--; }
+    { M = m = delete_el(velg, m); n--; }
     else
-      gel(velg, n+1) = next_el_imag(gel(velg, n), f);
+    { M = n+1; m = n; }
+    gel(velg, M) = next_el_imag(gel(velg, m), f);
   }
   z = gel(newgr, 2); n = lg(vellg)-1;
   for (i=1; i<=n; i++) if (lgefint(gel(z, i))>2) str = vec_append(str, gel(z, i));
