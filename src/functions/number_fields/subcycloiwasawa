@@ -15,8 +15,8 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  $\xi_n^{\chi}$ belonging to $F_n$.
 
  The function is only implemented when $p$ and $f$ are relatively small: both
- $p^4$ and $f^2$ must fit into a \kbd{long} integer. The argument \kbd{fH}
- encodes the data $[f,H]$ as follows:
+ $p^4$ and $f$ must fit into an \kbd{unsigned long} integer. The argument
+ \kbd{fH} encodes the data $[f,H]$ as follows:
 
  \item $\kbd{fH} = [f, H]$, where $H$ is given by a vector of
  integral generators,

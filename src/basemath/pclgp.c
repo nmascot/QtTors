@@ -4058,13 +4058,6 @@ checkp(const char *fun, long degF, GEN p)
   if (degF && dvdsi(degF, p)) errpdiv(fun, p, degF);
 }
 
-static void
-checkf(const char *fun, ulong f)
-{
-  ulong B = 1UL << (BITS_IN_LONG/2);
-  if (f >= B) pari_err_IMPL(stack_sprintf("conductor f >= %lu in %s", B, fun));
-}
-
 /* if flag is set, handle quadratic fields specially (don't set H) */
 static long
 subcyclo_init(const char *fun, GEN FH, long *pdegF, GEN *pH, long flag)
@@ -4078,7 +4071,8 @@ subcyclo_init(const char *fun, GEN FH, long *pdegF, GEN *pH, long flag)
     if (flag && degF == 2)
     {
       F = coredisc(ZX_disc(FH));
-      if (is_bigint(F)) checkf(fun, ULONG_MAX);
+      if (is_bigint(F))
+        pari_err_IMPL(stack_sprintf("conductor f > %lu in %s", ULONG_MAX, fun));
       f = itos(F); if (f == 1) degF = 1;
     }
     else
@@ -4149,7 +4143,6 @@ subcycloiwasawa_i(GEN FH, GEN P, long n)
   p = itos(P);
   if (p <= 1 || !uisprime(p)) pari_err_PRIME(fun, P);
   f = subcyclo_init(fun, FH, &degF, &H, 1);
-  checkf(fun, labs(f));
   if (degF == 1) return NULL;
   if (degF == 2)
   {
