@@ -937,7 +937,7 @@ quadlambda(long p, long m)
  *  polynomial of zeta_n over Q_p.
  *  phi(n)=deg*n_conj, n_conj == 1 <=> polcyclo(n) is irred mod p. */
 static GEN
-set_minpol(ulong n, GEN p, ulong r, long deg, long n_conj)
+set_minpol(ulong n, GEN p, ulong r, long n_conj)
 {
   GEN z, v, pol, pr;
   pari_timer ti;
@@ -1458,7 +1458,7 @@ abeliwasawa(long p, long f, GEN HH, long degF, long n)
       long d_chi = order_f_x(d_K, p), n_conj = eulerphiu(d_K)/d_chi;
       GEN C = set_C(p, d_K, d_chi, n_conj);
       long minpow = n? n+1: 2;
-      GEN MinPol = set_minpol(d_K, p0, minpow, d_chi, n_conj);
+      GEN MinPol = set_minpol(d_K, p0, minpow, n_conj);
       gel(vData, d_K) = mkvec3(MinPol, C, mkvecsmall3(d_chi, n_conj, minpow));
     }
     Chi = get_chi(H1);
@@ -3695,7 +3695,7 @@ pclgp(GEN p0, long f, GEN HH, long degF, long flag)
         long d_chi = order_f_x(d_K, pmodd), n_conj = eulerphiu(d_K)/d_chi;
 
         C = set_C(pmodd, d_K, d_chi, n_conj);
-        MinPol = set_minpol(d_K, p, max_pow, d_chi, n_conj);
+        MinPol = set_minpol(d_K, p, max_pow, n_conj);
         if (DEBUGLEVEL>3) timer_start(&ti);
         /* vNewton[2+i] = vNewton[2+i+d_K]. We need vNewton[2+i] for
          * 0 <= i < d_K. But vNewton[2+d_K-1] may be 0 and will be deleted.
@@ -4070,8 +4070,8 @@ checkp(const char *fun, long degF, GEN p)
 static void
 checkf(const char *fun, ulong f)
 {
-  long B = 1L << (BITS_IN_LONG/2);
-  if (f >= B) pari_err_IMPL(stack_sprintf("conductor f > %ld in %s", B, fun));
+  ulong B = 1UL << (BITS_IN_LONG/2);
+  if (f >= B) pari_err_IMPL(stack_sprintf("conductor f >= %lu in %s", B, fun));
 }
 
 /* if flag is set, handle quadratic fields specially (don't set H) */
