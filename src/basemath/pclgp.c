@@ -474,72 +474,63 @@ set_quad_chi_1(long m)
 static int*
 set_quad_chi_2(long m)
 {
-  long i, j, a, r, g, gn, np, nm, pq[2][30];
-  GEN fa, P, E;
-  long d = ((m-1)%4==0)?m:4*m, f = labs(d);
-  int *chi0 = (int*)stack_calloc(sizeof(int)*f), *chi=chi0;
+  long d = (m-1) % 4? 4*m: m, f = labs(d);
+  GEN fa = factoru(f), P = gel(fa, 1), E = gel(fa,2), u, v;
+  long i, j, np, nm, l = lg(P);
+  int *chi = (int*)stack_calloc(sizeof(int)*f);
   pari_sp av = avma;
-  int *plus0 = (int*)stack_calloc(sizeof(int)*f), *plus=plus0, *p0=plus;
-  int *minus0 = (int*)stack_calloc(sizeof(int)*f), *minus=minus0, *p1=minus;
-  fa = factoru(f), P = gel(fa, 1), E = gel(fa, 2); r = lg(P)-1;
-  for (i=0; i<r; i++)
+  int *plus = (int*)stack_calloc(sizeof(int)*f), *p0 = plus;
+  int *minus = (int*)stack_calloc(sizeof(int)*f), *p1 = minus;
+
+  u = cgetg(32, t_VECSMALL);
+  v = cgetg(32, t_VECSMALL);
+  for (i = 1; i < l; i++)
   {
-    long p, q, x, y;
-    p=upowuu(P[1+i], E[1+i]); q=f/p;
-    cbezout(p, q, &x, &y);
-    /* printf("%d*(%d)+%d*(%d)\n", p, x, q, y); */
-    pq[0][i] = smodss(p*x, f);
-    pq[1][i] = smodss(q*y, f);
+    ulong p = upowuu(P[i], E[i]);
+    u[i] = p * Fl_inv(p, f / p);
+    v[i] = Fl_sub(1, u[i], f);
   }
   if (E[1]==2)       /* f=4*(-m) */
   {
-    a=(1*pq[1][0]+pq[0][0])%f;
-    *p0++=a;
-    a=(3*pq[1][0]+pq[0][0])%f;
-    *p1++=a;
-    i=1;
+    *p0++ = Fl_add(v[1], u[1], f);
+    *p1++ = Fl_add(Fl_mul(3, v[1], f), u[1], f);
+    i = 2;
   }
   else if (E[1]==3)  /* f=8*(-m) */
   {
-    a = (1*pq[1][0]+pq[0][0])%f;
-    *p0++ = a;
-    a = (3*pq[1][0]+pq[0][0])%f;
-    if (kross(d, a)>0) *p0++ = a;
-    else *p1++ = a;
-    a = (5*pq[1][0]+pq[0][0])%f;
-    if (kross(d, a)>0) *p0++ = a;
-    else *p1++ = a;
-    a = (7*pq[1][0]+pq[0][0])%f;
-    if (kross(d, a)>0) *p0++ = a;
-    else *p1++ = a;
-    i = 1;
+    ulong a;
+    *p0++ = Fl_add(v[1], u[1], f);
+    a = Fl_add(Fl_mul(3, v[1], f), u[1], f);
+    if (kross(d, a) > 0) *p0++ = a; else *p1++ = a;
+    a = Fl_add(Fl_mul(5, v[1], f), u[1], f);
+    if (kross(d, a) > 0) *p0++ = a; else *p1++ = a;
+    a = Fl_add(Fl_mul(7, v[1], f), u[1], f);
+    if (kross(d, a) > 0) *p0++ = a; else *p1++ = a;
+    i = 2;
   }
   else              /* f=-m */
-  {*p0++ = 1; i=0; }
-  for (; i<r; i++)
+  {*p0++ = 1; i = 1; }
+  for (; i < l; i++)
   {
-    g = pgener_Fl(P[1+i]);
-    g = (g*pq[1][i]+pq[0][i])%f;
-    gn = g;
+    ulong gn, g = pgener_Fl(P[i]);
+    gn = g = Fl_add(Fl_mul(g, v[i], f), u[i], f);
     np = p0-plus;
     nm = p1-minus;
     for (;;)
     {
-      for (j=0; j<np; j++) *p1++ = (plus[j]*gn)%f;
-      for (j=0; j<nm; j++) *p0++ = (minus[j]*gn)%f;
-      gn = (gn*g)%f;
-      if (gn==1) break;
-      for (j=0; j<np; j++) *p0++ = (plus[j]*gn)%f;
-      for (j=0; j<nm; j++) *p1++ = (minus[j]*gn)%f;
-      gn = (gn*g)%f;
-      if (gn==1) break;
+      for (j = 0; j < np; j++) *p1++ = Fl_mul(plus[j], gn, f);
+      for (j = 0; j < nm; j++) *p0++ = Fl_mul(minus[j], gn, f);
+      gn = Fl_mul(gn, g, f); if (gn == 1) break;
+      for (j= 0; j < np; j++) *p0++ = Fl_mul(plus[j], gn, f);
+      for (j = 0; j < nm; j++) *p1++ = Fl_mul(minus[j], gn, f);
+      gn = Fl_mul(gn, g, f); if (gn == 1) break;
     }
   }
   np = p0-plus;
   nm = p1-minus;
-  for (i=0; i<np; i++) chi[plus[i]] = 1;
-  for (i=0; i<nm; i++) chi[minus[i]] = -1;
-  set_avma(av); return chi0;
+  for (i = 0; i < np; i++) chi[plus[i]] = 1;
+  for (i = 0; i < nm; i++) chi[minus[i]] = -1;
+  set_avma(av); return chi;
 }
 
 static long
