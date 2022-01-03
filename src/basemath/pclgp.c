@@ -106,16 +106,15 @@ ZX_p_val(GEN f, ulong p, ulong n)
 static GEN
 set_A(GEN B, int *chi)
 {
-  long a, i, j, B0, lA = lg(B)-1;
-  GEN A;
-  A = cgetg(lA+1, t_VECSMALL);
-  for (a=0, j=1, B0=B[1]; j<B0; j++) a+=chi[j];
+  long a, i, j, B1 = B[1], l = lg(B);
+  GEN A = cgetg(l, t_VECSMALL);
+  for (a = 0, j = 1; j < B1; j++) a += chi[j];
   A[1] = a;
-  for (i=1; i<lA; i++)
+  for (i = 2; i < l; i++)
   {
-    long Bi = B[i+1];
-    for (a=A[i], j=B[i]; j<Bi; j++) a+=chi[j];
-    A[i+1] = a;
+    long Bi = B[i];
+    for (a = A[i-1], j = B[i-1]; j < Bi; j++) a += chi[j];
+    A[i] = a;
   }
   return A;
 }
@@ -2761,12 +2760,10 @@ real_MLLn(long *y, GEN K, ulong p, ulong d_pow, ulong n,
                : D_xi_el_vell(K, elg, vellg, d, j0);
     if (DEBUGLEVEL>1) timer_printf(&ti, "subcyclopclgp:[D_xi_el]");
     if (DEBUGLEVEL>2) err_printf("z=%Ps\n", z);
-    lz = lg(z)-1;
-    for (k=1; k<=lz; k++)
-    {
+    lz = lg(z);
+    for (k = 1; k < lz; k++)
       for (j=1; j<=row; j++)
         y[(j-1)*row+(i-1)*lz+k-1] = get_y(gel(z, k), gel(vellg, j), d);
-    }
     set_avma(av);
   }
 }
@@ -3332,9 +3329,9 @@ imag_MLLn(long *y, GEN K, ulong p, long d_pow, long n,
     if (DEBUGLEVEL>1) err_printf("(f,el-1)=(%ld,%ld*%ld)\n", f,(elg[1]-1)/f,f);
     g = gauss_el_vell(f, elg, vellg, vz_2f);
     z = norm_chi(K, g, p, d_pow, M, j0);
-    lz = lg(z)-1;
-    for (k=1; k<=lz; k++)
-      for (j=1; j<=row; j++)
+    lz = lg(z);
+    for (k = 1; k < lz; k++)
+      for (j = 1; j <= row; j++)
         y[(j-1)*row+(i-1)*lz+k-1] = get_y(gel(z, k), gel(vellg, j), d);
     set_avma(av);
   }
@@ -3371,8 +3368,8 @@ imag_MLL(long *y, GEN K, ulong p, long d_pow, long n, GEN velg, GEN vellg,
       if (DEBUGLEVEL>1) err_printf("(f,el-1)=(%ld,%ld*%ld)\n",f,(elg[1]-1)/f,f);
       g = gauss_ZX_mul(f, elg, ellg);
       z = norm_chi(K, g, p, d_pow, ell, j0);
-      lz = lg(z)-1;
-      for (k=1; k<=lz; k++)
+      lz = lg(z);
+      for (k = 1; k < lz; k++)
         y[(j-1)*row+(i-1)*lz+k-1] = get_y(gel(z, k), ellg, d);
       set_avma(av);
     }
