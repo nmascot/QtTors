@@ -2238,7 +2238,7 @@ static GEN
 set_ell_real(GEN K, GEN velg, long n, long d_chi, long d2, long f0, long j0)
 {
   long i, n_ell = n*d_chi;
-  GEN z = const_vec(n_ell, NULL);
+  GEN z = cgetg(n_ell + 1, t_VEC);
   GEN df0l = muluu(d2, f0), ellg = mkvec2(gen_1, gen_1);
   for (i=1; i<=n; i++) df0l = muliu(df0l, gel(velg, i)[1]);
   for (i=1; i<=n_ell; i++) ellg = gel(z, i)= next_ell_real(K, ellg, d2, df0l, j0);
@@ -3055,7 +3055,7 @@ pclgp_cyc_real(GEN K, GEN p, long max_pow, long flag)
     for (n_el = 0; n_el < NUM_EL; el = addii(el, fpn))
     {
       ulong uel;
-      if (!isprime(el)) continue;
+      if (!BPSW_psp(el)) continue;
       uel = (lgefint(el) > 3)? 0: itou(el);
       if (uel)
       {
@@ -3099,8 +3099,8 @@ static GEN
 next_el_imag(GEN elg, long f)
 {
   long el = elg[1];
-  if (f&1) f<<=1;
-  while (uisprime(el+=f)==0);
+  if (odd(f)) f<<=1;
+  while (!uisprime(el+=f));
   return mkvecsmall2(el, pgener_Fl(el));
 }
 
@@ -3109,7 +3109,7 @@ static GEN
 next_ell_imag(GEN ellg, GEN df0l)
 {
   GEN ell = gel(ellg, 1);
-  while (isprime(ell = addii(ell, df0l))==0);
+  while (!BPSW_psp(ell = addii(ell, df0l)));
   return mkvec2(ell, pgener_Fp(ell));
 }
 
@@ -3117,7 +3117,7 @@ static GEN
 set_ell_imag(GEN velg, long n, long d_chi, GEN df0)
 {
   long i, n_ell = n*d_chi;
-  GEN z = const_vec(n_ell, NULL);
+  GEN z = cgetg(n_ell + 1, t_VEC);
   GEN df0l = shifti(df0, 1), ellg = mkvec2(gen_1, gen_1);
   for (i=1; i<=n; i++) df0l = muliu(df0l, gel(velg, i)[1]);
   for (i=1; i<=n_ell; i++) ellg = gel(z, i)= next_ell_imag(ellg, df0l);
