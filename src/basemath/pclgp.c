@@ -2753,17 +2753,17 @@ real_MLLn(long *y, GEN K, ulong p, ulong d_pow, ulong n,
   for (i=1; i<=n; i++)
   {
     GEN elg = gel(velg, i), z;
-    ulong el = elg[1], lz;
+    ulong el = elg[1], nz;
     pari_timer ti;
     if (DEBUGLEVEL>1) timer_start(&ti);
     z = (h<el) ? D_xi_el_vell_FFT(K, elg, vellg, d, j0, vG_K)
                : D_xi_el_vell(K, elg, vellg, d, j0);
     if (DEBUGLEVEL>1) timer_printf(&ti, "subcyclopclgp:[D_xi_el]");
     if (DEBUGLEVEL>2) err_printf("z=%Ps\n", z);
-    lz = lg(z);
-    for (k = 1; k < lz; k++)
+    nz = lg(z)-1;
+    for (k = 1; k <= nz; k++)
       for (j=1; j<=row; j++)
-        y[(j-1)*row+(i-1)*lz+k-1] = get_y(gel(z, k), gel(vellg, j), d);
+        y[(j-1)*row+(i-1)*nz+k-1] = get_y(gel(z, k), gel(vellg, j), d);
     set_avma(av);
   }
 }
@@ -2797,16 +2797,16 @@ real_MLL(long *y, GEN K, long p, long d_pow, long n,
     {
       pari_sp av2 = avma;
       GEN elg = gel(velg, i), z;
-      ulong el = elg[1], lz;
+      ulong el = elg[1], nz;
       pari_timer ti;
       if (DEBUGLEVEL>2) timer_start(&ti);
       z = h < el? D_xi_el_ZX_mul(K, elg, ellg, vG_K, d, j0)
                 : D_xi_el_sl(K, elg, ellg, d, j0);
       if (DEBUGLEVEL>2) timer_printf(&ti, "subcyclopclgp:[D_xi_el]");
       if (DEBUGLEVEL>3) err_printf("z=%Ps\n", z);
-      lz = lg(z)-1;
-      for (k=1; k<=lz; k++)
-        y[(j-1)*row+(i-1)*lz+k-1] = get_y(gel(z, k), ellg, d);
+      nz = lg(z)-1;
+      for (k = 1; k <= nz; k++)
+        y[(j-1)*row+(i-1)*nz+k-1] = get_y(gel(z, k), ellg, d);
       set_avma(av2);
     }
   }
@@ -3320,7 +3320,7 @@ imag_MLLn(long *y, GEN K, ulong p, long d_pow, long n,
 {
   GEN H1data = gmael(K, 1, 2);
   long f = H1data[2], d = upowuu(p, d_pow), row = lg(vellg)-1;
-  long i, j, k, lz;
+  long i, j, k, nz;
   GEN g, z, M, vz_2f = vz_2f_vell(f, vellg, &M);
   for (i=1; i<=n; i++)
   {
@@ -3329,10 +3329,10 @@ imag_MLLn(long *y, GEN K, ulong p, long d_pow, long n,
     if (DEBUGLEVEL>1) err_printf("(f,el-1)=(%ld,%ld*%ld)\n", f,(elg[1]-1)/f,f);
     g = gauss_el_vell(f, elg, vellg, vz_2f);
     z = norm_chi(K, g, p, d_pow, M, j0);
-    lz = lg(z);
-    for (k = 1; k < lz; k++)
+    nz = lg(z)-1;
+    for (k = 1; k <= nz; k++)
       for (j = 1; j <= row; j++)
-        y[(j-1)*row+(i-1)*lz+k-1] = get_y(gel(z, k), gel(vellg, j), d);
+        y[(j-1)*row+(i-1)*nz+k-1] = get_y(gel(z, k), gel(vellg, j), d);
     set_avma(av);
   }
 }
@@ -3364,13 +3364,13 @@ imag_MLL(long *y, GEN K, ulong p, long d_pow, long n, GEN velg, GEN vellg,
     for (i=1; i<=n; i++)
     {
       GEN elg = gel(velg, i), g, z;
-      ulong k, lz;
+      ulong k, nz;
       if (DEBUGLEVEL>1) err_printf("(f,el-1)=(%ld,%ld*%ld)\n",f,(elg[1]-1)/f,f);
       g = gauss_ZX_mul(f, elg, ellg);
       z = norm_chi(K, g, p, d_pow, ell, j0);
-      lz = lg(z);
-      for (k = 1; k < lz; k++)
-        y[(j-1)*row+(i-1)*lz+k-1] = get_y(gel(z, k), ellg, d);
+      nz = lg(z)-1;
+      for (k = 1; k <= nz; k++)
+        y[(j-1)*row+(i-1)*nz+k-1] = get_y(gel(z, k), ellg, d);
       set_avma(av);
     }
   }
