@@ -2774,7 +2774,6 @@ real_MLLn(long *y, GEN K, ulong p, ulong d_pow, ulong n,
 static void
 real_MLL1(long *y, GEN K, ulong p, ulong d_pow, GEN velg, GEN vellg, ulong j0)
 {
-  pari_sp av = avma;
   ulong h = gmael(K, 1, 2)[3], d = upowuu(p, d_pow);
   GEN elg = gel(velg, 1), ellg = gel(vellg, 1), z;
   ulong el = elg[1];
@@ -2785,14 +2784,13 @@ real_MLL1(long *y, GEN K, ulong p, ulong d_pow, GEN velg, GEN vellg, ulong j0)
             : D_xi_el_sl(K, elg, ellg, d, j0);
   if (DEBUGLEVEL>2) timer_printf(&ti, "subcyclopclgp:[D_xi_el]");
   if (DEBUGLEVEL>2) err_printf("z=%Ps\n", z);
-  y[0] = get_y(gel(z, 1), ellg, d); set_avma(av);
+  y[0] = get_y(gel(z, 1), ellg, d);
 }
 
 static void
 real_MLL(long *y, GEN K, long p, long d_pow, long n,
     GEN velg, GEN vellg, GEN vG_K, long j0)
 {
-  pari_sp av = avma;
   long i, j, row = lg(vellg)-1;
   ulong k, h = gmael(K, 1, 2)[3], d = upowuu(p, d_pow);
   for (j=1; j<=row; j++)
@@ -2815,7 +2813,6 @@ real_MLL(long *y, GEN K, long p, long d_pow, long n,
       set_avma(av2);
     }
   }
-  set_avma(av);
 }
 
 static long
@@ -2857,6 +2854,7 @@ cyc_real_MLL(GEN K, ulong p, long d_pow, long j0, long flag)
 
   for (n=n0; n<=n_el; n++) /* loop while structure is unknown */
   {
+    pari_sp av2 = avma;
     long n_ell, m, M;
     GEN y;
     pari_timer ti;
@@ -2878,11 +2876,12 @@ cyc_real_MLL(GEN K, ulong p, long d_pow, long j0, long flag)
       else
         real_MLLn(y0, K, p, d_pow, n, velg, vellg, vG_K, j0);
     }
-    y=ary2mat(y0, n_ell);
+    set_avma(av2);
+    y = ary2mat(y0, n_ell);
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
-    y=ZM_snf(y);
+    y = ZM_snf(y);
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
-    y=make_p_part(y, p, d_pow);
+    y = make_p_part(y, p, d_pow);
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
     newgr = structure_MLL(y, d_pow);
     if (DEBUGLEVEL>3)
@@ -2894,7 +2893,7 @@ cyc_real_MLL(GEN K, ulong p, long d_pow, long j0, long flag)
     { M = n+1; m = n; }
     gel(velg, M) = next_el_real(K, p, d_pow, gel(velg, m), j0, flag);
   }
-  z = gel(newgr, 2); n = lg(vellg)-1;
+  z = gel(newgr, 2); n = lg(z)-1;
   for (i=1; i<=n; i++) if (lgefint(gel(z, i))>2) str = vec_append(str, gel(z, i));
   return gerepilecopy(av, mkvec3(utoi(d_pow*d_chi), str, gen_0));
 }
@@ -3317,7 +3316,6 @@ static void
 imag_MLLn(long *y, GEN K, ulong p, long d_pow, long n,
     GEN velg, GEN vellg, long j0)
 {
-  pari_sp av = avma;
   GEN H1data = gmael(K, 1, 2);
   long f = H1data[2], d = upowuu(p, d_pow), row = lg(vellg)-1;
   long i, j, k, lz;
@@ -3335,13 +3333,11 @@ imag_MLLn(long *y, GEN K, ulong p, long d_pow, long n,
         y[(j-1)*row+(i-1)*lz+k-1] = get_y(gel(z, k), gel(vellg, j), d);
     set_avma(av);
   }
-  set_avma(av);
 }
 
 static void
 imag_MLL1(long *y, GEN K, ulong p, long d_pow, GEN velg, GEN vellg, long j0)
 {
-  pari_sp av = avma;
   GEN H1data = gmael(K, 1, 2);
   long f = H1data[2], d = upowuu(p, d_pow);
   GEN elg = gel(velg, 1), ellg = gel(vellg, 1), ell = gel(ellg, 1), g, z;
@@ -3350,7 +3346,6 @@ imag_MLL1(long *y, GEN K, ulong p, long d_pow, GEN velg, GEN vellg, long j0)
   g = gauss_ZX_mul(f, elg, ellg);
   z = norm_chi(K, g, p, d_pow, ell, j0);
   y[0] = get_y(gel(z, 1), ellg, d);
-  set_avma(av);
 }
 
 static void
@@ -3405,6 +3400,7 @@ cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
   }
   for (n=n0; n<=n_el; n++) /* loop while structure is unknown */
   {
+    pari_sp av2 = avma;
     pari_timer ti;
     long n_ell, m, M;
     GEN y;
@@ -3418,12 +3414,13 @@ cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
       imag_MLL(y0, K, p, d_pow, n, velg, vellg, j);
     else
       imag_MLLn(y0, K, p, d_pow, n, velg, vellg, j);
+    set_avma(av2);
     if (DEBUGLEVEL>2) timer_printf(&ti, "gauss sum");
-    y=ary2mat(y0, n_ell);
+    y = ary2mat(y0, n_ell);
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
-    y=ZM_snf(y);
+    y = ZM_snf(y);
     if (DEBUGLEVEL>3) err_printf("y=%Ps\n", y);
-    y=make_p_part(y, p, d_pow);
+    y = make_p_part(y, p, d_pow);
     if (DEBUGLEVEL>3)  err_printf("y=%Ps\n", y);
     newgr = structure_MLL(y, d_pow);
     if (DEBUGLEVEL>3)
@@ -3435,7 +3432,7 @@ cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
     { M = n+1; m = n; }
     gel(velg, M) = next_el_imag(gel(velg, m), f);
   }
-  z = gel(newgr, 2); n = lg(vellg)-1;
+  z = gel(newgr, 2); n = lg(z)-1;
   for (i=1; i<=n; i++) if (lgefint(gel(z, i))>2) str = vec_append(str, gel(z, i));
   return gerepilecopy(av, mkvec3(utoi(d_pow*d_chi), str, gen_1));
 }
