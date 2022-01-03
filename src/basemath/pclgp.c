@@ -1588,19 +1588,36 @@ srh_pol(GEN xpows, GEN vn, GEN pols, long el, long k, long f)
   return 0;  /* to suppress warning */
 }
 
+/* e_chi[i mod dK] = chi(i*j), i = 0..dK-1; beware: e_chi is translated ! */
+static GEN
+get_e_chi(GEN K, ulong j, ulong d, ulong *pdK)
+{
+  ulong i, dK = umael3(K, 1, 2, 1);
+  GEN TR = gel(K,4) + 2, e_chi = cgetg(dK+1, t_VECSMALL) + 1;
+  for (i = 0; i < dK; i++) e_chi[i] = umodiu(gel(TR, Fl_mul(i, j, dK)), d);
+  *pdK = dK; return e_chi;
+}
+static GEN
+get_e_chi_ll(GEN K, ulong j, GEN d, ulong *pdK)
+{
+  ulong i, dK = umael3(K, 1, 2, 1);
+  GEN TR = gel(K,4) + 2, e_chi = cgetg(dK+1, t_VEC) + 1;
+  for (i = 0; i < dK; i++) gel(e_chi,i) = modii(gel(TR, Fl_mul(i, j, dK)), d);
+  *pdK = dK; return e_chi;
+}
+
 /* el=1 (mod f) */
 static long
 chk_el_real_f(GEN K, ulong p, ulong d_pow, ulong el, ulong j0)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
-  ulong d_K = H1data[1], f = H1data[2], h = H1data[3], g_K = H1data[5];
+  GEN H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
+  ulong d_K, f = H1data[2], h = H1data[3], g_K = H1data[5];
   ulong  i, j, gi, d = upowuu(p, d_pow), dp = d*p;
   ulong g_el, z_f, flag = 0, el1f = (el-1)/f, el1dp = (el-1)/dp;
+  GEN e_chi = get_e_chi(K, j0, dp, &d_K);
   GEN vz_f, xi_el = cgetg(d_K+1, t_VECSMALL)+1;
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL)+1;
 
-  for (i=0; i<d_K; i++) e_chi[i]=umodiu(gel(TR, Fl_mul(i, j0, d_K)), dp);
   g_el = pgener_Fl(el);
   z_f = Fl_powu(g_el, el1f, el);
   vz_f = Fl_powers(z_f, f-1, el)+1;
@@ -1860,17 +1877,15 @@ chk_el_real_basis(GEN K, long p, long d_pow, long el, long j0)
   pari_sp av = avma;
   GEN xi = gel(K, 7), T = gel(xi, 1), A = gel(xi, 3), Xi = gel(xi, 4);
   GEN A_den = gel(xi, 5);
-  GEN TR, H1, H1data;
-  long i, j, x, found = 0;
+  ulong i, j, x, found = 0;
   GEN v_el, xi_el;
   GEN e_chi, xi_e_chi;
-  long d_K, d, dp, el1dp;
+  ulong d_K, d, dp, el1dp;
 
   if (dvdiu(A_den, el)) return 0;
 
-  TR = gel(K, 4)+2; H1 = gel(K, 1); H1data = gel(H1, 2);
-  d_K = H1data[1]; d = upowuu(p, d_pow); dp = d*p; el1dp = (el-1)/dp;
-  e_chi = cgetg(d_K+1, t_VECSMALL)+1;
+  d = upowuu(p, d_pow); dp = d*p; el1dp = (el-1)/dp;
+  e_chi = get_e_chi(K, j0, dp, &d_K);
   xi_e_chi = cgetg(d_K+1, t_VECSMALL)+1;
 
   if (DEBUGLEVEL>1) err_printf("chk_el_real_basis: d_K=%ld el=%ld\n",d_K,el);
@@ -1880,7 +1895,6 @@ chk_el_real_basis(GEN K, long p, long d_pow, long el, long j0)
   v_el = Flm_Flc_mul(A, Fl_powers(x, d_K-1, el), el);
   xi_el = Flm_Flc_mul(ZM_to_Flm(Xi, el), v_el, el);
   if (DEBUGLEVEL>2) err_printf("el=%ld xi_el=%Ps\n", el, xi_el);
-  for (i=0; i<d_K; i++) e_chi[i]=umodiu(gel(TR, Fl_mul(i, j0, d_K)), dp);
   for (i=0; i<d_K; i++)
   {
     long z = 1;
@@ -1939,8 +1953,8 @@ find_conj_el(GEN K, GEN pol, GEN Den)
 {
   pari_sp av = avma;
   GEN H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
-  long d_K = H1data[1], f = H1data[2], h = H1data[3], g = H1data[5];
-  long j, k, el, g_el, z_f, xi = 1, xi_g = 1;
+  ulong d_K = H1data[1], f = H1data[2], h = H1data[3], g = H1data[5];
+  ulong j, k, el, g_el, z_f, xi = 1, xi_g = 1;
   GEN T = NULL, vz_f;
 
   for (el=f+1; el; el+=f)
@@ -1997,7 +2011,7 @@ xi_data_galois(GEN K)
 {
   pari_sp av = avma;
   GEN H1data = gmael(K, 1, 2), T, G, perms, perm, pol, pol2, Den;
-  long k, d_K = H1data[1];
+  ulong k, d_K = H1data[1];
   pari_timer ti;
 
   if (DEBUGLEVEL>1) timer_start(&ti);
@@ -2028,31 +2042,23 @@ chk_el_real_galois(GEN K, long p, long d_pow, long el, long j0)
 {
   pari_sp av = avma;
   GEN xi = gel(K, 7), T = gel(xi, 1), F = gel(xi, 2), Den = gel(xi, 3);
-  GEN Fel;
-  long i, j, x, found = 0;
-  GEN TR, H1, H1data;
-  GEN xi_el, xi_e_chi, e_chi;
-  long d_K, d, dp, el1dp;
+  GEN Fel, xi_el, xi_e_chi, e_chi;
+  ulong i, j, x, found = 0;
+  ulong d_K, d, dp, el1dp;
 
   if (dvdiu(Den, el)) return 0;
 
-  TR = gel(K, 4)+2; H1 = gel(K, 1); H1data = gel(H1, 2);
-  d_K = H1data[1]; d = upowuu(p, d_pow); dp = d*p; el1dp = (el-1)/dp;
+  d = upowuu(p, d_pow); dp = d*p; el1dp = (el-1)/dp;
+  e_chi = get_e_chi(K, j0, dp, &d_K);
   xi_el = cgetg(d_K+1, t_VECSMALL)+1;
   xi_e_chi = cgetg(d_K+1, t_VECSMALL)+1;
-  e_chi = cgetg(d_K+1, t_VECSMALL)+1;
 
   if (DEBUGLEVEL>1) err_printf("chk_el_real_galois: d_K=%ld el=%ld\n",d_K,el);
   Fel = ZX_to_Flx(F, el);
   Fel = Flx_Fl_mul(Fel, Fl_inv(umodiu(Den, el), el), el);
   x = Flx_oneroot_split(ZX_to_Flx(T, el), el);
-  for (i=0; i<d_K; i++)
-  {
-    xi_el[i] = x;
-    x = Flx_eval(Fel, x, el);
-  }
+  for (i=0; i<d_K; i++) { xi_el[i] = x; x = Flx_eval(Fel, x, el); }
   if (DEBUGLEVEL>2) err_printf("el=%ld xi_el=%Ps\n", el, xi_el-1);
-  for (i=0; i<d_K; i++) e_chi[i]=umodiu(gel(TR, Fl_mul(i, j0, d_K)), dp);
   for (i=0; i<d_K; i++)
   {
     long z = 1;
@@ -2077,17 +2083,15 @@ static long
 chk_el_real_factor(GEN K, long p, long d_pow, long el, long j0)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1 = gel(K, 1), H1data = gel(H1, 2);
-  long d_K = H1data[1], f = H1data[2], h = H1data[3], g_K = H1data[5];
-  GEN H = gel(H1, 3);
-  long  i, j, k, d = upowuu(p, d_pow), dp = d*p, found = 0;
+  GEN H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
+  ulong f = H1data[2], h = H1data[3], g_K = H1data[5];
+  ulong i, j, k, d_K, d = upowuu(p, d_pow), dp = d*p, found = 0;
   GEN pols, coset, vn_g, polnum, xpows, G_K;
-  long el1dp = (el-1)/dp, n_coset, n_g, gi;
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL)+1;
+  ulong el1dp = (el-1)/dp, n_coset, n_g, gi;
+  GEN e_chi = get_e_chi(K, j0, dp, &d_K);
   pari_timer ti;
 
   if (DEBUGLEVEL>1) err_printf("chk_el_real_factor: f=%ld el=%ld\n",f,el);
-  for (i=0; i<d_K; i++) e_chi[i]=umodiu(gel(TR, Fl_mul(i, j0, d_K)), dp);
   coset = get_coset(H, h, f, el);
   if (DEBUGLEVEL>1)
   {
@@ -2139,10 +2143,10 @@ chk_el_real_factor(GEN K, long p, long d_pow, long el, long j0)
 }
 
 static long
-chk_el_real_chi(GEN K, long p, long d_pow, long el, long j0, long flag)
+chk_el_real_chi(GEN K, ulong p, ulong d_pow, ulong el, ulong j0, long flag)
 {
   GEN H1data = gmael(K, 1, 2);
-  long f = H1data[2];
+  ulong f = H1data[2];
 
   if (el%f == 1)
     return chk_el_real_f(K, p, d_pow, el, j0); /* must be faster */
@@ -2157,16 +2161,15 @@ static long
 chk_ell_real(GEN K, long d2, GEN ell, long j0)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
-  long d_K = H1data[1], f = H1data[2], h = H1data[3], g_K = H1data[5];
-  long  i, j, gi;
+  GEN H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
+  ulong f = H1data[2], h = H1data[3], g_K = H1data[5];
+  ulong d_K, i, j, gi;
+  GEN e_chi = get_e_chi(K, j0, d2, &d_K);
   GEN g_ell, z_f, vz_f, xi_el = cgetg(d_K+1, t_VEC)+1;
-  GEN ell1d2=diviuexact(subiu(ell, 1), d2), ell1f=diviuexact(subiu(ell, 1), f);
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL)+1;
+  GEN ell_1 = subiu(ell,1), ell1d2 = diviuexact(ell_1, d2);
 
-  for (i=0; i<d_K; i++) e_chi[i]=umodiu(gel(TR, Fl_mul(i, j0, d_K)), d2);
   g_ell = pgener_Fp(ell);
-  z_f = Fp_pow(g_ell, ell1f, ell);
+  z_f = Fp_pow(g_ell, diviuexact(subiu(ell, 1), f), ell);
   vz_f = Fp_powers(z_f, f-1, ell)+1;
   for (gi=1, i=0; i<d_K; i++)
   {
@@ -2354,19 +2357,18 @@ static GEN
 D_xi_el_vell_FFT(GEN K, GEN elg, GEN vellg, ulong d, ulong j0, GEN vG_K)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1data = gmael(K, 1, 2);
-  ulong d_K = H1data[1], h = H1data[3], d_chi = gel(K, 6)[1];
+  GEN H1data = gmael(K, 1, 2);
+  ulong d_K, h = H1data[3], d_chi = gel(K, 6)[1];
   ulong el = elg[1], g_el = elg[2], el_1 = el-1;
   ulong i, j, i2, k, dwel;
   GEN u = cgetg(el+2, t_POL) , v = cgetg(h+3, t_POL);
   GEN w = cgetg(el+1, t_VEC), ww;
   GEN M, vz_el, G_K, z = const_vec(d_chi, gen_1);
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL)+1;
+  GEN e_chi = get_e_chi(K, j0, d, &d_K);
 
   vz_el = vz_el_vell(elg, vellg, &M);
   u[1] = evalsigne(1) | evalvarn(0);
   v[1] = evalsigne(1) | evalvarn(0);
-  for (i=0; i<d_K; i++) e_chi[i]=umodiu(gel(TR, Fl_mul(i, j0, d_K)), d);
 
   for (i=i2=0; i<el; i++)
   {
@@ -2427,18 +2429,18 @@ static GEN
 D_xi_el_vell(GEN K, GEN elg, GEN vellg, ulong d, ulong j0)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
-  ulong d_K = H1data[1], f = H1data[2], h = H1data[3], g_K = H1data[5];
+  GEN H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
+  ulong f = H1data[2], h = H1data[3], g_K = H1data[5];
   GEN z_f, z_el, vz_f, vz_el;
   ulong el = elg[1], g_el = elg[2], el_1 = el-1;
-  ulong i, j, k, lv = lg(vellg), d_chi = gel(K, 6)[1];
+  ulong i, j, k, d_K, lv = lg(vellg), d_chi = gel(K, 6)[1];
   GEN A, B, P, M, z = const_vec(d_chi, gen_1);
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL)+1;
+  GEN e_chi = get_e_chi(K, j0, d, &d_K);
 
   A=cgetg(lv, t_VEC);
   B=cgetg(lv, t_VEC);
   P=cgetg(lv, t_VEC);
-  for (i=1; i<lv; i++)
+  for (i = 1; i < lv; i++)
   {
     GEN ell = gmael(vellg, i, 1), g_ell = gmael(vellg, i, 2);
     GEN ell_1 = subiu(ell, 1);
@@ -2448,11 +2450,9 @@ D_xi_el_vell(GEN K, GEN elg, GEN vellg, ulong d, ulong j0)
   }
   z_f = ZV_chinese(A, P, &M);
   z_el = ZV_chinese(B, P, NULL);
-
-  for (i=0; i<d_K; i++) e_chi[i] = umodiu(gel(TR, Fl_mul(i, j0, d_K)), d);
   vz_f = Fp_powers(z_f, f-1, M);
   vz_el = Fp_powers(z_el, el-1, M);
-  for (k=0; k<d_K; k++)
+  for (k = 0; k < d_K; k++)
   {
     pari_sp av = avma;
     GEN x0 = gen_1;
@@ -2484,19 +2484,18 @@ static GEN
 D_xi_el_ZX_mul(GEN K, GEN elg, GEN ellg, GEN vG_K, ulong d, ulong j0)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1data = gmael(K, 1, 2);
-  ulong d_K = H1data[1], f = H1data[2], h = H1data[3], g_K = H1data[5];
+  GEN H1data = gmael(K, 1, 2);
+  ulong d_K, f = H1data[2], h = H1data[3], g_K = H1data[5];
   ulong el = elg[1], g_el = elg[2], el_1 = el-1, d_chi = gel(K, 6)[1];
   GEN ell = gel(ellg, 1), g_ell = gel(ellg, 2);
   GEN u = cgetg(el+2, t_POL) , v = cgetg(h+3, t_POL);
   GEN w = cgetg(el+1, t_VEC), ww;
   GEN z_el, vz_el, G_K, z = const_vec(d_chi, gen_1);
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL)+1;
+  GEN e_chi = get_e_chi(K, j0, d, &d_K);
   ulong i, j, i2, k, dwel;
 
   u[1] = evalsigne(1) | evalvarn(0);
   v[1] = evalsigne(1) | evalvarn(0);
-  for (i=0; i<d_K; i++) e_chi[i]=umodiu(gel(TR, Fl_mul(i, j0, d_K)), d);
   z_el = Fp_pow(g_ell, diviuexact(subiu(ell, 1), el), ell);
   vz_el = Fp_powers(z_el, el_1, ell)+1;
 
@@ -2561,19 +2560,18 @@ static GEN
 D_xi_el_Flx_mul(GEN K, GEN elg, GEN ellg, GEN vG_K, ulong d, ulong j0)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1data = gmael(K, 1, 2);
-  ulong d_K = H1data[1], f = H1data[2], h = H1data[3], g_K = H1data[5];
+  GEN H1data = gmael(K, 1, 2);
+  ulong d_K, f = H1data[2], h = H1data[3], g_K = H1data[5];
   ulong el = elg[1], g_el = elg[2], el_1 = el-1, d_chi = gel(K, 6)[1];
   ulong ell = itou(gel(ellg, 1)), g_ell = itou(gel(ellg, 2)), z_el;
   GEN u = cgetg(el+2, t_VECSMALL), v = cgetg(h+3, t_VECSMALL);
   GEN w = cgetg(el+1, t_VECSMALL), ww;
   GEN vz_el, G_K, z = const_vecsmall(d_chi, 1);
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL)+1;
+  GEN e_chi = get_e_chi(K, j0, d, &d_K);
   ulong i, j, i2, k, dwel;
 
   u[1] = evalvarn(0);
   v[1] = evalvarn(0);
-  for (i=0; i<d_K; i++) e_chi[i]=umodiu(gel(TR, Fl_mul(i, j0, d_K)), d);
   z_el = Fl_powu(g_ell, (ell - 1) / el, ell);
   vz_el = Fl_powers(z_el, el_1, ell)+1;
 
@@ -2637,15 +2635,14 @@ static GEN
 D_xi_el_ss(GEN K, GEN elg, GEN ellg, ulong d, ulong j0)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
-  ulong d_K = H1data[1], f = H1data[2], h = H1data[3], g_K = H1data[5];
+  GEN H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
+  ulong d_K, f = H1data[2], h = H1data[3], g_K = H1data[5];
   ulong el = elg[1], g_el = elg[2], el_1 = el-1;
   ulong ell = itou(gel(ellg, 1)), g_ell = itou(gel(ellg, 2));
   ulong i, j, k, gk, z_f, z_el, d_chi = gel(K, 6)[1];
   GEN vz_f, vz_el, z = const_vecsmall(d_chi, 1);
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL)+1;
+  GEN e_chi = get_e_chi(K, j0, d, &d_K);
 
-  for (i=0; i<d_K; i++) e_chi[i] = umodiu(gel(TR, Fl_mul(i, j0, d_K)), d);
   z_f = Fl_powu(g_ell, (ell - 1) / f, ell);
   z_el = Fl_powu(g_ell, (ell - 1) / el, ell);
   vz_f = Fl_powers(z_f, f-1, ell)+1;
@@ -2680,15 +2677,14 @@ static GEN
 D_xi_el_sl(GEN K, GEN elg, GEN ellg, ulong d, ulong j0)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
-  ulong d_K = H1data[1], f = H1data[2], h = H1data[3], g_K = H1data[5];
+  GEN H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
+  ulong d_K, f = H1data[2], h = H1data[3], g_K = H1data[5];
   ulong el = elg[1], g_el = elg[2], el_1 = el-1, d_chi = gel(K, 6)[1];
   GEN ell = gel(ellg, 1), g_ell = gel(ellg, 2), ell_1 = subiu(ell, 1);
   GEN z_f, z_el, vz_f, vz_el, z = const_vec(d_chi, gen_1);
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL)+1;
+  GEN e_chi = get_e_chi(K, j0, d, &d_K);
   ulong i, j, k, gk;
 
-  for (i=0; i<d_K; i++) e_chi[i] = umodiu(gel(TR, Fl_mul(i, j0, d_K)), d);
   z_f = Fp_pow(g_ell, diviuexact(ell_1, f), ell);
   z_el = Fp_pow(g_ell, diviuexact(ell_1, el), ell);
   vz_f = Fp_powers(z_f, f-1, ell) + 1;
@@ -2832,7 +2828,7 @@ use_factor(ulong f)
 { GEN fa = factoru(f), P = gel(fa, 1); return (P[lg(P)-1]<500); }
 
 static GEN
-cyc_real_MLL(GEN K, long p, long d_pow, long j0, long flag)
+cyc_real_MLL(GEN K, ulong p, long d_pow, long j0, long flag)
 {
   pari_sp av = avma;
   GEN H1 = gel(K, 1), H1data = gel(H1, 2);
@@ -2938,16 +2934,14 @@ verbose_output(GEN K, GEN p, long pow, long j)
 
 /* return vec[-1,[],0], vec[0,[],0], vec[1,[1],0], vec[2,[1,1],0] etc */
 static GEN
-cyc_real_ss(GEN K, GEN xi, long p, long j, long pow, long el,
-    ulong pn, long flag)
+cyc_real_ss(GEN K, GEN xi, ulong p, long j, long pow, long el, ulong pn, long flag)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1data = gmael(K, 1, 2);
-  long i, x = 1, d_chi = gel(K, 6)[1], d_K = H1data[1];
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL);
+  ulong i, d_K, x = 1, d_chi = gel(K, 6)[1];
+  GEN e_chi = get_e_chi(K, j, pn, &d_K);
 
-  for (i=0; i<d_K; i++) e_chi[1+i]=umodiu(gel(TR, Fl_mul(i, j, d_K)), pn);
-  for (i=1; i<=d_K; i++) x = Fl_mul(x, Fl_powu(xi[i], e_chi[i], el), el);
+  xi++;
+  for (i = 0; i < d_K; i++) x = Fl_mul(x, Fl_powu(xi[i], e_chi[i], el), el);
   x = Fl_powu(x, (el-1)/pn, el);
   set_avma(av);
   if (x==1) return mkvec3(gen_m1, nullvec(), gen_0); /* not determined */
@@ -2960,16 +2954,14 @@ cyc_real_ss(GEN K, GEN xi, long p, long j, long pow, long el,
 }
 
 static GEN
-cyc_real_ll(GEN K, GEN xi, GEN p, long j, long pow, GEN el,
-    GEN pn, long flag)
+cyc_real_ll(GEN K, GEN xi, GEN p, long j, long pow, GEN el, GEN pn, long flag)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1data = gmael(K, 1, 2);
-  long i, d_K = H1data[1], d_chi = gel(K, 6)[1];
-  GEN e_chi = cgetg(d_K+1, t_VEC), x = gen_1;
+  ulong i, d_K, d_chi = gel(K, 6)[1];
+  GEN e_chi = get_e_chi_ll(K, j, pn, &d_K), x = gen_1;
 
-  for (i=0; i<d_K; i++) gel(e_chi, 1+i) = modii(gel(TR, Fl_mul(i, j, d_K)), pn);
-  for (i=1; i<=d_K; i++)
+  xi++;
+  for (i = 0; i < d_K; i++)
     x = Fp_mul(x, Fp_pow(gel(xi, i), gel(e_chi, i), el), el);
   x = Fp_pow(x, diviiexact(subiu(el, 1), pn), el); /* x = x^(el-1)/pn mod el */
   x = gerepilecopy(av, x);
@@ -3026,15 +3018,14 @@ xi_conj_l(GEN K, GEN el)
 }
 
 static long
-cyc_real_pre(GEN K, GEN xi, long p, long j, long el)
+cyc_real_pre(GEN K, GEN xi, ulong p, ulong j, long el)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1data = gmael(K, 1, 2);
-  long i, x = 1, d_K = H1data[1];
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL);
+  ulong i, d_K, x = 1;
+  GEN e_chi = get_e_chi(K, j, p, &d_K);
 
-  for (i=0; i<d_K; i++) e_chi[1+i]=umodiu(gel(TR, Fl_mul(i, j, d_K)), p);
-  for (i=1; i<=d_K; i++) x = Fl_mul(x, Fl_powu(xi[i], e_chi[i], el), el);
+  xi++;
+  for (i = 0; i < d_K; i++) x = Fl_mul(x, Fl_powu(xi[i], e_chi[i], el), el);
   x = Fl_powu(x, (el-1)/p, el);
   return gc_long(av, (x==1)?0:1);
 }
@@ -3064,7 +3055,7 @@ pclgp_cyc_real(GEN K, GEN p, long max_pow, long flag)
         {
           for (i=1; i<=n_conj; i++)
           {
-            if (cyc_real_pre(K, xi, itou(p), C[i], uel)==0) continue;
+            if (cyc_real_pre(K, xi, p[2], C[i], uel)==0) continue;
             Done[i] = 1;
             if (++n_done == n_conj) return gr;
           }
@@ -3080,7 +3071,7 @@ pclgp_cyc_real(GEN K, GEN p, long max_pow, long flag)
         GEN z;
         if (Done[i]) continue;
         if (uel)
-          z = cyc_real_ss(K, xi, itou(p), C[i], pow, uel, itou(pn), flag);
+          z = cyc_real_ss(K, xi, p[2], C[i], pow, uel, itou(pn), flag);
         else
           z = cyc_real_ll(K, xi, p, C[i], pow, el, pn, flag);
         if (equalim1(gel(z, 1))) continue;
@@ -3307,13 +3298,12 @@ static GEN
 norm_chi(GEN K, GEN TAU, ulong p, long d_pow, GEN ell, long j0)
 {
   pari_sp av = avma;
-  GEN TR = gel(K, 4)+2, H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
-  long d_K = H1data[1], f_K = H1data[2], h = H1data[3], g_K = H1data[5];
-  long i, j, gi, pd = upowuu(p, d_pow), d_chi = gel(K, 6)[1];
+  GEN H1 = gel(K, 1), H1data = gel(H1, 2), H = gel(H1, 3);
+  ulong d_K, f_K = H1data[2], h = H1data[3], g_K = H1data[5];
+  ulong i, j, gi, pd = upowuu(p, d_pow), d_chi = gel(K, 6)[1];
   GEN z = const_vec(d_chi, gen_1);
-  GEN e_chi = cgetg(d_K+1, t_VECSMALL)+1;
+  GEN e_chi = get_e_chi(K, j0, pd, &d_K);
 
-  for (i=0; i<d_K; i++) e_chi[i]=umodiu(gel(TR, Fl_mul(i, j0, d_K)), pd);
   for (gi=1, i=0; i<d_K; i++)
   {
     GEN y = gen_1;
