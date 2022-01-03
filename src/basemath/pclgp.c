@@ -2762,7 +2762,6 @@ real_MLLn(long *y, GEN K, ulong p, ulong d_pow, ulong n,
   ulong row = lg(vellg)-1;
   for (i=1; i<=n; i++)
   {
-    pari_sp av2 = avma;
     GEN elg = gel(velg, i), z;
     ulong el = elg[1], lz;
     pari_timer ti;
@@ -2777,9 +2776,8 @@ real_MLLn(long *y, GEN K, ulong p, ulong d_pow, ulong n,
       for (j=1; j<=row; j++)
         y[(j-1)*row+(i-1)*lz+k-1] = get_y(gel(z, k), gel(vellg, j), d);
     }
-    set_avma(av2);
+    set_avma(av);
   }
-  set_avma(av);
 }
 
 static void
@@ -3396,7 +3394,6 @@ imag_MLL(long *y, GEN K, ulong p, long d_pow, long n, GEN velg, GEN vellg,
     GEN ellg = gel(vellg, j), ell = gel(ellg, 1);
     for (i=1; i<=n; i++)
     {
-      pari_sp av = avma;
       GEN elg = gel(velg, i), g, z;
       ulong k, lz;
       if (DEBUGLEVEL>1) err_printf("(f,el-1)=(%ld,%ld*%ld)\n",f,(elg[1]-1)/f,f);
@@ -3409,7 +3406,6 @@ imag_MLL(long *y, GEN K, ulong p, long d_pow, long n, GEN velg, GEN vellg,
       set_avma(av);
     }
   }
-  set_avma(av);
 }
 
 /* return an upper bound >= 0 if one was found, otherwise return -1.
