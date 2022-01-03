@@ -2822,15 +2822,26 @@ static long
 use_factor(ulong f)
 { GEN fa = factoru(f), P = gel(fa, 1); return (P[lg(P)-1]<500); }
 
+/* group structure, destroy gr */
+static GEN
+get_str(GEN gr)
+{
+  GEN z = gel(gr,2);
+  long i, j, l = lg(z);
+  for (i = j = 1; i < l; i++)
+    if (lgefint(gel(z, i)) > 2) gel(z,j++) = gel(z,i);
+  setlg(z, j); return z;
+}
+
 static GEN
 cyc_real_MLL(GEN K, ulong p, long d_pow, long j0, long flag)
 {
   pari_sp av = avma;
   GEN H1 = gel(K, 1), H1data = gel(H1, 2);
   ulong d_K = H1data[1], f = H1data[2], d_chi = gel(K, 6)[1];
-  ulong i, n, n0 = 1, f0, n_el = d_pow, d = upowuu(p, d_pow), rank = n_el*d_chi;
-  GEN velg = const_vec(n_el, NULL), vellg = NULL, z;
-  GEN str = nullvec(), oldgr = mkvec2(gen_0, NULL), newgr = mkvec2(gen_0, NULL);
+  ulong n, n0 = 1, f0, n_el = d_pow, d = upowuu(p, d_pow), rank = n_el*d_chi;
+  GEN velg = const_vec(n_el, NULL), vellg = NULL;
+  GEN oldgr = mkvec2(gen_0, NULL), newgr = mkvec2(gen_0, NULL);
   long *y0 = (long*)stack_calloc(sizeof(long)*rank*rank);
 
   if (DEBUGLEVEL>1)
@@ -2893,29 +2904,25 @@ cyc_real_MLL(GEN K, ulong p, long d_pow, long j0, long flag)
     { M = n+1; m = n; }
     gel(velg, M) = next_el_real(K, p, d_pow, gel(velg, m), j0, flag);
   }
-  z = gel(newgr, 2); n = lg(z)-1;
-  for (i=1; i<=n; i++) if (lgefint(gel(z, i))>2) str = vec_append(str, gel(z, i));
-  return gerepilecopy(av, mkvec3(utoi(d_pow*d_chi), str, gen_0));
+  return gerepilecopy(av, mkvec3(utoi(d_pow*d_chi), get_str(newgr), gen_0));
 }
 
 static GEN
 cyc_buch(GEN K, GEN p0, long d_pow, long flag)
 {
   GEN H1data = gmael(K, 1, 2), Kdata = gel(K, 6);
-  long f = H1data[2], d_chi = Kdata[1], i, rank;
-  GEN z, h, gr, D, str = nullvec();
+  long f = H1data[2], d_chi = Kdata[1], i, j, l, x;
+  GEN z, h, gr, D, str;
 
   D = flag?stoi(-f):stoi(f);
   z = Buchquad(D, 0.0, 0.0, 0);
   h = gel(z, 1);
   gr = gel(z, 2);
   if (Z_pval(h, p0) != d_pow) pari_err_BUG("subcyclopclgp [Buchquad]");
-  rank = lg(gr)-1;
-  for (i=1; i<=rank; i++)
-  {
-    long x;
-    if ((x = Z_pval(gel(gr, i), p0))) str = vec_append(str, utoi(x));
-  }
+  l = lg(gr); str = cgetg(l, t_VEC);
+  for (i = j = 1; i < l; i++)
+    if ((x = Z_pval(gel(gr, i), p0))) gel(str, j++) = utoipos(x);
+  setlg(str, j);
   return mkvec3(utoi(d_pow*d_chi), str, flag?gen_1:gen_0);
 }
 
@@ -3383,9 +3390,9 @@ cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
   pari_sp av = avma;
   GEN H1data = gmael(K, 1, 2);
   long f = H1data[2], d_chi = gel(K, 6)[1];
-  long i, n, n0 = 1, n_el = d_pow, d = upowuu(p, d_pow), rank = n_el*d_chi;
-  GEN df0, velg = const_vec(n_el, NULL), vellg = NULL, z;
-  GEN str = nullvec(), oldgr = mkvec2(gen_0, NULL), newgr = mkvec2(gen_0, NULL);
+  long n, n0 = 1, n_el = d_pow, d = upowuu(p, d_pow), rank = n_el*d_chi;
+  GEN df0, velg = const_vec(n_el, NULL), vellg = NULL;
+  GEN oldgr = mkvec2(gen_0, NULL), newgr = mkvec2(gen_0, NULL);
   long *y0 = (long*)stack_calloc(sizeof(long)*rank*rank);
 
   if (DEBUGLEVEL>1)
@@ -3432,9 +3439,7 @@ cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
     { M = n+1; m = n; }
     gel(velg, M) = next_el_imag(gel(velg, m), f);
   }
-  z = gel(newgr, 2); n = lg(z)-1;
-  for (i=1; i<=n; i++) if (lgefint(gel(z, i))>2) str = vec_append(str, gel(z, i));
-  return gerepilecopy(av, mkvec3(utoi(d_pow*d_chi), str, gen_1));
+  return gerepilecopy(av, mkvec3(utoi(d_pow*d_chi), get_str(newgr), gen_1));
 }
 
 /* When |A_psi|=p^e, A_psi=(p^e1,...,p^er) (psi=chi^j),
