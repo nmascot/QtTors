@@ -1581,7 +1581,7 @@ srh_pol(GEN xpows, GEN vn, GEN pols, long el, long k, long f)
     for (j=0; j<=d; j++)
       z = Flx_add(z, Flx_Fl_mul(gel(xpows, 1+Fl_mul(j, k, f)), y[2+j], el), el);
     x = Flx_rem(z, pol, el);
-    if (lgpol(x)==0)
+    if (lg(x)==2)
     {vn[i] = 0; return gc_long(av, i); }  /* pols[i] is min pol of zeta_f^k */
   }
   pari_err_BUG("subcyclopclgp [minimal polinomial]");
@@ -3708,7 +3708,7 @@ ber_norm_by_cyc(GEN x0, long d, GEN MinPol)
   if (DEBUGLEVEL>1) timer_printf(&ti, "ber_norm_by_cyc [ber_norm_cyc]");
   x = ZX_rem(x, MinPol);  /* slow, why ? */
   if (DEBUGLEVEL>1) timer_printf(&ti, "ber_norm_by_cyc [ZX_rem]");
-  if (lgpol(x)!=1) pari_err_BUG("subcyclohminus [norm of Bernoulli number]");
+  if (lg(x)!=3) pari_err_BUG("subcyclohminus [norm of Bernoulli number]");
   return gerepilecopy(av, gel(x, 2));
 }
 
