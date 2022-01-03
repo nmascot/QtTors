@@ -3126,7 +3126,7 @@ gauss_Flx_mul(ulong f, GEN elg, GEN ellg)
 {
   pari_sp av = avma;
   ulong el = elg[1], g_el= elg[2];
-  ulong el_1 = el-1, f1 = f-1, f2 = f<<1, lv = el_1, lu = f, m = el_1/f;
+  ulong el_1 = el-1, f2 = f<<1, lv = el_1, lu = f, m = el_1/f;
   ulong ell = itou(gel(ellg, 1)), g_ell = itou(gel(ellg, 2));
   ulong z_2f = Fl_powu(g_ell, (ell - 1) / f2, ell);
   ulong z_el = Fl_powu(g_ell, (ell - 1) / el, ell);
@@ -3151,24 +3151,22 @@ gauss_Flx_mul(ulong f, GEN elg, GEN ellg)
     gi = Fl_mul(gi, g_el, el);
     if ((i2+=i+i+1)>=f2) i2%=f2; /* i2-=f2 does not work */
   }
-  w0 = Flx_mul(u, v, ell);
+  w0 = Flx_mul(u, v, ell) + 1;
   if (m==1)
-  {
-    for (i=1; i<el_1; i++) W[i] = Fl_add(w0[1+i], w0[1+i+lv], ell);
-    W[el_1] = w0[1+el_1];  /* el_1=1+f1 */
+  { /* el_1=f */
+    for (i=1; i<f; i++) W[i] = Fl_add(w0[i], w0[i+lv], ell);
+    W[f] = w0[f];
   }
   else
   {
     ulong start = 1+f, end = f+el-1;
     GEN w = cgetg(end+1, t_VECSMALL);
-    for (i=1; i<end; i++) w[i] = w0[1+i];
+    for (i=1; i<end; i++) w[i] = w0[i];
     w[end] = 0;
     for (i=1; i<m; i++, start+=f)
-    {
-      w = (f & i & 1)?Flv_shift_sub(w, w0+1, ell, start, end)
-        :Flv_shift_add(w, w0+1, ell, start, end);
-    }
-    for (i=0; i<=f1; i++) W[1+i] = Fl_add(w[1+i], w[1+i+lv], ell);
+      w = both_odd(f,i)? Flv_shift_sub(w, w0, ell, start, end)
+                       : Flv_shift_add(w, w0, ell, start, end);
+    for (i=0; i<f; i++) W[1+i] = Fl_add(w[1+i], w[1+i+lv], ell);
   }
   for (i=i2=1; i<f; i++)
   {
@@ -3182,9 +3180,9 @@ gauss_Flx_mul(ulong f, GEN elg, GEN ellg)
 static GEN
 gauss_ZX_mul(ulong f, GEN elg, GEN ellg)
 {
-  pari_sp av = avma, btop;
+  pari_sp av = avma, av2;
   ulong el = elg[1], g_el = elg[2], el_1 = el-1;
-  ulong f2 = f<<1, f1 = f-1, lv=el_1, lu=f, m=el_1/f;
+  ulong f2 = f<<1, lv=el_1, lu=f, m=el_1/f;
   GEN ell = gel(ellg, 1), g_ell = gel(ellg, 2), ell_1 = subiu(ell, 1);
   GEN z_2f = Fp_pow(g_ell, diviuexact(ell_1, f2), ell);
   GEN z_el = Fp_pow(g_ell, diviuexact(ell_1, el), ell);
@@ -3209,31 +3207,30 @@ gauss_ZX_mul(ulong f, GEN elg, GEN ellg)
     gi = Fl_mul(gi, g_el, el);
     if ((i2+=i+i+1)>=f2) i2%=f2;
   }
-  w0 = FpX_mul(u, v, ell);
-  btop = avma;
+  w0 = FpX_mul(u, v, ell) + 1; av2 = avma;
   if (m==1)
   {
-    for (i=1; i<el_1; i++) gel(W, i) = Fp_add(gel(w0, 1+i), gel(w0, 1+i+lv), ell);
-    gel(W, el_1) = gel(w0, 1+el_1);
+    for (i=1; i < f; i++) gel(W,i) = Fp_add(gel(w0, i), gel(w0, i+lv), ell);
+    gel(W, f) = gel(w0, f);
   }
   else
   {
     ulong start = 1+f, end = f+el-1;
     GEN w = cgetg(end+1, t_VEC);
-    for (i=1; i<end; i++) gel(w, i) = gel(w0, 1+i);
+    for (i=1; i<end; i++) gel(w, i) = gel(w0, i);
     gel(w, end) = gen_0;
     for (i=1; i<m; i++, start+=f)
     {
-      w = (f & i & 1)?FpV_shift_sub(w, w0+1, ell, start, end)
-        :FpV_shift_add(w, w0+1, ell, start, end);
-      gerepileall(btop, 1, &w);
+      w = both_odd(f,i)? FpV_shift_sub(w, w0, ell, start, end)
+                       : FpV_shift_add(w, w0, ell, start, end);
+      if ((i & 7) == 0) w = gerepilecopy(av2, w);
     }
-    for (i=0; i<=f1; i++) gel(W, 1+i) = addii(gel(w, 1+i), gel(w, 1+i+lv));
+    for (i = 1; i <= f; i++) gel(W, i) = addii(gel(w, i), gel(w, i+lv));
   }
-  for (i=i2=1; i<f; i++)
+  for (i = i2 = 1; i < f; i++)
   {
-    gel(W, i)=Fp_mul(gel(W, 1+i), gel(vz_2f, 1+i2), ell);
-    if ((i2+=i+i+1)>=f2) i2%=f2;
+    gel(W, i) = Fp_mul(gel(W, 1+i), gel(vz_2f, 1+i2), ell);
+    if ((i2+=i+i+1) >= f2) i2 %= f2;
   }
   return gerepilecopy(av, W);  /* W[r]=tau_{LL}^{sigma_r}, 1<= r <= f-1 */
 }
@@ -3242,16 +3239,15 @@ gauss_ZX_mul(ulong f, GEN elg, GEN ellg)
 static GEN
 gauss_el_vell(ulong f, GEN elg, GEN vellg, GEN vz_2f)
 {
-  pari_sp av = avma, btop;
+  pari_sp av = avma, av2;
   ulong el = elg[1], g_el = elg[2], el_1 = el-1;
-  ulong lv=el_1, f2=f<<1, lu=f, m=el_1/f, f1=f-1;
-  GEN W = cgetg(f+1, t_VEC), vz_el;
-  GEN u = cgetg(lu+2, t_POL), v = cgetg(lv+2, t_POL), w0, M;
+  ulong lv=el_1, f2=f<<1, lu=f, m=el_1/f;
+  GEN W = cgetg(f+1, t_VEC), vz_el, u, v, w0, M;
   ulong i, i2, gi;
 
   vz_el = vz_el_vell(elg, vellg, &M);
-  u[1] = evalsigne(1) | evalvarn(0);
-  v[1] = evalsigne(1) | evalvarn(0);
+  u = cgetg(lu+2, t_POL); u[1] = evalsigne(1) | evalvarn(0);
+  v = cgetg(lv+2, t_POL); v[1] = evalsigne(1) | evalvarn(0);
   for (i=i2=0; i<lu; i++)
   {
     long j2; /* i2=(i*i)%f2, gi=g_el^i */
@@ -3265,31 +3261,30 @@ gauss_el_vell(ulong f, GEN elg, GEN vellg, GEN vz_2f)
     gi = Fl_mul(gi, g_el, el);
     if ((i2+=i+i+1)>=f2) i2%=f2;
   }
-  w0 = FpX_mul(u, v, M);
-  btop = avma;
+  w0 = FpX_mul(u, v, M) + 1; av2 = avma;
   if (m==1)
-  {
-    for (i=1; i<el_1; i++) gel(W, i) = Fp_add(gel(w0, 1+i), gel(w0, 1+i+lv), M);
-    gel(W, el_1) = gel(w0, 1+el_1);  /* el_1=1+f1 */
+  { /* el_1=f */
+    for (i=1; i < f; i++) gel(W,i) = Fp_add(gel(w0, i), gel(w0, i+lv), M);
+    gel(W, f) = gel(w0, f);
   }
   else
   {
     ulong start = 1+f, end = f+el-1;
     GEN w = cgetg(end+1, t_VEC);
-    for (i=1; i<end; i++) gel(w, i) = gel(w0, 1+i);
+    for (i=1; i<end; i++) gel(w, i) = gel(w0, i);
     gel(w, end) = gen_0;
     for (i=1; i<m; i++, start+=f)
     {
-      w = (f & i & 1)?FpV_shift_sub(w, w0+1, M, start, end)
-        :FpV_shift_add(w, w0+1, M, start, end);
-      gerepileall(btop, 1, &w);
+      w = both_odd(f,i)? FpV_shift_sub(w, w0, M, start, end)
+                       : FpV_shift_add(w, w0, M, start, end);
+      if ((i & 7) == 0) w = gerepilecopy(av2, w);
     }
-    for (i=0; i<=f1; i++) gel(W, 1+i) = Fp_add(gel(w, 1+i), gel(w, 1+i+lv), M);
+    for (i = 1; i <= f; i++) gel(W, i) = Fp_add(gel(w, i), gel(w, i+lv), M);
   }
-  for (i=i2=1; i<f; i++)
+  for (i = i2 = 1; i < f; i++)
   {
-    gel(W, i)=Fp_mul(gel(W, 1+i), gel(vz_2f, 1+i2), M);
-    if ((i2+=i+i+1)>=f2) i2%=f2;
+    gel(W, i) = Fp_mul(gel(W, 1+i), gel(vz_2f, 1+i2), M);
+    if ((i2+=i+i+1) >= f2) i2 %= f2;
   }
   return gerepilecopy(av, W);  /* W[r]=tau_{LL}^{sigma_r}, 1<= r <= f-1 */
 }
