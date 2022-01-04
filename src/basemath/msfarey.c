@@ -261,7 +261,10 @@ msfarey(GEN F, void *E, long (*in)(void *, GEN), GEN *pCM)
     r = gel(M,m)[a]; ig = SL2_inv_shallow(gel(C,r));
     gel(V2, j) = normalise(ZM_mul(gel(C,m), gel(V,a)));
     gel(gam2, j) = normalise(ZM_mul(ZM_mul(gel(C,m), gel(gam,a)), ig));
-    v2[1] = r; v2[2] = ast[a]; ast2[j] = perm[vecvecsmall_search(B, v2)];
+    v2[1] = r; v2[2] = ast[a]; k = vecvecsmall_search(B,v2);
+    if (k < 0)
+      pari_err(e_MISC, "msfarey: H is not a subgroup of PSL_2(Z)");
+    ast2[j] = perm[k];
   }
   F = rectify(V2, ast2, gam2);
   if (pCM) *pCM = mkvec2(C,M);
