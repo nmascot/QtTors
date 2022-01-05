@@ -19,7 +19,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /* written by Takashi Fukuda */
 
 #define onevec(x) const_vec(x,gen_1)
-#define cyc_mul(x, y, n) ZX_mod_Xnm1(ZX_mul(x, y), n)
 #define nullvec() cgetg(1, t_VEC)
 #define order_f_x(f, x) Fl_order(x%f, eulerphiu(f), f)
 
@@ -35,19 +34,33 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define USE_F           (1L<<9)
 
 static ulong
-K_get_dK(GEN K) { return umael3(K, 1, 2, 1); }
+_get_d(GEN H) { return umael(H, 2, 1);}
 static ulong
-K_get_f(GEN K) { return umael3(K, 1, 2, 2); }
+_get_f(GEN H) { return umael(H, 2, 2);}
 static ulong
-K_get_h(GEN K) { return umael3(K, 1, 2, 3); }
-static ulong
-K_get_s(GEN K) { return umael3(K, 1, 2, 4); }
-static ulong
-K_get_g(GEN K) { return umael3(K, 1, 2, 5); }
+_get_h(GEN H) { return umael(H, 2, 3);}
+static long
+_get_s(GEN H) { return umael(H, 2, 4);}
+static long
+_get_g(GEN H) { return umael(H, 2, 5);}
 static GEN
-K_get_H(GEN K) { return gmael(K, 1, 3); }
+_get_H(GEN H) { return gel(H, 3);}
+static ulong
+K_get_d(GEN K) { return _get_d(gel(K,1)); }
+static ulong
+K_get_f(GEN K) { return _get_f(gel(K,1)); }
+static ulong
+K_get_h(GEN K) { return _get_h(gel(K,1)); }
+static long
+K_get_s(GEN K) { return _get_s(gel(K,1)); }
+static ulong
+K_get_g(GEN K) { return _get_g(gel(K,1)); }
+static GEN
+K_get_H(GEN K) { return _get_H(gel(K,1)); }
 static ulong
 K_get_dchi(GEN K) { return gel(K,6)[1]; }
+static ulong
+K_get_nconj(GEN K) { return gel(K,6)[2]; }
 
 /* temporary dummy implementation of factcylo */
 static GEN
@@ -1158,8 +1171,8 @@ static GEN
 pol_chi_xi(GEN K, long p, long j, long n)
 {
   pari_sp av = avma;
-  GEN MinPol2 = gel(K, 6), xi = gel(K, 7);
-  long d = K_get_dK(K), f = K_get_f(K), d_chi = gel(K, 5)[1];
+  GEN MinPol2 = gel(K, 7), xi = gel(K, 8);
+  long d = K_get_d(K), f = K_get_f(K), d_chi = K_get_dchi(K);
   long wd, minpolpow = (f==p)?2*n+1:n, pm = upowuu(p, minpolpow);
   GEN ser, pol, xi_conj;
   pari_timer ti;
@@ -1202,8 +1215,8 @@ static long
 lam_chi_ber(GEN K, long p, long j)
 {
   pari_sp av = avma;
-  GEN B1, B2, Chi = gel(K, 2), MinPol2 = gel(K, 6), B_num = gel(K, 7);
-  long x, p2 = p*p, d = K_get_dK(K), f = K_get_f(K);
+  GEN B1, B2, Chi = gel(K, 2), MinPol2 = gel(K, 7), B_num = gel(K, 8);
+  long x, p2 = p*p, d = K_get_d(K), f = K_get_f(K);
 
   if (f == d+1 && p == f && j == 1) return 0;  /* Teichmuller */
 
@@ -1220,8 +1233,8 @@ static long
 lam_chi_xi(GEN K, long p, long j, long n)
 {
   pari_sp av = avma;
-  GEN xi_conj, z, MinPol2 = gel(K, 6), xi = gel(K, 7);
-  long d = K_get_dK(K), f = K_get_f(K), d_chi = gel(K, 5)[1];
+  GEN xi_conj, z, MinPol2 = gel(K, 7), xi = gel(K, 8);
+  long d = K_get_d(K), f = K_get_f(K), d_chi = K_get_dchi(K);
   long wd, minpolpow = (f==p)?n+2:1, pm = upowuu(p, minpolpow);
 
   /* xi is FlxX mod p^m, MinPol2 is Flx mod p^m, xi_conj is FlxqX. */
@@ -1243,13 +1256,13 @@ lam_chi_xi(GEN K, long p, long j, long n)
   return gc_long(av, wd<0 ? -1 : wd*d_chi);
 }
 
-/* K = [H1, Chi, Minpol, C, [d_chi, n_conj, minpow]] */
+/* K = [H1, Chi, Minpol, C, [d_chi, n_conj]] */
 static GEN
 imag_cyc_pol(GEN K, long p, long n)
 {
   pari_sp av = avma;
   GEN Chi = gel(K, 2), MinPol = gel(K, 3), C = gel(K, 4), MinPol2;
-  long d_K = K_get_dK(K), f = K_get_f(K), n_conj = gel(K, 5)[2];
+  long d_K = K_get_d(K), f = K_get_f(K), n_conj = K_get_nconj(K);
   long i, q0, pn1, minpolpow, pmodf = p%f, n_done = 0;
   GEN z = nullvec(), Gam, xi, Lam, K2;
 
@@ -1294,14 +1307,14 @@ imag_cyc_pol(GEN K, long p, long n)
  * psi=chi^j, j in C : repre. of inj. odd char.
  * psi(p)==1 <=> chi(p)^j==0 <=> j*Chi[p]=0 (mod d) <=> Chi[p]==0
  *
- * K = [H1, Chi, Minpol, C, [d_chi, n_conj, minpow]] */
+ * K = [H1, Chi, Minpol, C, [d_chi, n_conj]] */
 static long
 imag_cyc_lam(GEN K, long p)
 {
   pari_sp av = avma;
   GEN Chi = gel(K, 2), MinPol = gel(K, 3), C = gel(K, 4), MinPol2;
-  long d_K = K_get_dK(K), f = K_get_f(K);
-  long n_conj = gel(K, 5)[2], minpow = gel(K, 5)[3];
+  long d_K = K_get_d(K), f = K_get_f(K);
+  long n_conj = K_get_nconj(K), minpow = 2;
   long i, q0, pn1, n, minpolpow, pmodf = p%f, lam = 0, n_done = 0;
   GEN p0 = utoi(p), Gam, Lam, xi, K2;
 
@@ -1388,8 +1401,8 @@ GHinit(long f, GEN HH, GEN *pcycGH)
 static GEN
 get_chi(GEN H1)
 {
-  GEN H = gel(H1, 3), H1data = gel(H1, 2);
-  long i, j, gi, d = H1data[1], f = H1data[2], h = H1data[3], g = H1data[5];
+  GEN H = _get_H(H1);
+  long i, j, gi, d = _get_d(H1), f = _get_f(H1), h = _get_h(H1), g = _get_g(H1);
   GEN Chi = const_vecsmall(f-1, -1);
 
   for (j=1; j<=h; j++) Chi[H[j]] = 0; /* i = 0 */
@@ -1419,8 +1432,8 @@ abeliwasawa(long p, long f, GEN HH, long degF, long n)
   vData = const_vec(degF, NULL);
   for (i=1; i<=n_f; i++) /* prescan. set Teichmuller */
   {
-    GEN H1 = gel(vH1,i), H1data = gel(H1, 2);
-    long d_K = H1data[1], f_K = H1data[2], g_K = H1data[5];
+    GEN H1 = gel(vH1,i);
+    long d_K = _get_d(H1), f_K = _get_f(H1), g_K = _get_g(H1);
 
     if (f_K == d_K+1 && p == f_K)  /* found K=Q(zeta_p) */
     {
@@ -1428,21 +1441,20 @@ abeliwasawa(long p, long f, GEN HH, long degF, long n)
       GEN C = set_C(p, d_K, d_chi, n_conj);
       long minpow = n? 2*n+1: 2;
       GEN MinPol = set_minpol_teich(g_K, p0, minpow);
-      gel(vData, d_K) = mkvec3(MinPol, C, mkvecsmall3(d_chi, n_conj, minpow));
+      gel(vData, d_K) = mkvec4(MinPol, C, NULL, mkvecsmall2(d_chi, n_conj));
       break;
     }
   }
 
   for (i=1; i<=n_f; i++)
   {
-    GEN H1 = gel(vH1,i), H1data = gel(H1, 2), z1;
-    long d_K = H1data[1], s = H1data[4];
-    GEN Chi, K;
+    GEN H1 = gel(vH1,i), z1, Chi, K;
+    long d_K = _get_d(H1), s = _get_s(H1);
 
     if (s) continue;  /* F is real */
 #ifdef DEBUG
     err_printf("  handling %s cyclic subfield K, deg(K)=%ld, cond(K)=%ld\n",
-        s? "a real": "an imaginary", d_K, H1data[2]);
+        s? "a real": "an imaginary", d_K, _get_f(H1));
 #endif
     if (!gel(vData, d_K))
     {
@@ -1450,7 +1462,7 @@ abeliwasawa(long p, long f, GEN HH, long degF, long n)
       GEN C = set_C(p, d_K, d_chi, n_conj);
       long minpow = n? n+1: 2;
       GEN MinPol = set_minpol(d_K, p0, minpow, n_conj);
-      gel(vData, d_K) = mkvec3(MinPol, C, mkvecsmall3(d_chi, n_conj, minpow));
+      gel(vData, d_K) = mkvec4(MinPol, C, NULL, mkvecsmall2(d_chi, n_conj));
     }
     Chi = get_chi(H1);
     K = shallowconcat(mkvec2(H1, Chi), gel(vData, d_K));
@@ -1599,7 +1611,7 @@ srh_pol(GEN xpows, GEN vn, GEN pols, long el, long k, long f)
 static GEN
 get_e_chi(GEN K, ulong j, ulong d, ulong *pdK)
 {
-  ulong i, dK = K_get_dK(K);
+  ulong i, dK = K_get_d(K);
   GEN TR = gel(K,4) + 2, e_chi = cgetg(dK+1, t_VECSMALL) + 1;
   if (j == 1)
     for (i = 0; i < dK; i++) e_chi[i] = umodiu(gel(TR, i), d);
@@ -1608,12 +1620,12 @@ get_e_chi(GEN K, ulong j, ulong d, ulong *pdK)
   *pdK = dK; return e_chi;
 }
 static GEN
-get_e_chi_ll(GEN K, ulong j, GEN d, ulong *pdK)
+get_e_chi_ll(GEN K, ulong j, GEN d)
 {
   ulong i, dK = umael3(K, 1, 2, 1);
   GEN TR = gel(K,4) + 2, e_chi = cgetg(dK+1, t_VEC) + 1;
   for (i = 0; i < dK; i++) gel(e_chi,i) = modii(gel(TR, Fl_mul(i, j, dK)), d);
-  *pdK = dK; return e_chi;
+  return e_chi;
 }
 
 /* el=1 (mod f) */
@@ -1671,7 +1683,7 @@ xi_approx(GEN K, long prec)
 {
   pari_sp av = avma;
   GEN H = K_get_H(K);
-  long d_K = K_get_dK(K), f = K_get_f(K), h = K_get_h(K), g_K = K_get_g(K);
+  long d_K = K_get_d(K), f = K_get_f(K), h = K_get_h(K), g_K = K_get_g(K);
   GEN xi = cgetg(d_K+1, t_COL), vz_f = grootsof1(f, prec);
   long i, j, g = 1, h2 = h>>1;
   for (i=1; i<=d_K; i++)
@@ -1693,7 +1705,7 @@ theta_xi_el(GEN K, ulong el)
 {
   pari_sp av = avma;
   GEN H = K_get_H(K);
-  ulong d_K = K_get_dK(K), f = K_get_f(K), h = K_get_h(K), g_K = K_get_g(K);
+  ulong d_K = K_get_d(K), f = K_get_f(K), h = K_get_h(K), g_K = K_get_g(K);
   GEN theta = cgetg(d_K+1, t_VECSMALL), xi = cgetg(d_K+1, t_VECSMALL), vz_f;
   ulong i, j, g = 1, x, y, g_el, z_f;
 
@@ -1743,7 +1755,7 @@ static GEN
 Xi_el(GEN K, GEN tInvA, ulong el)
 {
   pari_sp av = avma;
-  ulong d_K = K_get_dK(K);
+  ulong d_K = K_get_d(K);
   GEN tx = theta_xi_el(K, el), Theta, Xi, X;
 
   if ((Theta = make_Theta(gel(tx, 1), d_K, el))==NULL) return NULL;
@@ -1756,7 +1768,7 @@ static GEN
 pol_xi_el(GEN K, ulong el)
 {
   pari_sp av = avma;
-  ulong d_K = K_get_dK(K), f = K_get_f(K), h = K_get_h(K), g_K = K_get_g(K);
+  ulong d_K = K_get_d(K), f = K_get_f(K), h = K_get_h(K), g_K = K_get_g(K);
   GEN H = K_get_H(K), xi = cgetg(d_K+1, t_VECSMALL), vz_f;
   ulong i, j, g = 1, y, g_el, z_f;
 
@@ -1783,7 +1795,7 @@ theta_xi_approx(GEN K, long prec)
 {
   pari_sp av = avma;
   GEN H = K_get_H(K);
-  long d_K = K_get_dK(K), f = K_get_f(K), h = K_get_h(K), g_K = K_get_g(K);
+  long d_K = K_get_d(K), f = K_get_f(K), h = K_get_h(K), g_K = K_get_g(K);
   GEN theta = cgetg(d_K+1, t_VEC), xi = cgetg(d_K+1, t_VEC);
   GEN vz_f = grootsof1(f, prec);
   long i, j, g = 1, h2 = h>>1;
@@ -1808,7 +1820,7 @@ static GEN
 bound_coeff_xi(GEN K, GEN tInvA)
 {
   pari_sp av = avma;
-  long d_K = K_get_dK(K), prec = MEDDEFAULTPREC, i;
+  long d_K = K_get_d(K), prec = MEDDEFAULTPREC, i;
   GEN tInvV, R = cgetg(d_K+1, t_MAT), theta_xi = theta_xi_approx(K, prec);
   GEN theta = gel(theta_xi, 1), xi = gel(theta_xi, 2), x1, x2, bound;
 
@@ -1958,7 +1970,7 @@ find_conj_el(GEN K, GEN pol, GEN Den)
 {
   pari_sp av = avma;
   GEN H = K_get_H(K);
-  ulong d_K = K_get_dK(K), f = K_get_f(K), h = K_get_h(K), g = K_get_g(K);
+  ulong d_K = K_get_d(K), f = K_get_f(K), h = K_get_h(K), g = K_get_g(K);
   ulong j, k, el, g_el, z_f, xi = 1, xi_g = 1;
   GEN T = NULL, vz_f;
 
@@ -2016,7 +2028,7 @@ xi_data_galois(GEN K)
 {
   pari_sp av = avma;
   GEN T, G, perms, perm, pol, pol2, Den;
-  ulong k, d_K = K_get_dK(K);
+  ulong k, d_K = K_get_d(K);
   pari_timer ti;
 
   if (DEBUGLEVEL>1) timer_start(&ti);
@@ -2280,7 +2292,7 @@ G_K_vell(GEN K, GEN vellg, ulong gk)
 static GEN
 make_G_K(GEN K, GEN vellg)
 {
-  ulong d_K = K_get_dK(K), f = K_get_f(K), g_K = K_get_g(K);
+  ulong d_K = K_get_d(K), f = K_get_f(K), g_K = K_get_g(K);
   GEN G_K = cgetg(d_K+1, t_VEC);
   ulong i, g = 1;
 
@@ -2832,7 +2844,7 @@ get_str(GEN gr)
 static GEN
 cyc_real_MLL(GEN K, ulong p, long d_pow, long j0, long flag)
 {
-  ulong d_K = K_get_dK(K), f = K_get_f(K), d_chi = K_get_dchi(K);
+  ulong d_K = K_get_d(K), f = K_get_f(K), d_chi = K_get_dchi(K);
   ulong n, n0 = 1, f0, n_el = d_pow, d = upowuu(p, d_pow), rank = n_el*d_chi;
   GEN velg = const_vec(n_el, NULL), vellg = NULL;
   GEN oldgr = mkvec2(gen_0, NULL), newgr = mkvec2(gen_0, NULL);
@@ -2918,7 +2930,7 @@ cyc_buch(long dK, GEN p, long d_pow)
 static void
 verbose_output(GEN K, GEN p, long pow, long j)
 {
-  long d = K_get_dK(K), f = K_get_f(K), s = K_get_s(K), d_chi = K_get_dchi(K);
+  long d = K_get_d(K), f = K_get_f(K), s = K_get_s(K), d_chi = K_get_dchi(K);
   err_printf("|A_K_psi|=%Ps^%ld, psi=chi^%ld, d_psi=%ld, %s,\n\
     [K:Q]=%ld, [f,H]=[%ld, %Ps]\n",
     p,pow*d_chi,j,d_chi,s?"real":"imaginary",d,f,zv_to_ZV(gmael3(K,1,1,1)));
@@ -2942,12 +2954,12 @@ cyc_real_ss(GEN K, GEN xi, ulong p, long j, long pow, long el, ulong pn, long fl
 {
   ulong d_chi = K_get_dchi(K);
   if (cyc_real_pre(K, xi, pn, j, el) == 1) return NULL; /* not determined */
-  if (--pow==0) return mkvec3(gen_0, onevec(0), gen_0); /* trivial */
+  if (--pow==0) return mkvec3(gen_0, nullvec(), gen_0); /* trivial */
   if (DEBUGLEVEL) verbose_output(K, utoi(p), pow, j);
   if (flag&USE_MLL)
   {
     pari_sp av = avma;
-    GEN gr = (K_get_dK(K) == 2)? cyc_buch(gmael(K,1,2)[2], utoi(p), pow)
+    GEN gr = (K_get_d(K) == 2)? cyc_buch(K_get_f(K), utoi(p), pow)
                                : cyc_real_MLL(K, p, pow, j, flag);
     return gerepilecopy(av, mkvec3(utoipos(d_chi * pow), gr, gen_0));
   }
@@ -2959,15 +2971,14 @@ static GEN
 cyc_real_ll(GEN K, GEN xi, GEN p, long j, long pow, GEN el, GEN pn, long flag)
 {
   pari_sp av = avma;
-  ulong i, d_K, d_chi = K_get_dchi(K);
-  GEN e_chi = get_e_chi_ll(K, j, pn, &d_K), x = gen_1;
+  ulong i, d_K = K_get_d(K), d_chi = K_get_dchi(K);
+  GEN e_chi = get_e_chi_ll(K, j, pn), x = gen_1;
 
   xi++;
   for (i = 0; i < d_K; i++)
     x = Fp_mul(x, Fp_pow(gel(xi, i), gel(e_chi, i), el), el);
   x = Fp_pow(x, diviiexact(subiu(el, 1), pn), el); /* x = x^(el-1)/pn mod el */
-  x = gerepileuptoint(av, x);
-  if (equali1(x)) return NULL; /* not determined */
+  set_avma(av); if (equali1(x)) return NULL; /* not determined */
   if (--pow==0) return mkvec3(gen_0, nullvec(), gen_0); /* trivial */
   if (DEBUGLEVEL) verbose_output(K, p, pow, j);
   if (flag&USE_MLL)
@@ -2982,7 +2993,7 @@ xi_conj_s(GEN K, ulong el)
 {
   pari_sp av = avma;
   GEN  H = K_get_H(K);
-  long d = K_get_dK(K), f = K_get_f(K), h = K_get_h(K), g = K_get_g(K);
+  long d = K_get_d(K), f = K_get_f(K), h = K_get_h(K), g = K_get_g(K);
   long i, gi = 1, z = Fl_powu(pgener_Fl(el), (el-1)/f, el);
   GEN vz = Fl_powers(z, f, el)+1, xi = cgetg(d+1, t_VECSMALL);
 
@@ -3002,7 +3013,7 @@ xi_conj_l(GEN K, GEN el)
 {
   pari_sp av = avma;
   GEN  H = K_get_H(K);
-  long d = K_get_dK(K), f = K_get_f(K), h = K_get_h(K), g = K_get_g(K);
+  long d = K_get_d(K), f = K_get_f(K), h = K_get_h(K), g = K_get_g(K);
   long i, gi = 1;
   GEN z = Fp_pow(pgener_Fp(el), diviuexact(subiu(el, 1), f), el);
   GEN vz = Fp_powers(z, f, el)+1, xi = cgetg(d+1, t_VEC);
@@ -3023,8 +3034,8 @@ static GEN
 pclgp_cyc_real(GEN K, GEN p, long max_pow, long flag)
 {
   const long NUM_EL = 20;
-  GEN H1 = gel(K, 1), C = gel(K, 5);
-  long f_K = gel(H1, 2)[2], n_conj = gel(K, 6)[2];
+  GEN C = gel(K, 5);
+  long f_K = K_get_f(K), n_conj = K_get_nconj(K);
   long i, pow, n_el, n_done = 0;
   GEN gr = nullvec(), Done = const_vecsmall(n_conj, 0), xi;
   long first = 1;
@@ -3374,7 +3385,7 @@ cyc_imag_MLL(GEN K, ulong p, long d_pow, long j, long flag)
 
   if (DEBUGLEVEL>1)
     err_printf("cyc_imag_MLL:p=%ld d_pow=%ld deg(K)=%ld cond(K)=%ld avma=%ld\n",
-        p, d_pow, K_get_dK(K), f, avma);
+        p, d_pow, K_get_d(K), f, avma);
   df0 = muluu(d, f%p?f:f/p);
   gel(velg, 1) = next_el_imag(mkvecsmall2(1, 1), f);
   if (flag&USE_FULL_EL)
@@ -3432,7 +3443,7 @@ cyc_imag(GEN K, GEN B, GEN p, long j, GEN powp, long flag)
 {
   pari_sp av = avma;
   GEN MinPol = gel(K, 3), Chi = gel(K, 2), B1, B2, gr;
-  long x, d_K = K_get_dK(K), f_K = K_get_f(K), d_chi = K_get_dchi(K);
+  long x, d_K = K_get_d(K), f_K = K_get_f(K), d_chi = K_get_dchi(K);
 
   if (f_K == d_K+1 && equaliu(p, f_K) && j == 1) /* Teichmuller */
     return mkvec3(gen_0, nullvec(), gen_1);
@@ -3447,9 +3458,9 @@ cyc_imag(GEN K, GEN B, GEN p, long j, GEN powp, long flag)
   set_avma(av);
   if (x<0) pari_err_BUG("subcyclopclgp [Bernoulli number]");
   if (DEBUGLEVEL && x) verbose_output(K, p, x, j);
-  if (x==0) return mkvec3(gen_0, onevec(0), gen_1); /* trivial */
-  else if (x==1) return mkvec3(utoi(d_chi), onevec(d_chi), gen_1);
-  else if ((flag&USE_MLL)==0) return mkvec3(utoi(x*d_chi), onevec(0), gen_1);
+  if (x==0) return mkvec3(gen_0, nullvec(), gen_1); /* trivial */
+  if (x==1) return mkvec3(utoi(d_chi), onevec(d_chi), gen_1);
+  if ((flag&USE_MLL)==0) return mkvec3(utoi(x*d_chi), nullvec(), gen_1);
   gr = d_K == 2? cyc_buch(-f_K, p, x): cyc_imag_MLL(K, itou(p), x, j, flag);
   return gerepilecopy(av, mkvec3(utoipos(d_chi * x), gr, gen_1));
 }
@@ -3460,7 +3471,7 @@ static GEN
 pclgp_cyc_imag(GEN K, GEN p, long start_pow, long max_pow, long flag)
 {
   GEN C = gel(K, 5), Chi = gel(K, 2);
-  long n_conj = gel(K, 6)[2], d_K = K_get_dK(K), f_K = K_get_f(K);
+  long n_conj = K_get_nconj(K), d_K = K_get_d(K), f_K = K_get_f(K);
   long i, pow, n_done = 0;
   GEN gr = nullvec(), Done = const_vecsmall(n_conj, 0);
   GEN B = zx_ber_num(Chi, f_K, d_K), B_num;
@@ -3527,7 +3538,7 @@ gather_part(GEN g, long sgn)
 static void
 handling(GEN K)
 {
-  long d_K = K_get_dK(K), f_K = K_get_f(K), s_K = K_get_s(K), g_K = K_get_g(K);
+  long d_K = K_get_d(K), f_K = K_get_f(K), s_K = K_get_s(K), g_K = K_get_g(K);
   long d_chi = K_get_dchi(K);
   err_printf("  handling %s cyclic subfield K,\
       deg(K)=%ld, cond(K)=%ld g_K=%ld d_chi=%ld H=%Ps\n",
@@ -3563,8 +3574,8 @@ pclgp(GEN p0, long f, GEN HH, long degF, long flag)
 
     for (i=1; i<=n_f; i++) /* prescan. set Teichmuller */
     {
-      GEN H1 = gel(vH1, i), H1data = gel(H1, 2);
-      long d_K = H1data[1], f_K = H1data[2], g_K = H1data[5];
+      GEN H1 = gel(vH1, i);
+      long d_K = _get_d(H1), f_K = _get_f(H1), g_K = _get_g(H1);
 
       if (f_K == d_K+1 && equaliu(p, f_K)) /* found K=Q(zeta_p) */
       {
@@ -3587,8 +3598,8 @@ pclgp(GEN p0, long f, GEN HH, long degF, long flag)
 
     for (i=1; i<=n_f; i++) /* handle all cyclic K */
     {
-      GEN H1 = gel(vH1, i), H1data = gel(H1, 2), K, z1, Chi;
-      long d_K = H1data[1], s_K = H1data[4];
+      GEN H1 = gel(vH1, i), K, z1, Chi;
+      long d_K = _get_d(H1), s_K = _get_s(H1);
       pari_sp av2;
 
       if ((flag&SKIP_PROPER) && degF != d_K) continue;
@@ -3691,10 +3702,9 @@ static long
 ber_norm_by_val(GEN K, GEN B, GEN p)
 {
   pari_sp av = avma;
-  GEN Kdata = gel(K, 5);
   GEN MinPol = gel(K, 2), C = gel(K, 4);
   GEN vfac = gel(K, 3), fac = gel(vfac, 1), cofac = gel(vfac, 2);
-  long d_chi = Kdata[1], n_conj = Kdata[2], d_K = K_get_dK(K);
+  long d_chi = K_get_dchi(K), n_conj = K_get_nconj(K), d_K = K_get_d(K);
   long i, r, n_done = 0, x = 0, dcofac = degpol(cofac);
   GEN pr, Done;
 
@@ -3825,7 +3835,7 @@ ber_cyc5(GEN K, GEN p)
 {
   pari_sp av = avma;
   GEN MinPol = gel(K, 2), H = K_get_H(K);
-  long d = K_get_dK(K), f = K_get_f(K), h = K_get_h(K), g = K_get_g(K);
+  long d = K_get_d(K), f = K_get_f(K), h = K_get_h(K), g = K_get_g(K);
   GEN x, x1, x2, y, B = const_vecsmall(d+1, 0);
   long i, j, gi, e, f2 = f>>1, dMinPol = degpol(MinPol), chi2 = -1, *B2 = B+2;
 
@@ -3911,13 +3921,13 @@ rel_class_num(long f, GEN HH, long degF, GEN p)
   vData = const_vec(degF, NULL);
   for (i=1; i<=n_f; i++)
   {
-    GEN H1 = gel(vH1, i), H1data = gel(H1, 2), K;
-    long d_K = H1data[1], s = H1data[4];
+    GEN H1 = gel(vH1, i), K;
+    long d_K = _get_d(H1), s = _get_s(H1);
 
     if (s) continue;  /* F is real */
 #ifdef DEBUG
     err_printf("  handling %s cyclic subfield K, deg(K)=%ld, cond(K)=%ld\n",
-        s? "a real": "an imaginary", d_K, H1data[2]);
+        s? "a real": "an imaginary", d_K, _get_f(H1));
 #endif
     if (!gel(vData, d_K))
     {
@@ -3940,8 +3950,8 @@ rel_class_num(long f, GEN HH, long degF, GEN p)
         fac = cofac = C = NULL;
         d_chi = n_conj = 0;
       }
-      gel(vData, d_K) = mkvec4(MinPol, mkvec2(fac, cofac), C,
-                               mkvecsmall2(d_chi, n_conj));
+      gel(vData, d_K) = mkvec5(MinPol, mkvec2(fac, cofac), C,
+                               NULL, mkvecsmall2(d_chi, n_conj));
     }
     K = vec_prepend(gel(vData, d_K), H1);
     z = ber_cyc5(K, p);
