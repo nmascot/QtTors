@@ -738,11 +738,13 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
   if (isbin((const char**)lex))
   {
     while (**lex=='0' || **lex=='1') ++*lex;
+    yylloc->end = *lex;
     return KINTEGER;
   }
   if (ishex((const char**)lex))
   {
     while (isxdigit((int)**lex)) ++*lex;
+    yylloc->end = *lex;
     return KINTEGER;
   }
   if (isdigit((int)**lex))
