@@ -306,8 +306,8 @@ expanded around $0$, and incidentally this explains why we weren't able to do
 anything with \kbd{log(x)} which is not defined at $0$. (In fact \kbd{gp}
 knows about Laurent series, but \kbd{log(x)} is not meromorphic either at
 $0$.) If we try \kbd{log(1+x)}, then it works, but this time we \emph{lose}
-one significant term: the result is $x - 1/2*x^2 + \dots + 1/15*x^15 +
-O(x^16))$. (Do you understand why ?)
+one significant term: the result is $x - 1/2\*x^2 + \dots + 1/15\*x^{15} +
+O(x^{16}))$. (Do you understand why ?)
 
 But what if we wanted the expansion around a point different from 0? Well,
 you're able to change $x$ into $x+a$, aren't you? So for instance you can
