@@ -3665,45 +3665,42 @@ reduce_gcd(GEN x1, GEN x2)
   return mkvec2(x1, x2);
 }
 
-/*
- *  norm of x0 (= pol of zeta_d with deg <= d-1) by g of order n
- *  x0^{1+g+g^2+...+g^(n-1)}
- */
+/* norm of x0 (= pol of zeta_d with deg <= d-1) by g of order n
+ * x0^{1+g+g^2+...+g^(n-1)} */
 static GEN
 ber_norm_cyc(GEN x0, long g, long n, long d)
 {
   pari_sp av = avma;
-  long i, l, ei, gei, di, fi=0;
+  long i, ei, di, fi = 0, l = ulogint(n, 2);
   GEN xi = x0;
-  l = ulogint(n, 2); ei = (1L<<l); di = n/ei;
-  for (i=1; i<=l; i++)
+  ei = 1L << l; di = n / ei;
+  for (i = 1; i <= l; i++)
   {
-    fi += (di&1)*ei;
-    ei = 1L<<(l-i); gei = Fl_powu(g, ei, d); di=n/ei;
-    xi = cyc_mul(xi, ber_conj(xi, gei, d), d);
-    if (di&1) xi = cyc_mul(xi, ber_conj(x0, Fl_powu(g, fi, d), d), d);
+    if (odd(di)) fi += ei;
+    ei = 1L << (l-i); di = n / ei;
+    xi = ZX_mod_Xnm1(ZX_mul(xi, ber_conj(xi, Fl_powu(g, ei, d), d)), d);
+    if (odd(di))
+      xi = ZX_mod_Xnm1(ZX_mul(xi, ber_conj(x0, Fl_powu(g, fi, d), d)), d);
   }
   return gerepilecopy(av, xi);
 }
 
-/* x0 is ZX of deg <= d-1 */
+/* x0 a ZX of deg < d */
 static GEN
 ber_norm_by_cyc(GEN x0, long d, GEN MinPol)
 {
   pari_sp av=avma;
+  GEN x = x0, z = znstar(utoi(d)), cyc = gel(z, 2), gen = gel(z, 3);
+  long i, l = lg(cyc);
   pari_timer ti;
-  long i, r;
-  GEN x=x0,  z, gen, gr;
-  z = znstar0(utoi(d),0);
-  gr = gel(z, 2); gen = gel(z, 3); r = lg(gr)-1;
-  /* pari_printf("d=%ld r=%ld gen=%Ps gr=%Ps\n", d, r, gen, gr); */
+
   if (DEBUGLEVEL>1) timer_start(&ti);
-  for (i=1; i<=r; i++)
-    x = ber_norm_cyc(x, itou(gmael(gen, i, 2)), itou(gel(gr, i)), d);
+  for (i = 1; i < l; i++)
+    x = ber_norm_cyc(x, itou(gmael(gen, i, 2)), itou(gel(cyc, i)), d);
   if (DEBUGLEVEL>1) timer_printf(&ti, "ber_norm_by_cyc [ber_norm_cyc]");
-  x = ZX_rem(x, MinPol);  /* slow, why ? */
+  x = ZX_rem(x, MinPol);  /* slow */
   if (DEBUGLEVEL>1) timer_printf(&ti, "ber_norm_by_cyc [ZX_rem]");
-  if (lg(x)!=3) pari_err_BUG("subcyclohminus [norm of Bernoulli number]");
+  if (lg(x) != 3) pari_err_BUG("subcyclohminus [norm of Bernoulli number]");
   return gerepilecopy(av, gel(x, 2));
 }
 
