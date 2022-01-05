@@ -31,7 +31,7 @@ Doc:
                                c == 0 && (a == 1 || a == N-1));
  \\ Gamma_1(N) via Gamma_0(N): much faster
  G1(N) = msfarey(G0(N), g -> my(a=g[1,1]%N); a==1 || a==N-1);
- @eprog\noindent Note that the simpler criterion \kbd{g[1,1]%N == 1} would not
+ @eprog\noindent Note that the simpler criterion \kbd{g[1,1]\%N == 1} would not
  be correct since it must apply to elements of $\text{PSL}_2(\Z)$ hence be
  invariant under $g \mapsto -g$. Here are other examples:
  \bprog
