@@ -1302,7 +1302,7 @@ imag_cyc_lam(GEN K, long p)
   pari_sp av = avma;
   GEN Chi = gel(K, 2), MinPol = gel(K, 3), C = gel(K, 4), MinPol2;
   long d_K = K_get_d(K), f = K_get_f(K), n_conj = K_get_nconj(K);
-  long i, q0, n, pmodf = p%f, lam = 0, n_done = 0;
+  long i, q0, n, pmodf = p%f, n_done = 0;
   ulong pn1, pM;
   GEN p0 = utoi(p), Gam, Lam, xi, K2;
 
@@ -1314,24 +1314,22 @@ imag_cyc_lam(GEN K, long p)
     K2 = shallowconcat(K, mkvec2(MinPol2, zx_ber_num(Chi, f, d_K)));
     for (i=1; i<=n_conj; i++)
       if ((Lam[i] = lam_chi_ber(K2, p, C[i])) == 0) n_done++;
-    if (n_conj==n_done) return gc_long(av, lam);  /* all chi-parts trivial */
+    if (n_conj==n_done) return gc_long(av, 0);  /* all chi-parts trivial */
   }
   pM = pn1 = p;
   for (n=1; n>=0; n++)  /* 2nd trial is Stickelberger element */
   {
     pn1 *= p; /* p^(n+1) */
-    if (f != p) MinPol2 = ZX_to_Flx(MinPol, pM);
-    else /* do not use set_minpol: it returns a new pol for each call */
-    {
+    if (f == p)
+    { /* do not use set_minpol: it returns a new pol for each call */
       GEN fac, cofac, v, pol = polcyclo(d_K, 0);
-      long r = n+2;
-      pM = pn1 * p; /* p^r */
-      fac = FpX_red(MinPol, p0);
-      cofac = FpX_div(pol, fac, p0);
-      v = ZpX_liftfact(pol, mkvec2(fac, cofac), utoipos(pM), p0, r);
-      MinPol2 = ZX_to_Flx(gel(v, 1), pM);
+      pM = pn1 * p; /* p^(n+2) */
+      fac = FpX_red(MinPol, p0); cofac = FpX_div(pol, fac, p0);
+      v = ZpX_liftfact(pol, mkvec2(fac, cofac), utoipos(pM), p0, n+2);
+      MinPol2 = gel(v, 1);
     }
     Gam = set_gam((1+q0)%pn1, p, n);
+    MinPol2 = ZX_to_Flx(MinPol, pM);
     xi = (f==p)? get_xi_2(Chi, Gam, p, f, n, d_K, pM)
                : get_xi_1(Chi, Gam, p, f, n, d_K, pM);
     K2 = shallowconcat(K, mkvec2(MinPol2, xi));
@@ -1339,8 +1337,7 @@ imag_cyc_lam(GEN K, long p)
       if (Lam[i]<0 && (Lam[i] = lam_chi_xi(K2, p, C[i], n)) >= 0) n_done++;
     if (n_conj==n_done) break;
   }
-  for (i=1; i<=n_conj; i++) lam+=Lam[i];
-  return gc_long(av, lam);
+  return gc_long(av, zv_sum(Lam));
 }
 static GEN
 GHinit(long f, GEN HH, GEN *pcycGH)
@@ -2321,37 +2318,18 @@ G_K_l(GEN K, GEN ellg, ulong gk)
 }
 
 static GEN
-vz_el_vell(GEN elg, GEN vellg, GEN *pM)
+vz_vell(long d, GEN vellg, GEN *pM)
 {
-  long i, el = elg[1], lv = lg(vellg);
-  GEN A = cgetg(lv, t_VEC), P = cgetg(lv, t_VEC), M, z_el, vz_el;
+  long i, l = lg(vellg);
+  GEN A = cgetg(l, t_VEC), P = cgetg(l, t_VEC), z;
 
-  for (i=1; i<lv; i++)
+  for (i = 1; i < l; i++)
   {
     GEN ell = gmael(vellg, i, 1), g_ell = gmael(vellg, i, 2);
-    gel(A, i) = Fp_pow(g_ell, diviuexact(subiu(ell, 1), el), ell);
+    gel(A, i) = Fp_pow(g_ell, diviuexact(subiu(ell, 1), d), ell);
     gel(P, i) = ell;
   }
-  z_el = ZV_chinese(A, P, &M); *pM = M;
-  vz_el = Fp_powers(z_el, el-1, M);
-  return vz_el;
-}
-
-static GEN
-vz_2f_vell(long f, GEN vellg, GEN *pM)
-{
-  ulong i, f2 = f<<1, lv = lg(vellg);
-  GEN A = cgetg(lv, t_VEC), P = cgetg(lv, t_VEC), M, z_2f, vz_2f;
-
-  for (i=1; i<lv; i++)
-  {
-    GEN ell = gmael(vellg, i, 1), g_ell = gmael(vellg, i, 2);
-    gel(A, i) = Fp_pow(g_ell, diviuexact(subiu(ell, 1), f2), ell);
-    gel(P, i) = ell;
-  }
-  z_2f = ZV_chinese(A, P, &M); *pM = M;
-  vz_2f = Fp_powers(z_2f, f2-1, M);
-  return vz_2f;
+  z = ZV_chinese(A, P, pM); return Fp_powers(z, d-1, *pM);
 }
 
 static GEN
@@ -2366,7 +2344,7 @@ D_xi_el_vell_FFT(GEN K, GEN elg, GEN vellg, ulong d, ulong j0, GEN vG_K)
   GEN M, vz_el, G_K, z = const_vec(d_chi, gen_1);
   GEN e_chi = get_e_chi(K, j0, d, &d_K);
 
-  vz_el = vz_el_vell(elg, vellg, &M);
+  vz_el = vz_vell(el, vellg, &M);
   u[1] = evalsigne(1) | evalvarn(0);
   v[1] = evalsigne(1) | evalvarn(0);
 
@@ -3232,7 +3210,7 @@ gauss_el_vell(ulong f, GEN elg, GEN vellg, GEN vz_2f)
   GEN W = cgetg(f+1, t_VEC), vz_el, u, v, w0, M;
   ulong i, i2, gi;
 
-  vz_el = vz_el_vell(elg, vellg, &M);
+  vz_el = vz_vell(el, vellg, &M);
   u = cgetg(lu+2, t_POL); u[1] = evalsigne(1) | evalvarn(0);
   v = cgetg(lv+2, t_POL); v[1] = evalsigne(1) | evalvarn(0);
   for (i=i2=0; i<lu; i++)
@@ -3306,7 +3284,7 @@ imag_MLLn(long *y, GEN K, ulong p, long d_pow, long n,
     GEN velg, GEN vellg, long j0)
 {
   long f = K_get_f(K), d = upowuu(p, d_pow), row = lg(vellg)-1, i, j, k, nz;
-  GEN g, z, M, vz_2f = vz_2f_vell(f, vellg, &M);
+  GEN g, z, M, vz_2f = vz_vell(f << 1, vellg, &M);
   for (i=1; i<=n; i++)
   {
     pari_sp av = avma;
