@@ -168,12 +168,10 @@ set_gam2(long q01, long n)
   return gam;
 }
 
-/*
- * g_n(a)=g_n(b) <==> a^(p-1)=b^(p-1) mod p^(n+1) <==> a=xb x=<g^(p^n)>
+/* g_n(a)=g_n(b) <==> a^(p-1)=b^(p-1) mod p^(n+1) <==> a=xb x=<g^(p^n)>
  * g_n(a)=g_n(1+q0)^k <==> a=x(1+q0)^k x=<g^(p^n)>
  * gam[1+a]=k, k<0  ==> g_n(a)=0
- *             k>=0 ==> g_n(a)^(-1)=gamma^k, gamma=g_n(1+q0)
- */
+ *             k>=0 ==> g_n(a)^(-1)=gamma^k, gamma=g_n(1+q0) */
 static GEN
 set_gam(long q01, long p, long n)
 {
@@ -594,15 +592,6 @@ Flx_red_inplace(GEN x, ulong p)
   long i, l = lg(x);
   for (i=2; i<l; i++) x[i] = uel(x, i)%p;
   Flx_renormalize(x, l);
-}
-
-/* x is FlxX. coefficients of x[i] may be > pm */
-static GEN
-FlxX_xi_init(GEN x, ulong pm)
-{
-  long i, l = lg(x);
-  for (i=2; i<l; i++) Flx_red_inplace(gel(x, i), pm);
-  return FlxX_renormalize(x, l); ;
 }
 
 /* x[i], T[i] < pn */
@@ -1122,7 +1111,7 @@ Flv_extgcd(GEN c, ulong d)
 
 /* f!=p; return exact xi. */
 static GEN
-get_xi_1(GEN Chi, GEN Gam, long p, long f, long n, long d)
+get_xi_1(GEN Chi, GEN Gam, long p, long f, long n, long d, ulong pm)
 {
   GEN Gam1 = Gam+1, xi;
   long i, j, j0, f0, pn, pn1, deg, pn1f;
@@ -1143,13 +1132,13 @@ get_xi_1(GEN Chi, GEN Gam, long p, long f, long n, long d)
       xij0[deg] += i;
     }
   }
-  for (i=0; i<pn; i++) gel(xi, 2+i) = Flx_renormalize(gel(xi, 2+i), d+2);
+  for (i=0; i<pn; i++) Flx_red_inplace(gel(xi, 2+i), pm);
   return FlxX_renormalize(xi, pn+2);
 }
 
-/* f=p; return p^(n+1)*xi. */
+/* f=p; return p^(n+1)*xi mod pm. */
 static GEN
-get_xi_2(GEN Chi, GEN Gam, long p, long f, long n, long d)
+get_xi_2(GEN Chi, GEN Gam, long p, long f, long n, long d, ulong pm)
 {
   long a, amodf, i, j0, pn, pn1, deg;
   GEN Gam1 = Gam+1, xi;
@@ -1163,7 +1152,7 @@ get_xi_2(GEN Chi, GEN Gam, long p, long f, long n, long d)
     if ((j0=Gam1[a])<0 || amodf==0 || (deg=Chi[amodf])<0) continue;
     mael(xi, 2+j0, 2+deg) += a;
   }
-  for (i=0; i<pn; i++) gel(xi, 2+i) = Flx_renormalize(gel(xi, 2+i), d+2);
+  for (i=0; i<pn; i++) Flx_red_inplace(gel(xi, 2+i), pm);
   return FlxX_renormalize(xi, pn+2);
 }
 
@@ -1263,11 +1252,9 @@ imag_cyc_pol(GEN K, long p, long n)
   pari_sp av = avma;
   GEN Chi = gel(K, 2), MinPol = gel(K, 3), C = gel(K, 4), MinPol2;
   long d_K = K_get_d(K), f = K_get_f(K), n_conj = K_get_nconj(K);
-  long i, q0, pn1, minpolpow, pmodf = p%f, n_done = 0;
+  long i, q0, pn1, pM, pmodf = p%f, n_done = 0;
   GEN z = nullvec(), Gam, xi, Lam, K2;
 
-  q0 = (f%p)?f*p:f;
-  pn1 = upowuu(p, n+1);
   Lam = const_vecsmall(n_conj, -1);
   if (pmodf==0 || Chi[pmodf]) /* mark trivial chi-part using Bernoulli number */
   {
@@ -1277,12 +1264,13 @@ imag_cyc_pol(GEN K, long p, long n)
       if ((Lam[i] = lam_chi_ber(K2, p, C[i])) == 0) n_done++;
     if (n_conj==n_done) return gerepilecopy(av, z); /* all chi-parts trivial */
   }
+  q0 = (f%p)? f*p: f;
+  pn1 = upowuu(p, n+1);
   Gam = set_gam((1+q0)%pn1, p, n);
-  minpolpow = (f==p)? 2*n+1: n;
-  MinPol2 = ZX_to_Flx(MinPol, upowuu(p, minpolpow));
-  xi = (f==p)? get_xi_2(Chi, Gam, p, f, n, d_K)
-             : get_xi_1(Chi, Gam, p, f, n, d_K);
-  xi = FlxX_xi_init(xi, upowuu(p, minpolpow));
+  pM = upowuu(p, (f==p)? 2*n+1: n);
+  MinPol2 = ZX_to_Flx(MinPol, pM);
+  xi = (f==p)? get_xi_2(Chi, Gam, p, f, n, d_K, pM)
+             : get_xi_1(Chi, Gam, p, f, n, d_K, pM);
   K2 = shallowconcat(K, mkvec2(MinPol2, xi));
   for (i=1; i<=n_conj; i++)
   {
@@ -1313,9 +1301,9 @@ imag_cyc_lam(GEN K, long p)
 {
   pari_sp av = avma;
   GEN Chi = gel(K, 2), MinPol = gel(K, 3), C = gel(K, 4), MinPol2;
-  long d_K = K_get_d(K), f = K_get_f(K);
-  long n_conj = K_get_nconj(K), minpow = 2;
-  long i, q0, pn1, n, minpolpow, pmodf = p%f, lam = 0, n_done = 0;
+  long d_K = K_get_d(K), f = K_get_f(K), n_conj = K_get_nconj(K);
+  long i, q0, n, pmodf = p%f, lam = 0, n_done = 0;
+  ulong pn1, pM;
   GEN p0 = utoi(p), Gam, Lam, xi, K2;
 
   q0 = (f%p)? f*p: f;
@@ -1328,24 +1316,24 @@ imag_cyc_lam(GEN K, long p)
       if ((Lam[i] = lam_chi_ber(K2, p, C[i])) == 0) n_done++;
     if (n_conj==n_done) return gc_long(av, lam);  /* all chi-parts trivial */
   }
+  pM = pn1 = p;
   for (n=1; n>=0; n++)  /* 2nd trial is Stickelberger element */
   {
-    pn1 = upowuu(p, n+1);
-    minpolpow = (f==p)?n+2:1;   /* for xi_n */
-    if (minpolpow <= minpow) MinPol2 = ZX_to_Flx(MinPol, upowuu(p, minpolpow));
+    pn1 *= p; /* p^(n+1) */
+    if (f != p) MinPol2 = ZX_to_Flx(MinPol, pM);
     else /* do not use set_minpol: it returns a new pol for each call */
     {
       GEN fac, cofac, v, pol = polcyclo(d_K, 0);
-      long r = minpolpow;
+      long r = n+2;
+      pM = pn1 * p; /* p^r */
       fac = FpX_red(MinPol, p0);
       cofac = FpX_div(pol, fac, p0);
-      v = ZpX_liftfact(pol, mkvec2(fac, cofac), powiu(p0, r), p0, r);
-      MinPol2 = ZX_to_Flx(gel(v, 1), upowuu(p, r));
+      v = ZpX_liftfact(pol, mkvec2(fac, cofac), utoipos(pM), p0, r);
+      MinPol2 = ZX_to_Flx(gel(v, 1), pM);
     }
     Gam = set_gam((1+q0)%pn1, p, n);
-    xi = (f==p)? get_xi_2(Chi, Gam, p, f, n, d_K)
-               : get_xi_1(Chi, Gam, p, f, n, d_K);
-    xi = FlxX_xi_init(xi, upowuu(p, minpolpow));
+    xi = (f==p)? get_xi_2(Chi, Gam, p, f, n, d_K, pM)
+               : get_xi_1(Chi, Gam, p, f, n, d_K, pM);
     K2 = shallowconcat(K, mkvec2(MinPol2, xi));
     for (i=1; i<=n_conj; i++)
       if (Lam[i]<0 && (Lam[i] = lam_chi_xi(K2, p, C[i], n)) >= 0) n_done++;
