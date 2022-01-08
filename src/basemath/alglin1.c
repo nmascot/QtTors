@@ -2882,16 +2882,24 @@ ZlM_gauss_ratlift(GEN a, GEN b, ulong p, long e, GEN C)
 /* Dixon p-adic lifting algorithm.
  * Numer. Math. 40, 137-141 (1982), DOI: 10.1007/BF01459082 */
 GEN
-ZM_gauss(GEN a, GEN b0)
+ZM_gauss(GEN a, GEN b)
 {
   pari_sp av = avma, av2;
   int iscol;
   long n, ncol, i, m, elim;
   ulong p;
-  GEN C, delta, nb, nmin, res, b = b0;
+  GEN C, delta, nb, nmin, res;
   forprime_t S;
 
   if (!init_gauss(a, &b, &n, &ncol, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
+  if (n < ncol)
+  {
+    GEN y = ZM_indexrank(a), y1 = gel(y,1), y2 = gel(y,2);
+    if (lg(y2)-1 != n) return NULL;
+    a = rowpermute(a, y1);
+    b = rowpermute(b, y1);
+  }
+  /* a is square and invertible */
   nb = gen_0; ncol = lg(b);
   for (i = 1; i < ncol; i++)
   {

@@ -28,10 +28,9 @@ Doc: Let $M$ be a left-invertible matrix and $B$ a column vector
   ***                 ^------------------
   *** matsolve: impossible inverse in gauss: [1, 1; 1, 1].
  @eprog\noindent The function also works when $B$ is a matrix and we return
- the unique matrix solution $X$ provided it exists.
-
-Variant: For integral input, the function
- \fun{GEN}{ZM_gauss}{GEN M,GEN B} is also available.
+ the unique matrix solution $X$ provided it exists. Again, if there is no
+ solution, the function returns an $X$ such that $MX - B$ is nonzero
+ although it has at least $\#M$ zero rows.
 
 Function: _ZM_inv_worker
 C-Name: ZM_inv_worker
