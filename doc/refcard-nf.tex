@@ -224,11 +224,13 @@ $\var{bnr},H$ (congruence subgroup) or $\var{bnr},\chi$ (character on
 \li{canonical projection $\text{Cl}_F\to\text{Cl}_f$, $f\mid F$}{bnrmap}
 \li{Artin group of extension $K[Y]/(g)$}{rnfnormgroup$(\var{bnr},g)$}
 \li{subgroups of \var{bnr}, index $<=b$}{subgrouplist$(\var{bnr},b,\{\fl\})$}
+\li{compositum as \kbd{[bnr,H]}}
+   {bnrcompositum$(\kbd{[bnr1,H1]}, \kbd{[bnr2,H2]})$}
+\shortcopyrightnotice
+\newcolumn
 \li{class field defined by $H < \text{Cl}_f$}{bnrclassfield$(\var{bnr},H)$}
 \li{\dots low level equivalent, prime degree}{rnfkummer$(\var{bnr},H)$}
 \li{same, using Stark units (real field)}{bnrstark$(\var{bnr},sub,\{\fl\})$}
-\shortcopyrightnotice
-\newcolumn
 \li{is $a$ an $n$-th power in $K_v$ ?}{nfislocalpower$(\var{nf},v,a,n)$}
 \li{cyclic $L/K$ satisf. local conditions}
    {nfgrunwaldwang$(\var{nf},P,D,\var{pl})$}
@@ -293,18 +295,17 @@ where $G$ is \kbd{idealstar}$(f, 1)$, or a minimal polynomial.\hfil\break
 \li{project $t$ to $\ZZ_K/\var{pr}$}{nfmodpr$(\var{nf},t,\var{modpr})$}
 \li{lift from $\ZZ_K/\var{pr}$}{nfmodprlift$(\var{nf},t,\var{modpr})$}
 
-\section{Galois theory over $\QQ$}
-\li{conjugates of a root $\theta$ of \var{nf}}{nfgaloisconj$(\var{nf},\{\fl\})$}
-\li{apply Galois automorphism $s$ to $x$}{nfgaloisapply$(\var{nf},s,x)$}
-\li{Galois group of field $\QQ[x]/(f)$}{polgalois$(f)$}
-\li{resolvent field of $\QQ[x]/(f)$}{nfresolvent$(f)$}
-
 \newcolumn
 \title{\TITLE}
 \centerline{(PARI-GP version \PARIversion)}
 
 \medskip
 
+\section{Galois theory over $\QQ$}
+\li{conjugates of a root $\theta$ of \var{nf}}{nfgaloisconj$(\var{nf},\{\fl\})$}
+\li{apply Galois automorphism $s$ to $x$}{nfgaloisapply$(\var{nf},s,x)$}
+\li{Galois group of field $\QQ[x]/(f)$}{polgalois$(f)$}
+\li{resolvent field of $\QQ[x]/(f)$}{nfresolvent$(f)$}
 \li{initializes a Galois group structure $G$}{galoisinit$(\var{pol},\{den\})$}
 \li{\dots for the splitting field of \var{pol}}{galoissplittinginit$(\var{pol},\{d\})$}
 \li{character table of $G$}{galoischartable$(G)$}
@@ -438,13 +439,15 @@ $A$ is a general associative algebra given by a multiplication table \var{mt}
 \li{sum $lat1+lat2$ of the lattices}{alglatadd$(\var{al},\var{lat1},\var{lat2})$}
 \li{intersection $lat1\cap lat2$}{alglatinter$(\var{al},\var{lat1},\var{lat2})$}
 \li{test~$lat1\subset lat2$}{alglatsubset$(\var{al},\var{lat1},\var{lat2})$}
+
+\copyrightnotice
+\newcolumn
 \li{generalized index~$(lat2:lat1)$}{alglatindex$(\var{al},\var{lat1},\var{lat2})$}
 \li{$\{x\in al\mid x\cdot lat1\subset lat2\}$}{alglatlefttransporter$(\var{al},\var{lat1},\var{lat2})$}
 \li{$\{x\in al\mid lat1\cdot x\subset lat2\}$}{alglatrighttransporter$(\var{al},\var{lat1},\var{lat2})$}
 \li{test~$x\in lat$ (set~$c =$ coord. of~$x$)}{alglatcontains$(\var{al},\var{lat},x,\{\& c\})$}
 \li{element of~$lat$ with coordinates~$c$}{alglatelement$(\var{al},\var{lat},c)$}
 
-\copyrightnotice
 
 \subsec{Operations on elements}
 \li{$a+b$, $a-b$, $-a$}{algadd$(\var{al},a,b)${\rm, }algsub{\rm, }algneg}

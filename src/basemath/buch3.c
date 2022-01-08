@@ -2828,3 +2828,51 @@ bnrisgalois(GEN bnr, GEN M, GEN H)
   }
   return gc_long(av,1);
 }
+
+static GEN
+bnrlcmcond(GEN bnr1, GEN bnr2)
+{
+  GEN I1 = bnr_get_bid(bnr1), f1 = bid_get_fact(I1), a1 = bid_get_arch(I1);
+  GEN I2 = bnr_get_bid(bnr2), f2 = bid_get_fact(I2), a2 = bid_get_arch(I2);
+  GEN f, a;
+  long i, l;
+  if (!gidentical(bnr_get_nf(bnr1), bnr_get_nf(bnr2)))
+    pari_err_TYPE("bnrcompositum[different fields]", mkvec2(bnr1,bnr2));
+  f = merge_factor(f1, f2, (void*)&cmp_prime_ideal, &cmp_nodata);
+  a = cgetg_copy(a1, &l);
+  for (i = 1; i < l; i++)
+    gel(a,i) = (signe(gel(a1,i)) || signe(gel(a2,i)))? gen_1: gen_0;
+  return mkvec2(f, a);
+}
+/* H subgroup (of bnr.clgp) in HNF; lift to BNR */
+static GEN
+bnrliftsubgroup(GEN BNR, GEN bnr, GEN H)
+{
+  GEN E = gel(bnrsurjection(BNR, bnr), 1), K = kerint(shallowconcat(E, H));
+  return ZM_hnfmodid(rowslice(K, 1, lg(E)-1), bnr_get_cyc(BNR));
+}
+static GEN
+ZM_intersect(GEN A, GEN B)
+{
+  GEN K = kerint(shallowconcat(A, B));
+  return ZM_mul(A, rowslice(K, 1, lg(A)-1));
+}
+GEN
+bnrcompositum(GEN fH1, GEN fH2)
+{
+  pari_sp av = avma;
+  GEN bnr1, bnr2, bnr, H1, H2, H, n1, n2;
+  if (typ(fH1) != t_VEC || lg(fH2) != 3) pari_err_TYPE("bnrcompositum", fH1);
+  if (typ(fH2) != t_VEC || lg(fH2) != 3) pari_err_TYPE("bnrcompositum", fH2);
+  bnr1 = gel(fH1,1); if (!checkbnr_i(bnr1)) pari_err_TYPE("bnrcompositum",bnr1);
+  bnr2 = gel(fH2,1); if (!checkbnr_i(bnr2)) pari_err_TYPE("bnrcompositum",bnr2);
+  H1 = bnr_subgroup_check(bnr1, gel(fH1,2), &n1);
+  if (!H1) H1 = diagonal_shallow(bnr_get_cyc(bnr1));
+  H2 = bnr_subgroup_check(bnr2, gel(fH2,2), &n2);
+  if (!H2) H2 = diagonal_shallow(bnr_get_cyc(bnr2));
+  bnr = bnrinitmod(bnr_get_bnf(bnr1), bnrlcmcond(bnr1, bnr2), 0, lcmii(n1,n2));
+  H1 = bnrliftsubgroup(bnr, bnr1, H1);
+  H2 = bnrliftsubgroup(bnr, bnr2, H2);
+  H = ZM_intersect(H1, H2);
+  return gerepilecopy(av, mkvec2(bnr, ZM_hnfmodid(H, bnr_get_cyc(bnr))));
+}

@@ -2841,6 +2841,7 @@ GEN     bnrsurjection(GEN bnr1, GEN bnr2);
 GEN     bnfnarrow(GEN bnf);
 long    bnfcertify(GEN bnf);
 long    bnfcertify0(GEN bnf, long flag);
+GEN     bnrcompositum(GEN fH1, GEN fH2);
 GEN     decodemodule(GEN nf, GEN fa);
 GEN     discrayabslist(GEN bnf,GEN listes);
 GEN     discrayabslistarch(GEN bnf, GEN arch, ulong bound);

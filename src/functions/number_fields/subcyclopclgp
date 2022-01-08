@@ -177,13 +177,18 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
 
  Let $F = \Q(106)$ defined as above; namely, $F$ is the composite field
  of $\Q(\sqrt{2})$ and the subfield of $\Q(\zeta_{53^2})$ with degree 53.
+ This time we shall build the compositum using class field theory:
  \bprog
- ? subcyclopclgp([8*53^2, [16855, 1009]], 107)
+ ? Q = bnfinit(y);
+ ? bnr1 = bnrinit(Q, 8); H1 = Mat(2);
+ ? bnr2 = bnrinit(Q, [53^2, [1]]); H2 = Mat(53);
+ ? [bnr,H] = bnrcompositum([bnr1, H1], [bnr2, H2]);
+ ? subcyclopclgp([bnr,H], 107)
  time = 10 ms.
- %1 = [107, [1, [1]], [0, []], [106], 3, 105]
- ? subcyclopclgp([8*53^2, [16855, 1009]], 107, 1) \\ requires 2.5GB
+ %5 = [107, [1, [1]], [0, []], [106], 3, 105]
+ ? subcyclopclgp([bnr,H], 107, 1) \\ requires 2.5GB
  time = 20min, 45,602 ms.
- %2 = [107, [1, [1]], [0, []], [106], 3, 105]
+ %6 = [107, [1, [1]], [0, []], [106], 3, 105]
  @eprog\noindent Both results are identical (and they were expected to be),
  but only the second is rigorous. Flag bit 32 has a minor impact in this case
  (reduces timings by 20 s.)

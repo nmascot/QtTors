@@ -5,6 +5,10 @@ subcyclopclgp(23,3)
 subcyclopclgp(81,5)
 subcyclopclgp(132,[3,7,11],)
 subcyclopclgp([8*53^2,[16855,1009]],107)  /* 107 | h(106) */
+Q = bnfinit(y);
+bnr1 = bnrinit(Q, 8); H1 = Mat(2);
+bnr2 = bnrinit(Q, [53^2, [1]]); H2 = Mat(53);
+[bnr,H] = bnrcompositum([bnr1, H1], [bnr2, H2]); subcyclopclgp([bnr,H], 107)
 subcyclopclgp(521,3,1)
 subcyclopclgp(10220,[7,13,19,37],1)
 

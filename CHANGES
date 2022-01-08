@@ -187,7 +187,7 @@ BA  60- new GP function serdiffdep
 BA  62- new GP function lfuneuler
 TF  63- new GP functions znsubgroupgenerators, subcyclohminus,
         subcycloiwasawa, subcyclopclgp
-
+    64- new GP function bnrcompositum
 
   Changed
 HC   1- faster implementation of eulervec + cache result

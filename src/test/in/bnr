@@ -150,3 +150,10 @@ bnr = bnrinit(bnr,bnr.mod,1);
 bnrisprincipal(bnr,P,4)
 bnrisprincipal(bnr,P,1)
 bnrisprincipal(bnr,P,0)
+
+Q = bnfinit(y);
+bnr1 = bnrinit(Q, [7, [1]]);
+bnr2 = bnrinit(Q, [13, [1]]);
+H1 = Mat(2); H2 = Mat(2);
+[bnr,H] = bnrcompositum([bnr1, H1], [bnr2,H2]);
+bnrclassfield(bnr,H)
