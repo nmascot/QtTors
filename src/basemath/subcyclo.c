@@ -985,28 +985,15 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, GEN P,
   return f;
 }
 
-/* fd = factoru(odd part of d = d or d/4). Return eulerphi(d) */
-static ulong
-phi(long d, GEN fd)
-{
-  GEN P = gel(fd,1), E = gel(fd,2);
-  long i, l = lg(P);
-  ulong phi = 1;
-  for (i = 1; i < l; i++)
-  {
-    ulong p = P[i], e = E[i];
-    phi *= upowuu(p, e-1)*(p-1);
-  }
-  if (!odd(d)) phi <<= 1;
-  return phi;
-}
-
+/* d != 2 mod 4; fd = factoru(odd(d)? d: d / 4) */
 static void
 Aurifeuille_init(GEN a, long d, GEN fd, struct aurifeuille_t *S)
 {
-  GEN sqrta = sqrtr_abs(itor(a, LOWDEFAULTPREC));
-  GEN bound = ceil_safe(powru(addrs(sqrta,1), phi(d, fd)));
-  GEN zl = polsubcyclo_start(d, 0, 0, 1, bound, &(S->e), (long*)&(S->l));
+  GEN bound, zl, sqrta = sqrtr_abs(itor(a, LOWDEFAULTPREC));
+  ulong phi = eulerphiu_fact(fd);
+  if (!odd(d)) phi <<= 1; /* eulerphi(d) */
+  bound = ceil_safe(powru(addrs(sqrta,1), phi));
+  zl = polsubcyclo_start(d, 0, 0, 1, bound, &(S->e), (long*)&(S->l));
   S->le = gel(zl,1);
   S->z  = gel(zl,2);
 }
