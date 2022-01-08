@@ -276,7 +276,7 @@ eulerf_hgm(GEN an, GEN p)
   long i, l = lg(L);
   for (i = 1; i < l; i++) /* wild primes */
     if (equalii(p, gmael(L, i, 1))) break;
-  return ginv(i == l? hgmeulerfactor(H, t, itos(p), NULL): gmael(L,i,2));
+  return i == l? ginv(hgmeulerfactor(H, t, itos(p), NULL)): gmael(L,i,2);
 }
 
 static GEN

@@ -75,7 +75,9 @@ R=hgmbydegree(9);vector(#R,i,#R[i])
 \\#hgmbydegree(10)
 \\lfunhgm(H,6/7)
 H=hgminit([1/6,5/6],[0,1/2]);
-lfunhgm(H,-1)
+L=lfunhgm(H,-1)
+lfuneuler(L,2)
+lfuneuler(L,3)
 \\
 HCAN=hgminit([1/2,1/2,1/2]);
 lfunhgm(HCAN,1/4)
