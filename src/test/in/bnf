@@ -118,4 +118,6 @@ localbitprec(128); bnfinit(P,1).no
 P=x^7-22*x^6+169*x^5-568*x^4+1263*x^3-1506*x^2+2295*x+2;
 localbitprec(128); bnfinit(P,1).no
 
+localbitprec(128); bitprecision(bnfinit(x).nf)
+
 \\ ERRORS: keep at end of file

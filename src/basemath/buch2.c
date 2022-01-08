@@ -3695,10 +3695,11 @@ Buchall_param(GEN P, double cbach, double cbach2, long Nrelid, long flag, long p
       flag_nfinit = nf_RED;
     }
   }
+  PREC = maxss(DEFAULTPREC, prec);
   N = degpol(P);
   if (N <= 1)
   {
-    if (!nf) nf = nfinit_complete(&nfT, flag_nfinit, DEFAULTPREC);
+    if (!nf) nf = nfinit_complete(&nfT, flag_nfinit, PREC);
     return gerepilecopy(av0, Buchall_deg1(nf));
   }
   D = absi_shallow(D);
@@ -3710,7 +3711,6 @@ Buchall_param(GEN P, double cbach, double cbach2, long Nrelid, long flag, long p
    * We consider v with T2(v) <= BMULT * T2(v0)
    * Hence Nv <= ((4/3)^((n-1)/2) * BMULT / n)^(n/2) NI sqrt(disc(K)).
    * NI <= LIMCMAX^2 */
-  PREC = maxss(DEFAULTPREC, prec);
   if (nf) PREC = maxss(PREC, nf_get_prec(nf));
   PREC = maxss(PREC, nbits2prec((long)(LOGD2 * 0.02) + N*N));
   if (DEBUGLEVEL) err_printf("PREC = %ld\n", PREC);
