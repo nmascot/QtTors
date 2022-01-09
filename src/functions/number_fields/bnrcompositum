@@ -5,8 +5,8 @@ Prototype: GG
 Help: bnrcompositum(A,B): compositum [bnr,H] of the two abelian extensions
  given by A = [bnr1,H1] and B = [bnr2,H2], where bnr1 and bnr2 are attached
  to the same base field.
-Doc: given two abelian extensions $A = \kbd{[bnr1, H1]$ and
- $B = \kbd{[bnr2, H2]}, where \kbd{bnr1} and \kbd{bnr2} are two \kbd{bnr}
+Doc: given two abelian extensions $A = \kbd{[bnr1, H1]}$ and
+ $B = \kbd{[bnr2, H2]}$, where \kbd{bnr1} and \kbd{bnr2} are two \kbd{bnr}
  structures attached to the same base field, return their compositum
  as \kbd{[bnr, H]}. The modulus attached to \kbd{bnr} need not be the
  conductor of the compositum.
