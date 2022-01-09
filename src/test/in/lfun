@@ -23,6 +23,7 @@ lfun(1,2+x^2+O(x^6),2)
 lfun(x^4-2,x+O(x^6),1)
 lfun(x^4-2,x+O(x^6),2)
 \p38
+lfuncreate(x^2+1/2);
 
 lfun(polcyclo(12),2)
 

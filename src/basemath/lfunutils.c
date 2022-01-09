@@ -964,14 +964,18 @@ vec01(long r1, long r2)
 
 /* true nf or t_POL */
 static GEN
-lfunzetak_i(GEN nf)
+lfunzetak_i(GEN T)
 {
   GEN Vga, N;
   long r1, r2;
-  if (typ(nf) == t_POL) nf = nfinit(nf, DEFAULTPREC);
-  nf_get_sign(nf,&r1,&r2); Vga = vec01(r1+r2,r2);
-  N = absi_shallow(nf_get_disc(nf));
-  return mkvecn(7, tag(nf,t_LFUN_NF), gen_0, Vga, gen_1, N, gen_1, gen_0);
+  if (typ(T) == t_POL)
+  {
+    T = nfinit(T, DEFAULTPREC);
+    if (lg(T) == 3) T = gel(T,1); /* [nf,change of var] */
+  }
+  nf_get_sign(T,&r1,&r2); Vga = vec01(r1+r2,r2);
+  N = absi_shallow(nf_get_disc(T));
+  return mkvecn(7, tag(T,t_LFUN_NF), gen_0, Vga, gen_1, N, gen_1, gen_0);
 }
 static GEN
 lfunzetak(GEN T)
