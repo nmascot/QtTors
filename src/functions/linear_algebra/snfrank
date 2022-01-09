@@ -6,7 +6,7 @@ Help: snfrank(D,q): assuming that D is a Smith normal form
  (i.e. vector of elementary divisors) for some module and q a power of an
  irreducible element or 0, return the rank of D/qD.
 Doc: assuming that $D$ is a Smith normal form
- (i.e. vector of elementary divisors) for some module and $q$ a power or an
+ (i.e. vector of elementary divisors) for some module and $q$ a power of an
  irreducible element or $0$, return the minimal number of generators for
  $D/qD$. For instance, if $q=p^n$ where $p$ is a prime number, this is the
  dimension of $(p^{n-1}D)/p^nD$ as an $\F_p$-vector space.
@@ -35,4 +35,4 @@ Doc: assuming that $D$ is a Smith normal form
  ? snfrank(D,x^2+1)
  %10 = 2
  @eprog\noindent Finally this function supports any output from \kbd{matsnf}
- (e.g., with transformation matrices included, with our without cleanup).
+ (e.g., with transformation matrices included, with or without cleanup).
