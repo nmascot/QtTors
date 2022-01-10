@@ -342,23 +342,52 @@ lfunmul(GEN ldata1, GEN ldata2, long bitprec)
   return gerepilecopy(ltop, lfunmul_k(ldata1, ldata2, k, bitprec));
 }
 
+/* lfunrtopoles without sort */
+static GEN
+rtopoles(GEN r)
+{
+  long j, l = lg(r);
+  GEN v = cgetg(l, t_VEC);
+  for (j = 1; j < l; j++)
+  {
+    GEN rj = gel(r,j), a = gel(rj,1);
+    gel(v,j) = a;
+  }
+  return v;
+}
+
 static GEN
 lfundivpoles(GEN ldata1, GEN ldata2, long bitprec)
 {
   long i, j, l;
-  GEN k  = ldata_get_k(ldata1);
+  GEN be2, k  = ldata_get_k(ldata1);
   GEN r1 = ldata_get_residue(ldata1);
   GEN r2 = ldata_get_residue(ldata2), r;
 
   if (r1 && typ(r1) != t_VEC) r1 = mkvec(mkvec2(k, r1));
   if (r2 && typ(r2) != t_VEC) r2 = mkvec(mkvec2(k, r2));
   if (!r1) return NULL;
-  r1 = lfunrtopoles(r1);
   l = lg(r1); r = cgetg(l, t_VEC);
+  be2 = r2? rtopoles(r2): NULL;
   for (i = j = 1; j < l; j++)
   {
-    GEN be = gel(r1,j);
-    GEN z = gdiv(lfun(ldata1,be,bitprec), lfun(ldata2,be,bitprec));
+    GEN z, v = gel(r1,j), be = gel(v,1), s1 = gel(v,2);
+    long n;
+    if (be2 && (n = RgV_isin(be2, be)))
+    {
+      GEN s2 = gmael(r2,n,2); /* s1,s2: polar parts */
+      switch(((typ(s1) == t_SER)<<1) | (typ(s2) == t_SER))
+      {
+        case 0: continue;
+        case 1: if (lg(s2) == 3) continue;
+                break;
+        case 2: if (lg(s1) == 3) continue;
+                break;
+        case 3: if (lg(s1) == lg(s2)) continue;
+                break;
+      }
+    }
+    z = gdiv(lfun(ldata1,be,bitprec), lfun(ldata2,be,bitprec));
     if (valp(z) < 0) gel(r,i++) = mkvec2(be, z);
   }
   if (i == 1) return NULL;
