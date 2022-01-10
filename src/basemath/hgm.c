@@ -2128,13 +2128,13 @@ lfunhgm_i(GEN hgm, GEN t, long limdeg, long bitprec)
     return L;
   }
   v = lfunhgmwild(L, hgm, t, BAD, pole, limdeg, bitprec);
-  gel(L, 5) = gel(v, 1);
-  gmael3(L, 1, 2, 2) = gel(v, 2);
-  if (!pole) gel(L, 6) = gel(v, 3);
-  else
+  gel(L, 5) = gel(v, 1); /* N */
+  gmael3(L, 1, 2, 2) = gel(v, 2); /* [t, PPOL] */
+  gel(L, 6) = gel(v, 3); /* w */
+  if (pole)
   {
     vr = lfunrootres(L, bitprec);
-    gel(L, 6) = gel(vr, 3); gel(L, 7) = gel(vr, 1);
+    gel(L, 7) = gel(vr, 1);
   }
   return L;
 }

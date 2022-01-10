@@ -2030,11 +2030,13 @@ lfuncheckfeq(GEN lmisc, GEN t0, long bitprec)
 /*******************************************************************/
 /* round root number to \pm 1 if close to integer. */
 static GEN
-ropm1(GEN eno, long prec)
+ropm1(GEN w, long prec)
 {
   long e;
-  GEN r = grndtoi(eno, &e);
-  return (e < -prec2nbits(prec)/2)? r: eno;
+  GEN r;
+  if (typ(w) == t_INT) return w;
+  r = grndtoi(w, &e);
+  return (e < -prec2nbits(prec)/2)? r: w;
 }
 
 /* theta for t=1/sqrt(2) and t2==2t simultaneously, saving 25% of the work.
@@ -2193,18 +2195,17 @@ lfunrootres(GEN data, long bitprec)
     R = lfuntheta(linit, gen_1, 0, bitprec);
   else
   {
+    GEN p2k = gpow(gen_2,k,prec);
     lfunthetaspec(linit, bitprec, &v2, &v);
     if (gequal(gmulsg(2, be), k)) pari_err_IMPL("pole at k/2 in lfunrootres");
     if (gequal(be, k))
     {
-      GEN p2k = gpow(gen_2,k,prec);
       a = conj_i(gsub(gmul(p2k, v), v2));
       b = subiu(p2k, 1);
       e = gmul(gsqrt(p2k, prec), gsub(v2, v));
     }
     else
     {
-      GEN p2k = gpow(gen_2,k,prec);
       GEN tk2 = gsqrt(p2k, prec);
       GEN tbe = gpow(gen_2, be, prec);
       GEN tkbe = gpow(gen_2, gdivgs(gsub(k, be), 2), prec);
@@ -2212,10 +2213,9 @@ lfunrootres(GEN data, long bitprec)
       b = gsub(gdiv(tbe, tkbe), tkbe);
       e = gsub(gmul(gdiv(tbe, tk2), v2), gmul(tk2, v));
     }
-    if (!isintzero(w)) R = gdiv(gsub(e, gmul(a, w)), b);
-    else
+    if (isintzero(w))
     { /* Now residue unknown, r = [[be,0]], and w unknown. */
-      GEN t0  = mkfrac(stoi(11),stoi(10));
+      GEN t0  = mkfrac(utoi(11),utoi(10));
       GEN th1 = lfuntheta(linit, t0,  0, bitprec);
       GEN th2 = lfuntheta(linit, ginv(t0), 0, bitprec);
       GEN tbe = gpow(t0, gmulsg(2, be), prec);
@@ -2226,12 +2226,13 @@ lfunrootres(GEN data, long bitprec)
       GEN f = gsub(gmul(gdiv(tbe, tk2), th2), gmul(tk2, th1));
       GEN D = gsub(gmul(a, d), gmul(b, c));
       w = gdiv(gsub(gmul(d, e), gmul(b, f)), D);
-      R = gdiv(gsub(gmul(a, f), gmul(c, e)), D);
     }
+    w = ropm1(w, prec);
+    R = gdiv(gsub(e, gmul(a, w)), b);
   }
   r = normalize_simple_pole(Rtor(be, R, ldata, prec), be);
   R = lfunrtoR_i(ldata, r, w, prec);
-  return gerepilecopy(ltop, mkvec3(r, R, ropm1(w, prec)));
+  return gerepilecopy(ltop, mkvec3(r, R, w));
 }
 
 /*******************************************************************/
