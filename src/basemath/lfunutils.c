@@ -282,36 +282,65 @@ eulerf_hgm(GEN an, GEN p)
 static GEN
 deg1ser_shallow(GEN a1, GEN a0, long e)
 { return RgX_to_ser(deg1pol_shallow(a1, a0, 0), e+2); }
+/* lfunrtopoles without sort */
 static GEN
-residuetopoles(GEN r, GEN k)
+rtopoles(GEN r)
 {
-  if (!is_vec_t(typ(r))) r = mkvec(mkvec2(k, r));
-  return lfunrtopoles(r);
+  long j, l = lg(r);
+  GEN v = cgetg(l, t_VEC);
+  for (j = 1; j < l; j++)
+  {
+    GEN rj = gel(r,j), a = gel(rj,1);
+    gel(v,j) = a;
+  }
+  return v;
 }
+/* re = polar part; overestimate when re = gen_0 (unknown) */
+static long
+orderpole(GEN re) { return typ(re) == t_SER? -valp(re): 1; }
 static GEN
 lfunmulpoles(GEN ldata1, GEN ldata2, long bitprec)
 {
-  GEN k = ldata_get_k(ldata1);
+  GEN r, k = ldata_get_k(ldata1), b1 = NULL, b2 = NULL;
   GEN r1 = ldata_get_residue(ldata1);
-  GEN r2 = ldata_get_residue(ldata2), r;
-  long l, j;
+  GEN r2 = ldata_get_residue(ldata2);
+  long i, j, l, L = 0;
 
   if (!r1 && !r2) return NULL;
-  if (r1) r1 = residuetopoles(r1, k);
-  if (r2) r2 = residuetopoles(r2, k);
-  r = r1? (r2? setunion_i(r1, r2): r1): r2;
-  l = lg(r); if (l == 1) return NULL;
-  for (j = 1; j < l; j++)
+  if (r1 && !is_vec_t(typ(r1))) r1 = mkvec(mkvec2(k, r1));
+  if (r2 && !is_vec_t(typ(r2))) r2 = mkvec(mkvec2(k, r2));
+  if (r1) { b1 = rtopoles(r1); L += lg(b1); }
+  if (r2) { b2 = rtopoles(r2); L += lg(b2); }
+  r = cgetg(L, t_VEC); j = 1;
+  if (b1)
   {
-    GEN be = gel(r,j), bx = deg1ser_shallow(gen_1, be, 2);
-    GEN z1 = lfun(ldata1,bx,bitprec), z2 = lfun(ldata2,bx,bitprec);
-    long e = valp(z1) + valp(z2);
-    GEN b = deg1ser_shallow(gen_1, be, 2-e);
-    z1 = lfun(ldata1,b,bitprec);
-    z2 = lfun(ldata2,b,bitprec);
-    gel(r,j) = mkvec2(be, gmul(z1, z2));
+    l = lg(b1);
+    for (i = 1; i < l; i++)
+    {
+      GEN z, z1, z2, be = gmael(r1,i,1);
+      long n, v = orderpole(gmael(r1,i,2));
+      if (b2 && (n = RgV_isin(b2, be))) v += orderpole(gmael(r2,n,2));
+      z = deg1ser_shallow(gen_1, be, 2 + v);
+      z1 = lfun(ldata1,z,bitprec);
+      z2 = lfun(ldata2,z,bitprec);
+      gel(r,j++) = mkvec2(be, gmul(z1, z2));
+    }
   }
-  return r;
+  if (b2)
+  {
+    long l = lg(b2);
+    for (i = 1; i < l; i++)
+    {
+      GEN z, z1, z2, be = gmael(r2,i,1);
+      long n, v = orderpole(gmael(r2,i,2));
+      if (b1 && (n = RgV_isin(b1, be))) continue; /* done already */
+      z = deg1ser_shallow(gen_1, be, 2 + v);
+      z1 = lfun(ldata1,z,bitprec);
+      z2 = lfun(ldata2,z,bitprec);
+      gel(r,j++) = mkvec2(be, gmul(z1, z2));
+    }
+  }
+  setlg(r, j); return r;
 }
 
 static GEN
@@ -342,20 +371,6 @@ lfunmul(GEN ldata1, GEN ldata2, long bitprec)
   return gerepilecopy(ltop, lfunmul_k(ldata1, ldata2, k, bitprec));
 }
 
-/* lfunrtopoles without sort */
-static GEN
-rtopoles(GEN r)
-{
-  long j, l = lg(r);
-  GEN v = cgetg(l, t_VEC);
-  for (j = 1; j < l; j++)
-  {
-    GEN rj = gel(r,j), a = gel(rj,1);
-    gel(v,j) = a;
-  }
-  return v;
-}
-
 static GEN
 lfundivpoles(GEN ldata1, GEN ldata2, long bitprec)
 {
@@ -364,8 +379,8 @@ lfundivpoles(GEN ldata1, GEN ldata2, long bitprec)
   GEN r1 = ldata_get_residue(ldata1);
   GEN r2 = ldata_get_residue(ldata2), r;
 
-  if (r1 && typ(r1) != t_VEC) r1 = mkvec(mkvec2(k, r1));
-  if (r2 && typ(r2) != t_VEC) r2 = mkvec(mkvec2(k, r2));
+  if (r1 && !is_vec_t(typ(r1))) r1 = mkvec(mkvec2(k, r1));
+  if (r2 && !is_vec_t(typ(r2))) r2 = mkvec(mkvec2(k, r2));
   if (!r1) return NULL;
   l = lg(r1); r = cgetg(l, t_VEC);
   be2 = r2? rtopoles(r2): NULL;
@@ -376,16 +391,7 @@ lfundivpoles(GEN ldata1, GEN ldata2, long bitprec)
     if (be2 && (n = RgV_isin(be2, be)))
     {
       GEN s2 = gmael(r2,n,2); /* s1,s2: polar parts */
-      switch(((typ(s1) == t_SER)<<1) | (typ(s2) == t_SER))
-      {
-        case 0: continue;
-        case 1: if (lg(s2) == 3) continue;
-                break;
-        case 2: if (lg(s1) == 3) continue;
-                break;
-        case 3: if (lg(s1) == lg(s2)) continue;
-                break;
-      }
+      if (orderpole(s1) == orderpole(s2)) continue;
     }
     z = gdiv(lfun(ldata1,be,bitprec), lfun(ldata2,be,bitprec));
     if (valp(z) < 0) gel(r,i++) = mkvec2(be, z);

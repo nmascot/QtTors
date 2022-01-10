@@ -537,11 +537,11 @@ fracgammadegree(GEN FVga)
 static GEN
 rtoR(GEN a, GEN r, GEN FVga, GEN N, long prec)
 {
-  long v = lg(r)-2;
-  GEN as = deg1ser_shallow(gen_1, a, varn(r), v);
-  GEN Na = gpow(N, gdivgs(as, 2), prec);
-  long d = fracgammadegree(FVga), ext;
-  if (d) as = sertoser(as, v+d); /* make up for a possible loss of accuracy */
+  long v = lg(r)-2, d = fracgammadegree(FVga), ext;
+  GEN Na, as = deg1ser_shallow(gen_1, a, varn(r), v);
+  Na = gpow(N, gdivgs(as, 2), prec);
+  /* make up for a possible loss of accuracy */
+  if (d) as = deg1ser_shallow(gen_1, a, varn(r), v + d);
   return gmul(gmul(r, Na), gammafactproduct(FVga, as, &ext, prec));
 }
 
