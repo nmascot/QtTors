@@ -1,0 +1,6 @@
+Function: pictorsgalrep
+Section: modular_forms
+C-Name: PicTorsGalRep
+Prototype: GGDG
+Help: pictorsgalrep(J,l,{Chi}): Given a p-adic Jacobian J and a prime l, computes the mod l Galois representation occurring in the l-torsion of J. If Chi is present, it must be a divisor of Lp mod l which is coprime to its cofactor mod l, and we compute the Galois representation afforded by the piece of J[l] on which Frob_p acts with characteristic polynomial Chi.
+Doc: TODO

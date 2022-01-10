@@ -4013,6 +4013,8 @@ ZetaFromPointCount(GEN N, ulong p, ulong g)
   pari_sp av = avma;
   GEN Z,L,Pi;
   ulong i;
+	if(g==0)
+		return pol_1(0);
   Z = cgetg(g+2,t_SER);
   Z[1] = 0;
   setsigne(Z,1);
