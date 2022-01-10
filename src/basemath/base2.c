@@ -171,11 +171,13 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
   S->T = T = ZX_Q_normalize(T, &L);
   S->unscale = L;
   S->dT = dT = set_disc(S);
+  S->certify = 1;
   if (!signe(dT)) pari_err_IRREDPOL("nfmaxord",T);
   if (fa)
   {
     const long MIN = 100; /* include at least all p < 101 */
     GEN P0 = NULL, U;
+    S->certify = 0;
     if (!isint1(L)) fa = update_fact(dT, fa);
     switch(typ(fa))
     {
@@ -201,7 +203,10 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
     }
   }
   else
-    fa = poldiscfactors_i(T, dT, !(flag & nf_PARTIALFACT));
+  {
+    S->certify = !(flag & nf_PARTIALFACT);
+    fa = poldiscfactors_i(T, dT, 0);
+  }
   P = gel(fa,1); l = lg(P);
   E = gel(fa,2);
   if (l > 1 && is_pm1(gel(P,1)))
@@ -285,6 +290,33 @@ static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN maxord(GEN p,GEN f,long mf);
 static GEN ZX_Dedekind(GEN F, GEN *pg, GEN p);
 
+static void
+fix_PE(GEN *pP, GEN *pE, long i, GEN u, GEN N)
+{
+  GEN P, E;
+  long k, l = lg(u), lP = lg(*pP);
+  pari_sp av;
+
+  *pP = P = shallowconcat(*pP, vecslice(u, 2, l-1));
+  *pE = E = vecsmall_lengthen(*pE, lP + l-2);
+  gel(P,i) = gel(u,1); av = avma;
+  E[i] = Z_pvalrem(N, gel(P,i), &N);
+  for (k=lP, lP=lg(P); k < lP; k++) E[k] = Z_pvalrem(N, gel(P,k), &N);
+  set_avma(av);
+}
+static long
+diag_denomval(GEN M, GEN p)
+{
+  long j, v, l;
+  if (typ(M) != t_MAT) return 0;
+  v = 0; l = lg(M);
+  for (j=1; j<l; j++)
+  {
+    GEN t = gcoeff(M,j,j);
+    if (typ(t) == t_FRAC) v += Z_pval(gel(t,2), p);
+  }
+  return v;
+}
 /* Warning: data computed for T = ZX_Q_normalize(T0). If S.unscale !=
  * gen_1, caller must take steps to correct the components if it wishes
  * to stick to the original T0. Return a vector of p-maximal orders, for
@@ -292,7 +324,8 @@ static GEN ZX_Dedekind(GEN F, GEN *pg, GEN p);
 static GEN
 get_maxord(nfmaxord_t *S, GEN T0, long flag)
 {
-  VOLATILE GEN P, E, O;
+  GEN P, E;
+  VOLATILE GEN O;
   VOLATILE long lP, i, k;
 
   nfmaxord_check_args(S, T0, flag);
@@ -303,10 +336,22 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
   {
     VOLATILE pari_sp av;
     /* includes the silly case where P[i] = -1 */
-    if (E[i] <= 1) { O = vec_append(O, gen_1); continue; }
+    if (E[i] <= 1)
+    {
+      if (S->certify)
+      {
+        GEN p = gel(P,i);
+        if (signe(p) > 0 && !BPSW_psp(p))
+        {
+          fix_PE(&P, &E, i, gel(Z_factor(p), 1), S->dT);
+          lP = lg(P); i--; continue;
+        }
+      }
+      O = vec_append(O, gen_1); continue;
+    }
     av = avma;
     pari_CATCH(CATCH_ALL) {
-      GEN N, u, err = pari_err_last();
+      GEN u, err = pari_err_last();
       long l;
       switch(err_get_num(err))
       {
@@ -334,8 +379,8 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
           set_avma(av);
           if (DEBUGLEVEL)
             pari_warn(warner,"large composite in nfmaxord:loop(), %Ps", p);
-          if (expi(p) < 100) /* factor should require ~20ms for this */
-            u = gel(Z_factor(p), 1);
+          if (expi(p) < 100 || S->certify)
+            u = gel(Z_factor(p), 1); /* factor(n < 2^100) should take ~20ms */
           else
           { /* give up, probably not maximal */
             GEN B, g, k = ZX_Dedekind(S->T, &g, p);
@@ -349,18 +394,23 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
         default: pari_err(0, err);
           return NULL;/*LCOV_EXCL_LINE*/
       }
-      l = lg(u);
-      gel(P,i) = gel(u,1);
-      P = shallowconcat(P, vecslice(u, 2, l-1));
-      av = avma;
-      N = S->dT; E[i] = Z_pvalrem(N, gel(P,i), &N);
-      for (k=lP, lP=lg(P); k < lP; k++) E[k] = Z_pvalrem(N, gel(P,k), &N);
+      fix_PE(&P, &E, i, u, S->dT);
+      lP = lg(P); av = avma;
     } pari_RETRY {
-      if (DEBUGLEVEL>2) err_printf("Treating p^k = %Ps^%ld\n",P[i],E[i]);
-      O = vec_append(O, maxord(gel(P,i),S->T,E[i]));
+      GEN p = gel(P,i), O2;
+      if (DEBUGLEVEL>2) err_printf("Treating p^k = %Ps^%ld\n",p,E[i]);
+      O2 = maxord(p,S->T,E[i]);
+      if (S->certify && !BPSW_psp(p)
+                     && (odd(E[i]) || E[i] != 2*diag_denomval(O2, p)))
+      {
+        fix_PE(&P, &E, i, gel(Z_factor(p), 1), S->dT);
+        lP = lg(P); i--;
+      }
+      else
+        O = vec_append(O, O2);
     } pari_ENDCATCH;
   }
-  S->dTP = P; return O;
+  S->dTP = P; S->dTE = E; return O;
 }
 
 /* M a QM, return denominator of diagonal. All denominators are powers of

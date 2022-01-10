@@ -239,6 +239,7 @@ BA  22- [libpari] gen_factorback now take an extra parameter one.
     32- allow logint for positive real number argument
     33- improve gamma and lngamma for t_FRAC inputs
     34- renamed normalize -> normalizeser
+    35- nfinit/nfdisc/nfbasis: use lazy factorization by default [#2326]
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

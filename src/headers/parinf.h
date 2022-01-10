@@ -67,6 +67,7 @@ typedef struct {
   GEN basden; /* [nums(bas), dens(bas)] */
   GEN dTP, dTE; /* (possibly partial) factorization of dT, primes / exponents */
   GEN dKP, dKE; /* (possibly partial) factorization of dK, primes / exponents */
+  long certify; /* must we certify at the end */
 } nfmaxord_t;
 
 /* qfr3 / qfr5 */
