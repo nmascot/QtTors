@@ -2031,6 +2031,15 @@ nfinit_basic_partial(nfmaxord_t *S, GEN T)
   if (typ(T) == t_POL) { nfmaxord(S, mkvec2(T,utoipos(500000)), 0); }
   else nfinit_basic(S, T);
 }
+static void
+nfinit_basic_flag(nfmaxord_t *S, GEN x, long flag)
+{
+  if (flag & nf_PARTIALFACT)
+    nfinit_basic_partial(S, x);
+  else
+    nfinit_basic(S, x);
+}
+
 /* true nf */
 static GEN
 nf_basden(GEN nf)
@@ -2532,10 +2541,8 @@ Polred(GEN x, long flag, GEN fa)
   nfmaxord_t S;
   if (fa)
     nfinit_basic(&S, mkvec2(x,fa));
-  else if (flag & nf_PARTIALFACT)
-    nfinit_basic_partial(&S, x);
   else
-    nfinit_basic(&S, x);
+    nfinit_basic_flag(&S, x, flag);
   return gerepilecopy(av, polred_aux(&S, NULL, flag));
 }
 
@@ -2825,7 +2832,7 @@ polredabs_i(GEN x, nfmaxord_t *S, GEN *u, long flag)
   GEN v, y, a;
   long i, l;
 
-  nfinit_basic_partial(S, x);
+  nfinit_basic_flag(S, x, flag);
   x = S->T0;
   if (degpol(x) == 1)
   {
@@ -2834,19 +2841,6 @@ polredabs_i(GEN x, nfmaxord_t *S, GEN *u, long flag)
     return mkvec2(mkvec( pol_x(vx) ),
                   mkvec( deg1pol_shallow(gen_1, negi(gel(S->T,2)), vx) ));
   }
-  if (!(flag & nf_PARTIALFACT) && S->dK && S->dKP)
-  {
-    GEN vw = primes_certify(S->dK, S->dKP);
-    v = gel(vw,1); l = lg(v);
-    if (l != 1)
-    { /* fix integral basis */
-      GEN w = gel(vw,2);
-      for (i = 1; i < l; i++)
-        w = ZV_union_shallow(w, gel(Z_factor(gel(v,i)),1));
-      nfinit_basic(S, mkvec2(S->T0,w));
-    }
-  }
-
   chk.data = (void*)&d;
   polred_init(S, &F, &d);
   d.bound = embed_T2(F.ro, d.r1);
