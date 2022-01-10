@@ -182,5 +182,8 @@ usersch3.tex: $desc/\$(DESC) ../src/desc/doc_make usersFUNCS.tex
 	cat usersFUNCS.tex > usersch3\$(TMPSUF)
 	cd ../src/desc && \$(PERL) doc_make >> ../../doc/usersch3\$(TMPSUF)
 	mv usersch3\$(TMPSUF) \$@
+
+.NOTPARALLEL:
+
 EOT
 fi
