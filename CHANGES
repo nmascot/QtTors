@@ -109,6 +109,7 @@ BA  90- x->x+0x1 was not displayed correctly
     91- bnfinit(Q) was not using current precision [#2335]
     92- lfuncreate(x^2 + 1/2) -> internal error. Allow rational coefficients.
     93- polresultant(t_POL with t_RFRAC coefs,...) -> internal errors
+    94- znchardecompose(znstar(2,1),[],2) -> SEGV [#2339]
 
   Added
 HC   1- new GP function eulerreal

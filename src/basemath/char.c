@@ -1378,7 +1378,7 @@ znchardecompose(GEN G, GEN chi, GEN Q)
   { if (!zncharcheck(G, chi)) pari_err_TYPE("znchardecompose", chi); }
   else
     chi = znconreylog(G, chi);
-  l = lg(chi);
+  l = lg(chi); if (l == 1) return cgetg(1, t_VEC);
   F = znstar_get_faN(G);
   c = zerocol(l-1);
   P = gel(F,1); /* prime divisors of N */
