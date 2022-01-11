@@ -2305,7 +2305,7 @@ sdmob(GEN s, long n, GEN fan)
   GEN D = divisorsu_moebius(gel(fan,1)), S = sercoeff(s, n); /* d = 1 */
   long i, l = lg(D);
   for (i = 2; i < l; i++)
-    S = gadd(S, gdivgu(sercoeff(s, n/labs(D[i])), D[i]));
+    S = gadd(S, gdivgs(sercoeff(s, n/labs(D[i])), D[i]));
   return S;
 }
 /* log (zeta(s) * prod_i (1 - P[i]^-s) */
