@@ -7510,6 +7510,13 @@ mod $4$).
 \fun{GEN}{teichmullerinit}{long p, long n} returns the values of
 \tet{Zp_teichmuller} at all $x = 1, \dots, p-1$.
 
+\fun{GEN}{Zp_exp}{GEN z, GEN p, ulong e} given a \typ{INT} $z$ (preferably
+reduced mod $p^e$), return $\exp_p(a)$ mod $p^e$ (\typ{INT}).
+
+\fun{GEN}{Zp_log}{GEN z, GEN p, ulong e} given a \typ{INT} $z$ (preferably
+reduced mod $p^e$), such that $a \equiv 1 \pmod{p}$, return
+$\log_p(a)$ mod $p^e$ (\typ{INT}).
+
 \subsec{ZpM}
 
 \fun{GEN}{ZpM_invlift}{GEN M, GEN Np, GEN p, long e} let

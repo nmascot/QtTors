@@ -192,6 +192,7 @@ TF  63- new GP functions znsubgroupgenerators, subcyclohminus,
         subcycloiwasawa, subcyclopclgp
     64- new GP function bnrcompositum
     65- [libpari] gdivgu, gdivgunextu, divrunextu, gmulgu, gmulug
+    66- [libpari] Zp_log, Zp_exp
 
   Changed
 HC   1- faster implementation of eulervec + cache result
