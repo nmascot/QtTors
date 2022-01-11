@@ -2678,3 +2678,112 @@ sumnumlagrange(void *E, GEN (*eval)(void*,GEN,long), GEN a, GEN tab, long prec)
 GEN
 sumnumlagrange0(GEN a, GEN code, GEN tab, long prec)
 { EXPR_WRAP(code, sumnumlagrange(EXPR_ARGPREC, a, tab, prec)); }
+
+/********************************************************************/
+/*                          SIDI type programs                      */
+/********************************************************************/
+
+GEN
+sumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec)
+{
+  pari_sp av;
+  GEN M = cgetg(1, t_VEC), N = cgetg(1, t_VEC);
+  GEN Wkeep = gen_0, _1, S, t, Wp, W = NULL, fn;
+  long bit = prec2nbits(prec), newbit = (long)(mu * bit) + 33;
+  long n, s, fail = 0, BIG = LONG_MAX, EX = LONG_MAX, EXkeep = 0;
+
+  prec = nbits2prec(newbit); _1 = real_1(prec); S = real_0(prec);
+  av = avma;
+  fn = f(E, a, prec); t = fn; Wp = fn;
+  for (n = 1;; n++) /* fn = f(n) */
+  {
+    long e = BIG;
+    GEN c;
+    S = gadd(S, t); t = f(E, gaddsg(n, a), prec);
+    if (gequal0(t))
+      c = divru(real2n(bit, prec), n);
+    else
+      c = gdiv(_1, gmulsg(n, t));
+    /* Sidi's W algorithm */
+    M = vec_append(M, gmul(S, c));
+    N = vec_append(N, c); if (n == 1) continue;
+    for (s = n - 1; s >= 1; s--)
+    {
+      GEN d = sstoQ(s * n, n - s);
+      gel(M, s) = gmul(d, gsub(gel(M, s), gel(M, s + 1)));
+      gel(N, s) = gmul(d, gsub(gel(N, s), gel(N, s + 1)));
+    }
+    if (!gequal0(gel(N, 1)))  /* if N[1] = 0, count as failure */
+    {
+      W = gdiv(gel(M, 1), gel(N, 1));
+      e = gexpo(gsub(W, Wp));
+      if (e < -bit) break;
+    }
+    if (++fail >= 10)
+    {
+      if (DEBUGLEVEL)
+        err_printf("sumsidi: reached accuracy of %ld bits.", -EXkeep);
+      bit = -EXkeep; W = Wkeep; break;
+    }
+    if (e < EX) { fail = 0; EX = e; EXkeep = EX; Wkeep = W; }
+    Wp = W;
+    if (gc_needed(av,2))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"sumsidi");
+      gerepileall(av, 6, &Wp, &W, &Wkeep, &S, &M, &N);
+    }
+  }
+  return gprec_w(W, nbits2prec(bit));
+}
+
+struct _osc_wrap
+{
+  void *E;
+  GEN (*f)(void*, GEN);
+  GEN a, H, tab;
+  long prec;
+};
+
+static GEN
+_int_eval(void *E, GEN (*f)(void*, GEN), GEN a, GEN n, GEN H, GEN T, long prec)
+{
+  GEN u = gmul(n, H);
+  if (a) u = gadd(a, u);
+  return intnumgauss(E, f, u, gadd(u, H), T, prec);
+}
+static GEN
+osc_wrap(void* E, GEN n)
+{
+  struct _osc_wrap *D = (struct _osc_wrap*)E;
+  return _int_eval(D->E, D->f, D->a, n, D->H, D->tab, D->prec);
+}
+static GEN
+osc_wrap_prec(void* E, GEN n, long prec)
+{
+  struct _osc_wrap *D = (struct _osc_wrap*)E;
+  return _int_eval(D->E, D->f, D->a, n, D->H, D->tab, prec);
+}
+
+GEN
+intnumosc(void *E, GEN (*f)(void*, GEN), GEN a, GEN H, long flag, GEN tab,
+          long prec)
+{
+  pari_sp av = avma;
+  struct _osc_wrap D;
+  GEN S;
+  if (flag < 0 || flag > 2) pari_err_FLAG("intnumosc");
+  if (!tab) tab = intnumgaussinit(0, prec + (flag == 0? (prec>>1): 0));
+  if (gequal0(a)) a = NULL;
+  D.E = E; D.f = f; D.a = a; D.H = H; D.tab = tab; D.prec = prec;
+  switch(flag)
+  {
+    case 0: S = sumsidi((void*)&D, osc_wrap_prec, gen_0, 1.56, prec); break;
+    case 1: S = sumsidi((void*)&D, osc_wrap_prec, gen_0, 1.0, prec); break;
+    default:S = sumalt((void*)&D, osc_wrap, gen_0, prec); break; /* 2*/
+  }
+  return gerepilecopy(av, S);
+}
+
+GEN
+intnumosc0(GEN a, GEN code, GEN H, long flag, GEN tab, long prec)
+{ EXPR_WRAP(code, intnumosc(EXPR_ARG, a, H, flag, tab, prec)); }

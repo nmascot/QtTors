@@ -130,7 +130,33 @@ Doc: numerical integration
  Fourier series, use the above codings, and sum the resulting contributions.
  Otherwise you will get nonsense. Note that $\cos(kx)$, and similarly
  $\sin(kx)$, means that very function, and not a translated version such as
- $\cos(kx+a)$.
+ $\cos(kx+a)$. Note that the (slower) function \kbd{intnumosc} is more robust
+ and should be able to integrate much more general quasi-periodic functions
+ such as fractional parts or Bessel $J$ and $Y$ functions.
+
+ \bprog
+ ? \pb1664
+ ? exponent(intnum(x=0,+oo, sinc(x)) - Pi/2)
+ time = 308 ms.
+ %1 = 5 \\ junk
+ ? exponent(intnum(x=0,[+oo,-I], sinc(x)) - Pi/2)
+ time = 493 ms.
+ %2 = -1663 \\ perfect when k is given
+ ? exponent(intnum(x=0,[+oo,-0.999*I], sinc(x)) - Pi/2)
+ time = 604 ms.
+ %3 = -14 \\ junk when k is off
+
+ \\ intnumosc requires the half-period
+ ? exponent(intnumosc(x=0, sinc(x), Pi) - Pi/2)
+ time = 20,570 ms.
+ %4 = -1663 \\ slower but perfect
+ ? exponent(intnumosc(x=0, sinc(x), Pi, 1) - Pi/2)
+ time = 7,976 ms.
+ %4 = -1663 \\ also perfect in fast unsafe mode
+ ? exponent(intnumosc(x=0, sinc(x), Pi+0.001, 1) - Pi/2)
+ time = 23,115 ms.
+ %5 = -1278 \\ loses some accuracy when period is off, but much less
+ @eprog
 
  \misctitle{Note} If $f(x)=\cos(kx)g(x)$ where $g(x)$ tends to zero
  exponentially fast as $\exp(-\alpha x)$, it is up to the user to choose

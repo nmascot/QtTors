@@ -121,6 +121,7 @@ GEN  intcirc0(GEN a, GEN R, GEN code, GEN tab, long prec);
 GEN  intfuncinit0(GEN a, GEN b, GEN code, long m, long prec);
 GEN  intnum0(GEN a, GEN b, GEN code, GEN tab, long prec);
 GEN  intnumgauss0(GEN a, GEN b, GEN code, GEN tab, long prec);
+GEN  intnumosc0(GEN a, GEN H, GEN code, long flag, GEN tab, long prec);
 GEN  intnumromb0_bitprec(GEN a, GEN b, GEN code, long flag, long bit);
 GEN  laurentseries0(GEN f, long M, long v, long prec);
 GEN  limitnum0(GEN u, GEN alpha, long prec);

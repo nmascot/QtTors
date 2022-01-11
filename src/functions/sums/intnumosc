@@ -1,0 +1,73 @@
+Function: intnumosc
+Section: sums
+C-Name: intnumosc0
+Prototype: V=GEGD0,L,DGp
+Help: intnumosc(x=a,expr,H,{flag=0},{tab}): numerical integration from a
+ to oo of oscillating quasi-periodic function expr of half-period H.
+ tab is either omitted (and will be recomputed) or precomputed with
+ intnumgaussinit; flag is either 0 (Sidi extrapolation, safe mode), 1 (Sidi
+ extrapolation, unsafe mode) or 2 (sumalt).
+Doc: numerical integration from $a$ to $\infty$ of oscillating
+ quasi-periodic function \var{expr} of half-period $H$, meaning that we
+ at least expect the distance between the function's consecutive zeros to be
+ close to $H$: the sine or cosine functions ($H = \pi$) are paradigmatic
+ examples, but the Bessel $J_\nu$ or $Y_\nu$ functions ($H = \pi/2$) can
+ also be handled. The integral from $a$ to $\infty$ is computed
+ by summing the integral between two consecutive multiples of $H$;
+ \fl determines the summation algorithm used: either $0$ (Sidi extrapolation,
+ safe mode), 1 (Sidi extrapolation, unsafe mode) or 2 (\kbd{sumalt}).
+ The default is $\fl = 0$; Sidi summation should be the most
+ robust alorithm; you can try it in unsafe mode when the integrals between
+ two consecutive multiples of $H$ form an alternating series, this should be
+ about twice faster than the default and not lose accuracy.
+
+ \kbd{tab} is either omitted or precomputed with \kbd{intnumgaussinit};
+ if using Sidi summation in safe mode ($\fl = 0$) \emph{and} precompute
+ \kbd{tab}, you should use a precision roughly 50\% larger than the target
+ (this is not necessary for any of the other summations).
+
+ First an alternating example:
+ \bprog
+ ? \pb384
+ ? exponent(intnumosc(x=0,sinc(x),Pi) - Pi/2)
+ time = 183 ms.
+ %1 = -383
+ ? exponent(intnumosc(x=0,sinc(x),Pi,1) - Pi/2)
+ time = 115 ms.
+ %2 = -383  \\ alternating: unsafe mode is fine and almost twice faster
+ ? exponent(intnumosc(x=0,sinc(x),Pi,2) - Pi/2)
+ time = 115 ms. \\ sumalt is just as accurate and fast
+ %3 = -383
+ @eprog
+
+ Now a non-alternating one:
+ \bprog
+ ? exponent(intnumosc(x=0,sinc(x)^2,Pi) - Pi/2)
+ time = 277 ms.
+ %4 = -383 \\ safe mode is still perfect
+ ? exponent(intnumosc(x=0,sinc(x)^2,Pi,1) - Pi/2)
+ time = 97 ms.
+ %5 = -284 \\ non-alternating; this time, Sidi's unsafe mode loses accuracy
+ ? exponent(intnumosc(x=0,sinc(x)^2,Pi,2) - Pi/2)
+ time = 113 ms.
+ %6 = -10 \\ this time sumalt fails completely
+ @eprog
+
+ Exemples of a different flavour:
+ \bprog
+ ? exponent(intnumosc(x = 0, besselj(0,x)*sin(3*x), Pi) - 1/sqrt(8))
+ time = 5,113 ms.
+ %8 = -385 \\ more expensive but correct
+ ? exponent(intnumosc(x = 0, besselj(0,x)*sin(3*x), Pi, 1) - 1/sqrt(8))
+ time = 1,424 ms.
+ %9 = -279 \\ unsafe mode loses some accuracy
+
+ ? S = log(2*Pi)- Euler - 1;
+ ? exponent(intnumosc(t=1, (frac(t)/t)^2, 1) - S)
+ time = 66ms.
+ %10 = -384
+ ? exponent(intnumosc(t=1, (frac(t)/t)^2, 1, 1) - S)
+ time = 20 ms.
+ %11 = -286
+ @eprog\noindent Again, Sidi extrapolation behaves well, especially in safe
+ mode; sumalt summation fails.

@@ -28,9 +28,9 @@ Doc:
  see the Libpari manual for details.
 
  \misctitle{Numerical integration}\sidx{numerical integration}
- Starting with version 2.2.9 the ``double exponential'' univariate
+ The ``double exponential'' (DE) univariate
  integration method is implemented in \tet{intnum} and its variants. Romberg
- integration is still available under the name \kbd{intnumromb}, but
+ integration is still available under the name \tet{intnumromb}, but
  superseded. It is possible to compute numerically integrals to thousands of
  decimal places in reasonable time, as long as the integrand is regular. It is
  also reasonable to compute numerically integrals in several variables,
@@ -45,5 +45,38 @@ Doc:
  derivative of the function. For instance, the point $0$ is a singularity of
  $\text{abs}(x)$.
 
- See also the discrete summation methods below, sharing the prefix \kbd{sum}.
+ Assume the bitprecision is $b$, so we try to achieve an absolute error less than
+ $2^{-b}$. DE methods use $O(b \log b)$ function evaluations and should work
+ for both compact and non-compact intervals as long as the integrand is the
+ restriction of an analytic function to a suitable domain and its behaviour at
+ infinity is correctly described.
+ When integrating regular functions on a \emph{compact} interval, away from
+ poles of the integrand, Gauss-Legendre integration (\tet{intnumgauss})
+ is the best choice, using $O(b)$ function evaluations. To integrate
+ oscillating functions on non-compact interval, the slower but robust
+ \tet{intnumosc} is available, performing Gaussian integration on intervals of
+ length the half-period (or quasi-period) and using Sidi's mW algorithm to
+ extrapolate their sum. For maximal efficiency, abscissas and integration
+ weights can be precomputed, respectively using \tet{intnuminit} ($O(b^2)$)
+ or \tet{intnumgaussinit} ($O(b^3)$).
 
+ \misctitle{Numerical summation}\sidx{numerical summation}
+
+ Many numerical summation methods are available to approximate
+ $\sum_{n\geq n_0} f(n)$ at accuracy $2^{-b}$: the overall best choice should
+ be \tet{sumnum}, which uses Euler-MacLaurin (and $O(b\log b)$ function
+ evaluations). Also available are
+
+ \item Abel-Plana summation (\tet{sumnumap}),
+ also $O(b\log b)$ function evaluations but slowest $O(b^3)$ initialization
+ (\tet{sumnumapinit});
+
+ \item Lagrange summation (\tet{sumnumlagrange}) uses $O(b)$ evaluations
+ but more brittle and the asymptotic behaviour of $f$ must be correctly
+ indicated. Initialization (\tet{sumnumlagrangeinit}) can vary from $O(b^2)$
+ to $O(b^3)$ depending on the asymptotic behaviour.
+
+ \item Monien summation (\tet{sumnummonien}) uses $O(b/\log b)$ evaluations
+ but is even more brittle and also $O(b^3)$ initialization (\kbd{summonieninit}).
+
+ \item To sum rational functions, use \tet{sumnumrat}.
