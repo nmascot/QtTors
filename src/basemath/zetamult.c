@@ -298,14 +298,14 @@ zetamult_interpolate2_i(GEN avec, GEN t, long prec)
         }
         if (!odd(j)) S = gsub(S, gmul(C, gcoeff(a,i+1, j/2+1)));
       }
-      gcoeff(a, i+1, j) = gerepileupto(av, gdivgs(S, j));
+      gcoeff(a, i+1, j) = gerepileupto(av, gdivgu(S, j));
     }
   }
   _1 = real_1(prec + EXTRAPRECWORD); av = avma;
   ze = cgetg(n+1, t_VEC);
   for (i = 1; i <= n; i++)
   {
-    GEN S = gdivgs(gcoeff(a, n+2-i, 1), s), sj = utoipos(s);
+    GEN S = gdivgu(gcoeff(a, n+2-i, 1), s), sj = utoipos(s);
     for (j = 2; j <= l; j++)
     {
       sj = muliu(sj, s); /* = s^j */

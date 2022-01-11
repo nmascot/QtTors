@@ -1819,7 +1819,7 @@ serreverse(GEN x)
     }
     i++;
     gel(u,i) = gerepileupto(av2, gneg(p1));
-    gel(y,i) = gdivgs(gel(u,i), i-1);
+    gel(y,i) = gdivgu(gel(u,i), i-1);
     if (gc_needed(av,2))
     {
       GEN dummy = cgetg(1,t_VEC);
@@ -2263,7 +2263,7 @@ RgX_integ(GEN x)
   GEN y;
   if (lx == 2) return RgX_copy(x);
   y = cgetg(lx+1, t_POL); y[1] = x[1]; gel(y,2) = gen_0;
-  for (i=3; i<=lx; i++) gel(y,i) = gdivgs(gel(x,i-1),i-2);
+  for (i=3; i<=lx; i++) gel(y,i) = gdivgu(gel(x,i-1),i-2);
   return y;
 }
 

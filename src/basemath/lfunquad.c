@@ -326,7 +326,7 @@ modulareven(long D, long r, long N0)
   if (r == 2*d)
   { /* r = 2 or (r = 4 and N = 4) */
     GEN v = mfDcoefs(mfderiv(mfTheta(NULL), d+1), vD, 1);
-    gel(M, d) = gadd(gel(M, d), gdivgs(v, N*(2*d - 1)));
+    gel(M, d) = gadd(gel(M, d), gdivgu(v, N*(2*d - 1)));
   }
   R = Hcol(k, r, vD, 1, (N == 8 || N0 == 12)? N >> 2: 1);
   /* Cost is O(d^2) * bitsize(result) ~ O(d^3.8) [heuristic] */

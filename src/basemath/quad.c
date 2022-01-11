@@ -858,7 +858,7 @@ classno(GEN x)
     ulong N, n = 2*itou(sqrti(d1));
     GEN D = d1, T = gen_Shanks_init(g1, n, E, &qfi_group);
     d2 = gen_1;
-    N = itou( gceil(gdivgs(d1,n)) ); /* order(g1) <= n*N */
+    N = itou( gceil(gdivgu(d1,n)) ); /* order(g1) <= n*N */
     for (i = 1; i < l; i++)
     {
       GEN d, f = gel(forms,i), B = gel(order_bound,i);
@@ -1071,7 +1071,7 @@ hclassno(GEN x)
   if (s < 0) return gen_0;
   if (!s) return gdivgs(gen_1, -12);
   a = mod4(x); if (a == 1 || a == 2) return gen_0;
-  return gdivgs(hclassno6(x), 6);
+  return gdivgu(hclassno6(x), 6);
 }
 
 /* return [N',v]; v contains all x mod N' s.t. x^2 + B x + C = 0 modulo N */

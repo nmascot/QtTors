@@ -131,7 +131,7 @@ qrom2(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long bit)
       sum = gadd(sum, eval(E, x)); x = addrr(x,del);
       if ((j1 & 0x1ff) == 0) gerepileall(av2, 2, &sum,&x);
     }
-    sum = gmul(sum,del); p1 = gdivgs(gel(s,j-1),3);
+    sum = gmul(sum,del); p1 = gdivgu(gel(s,j-1),3);
     gel(s,j) = gerepileupto(av, gadd(p1,sum));
     if (j >= KLOC && (ss = interp(h, s, j, bit-(3*j/2)+3, KLOC)))
       return gmulsg(sig, ss);
@@ -1983,7 +1983,7 @@ intnumgauexpinit(long prec)
   Pade(V, &P, &Q);
   N = RgX_recip(gsub(P, Q));
   E = RgX_recip(Q);
-  R = gdivgs(gdiv(N, RgX_deriv(E)), 2);
+  R = gdivgu(gdiv(N, RgX_deriv(E)), 2);
   vabs = RX_realroots(E,prec2);
   l = lg(vabs); settyp(vabs, t_VEC);
   vwt = cgetg(l, t_VEC);
@@ -2126,10 +2126,10 @@ intnumainfrat(GEN F, long N, double r, long prec)
   ser = gmul(F, real_1(prec + EXTRAPREC64));
   ser = rfracrecip_to_ser_absolute(ser, lim+2);
   v = valp(ser);
-  S = gdivgs(sercoeff(ser,lim+1), lim*N);
+  S = gdivgu(sercoeff(ser,lim+1), lim*N);
   /* goes down to 2, but coeffs are 0 in degree < v */
   for (k = lim; k >= v; k--) /* S <- (S + coeff(ser,k)/(k-1)) / N */
-    S = gdivgs(gadd(S, gdivgs(sercoeff(ser,k), k-1)), N);
+    S = gdivgu(gadd(S, gdivgu(sercoeff(ser,k), k-1)), N);
   if (v-2) S = gdiv(S, powuu(N, v-2));
   return gerepilecopy(av, gprec_wtrunc(S, prec));
 }
@@ -2210,7 +2210,7 @@ sumnumrat_i(GEN F, GEN F0, GEN vF, long prec)
   S = rfrac_to_ser_i(S, k + 2);
   S2 = gen_0;
   for (j = 2; j <= k; j += 2)
-    S2 = gadd(S2, gmul(gdivgs(bernfrac(j),j), sercoeff(S, j-1)));
+    S2 = gadd(S2, gmul(gdivgu(bernfrac(j),j), sercoeff(S, j-1)));
   return gadd(intf, gsub(S1, S2));
 }
 /* sum_{n >= a} F(n) */
@@ -2294,7 +2294,7 @@ prodnumrat(GEN F, long a, long prec)
   for (m = 0; m < N; m++) S1 = gmul(S1, gsubst(F, vx, utoi(m)));
   S2 = gen_0;
   for (j = 2; j <= k; j += 2)
-    S2 = gadd(S2, gmul(gdivgs(bernfrac(j),j*(j-1)), sercoeff(S, j-2)));
+    S2 = gadd(S2, gmul(gdivgu(bernfrac(j),j*(j-1)), sercoeff(S, j-2)));
   return gerepileupto(ltop, gmul(S1, gexp(gsub(intf, S2), prec)));
 }
 
@@ -2305,7 +2305,7 @@ sdmob(GEN s, long n, GEN fan)
   GEN D = divisorsu_moebius(gel(fan,1)), S = sercoeff(s, n); /* d = 1 */
   long i, l = lg(D);
   for (i = 2; i < l; i++)
-    S = gadd(S, gdivgs(sercoeff(s, n/labs(D[i])), D[i]));
+    S = gadd(S, gdivgu(sercoeff(s, n/labs(D[i])), D[i]));
   return S;
 }
 /* log (zeta(s) * prod_i (1 - P[i]^-s) */

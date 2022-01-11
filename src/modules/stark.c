@@ -2250,7 +2250,7 @@ LABDOUB:
       p1 = real_0(newprec); p2 = gel(ch_CHI(dtcr), 2);
       for (j = 1; j <= n; j++)
         if ( (an = EvalCoeff(p2, matan[j], d)) )
-          p1 = gadd(p1, gdivgs(an, j));
+          p1 = gadd(p1, gdivgu(an, j));
       gel(L1,i) = gerepileupto(av2, p1);
       FreeMat(matan, n);
     }
@@ -2278,7 +2278,7 @@ LABDOUB:
       if (chi_get_deg(CHI) != 2) t = gmul2n(t, 1); /* character not real */
       z = gadd(z, t);
     }
-    gel(vzeta,i) = gmul2n(gcosh(gdivgs(z,den), newprec), 1);
+    gel(vzeta,i) = gmul2n(gcosh(gdivgu(z,den), newprec), 1);
   }
   polrelnum = roots_to_pol(vzeta, 0);
   if (DEBUGLEVEL)
@@ -3054,7 +3054,7 @@ ellphistinit(GEN om, long prec)
   if (gsigne(imag_i(gdiv(om1,om2))) < 0) { swap(om1,om2); om = mkvec2(om1,om2); }
   om1b = conj_i(om1);
   om2b = conj_i(om2); res = cgetg(4,t_VEC);
-  gel(res,1) = gdivgs(elleisnum(om,2,0,prec),12);
+  gel(res,1) = gdivgu(elleisnum(om,2,0,prec),12);
   gel(res,2) = gdiv(PiI2(prec), gmul(om2, imag_i(gmul(om1b,om2))));
   gel(res,3) = om2b; return res;
 }

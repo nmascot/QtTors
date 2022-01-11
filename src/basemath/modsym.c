@@ -4175,7 +4175,7 @@ mspadicseries(GEN oms, long teichi)
       if (!gequal0(a) || valp(a) > 0) done = 0; else setlg(s2,j+1);
     }
     if (done || j == m-1) break;
-    bin = RgXn_mul(bin, gdivgs(gsubgs(X, j), j+1), m);
+    bin = RgXn_mul(bin, gdivgu(gsubgs(X, j), j+1), m);
   }
   s = RgV_to_ser(s,0,lg(s)+1);
   if (s2) { s2 = RgV_to_ser(s2,0,lg(s2)+1); s = mkvec2(s, s2); }
@@ -4978,7 +4978,7 @@ mspetersson_i(GEN W, GEN F, GEN G, GEN *pvf, GEN *pvg, GEN *pC)
     c = cocycle(gcoeff(gel(annT31,i), 2,1));
     f = mseval(W, G, c);
     c = cocycle(gcoeff(gel(annT31,i), 3,1));
-    gel(vg, i+n1+n2) = gdivgs(gadd(f, mseval(W, G, c)), 3);
+    gel(vg, i+n1+n2) = gdivgu(gadd(f, mseval(W, G, c)), 3);
   }
   *pC = binomial_init(msk_get_weight(W) - 2, NULL);
   *pvf = vf;
@@ -5328,7 +5328,7 @@ eispetersson(GEN M, GEN F, GEN Eis, GEN CD)
   {
     GEN e = gel(Eis,i), Q = mseval(M, F, gel(e,2)), z = bil(gel(e,3), Q, CD);
     long d = itou(gel(e,1));
-    res = gadd(res, d == 1? z: gdivgs(z,d));
+    res = gadd(res, d == 1? z: gdivgu(z,d));
   }
   return gerepileupto(av, gdiv(simplify_shallow(res), gel(CD,2)));
 };
@@ -5371,7 +5371,7 @@ get_C(GEN vC, long k)
   {
     GEN c = gel(vC, j);
     if (!odd(j)) c = negi(c);
-    gel(C,k-j) = gel(C, j) = gdivgs(c, j*(k-j));
+    gel(C,k-j) = gel(C, j) = gdivgu(c, j*(k-j));
   }
   return C;
 }

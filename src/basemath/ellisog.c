@@ -662,8 +662,8 @@ static GEN
 isogeny_a4a6(GEN E)
 {
   GEN a1 = ell_get_a1(E), a3 = ell_get_a3(E), b2 = ell_get_b2(E);
-  retmkvec3(deg1pol(gen_1, gdivgs(b2, 12), 0),
-            deg1pol(gdivgs(a1,2), deg1pol(gen_1, gdivgs(a3,2), 1), 0),
+  retmkvec3(deg1pol(gen_1, gdivgu(b2, 12), 0),
+            deg1pol(gdivgu(a1,2), deg1pol(gen_1, gdivgu(a3,2), 1), 0),
             pol_1(0));
 }
 
@@ -673,7 +673,7 @@ invisogeny_a4a6(GEN E)
   GEN a1 = ell_get_a1(E), a3 = ell_get_a3(E), b2 = ell_get_b2(E);
   retmkvec3(deg1pol(gen_1, gdivgs(b2, -12), 0),
             deg1pol(gdivgs(a1,-2),
-              deg1pol(gen_1, gadd(gdivgs(a3,-2), gdivgs(gmul(b2,a1), 24)), 1), 0),
+              deg1pol(gen_1, gadd(gdivgs(a3,-2), gdivgu(gmul(b2,a1), 24)), 1), 0),
             pol_1(0));
 }
 
@@ -762,25 +762,25 @@ elkies98(GEN a4, GEN a6, long l, GEN s, GEN a4t, GEN a6t)
   long i, n, d;
   d = l == 2 ? 1 : l>>1;
   C = cgetg(d+1, t_VEC);
-  gel(C, 1) = gdivgs(gsub(a4, a4t), 5);
+  gel(C, 1) = gdivgu(gsub(a4, a4t), 5);
   if (d >= 2)
-    gel(C, 2) = gdivgs(gsub(a6, a6t), 7);
+    gel(C, 2) = gdivgu(gsub(a6, a6t), 7);
   if (d >= 3)
-    gel(C, 3) = gdivgs(gsub(gsqr(gel(C, 1)), gmul(a4, gel(C, 1))), 3);
+    gel(C, 3) = gdivgu(gsub(gsqr(gel(C, 1)), gmul(a4, gel(C, 1))), 3);
   for (n = 3; n < d; ++n)
   {
     GEN s = gen_0;
     for (i = 1; i < n; i++)
       s = gadd(s, gmul(gel(C, i), gel(C, n-i)));
-    gel(C, n+1) = gdivgs(gsub(gsub(gmulsg(3, s), gmul(gmulsg((2*n-1)*(n-1), a4), gel(C, n-1))), gmul(gmulsg((2*n-2)*(n-2), a6), gel(C, n-2))), (n-1)*(2*n+5));
+    gel(C, n+1) = gdivgu(gsub(gsub(gmulsg(3, s), gmul(gmulsg((2*n-1)*(n-1), a4), gel(C, n-1))), gmul(gmulsg((2*n-2)*(n-2), a6), gel(C, n-2))), (n-1)*(2*n+5));
   }
   P = cgetg(d+2, t_VEC);
   gel(P, 1 + 0) = stoi(d);
   gel(P, 1 + 1) = s;
   if (d >= 2)
-    gel(P, 1 + 2) = gdivgs(gsub(gel(C, 1), gmulgs(gmulsg(2, a4), d)), 6);
+    gel(P, 1 + 2) = gdivgu(gsub(gel(C, 1), gmulgs(gmulsg(2, a4), d)), 6);
   for (n = 2; n < d; ++n)
-    gel(P, 1 + n+1) = gdivgs(gsub(gsub(gel(C, n), gmul(gmulsg(4*n-2, a4), gel(P, 1+n-1))), gmul(gmulsg(4*n-4, a6), gel(P, 1+n-2))), 4*n+2);
+    gel(P, 1 + n+1) = gdivgu(gsub(gsub(gel(C, n), gmul(gmulsg(4*n-2, a4), gel(P, 1+n-1))), gmul(gmulsg(4*n-4, a6), gel(P, 1+n-2))), 4*n+2);
   S = cgetg(d+3, t_POL);
   S[1] = evalsigne(1) | evalvarn(0);
   gel(S, 2 + d - 0) = gen_1;

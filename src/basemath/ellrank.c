@@ -698,7 +698,7 @@ static GEN
 quartic_cubic(GEN g, long v)
 {
   GEN a = gel(g, 6), b = gel(g, 5), c = gel(g, 4);
-  GEN a3 = gdivgs(a,3);
+  GEN a3 = gdivgu(a,3);
   return deg1pol(gmul2n(a3,2), gsub(gsqr(b),gmul2n(gmul(a3,c),3)), v);
 }
 
@@ -1606,7 +1606,7 @@ nf2selmer_quad(GEN nf, GEN S)
     gel(norms, i) = factorback2(QS2gen, F2c_to_ZC(gel(KerH, i)));
   LS2gen = cgetg(l, t_VEC);
   chpol = QXQ_charpoly(gel(nf_get_zk(nf), 2), nf_get_pol(nf), 0);
-  b = gdivgs(negi(gel(chpol, 3)), 2);
+  b = gdivgu(negi(gel(chpol, 3)), 2);
   c = gel(chpol, 2);
   Q = mkmat3(mkcol3(gen_1, b, gen_0),
              mkcol3(b, c, gen_0),

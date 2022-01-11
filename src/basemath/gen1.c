@@ -3063,12 +3063,8 @@ divrunextu(GEN x, ulong i)
 GEN
 gdivgunextu(GEN x, ulong i)
 {
-#ifdef LONG_IS_64BIT
-  if (i < 3037000500L) /* i(i+1) < 2^63 */
-#else
-  if (i < 46341L) /* i(i+1) < 2^31 */
-#endif
-    return gdivgs(x, i*(i+1));
+  if (i & HIGHMASK) /* i(i+1) >= 2^BITS_IN_LONG*/
+    return gdivgu(x, i*(i+1));
   else
     return gdiv(x, muluu(i, i+1));
 }

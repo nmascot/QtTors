@@ -3100,9 +3100,9 @@ makeA5resolvent(GEN pol, long flag)
   GEN R = cgetg(9, t_POL), D = ZX_disc(pol), c, d, e, f, v;
   GEN c2, d2, e2, c4, df;
   pol = RgX_translate(pol, gdivgs(gel(pol, 6), -5));
-  c = gdivgs(gel(pol, 5), 10);
-  d = gdivgs(gel(pol, 4), 10);
-  e = gdivgs(gel(pol, 3), 5);
+  c = gdivgu(gel(pol, 5), 10);
+  d = gdivgu(gel(pol, 4), 10);
+  e = gdivgu(gel(pol, 3), 5);
   f = gel(pol, 2);
   c2 = gsqr(c); c4 = gsqr(c2); d2 = gsqr(d); e2 = gsqr(e);
   df = gmul(d, f);

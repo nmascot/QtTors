@@ -160,7 +160,7 @@ taugen_n(GEN n, GEN G)
     }
   }
   S = addii(shifti(S,1), mulii(leading_coeff(G), hclassno6(n4)));
-  return gdivgs(S, 12);
+  return gdivgu(S, 12);
 }
 
 /* ell != 12 */
@@ -181,7 +181,7 @@ newtrace(GEN fan, GEN n, long ell)
     else /* d^2 = n */
     {
       T = gadd(T, gmul2n(q, -1));
-      T = gsub(T, gdivgs(mulii(diviiexact(q,d), mfrhopol_eval(G, utoipos(4))), 12));
+      T = gsub(T, gdivgu(mulii(diviiexact(q,d), mfrhopol_eval(G, utoipos(4))), 12));
       break;
     }
   }

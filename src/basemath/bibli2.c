@@ -338,7 +338,7 @@ pollegendre_eval0(long n, GEN x, long flag)
   { /* u = P_i(x), v = P_{i-1}(x), compute t = P_{i+1}(x) */
     GEN t;
     if ((i & 0xff) == 0) gerepileall(av,2,&u, &v);
-    t = gdivgs(gsub(gmul(gmulsg(2*i+1,x), u), gmulsg(i,v)), i+1);
+    t = gdivgu(gsub(gmul(gmulsg(2*i+1,x), u), gmulsg(i,v)), i+1);
     v = u; u = t;
   }
   if (flag) return gerepilecopy(av, mkvec2(v, u));
@@ -366,7 +366,7 @@ pollaguerre(long n, GEN a, long v)
     if (i)
     {
       c2 = divis(c2,-i);
-      c1 = gdivgs(gmul(c1, gaddsg(i,a)), n+1-i);
+      c1 = gdivgu(gmul(c1, gaddsg(i,a)), n+1-i);
     }
   }
   return gerepilecopy(av, L);
@@ -409,7 +409,7 @@ pollaguerre_eval0(long n, GEN a, GEN x, long flag)
   { /* u = P_i(x), v = P_{i-1}(x), compute t = P_{i+1}(x) */
     GEN t;
     if ((i & 0xff) == 0) gerepileall(av,2,&u, &v);
-    t = gdivgs(gsub(gmul(gsub(gaddsg(2*i+1,a),x), u), gmul(gaddsg(i,a),v)), i+1);
+    t = gdivgu(gsub(gmul(gsub(gaddsg(2*i+1,a),x), u), gmul(gaddsg(i,a),v)), i+1);
     v = u; u = t;
   }
   if (flag) return gerepilecopy(av, mkvec2(v, u));

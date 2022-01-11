@@ -88,7 +88,7 @@ LogHeight(GEN x, long prec)
     GEN t = gabs(gel(x,i), prec);
     if (gcmpgs(t,1) > 0) LH = gmul(LH, t);
   }
-  return gerepileupto(av, gdivgs(glog(LH,prec), n));
+  return gerepileupto(av, gdivgu(glog(LH,prec), n));
 }
 
 /* |x|^(1/n), x t_INT */

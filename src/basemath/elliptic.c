@@ -2026,7 +2026,7 @@ ellmul_CM(GEN e, GEN P, GEN n)
   if (degpol(p1) > vn || signe(z2))
     pari_err_TYPE("ellmul [not a complex multiplication]", n);
   q1p = RgX_deriv(q1);
-  b2ov12 = gdivgs(ell_get_b2(e), 12);
+  b2ov12 = gdivgu(ell_get_b2(e), 12);
   grdx = gadd(gel(P,1), b2ov12); /* x(P) + b2/12 */
   q1 = poleval(q1, grdx);
   if (gequal0(q1)) return ellinf();
@@ -2746,7 +2746,7 @@ elleisnum(GEN om, long k, long flag, long prec)
     GEN a = gmul(Pi2n(1,T.prec), mului(12, T.c));
     y = gsub(y, mulcxI(gdiv(a, gmul(T.w2, T.W2))));
   }
-  else if (k==4 && flag) y = gdivgs(y,  12);
+  else if (k==4 && flag) y = gdivgu(y,  12);
   else if (k==6 && flag) y = gdivgs(y,-216);
   return gerepilecopy(av, gprec_wtrunc(y, T.prec0));
 }
@@ -2915,9 +2915,9 @@ ellwpseries_aux(GEN c4, GEN c6, long v, long PRECDL)
   _1 = Rg_get_1(c4);
   switch(PRECDL)
   {
-    default:P[6] = gdivgs(c6,6048);
+    default:P[6] = gdivgu(c6,6048);
     case 6:
-    case 5: P[4] = gdivgs(c4, 240);
+    case 5: P[4] = gdivgu(c4, 240);
     case 4:
     case 3: P[2] = gmul(_1,gen_0);
     case 2:
@@ -2925,7 +2925,7 @@ ellwpseries_aux(GEN c4, GEN c6, long v, long PRECDL)
   }
   if (PRECDL <= 8) return res;
   av = avma;
-  P[8] = gerepileupto(av, gdivgs(gsqr(P[4]), 3));
+  P[8] = gerepileupto(av, gdivgu(gsqr(P[4]), 3));
   for (k=5; (k<<1) < PRECDL; k++)
   {
     av = avma;
@@ -2934,9 +2934,9 @@ ellwpseries_aux(GEN c4, GEN c6, long v, long PRECDL)
     t = gmul2n(t, 1);
     if ((k & 1) == 0) t = gadd(gsqr(P[k]), t);
     if (k % 3 == 2)
-      t = gdivgs(gmulsg(3, t), (k-3)*(2*k+1));
+      t = gdivgu(gmulsg(3, t), (k-3)*(2*k+1));
     else /* same value, more efficient */
-      t = gdivgs(t, ((k-3)*(2*k+1)) / 3);
+      t = gdivgu(t, ((k-3)*(2*k+1)) / 3);
     P[k<<1] = gerepileupto(av, t);
   }
   return res;
@@ -3201,7 +3201,7 @@ pointell(GEN e, GEN z, long prec)
   }
   v = ellwpnum_all(e,z,1,prec);
   if (!v) { set_avma(av); return ellinf(); }
-  gel(v,1) = gsub(gel(v,1), gdivgs(ell_get_b2(e),12));
+  gel(v,1) = gsub(gel(v,1), gdivgu(ell_get_b2(e),12));
   gel(v,2) = gmul2n(gsub(gel(v,2), ec_h_evalx(e,gel(v,1))),-1);
   return gerepilecopy(av, v);
 }
@@ -4567,7 +4567,7 @@ nfrestrict23(GEN nf, GEN E)
   s = gshift(gsub(A1,a1), -1);
   s = lift_if_rational(basistoalg(nf, s));
   A2 = nfsub(nf, a2, nfmul(nf,s, nfadd(nf,a1,s)));
-  r = gdivgs(gsub(gmodgs(A2,3), A2), 3);
+  r = gdivgu(gsub(gmodgs(A2,3), A2), 3);
   r = lift_if_rational(basistoalg(nf, r));
   A3 = nfadd(nf, a3, nfmul(nf,r,A1));
   t = nfadd(nf, nfmul(nf, r,s), gshift(gsub(gmodgs(A3,2), A3), -1));
@@ -6840,7 +6840,7 @@ elltaniyama(GEN e, long prec)
       s1 = gadd(b6, gmul(U, gadd(gmul2n(b4,1), gmul(U,gadd(b2,gmul2n(U,2))))));
       /* s2 = (qX')^2 - (4X^3 + b2 U^2 + 2b4 U + b6) = 28 x_4 + O(q) */
       s2 = gsub(gmul(c,gsqr(w)), s1);
-      s1 = signe(s2)? gdivgs(gel(s2,2), 28): gen_0; /* = x_4 */
+      s1 = signe(s2)? gdivgu(gel(s2,2), 28): gen_0; /* = x_4 */
     }
     gel(X,n+2) = gerepileupto(av2, s1);
   }
@@ -7583,7 +7583,7 @@ ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
     }
     gcoeff(M, f, f) = h;
     for (i = 1; i <= nH; i++)
-      if (i != f) gcoeff(M, f, i) = gdivgs(RgV_dotproduct(gel(M,i), Ki), l);
+      if (i != f) gcoeff(M, f, i) = gdivgu(RgV_dotproduct(gel(M,i), Ki), l);
     for (i = 1; i <= nH; i++) gcoeff(M, i, f) = gcoeff(M, f, i);
     gel(H,f) = R; return H; /* found l-divisible point: return new lattice */
   }

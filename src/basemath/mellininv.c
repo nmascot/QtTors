@@ -347,9 +347,9 @@ Kderivlarge(GEN K, GEN t, GEN t2d, long bitprec0)
   prec = nbits2prec(bitprec);
   t2d = gtofp(t2d, prec);
   if (t)
-    tdA = gpow(t, gdivgs(A2,d), prec);
+    tdA = gpow(t, gdivgu(A2,d), prec);
   else
-    tdA = gpow(t2d, gdivgs(A2,2), prec);
+    tdA = gpow(t2d, gdivgu(A2,2), prec);
   tdA = gmul(cd, tdA);
 
   pi = mppi(prec);
@@ -517,7 +517,7 @@ gammamellininvasymp_i(GEN Vga, long nlimmax, long m, long *status)
   if (!m) return M;
   d = lg(Vga)-1;
   /* half the exponent of t in asymptotic expansion. */
-  A = gdivgs(gaddsg(1-d, sumVga(Vga)), 2*d);
+  A = gdivgu(gaddsg(1-d, sumVga(Vga)), 2*d);
   if (*status == 2) M = shallowconcat(M, zerovec(m));
   nlim = lg(M)-1;
   Aadd = sstoQ(2-d, 2*d); /* (1/d) - (1/2) */
@@ -581,7 +581,7 @@ gammamellininvinit(GEN Vga, long m, long bitprec)
   if (!is_vec_t(typ(Vga)) || !d) pari_err_TYPE("gammamellininvinit",Vga);
   nlimmax = ceil(E * log2(1+M_PI*tmax) * C2 / get_D(d));
   A2 = gaddsg(m*(2-d) + 1-d, sumVga(Vga));
-  cd = (d <= 2)? gen_2: gsqrt(gdivgs(int2n(d+1), d), nbits2prec(bitprec));
+  cd = (d <= 2)? gen_2: gsqrt(gdivgu(int2n(d+1), d), nbits2prec(bitprec));
   /* if in Klarge, we have |t| > tmax = E/C2, thus nlim < E*C2/D. */
   M = gammamellininvasymp_i(Vga, nlimmax, m, &status);
   if (status == 2)
@@ -637,6 +637,6 @@ gammamellininv(GEN K, GEN s, long m, long bitprec)
   if (!is_vec_t(typ(K)) || lg(K) != 6 || !is_vec_t(typ(GMi_get_Vga(K))))
     K = gammamellininvinit(K, m, bitprec);
   d = GMi_get_degree(K);
-  s2d = gpow(s, gdivgs(gen_2, d), nbits2prec(bitprec));
+  s2d = gpow(s, gdivgu(gen_2, d), nbits2prec(bitprec));
   return gerepileupto(av, gammamellininvrt_i(K, s, s2d, bitprec));
 }

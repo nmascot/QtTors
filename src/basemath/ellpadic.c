@@ -212,7 +212,7 @@ doellQp_root(GEN E, long prec)
   }
   a = cvtop(a, p, prec);
   if (alpha) setvalp(a, valp(a)+alpha);
-  return gsub(a, gdivgs(ell_get_b2(E), 12));
+  return gsub(a, gdivgu(ell_get_b2(E), 12));
 }
 GEN
 ellQp_root(GEN E, long prec)
@@ -223,7 +223,7 @@ static void
 doellQp_ab(GEN E, GEN *pta, GEN *ptb, long prec)
 {
   GEN b2 = ell_get_b2(E), b4 = ell_get_b4(E), e1 = ellQp_root(E, prec);
-  GEN w, u, t = gadd(gdivgs(b2,4), gmulsg(3,e1)), p = ellQp_get_p(E);
+  GEN w, u, t = gadd(gdivgu(b2,4), gmulsg(3,e1)), p = ellQp_get_p(E);
   w = Qp_sqrt(gmul2n(gadd(b4,gmul(e1,gadd(b2,gmulsg(6,e1)))),1));
   u = gadd(t,w);
   /* Decide between w and -w: we want v(a-b) > v(b) */
@@ -782,7 +782,7 @@ ellpadics2_tate(GEN Ep, long n)
     if ((m & 31) == 0) s = gerepileuptoint(av, s);
   }
   s = subui(1, muliu(s,24));
-  s = gdivgs(gsub(b2, gdiv(s,u2)), 12);
+  s = gdivgu(gsub(b2, gdiv(s,u2)), 12);
   return precp_fix(s,n);
 }
 
@@ -945,7 +945,7 @@ ellpadicbsd(GEN E, GEN p, long n, GEN D)
   else if (dvdii(ND,p))
   {
     if (equalim1(apD)) /* divide by 1-1/a_p */
-      U = gdivgs(U, 2);
+      U = gdivgu(U, 2);
     else
     { /* ap = 1 */
       GEN EDp = ellinit(ED, zeropadic(p,n), 0);

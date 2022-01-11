@@ -396,7 +396,7 @@ lambertp(GEN x)
   if (k < 0) return NULL;
   y = gpowgs(cvstop2(k, x), k - 1);
   for (k--; k; k--)
-    y = gsub(gpowgs(cvstop2(k, x), k - 1), gdivgs(gmul(x, y), k + 1));
+    y = gsub(gpowgs(cvstop2(k, x), k - 1), gdivgu(gmul(x, y), k + 1));
   return gerepileupto(av, gmul(x, y));
 }
 

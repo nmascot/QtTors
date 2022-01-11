@@ -1034,7 +1034,7 @@ ser_pow_1(GEN x, GEN n)
       GEN t = gsubgs(gmulgs(n,j),i-j);
       s = gadd(s, gmul(gmul(t, gel(X,j)), gel(Y,i-j)));
     }
-    gel(Y,i) = gerepileupto(av, gdivgs(s,i));
+    gel(Y,i) = gerepileupto(av, gdivgu(s,i));
   }
   return y;
 }
@@ -2512,7 +2512,7 @@ serexp(GEN x, long prec)
       av = avma; if (X) t = gmul(t, X);
       for (j = e + 1; j <= J; j++)
         t = gadd(t, gmulgs(gmul(gel(xd,j),gel(yd,i-j)), j));
-      gel(yd,i) = gerepileupto(av, gdivgs(t, i));
+      gel(yd,i) = gerepileupto(av, gdivgu(t, i));
     }
     return y;
   }
@@ -3729,7 +3729,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       if (ex2 > lx)
       {
         *s = x == y? gcopy(y): gerepilecopy(av, y); av = avma;
-        *c = gerepileupto(av, gsubsg(1, gdivgs(gsqr(y),2)));
+        *c = gerepileupto(av, gsubsg(1, gdivgu(gsqr(y),2)));
         return;
       }
       if (!ex)
@@ -3768,7 +3768,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
           av = avma; p1 = gen_0;
           for (j=ex; j<=minss(i-ex2,mi); j++)
             p1 = gadd(p1,gmulgs(gmul(gel(y,j-ex+2),gel(pc,i-j)),j));
-          p1 = gdivgs(p1,i-2);
+          p1 = gdivgu(p1,i-2);
           gel(ps,ii) = gerepileupto(av, gadd(p1,gel(y,ii)));
         }
       }

@@ -946,7 +946,7 @@ dft(GEN p, long k, long NN, long Lmax, long bit, GEN F, GEN H, long polreal)
   {
     aux=gel(U,k-i);
     for (j=1+i; j<k; j++) aux = gadd(aux,gmul(gel(F,2+j),gel(U,j-i)));
-    gel(H,i+2) = gdivgs(aux,NN);
+    gel(H,i+2) = gdivgu(aux,NN);
   }
 }
 

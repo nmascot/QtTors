@@ -539,7 +539,7 @@ rtoR(GEN a, GEN r, GEN FVga, GEN N, long prec)
 {
   long v = lg(r)-2, d = fracgammadegree(FVga), ext;
   GEN Na, as = deg1ser_shallow(gen_1, a, varn(r), v);
-  Na = gpow(N, gdivgs(as, 2), prec);
+  Na = gpow(N, gdivgu(as, 2), prec);
   /* make up for a possible loss of accuracy */
   if (d) as = deg1ser_shallow(gen_1, a, varn(r), v + d);
   return gmul(gmul(r, Na), gammafactproduct(FVga, as, &ext, prec));
@@ -772,7 +772,7 @@ mkvroots(long d, long lim, long prec)
         return v;
     }
   }
-  return vecpowug(lim, gdivgs(gen_2,d), prec);
+  return vecpowug(lim, gdivgu(gen_2,d), prec);
 }
 
 GEN
@@ -909,7 +909,7 @@ lfuntheta(GEN data, GEN t, long m, long bitprec)
     GEN K = theta_get_K(thetainit);
     GEN vroots = mkvroots(d, limt, prec);
     pari_sp av;
-    t = gpow(t, gdivgs(gen_2,d), prec);
+    t = gpow(t, gdivgu(gen_2,d), prec);
     S = gen_0; av = avma;
     for (n = 1; n <= limt; ++n)
     {
@@ -1180,7 +1180,7 @@ lfuninit_ab(GEN theta, GEN h, struct lfunp *S)
      * Speedup: if n' = 2n and m' = m - m0 >= 0; then k[m,n] = k[m',n']. */
     /* vroots[n] = n^(2/d) */
     vroots = mkvroots(S->d, S->nmax, prec);
-    d2 = gdivgs(gen_2, S->d);
+    d2 = gdivgu(gen_2, S->d);
     /* peh2d[m+1] = (exp(mh)/sqrt(N))^(2/d) */
     peh2d = gpowers0(gexp(gmul(d2,h), prec), M, gpow(isqN, d2, prec));
     m0 = S->m0;
@@ -1283,7 +1283,7 @@ lfuninit_make(long t, GEN ldata, GEN tech, GEN domain)
   GEN Vga = ldata_get_gammavec(ldata);
   long d = lg(Vga)-1;
   GEN w2 = gen_1, k2 = gmul2n(ldata_get_k(ldata), -1);
-  GEN expot = gdivgs(gadd(gmulsg(d, gsubgs(k2, 1)), sumVga(Vga)), 4);
+  GEN expot = gdivgu(gadd(gmulsg(d, gsubgs(k2, 1)), sumVga(Vga)), 4);
   if (typ(ldata_get_dual(ldata))==t_INT)
   {
     GEN eno = ldata_get_rootno(ldata);
@@ -1730,7 +1730,7 @@ lfun_OK(GEN linit, GEN s, GEN sdom, long bitprec)
   }
   gas = gammafactproduct(FVga, ss, &ext, prec);
   N = ldata_get_conductor(linit_get_ldata(linit));
-  res = gdiv(S, gmul(gpow(N, gdivgs(ss, 2), prec), gas));
+  res = gdiv(S, gmul(gpow(N, gdivgu(ss, 2), prec), gas));
   if (typ(s) != t_SER && is_ser(res)) res = lfunservec(res);
   else if (ext) res = lfununextvec(res);
   return gprec_w(res, prec);
@@ -1930,7 +1930,7 @@ theta_pole_contrib(GEN R, long v, GEN L)
   GEN s = mysercoeff(R,-v);
   long i;
   for (i = v-1; i >= 1; i--)
-    s = gadd(mysercoeff(R,-i), gdivgs(gmul(s,L), i));
+    s = gadd(mysercoeff(R,-i), gdivgu(gmul(s,L), i));
   return s;
 }
 /* subtract successively rather than adding everything then subtracting.
@@ -2070,7 +2070,7 @@ lfunthetaspec(GEN linit, long bitprec, GEN *pv, GEN *pv2)
    * theta(t) / theta(2t) without assuming t = 1/sqrt(2) */
   K = theta_get_K(thetainit);
   vroots = mkvroots(d, L, prec);
-  t = gpow(t, gdivgs(gen_2, d), prec); /* rt variant: t->t^(2/d) */
+  t = gpow(t, gdivgu(gen_2, d), prec); /* rt variant: t->t^(2/d) */
   /* v = \sum_{n <= L, n odd} a_n K(nt) */
   for (v = gen_0, n = 1; n <= L; n+=2)
   {
@@ -2103,7 +2103,7 @@ static GEN
 Rtor(GEN a, GEN R, GEN ldata, long prec)
 {
   GEN FVga = gammafactor(ldata_get_gammavec(ldata));
-  GEN Na = gpow(ldata_get_conductor(ldata), gdivgs(a,2), prec);
+  GEN Na = gpow(ldata_get_conductor(ldata), gdivgu(a,2), prec);
   long ext;
   return gdiv(R, gmul(Na, gammafactproduct(FVga, a, &ext, prec)));
 }
@@ -2208,7 +2208,7 @@ lfunrootres(GEN data, long bitprec)
     {
       GEN tk2 = gsqrt(p2k, prec);
       GEN tbe = gpow(gen_2, be, prec);
-      GEN tkbe = gpow(gen_2, gdivgs(gsub(k, be), 2), prec);
+      GEN tkbe = gpow(gen_2, gdivgu(gsub(k, be), 2), prec);
       a = conj_i(gsub(gmul(tbe, v), v2));
       b = gsub(gdiv(tbe, tkbe), tkbe);
       e = gsub(gmul(gdiv(tbe, tk2), v2), gmul(tk2, v));
@@ -2368,7 +2368,7 @@ lfunzeros(GEN ldata, GEN lim, long divz, long bitprec)
   cN = gdiv(ldata_get_conductor(ldata), gpowgs(Pi2n(-1, prec), d));
   cN = gexpo(cN) >= 0? gaddsg(d, gmulsg(2, glog(cN, prec))): utoi(d);
   pi2 = Pi2n(1, prec);
-  pi2div = gdivgs(pi2, labs(divz));
+  pi2div = gdivgu(pi2, labs(divz));
   s1 = gsigne(h1);
   s2 = gsigne(h2);
   w = cgetg(100+1, t_VEC); c = 1; ct = 0; T = NULL;

@@ -80,9 +80,9 @@ hankel_ABr(GEN *pA, GEN *pB, GEN *pr, GEN n, GEN z, long bit)
   P = C = real_1_bit(bit);
   for (m = 1;; m += 2)
   {
-    C = gmul(C, gdivgs(gmul(gsub(n2, sqru(2*m - 1)), zi), m));
+    C = gmul(C, gdivgu(gmul(gsub(n2, sqru(2*m - 1)), zi), m));
     Q = gadd(Q, C);
-    C = gmul(C, gdivgs(gmul(gsub(n2, sqru(2*m + 1)), zi), m + 1));
+    C = gmul(C, gdivgu(gmul(gsub(n2, sqru(2*m + 1)), zi), m + 1));
     P = gadd(P, C);
     if (gexpo(C) < -B && gcmpgs(K, m) <= 0) break;
   }
@@ -442,7 +442,7 @@ _kbessel(long n, GEN x, long m, long prec)
   if (exact)
   {
     gel(H,2) = s = gen_1;
-    for (k=2; k<=M; k++) gel(H,k+1) = s = gdivgs(gaddsg(1,gmulsg(k,s)),k);
+    for (k=2; k<=M; k++) gel(H,k+1) = s = gdivgu(gaddsg(1,gmulsg(k,s)),k);
   }
   else
   {
@@ -573,7 +573,7 @@ kbesselintern(GEN n, GEN z, long N, long prec)
         pp = jbesselintern(n, y, N, prec);
         p2 = gpowgs(y,-k); if (fl2 == 0) p2 = gneg(p2);
         p3 = gmul2n(diviiexact(mpfact(k + 1),mpfact((k + 1) >> 1)),-(k + 1));
-        p3 = gdivgs(gmul2n(gsqr(p3),1),k);
+        p3 = gdivgu(gmul2n(gsqr(p3),1),k);
         p2 = gmul(p2,p3);
         p1 = gsub(pp,gmul(p2,pm));
       }
@@ -1016,7 +1016,7 @@ incgamspec(GEN s, GEN x, GEN g, long prec)
 
   if (k && gexpo(x) > 0)
   {
-    GEN xk = gdivgs(x, k);
+    GEN xk = gdivgu(x, k);
     long bitprec = prec2nbits(prec);
     double d = (gexpo(xk) > bitprec)? bitprec*M_LN2: log(dblmodulus(xk));
     d = k * (d + 1) / M_LN2;
@@ -1069,9 +1069,9 @@ incgamspec(GEN s, GEN x, GEN g, long prec)
   /* ( gamma(1+sk) - exp(sk log(x))) ) / sk */
   S1 = gdiv(gsub(ggamma1m1(sk, prec+EXTRAPREC64), F3), sk);
   q = x; S3 = gdiv(x, gaddsg(1,sk));
-  for (n = 2; gexpo(q) - gexpo(S3) > -E; ++n)
+  for (n = 2; gexpo(q) - gexpo(S3) > -E; n++)
   {
-    q = gmul(q, gdivgs(mx, n));
+    q = gmul(q, gdivgu(mx, n));
     S3 = gadd(S3, gdiv(q, gaddsg(n, sk)));
   }
   S2 = gadd(gadd(S1, S3), gmul(F3, S3));
@@ -1230,7 +1230,7 @@ cxeint1(GEN x, long prec)
   for (n = 2; gexpo(q) - gexpo(S) >= -E; n++)
   {
     H = addrr(H, divru(run, n)); /* H = sum_{k<=n} 1/k */
-    z = gdivgs(gmul(x,z), n);   /* z = x^(n-1)/n! */
+    z = gdivgu(gmul(x,z), n);   /* z = x^(n-1)/n! */
     q = gmul(z, H); S = gadd(S, q);
     if ((n & 0x1ff) == 0) gerepileall(av2, 4, &z, &q, &S, &H);
   }
@@ -2199,9 +2199,9 @@ hurwitzp(GEN s, GEN x)
     for (j = 0; j < M; j++)
     {
       GEN y = gaddsg(j, x);
-      if (valp(y) <= 0) S = gadd(S, hurwitzp(s, gdivgs(y, M)));
+      if (valp(y) <= 0) S = gadd(S, hurwitzp(s, gdivgu(y, M)));
     }
-    return gdivgs(S, M);
+    return gdivgu(S, M);
   }
   if (valp(s) <= 1/(p-1) - vqp)
     pari_err_DOMAIN("hurwitzp", "v(s)", "<=", stoi(1/(p-1)-vqp), s);
@@ -2331,7 +2331,7 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
     if (odd(k)) k++;
     /* R_k < 2 |binom(a,k+1) B_{k+2}/(k+2)| */
     C = binomial(a, k+1); C = polcoef_i(C, 0, -1);
-    C = gmul(C, gdivgs(bernfrac(k+2), k+2));
+    C = gmul(C, gdivgu(bernfrac(k+2), k+2));
     C = gmul2n(gabs(C,LOWDEFAULTPREC), bitprec + 1);
     C = gpow(C, ginv(gsubsg(k+1, ra)), LOWDEFAULTPREC);
     /* need |N + x - 1|^2 > C^2 */
@@ -2374,12 +2374,12 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
   N2 = ginv(gsqr(Nx));
   if (typ(s0) == t_INT)
   {
-    S2 = gdivgs(bernreal(k, prec), k);
+    S2 = divru(bernreal(k, prec), k);
     for (j = k - 2; j >= 2; j -= 2)
     {
       GEN t = gsubgs(a, j), u = gmul(t, gaddgs(t, 1));
       u = gmul(gdivgunextu(u, j), gmul(S2, N2));
-      S2 = gadd(gdivgs(bernreal(j, prec), j), u);
+      S2 = gadd(divru(bernreal(j, prec), j), u);
     }
     S2 = gmul(S2, gdiv(a, Nx));
   }
@@ -2441,18 +2441,18 @@ cxpolylog(long m, GEN x, long prec)
   q = gen_1; s = gel(vz, m);
   for (n=1; n < m-1; n++)
   {
-    q = gdivgs(gmul(q,z),n);
+    q = gdivgu(gmul(q,z),n);
     s = gadd(s, gmul(gel(vz,m-n), real? real_i(q): q));
   }
   /* n = m-1 */
-    q = gdivgs(gmul(q,z),n); /* multiply by "zeta(1)" */
+    q = gdivgu(gmul(q,z),n); /* multiply by "zeta(1)" */
     h = gmul(q, gsub(harmonic(m-1), glog(gneg_i(z),prec)));
     s = gadd(s, real? real_i(h): h);
   /* n = m */
-    q = gdivgs(gmul(q,z),m);
+    q = gdivgu(gmul(q,z),m);
     s = gadd(s, gdivgs(real? real_i(q): q, -2)); /* zeta(0) = -1/2 */
   /* n = m+1 */
-    q = gdivgs(gmul(q,z),m+1); /* = z^(m+1) / (m+1)! */
+    q = gdivgu(gmul(q,z),m+1); /* = z^(m+1) / (m+1)! */
     s = gadd(s, gdivgs(real? real_i(q): q, -12)); /* zeta(-1) = -1/12 */
 
   li = -(prec2nbits(prec)+1);
@@ -2469,7 +2469,7 @@ cxpolylog(long m, GEN x, long prec)
   {
     GEN t = q = gdivgunextu(gmul(q,Z), 2*k+m); /* z^(2k+m+1)/(2k+m+1)! */
     if (real) t = real_i(t);
-    t = gmul(t, gdivgs(bernfrac(2*k+2), 2*k+2)); /* - t * zeta(1-(2k+2)) */
+    t = gmul(t, gdivgu(bernfrac(2*k+2), 2*k+2)); /* - t * zeta(1-(2k+2)) */
     s = gsub(s, t);
     if (gexpo(t)  < li) return s;
     /* large values ? */
@@ -2565,7 +2565,7 @@ polylog(long m, GEN x, long prec)
     GEN logx = glog(x,l), logx2 = gsqr(logx), vz = constzeta(m, l);
     p1 = mkfrac(gen_m1,gen_2);
     for (i = m-2; i >= 0; i -= 2)
-      p1 = gadd(gel(vz, m-i), gmul(p1,gdivgs(logx2,(i+1)*(i+2))));
+      p1 = gadd(gel(vz, m-i), gmul(p1, gdivgunextu(logx2, i+1)));
     if (m&1) p1 = gmul(logx,p1); else y = gneg_i(y);
     p1 = gadd(gmul2n(p1,1), gmul(z,gpowgs(logx,m-1)));
     if (typ(x) == t_REAL && signe(x) < 0) p1 = real_i(p1);
@@ -2616,7 +2616,7 @@ polylogD(long m, GEN x, long flag, long prec)
   for (k = 1; k < m; k++)
   {
     GEN t = RIpolylog(m-k, x, m2, l);
-    p2 = gdivgs(gmul(p2,p1), k); /* (-log|x|)^k / k! */
+    p2 = gdivgu(gmul(p2,p1), k); /* (-log|x|)^k / k! */
     y = gadd(y, gmul(p2, t));
   }
   if (m2)
@@ -3097,7 +3097,7 @@ sumdedekind(GEN h, GEN k)
 static GEN
 eta_reduced(GEN x, long prec)
 {
-  GEN z = expIPiC(gdivgs(x, 12), prec); /* e(x/24) */
+  GEN z = expIPiC(gdivgu(x, 12), prec); /* e(x/24) */
   if (24 * gexpo(z) >= -prec2nbits(prec))
     z = gmul(z, inteta( gpowgs(z,24) ));
   return z;
@@ -3211,7 +3211,7 @@ ser_j2(long prec, long v)
   GEN iD = gpowgs(ginv(ser_eta(prec)), 24); /* q/Delta */
   GEN J = gmul(ser_E(prec), iD);
   setvalp(iD,-1); /* now 1/Delta */
-  J = gadd(gdivgs(J, 691), iD);
+  J = gadd(gdivgu(J, 691), iD);
   J = gerepileupto(av, J);
   if (prec > 1) gel(J,3) = utoipos(744);
   setvarn(J,v); return J;

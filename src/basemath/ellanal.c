@@ -587,7 +587,7 @@ lambda1(GEN E, GEN nv, GEN p, long prec)
     long j, m = kod - 4, nl = 1 + (m >> 1L);
     res = cgetg(nl, t_VEC);
     for (j = 1; j < nl; j++)
-      gel(res, j) = gmul(lp, gsubgs(gdivgs(sqru(j), n), j)); /* j^2/n - j */
+      gel(res, j) = gmul(lp, gsubgs(gdivgu(sqru(j), n), j)); /* j^2/n - j */
   }
   else if (kod < -4)
     res = mkvec2(negr(lp), shiftr(mulrs(lp, kod), -2));
@@ -680,7 +680,7 @@ hnaive_max(GEN ell, GEN ht)
   GEN logd   = glog(absi_shallow(ell_get_disc(ell)), prec);
   GEN logj   = logplusQ(j, prec);
   GEN hj     = heightQ(j, prec);
-  GEN logb2p = signe(b2)? addrr(logplusQ(gdivgs(b2, 12),prec), mplog2(prec))
+  GEN logb2p = signe(b2)? addrr(logplusQ(gdivgu(b2, 12),prec), mplog2(prec))
                         : real_1(prec);
   GEN mu     = addrr(divru(addrr(logd, logj),6), logb2p);
   return addrs(addrr(addrr(ht, divru(hj,12)), mu), 2);

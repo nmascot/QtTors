@@ -268,7 +268,7 @@ smoothness_vec(ulong p, long r, long n)
 static GEN
 smooth_cost(GEN fb, GEN pr, GEN prC)
 {
-  GEN a = gdivgs(pr,6);
+  GEN a = gdivgu(pr,6);
   GEN b = gsubgs(prC,1);
   GEN c = gneg(fb);
   GEN vD = gsqrt(gsub(gsqr(b),gmul2n(gmul(a,c),2)),BIGDEFAULTPREC);
@@ -305,12 +305,12 @@ smooth_best(long p, long n, long *pt_r, long *pt_nb)
       GEN Nmax = powuu(p,d+1);
       if (gcmp(N,Nmax) >= 0)
       {
-        rels = itou_or_0(addui(rels, gceil(gmul(gdivgs(sqri(Nmax),6),pr))));
+        rels = itou_or_0(addui(rels, gceil(gmul(gdivgu(sqri(Nmax),6),pr))));
         if (!rels) rels = ULONG_MAX;
         set_avma(av2);
         continue;
       }
-      c = gdivgs(addii(powuu(p,2*d),sqri(N)),6);
+      c = gdivgu(addii(powuu(p,2*d),sqri(N)),6);
       FB = addii(FB,N);
       if ((!bestc || gcmp(gmul2n(c,r), gmul2n(bestc,bestr)) < 0))
       {

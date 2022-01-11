@@ -1400,13 +1400,13 @@ gadw(GEN x, long p)
   gel(u, 1) = s;
   gel(u, 2) = s;
   for (j = 2; j < p; ++j)
-    gel(u, j+1) = gdivgs(gel(u, j), j);
+    gel(u, j+1) = gdivgu(gel(u, j), j);
   for (k = 1, kp = p; k < n; ++k, kp += p) /* kp = k*p */
   {
     GEN c;
-    gel(u, 1) = gdivgs(gadd(gel(u, 1), gel(u, p)), kp);
+    gel(u, 1) = gdivgu(gadd(gel(u, 1), gel(u, p)), kp);
     for (j = 1; j < p; ++j)
-      gel(u, j+1) = gdivgs(gadd(gel(u, j), gel(u, j+1)), kp + j);
+      gel(u, j+1) = gdivgu(gadd(gel(u, j), gel(u, j+1)), kp + j);
 
     t = gmul(t, gaddgs(x, k-1));
     c = leafcopy(gel(u,1)); setvalp(c, valp(c) + k); /* c = u[1] * p^k */
@@ -1436,12 +1436,12 @@ Qp_gamma_Dwork(GEN x, long p)
   if (k)
   {
     GEN x_k = gsubgs(x,k);
-    x = gdivgs(x_k, p);
+    x = gdivgu(x_k, p);
     p1 = gadw(x, p); if (!odd(k)) p1 = gneg(p1);
     for (j = 1; j < k; ++j) p1 = gmul(p1, gaddgs(x_k, j));
   }
   else
-    p1 = gneg(gadw(gdivgs(x, p), p));
+    p1 = gneg(gadw(gdivgu(x, p), p));
   return gerepileupto(ltop, p1);
 }
 
@@ -2083,11 +2083,11 @@ serpsiz0(GEN z0, long L, long v, long prec)
   /* Start from n = 3; in Luke's notation, A2 := A_{n-2}, A1 := A_{n-1},
    * A := A_n. Same for B */
   av = avma;
-  A2= gdivgs(mkpoln(2, gen_1, utoipos(6)), 2);
+  A2= gdivgu(mkpoln(2, gen_1, utoipos(6)), 2);
   B2 = scalarpol_shallow(utoipos(4), 0);
-  A1= gdivgs(mkpoln(3, gen_1, utoipos(82), utoipos(96)), 6);
+  A1= gdivgu(mkpoln(3, gen_1, utoipos(82), utoipos(96)), 6);
   B1 = mkpoln(2, utoipos(8), utoipos(28));
-  A = gdivgs(mkpoln(4, gen_1, utoipos(387), utoipos(2906), utoipos(1920)), 12);
+  A = gdivgu(mkpoln(4, gen_1, utoipos(387), utoipos(2906), utoipos(1920)), 12);
   B = mkpoln(3, utoipos(14), utoipos(204), utoipos(310));
   A2= tr(A2,z0, L);
   B2= tr(B2,z0, L);

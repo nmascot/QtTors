@@ -281,11 +281,11 @@ compu(long ell, long p, long D)
   long s, t, k, i, L = ell * p;
 
   gel(v,1) = gel(v,2) = cvtop(gen_1, stoi(p), D);
-  for (i = 2; i < p; i++) gel(v, i+1) = gdivgs(gel(v, i), i);
+  for (i = 2; i < p; i++) gel(v, i+1) = gdivgu(gel(v, i), i);
   gel(w, 1) = shallowcopy(v);
   for (k = s = 1, t = p; k <= L; k++)
   {
-    gel(v, s) = gdivgs(gadd(gel(v, t), gel(v, s)), k + p - 1);
+    gel(v, s) = gdivgu(gadd(gel(v, t), gel(v, s)), k + p - 1);
     if (++s > p) { s = 1; gel(w, k/p + 1) = shallowcopy(v); }
     if (++t > p) t = 1;
   }
@@ -2083,7 +2083,7 @@ hgmmoments(GEN H, GEN t, GEN M, long nb)
     if ((i & 0xf) == 0) S = gerepilecopy(av2, S);
   }
   if (tm != t_VEC && tm != t_COL && tm != t_VECSMALL) S = gel(S, 1);
-  return gerepileupto(av, gdivgs(S, ct));
+  return gerepileupto(av, gdivgu(S, ct));
 }
 
 /* Heuristic guess: is there a pole ? */

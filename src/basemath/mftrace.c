@@ -515,7 +515,7 @@ tracerel(GEN a, GEN v, GEN z)
     GEN T = gel(v,3);
     long degrel = itou(gel(T,1));
     a = tracerel_i(T, RgX_rem(a, gel(v,2)));
-    if (degrel != 1) a = gdivgs(a, degrel);
+    if (degrel != 1) a = gdivgu(a, degrel);
     if (typ(a) == t_POL) a = RgX_rem(a, gel(v,1));
   }
   return a;
@@ -1356,7 +1356,7 @@ c_derivE2(long n, long d, GEN F, GEN gm)
     res = cgetg(n+2, t_VEC);
     for (i = 0; i <= n; i++) gel(res, i+1) = gmulsg(i, gel(VF, i*d+1));
     tmp = c_deflate(n, d, RgV_mul_RgXn(VF, VE));
-    return gerepileupto(av, gsub(res, gmul(gdivgs(gk, 12), tmp)));
+    return gerepileupto(av, gsub(res, gmul(gdivgu(gk, 12), tmp)));
   }
   else
   {
@@ -1365,7 +1365,7 @@ c_derivE2(long n, long d, GEN F, GEN gm)
     {
       tmp = RgV_mul_RgXn(VF, VE);
       for (i = 0; i <= nd; i++) gel(VF, i+1) = gmulsg(i, gel(VF, i+1));
-      VF = gsub(VF, gmul(gdivgs(gaddgs(gk, 2*(j-1)), 12), tmp));
+      VF = gsub(VF, gmul(gdivgu(gaddgs(gk, 2*(j-1)), 12), tmp));
     }
     return gerepilecopy(av, c_deflate(n, d, VF));
   }
@@ -3109,8 +3109,8 @@ TA2(long N, long k, GEN VCHI, long n, GEN SQRTS, GEN MUP, GEN GCD)
         }
       }
       if (gequal0(sh)) { set_avma(av); continue; }
-      if (D0 == -3) sh = gdivgs(sh, 3);
-      else if (D0 == -4) sh = gdivgs(sh, 2);
+      if (D0 == -3) sh = gdivgu(sh, 3);
+      else if (D0 == -4) sh = gdivgu(sh, 2);
       else sh = gmulgs(sh, myh(D0));
     }
     S = gerepileupto(av, gadd(S, mfrhopowsimp(Q,sh,nu,t,t2,n)));
@@ -7079,7 +7079,7 @@ findqganew(long N, GEN z)
     g = ugcdiu(D,e);
     if (g > 1) { C = muliu(C,e/g); D = diviuexact(D,g); } else C = muliu(C,e);
     m = gadd(gsqr(gadd(gmul(C, x), D)), gsqr(gmul(C, y)));
-    m = gdivgs(m, valNC2(P, E, e));
+    m = gdivgu(m, valNC2(P, E, e));
     if (gcmp(m, MI) < 0) { MI = m; Ck = C; Dk = D; }
   }
   return signe(Ck)? mkvec2(Ck, Dk): NULL;
@@ -7347,7 +7347,7 @@ mfeval_i(GEN mf, GEN F, GEN vtau, long flag, long bitprec)
     gel(vs,i) = evalcusp(mf, F, z, prec);
     if (gel(vs,i)) continue;
     tau = cxredga0N(N, z, &U, &gel(vczd,i), flag);
-    if (!flag) w = 0; else { w = mfZC_width(N, gel(U,1)); tau = gdivgs(tau,w); }
+    if (!flag) w = 0; else { w = mfZC_width(N, gel(U,1)); tau = gdivgu(tau,w); }
     gel(vTAU,i) = mulcxmI(gmul(tau, sqN));
     n = lfunthetacost(L0, real_i(gel(vTAU,i)), 0, bitprec);
     if (N0 < n) N0 = n;
@@ -8156,7 +8156,7 @@ mfgaexpansion_i(GEN mf, GEN B0, GEN ga, long n, long prec)
     {
       GEN gell = gceil(gmulsg(-w, almin));
       ell = itos(gell);
-      almin = gadd(almin, gdivgs(gell, w));
+      almin = gadd(almin, gdivgu(gell, w));
       if (nw < ell) pari_err_IMPL("alpha < 0 in mfgaexpansion");
     }
     if (ve) { ell += ve; e = vecslice(e, ve+1, l-1); }
@@ -8235,7 +8235,7 @@ mf2gaexpansion(GEN mf2, GEN F, GEN ga, long n, long prec)
   gsh = gfloor(gmulsg(w, al));
   if (!gequal0(gsh))
   {
-    al = gsub(al, gdivgs(gsh, w));
+    al = gsub(al, gdivgu(gsh, w));
     if (gsigne(gsh) > 0)
     {
       V = RgV_shift(V, gsh);
@@ -10137,9 +10137,9 @@ mftaylor(GEN F, long n, long flreal, long prec)
   v = cgetg(n+2, t_VEC); gel(v, 1) = RgX_coeff(P0,0);
   for (m = 0; m < n; m++)
   {
-    GEN P1 = gdivgs(gmulsg(-(k + 2*m), RgX_shift(P0,1)), 12);
+    GEN P1 = gdivgu(gmulsg(-(k + 2*m), RgX_shift(P0,1)), 12);
     P1 = gadd(P1, gmul(X2, RgX_deriv(P0)));
-    if (m) P1 = gsub(P1, gdivgs(gmulsg(m*(m+k-1), Pm1), 144));
+    if (m) P1 = gsub(P1, gdivgu(gmulsg(m*(m+k-1), Pm1), 144));
     Pm1 = P0; P0 = P1;
     gel(v, m+2) = RgX_coeff(P0, 0);
   }
@@ -10246,7 +10246,7 @@ mfqk(long k, long N)
 {
   GEN X, P, ZI, Q, Xm1, invden;
   long i;
-  ZI = gdivgs(RgX_shift_shallow(RgV_to_RgX(identity_ZV(N-1), 0), 1), N);
+  ZI = gdivgu(RgX_shift_shallow(RgV_to_RgX(identity_ZV(N-1), 0), 1), N);
   if (k == 1) return ZI;
   P = gsubgs(pol_xn(N,0), 1);
   invden = RgXQ_powu(ZI, k, P);
@@ -10265,7 +10265,7 @@ mfskcx(long k, GEN CHI, long M, long prec)
   long F, m, i, l;
   CHI = mfchartoprimitive(CHI, &F);
   CHIvec = mfcharcxinit(CHI, prec);
-  if (F == 1) S = gdivgs(bernfrac(k), k);
+  if (F == 1) S = gdivgu(bernfrac(k), k);
   else
   {
     GEN Q = mfqk(k, F), V = CHIvec_val(CHIvec);
@@ -11646,7 +11646,7 @@ intAoo(GEN van, long nlim, GEN al, long w, GEN P, GEN A, long k, long prec)
   alw = gmulsg(w, al);
   P1 = RgX_translate(P, gneg(A));
   piI2A = gmul(PiI2n(1, prec), A);
-  q = gexp(gdivgs(piI2A, w), prec);
+  q = gexp(gdivgu(piI2A, w), prec);
   S = gen_0;
   for (n = nlim; n >= 1; n--)
   {
@@ -11661,7 +11661,7 @@ intAoo(GEN van, long nlim, GEN al, long w, GEN P, GEN A, long k, long prec)
     S = gmul(S, gexp(gmul(piI2A, al), prec));
   }
   else if (!gequal0(van0))
-    S = gsub(S, gdivgs(gmul(van0, gpowgs(gsub(pol_x(0), A), k-1)), k-1));
+    S = gsub(S, gdivgu(gmul(van0, gpowgs(gsub(pol_x(0), A), k-1)), k-1));
   if (is_vec_t(typ(S)))
   {
     long j, l = lg(S);
@@ -12251,7 +12251,7 @@ intAoo0(GEN fs, GEN A, GEN ga, GEN P, long bit)
   GEN van, mf, F, al;
   get_mf_F(fs, &mf,&F); N = MF_get_N(mf); k = MF_get_k(mf);
   w = mfZC_width(N, gel(ga,1));
-  nlim = mfperiod_prelim(gdivgs(imag_i(A), w), k, bit + 32);
+  nlim = mfperiod_prelim(gdivgu(imag_i(A), w), k, bit + 32);
   van = mfgetvan(fs, ga, &al, nlim, prec);
   return intAoo(van, nlim, al,w, P, A, k, prec);
 }
@@ -12267,8 +12267,8 @@ mfsymboleval_direct(GEN fs, GEN path, GEN ga, GEN P)
   A = gel(path, 1);
   B = gel(path, 2); if (typ(B) == t_INFINITY) B = NULL;
   w = mfZC_width(N, gel(ga,1));
-  nlimA = mfperiod_prelim(gdivgs(imag_i(A),w), k, bit + 32);
-  if (B) nlimB = mfperiod_prelim(gdivgs(imag_i(B),w), k, bit + 32);
+  nlimA = mfperiod_prelim(gdivgu(imag_i(A),w), k, bit + 32);
+  if (B) nlimB = mfperiod_prelim(gdivgu(imag_i(B),w), k, bit + 32);
   van = mfgetvan(fs, ga, &al, maxss(nlimA,nlimB), prec);
   S = intAoo(van, nlimA, al,w, P, A, k, prec);
   if (B) S = gsub(S, intAoo(van, nlimB, al,w, P, B, k, prec));
@@ -12286,7 +12286,7 @@ mfsymbolevalpartial(GEN fs, GEN A, GEN ga, long bit)
   get_mf_F(fs, &mf, &F);
   N = MF_get_N(mf); w = mfZC_width(N, gel(ga,1));
   k = MF_get_k(mf);
-  Y = gdivgs(imag_i(A), w);
+  Y = gdivgu(imag_i(A), w);
   P = get_P(k, fetch_var(), prec);
   if (lg(fs) != 3 && gtodouble(Y)*(2*N) < 1)
   { /* true symbol + low imaginary part: use GL_2 action to improve */
@@ -12648,7 +12648,7 @@ mfpeterssonnoncusp(GEN F1S, GEN F2S)
     }
   }
   delete_var();
-  return gerepileupto(av, gdivgs(Haberland(GF1,GF2, vE1,vE2, k), r));
+  return gerepileupto(av, gdivgu(Haberland(GF1,GF2, vE1,vE2, k), r));
 }
 
 /* Petersson product of F and G, given by mfsymbol's [k > 1 integral] */
@@ -12695,7 +12695,7 @@ mfpetersson_i(GEN FS, GEN GS)
     PGjm1 = RgX_Rg_mul(PGjm1, mfcharcxeval(CHI, D, prec));
     gel(PH,j) = gsub(PGj1, PGjm1);
   }
-  return gerepileupto(av, gdivgs(Haberland(PF, PH, vEF, vEG, k), 6*r));
+  return gerepileupto(av, gdivgu(Haberland(PF, PH, vEF, vEG, k), 6*r));
 }
 
 /****************************************************************/
@@ -12799,7 +12799,7 @@ Unelson(long r, GEN V)
   if (!r) return S;
   for (j = 1; j <= r; j++)
   {
-    C = gdivgs(gmulgs(C, (r+j)*(r-j+1)), j);
+    C = gdivgu(gmulgs(C, (r+j)*(r-j+1)), j);
     S = gadd(S, gmul2n(gmul(C, gel(V, r-j+1)), -j));
   }
   return S;

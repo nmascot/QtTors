@@ -2639,7 +2639,7 @@ artin_dim(GEN ind, GEN ch)
   GEN s = gen_0;
   for(i=1; i<=d; i++)
     s = gadd(s, gel(ch, gel(elts,i)[1]));
-  return gtos(gdivgs(cyclotoi(s), d));
+  return gtos(gdivgu(cyclotoi(s), d));
 }
 
 static GEN
@@ -2649,7 +2649,7 @@ artin_ind(GEN elts, GEN ch, GEN p)
   GEN s = gen_0;
   for(i=1; i<=d; i++)
     s = gadd(s, gel(ch, gmul(gel(elts,i),p)[1]));
-  return gdivgs(s, d);
+  return gdivgu(s, d);
 }
 
 static GEN

@@ -73,7 +73,7 @@ airy_i(GEN x, long prec)
   }
   prec2 = prec + EXTRAPRECWORD;
   x = gprec_wensure(x, prec2);
-  z = gsqrt(gpowgs(x,3), prec2); z2 = gdivgs(gmul2n(z,1),3);
+  z = gsqrt(gpowgs(x,3), prec2); z2 = gdivgu(gmul2n(z,1),3);
   if (is_real_t(tx) && gsigne(x) > 0)
     a = b = gsqrt(x, prec2); /* expression simplifies */
   else
@@ -84,7 +84,7 @@ airy_i(GEN x, long prec)
   a = gmul(a, ibessel(sstoQ(-1,3),z2, prec));
   b = gmul(b, ibessel(uutoQ(1,3), z2, prec));
   if (isexactzero(imag_i(x))) { a = real_i(a); b = real_i(b); }
-  A = gdivgs(gsub(a,b), 3);
+  A = gdivgu(gsub(a,b), 3);
   B = gdiv(gadd(a,b), sqrtr_abs(utor(3, prec)));
 
   bit -= gexpo(a) + 16;
@@ -201,7 +201,7 @@ hyperu_i(GEN a, GEN b, GEN x, long prec)
       {
         GEN w = gadd(gmul(gaddgs(a,k-1),u), gmul(gaddgs(qmb,1-k),v));
         u = gmul(divru(q,k),v);
-        v = gdivgs(w, k);
+        v = gdivgu(w, k);
         d = mulrr(d, c);
         e = gadd(e, gmul(d,u));
         f = gadd(f, p1 = gmul(d,v));
@@ -222,7 +222,7 @@ hyperu_i(GEN a, GEN b, GEN x, long prec)
     zf = gpow(x, gneg_i(a), l);
     for (k = n-1; k >= 0; k--)
     {
-      s = gaddsg(1, gmul(gmul(T, gdivgs(zz,k+1)), s));
+      s = gaddsg(1, gmul(gmul(T, gdivgu(zz,k+1)), s));
       if (!k) break;
       T = gsubgs(gsub(T, S), 2*k-1);
     }
@@ -1171,7 +1171,7 @@ serhypergeom(GEN N, GEN D, GEN y, long prec)
   {
     GEN H = gdiv(vpoch_mul(vN, i), vpoch_mul(vD, i));
     if (y0) H = gmul(H, hypergeom_i(RgV_z_add(N,i), RgV_z_add(D,i), y0,prec));
-    S = gadd(S, gmul(pn, H)); if (i + 1 < l) pn = gdivgs(gmul(pn, y), i + 1);
+    S = gadd(S, gmul(pn, H)); if (i + 1 < l) pn = gdivgu(gmul(pn, y), i + 1);
     if (gc_needed(av,1))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"hypergeom, i = %ld / %ld", i,l-1);
