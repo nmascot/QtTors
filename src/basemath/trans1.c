@@ -3407,7 +3407,7 @@ mpcosm1(GEN x, long *ptmod8)
     for (i = n; i >= 2; i--)
     {
       GEN t;
-      setprec(x2,l1); t = divrunu(x2, 2*i-1);
+      setprec(x2,l1); t = divrunextu(x2, 2*i-1);
       l1 += dvmdsBIL(s - expo(t), &s); if (l1 > L) l1 = L;
       if (i != n) t = mulrr(t,u);
       setprec(un,l1); t = addrr_sign(un,1, t,-signe(t));

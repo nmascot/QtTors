@@ -3596,11 +3596,14 @@ GEN     galoisgetpol(long a, long b, long s);
 /* gen1.c */
 GEN     conj_i(GEN x);
 GEN     conjvec(GEN x,long prec);
+GEN     divrunextu(GEN x, ulong i);
 GEN     gadd(GEN x, GEN y);
 GEN     gaddsg(long x, GEN y);
 GEN     gconj(GEN x);
 GEN     gdiv(GEN x, GEN y);
 GEN     gdivgs(GEN x, long s);
+GEN     gdivgu(GEN x, ulong s);
+GEN     gdivgunextu(GEN x, ulong i);
 GEN     ginv(GEN x);
 GEN     gmul(GEN x, GEN y);
 GEN     gmul2n(GEN x, long n);

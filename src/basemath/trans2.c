@@ -947,36 +947,13 @@ mulu_interval_step_prec(long l, long m, long s, long prec)
 
 /* x * (i*(i+1)) */
 static GEN
-muliunu(GEN x, ulong i)
+muliunextu(GEN x, ulong i)
 {
   if (i & HIGHMASK) /* i(i+1) >= 2^BITS_IN_LONG*/
     return mulii(x, muluu(i, i+1));
   else
     return muliu(x, i*(i+1));
 }
-/* x / (i*(i+1)) */
-GEN
-divrunu(GEN x, ulong i)
-{
-  if (i & HIGHMASK) /* i(i+1) >= 2^BITS_IN_LONG*/
-    return divri(x, muluu(i , i+1));
-  else
-    return divru(x, i*(i+1));
-}
-/* x / (i*(i+1)) */
-GEN
-divgunu(GEN x, ulong i)
-{
-#ifdef LONG_IS_64BIT
-  if (i < 3037000500L) /* i(i+1) < 2^63 */
-#else
-  if (i < 46341L) /* i(i+1) < 2^31 */
-#endif
-    return gdivgs(x, i*(i+1));
-  else
-    return gdiv(x, muluu(i, i+1));
-}
-
 /* arg(s+it) */
 double
 darg(double s, double t)
@@ -1037,8 +1014,8 @@ lngamma1(GEN z, long prec)
 }
 /* B_i / (i(i-1)), i even. Sometimes NOT reduced (but gadd/gmul won't care)!*/
 static GEN
-bern_unu(long i)
-{ GEN B = bernfrac(i); return mkfrac(gel(B,1), muliunu(gel(B,2), i-1)); }
+bern_unextu(long i)
+{ GEN B = bernfrac(i); return mkfrac(gel(B,1), muliunextu(gel(B,2), i-1)); }
 /* B_i / i, i even. Sometimes NOT reduced (but gadd/gmul won't care)!*/
 static GEN
 bern_u(long i)
@@ -1048,11 +1025,11 @@ static GEN
 lngamma_sum(GEN a, long N)
 {
   pari_sp av = avma;
-  GEN S = bern_unu(2*N);
+  GEN S = bern_unextu(2*N);
   long i;
   for (i = 2*N-2; i > 0; i -= 2)
   {
-    S = gadd(bern_unu(i), gmul(a,S));
+    S = gadd(bern_unextu(i), gmul(a,S));
     if (gc_needed(av,3))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"gamma: i = %ld", i);
@@ -1526,7 +1503,7 @@ Qp_lngamma(GEN x)
   s = gen_0; Y = y = ginv(x); y = gsqr(y); constbern(K);
   for (k = 1; k <= K; k++)
   {
-    s = gadd(s, gmul(divgunu(bernfrac(2*k), 2*k-1), Y));
+    s = gadd(s, gmul(gdivgunextu(bernfrac(2*k), 2*k-1), Y));
     if (k < K) Y = gmul(Y, y); /* x^(1-2k) */
   }
   return gadd(s, gsub(gmul(gsub(x, ghalf), Qp_log(x)), x));

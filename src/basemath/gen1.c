@@ -2975,6 +2975,104 @@ gdivgs(GEN x, long s)
   return NULL; /* LCOV_EXCL_LINE */
 }
 
+GEN
+gdivgu(GEN x, ulong s)
+{
+  long tx = typ(x), lx, i;
+  pari_sp av;
+  GEN z;
+
+  if (!s)
+  {
+    if (is_matvec_t(tx) && lg(x) == 1) return gcopy(x);
+    pari_err_INV("gdivgu",gen_0);
+  }
+  switch(tx)
+  {
+    case t_INT: return Qdiviu(x, s);
+    case t_REAL: return divru(x,s);
+
+    case t_INTMOD:
+      z = cgetg(3, t_INTMOD); s = umodui(s, gel(x,1));
+      return div_intmod_same(z, gel(x,1), gel(x,2), utoi(s));
+
+    case t_FFELT: return FF_Z_Z_muldiv(x,gen_1,utoi(s));
+
+    case t_FRAC: z = cgetg(3, t_FRAC);
+      i = ugcd(s, umodiu(gel(x,1), s));
+      if (i == 1)
+      {
+        gel(z,2) = mului(s, gel(x,2));
+        gel(z,1) = icopy(gel(x,1));
+      }
+      else
+      {
+        gel(z,2) = mului(s/i, gel(x,2));
+        gel(z,1) = divis(gel(x,1), i);
+      }
+      normalize_frac(z);
+      fix_frac_if_int(z); return z;
+
+    case t_COMPLEX: z = cgetg(3, t_COMPLEX);
+      gel(z,1) = gdivgu(gel(x,1),s);
+      gel(z,2) = gdivgu(gel(x,2),s); return z;
+
+    case t_PADIC: /* divpT */
+    {
+      GEN p = gel(x,2);
+      if (!signe(gel(x,4))) return zeropadic(p, valp(x) - u_pval(s,p));
+      av = avma;
+      return gerepileupto(av, divpp(x, cvtop2(utoi(s),x)));
+    }
+
+    case t_QUAD: z = cgetg(4, t_QUAD);
+      gel(z,1) = ZX_copy(gel(x,1));
+      gel(z,2) = gdivgu(gel(x,2),s);
+      gel(z,3) = gdivgu(gel(x,3),s); return z;
+
+    case t_POLMOD:
+      retmkpolmod(gdivgu(gel(x,2),s), RgX_copy(gel(x,1)));
+
+    case t_RFRAC:
+      if (s == 1) return gcopy(x);
+      return div_rfrac_scal(x, utoi(s));
+
+    case t_POL: case t_SER:
+      z = cgetg_copy(x, &lx); z[1] = x[1];
+      for (i=2; i<lx; i++) gel(z,i) = gdivgu(gel(x,i),s);
+      return z;
+    case t_VEC: case t_COL: case t_MAT:
+      z = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(z,i) = gdivgu(gel(x,i),s);
+      return z;
+  }
+  pari_err_TYPE2("/",x, utoi(s));
+  return NULL; /* LCOV_EXCL_LINE */
+}
+
+/* x / (i*(i+1)) */
+GEN
+divrunextu(GEN x, ulong i)
+{
+  if (i & HIGHMASK) /* i(i+1) >= 2^BITS_IN_LONG*/
+    return divri(x, muluu(i , i+1));
+  else
+    return divru(x, i*(i+1));
+}
+/* x / (i*(i+1)) */
+GEN
+gdivgunextu(GEN x, ulong i)
+{
+#ifdef LONG_IS_64BIT
+  if (i < 3037000500L) /* i(i+1) < 2^63 */
+#else
+  if (i < 46341L) /* i(i+1) < 2^31 */
+#endif
+    return gdivgs(x, i*(i+1));
+  else
+    return gdiv(x, muluu(i, i+1));
+}
+
 /* True shift (exact multiplication by 2^n) */
 GEN
 gmul2n(GEN x, long n)

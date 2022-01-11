@@ -1769,7 +1769,7 @@ czeta(GEN s0, long prec)
     {
       s5 = gsub(s5, s4);
       s4 = gsub(s4, s3);
-      tes = gadd(bernfrac(i), divgunu(gmul(s5,tes), i+1));
+      tes = gadd(bernfrac(i), gdivgunextu(gmul(s5,tes), i+1));
       if (gc_needed(av2,3))
       {
         if(DEBUGMEM>1) pari_warn(warnmem,"czeta i = %ld", i);
@@ -2220,7 +2220,7 @@ binsplit(GEN *pP, GEN *pR, GEN aN2, GEN isqaN, GEN s, long j, long k, long prec)
     else
     {
       P = gmul(gaddgs(s, j2-1), gaddgs(s, j2));
-      P = divgunu(gmul(P, isqaN), j2+1);
+      P = gdivgunextu(gmul(P, isqaN), j2+1);
     }
     if (pP) *pP = P;
     if (pR) *pR = gmul(bernreal(j2+2, prec), P);
@@ -2378,7 +2378,7 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
     for (j = k - 2; j >= 2; j -= 2)
     {
       GEN t = gsubgs(a, j), u = gmul(t, gaddgs(t, 1));
-      u = gmul(divgunu(u, j), gmul(S2, N2));
+      u = gmul(gdivgunextu(u, j), gmul(S2, N2));
       S2 = gadd(gdivgs(bernreal(j, prec), j), u);
     }
     S2 = gmul(S2, gdiv(a, Nx));
@@ -2467,7 +2467,7 @@ cxpolylog(long m, GEN x, long prec)
   constbern(ksmall);
   for(k = 1; k < ksmall; k++)
   {
-    GEN t = q = divgunu(gmul(q,Z), 2*k+m); /* z^(2k+m+1)/(2k+m+1)! */
+    GEN t = q = gdivgunextu(gmul(q,Z), 2*k+m); /* z^(2k+m+1)/(2k+m+1)! */
     if (real) t = real_i(t);
     t = gmul(t, gdivgs(bernfrac(2*k+2), 2*k+2)); /* - t * zeta(1-(2k+2)) */
     s = gsub(s, t);
@@ -2664,7 +2664,7 @@ polylogP(long m, GEN x, long prec)
       p2 = shiftr(p1,-1);
       for (k = 2; k < m; k += 2)
       {
-        if (k > 2) p2 = divgunu(gmul(p2,p1),k-1); /* 2^k/k! log^k |x|*/
+        if (k > 2) p2 = gdivgunextu(gmul(p2,p1),k-1); /* 2^k/k! log^k |x|*/
         t = RIpolylog(m-k, x, m2, l);
         u = gmul(p2, bernfrac(k));
         y = gadd(y, gmul(u, t));

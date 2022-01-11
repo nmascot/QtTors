@@ -535,8 +535,6 @@ int   lgcdii(ulong* d, ulong* d1, ulong* u, ulong* u1, ulong* v, ulong* v1, ulon
 ulong rgcduu(ulong d, ulong d1, ulong vmax, ulong* u, ulong* u1, ulong* v, ulong* v1, long *s);
 ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
 ulong xxgcduu(ulong d, ulong d1, int f, ulong* u, ulong* u1, ulong* v, ulong* v1, long *s);
-GEN   divgunu(GEN x, ulong i);
-GEN   divrunu(GEN x, ulong i);
 GEN   muliispec(GEN x, GEN y, long nx, long ny);
 GEN   red_montgomery(GEN T, GEN N, ulong inv);
 GEN   sqrispec(GEN x, long nx);

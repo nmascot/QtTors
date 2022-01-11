@@ -12296,6 +12296,16 @@ comparison function:
   int (*cmp_coeff)(GEN,GEN) = (int(*)(GEN,GEN)) data;
 @eprog
 
+\section{Division}
+
+\fun{GEN}{gdivgu}{GEN x, ulong u} return $x/u)$.
+
+\fun{GEN}{gdivgunextu}{GEN x, ulong u} return $x/(u(u+1))$. If $u(u+1)$
+does not fit into an \kbd{ulong}, it is created and left on the stack for efficiency.
+
+\fun{GEN}{divrunextu}{GEN x, ulong i} as \kbd{gdivgunextu} for a
+\typ{REAL}~$x$.
+
 \section{Divisibility, Euclidean division}
 
 \fun{GEN}{gdivexact}{GEN x, GEN y} returns the quotient $\kbd{x} / \kbd{y}$,
@@ -12560,7 +12570,6 @@ to \op\ are as follows:
 
 \fun{GEN}{gdiv}{GEN x, GEN y}, \fun{GEN}{gdivgs}{GEN x, long s},
 \fun{GEN}{gdivsg}{long s, GEN x}
-
 
 \fun{GEN}{gpow}{GEN x, GEN y, long l} creates $\kbd{x}^{\kbd{y}}$. If
 \kbd{y} is a \typ{INT}, return \kbd{powgi(x,y)} (the precision \kbd{l} is not

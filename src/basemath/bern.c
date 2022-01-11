@@ -102,7 +102,7 @@ bernset(GEN *y, long m, long n)
     B = roundr(addrr(B, fractor(z,LOWDEFAULTPREC))); /* B - z = B_n */
     *y-- = gclone(gsub(B, z));
     if (i == m) break;
-    affrr(divrunu(mulrr(v,u), k-1), v);
+    affrr(divrunextu(mulrr(v,u), k-1), v);
     for (j = r; j >= 3; j -= 2) affii(muliu2(gel(t,j), j), gel(t,j));
     set_avma(av2); k -= 2;
     if ((k & 0x7f) == 0)
@@ -485,7 +485,7 @@ eulerset(GEN *y, long m, long n)
     E = roundr(E); if (odd(i)) setsigne(E, -1); /* E ~ E_n */
     *y-- = gclone(E);
     if (i == m) break;
-    affrr(divrunu(mulrr(v,u), k-2), v);
+    affrr(divrunextu(mulrr(v,u), k-2), v);
     for (j = r; j >= 3; j -= 2) affii(muliu2(gel(t,j), j), gel(t,j));
     set_avma(av2); k -= 2;
     if ((k & 0x7f) == 1)
