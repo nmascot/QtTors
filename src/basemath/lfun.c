@@ -424,7 +424,11 @@ gammaordinary(GEN Vga, GEN s)
   {
     GEN z = gadd(s, gel(Vga,i));
     long e;
-    if (gsigne(z) <= 0) { (void)grndtoi(z, &e); if (e < -10) return 0; }
+    if (gexpo(imag_i(z)) < -10)
+    {
+      z = real_i(z);
+      if (gsigne(z) <= 0) { (void)grndtoi(z, &e); if (e < -10) return 0; }
+    }
   }
   return 1;
 }
