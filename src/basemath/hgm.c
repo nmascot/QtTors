@@ -1336,6 +1336,7 @@ hgmgammatocyclo(GEN VPOLGA, GEN *pD, GEN *pE)
     long e = v[i];
     if (e > 0) cn += e; else cd -= e;
   }
+  if (!cn || !cd) pari_err_TYPE("hgmgammatocyclo", VPOLGA);
   *pE = n = cgetg(cn+1, t_VECSMALL);
   *pD = d = cgetg(cd+1, t_VECSMALL);
   for (i = cn = cd = 1; i < l; i++)

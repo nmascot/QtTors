@@ -155,6 +155,9 @@ x^-1 + O(x^0)]]]]
 0
 0
 [[[2, 1/(4*x^2 + 2*x + 1)], [3, 1]], [0, [-1, 0, 1], 3, 324, 1]]
+  ***   at top-level: hgminit([0])
+  ***                 ^------------
+  *** hgminit: incorrect type in hgmgammatocyclo (t_VECSMALL).
   ***   at top-level: H=hgminit(2,Vecsmall(1))
   ***                   ^----------------------
   *** hgminit: incorrect type in hgminit (t_INT).
@@ -200,4 +203,4 @@ x^-1 + O(x^0)]]]]
   ***   at top-level: hgmeulerfactor(HCAN,1,p)
   ***                 ^------------------------
   *** hgmeulerfactor: overflow in hgmCallmodp2.
-Total time spent: 2289
+Total time spent: 2285

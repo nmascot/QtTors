@@ -169,6 +169,7 @@ hgmeulerfactor(H,4,3)
 test(H,4)
 
 \\ ERRORS
+hgminit([0])
 H=hgminit(2, Vecsmall(1))
 H=hgminit([2], Vecsmall(1))
 lfunhgm(1,1)
