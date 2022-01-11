@@ -2432,6 +2432,9 @@ gdivexact(GEN x, GEN y)
           if (!degpol(y)) { y = gel(y,2); break; }
           return RgX_div(x,y);
         }
+        case t_RFRAC:
+          if (varn(gel(y,2)) != varn(x)) break;
+          return gdiv(x, y);
       }
       return RgX_Rg_divexact(x, y);
     case t_VEC: case t_COL: case t_MAT:
