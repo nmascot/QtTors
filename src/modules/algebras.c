@@ -2705,7 +2705,7 @@ algtrace_mat(GEN al, GEN M, long abs) {
     if (p)  res = Fp_add(res, algtrace(al,gcoeff(M,i,i),abs), p);
     else    res = gadd(res, algtrace(al,gcoeff(M,i,i),abs));
   }
-  if (abs || alg_type(al) == al_TABLE) res = gmulgs(res, N); /* absolute trace */
+  if (abs || alg_type(al) == al_TABLE) res = gmulgu(res, N);/* absolute trace */
   return gerepileupto(av, res);
 }
 

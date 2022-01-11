@@ -170,7 +170,7 @@ antwist(GEN an, GEN Vga, long prec)
     if (typ(an) == t_VECSMALL)
       for (i = 1; i < l; i++) gel(b,i) = mulss(an[i], i);
     else
-      for (i = 1; i < l; i++) gel(b,i) = gmulgs(gel(an,i), i);
+      for (i = 1; i < l; i++) gel(b,i) = gmulgu(gel(an,i), i);
   }
   else
   {

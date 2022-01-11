@@ -691,7 +691,7 @@ quartic_hessiandd(GEN g)
   GEN a8 = gmul2n(a, 3), p4 = gsub(gmulsg(3, gsqr(b)), gmul(a8, c));
   GEN p3 = gsub(gmul(b, c), gmul(gmulsg(6, a), d));
   GEN p2 = gsub(gmulsg(8, gsqr(c)), gmulsg(12, gadd(gmul(b, d), gmul(a8, e))));
-  return deg2pol_shallow(gmulgs(p4,12), gmulgs(p3,24), p2, 1);
+  return deg2pol_shallow(gmulgu(p4,12), gmulgu(p3,24), p2, 1);
 }
 
 static GEN
@@ -714,7 +714,7 @@ quartic_H(GEN g, GEN *pT)
   GEN a = gel(g, 6), b = gel(g, 5), c = gel(g, 4);
   GEN IJ = quartic_IJ(g), I = gel(IJ, 1);
   GEN ddh = quartic_hessiandd(g);
-  GEN ddg = deg2pol_shallow(gmulgs(a,12), gmulgs(b,6), gmulgs(c,2), 1);
+  GEN ddg = deg2pol_shallow(gmulgu(a,12), gmulgu(b,6), gmulgu(c,2), 1);
   *pT = quarticinv_pol(IJ);
   return deg2pol_shallow(stoi(-8), gmul2n(ddg,2), gadd(ddh,gmul2n(I,3)),0);
 }

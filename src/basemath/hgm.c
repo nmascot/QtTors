@@ -380,7 +380,7 @@ precomp(ulong p, long f, long D)
     if (!odd(m0)) S = pD - S;
     vres[pf - m] = Fl_inv(S, pD);
   }
-  l2 = gmulgs(Qp_log(cvtop(gen_2, gp, D)), p - 1);
+  l2 = gmulgu(Qp_log(cvtop(gen_2, gp, D)), p - 1);
   ga12 = Fl_inv(Rg_to_Fl(Qp_gamma(cvtop(ghalf, gp, D)), pD), pD);
   pM = maxuu(pD, pf); av2 = avma;
   for (v = 1, vpo = 2; vpo < Q; v++, vpo <<= 1)

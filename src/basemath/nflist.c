@@ -2991,7 +2991,7 @@ nflist_Mgen_worker(GEN field, GEN X, GEN Xinf, GEN T)
     {
       GEN fn = powuu(f, ell - 1);
       long imax = minss(e - 1, logint(divii(Fn, fn), lpow));
-      F = mkcol2(F, gmulgs(idealpows(bnf, pell, imax), f));
+      F = mkcol2(F, gmulgu(idealpows(bnf, pell, imax), f));
     }
     K = mybnrclassfield_X(bnf, F, ell, NULL, NULL, G); lK = lg(K);
     for (k = ci = 1; k < lK; k++)

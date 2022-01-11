@@ -12555,7 +12555,11 @@ to \op\ are as follows:
 
 \funno{GEN}{g\op gs}{GEN x, long s}
 
+\funno{GEN}{g\op gu}{GEN x, ulong u}
+
 \funno{GEN}{g\op sg}{long s, GEN y}
+
+\funno{GEN}{g\op ug}{ulong u, GEN y}
 
 \noindent Explicitly
 
@@ -12563,13 +12567,14 @@ to \op\ are as follows:
 \fun{GEN}{gaddsg}{long s, GEN x}
 
 \fun{GEN}{gmul}{GEN x, GEN y}, \fun{GEN}{gmulgs}{GEN x, long s},
-\fun{GEN}{gmulsg}{long s, GEN x}
+\fun{GEN}{gmulsg}{long s, GEN x}, \fun{GEN}{gmulgu}{GEN x, ulong u},
+\fun{GEN}{gmulug}{GEN x, ulong u},
 
 \fun{GEN}{gsub}{GEN x, GEN y}, \fun{GEN}{gsubgs}{GEN x, long s},
 \fun{GEN}{gsubsg}{long s, GEN x}
 
 \fun{GEN}{gdiv}{GEN x, GEN y}, \fun{GEN}{gdivgs}{GEN x, long s},
-\fun{GEN}{gdivsg}{long s, GEN x}
+\fun{GEN}{gdivsg}{long s, GEN x}, \fun{GEN}{gdivgu}{GEN x, ulong u},
 
 \fun{GEN}{gpow}{GEN x, GEN y, long l} creates $\kbd{x}^{\kbd{y}}$. If
 \kbd{y} is a \typ{INT}, return \kbd{powgi(x,y)} (the precision \kbd{l} is not

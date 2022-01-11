@@ -1673,7 +1673,7 @@ wrapmonw2(void* E, GEN x)
 {
   struct mon_w *W = (struct mon_w*)E;
   GEN wnx = closure_callgen1prec(W->w, x, W->prec);
-  return gdiv(wnx, gpow(x, gadd(gmulgs(W->a, W->j), W->b), W->prec));
+  return gdiv(wnx, gpow(x, gadd(gmulgu(W->a, W->j), W->b), W->prec));
 }
 static GEN
 M_from_wrapmon(struct mon_w *S, GEN wfast, GEN n0)

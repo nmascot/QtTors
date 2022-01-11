@@ -2839,7 +2839,7 @@ gmulsg(long s, GEN y)
       }
       else
       {
-        gel(z,2) = divis(gel(y,2), i);
+        gel(z,2) = diviuexact(gel(y,2), (ulong)i);
         gel(z,1) = mulis(gel(y,1), s/i);
         fix_frac_if_int(z);
       }
@@ -2886,6 +2886,86 @@ gmulsg(long s, GEN y)
     case t_VEC: case t_COL: case t_MAT:
       z = cgetg_copy(y, &ly);
       for (i=1; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
+      return z;
+  }
+  pari_err_TYPE("gmulsg",y);
+  return NULL; /* LCOV_EXCL_LINE */
+}
+
+GEN
+gmulug(ulong s, GEN y)
+{
+  long ly, i;
+  pari_sp av;
+  GEN z;
+
+  switch(typ(y))
+  {
+    case t_INT:  return mului(s,y);
+    case t_REAL: return s? mulur(s,y): gen_0; /* gmul semantic */
+    case t_INTMOD: { GEN p = gel(y,1);
+      z = cgetg(3,t_INTMOD);
+      gel(z,2) = gerepileuptoint((pari_sp)z, modii(mului(s,gel(y,2)), p));
+      gel(z,1) = icopy(p); return z;
+    }
+    case t_FFELT: return FF_Z_mul(y,utoi(s));
+    case t_FRAC:
+      if (!s) return gen_0;
+      z = cgetg(3,t_FRAC);
+      i = ugcd(s, umodiu(gel(y,2), s));
+      if (i == 1)
+      {
+        gel(z,2) = icopy(gel(y,2));
+        gel(z,1) = muliu(gel(y,1), s);
+      }
+      else
+      {
+        gel(z,2) = diviuexact(gel(y,2), i);
+        gel(z,1) = muliu(gel(y,1), s/i);
+        fix_frac_if_int(z);
+      }
+      return z;
+
+    case t_COMPLEX:
+      if (!s) return gen_0;
+      z = cgetg(3, t_COMPLEX);
+      gel(z,1) = gmulug(s,gel(y,1));
+      gel(z,2) = gmulug(s,gel(y,2)); return z;
+
+    case t_PADIC:
+      if (!s) return gen_0;
+      av = avma; return gerepileupto(av, mulpp(cvtop2(utoi(s),y), y));
+
+    case t_QUAD: z = cgetg(4, t_QUAD);
+      gel(z,1) = ZX_copy(gel(y,1));
+      gel(z,2) = gmulug(s,gel(y,2));
+      gel(z,3) = gmulug(s,gel(y,3)); return z;
+
+    case t_POLMOD:
+      retmkpolmod(gmulug(s,gel(y,2)), RgX_copy(gel(y,1)));
+
+    case t_POL:
+      if (!signe(y)) return RgX_copy(y);
+      if (!s) return scalarpol(Rg_get_0(y), varn(y));
+      z = cgetg_copy(y, &ly); z[1]=y[1];
+      for (i=2; i<ly; i++) gel(z,i) = gmulug(s,gel(y,i));
+      return normalizepol_lg(z, ly);
+
+    case t_SER:
+      if (ser_isexactzero(y)) return gcopy(y);
+      if (!s) return Rg_get_0(y);
+      z = cgetg_copy(y, &ly); z[1]=y[1];
+      for (i=2; i<ly; i++) gel(z,i) = gmulug(s,gel(y,i));
+      return normalizeser(z);
+
+    case t_RFRAC:
+      if (!s) return zeropol(varn(gel(y,2)));
+      if (s == 1) return gcopy(y);
+      return mul_rfrac_scal(gel(y,1), gel(y,2), utoi(s));
+
+    case t_VEC: case t_COL: case t_MAT:
+      z = cgetg_copy(y, &ly);
+      for (i=1; i<ly; i++) gel(z,i) = gmulug(s,gel(y,i));
       return z;
   }
   pari_err_TYPE("gmulsg",y);

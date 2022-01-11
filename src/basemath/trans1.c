@@ -1031,7 +1031,7 @@ ser_pow_1(GEN x, GEN n)
     GEN s = gen_0;
     for (j=1; j<=minss(i,mi); j++)
     {
-      GEN t = gsubgs(gmulgs(n,j),i-j);
+      GEN t = gsubgs(gmulgu(n,j),i-j);
       s = gadd(s, gmul(gmul(t, gel(X,j)), gel(Y,i-j)));
     }
     gel(Y,i) = gerepileupto(av, gdivgu(s,i));
@@ -2501,7 +2501,7 @@ serexp(GEN x, long prec)
     y[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(x));
     /* zd[i] = coefficient of X^i in z */
     xd = x+2-e; yd = y+2; ly -= 2;
-    X = gel(xd,e); if (e != 1) X = gmulgs(X, e); /* left on stack */
+    X = gel(xd,e); if (e != 1) X = gmulgu(X, e); /* left on stack */
     X = isint1(X)? NULL: X;
     gel(yd,0) = gen_1;
     for (i = 1; i < e; i++) gel(yd,i) = gen_0;
@@ -2511,7 +2511,7 @@ serexp(GEN x, long prec)
       long J = minss(i, mi);
       av = avma; if (X) t = gmul(t, X);
       for (j = e + 1; j <= J; j++)
-        t = gadd(t, gmulgs(gmul(gel(xd,j),gel(yd,i-j)), j));
+        t = gadd(t, gmulgu(gmul(gel(xd,j),gel(yd,i-j)), j));
       gel(yd,i) = gerepileupto(av, gdivgu(t, i));
     }
     return y;
@@ -3761,13 +3761,13 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
         long ii = i-ex;
         av = avma; p1 = gen_0;
         for (j=ex; j<=minss(ii-2,mi); j++)
-          p1 = gadd(p1, gmulgs(gmul(gel(y,j-ex+2),gel(ps,ii-j)),j));
+          p1 = gadd(p1, gmulgu(gmul(gel(y,j-ex+2),gel(ps,ii-j)),j));
         gel(pc,i) = gerepileupto(av, gdivgs(p1,2-i));
         if (ii < lx)
         {
           av = avma; p1 = gen_0;
           for (j=ex; j<=minss(i-ex2,mi); j++)
-            p1 = gadd(p1,gmulgs(gmul(gel(y,j-ex+2),gel(pc,i-j)),j));
+            p1 = gadd(p1,gmulgu(gmul(gel(y,j-ex+2),gel(pc,i-j)),j));
           p1 = gdivgu(p1,i-2);
           gel(ps,ii) = gerepileupto(av, gadd(p1,gel(y,ii)));
         }

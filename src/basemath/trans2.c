@@ -1457,7 +1457,7 @@ Qp_gamma_Morita(long n, GEN p, long e)
   for (i = 2; i < n; i++)
     if (!pp || i%pp)
     {
-      p2 = gmulgs(p2, i);
+      p2 = gmulgu(p2, i);
       if ((i&0xFL) == 0xFL)
         p2 = gerepileupto(ltop, p2);
     }

@@ -493,7 +493,7 @@ polcyclo_eval(long n, GEN x)
   } else {
     if (gequal1(x))
     { /* n is prime, return n; multiply by x to keep the type */
-      if (l == 1) return gerepileupto(av, gmulgs(x,n));
+      if (l == 1) return gerepileupto(av, gmulgu(x,n));
       return gerepilecopy(av, x); /* else 1 */
     }
     if (gequalm1(x)) return gerepileupto(av, gneg(x)); /* -1 */
@@ -553,7 +553,7 @@ polcyclo_eval(long n, GEN x)
     if (!(bitmask_q & (bitmask_q-1))) /* detects power of 2, since bitmask!=0 */
     {
       i = vals(bitmask_q)+1; /* q = P[i] */
-      ypos = gmulgs(ypos, P[i]);
+      ypos = gmulgu(ypos, P[i]);
     }
   }
   return gerepileupto(av, ypos);

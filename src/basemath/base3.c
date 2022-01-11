@@ -154,7 +154,7 @@ nftrace(GEN nf, GEN x)
   nf = checknf(nf);
   x = nf_to_scalar_or_basis(nf, x);
   x = (typ(x) == t_COL)? RgV_dotproduct(x, gel(nf_get_Tr(nf),1))
-                       : gmulgs(x, nf_get_degree(nf));
+                       : gmulgu(x, nf_get_degree(nf));
   return gerepileupto(av, x);
 }
 GEN
@@ -164,7 +164,7 @@ rnfelttrace(GEN rnf, GEN x)
   checkrnf(rnf);
   x = rnfeltabstorel(rnf, x);
   x = (typ(x) == t_POLMOD)? rnfeltdown(rnf, gtrace(x))
-                          : gmulgs(x, rnf_get_degree(rnf));
+                          : gmulgu(x, rnf_get_degree(rnf));
   return gerepileupto(av, x);
 }
 

@@ -2616,6 +2616,8 @@ gminsg(long s, GEN y) { return gmings(y,s); }
 INLINE GEN
 gmulgs(GEN y, long s) { return gmulsg(s,y); }
 INLINE GEN
+gmulgu(GEN y, ulong s) { return gmulug(s,y); }
+INLINE GEN
 gsubgs(GEN y, long s) { return gaddgs(y, -s); }
 INLINE GEN
 gdivsg(long s, GEN y) { return gdiv(stoi(s), y); }

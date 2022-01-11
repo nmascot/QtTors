@@ -513,7 +513,7 @@ non_two_torsion_ordinate_char2(GEN E, GEN h, GEN x, GEN y)
   m = degpol(h);
   p1 = RgX_coeff(h, m-1); /* first power sum */
 
-  t1 = gmul(gadd(gmul(a1, p1), gmulgs(a3, m)), RgX_mul(h,h2));
+  t1 = gmul(gadd(gmul(a1, p1), gmulgu(a3, m)), RgX_mul(h,h2));
 
   t2 = gmul(a1, gadd(gmul(a1, gadd(y, psi2)), RgX_add(RgX_Rg_add(RgX_sqr(x), a4), t)));
   t2 = gmul(t2, gmul(dh, h2));
@@ -719,7 +719,7 @@ static GEN
 a4a6_divpol(GEN a4, GEN a6, long n)
 {
   if (n == 2) return mkpoln(4, gen_1, gen_0, a4, a6);
-  return mkpoln(5, utoi(3), gen_0, gmulgs(a4,6) , gmulgs(a6,12),
+  return mkpoln(5, utoi(3), gen_0, gmulgu(a4,6) , gmulgu(a6,12),
                    gneg(gsqr(a4)));
 }
 
@@ -752,7 +752,7 @@ static GEN
 corr(GEN c4, GEN c6)
 {
   GEN c62 = gmul2n(c6, 1);
-  return gadd(gdiv(gsqr(c4), c62), gdiv(c62, gmulgs(c4,3)));
+  return gadd(gdiv(gsqr(c4), c62), gdiv(c62, gmulgu(c4,3)));
 }
 
 static GEN
@@ -778,7 +778,7 @@ elkies98(GEN a4, GEN a6, long l, GEN s, GEN a4t, GEN a6t)
   gel(P, 1 + 0) = stoi(d);
   gel(P, 1 + 1) = s;
   if (d >= 2)
-    gel(P, 1 + 2) = gdivgu(gsub(gel(C, 1), gmulgs(gmulsg(2, a4), d)), 6);
+    gel(P, 1 + 2) = gdivgu(gsub(gel(C, 1), gmulgu(a4, 2*d)), 6);
   for (n = 2; n < d; ++n)
     gel(P, 1 + n+1) = gdivgu(gsub(gsub(gel(C, n), gmul(gmulsg(4*n-2, a4), gel(P, 1+n-1))), gmul(gmulsg(4*n-4, a6), gel(P, 1+n-2))), 4*n+2);
   S = cgetg(d+3, t_POL);

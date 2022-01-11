@@ -285,7 +285,7 @@ zetamult_interpolate2_i(GEN avec, GEN t, long prec)
       pari_sp av = avma;
       GEN S = gel(b, j + 1);
       S = gsub(S, gcoeff(a, i+1, 1)); /* u = 0 */
-      if (j > 2) S = gsub(S, gmulgs(gcoeff(a, i+1, 2), j)); /* u = 1 */
+      if (j > 2) S = gsub(S, gmulgu(gcoeff(a, i+1, 2), j)); /* u = 1 */
       if (j >= 4)
       {
         GEN C = utoipos(j*(j-1) / 2);

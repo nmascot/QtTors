@@ -155,7 +155,7 @@ _jbessel(GEN n, GEN x, long m)
 
   for (k = m; k >= 1; k--)
   {
-    s = gaddsg(1, gdiv(gmul(x,s), gmulgs(gaddgs(n, k), k)));
+    s = gaddsg(1, gdiv(gmul(x,s), gmulgu(gaddgs(n, k), k)));
     if (gc_needed(av,1))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"besselj");
@@ -705,7 +705,7 @@ eint1_asymp(GEN x, GEN expx, long prec)
       if (eq > oldeq) return gc_NULL(av); /* regressing, abort */
       oldeq = eq;
     }
-    q = gmul(q, gmulgs(z, j)); S = gadd(S, q);
+    q = gmul(q, gmulgu(z, j)); S = gadd(S, q);
     if (gc_needed(av2, 1)) gerepileall(av2, 2, &S, &q);
   }
   if (DEBUGLEVEL > 2) err_printf("eint1: using asymp\n");
@@ -1593,7 +1593,7 @@ veczeta(GEN a, GEN b, long N, long prec)
   L = mplog2(prec);
   for (j = 0; j < N; j++)
   {
-    GEN u = gsubgs(gadd(b, gmulgs(a,j)), 1);
+    GEN u = gsubgs(gadd(b, gmulgu(a,j)), 1);
     GEN w = gexp(gmul(u, L), prec); /* 2^u */
     gel(z,j+1) = gdiv(gmul(gel(z,j+1), w), gmul(d,gsubgs(w,1)));
   }

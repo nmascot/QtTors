@@ -1453,7 +1453,7 @@ c_theta(long n, long d, GEN psi)
     {
       pari_sp av = avma;
       GEN c = mfchareval(psi, f);
-      gel(V, f*f/d + 1) = gerepileupto(av, par < 0 ? gmulgs(c,2*f) : gmul2n(c,1));
+      gel(V, f*f/d + 1) = gerepileupto(av, par < 0? gmulgu(c,2*f): gmul2n(c,1));
     }
   if (F == 1) gel(V, 1) = gen_1;
   return V; /* no gerepile needed */
@@ -3111,7 +3111,7 @@ TA2(long N, long k, GEN VCHI, long n, GEN SQRTS, GEN MUP, GEN GCD)
       if (gequal0(sh)) { set_avma(av); continue; }
       if (D0 == -3) sh = gdivgu(sh, 3);
       else if (D0 == -4) sh = gdivgu(sh, 2);
-      else sh = gmulgs(sh, myh(D0));
+      else sh = gmulgu(sh, myh(D0));
     }
     S = gerepileupto(av, gadd(S, mfrhopowsimp(Q,sh,nu,t,t2,n)));
   }
@@ -8879,7 +8879,7 @@ c_QFsimple_i(long n, GEN Q, GEN P)
   else
   {
     gel(V,1) = gcopy(P);
-    for (i = 2; i <= l; i++) gel(V,i) = gmulgs(P, v[i-1] << 1);
+    for (i = 2; i <= l; i++) gel(V,i) = gmulgu(P, v[i-1] << 1);
   }
   return V;
 }
@@ -9948,7 +9948,7 @@ mkeisen(GEN E, long ord, GEN P, long lim)
   long k = itou(gel(E,1)), e = itou(gel(E,4));
   GEN CHI1 = gel(E,2), CHI2 = gel(E,3);
   if (k == 2 && mfcharistrivial(CHI1) && mfcharistrivial(CHI2))
-    return gsub(mkF2bd(1,lim), gmulgs(mkF2bd(e,lim), e));
+    return gsub(mkF2bd(1,lim), gmulgu(mkF2bd(e,lim), e));
   else
   {
     GEN V = mfeisenstein2pure(k, CHI1, CHI2, ord, P, lim);
@@ -10154,7 +10154,7 @@ mftaylor(GEN F, long n, long flreal, long prec)
     for (m = 0; m <= n; m++)
     {
       gel(v, m+1) = gdiv(gmul(C, gmul(gel(v, m+1), gel(VPC, m+1))), facn);
-      facn = gmulgs(facn, m+1);
+      facn = gmulgu(facn, m+1);
     }
   }
   return gerepilecopy(ltop, v);
@@ -12799,7 +12799,7 @@ Unelson(long r, GEN V)
   if (!r) return S;
   for (j = 1; j <= r; j++)
   {
-    C = gdivgu(gmulgs(C, (r+j)*(r-j+1)), j);
+    C = gdivgu(gmulgu(C, (r+j)*(r-j+1)), j);
     S = gadd(S, gmul2n(gmul(C, gel(V, r-j+1)), -j));
   }
   return S;
@@ -12860,7 +12860,7 @@ fs2_init(GEN mf, GEN F, long bit)
     for (n = 1; n <= Lw; n++)
       gel(tab,n) = WfromZ(uutoQ(n,N), vP, gkm1, Wf, k, pi4, prec);
     if (!cusps) cusps = mfcusps_i(N);
-    DEN = gmul2n(gmulgs(gpow(Pi2n(3, prec), gkm1, prec), mypsiu(N)), -2);
+    DEN = gmul2n(gmulgu(gpow(Pi2n(3, prec), gkm1, prec), mypsiu(N)), -2);
     if (odd(k2)) DEN = gdiv(DEN, sqrtr_abs(Pi2n(-1,prec)));
   }
   l = lg(cusps);
@@ -12927,7 +12927,7 @@ mfpetersson2(GEN Fs, GEN Gs)
         if (gc_needed(av,2)) T = gerepileupto(av,T);
       }
     }
-    if (w != 1) T = gmulgs(T,w);
+    if (w != 1) T = gmulgu(T,w);
     RES = gerepileupto(av, gadd(RES, T));
   }
   if (!Gs) RES = real_i(RES);

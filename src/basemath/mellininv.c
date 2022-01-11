@@ -384,7 +384,7 @@ vp(long p, long c, GEN SMd, GEN sh)
   long m, j, k;
 
   gel(ve,1) = gen_1; gel(ve,2) = utoipos(c);
-  for (j = 2; j <= p; j++) gel(ve,j+1) = gdivgs(gmulgs(gel(ve,j), c), j);
+  for (j = 2; j <= p; j++) gel(ve,j+1) = gdivgs(gmulgu(gel(ve,j), c), j);
   s = gel(SMd, 1);
   for (m = 1; m <= p; m++)
   {

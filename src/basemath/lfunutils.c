@@ -243,7 +243,7 @@ vecan_shift(GEN an, long n, long prec)
       for(i = 1; i <= n ; i++)
       {
         GEN gi = gel(p1, i);
-        gel(V, i) = gequal0(gi)? gi: gmulgs(gi, i);
+        gel(V, i) = gequal0(gi)? gi: gmulgu(gi, i);
       }
     else
       for(i = 1; i <= n ; i++)
