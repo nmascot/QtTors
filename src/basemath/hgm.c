@@ -817,8 +817,10 @@ inv(ulong q, long n)
 static GEN
 hgmH(GEN C, long p, long f, long dfp, GEN t)
 {
-  GEN q = powuu(p, dfp), z = Rg_to_Fp(t, q);
+  GEN q = powuu(p, dfp), z;
   long n;
+  (void)Q_lvalrem(t, p, &t);
+  z = Rg_to_Fp(t, q);
   z = Zp_teichmuller(z, utoipos(p), dfp, q);
   z = FpX_eval(C, z, q);
   n = dfp / f; if (!(dfp % f)) n--;

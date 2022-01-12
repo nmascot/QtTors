@@ -106,6 +106,8 @@ x + 1
 [-24, 2332800]
 -4826809*x^6 + 114244*x^5 + 2197*x^4 - 13*x^2 - 4*x + 1
 1771561*x^4 - 118459*x^3 + 3861*x^2 - 89*x + 1
+-1
+-x + 1
 49*x^2 + 13*x + 1
 2
 117649*x^4 + 2744*x^3 + 252*x^2 + 8*x + 1
@@ -203,4 +205,4 @@ x^-1 + O(x^0)]]]]
   ***   at top-level: hgmeulerfactor(HCAN,1,p)
   ***                 ^------------------------
   *** hgmeulerfactor: overflow in hgmCallmodp2.
-Total time spent: 2285
+Total time spent: 2253

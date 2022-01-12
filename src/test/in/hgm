@@ -116,8 +116,10 @@ hgmeulerfactor(H,8,7)
 hgmeulerfactor(H,12,11)
 H=hgminit([2,4,10],[1,18]); H[10]
 hgmeulerfactor(H,14,13)
-H=hgminit([5],[1,1,1,1]);
+H=hgminit([5]);
 hgmeulerfactor(H,11^5,11)
+hgmcoef(H,1/2,2)
+hgmeulerfactor(H,1/2,2)
 hgmcoefs(H,-1,1000); \\ make sure it's not too slow
 H=hgminit([3,3],[1,1,1,1]);
 hgmeulerfactor(H,7^3,7,&c)
