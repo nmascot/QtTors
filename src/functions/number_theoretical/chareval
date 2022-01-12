@@ -14,7 +14,7 @@ Doc:
  method, e.g $G = \kbd{znstar}(N, 1)$ for $(\Z/N\Z)^*$ or a \kbd{bnr}
  structure, let $x$ be an element of $G$ and let \var{chi} be a character of
  $G$ (see the note below for details). This function returns the value of
- \var{chi} at $x$.
+ \var{chi} at~$x$.
 
  \misctitle{Note on characters}
  Let $K$ be some field. If $G$ is an abelian group,
@@ -37,11 +37,11 @@ Doc:
  generators, or a \typ{INT} (Conrey label);
  see \secref{se:dirichletchar} or \kbd{??character}.
 
- \misctitle{Note on Hecke characters}
+ \misctitle{Note on Hecke Grossencharacters}
  In the case where \var{G} describes a group of Hecke Grossencharacters
- (output by \kbd{G = gcharinit(\var{bnf},\var{mod})}),
- \var{chi} is a \typ{vec} of exponents modulo \kbd{G.cyc}, and
- \var{x} an ideal of \kbd{G.bnf}.
+ (output by $G = \kbd{gcharinit(\var{bnf},\var{mod})})$,
+ \var{chi} is a \typ{VEC} of exponents modulo \var{G}\kbd{.cyc}, and~\var{x} an ideal
+ of \var{G}\kbd{.bnf}.
  Consider installing the library function \kbd{gchareval} for more options.
 
  The character value is encoded as follows, depending on the optional
