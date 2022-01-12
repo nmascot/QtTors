@@ -1130,7 +1130,7 @@ gchari_shift(GEN gc, GEN chi, GEN w)
 
 /* chip has ncp = #zm[1][i].cyc components */
   static GEN
-conductor_expo_pr(GEN nf, GEN gens_fil, GEN chip)
+conductor_expo_pr(GEN gens_fil, GEN chip)
 {
   long i;
   for (i = lg(gens_fil) - 1; i > 0; i--)
@@ -1154,7 +1154,6 @@ gcharlog_conductor_f(GEN gc, GEN chi)
   GEN nf, zm, expo, Lsprk, ufil, famod;
   long i, np, ns, ic;
   pari_sp av = avma;
-  nf = checknf(gchar_get_bnf(gc));
   if (gchar_get_nc(gc) == 0)
     return gen_1;
   zm = gchar_get_zm(gc);
@@ -1172,10 +1171,11 @@ gcharlog_conductor_f(GEN gc, GEN chi)
     gens = gel(ufil, i);
     ncp = lg(sprk_get_cyc(sprk)) - 1;
     chip = vecslice(chi, ic + 1, ic + ncp);
-    gel(expo, i) = conductor_expo_pr(nf, gens, chip);
+    gel(expo, i) = conductor_expo_pr(gens, chip);
     ic += ncp;
   }
   famod = mkmat2(gel(famod,1),expo);
+  nf = checknf(gchar_get_bnf(gc));
   return gerepilecopy(av, idealfactorback(nf, famod, NULL, 0)); /* red = 0 */
 }
 
