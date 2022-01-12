@@ -461,7 +461,8 @@ Doc:
  \item \var{gc} denotes a structure allowing to compute with Hecke Grossencharacters.
 
  \item \kbd{gcharinit(\var{bnf},\var{mod})} initializes the structure \var{gc}.
- The underlying number field and modulus can be accessed using \kbd{gc.bnf} and \kbd{gc.mod}.
+ The underlying number field and modulus can be accessed using
+ \var{gc}\kbd{.bnf} and \var{gc}\kbd{.mod}.
 
  \item \var{gc}\kbd{.cyc} describes the finite abelian group structure of \var{gc},
  the torsion part corresponding to finite order ray class characters, and
@@ -469,7 +470,7 @@ Doc:
 
  \item a character on $gc=\kbd{gcharinit(bnf,mod)}$ is described as a
  row vector \var{chi} of components on the finitely generated abelian
- group structure $\kbd{g.cyc}$.
+ group structure $\var{gc}\kbd{.cyc}$.
 
- \item Hecke Grossencharacters have L-functions and can be given to all \kbd{lfun} objects as a 2 components
+ \item Hecke Grossencharacters have $L$-functions and can be given to all \kbd{lfun} objects as a 2 components
  vector \kbd{[\var{gc},\var{chi}]}.

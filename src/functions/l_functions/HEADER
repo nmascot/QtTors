@@ -260,21 +260,22 @@ Doc:
 
  \subsec{General Hecke $L$-functions} %GPHELPskip
 
- Given a Hecke \tev{Grossencharacter} $\chi: \A^\times\to \C$, we let
- $$L(\chi, s) = \sum_{A \subset O_K} \chi(A)\, \left(N_{K/\Q}A\right)^{-s}.$$
+ Given a Hecke \tev{Grossencharacter} $\chi: \A^\times\to \C^\times$ of
+ conductor~$\goth{f}$, we let
+ $$L(\chi, s) = \sum_{A \subset \Z_K,\ A+\goth{f}=\Z_K} \chi(A)\, \left(N_{K/\Q}A\right)^{-s}.$$
 
  Let $C_K(\goth{m})=\A^\times/(K^\times\cdot U(\goth{m}))$ be a id\`ele class
- group of modulus $\goth{m}$ given by a \var{gchar} structure \var{g}.
+ group of modulus $\goth{m}$ given by a \var{gchar} structure~\var{gc}.
  A Grossencharacter $\chi$ on $C_K(\goth{m})$ is given by a row
- vector of size \kbd{\#gc.cyc}.
+ vector of size \kbd{\#\var{gc}.cyc}.
 
  \bprog
  ? gc = gcharinit(x^3+4*x-1,[5,[1]]); \\ mod = 5.oo
  ? gc.cyc
  %3 = [4, 2, 0, 0]
  ? gcharideallog(gc,idealprimedec(gc.bnf,5)[1]) \\@com logarithm map $C_K(\goth{m})\to \R^n$
- ? gcharparameters(gc,[1,0,0,1]); \\@com row vector of exponents in $\R^n$
- ? lfunzeros([gc,[1,0,0,1]],1); \\@com non algebraic L function
+ ? gcharparameters(gc,[1,0,0,1]) \\@com row vector of exponents in $\R^n$
+ ? lfunzeros([gc,[1,0,0,1]],1) \\@com non algebraic $L$-function
  @eprog
 
  Finite order Hecke characters are a special case.
