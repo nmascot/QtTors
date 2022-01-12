@@ -170,24 +170,28 @@ Number field elements are \typ{INT}, \typ{FRAC}, \typ{POL}, \typ{POLMOD}, or
 
 \smallskip
 \subsec{Hecke Grossencharacters}
-Let $K$ be a number field and $m$ a modulus. A \var{gc} structure
-describes the group of Hecke characters having modulus $m$ as
+Let $K$ be a number field and $m$ a modulus. A gchar structure
+describes the group of Hecke Grossencharacters of~$K$ of modulus~$m$
 and allows computations with these characters. A character $\chi$
-is described by its components modulo \var{bnf}.cyc.
+is described by its components modulo \var{gc}\kbd{.cyc}.
 \smallskip
-\li{init gchar structure for modulus \var{m}}{gcharinit$(\var{bnf},\var{m},\{cm\})$}
-\subsec{gchar members:}
+\li{init gchar structure \var{gc} for modulus \var{m}}{gcharinit$(\var{bnf},\var{m},\{cm\})$}
+\subsec{gc members:}
 \beginindentedkeys
-\li{underlying \var{bnf}}{\var{gchar}.bnf}
+\li{underlying \var{bnf}}{\var{gc}.bnf}
 %\li{big ideal structure}{\var{bnr}.bid}
-\li{modulus}{\var{gchar}.mod}
+\li{modulus}{\var{gc}.mod}
 %\li{structure of $(\ZZ_K/m)^*$}{\var{bnr}.zkst}
-\li{elementary divisors (including 0s)}{\var{gchar}.cyc}
+\li{elementary divisors (including $0$s)}{\var{gc}.cyc}
 \endindentedkeys
-\li{evaluate Hecke character \var{chi} at ideal \var{id}}{chareval$(\var{gchar},\var{chi},\var{id})$}
-\li{exponent column of \var{id} in $\RR^n$}{gcharideallog$(\var{gchar},\var{id})$}
-\li{exponent vector of $\chi$ in $\RR^n$}{gcharparameters$(\var{gchar},\var{chi})$}
-\li{L-function of $\chi$}{lfuncreate$([\var{gchar},\var{chi}])$}
+\li{recompute \var{gc}\ using current precision}{gcharnewprec$(gc)$}
+\li{evaluate Hecke character \var{chi} at ideal \var{id}}{chareval$(\var{gc},\var{chi},\var{id})$}
+\li{exponent column of \var{id} in $\RR^n$}{gcharideallog$(\var{gc},\var{id})$}
+\li{exponent vector of $\chi$ in $\RR^n$}{gcharparameters$(\var{gc},\var{chi})$}
+\li{conductor of~$\chi$}{gcharconductor$(gc,chi)$}
+\li{L-function of $\chi$}{lfuncreate$([\var{gc},\var{chi}])$}
+\li{$\chi$ s.t. $\chi_{v} \approx \var{Lchiv}\kbd{[i]}$ for~$v=\var{Lv}\kbd{[i]}$}{gcharidentify$(\var{gc},\var{Lv},\var{Lchiv})$}
+\li{basis of group of algebraic characters}{gcharalgebraic$(gc)$}
 
 \smallskip
 \subsec{Dedekind Zeta Function $\zeta_K$, Hecke $L$ series}
