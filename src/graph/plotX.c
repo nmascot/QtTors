@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*******************************************************************/
 
 #include "pari.h"
+#include "paripriv.h"
 #include "rect.h"
 
 #ifdef HPPA
@@ -236,7 +237,10 @@ draw(PARI_plot *T, GEN w, GEN x, GEN y)
   plotX.pl = T;
   plotX.data = (void*)&dx;
 
-  pari_close();
+  if (mt_is_thread())
+    pari_thread_close();
+  else
+    pari_close();
   for(;;)
   {
     XNextEvent(display, &event);

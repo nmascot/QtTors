@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /////////////////////////////////////////////////////////////////////////////
 extern "C" {
 #include "pari.h"
+#include "paripriv.h"
 #include "rect.h"
 }
 
@@ -169,8 +170,10 @@ draw(PARI_plot *T, GEN w, GEN x, GEN y)
   Plotter *win;
 
   if (pari_daemon()) return;  // parent process returns
-  pari_close();
-
+  if (mt_is_thread())
+    pari_thread_close();
+  else
+    pari_close();
   Fl::visual(FL_DOUBLE|FL_INDEX);
   win = new Plotter(T, w, x, y);
   win->size_range(1,1);
