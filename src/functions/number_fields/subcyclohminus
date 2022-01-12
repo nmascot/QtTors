@@ -43,10 +43,10 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
 
  \item If $f=p^a$ with a prime number $p$, then $Q=1$.
 
- \item If $F=\Q(\zeta_f)$, then $Q=1\Longleftrightarrow f=p^a$.
+ \item If $F=\Q(\zeta_f)$, then $Q=1$ if and only if $f=p^a$.
 
  \item If $f=4p^a$ or $p^aq^b$ with odd prime numbers $p,\,q$,
- then $Q=1 \Longleftrightarrow [\Q(\zeta_f):F]$ is even.
+ then $Q=1$ if and only if $[\Q(\zeta_f):F]$ is even.
 
  Finally, the optional parameter $p$ is an \emph{odd} prime number.
  If $p$ is given, then \kbd{subcyclohminus} outputs the valuation at $p$ of

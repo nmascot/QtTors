@@ -46,7 +46,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  $\xi_n^\chi$ belongs to ${\cal O}_\chi[\Sigma_n]$;
  the polynomial $f_n^{\chi}(x)\in{\cal O}_{\chi}[x]$
  is constructed from $\xi_n^{\chi}$ by the correspondence
- $\sigma\leftrightarrow 1+x$. If $n$ is sufficiently large, then
+ $\sigma \mapsto 1+x$. If $n$ is sufficiently large, then
  $\goth{p}$ does not divide $f_n^{\chi}(x)$ and the distinguished polynomial
  $g_n^{\chi}(x)\in{\cal O}_{\chi}[x]$ is uniquely determined by the relation
  $f_n^{\chi}(x)=u(x)g_n^{\chi}(x),\,u(x)\in{\cal O}_{\chi}[x]^{\times}$.

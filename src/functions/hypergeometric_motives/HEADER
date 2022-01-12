@@ -13,7 +13,7 @@ Doc:
  B(x)=\prod_{1\le k\le d}(x-e^{2\pi i\beta_k})\;.$$
  We make the following assumptions:
 
- \item $\alpha_j\not\equiv\beta_k\pmod{1}$ for all $j$ and $k$, or
+ \item $\alpha_j-\beta_k\notin\Z$ for all $j$ and $k$, or
  equivalently $\gcd(A,B)=1$.
 
  \item $\alpha_j\notin\Z$ for all $j$, or equivalently $A(1)\ne0$.

@@ -106,7 +106,8 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  This computes the 101-part $A_F$ of the ideal class group of
  $F=\Q(\zeta_{22220})$.
  The output says that $A_F^+=0$, which is rigorous (since trivial),
- and $|A_F^-|=101^{41}$, $A_F^-\cong(\Z/101\Z)^{41}$ which is also rigorous
+ and $|A_F^-|=101^{41}$, more precisely $A_F^-$ is isomorphic to
+ $(\Z/101\Z)^{41}$ which is also rigorous
  (since the description of $A_F^-$ is always rigorous). The Galois group
  $\text{Gal}(F/\Q)$ is $\Z/100\Z\oplus\Z/20\Z\oplus\Z/2\Z\oplus\Z/2\Z$.
  The field $F$ has 479 cyclic subfields different from $\Q$ and
@@ -119,18 +120,18 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  %2 = [11, [2, [1, 1]], [16, []], [100, 20, 2, 2], 479, 1799]
  @eprog\noindent
  This computes the 11-part $A_F$ for the same $F$. The result says that
- $|A_F^+|=11^2$, $A^+_F\cong(\Z/11\Z)^2$ which is not rigorous and is only an
- upper bound, and $|A_F^-|=11^{16}$ which is rigorous.
- The group structure of $A_F^-$ is unknown.
+ $|A_F^+|=11^2$, $A^+_F$ is isomorphic to $(\Z/11\Z)^2$ which is not rigorous
+ and is only an upper bound, and $|A_F^-|=11^{16}$ which is rigorous. The
+ group structure of $A_F^-$ is unknown.
 
  \bprog
  ? subcyclopclgp(22220, 11, 1)
  time = 165 ms.
  %3 = [11, [2, [1, 1]], [16, [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
  [100, 20, 2, 2], 479, 1799]
- @eprog\noindent now guarantees $A^+_F\cong(\Z/11\Z)^2$ and determines that
- $A_F^-\cong\Z/11^2\Z\oplus(\Z/11\Z)^{14}$, at the expense of slightly
- increasing the running time.
+ @eprog\noindent now guarantees that $A^+_F$ is isomorphic to $(\Z/11\Z)^2$
+ and determines that $A_F^-$ is isomorphic to $\Z/11^2\Z\oplus(\Z/11\Z)^{14}$,
+ at the expense of slightly increasing the running time.
 
  We now try a much harder example: $F=\Q(\sqrt{36322},\zeta_5)$, which
  we could define using $f = 726440$ and $H = [41, 61, 111, 131]$ (prove it!).
@@ -151,8 +152,8 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  \\ trying to reduce memory use does not work (still need 2.5GB); slower
  ? subcyclopclgp(T, 5, 1+16)
  time = 46,794 ms.
- @eprog\noindent This shows that $A_F^+\cong\Z/5\Z$ and
- $A_F^-\cong\Z/5^3\Z\oplus\Z/5\Z$ for $p=5$. For this example, trying to
+ @eprog\noindent This shows that $A_F^+$ is isomorphic to $\Z/5\Z$ and
+ $A_F^-$ is isomorphic to $\Z/5^3\Z\oplus\Z/5\Z$ for $p=5$. For this example, trying to
  reduce memory use with $\fl = 1+16$ fails: the computation becomes
  slower (46,796 ms.) and still needs 2.5GB; $\fl = 1+16+32$ is a
  disaster: it bombs even with 10GB after 3 minutes of computation.
