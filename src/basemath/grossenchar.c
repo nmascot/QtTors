@@ -586,7 +586,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
 }
 
 /* b) do HNF reductions + LLL + SNF form, keep base change u0 */
-GEN
+  GEN
 gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 {
     GEN bnf, u, u0, m, m0;
@@ -682,7 +682,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 }
 
 /* convert to snf basis of torsion + Z^(r1+2*r2-1) */
-void
+  void
 gchar_snfbasis_shallow(GEN gc, GEN rel)
 {
   long n, r1, r2;
@@ -722,7 +722,7 @@ gchar_snfbasis_shallow(GEN gc, GEN rel)
 /* c) transpose inverse + clean rationals.
    prec = target prec,
    internal prec = nfprec */
-void
+  void
 gcharmat_tinverse(GEN gc, GEN m, long prec)
 {
   GEN bnf, m_inv;
@@ -810,7 +810,7 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
 
 /* recompute matrix with precision increased */
 
-void
+  void
 vaffect_shallow(GEN x, long i0, GEN y)
 {
   long i;
@@ -819,7 +819,7 @@ vaffect_shallow(GEN x, long i0, GEN y)
 }
 
 /* u0 the base change, returns m0 * u0 */
-GEN
+  GEN
 gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
 {
     GEN bnf, m0, u0, sunits, fu, c, emb;
@@ -878,7 +878,7 @@ check_gchar_group(GEN gc)
 }
 
 /* increase prec if needed */
-GEN
+  GEN
 gcharnewprec(GEN gc, long newprec)
 {
   long prec, prec0, nfprec, nfprec0;
@@ -976,7 +976,7 @@ _check_gchar_group(GEN gc, long flag)
 
 /* basis of algebraic characters + cyc vector */
   GEN
-gchar_algebraic(GEN gc)
+gchar_algebraic_basis(GEN gc)
 {
   long nt, nf, nc, nm, r2, nalg, n0, k;
   GEN basis, args, m, w, normchar, alg_basis, tors_basis;
@@ -986,10 +986,11 @@ gchar_algebraic(GEN gc)
   nf = gchar_get_nfree(gc);
   nc = nt + nf;
   /* in internal basis */
-  nalg = gchar_get_nalg(gc); /* number of generators of free algebraic chars */
   n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion chars, internal basis */
   r2 = gchar_get_r2(gc);
   nm = gchar_get_nm(gc);
+  /* in both */
+  nalg = gchar_get_nalg(gc); /* number of generators of free algebraic chars */
 
   /* finite order characters have weight 0 */
   tors_basis = matid(nt);
@@ -1045,6 +1046,64 @@ gchar_algebraic(GEN gc)
     basis = alg_basis;
   basis = matconcat(mkcol2(basis,normchar));
   return gerepilecopy(av, basis);
+}
+  GEN
+gchar_algebraicoftype(GEN gc, GEN type)
+{
+  long i, nt, nf, nc, r2, nalg, n0, nm;
+  GEN p, q, w, k, matk, chi;
+  pari_sp av = avma;
+  /* in snf basis */
+  nt = gchar_get_ntors(gc);
+  nf = gchar_get_nfree(gc);
+  nc = nt + nf;
+  /* in internal basis */
+  n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion chars, internal basis */
+  r2 = gchar_get_r2(gc);
+  nm = gchar_get_nm(gc);
+  /* in both */
+  nalg = gchar_get_nalg(gc); /* number of generators of free algebraic chars */
+
+  if (typ(type)!=t_VEC || lg(type) != r2+1)
+    pari_err_TYPE("gcharalgebraic", type);
+  for (i = 1; i<=r2; i++)
+    if (typ(gel(type,i)) != t_VEC
+        ||lg(gel(type,i)) != 3
+        ||typ(gmael(type,i,1)) != t_INT
+        ||typ(gmael(type,i,2)) != t_INT)
+      pari_err_TYPE("gcharalgebraic", type);
+
+  if (!nalg)
+    return cgetg(1,t_VEC);
+
+  k = cgetg(r2+1,t_VEC);
+  p = gmael(type, 1, 1);
+  q = gmael(type, 1, 2);
+  w = gadd(p, q);
+  gel(k, 1) = subii(p, q);
+  for(i=2; i<=r2; i++)
+  {
+    p = gmael(type, 1, 1);
+    q = gmael(type, 1, 2);
+    if (!equalii(w,gadd(p, q))) return cgetg(1,t_VEC);
+    gel(k, i) = subii(p, q);
+  }
+  /* block of k_s parameters of free algebraic */
+  matk = matslice(gchar_get_basis(gc),n0+1,n0+nalg,nm-r2+1,nm);
+  chi = gtrans(inverseimage(gtrans(matk),gtrans(k)));
+  if (lg(chi) == 1)
+    return cgetg(1, t_VEC);
+  chi = gconcat1(mkvec4(zerovec(nt),chi,zerovec(nf-nalg),w));
+  return gerepilecopy(av, mkvec(chi));
+}
+
+  GEN
+gcharalgebraic(GEN gc, GEN type)
+{
+  check_gchar_group(gc);
+  if (type == NULL)
+    return gchar_algebraic_basis(gc);
+  return gchar_algebraicoftype(gc, type);
 }
 
 /*********************************************************************/
@@ -1207,13 +1266,60 @@ gchari_conductor(GEN gc, GEN chi)
   return gerepilecopy(av, mkvec2(gcharlog_conductor_f(gc, chi), gcharlog_conductor_oo(gc, chi)));
 }
 
-GEN
+  GEN
 gchar_conductor(GEN gc, GEN chi)
 {
   pari_sp av = avma;
   check_gchar_group(gc);
   return gerepilecopy(av, gchari_conductor(gc, gchar_internal(gc, chi, NULL)));
 }
+
+  int
+gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
+{
+  long i, nt, nc, n0, nalg, r2;
+  GEN w, chii;
+  pari_sp av = avma;
+  check_gchar_group(gc);
+  /* in snf basis */
+  nt = gchar_get_ntors(gc);
+  nc = gchar_get_nc(gc);
+  /* in internal basis */
+  r2 = gchar_get_r2(gc);
+  n0 = gchar_get_nm(gc) - r2; /* last index before k_s */
+  /* in both */
+  nalg = gchar_get_nalg(gc); /* number of generators of free algebraic chars */
+
+  check_gchar(gc, chi, &w);
+  /* check component are on algebraic generators */
+  for (i=nt+nalg+1;i<=nc;i++)
+    if (!gequal0(gel(chi,i)))
+      return gc_bool(av, 0);
+  chii = gchar_parameters(gc, chi);
+  /* condition is k_s + w = 0 mod 2 for all s */
+  w = gmul2n(w, 1);
+  if (typ(w) != t_INT)
+    return gc_bool(av, 0);
+  for (i = 1; i <= r2; i++)
+    if (smodis(addii(gel(chii, n0 + i), w), 2))
+      return gc_bool(av, 0);
+  if (pq)
+  { 
+    /* set the infinity type */
+    GEN v = cgetg(r2+1, t_VEC);
+    for (i = 1; i <= r2; i++)
+    {
+      GEN p, q;
+      p = gmul2n(addii(w, gel(chii, n0+i)), -1);
+      q = gmul2n(subii(w, gel(chii, n0+i)), -1);
+      gel(v, i) = mkvec2(p, q);
+    }
+    *pq = gerepilecopy(av, v);
+    av = avma;
+  }
+  return gc_bool(av, 1);
+}
+
 
 /*******************************************************************/
 /*                                                                 */
@@ -1552,7 +1658,7 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
 }
 
 /* TODO export the init interface */
-GEN
+  GEN
 gchar_identify(GEN gc, GEN Lv, GEN Lchiv, long prec)
 {
   pari_sp av = avma;
@@ -1683,7 +1789,7 @@ cleanup_vga(GEN vga, long prec)
 }
 
 /* TODO: move to lfunutils, use lfunzeta and lfunzetak */
-GEN
+  GEN
 gchari_lfun(GEN gc, GEN chi, GEN w)
 {
   pari_sp av = avma;
@@ -1734,7 +1840,8 @@ gchari_lfun(GEN gc, GEN chi, GEN w)
   return gerepilecopy(av, L);
 }
 
-GEN lfungchar(GEN gc, GEN chi)
+  GEN
+lfungchar(GEN gc, GEN chi)
 {
   pari_sp av = avma;
   GEN w2;

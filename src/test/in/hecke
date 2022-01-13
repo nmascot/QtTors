@@ -229,6 +229,10 @@ g = gcharinit(bnf,1);
 
 g = gcharinit(polcyclo(5),25);
 gcharalgebraic(g)
+gcharalgebraic(g,[[2,3],[0,0]])
+gcharisalgebraic(g,[0,0,1,0,0,0])
+gcharisalgebraic(g,[0,0,1,0,1,0,3/2],&pq)
+pq
 
 print("need to increase prec");
 pol = x^4 - 2*x^3 + 5*x^2 - 2*x - 1;

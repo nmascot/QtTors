@@ -3919,7 +3919,8 @@ GEN     genus2red(GEN PQ, GEN p);
 
 int     is_gchar_group(GEN gc);
 GEN     gcharinit(GEN bnf, GEN mod, long prec);
-GEN     gchar_algebraic(GEN gc);
+GEN     gcharalgebraic(GEN gc, GEN type);
+int     gcharisalgebraic(GEN gc, GEN chi, GEN *pq);
 GEN     gcharnewprec(GEN gc, long prec);
 GEN     gchareval(GEN gc, GEN chi, GEN x, long flag, GEN logx);
 GEN     gchar_conductor(GEN gc, GEN chi);

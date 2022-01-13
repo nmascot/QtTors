@@ -87,6 +87,10 @@ non trivial cm subfield
 
 [0 0 0 0 0 0   1]
 
+[[0, 0, 0, -1, -1, 0, 5]]
+1
+1
+[[1, 2], [2, 1]]
 need to increase prec
 larger fields
 r2 = 5, clno = 5
@@ -203,4 +207,4 @@ bad inputs
   ***   at top-level: gcharidentify(G,[pr],[0])
   ***                 ^-------------------------
   *** gcharidentify: domain error in gchar_identify_init: valuation at prime dividing the modulus > 0
-Total time spent: 44222
+Total time spent: 45098

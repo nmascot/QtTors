@@ -1,10 +1,18 @@
 Function: gcharalgebraic
 Section: number_fields
-C-Name: gchar_algebraic
-Prototype: G
-Help: gcharalgebraic(gc): returns a matrix whose rows form a basis of the
- algebraic Grossencharacters in gc.
+C-Name: gcharalgebraic
+Prototype: GDG
+Help: gcharalgebraic(gc,{type}): returns a matrix whose rows form a basis of the
+ algebraic Grossencharacters in gc. If type is specified as a vector of
+ integer exponents [p,q] for each complex place, return a vector containing
+ an algebraic character of that infinity type (or the empty vector if such a character does
+ not exist).
 Doc: \var{gc} being the structure returned by \kbd{gcharinit}, return a \typ{MAT}
  whose rows form a basis of the subgroup of algebraic Grossencharacters in \var{gc}
- (Weil type A0).
- The last component is interpreted as a power of the norm.
+ (Weil type A0). The last component is interpreted as a power of the norm.
+
+ If \var{type} is a \kbd{t_VEC} of length \var{gc.r2}, with values $(p_\tau,q_\tau)$
+ for complex embedding $\tau$, return a character whose infinity type is
+ $$ z \to \prod_\tau z_\tau^{p_\tau}\bar{z_\tau}^{q_\tau}$$.
+ The full set of characters of that infinity type is obtained by twisting with
+ a finite order character.
