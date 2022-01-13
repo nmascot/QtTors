@@ -155,25 +155,23 @@ gchar_logm(GEN bnf, GEN zm, GEN x)
 static GEN
 gchar_nflog(GEN bnf, GEN zm, GEN S, GEN x, long prec)
 {
-  GEN emb;
-  emb = nfembedlog(bnf,x,prec);
+  GEN emb = nfembedlog(bnf,x,prec);
   if (!emb) return NULL;
   return shallowconcat1(mkvec3(gchar_Sval(bnf,S,x),gchar_logm(bnf,zm,x),emb));
 }
 
-GEN
-matvaluations(GEN bnf, GEN S, GEN clgen)
+static GEN
+matvaluations(GEN bnf, GEN S, GEN g)
 {
-  long i, j, ni, nj;
-  GEN m;
-  pari_sp av = avma;
-  ni = lg(S) - 1;
-  nj = lg(clgen) - 1;
-  m = zeromatcopy(ni, nj);
-  for(i=1;i<=ni;i++)
-    for(j=1;j<=nj;j++)
-      gcoeff(m,i,j) = stoi(idealval(bnf, gel(clgen, j), gel(S, i)));
-  return gerepilecopy(av, m);
+  long i, j, li = lg(S), lj = lg(g);
+  GEN m = cgetg(lj, t_MAT);
+  for(j = 1; j < lj; j++)
+  {
+    GEN c = cgetg(li, t_COL); gel(m,j) = c;
+    for(i = 1; i < li; i++)
+      gel(c,i) = stoi(idealval(bnf, gel(g,j), gel(S,i)));
+  }
+  return m;
 }
 
 /*******************************************************************/
