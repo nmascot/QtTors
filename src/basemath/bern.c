@@ -105,7 +105,7 @@ bernset(GEN *y, long m, long n)
     affrr(divrunextu(mulrr(v,u), k-1), v);
     for (j = r; j >= 3; j -= 2) affii(muliu2(gel(t,j), j), gel(t,j));
     set_avma(av2); k -= 2;
-    if ((k & 0x7f) == 0)
+    if (((N - k) & 0x7f) == 0x7e)
     { /* reduce precision if possible */
       long p2 = p, prec2 = prec;
       p = bernbitprec(k); prec = nbits2prec(p); if (prec2 == prec) continue;
@@ -488,7 +488,7 @@ eulerset(GEN *y, long m, long n)
     affrr(divrunextu(mulrr(v,u), k-2), v);
     for (j = r; j >= 3; j -= 2) affii(muliu2(gel(t,j), j), gel(t,j));
     set_avma(av2); k -= 2;
-    if ((k & 0x7f) == 1)
+    if (((N1 - k) & 0x7f) == 0x7e)
     { /* reduce precision if possible */
       long p2 = p, prec2 = prec;
       p = eulerbitprec(k); prec = nbits2prec(p); if (prec2 == prec) continue;

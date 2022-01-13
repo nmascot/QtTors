@@ -29,6 +29,8 @@ E=Mod(eulervec(7000), p); t=1/cosh(X);
 j=0; J=Mod(1,p); /* 2i and j! mod p */
 for (i=0, #E-1, if (E[1+i] != polcoeff(t,j)*J, error(i)); j+=2; J *= j*(j-1))
 
+bernvec(579)[14]
+
 \\ Errors, keep at end of file
 bernfrac(-1)
 bernreal(-1)
