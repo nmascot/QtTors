@@ -16,4 +16,4 @@ Doc: \var{gc} being the structure returned by \kbd{gcharinit}, return a \typ{MAT
  whose infinity type is
  $$z \mapsto \prod_\tau z_\tau^{p_\tau}\bar{z}_{\tau}^{q_\tau}.$$
  The full set of characters of that infinity type is obtained by multiplying by
- a finite order character.
+ the group of finite order characters.
