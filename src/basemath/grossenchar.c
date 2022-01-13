@@ -1050,13 +1050,12 @@ gchar_algebraic_basis(GEN gc)
 GEN
 gchar_algebraicoftype(GEN gc, GEN type)
 {
-  long i, nt, nf, nc, r2, nalg, n0, nm;
+  long i, nt, nf, r2, nalg, n0, nm;
   GEN p, q, w, k, matk, chi;
   pari_sp av = avma;
   /* in snf basis */
   nt = gchar_get_ntors(gc);
   nf = gchar_get_nfree(gc);
-  nc = nt + nf;
   /* in internal basis */
   n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion chars, internal basis */
   r2 = gchar_get_r2(gc);
