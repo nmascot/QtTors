@@ -43,15 +43,6 @@ where Ufil_p = [ Mat([gen[j], t_COL of size ncp]_j) ]_{1<=i<=k}
 #define GC_LENGTH   11
 #define LOCS_LENGTH 4
 
-/* log on sprk of generators of U_{e-1}/U_e(pr) */
-static GEN
-log_gen_fil(GEN nf, GEN sprk, long e)
-{
-  long ncp = lg(sprk_get_cyc(sprk))-1;
-  if (e == 1) retmkmat(col_ei(ncp,1));
-  return sprk_log_gen_pr2(nf, sprk, e);
-}
-
 static GEN
 compute_Lcyc(GEN Lsprk, GEN moo)
 {
@@ -62,36 +53,31 @@ compute_Lcyc(GEN Lsprk, GEN moo)
   return Lcyc;
 }
 
-/* modulus = [ factor(m_f), m_oo ] */
+/* true nf; modulus = [ factor(m_f), m_oo ] */
 static GEN
-localstar(GEN nf, GEN mod)
+localstar(GEN nf, GEN famod, GEN moo)
 {
-  pari_sp av = avma;
-  long ip, e, k;
-  GEN Lcyc, cyc, Lsprk, Lgenfil, moo, famod, Lpr, Lk, sprk;
-  nf = checknf(nf);
-  famod = gel(mod,1);
-  Lpr = gel(famod,1);
-  Lk = gel(famod,2);
-  moo = gel(mod,2);
+  GEN Lcyc, cyc, Lsprk, Lgenfil, P = gel(famod,1), E = gel(famod,2);
+  long i, l = lg(P);
 
-  Lsprk = cgetg(lg(Lpr), t_VEC);
-  Lgenfil = cgetg(lg(Lpr), t_VEC);
-  for(ip = 1; ip < lg(Lpr); ip++)
+  Lsprk = cgetg(l, t_VEC);
+  Lgenfil = cgetg(l, t_VEC);
+  for(i = 1; i < l; i++)
   {
-    k = itos(gel(Lk,ip));
-    sprk = log_prk_init(nf, gel(Lpr,ip), k, NULL);
-    gel(Lsprk,ip) = sprk;
-    gel(Lgenfil,ip) = cgetg(k+1, t_VEC);
-    for(e = 1; e <= k; e++)
-      gmael(Lgenfil, ip, e) = log_gen_fil(nf, sprk, e);
+    long n, e, k = itos(gel(E,i));
+    GEN sprk = log_prk_init(nf, gel(P,i), k, NULL);
+    gel(Lsprk,i) = sprk; n = lg(sprk_get_cyc(sprk))-1;
+    gel(Lgenfil,i) = cgetg(k+1, t_VEC);
+    /* log on sprk of generators of U_{e-1}/U_e(pr) */
+    gmael(Lgenfil, i, 1) = col_ei(n, 1);
+    for(e = 2; e <= k; e++) gmael(Lgenfil, i, e) = sprk_log_gen_pr2(nf, sprk, e);
   }
   Lcyc = compute_Lcyc(Lsprk, moo);
   if (lg(Lcyc) > 1)
-    cyc = gtovec(shallowconcat1(Lcyc));
+    cyc = shallowconcat1(Lcyc);
   else
     cyc = cgetg(1, t_VEC);
-  return gerepilecopy(av, mkvec4(cyc, Lsprk, Lgenfil, mod));
+  return mkvec4(cyc, Lsprk, Lgenfil, mkvec2(famod,moo));
 }
 
 /* log_prk(alpha*pi_pr^{-v_pr(alpha)}), sign(sigma(alpha)) */
@@ -408,7 +394,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
 
   /* Dirichlet group + make sure mod contains archimedean places */
   mod = check_mod_factored(nfs,mod,NULL,&fa2,&archp,NULL);
-  zm = localstar(bnf, mkvec2(fa2,archp));
+  zm = localstar(nfs, fa2, archp);
   zmcyc = locs_get_cyc(zm);
 
   /* set of primes S */
