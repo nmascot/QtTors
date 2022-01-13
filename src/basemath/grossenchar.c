@@ -116,21 +116,18 @@ GEN
 nfembedlog(GEN bnf, GEN x, long prec)
 {
   pari_sp av = avma;
-  GEN args, logs, nf, cxlogs;
-  long k, r1, r2;
+  GEN logs, nf, cxlogs;
+  long k, r1, r2, n;
+
   nf = bnf_get_nf(bnf);
   nf_get_sign(nf, &r1, &r2);
   cxlogs = nf_cxlog(nf, x, prec);
   if (!cxlogs) return NULL;
   cxlogs = nf_cxlog_normalize(nf, cxlogs, prec);
-  logs = cgetg(r1+r2+1,t_COL);
-  for (k=1;k<=r1+r2;k++)
-    gel(logs,k) = real_i(gel(cxlogs,k));
-  args = cgetg(r2+1,t_COL);
-  for (k=1; k<=r2; k++)
-    gel(args,k) = gmul2n(imag_i(gel(cxlogs,k+r1)),-1);
-  logs = shallowconcat(logs, args);
-  return gerepilecopy(av, gdiv(logs, Pi2n(1,prec)));
+  n = r1 + 2*r2; logs = cgetg(n+1,t_COL);
+  for (k = 1; k <= r1+r2; k++) gel(logs,k) = real_i(gel(cxlogs,k));
+  for (     ; k <= n; k++) gel(logs,k) = gmul2n(imag_i(gel(cxlogs,k-r2)), -1);
+  return gerepileupto(av, gdiv(logs, Pi2n(1,prec)));
 }
 
 static GEN
