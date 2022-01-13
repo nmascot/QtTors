@@ -2952,7 +2952,6 @@ lfundatatype(GEN data)
       if (checknf_i(data)) return t_LFUNMISC_POL;
       long l = lg(data);
       if (l == 17) return t_LFUNMISC_ELLINIT;
-      //if (l == 3 && typ(gel(data,1)) == t_VEC) return t_LFUNMISC_CHIGEN;
       if (l == 3 && typ(gel(data,1)) == t_VEC)
         return is_gchar_group(gel(data,1))? t_LFUNMISC_HECKE
                                           : t_LFUNMISC_CHIGEN;

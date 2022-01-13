@@ -1467,7 +1467,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   mult = shifti(mult,s);
   npr = 0;
   nk1 = 0;
-  uni = gen_sort_uniq(Lv, cmp_universal, cmp_nodata);
+  uni = gen_sort_uniq(Lv, (void*)cmp_universal, cmp_nodata);
   if (lg(uni) < lg(Lv)) pari_err(e_MISC, "components of Lv must be distinct");
   for (i = 1; i < lg(Lv); i++)
   {
