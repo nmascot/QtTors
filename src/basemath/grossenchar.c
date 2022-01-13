@@ -1420,7 +1420,7 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long
   }
   else if (norm)
   {
-    GEN expo = gdiv(w2, mkcomplex(gen_0, Pi2n(1, prec)));
+    GEN expo = gdiv(w2, PiI2(prec));
     val = gadd(val, gmul(expo, glog(norm, prec)));
   }
   if (DEBUGLEVEL>1) pari_printf("char value %Ps\n", val);
@@ -1569,15 +1569,15 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   M = ZM_mul(M,U);
   U = rowslice(U, npr+nk1+2, npr+nk1+1+nchi);
 
-  return gerepilecopy(av, mkvecn(9,M,U,Lpr,Lk1,Lphi1,Lk2,mult,eps,Lv));
+  return gerepilecopy(av, mkvecn(10,M,U,Lpr,Lk1,Lphi1,Lk2,mult,eps,Lv,mkvecsmall(prec)));
 }
 
-/* TODO return the distance between the character found and the conditions */
+/* TODO return the distance between the character found and the conditions? */
 static GEN
 gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
 {
-  GEN M, U, Lpr, Lk1, Lphi1, Lk2, mult, eps, cyc, y, x, sumphi, Lv;
-  long i, r1, r2, npr, nk1, nmiss;
+  GEN M, U, Lpr, Lk1, Lphi1, Lk2, mult, eps, cyc, y, x, sumphi, Lv, normcompo, bnf;
+  long i, r1, r2, npr, nk1, nmiss, nnormcompo, prec;
   M = gel(idinit,1);
   U = gel(idinit,2);
   Lpr = gel(idinit,3);
@@ -1587,19 +1587,33 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
   mult = gel(idinit,7);
   eps = gel(idinit,8);
   Lv = gel(idinit,9);
+  prec = gel(idinit,10)[1];
   npr = lg(Lpr)-1;
   nk1 = lg(Lk1)-1;
   r1 = gchar_get_r1(gc);
   r2 = gchar_get_r2(gc);
   cyc = gchar_get_cyc(gc);
+  bnf = gchar_get_bnf(gc);
+  nnormcompo = 0;
+  normcompo = gen_0;
 
   if (lg(Lv) != lg(Lchiv)) pari_err_DIM("gchar_identify_i [lg(Lv) != lg(Lchiv)]");
   for (i=1; i<lg(Lchiv); i++)
   {
     if (typ(gel(Lv,i)) != t_INT)
     {
-      if (!is_real_t(typ(gel(Lchiv,i))))
-        pari_err_TYPE("gchar_identify_i [character value: should be real]", gel(Lchiv,i));
+      x = gel(Lchiv,i);
+      if (typ(x) == t_COMPLEX)
+      {
+        nnormcompo++;
+        /* 2 Pi Im(theta) / log N(pr) */
+        normcompo = gadd(normcompo,
+          gdiv(gmul(Pi2n(1,prec),gimag(x)), glog(idealnorm(bnf,gel(Lv,i)),prec)));
+        x = greal(x);
+        gel(Lchiv,i) = x;
+      }
+      if (!is_real_t(typ(x)))
+        pari_err_TYPE("gchar_identify_i [character value: should be real or complex]", x);
     }
     else
     {
@@ -1609,8 +1623,16 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
         pari_err_DIM("gchar_identify_i [character at infinite place: should have two components]");
       if (typ(gmael(Lchiv,i,1)) != t_INT)
         pari_err_TYPE("gchar_identify_i [k parameter at infinite place: should be a t_INT]", gmael(Lchiv,i,1));
-      if (!is_real_t(typ(gmael(Lchiv,i,2))))
-        pari_err_TYPE("gchar_identify_i [phi parameter at infinite place: should be real]", gmael(Lchiv,i,2));
+      x = gmael(Lchiv,i,2);
+      if (typ(x) == t_COMPLEX)
+      {
+        nnormcompo++;
+        normcompo = gadd(normcompo,gneg(gimag(x)));
+        x = greal(x);
+        gmael(Lchiv,i,2) = x;
+      }
+      if (!is_real_t(typ(x)))
+        pari_err_TYPE("gchar_identify_i [phi parameter at infinite place: should be real or complex]", x);
     }
   }
 
@@ -1653,6 +1675,11 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
   x = ZM_ZC_mul(U, x);
   for (i=1; i<lg(cyc); i++)
     if (signe(gel(cyc,i))) gel(x,i) = modii(gel(x,i), gel(cyc,i));
+  if (nnormcompo>0)
+  {
+    normcompo = gdivgu(normcompo,lg(Lv)-1);
+    x = shallowconcat(x,normcompo);
+  }
   return shallowtrans(x);
 }
 

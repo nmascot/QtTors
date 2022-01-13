@@ -392,6 +392,9 @@ pr = idealprimedec(bnf,11)[1];
 chi = gcharidentify(gc,[pr],[0.184760]);
 abs(chi[1]) > 1000
 localprec(10); chi = gcharidentify(gc,[pr],[0.184760])
+bnf = bnfinit(x^2-2,1);
+gc = gcharinit(bnf,1); gc.cyc
+gcharidentify(gc,[1,2],[[0,3.5-1/3*I],[0,-3.5-1/3*I]])
 
 
 print("bug from Atelier demo");
@@ -417,12 +420,13 @@ gcharidentify(G,[1,0],[[0,0],[0,0]]);
 gcharidentify(G,[1,3],[[0,0],[0,0]]);
 gcharidentify(G,[1,[]],[[0,0],[0,0]]);
 gcharidentify(G,[1,'x],[[0,0],[0,0]]);
-gcharidentify(G,[pr],[1.+I*0.7]);
+gcharidentify(G,[[]],[1.]);
+gcharidentify(G,[pr],[1+O(3^7)]);
 gcharidentify(G,[pr],['x]);
 gcharidentify(G,[1],['x]);
 gcharidentify(G,[1],[[]]);
 gcharidentify(G,[1],[[0.1,0]]);
-gcharidentify(G,[1],[[0,sqrt(I)]]);
+gcharidentify(G,[1],[[0,O(3^7)]]);
 gcharidentify(G,[1],[0,0]);
 G = gcharinit(bnf, pr);
 gcharidentify(G,[pr],[0]);

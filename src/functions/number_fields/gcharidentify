@@ -50,3 +50,14 @@ Doc: \var{gc} being a Grossencharacter group as output by \kbd{gcharinit}, $Lv$ 
  ? chareval(gc,chi,pr)
  % = 0.18476080328172203337331245154966763237
  @eprog
+
+ The output may be a quasi-character when the parameters~$\varphi$ or~$\theta$
+ have a nonzero imaginary part.
+
+ \bprog
+ ? bnf = bnfinit(x^2-2,1);
+ ? gc = gcharinit(bnf,1); gc.cyc
+ % = [0]
+ ? gcharidentify(gc,[1,2],[[0,3.5-1/3*I],[0,-3.5-1/3*I]])
+ % = [-1, 1/3]
+ @eprog
