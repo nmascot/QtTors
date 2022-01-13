@@ -227,11 +227,16 @@ g = gcharinit(bnf,1);
 \\c2 = [0,1,0,0,0,0,0];
 \\vecan_gchar([g,c2],50);
 
-g = gcharinit(polcyclo(5),25);
-gcharalgebraic(g)
-gcharalgebraic(g,[[2,3],[0,0]])
-gcharisalgebraic(g,[0,0,1,0,0,0])
-gcharisalgebraic(g,[0,0,1,0,1,0,3/2],&pq)
+gc = gcharinit(polcyclo(5),25);
+gcharalgebraic(gc)
+gcharalgebraic(gc,[[2,3],[0,0]])
+gcharalgebraic(gc,[[-2,3],[1,0]])
+gcharisalgebraic(gc,[0,0,1,0,0,0])
+gcharisalgebraic(gc,[0,0,1,0,1,0,3/2],&pq)
+pq
+gc = gcharinit(x^2+1,1);
+[chi]=gcharalgebraic(gc,[[4,0]])
+gcharisalgebraic(gc,chi,&pq)
 pq
 
 print("need to increase prec");

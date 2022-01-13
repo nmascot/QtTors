@@ -1082,8 +1082,8 @@ gchar_algebraicoftype(GEN gc, GEN type)
   gel(k, 1) = subii(p, q);
   for(i=2; i<=r2; i++)
   {
-    p = gmael(type, 1, 1);
-    q = gmael(type, 1, 2);
+    p = gmael(type, i, 1);
+    q = gmael(type, i, 2);
     if (!equalii(w,gadd(p, q))) return cgetg(1,t_VEC);
     gel(k, i) = subii(p, q);
   }
@@ -1092,7 +1092,7 @@ gchar_algebraicoftype(GEN gc, GEN type)
   chi = gtrans(inverseimage(gtrans(matk),gtrans(k)));
   if (lg(chi) == 1)
     return cgetg(1, t_VEC);
-  chi = gconcat1(mkvec4(zerovec(nt),chi,zerovec(nf-nalg),w));
+  chi = gconcat1(mkvec4(zerovec(nt),chi,zerovec(nf-nalg),gmul2n(w,-1)));
   return gerepilecopy(av, mkvec(chi));
 }
 
