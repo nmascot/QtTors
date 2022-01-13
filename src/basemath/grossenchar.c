@@ -1646,7 +1646,7 @@ vecan_gchar(GEN an, long n, long prec)
   {
     GEN nw2 = dirpowers(n, w2, prec);
     long j;
-    for (j = 1; j < n; j++)
+    for (j = 1; j <= n; j++)
     {
       if (gel(v,j)!=gen_0)
         gel(v, j) = gmul(gel(v,j),gel(nw2,j));
