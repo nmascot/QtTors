@@ -34,8 +34,8 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
 
  $v[1]$ is $p$.
 
- $v[2]$ contains $[v, [e_1,\dots,e_k]]$ with $v = \sum_i e_i$, meaning that
- the order of $A_F^+$ is $p^v$ and its cyclic structure is $\Z/p^{e_1}\Z \times
+ $v[2]$ contains $[E, [e_1,\dots,e_k]]$ with $E = \sum_i e_i$, meaning that
+ the order of $A_F^+$ is $p^E$ and its cyclic structure is $\Z/p^{e_1}\Z \times
  \dots \Z/p^{e_k}\Z$
 
  $v[3]$ similarly describes the order and the structure of $A_F^-$.
@@ -62,11 +62,11 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  and guarantees informations about $A_F^+$. This last part is usually
  costly.
 
- 2: do not compute quantities related to $A_F^+$ (the corresponding entry
- $v[2]$ is replaced with a dummy empty vector).
+ 2: do not compute quantities related to $A_F^+$ (the corresponding $(e_i)$
+ in $v[2]$ is replaced with a dummy empty vector).
 
- 4: do not compute quantities related to $A_F^-$ (the corresponding entry
- $v[3]$ is replaced with a dummy empty vector).
+ 4: do not compute quantities related to $A_F^-$ (the corresponding $(e_i)$
+ in $v[3]$ is replaced with a dummy empty vector).
 
  8: ignores proper subfields of $F$. This is motivated by the following kind
  of problems: let $\Q(p^k)$ be the $k$-th layer of the cyclotomic
