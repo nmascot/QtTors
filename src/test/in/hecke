@@ -387,6 +387,13 @@ pr = idealprimedec(bnf,11)[1];
 chi = gcharidentify(g,[pr],[0.3]);
 chareval(g,chi,pr)
 
+print("bug from Atelier demo");
+bnf = bnfinit(x^2+5,1);
+gc = gcharinit(bnf,1);
+chi = [1,0,1];
+L = lfuncreate([gc,chi]);
+round(lfunan(L,5))
+
 print("bad inputs");
 gcharinit([],1)
 gcharinit(bnfinit(x),[])

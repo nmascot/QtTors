@@ -146,6 +146,8 @@ prec increase
 from doc
 13.057005210545987626926134713745179631
 0.30000006229129706787363344444425752636
+bug from Atelier demo
+[1, -2, -6, 4, 5]
 bad inputs
   ***   at top-level: gcharinit([],1)
   ***                 ^---------------
@@ -207,4 +209,4 @@ bad inputs
   ***   at top-level: gcharidentify(G,[pr],[0])
   ***                 ^-------------------------
   *** gcharidentify: domain error in gchar_identify_init: valuation at prime dividing the modulus > 0
-Total time spent: 45098
+Total time spent: 68380
