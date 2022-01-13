@@ -11,8 +11,9 @@ Doc: \var{gc} being the structure returned by \kbd{gcharinit}, return a \typ{MAT
  whose rows form a basis of the subgroup of algebraic Grossencharacters in \var{gc}
  (Weil type A0). The last component is interpreted as a power of the norm.
 
- If \var{type} is a \kbd{t_VEC} of length \var{gc.r2}, with values $(p_\tau,q_\tau)$
- for complex embedding $\tau$, return a character whose infinity type is
- $$ z \to \prod_\tau z_\tau^{p_\tau}\bar{z_\tau}^{q_\tau}$$.
- The full set of characters of that infinity type is obtained by twisting with
+ If \var{type} is a \typ{VEC} of length $\var{gc}\kbd{.r1}+\var{gc}\kbd{.r2}$,
+ with values $(p_\tau,q_\tau)$ for complex embedding $\tau$, return a character
+ whose infinity type is
+ $$z \to \prod_\tau z_\tau^{p_\tau}\bar{z}_{\tau}^{q_\tau}.$$
+ The full set of characters of that infinity type is obtained by multiplying by
  a finite order character.

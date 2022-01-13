@@ -7,7 +7,7 @@ Help: gcharisalgebraic(gc,chi,{&type}): returns 1 if chi is an algebraic (type A
 Doc: \var{gc} being the structure returned by \kbd{gcharinit} and \var{chi}
  a character on \var{gc}, return 1 if chi is an algebraic (Weil type A0) character,
  so that its infinity type can be written
- $$ z \to \prod_\tau z_\tau^{p_\tau}\bar{z_\tau}^{q_\tau} $$
- for pairs of integers $(p_\tau,q_\tau)$ for each complex place $\tau$.
+ $$ z \to \prod_\tau z_\tau^{p_\tau}\bar{z}_{\tau}^{q_\tau} $$
+ for pairs of integers $(p_\tau,q_\tau)$ for each complex embedding $\tau$.
 
- If \var{type} is given, set it to the \kbd{t\_VEC} of size $of exponents $[p_\tau,q_\tau]$.
+ If \var{type} is given, set it to the \typ{VEC} of exponents $[p_\tau,q_\tau]$.
