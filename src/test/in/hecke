@@ -380,12 +380,19 @@ exponent(v1-v2) < -132
 
 print("from doc");
 bnf = bnfinit(x^2-5,1);
-g = gcharinit(bnf,1);
-chi = gcharidentify(g,[2],[[0,13.]]);
-gcharparameters(g,chi)[2]
+gc = gcharinit(bnf,1);
+chi = gcharidentify(gc,[2],[[0,13.]]);
+gcharparameters(gc,chi)[2]
 pr = idealprimedec(bnf,11)[1];
-chi = gcharidentify(g,[pr],[0.3]);
-chareval(g,chi,pr)
+chi = gcharidentify(gc,[pr],[0.3]);
+chareval(gc,chi,pr)
+bnf = bnfinit(x^2-5,1);
+gc = gcharinit(bnf,1);
+pr = idealprimedec(bnf,11)[1];
+chi = gcharidentify(gc,[pr],[0.184760]);
+abs(chi[1]) > 1000
+localprec(10); chi = gcharidentify(gc,[pr],[0.184760])
+
 
 print("bug from Atelier demo");
 bnf = bnfinit(x^2+5,1);
