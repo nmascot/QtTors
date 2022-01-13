@@ -294,19 +294,19 @@ cm_select(GEN bnf, GEN cm, long prec)
   /* group complex embeddings */
   emb = nfeltembed(bnf, gel(cm, 2), NULL, prec);
   /* sort */
-  keys = gadd(gmul(mppi(prec), greal_i(emb)), gabs(gimag_i(emb), prec));
+  keys = gadd(gmul(mppi(prec), real_i(emb)), gabs(imag_i(emb), prec));
   v = indexsort(keys);
 
   /* selection matrix */
   m_sel = zeromatcopy(nc, r2);
   for(j=1,c=1; c<=nc; c++)
   {
-    int ref = gsigne(gimag_i(gel(emb, v[j])));
+    int ref = gsigne(imag_i(gel(emb, v[j])));
     gcoeff(m_sel, c, v[j]) = gen_1;
     j++;
     for(i=2;i<=r_cm;i++)
     {
-      int s = gsigne(gimag_i(gel(emb, v[j])));
+      int s = gsigne(imag_i(gel(emb, v[j])));
       gcoeff(m_sel, c, v[j]) = (s == ref) ? gen_1 : gen_m1;
       j++;
     }
@@ -1533,8 +1533,8 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
         nnormcompo++;
         /* 2 Pi Im(theta) / log N(pr) */
         normcompo = gadd(normcompo,
-          gdiv(gmul(Pi2n(1,prec),gimag(x)), glog(idealnorm(bnf,gel(Lv,i)),prec)));
-        x = greal(x);
+          gdiv(gmul(Pi2n(1,prec),imag_i(x)), glog(idealnorm(bnf,gel(Lv,i)),prec)));
+        x = real_i(x);
         gel(Lchiv,i) = x;
       }
       if (!is_real_t(typ(x)))
@@ -1552,8 +1552,8 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
       if (typ(x) == t_COMPLEX)
       {
         nnormcompo++;
-        normcompo = gadd(normcompo,gneg(gimag(x)));
-        x = greal(x);
+        normcompo = gadd(normcompo,gneg(imag_i(x)));
+        x = real_i(x);
         gmael(Lchiv,i,2) = x;
       }
       if (!is_real_t(typ(x)))
