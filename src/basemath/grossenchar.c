@@ -190,9 +190,7 @@ embedcol(GEN v, long size, long shift)
   return w;
 }
 
-/* write exact rationals from real approximation, in place.
-   prec is used to check we do not squash non int
-   */
+/* write exact rationals from real approximation, in place. */
 static void
 shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
 {
@@ -208,28 +206,25 @@ shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
   }
 }
 
-/*
-   lower-left hnf on subblock m[r0+1..r0+nr, c0+1..c0+nc]
-   return base change matrix U
-   */
+/* lower-left hnf on subblock m[r0+1..r0+nr, c0+1..c0+nc]
+ * return base change matrix U */
 static GEN
 hnf_block(GEN m, long r0, long nr, long c0, long nc)
 {
-  GEN block, den, hnf, u, uu;
+  GEN block, u, uu;
   long nm = lg(m)-1, k;
   pari_sp av = avma;
+
   block = matslice(m, r0+1, r0+nr, c0+1, c0+nc);
-  den = denominator(block, NULL);
-  block = gmul(block, den);
+  block = Q_remove_denom(block, NULL);
 
   /* reverse lines, ~matlinereverse */
-  block = gtrans(block);
+  block = shallowtrans(block);
   vecreverse_inplace(block);
-  block = gtrans(block);
+  block = shallowtrans(block);
   /* end reverse lines */
 
-  hnf = hnfall(block);
-  u = gel(hnf, 2);
+  (void)ZM_hnfall(block, &u, 1);
   vecreverse_inplace(u);
   uu = matid(nm);
   /* embed in matid */
@@ -244,12 +239,11 @@ lll_block(GEN m, long r0, long nr, long c0, long nc)
   GEN block, u, uu;
   long nm = lg(m)-1, k;
   pari_sp av = avma;
-  block = matslice(m, r0+1, r0+nr, c0+1, c0+nc);
 
+  block = matslice(m, r0+1, r0+nr, c0+1, c0+nc);
   u = lll(block);
   vecreverse_inplace(u);
-  if (lg(u) <= nc)
-    return NULL;
+  if (lg(u) <= nc) return NULL;
   /* embed in matid */
   uu = matid(nm);
   for(k=1; k <= nc; k++)
@@ -263,11 +257,9 @@ shallowmatinsert(GEN m, GEN x, long i)
 {
   long k, n = lg(m);
   GEN mm = cgetg(n+1,t_MAT);
-  for (k=1; k < i; k++)
-    gel(mm, k) = gel(m, k);
+  for (k=1; k < i; k++) gel(mm, k) = gel(m, k);
   gel(mm, i) = x;
-  for (k=i; k < n; k++)
-    gel(mm, k+1) = gel(m, k);
+  for (k=i; k < n; k++) gel(mm, k+1) = gel(m, k);
   return mm;
 }
 
@@ -276,16 +268,13 @@ vec_v0(long n, long n0, long r1, long r2)
 {
   long k;
   GEN C = zerocol(n);
-  for(k = 1; k <= r1; k++)
-    gel(C, n0++) = gen_1;
-  for(k = 1; k <= r2; k++)
-    gel(C, n0++) = utoi(2);
+  for(k = 1; k <= r1; k++) gel(C, n0++) = gen_1;
+  for(k = 1; k <= r2; k++) gel(C, n0++) = utoi(2);
   return C;
 }
 
-/* select cm embeddings
- * return a matrix */
-GEN
+/* select cm embeddings; return a matrix */
+static GEN
 cm_select(GEN bnf, GEN cm, long prec)
 {
   long nc, r2, d_cm, r_cm, c, i, j;
@@ -305,19 +294,19 @@ cm_select(GEN bnf, GEN cm, long prec)
   /* group complex embeddings */
   emb = nfeltembed(bnf, gel(cm, 2), NULL, prec);
   /* sort */
-  keys = gadd(gmul(mppi(prec), greal(emb)), gabs(gimag(emb), prec));
-  v = vecsort0(keys, NULL, 1);
+  keys = gadd(gmul(mppi(prec), greal_i(emb)), gabs(gimag_i(emb), prec));
+  v = indexsort(keys);
 
   /* selection matrix */
   m_sel = zeromatcopy(nc, r2);
   for(j=1,c=1; c<=nc; c++)
   {
-    int ref = gsigne(gimag(gel(emb, v[j])));
+    int ref = gsigne(gimag_i(gel(emb, v[j])));
     gcoeff(m_sel, c, v[j]) = gen_1;
     j++;
     for(i=2;i<=r_cm;i++)
     {
-      int s = gsigne(gimag(gel(emb, v[j])));
+      int s = gsigne(gimag_i(gel(emb, v[j])));
       gcoeff(m_sel, c, v[j]) = (s == ref) ? gen_1 : gen_m1;
       j++;
     }
