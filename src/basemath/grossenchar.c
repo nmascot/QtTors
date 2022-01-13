@@ -314,14 +314,12 @@ cm_select(GEN bnf, GEN cm, long prec)
   return gerepilecopy(av, m_sel);
 }
 
-/* compute basis of characters
- * gc[1] generating family, as lines
- */
-GEN gchar_hnfreduce_shallow(GEN gc, GEN cm, long prec);
-void gchar_snfbasis_shallow(GEN gc, GEN rel);
-void gcharmat_tinverse(GEN gc, GEN m, long prec);
-GEN gcharmatnewprec_shallow(GEN gc, long *precptr);
+static GEN gchar_hnfreduce_shallow(GEN gc, GEN cm, long prec);
+static void gchar_snfbasis_shallow(GEN gc, GEN rel);
+static void gcharmat_tinverse(GEN gc, GEN m, long prec);
+static GEN gcharmatnewprec_shallow(GEN gc, long *precptr);
 
+/* compute basis of characters; gc[1] generating family, as lines */
 GEN
 gcharinit(GEN bnf, GEN mod, long prec)
 {
@@ -513,7 +511,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
 }
 
 /* b) do HNF reductions + LLL + SNF form, keep base change u0 */
-GEN
+static GEN
 gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 {
     GEN bnf, u, u0, m, m0;
@@ -609,7 +607,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 }
 
 /* convert to snf basis of torsion + Z^(r1+2*r2-1) */
-void
+static void
 gchar_snfbasis_shallow(GEN gc, GEN rel)
 {
   long n, r1, r2;
@@ -649,7 +647,7 @@ gchar_snfbasis_shallow(GEN gc, GEN rel)
 /* c) transpose inverse + clean rationals.
    prec = target prec,
    internal prec = nfprec */
-void
+static void
 gcharmat_tinverse(GEN gc, GEN m, long prec)
 {
   GEN bnf, m_inv;
@@ -746,7 +744,7 @@ vaffect_shallow(GEN x, long i0, GEN y)
 }
 
 /* u0 the base change, returns m0 * u0 */
-GEN
+static GEN
 gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
 {
     GEN bnf, m0, u0, sunits, fu, c, emb;
