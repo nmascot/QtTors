@@ -2930,7 +2930,7 @@ sprk_log_prk1_2(GEN nf, GEN a, GEN sprk)
   return vecmodii(y, sprk_get_cyc(sprk));
 }
 /* true nf; assume e >= 2 */
-static GEN
+GEN
 sprk_log_gen_pr2(GEN nf, GEN sprk, long e)
 {
   GEN M, G, pr = sprk_get_pr(sprk);

@@ -43,62 +43,22 @@ where Ufil_p = [ Mat([gen[j], t_COL of size ncp]_j) ]_{1<=i<=k}
 #define GC_LENGTH   11
 #define LOCS_LENGTH 4
 
-/* duplicate of log_gen_pr, up to interface
- * log on sprk of generators of U_{e-1}/U_e(pr) */
+/* log on sprk of generators of U_{e-1}/U_e(pr) */
 static GEN
 log_gen_fil(GEN nf, GEN sprk, long e)
 {
   long ncp = lg(sprk_get_cyc(sprk))-1;
-  GEN A;
   if (e == 1) retmkmat(col_ei(ncp,1));
-  else
-  {
-    GEN G, pr = sprk_get_pr(sprk);
-    long i, l;
-    if (e == 2)
-    {
-      GEN A, g, L, L2; sprk_get_AgL2(sprk,&A,&g,&L2); L = gel(L2,1);
-      G = gel(L,2); l = lg(G);
-    }
-    else
-    {
-      GEN perm = pr_basis_perm(nf,pr), PI = nfpow_u(nf, pr_get_gen(pr), e-1);
-      l = lg(perm);
-      G = cgetg(l, t_VEC);
-      if (typ(PI) == t_INT)
-      { /* zk_ei_mul doesn't allow t_INT */
-        long N = nf_get_degree(nf);
-        gel(G,1) = addiu(PI,1);
-        for (i = 2; i < l; i++)
-        {
-          GEN z = col_ei(N, 1);
-          gel(G,i) = z; gel(z, perm[i]) = PI;
-        }
-      }
-      else
-      {
-        gel(G,1) = nfadd(nf, gen_1, PI);
-        for (i = 2; i < l; i++)
-          gel(G,i) = nfadd(nf, gen_1, zk_ei_mul(nf, PI, perm[i]));
-      }
-    }
-    A = cgetg(l, t_MAT);
-    for (i = 1; i < l; i++)
-      gel(A,i) = log_prk(nf, gel(G,i), sprk, NULL);
-    return A;
-  }
+  return sprk_log_gen_pr2(nf, sprk, e);
 }
 
 static GEN
-compute_Lcyc(GEN Lsprk, GEN moo) {
-  long len, i;
-  GEN Lcyc;
-  len = lg(Lsprk)+lg(moo)-1;
-  Lcyc = cgetg(len,t_VEC);
-  for (i=1; i < lg(Lsprk); i++)
-    gel(Lcyc,i) = sprk_get_cyc(gel(Lsprk,i));
-  for(i=lg(Lsprk); i < len; i++)
-    gel(Lcyc,i) = gen_2;
+compute_Lcyc(GEN Lsprk, GEN moo)
+{
+  long i, l = lg(Lsprk), len = l+lg(moo)-1;
+  GEN Lcyc = cgetg(len,t_VEC);
+  for (i = 1; i < l; i++)   gel(Lcyc,i) = sprk_get_cyc(gel(Lsprk,i));
+  for (     ; i < len; i++) gel(Lcyc,i) = gen_2;
   return Lcyc;
 }
 
