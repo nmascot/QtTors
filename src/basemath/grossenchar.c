@@ -45,7 +45,7 @@ where Ufil_p = [ Mat([gen[j], t_COL of size ncp]_j) ]_{1<=i<=k}
 
 /* duplicate of log_gen_pr, up to interface
  * log on sprk of generators of U_{e-1}/U_e(pr) */
-  static GEN
+static GEN
 log_gen_fil(GEN nf, GEN sprk, long e)
 {
   long ncp = lg(sprk_get_cyc(sprk))-1;
@@ -103,7 +103,7 @@ compute_Lcyc(GEN Lsprk, GEN moo) {
 }
 
 /* modulus = [ factor(m_f), m_oo ] */
-  static GEN
+static GEN
 localstar(GEN nf, GEN mod)
 {
   pari_sp av = avma;
@@ -135,7 +135,7 @@ localstar(GEN nf, GEN mod)
 }
 
 /* log_prk(alpha*pi_pr^{-v_pr(alpha)}), sign(sigma(alpha)) */
-  static GEN
+static GEN
 locallog(GEN nf, GEN locs, GEN alpha)
 {
   pari_sp av = avma;
@@ -169,7 +169,7 @@ locallog(GEN nf, GEN locs, GEN alpha)
 /* (nv * log|x^sigma|/norm, arg(x^sigma))/2*Pi
  * substract norm so that we project to the hyperplane
  * H : sum n_s x_s = 0 */
-  GEN
+GEN
 nfembedlog(GEN bnf, GEN x, long prec)
 {
   pari_sp av = avma;
@@ -190,7 +190,7 @@ nfembedlog(GEN bnf, GEN x, long prec)
   return gerepilecopy(av, gdiv(logs, Pi2n(1,prec)));
 }
 
-  static GEN
+static GEN
 gchar_Sval(GEN nf, GEN S, GEN x)
 {
   GEN res = cgetg(lg(S),t_COL);
@@ -205,14 +205,14 @@ gchar_Sval(GEN nf, GEN S, GEN x)
 }
 
 /* discretelog(x mod m) */
-  GEN
+GEN
 gchar_logm(GEN bnf, GEN zm, GEN x)
 {
   pari_sp av = avma;
   return gerepilecopy(av,locallog(bnf,zm,x));
 }
 
-  static GEN
+static GEN
 gchar_nflog(GEN bnf, GEN zm, GEN S, GEN x, long prec)
 {
   GEN emb;
@@ -221,7 +221,7 @@ gchar_nflog(GEN bnf, GEN zm, GEN S, GEN x, long prec)
   return shallowconcat1(mkvec3(gchar_Sval(bnf,S,x),gchar_logm(bnf,zm,x),emb));
 }
 
-  GEN
+GEN
 matvaluations(GEN bnf, GEN S, GEN clgen)
 {
   long i, j, ni, nj;
@@ -243,7 +243,7 @@ matvaluations(GEN bnf, GEN S, GEN clgen)
 /*******************************************************************/
 
 /* embed v in vector of length size, shifted to the right */
-  static GEN
+static GEN
 embedcol(GEN v, long size, long shift)
 {
   long k;
@@ -255,7 +255,7 @@ embedcol(GEN v, long size, long shift)
 /* write exact rationals from real approximation, in place.
    prec is used to check we do not squash non int
    */
-  static void
+static void
 shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
 {
   long k, e;
@@ -274,7 +274,7 @@ shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
    lower-left hnf on subblock m[r0+1..r0+nr, c0+1..c0+nc]
    return base change matrix U
    */
-  static GEN
+static GEN
 hnf_block(GEN m, long r0, long nr, long c0, long nc)
 {
   GEN block, den, hnf, u, uu;
@@ -300,7 +300,7 @@ hnf_block(GEN m, long r0, long nr, long c0, long nc)
   return gerepilecopy(av, uu);
 }
 
-  static GEN
+static GEN
 lll_block(GEN m, long r0, long nr, long c0, long nc)
 {
   GEN block, u, uu;
@@ -320,7 +320,7 @@ lll_block(GEN m, long r0, long nr, long c0, long nc)
 }
 
 /* insert a column at index i, no copy */
-  static GEN
+static GEN
 shallowmatinsert(GEN m, GEN x, long i)
 {
   long k, n = lg(m);
@@ -333,7 +333,7 @@ shallowmatinsert(GEN m, GEN x, long i)
   return mm;
 }
 
-  static GEN
+static GEN
 vec_v0(long n, long n0, long r1, long r2)
 {
   long k;
@@ -347,7 +347,7 @@ vec_v0(long n, long n0, long r1, long r2)
 
 /* select cm embeddings
  * return a matrix */
-  GEN
+GEN
 cm_select(GEN bnf, GEN cm, long prec)
 {
   long nc, r2, d_cm, r_cm, c, i, j;
@@ -395,7 +395,7 @@ void gchar_snfbasis_shallow(GEN gc, GEN rel);
 void gcharmat_tinverse(GEN gc, GEN m, long prec);
 GEN gcharmatnewprec_shallow(GEN gc, long *precptr);
 
-  GEN
+GEN
 gcharinit(GEN bnf, GEN mod, long prec)
 {
   pari_sp av = avma;
@@ -586,7 +586,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
 }
 
 /* b) do HNF reductions + LLL + SNF form, keep base change u0 */
-  GEN
+GEN
 gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 {
     GEN bnf, u, u0, m, m0;
@@ -682,7 +682,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 }
 
 /* convert to snf basis of torsion + Z^(r1+2*r2-1) */
-  void
+void
 gchar_snfbasis_shallow(GEN gc, GEN rel)
 {
   long n, r1, r2;
@@ -722,7 +722,7 @@ gchar_snfbasis_shallow(GEN gc, GEN rel)
 /* c) transpose inverse + clean rationals.
    prec = target prec,
    internal prec = nfprec */
-  void
+void
 gcharmat_tinverse(GEN gc, GEN m, long prec)
 {
   GEN bnf, m_inv;
@@ -810,7 +810,7 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
 
 /* recompute matrix with precision increased */
 
-  void
+void
 vaffect_shallow(GEN x, long i0, GEN y)
 {
   long i;
@@ -819,7 +819,7 @@ vaffect_shallow(GEN x, long i0, GEN y)
 }
 
 /* u0 the base change, returns m0 * u0 */
-  GEN
+GEN
 gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
 {
     GEN bnf, m0, u0, sunits, fu, c, emb;
@@ -871,14 +871,14 @@ gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
 
 static void _check_gchar_group(GEN gc, long flag);
 
-  void
+void
 check_gchar_group(GEN gc)
 {
   _check_gchar_group(gc, 0);
 }
 
 /* increase prec if needed */
-  GEN
+GEN
 gcharnewprec(GEN gc, long newprec)
 {
   long prec, prec0, nfprec, nfprec0;
@@ -919,7 +919,7 @@ gcharnewprec(GEN gc, long newprec)
   return gerepilecopy(av, gc2);
 }
 
-  void
+void
 check_localstar(GEN x)
 {
   if (typ(x) != t_VEC || lg(x) != LOCS_LENGTH + 1)
@@ -944,7 +944,7 @@ is_gchar_group(GEN gc)
 /* validates the structure format.
  * Raise error if inconsistent precision, unless flag=1.
  */
-  static void
+static void
 _check_gchar_group(GEN gc, long flag)
 {
   if (typ(gc) != t_VEC || lg(gc) != GC_LENGTH + 1)
@@ -975,7 +975,7 @@ _check_gchar_group(GEN gc, long flag)
 }
 
 /* basis of algebraic characters + cyc vector */
-  GEN
+GEN
 gchar_algebraic_basis(GEN gc)
 {
   long nt, nf, nc, nm, r2, nalg, n0, k;
@@ -1047,7 +1047,7 @@ gchar_algebraic_basis(GEN gc)
   basis = matconcat(mkcol2(basis,normchar));
   return gerepilecopy(av, basis);
 }
-  GEN
+GEN
 gchar_algebraicoftype(GEN gc, GEN type)
 {
   long i, nt, nf, nc, r2, nalg, n0, nm;
@@ -1097,7 +1097,7 @@ gchar_algebraicoftype(GEN gc, GEN type)
   return gerepilecopy(av, mkvec(chi));
 }
 
-  GEN
+GEN
 gcharalgebraic(GEN gc, GEN type)
 {
   check_gchar_group(gc);
@@ -1162,7 +1162,7 @@ gchar_internal(GEN gc, GEN chi, GEN *w2)
 }
 
 /* from internal basis form, return the R/Z components and set w2 to the R component */
-  static GEN
+static GEN
 gchari_log(GEN gc, GEN chi, GEN *w2)
 {
   long i, ns, nc;
@@ -1188,7 +1188,7 @@ gchari_shift(GEN gc, GEN chi, GEN w)
 }
 
 /* chip has ncp = #zm[1][i].cyc components */
-  static GEN
+static GEN
 conductor_expo_pr(GEN gens_fil, GEN chip)
 {
   long i;
@@ -1207,7 +1207,7 @@ conductor_expo_pr(GEN gens_fil, GEN chip)
 }
 
 /* assume chi in log form */
-  static GEN
+static GEN
 gcharlog_conductor_f(GEN gc, GEN chi)
 {
   GEN nf, zm, expo, Lsprk, ufil, famod;
@@ -1239,7 +1239,7 @@ gcharlog_conductor_f(GEN gc, GEN chi)
 }
 
 /* ={sigma} s.t. k_sigma = 1 */
-  static GEN
+static GEN
 gcharlog_conductor_oo(GEN gc, GEN chi)
 {
   long ns, nc, noo, i;
@@ -1258,7 +1258,7 @@ gcharlog_conductor_oo(GEN gc, GEN chi)
   return chi_oo;
 }
 
-  static GEN
+static GEN
 gchari_conductor(GEN gc, GEN chi)
 {
   pari_sp av = avma;
@@ -1266,7 +1266,7 @@ gchari_conductor(GEN gc, GEN chi)
   return gerepilecopy(av, mkvec2(gcharlog_conductor_f(gc, chi), gcharlog_conductor_oo(gc, chi)));
 }
 
-  GEN
+GEN
 gchar_conductor(GEN gc, GEN chi)
 {
   pari_sp av = avma;
@@ -1274,7 +1274,7 @@ gchar_conductor(GEN gc, GEN chi)
   return gerepilecopy(av, gchari_conductor(gc, gchar_internal(gc, chi, NULL)));
 }
 
-  int
+int
 gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
 {
   long i, nt, nc, n0, nalg, r2;
@@ -1304,7 +1304,7 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
     if (smodis(addii(gel(chii, n0 + i), w), 2))
       return gc_bool(av, 0);
   if (pq)
-  { 
+  {
     /* set the infinity type */
     GEN v = cgetg(r2+1, t_VEC);
     for (i = 1; i <= r2; i++)
@@ -1328,7 +1328,7 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
 /*******************************************************************/
 
 /* parameters of a character */
-  GEN
+GEN
 gchar_parameters(GEN gc, GEN chi)
 {
   check_gchar_group(gc);
@@ -1349,7 +1349,7 @@ gchar_parameters(GEN gc, GEN chi)
 
 /* complete log of ideal */
 /* TODO handle nfembedlog()==NULL loss of precision */
-  GEN
+GEN
 gchar_ideallog(GEN gc, GEN x, long prec)
 {
   GEN bnf, zm, val_S, v, vp, alpha, t, arch_log, zm_log;
@@ -1372,7 +1372,7 @@ gchar_ideallog(GEN gc, GEN x, long prec)
   return gerepilecopy(av, gconcat1(mkvec3(vp,gneg(zm_log),gneg(arch_log))));
 }
 
-  static GEN
+static GEN
 gcharlog_eval_raw(GEN logchi, GEN logx)
 {
   GEN val;
@@ -1384,7 +1384,7 @@ gcharlog_eval_raw(GEN logchi, GEN logx)
 /* if flag = 1 -> value in C, flag = 0 -> value in R/Z
  * assume gc (and logchi) has enough internal precision,
  * but increase precision if log is large */
-  static GEN
+static GEN
 gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long prec)
 {
   GEN val, w2 = gen_0, norm = NULL;
@@ -1428,7 +1428,7 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long
   return gerepilecopy(av, val);
 }
 
-  GEN
+GEN
 gchareval(GEN gc, GEN chi, GEN x, long flag, GEN logx)
 {
   GEN w2;
@@ -1658,7 +1658,7 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
 }
 
 /* TODO export the init interface */
-  GEN
+GEN
 gchar_identify(GEN gc, GEN Lv, GEN Lchiv, long prec)
 {
   pari_sp av = avma;
@@ -1675,7 +1675,7 @@ gchar_identify(GEN gc, GEN Lv, GEN Lchiv, long prec)
 /* TODO: could merge with vecan_chigen */
 
 /* return x + yz; y != 0; z = 0,1 "often"; x = 0 "often" */
-  static GEN
+static GEN
 gaddmul(GEN x, GEN y, GEN z)
 {
   pari_sp av;
@@ -1689,7 +1689,7 @@ gaddmul(GEN x, GEN y, GEN z)
   return gerepileupto(av, gadd(x, gmul(y,z)));
 }
 
-  GEN
+GEN
 vecan_gchar(GEN an, long n, long prec)
 {
   forprime_t iter;
@@ -1789,7 +1789,7 @@ cleanup_vga(GEN vga, long prec)
 }
 
 /* TODO: move to lfunutils, use lfunzeta and lfunzetak */
-  GEN
+GEN
 gchari_lfun(GEN gc, GEN chi, GEN w)
 {
   pari_sp av = avma;
@@ -1840,7 +1840,7 @@ gchari_lfun(GEN gc, GEN chi, GEN w)
   return gerepilecopy(av, L);
 }
 
-  GEN
+GEN
 lfungchar(GEN gc, GEN chi)
 {
   pari_sp av = avma;
