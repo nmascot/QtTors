@@ -625,9 +625,9 @@ gchar_snfbasis_shallow(GEN gc, GEN rel)
   U = shallowtrans(U);
   Ui = shallowtrans(Ui);
 
-  gchar_set_cyc(gc, cyc);
   gchar_set_nfree(gc, n-1);
   gchar_set_ntors(gc, (lg(cyc)-1) - (n-1));
+  gchar_set_cyc(gc, gconcat(cyc,stor(0,gchar_get_prec(gc))));
   gchar_set_HUUi(gc, rel, U, Ui);
 }
 
@@ -808,12 +808,15 @@ gcharnewprec(GEN gc, long newprec)
 
   if ((prec0 && prec > prec0) || (nfprec0 && nfprec > nfprec0))
   {
-    GEN m;
+    GEN m, cyc;
     if (DEBUGLEVEL) pari_warn(warnprec,"gcharnewprec",nfprec);
     gel(gc2, 10) = shallowcopy(gel(gc2, 10));
     m = gcharmatnewprec_shallow(gc2, &nfprec);
     if (DEBUGLEVEL>2) { pari_printf("m0*u0 recomputed ->"); outmat(m); }
     gcharmat_tinverse(gc2, m, prec);
+    cyc = shallowcopy(gchar_get_cyc(gc2));
+    gel(cyc, lg(cyc)-1) = stor(0, prec);
+    gchar_set_cyc(gc2, cyc);
   }
   return gerepilecopy(av, gc2);
 }
@@ -1015,12 +1018,12 @@ gcharalgebraic(GEN gc, GEN type)
 static GEN
 check_gchar_i(GEN chi, long l, GEN *w2)
 {
-  long i, lchi=lg(chi);
+  long i, lchi=lg(chi)-1;
   if (typ(chi)!=t_VEC)
     pari_err_TYPE("check_gchar_i [chi]", chi);
-  if (lchi!=l && lchi!=l+1)
+  if (lchi!=l && lchi!=l-1) /* allow missing weight component */
     pari_err_DIM("check_gchar_i [chi]");
-  if (lchi==l+1)
+  if (lchi==l)
   {
     if (w2)
     {
@@ -1044,7 +1047,7 @@ check_gchar_i(GEN chi, long l, GEN *w2)
 static GEN
 check_gchar(GEN gc, GEN chi, GEN *w2)
 {
-  return check_gchar_i(chi, lg(gchar_get_cyc(gc)), w2);
+  return check_gchar_i(chi, lg(gchar_get_cyc(gc))-1, w2);
 }
 
 static GEN
@@ -1066,7 +1069,6 @@ static GEN
 gchari_log(GEN gc, GEN chi, GEN *w2)
 {
   long i, ns, nc;
-  check_gchar_group(gc);
   chi = check_gchari(gc, chi, w2);
   chi = RgV_RgM_mul(chi, gchar_get_basis(gc));
 
@@ -1177,13 +1179,13 @@ gchar_conductor(GEN gc, GEN chi)
 int
 gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
 {
-  long i, nt, nc, n0, nalg, r2;
+  long i, nt, nf, n0, nalg, r2;
   GEN w, chii;
   pari_sp av = avma;
   check_gchar_group(gc);
   /* in snf basis */
   nt = gchar_get_ntors(gc);
-  nc = gchar_get_nc(gc);
+  nf = gchar_get_nfree(gc);
   /* in internal basis */
   r2 = gchar_get_r2(gc);
   n0 = gchar_get_nm(gc) - r2; /* last index before k_s */
@@ -1192,7 +1194,7 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
 
   check_gchar(gc, chi, &w);
   /* check component are on algebraic generators */
-  for (i=nt+nalg+1;i<=nc;i++)
+  for (i=nt+nalg+1;i<=nt+nf;i++)
     if (!gequal0(gel(chi,i)))
       return gc_bool(av, 0);
   chii = gchar_parameters(gc, chi);
@@ -1361,7 +1363,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   cyc = gchar_get_cyc(gc);
   famod1 = gmael(gchar_get_mod(gc),1,1);
   bnf = gchar_get_bnf(gc);
-  nchi = lg(cyc)-1;
+  nchi = lg(cyc)-2; /* ignore norm */
   if (nchi>=r1+2*r2)    mult = gel(cyc,1);
   else                  mult = gen_1;
   s = (8*prec2nbits(prec))/10;
@@ -1575,7 +1577,7 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
   /* find approximation */
   x = RgM_Babai(M, y);
   x = ZM_ZC_mul(U, x);
-  for (i=1; i<lg(cyc); i++)
+  for (i=1; i<lg(cyc)-1; i++) /* ignore norm */
     if (signe(gel(cyc,i))) gel(x,i) = modii(gel(x,i), gel(cyc,i));
   if (nnormcompo>0)
   {

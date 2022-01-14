@@ -1,6 +1,6 @@
   ***   Warning: new stack size = 16000000 (15.259 Mbytes).
 one large field
-[10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+[10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 non trivial cm subfield
 
 [1 0 0 0 0 0   0]
@@ -29,7 +29,7 @@ r2 = 5, clno = 5
 r2 = 4, clno = 3
 r2 = 8, clno = 16
 gcharidentify
-[2, 0, 0, 0]
+[2, 0, 0, 0, 0]
 [0, 0, 0, 0]
 [0, 0, 0, 0]
 [0, 0, 0, 0]
@@ -42,7 +42,7 @@ gcharidentify
 
 [0 0 1]
 
-[129024, 12, 12, 12, 6, 0, 0, 0, 0, 0]
+[129024, 12, 12, 12, 6, 0, 0, 0, 0, 0, 0]
 
 [1 0 0 0 0 0 0 0 0 0 0]
 
@@ -59,7 +59,7 @@ gcharidentify
 [0 0 0 0 0 0 0 0 0 0 1]
 
 prec increase
-[444, 12, 2, 2, 0, 0]
+[444, 12, 2, 2, 0, 0, 0]
 1
 1
 1
@@ -113,7 +113,7 @@ gcharparameters
 chareval
 1
 gcharidentify 2
-[0]
+[0, 0]
 [5]
 1
 from doc
@@ -121,7 +121,7 @@ from doc
 0.30000006229129706787363344444425752636
 1
 [-7]
-[0]
+[0, 0]
 [-1, 1/3]
 bad inputs
   ***   at top-level: gcharinit([],1)
@@ -223,4 +223,4 @@ wrong, this should be an invalid input:
 []
 wrong, this should be an invalid input:
 []
-Total time spent: 8825
+Total time spent: 2150

@@ -63,7 +63,7 @@ billtest
 [1, [0, 0, 0]]
 1
 L function with imaginary shifts
-[0, 0, 0]
+[0, 0, 0, 0]
 1
 1
 1
@@ -91,4 +91,4 @@ bad inputs
   ***   at top-level: lfuncreate([G,[1,0,0,'x]])
   ***                 ^--------------------------
   *** lfuncreate: incorrect type in check_gchar_i [coefficient] (t_POL).
-Total time spent: 108804
+Total time spent: 40383
