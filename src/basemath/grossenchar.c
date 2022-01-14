@@ -124,6 +124,7 @@ nfembedlog(GEN bnf, GEN x, long prec)
   cxlogs = nf_cxlog(nf, x, prec);
   if (!cxlogs) return NULL;
   cxlogs = nf_cxlog_normalize(nf, cxlogs, prec);
+  if (!cxlogs) return NULL;
   n = r1 + 2*r2; logs = cgetg(n+1,t_COL);
   for (k = 1; k <= r1+r2; k++) gel(logs,k) = real_i(gel(cxlogs,k));
   for (     ; k <= n; k++) gel(logs,k) = gmul2n(imag_i(gel(cxlogs,k-r2)), -1);
@@ -368,7 +369,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
   */
 
   /* impose that we have fundamental units */
-  bnf = bnfinit0(bnf, 1, NULL, nfprec);
+  bnf = bnfinit0(bnf, 1, NULL, nfprec); /* FIXME: this seems to recompute the bnf from scratch */
   nfs = bnf_get_nf(bnf);
 
   /* Dirichlet group + make sure mod contains archimedean places */
