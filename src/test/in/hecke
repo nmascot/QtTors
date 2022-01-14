@@ -383,6 +383,72 @@ localbitprec(132); v1 = chareval(g,[137,7,1,0,-1283,1233],p);
 localbitprec(2048); v2 = chareval(g,[137,7,1,0,-1283,1233],p);
 exponent(v1-v2) < -132
 
+print("limit cases");
+bnf = bnfinit(x^2-5,1);
+gc = gcharinit(bnf,1);
+gcharalgebraic(gc)
+bnf = bnfinit(x^2+1,1);
+gc = gcharinit(bnf,1);
+gcharalgebraic(gc)
+print("wrong, this should be []:");
+gcharalgebraic(gc,[[2,0]])
+gc = gcharinit(x^4+x^2+x+1,1);
+gcharalgebraic(gc)
+gcharalgebraic(gc,[[1,0],[1,0]])
+print("wrong, this should be [0,0,0,0]:");
+gcharalgebraic(gc,[[0,0],[0,0]])
+print("wrong, this should be [0,0,0,1]:");
+gcharalgebraic(gc,[[1,1],[1,1]])
+bnf = bnfinit(x^2-15,1);
+gc = gcharinit(bnf,1);
+print("wrong, this should be [[0,0,0]]:");
+gcharalgebraic(gc,[[0,0],[0,0]])
+print("wrong, this should be [[0,0,1]]:");
+gcharalgebraic(gc,[[1,0],[0,1]])
+bnf = bnfinit(x^3-x-1,1);
+gc = gcharinit(bnf,1);
+print("wrong, this should be [[0,0,1]]:");
+gcharalgebraic(gc,[[1,0],[1,1]])
+print("wrong, this should be []:");
+gcharalgebraic(gc,[[1,0],[1,0]])
+
+print("gcharisalgebraic");
+bnf = bnfinit(polcompositum(x^2+1,x^2-2,2),1);
+gc = gcharinit(bnf,1);
+gcharisalgebraic(gc,[0,0,1])
+gcharisalgebraic(gc,[0,1,0,1])
+gcharisalgebraic(gc,[0,1,0,1/2])
+gcharisalgebraic(gc,[0,1,0,1/3])
+
+
+print("gcharparameters");
+bnf = bnfinit(polcompositum(x^2+1,x^2-2,2),1);
+gc = gcharinit(bnf,1);
+round(2^20*gcharparameters(gc,[1,1,0;-1,0,1]))
+
+print("chareval");
+bnf = bnfinit(x^2-5,1);
+gc = gcharinit(bnf,1);
+{pr =
+idealprimedec(bnf,4868320566074468416097809002841831981658439271775190047920287334713696332088188270302203142585474506572031649428572390977423717630750557541900820118557642144443115103994166347876446053933456365372443159385038281515406885479747287229391251928691579336473986380517198489368653247235220470411135182771495870761970425831248490802339741145177367606504253702366044757540837091578313318381751990985274838858471553879603486279186618215547339963941317895448200405735601843412836041079417187853293418139422395939702479069851901004480187793116104550625410950517848593134330788344046026982177143293369431992447318613826461691545456669249262035189314826400325163760162186599556491881653572410925778376382784596006650973201534577780715605881753754637909365503082172360234118525438866377677143768516149987111093650011641611864293773011677933805015609245095155892783139734857107226208996763683785018645448619606720812034222383494488841874984727092271722163949359822795927735020861595850675165350830336905890838102021)[1]};
+v1 = chareval(gc,[16876547436542378657653465325489780897097678654765346543],pr);
+default(realbitprecision,1024)
+gc = gcharnewprec(gc);
+v2 = chareval(gc,[16876547436542378657653465325489780897097678654765346543],pr);
+exponent(v1-v2) < -120
+default(realbitprecision,128)
+
+print("gcharidentify");
+bnf = bnfinit(x^2-2,1);
+gc = gcharinit(bnf,1); gc.cyc
+pr = idealprimedec(bnf,7)[1];
+th = chareval(gc,[5],pr);
+gcharidentify(gc,[pr],[th])
+chiw = gcharidentify(gc,[pr],[th+I*5/7]);
+exponent(chareval(gc,chiw,pr)-th-I*5/7) < -100
+
+
+
 print("from doc");
 bnf = bnfinit(x^2-5,1);
 gc = gcharinit(bnf,1);
@@ -399,7 +465,7 @@ abs(chi[1]) > 1000
 localprec(10); chi = gcharidentify(gc,[pr],[0.184760])
 bnf = bnfinit(x^2-2,1);
 gc = gcharinit(bnf,1); gc.cyc
-gcharidentify(gc,[1,2],[[0,3.5-1/3*I],[0,-3.5-1/3*I]])
+gcharidentify(gc,[1,2],[[0,3.5+1/3*I],[0,-3.5+1/3*I]])
 
 
 print("bug from Atelier demo");
@@ -435,4 +501,35 @@ gcharidentify(G,[1],[[0,O(3^7)]]);
 gcharidentify(G,[1],[0,0]);
 G = gcharinit(bnf, pr);
 gcharidentify(G,[pr],[0]);
+tmp = G[3];
+G[3] = 0;
+gcharnewprec(G);
+G[3] = tmp;
+tmp = G[1];
+G[1] = 0;
+gcharnewprec(G);
+G[1] = tmp;
+tmp = G[7];
+G[7] = 0;
+gcharnewprec(G);
+G[7] = tmp;
+tmp = G[7][1][2];
+G[7][1][2] = 2^20;
+gcharidentify(G,[],[]);
+G[7][1][2] = tmp;
+gc = gcharinit(x^2+1,1);
+gcharalgebraic(gc,0);
+gcharalgebraic(gc,[1..10]);
+gcharalgebraic(gc,[0]);
+gcharalgebraic(gc,[[]]);
+gcharalgebraic(gc,[[0,[]]]);
+gcharalgebraic(gc,[[[],0]]);
+chareval(gc,O(3^7),1);
+chareval(gc,[0,O(3^7)],1);
+gc = gcharinit(x^2-2,1);
+print("wrong, this should be an invalid input:");
+gcharalgebraic(gc,[])
+gc = gcharinit(x^3-x-1,1);
+print("wrong, this should be an invalid input:");
+gcharalgebraic(gc,[[1,1]])
 \\don't put tests after the errors

@@ -58,6 +58,6 @@ Doc: \var{gc} being a Grossencharacter group as output by \kbd{gcharinit}, $Lv$ 
  ? bnf = bnfinit(x^2-2,1);
  ? gc = gcharinit(bnf,1); gc.cyc
  % = [0]
- ? gcharidentify(gc,[1,2],[[0,3.5-1/3*I],[0,-3.5-1/3*I]])
+ ? gcharidentify(gc,[1,2],[[0,3.5+1/3*I],[0,-3.5+1/3*I]])
  % = [-1, 1/3]
  @eprog

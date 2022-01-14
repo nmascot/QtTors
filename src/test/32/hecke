@@ -147,6 +147,58 @@ prec increase
 1
 1
 1
+limit cases
+
+[0 1]
+
+
+[1 0]
+
+[0 1]
+
+wrong, this should be []:
+[[1/2, 1]]
+
+[0 0 0 1]
+
+[]
+wrong, this should be [0,0,0,0]:
+[]
+wrong, this should be [0,0,0,1]:
+[]
+wrong, this should be [[0,0,0]]:
+  ***   at top-level: gcharalgebraic(gc,[[0,0],[0,0]])
+  ***                 ^--------------------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
+wrong, this should be [[0,0,1]]:
+  ***   at top-level: gcharalgebraic(gc,[[1,0],[0,1]])
+  ***                 ^--------------------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
+wrong, this should be [[0,0,1]]:
+  ***   at top-level: gcharalgebraic(gc,[[1,0],[1,1]])
+  ***                 ^--------------------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
+wrong, this should be []:
+  ***   at top-level: gcharalgebraic(gc,[[1,0],[1,0]])
+  ***                 ^--------------------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
+gcharisalgebraic
+0
+1
+0
+0
+gcharparameters
+
+[     0       0   6291456 2097152]
+
+[934393 -934393 -13631488 1048576]
+
+chareval
+1
+gcharidentify
+[0]
+[5]
+1
 from doc
 13.057005210545987626926134713745179631
 0.30000006229129706787363344444425752636
@@ -220,4 +272,46 @@ bad inputs
   ***   at top-level: gcharidentify(G,[pr],[0])
   ***                 ^-------------------------
   *** gcharidentify: domain error in gchar_identify_init: valuation at prime dividing the modulus > 0
-Total time spent: 47416
+  ***   at top-level: gcharnewprec(G)
+  ***                 ^---------------
+  *** gcharnewprec: incorrect type in char group (t_INT).
+[100]
+0
+  ***   at top-level: gcharnewprec(G)
+  ***                 ^---------------
+  *** gcharnewprec: incorrect type in gchar group (locyc, basis) (t_VEC).
+  ***   at top-level: gcharnewprec(G)
+  ***                 ^---------------
+  *** gcharnewprec: incorrect type in gchar group (gc[7]) (t_INT).
+  ***   at top-level: gcharidentify(G,[],[])
+  ***                 ^----------------------
+  *** gcharidentify: precision too low in gchar group, please call gcharnewprec.
+  ***   at top-level: gcharalgebraic(gc,0)
+  ***                 ^--------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_INT).
+  ***   at top-level: gcharalgebraic(gc,[1..10])
+  ***                 ^--------------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
+  ***   at top-level: gcharalgebraic(gc,[0])
+  ***                 ^----------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (2) (t_VEC).
+  ***   at top-level: gcharalgebraic(gc,[[]])
+  ***                 ^-----------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (2) (t_VEC).
+  ***   at top-level: gcharalgebraic(gc,[[0,[]]])
+  ***                 ^---------------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (2) (t_VEC).
+  ***   at top-level: gcharalgebraic(gc,[[[],0]])
+  ***                 ^---------------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (2) (t_VEC).
+  ***   at top-level: chareval(gc,O(3^7),1)
+  ***                 ^---------------------
+  *** chareval: incorrect type in check_gchar_i [chi] (t_PADIC).
+  ***   at top-level: chareval(gc,[0,O(3^7)],1)
+  ***                 ^-------------------------
+  *** chareval: incorrect type in check_gchar_i [w2] (t_PADIC).
+wrong, this should be an invalid input:
+[]
+wrong, this should be an invalid input:
+[]
+Total time spent: 75070

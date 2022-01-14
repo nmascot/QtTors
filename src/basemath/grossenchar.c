@@ -201,7 +201,7 @@ shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
     if (DEBUGLEVEL>1) pari_printf("[%Ps*%Ps=%Ps..e=%ld|prec=%ld]\n",
                         gel(v,k),den,rnd,e,prec);
     if (e > -10)
-      pari_err_BUG("gcharinit, non rational entry");
+      pari_err_BUG("gcharinit, non rational entry"); /*LCOV_EXCL_LINE*/
     gel(v, k) = gdiv(rnd,den);
   }
 }
@@ -285,12 +285,12 @@ cm_select(GEN bnf, GEN cm, long prec)
   /* degree of the cm field */
   d_cm = poldegree(gel(cm, 1), -1);
   if(d_cm % 2)
-    pari_err(e_MISC,"not a CM field");
+    pari_err_BUG("cm_select: not a CM field (1)"); /*LCOV_EXCL_LINE*/
   /* nb of clusters */
   nc = d_cm / 2;
   r_cm = poldegree(nf_get_pol(nf),-1) / d_cm; /* nb by cluster */
   if(nc * r_cm != r2)
-    pari_err(e_MISC,"not a CM field");
+    pari_err_BUG("cm_select: not a CM field (2)"); /*LCOV_EXCL_LINE*/
   /* group complex embeddings */
   emb = nfeltembed(bnf, gel(cm, 2), NULL, prec);
   /* sort */
@@ -860,19 +860,19 @@ _check_gchar_group(GEN gc, long flag)
 {
   if (typ(gc) != t_VEC || lg(gc) != GC_LENGTH + 1)
     pari_err_TYPE("char group", gc);
+  check_localstar(gchar_get_zm(gc));
   if (typ(gchar_get_loccyc(gc)) != t_VEC
       ||typ(gchar_get_basis(gc)) != t_MAT)
   {
     output(gchar_get_loccyc(gc));
     output(gchar_get_basis(gc));
-    pari_err_TYPE("gchar group", gc);
+    pari_err_TYPE("gchar group (locyc, basis)", gc);
   }
   checkbnf(gchar_get_bnf(gc));
-  check_localstar(gchar_get_zm(gc));
   /* modify prec inplace if incoherent */
   if (typ(gel(gc,7)) != t_VEC
       ||typ(gmael(gc,7,1)) != t_VECSMALL)
-    pari_err_TYPE("gchar group", gc);
+    pari_err_TYPE("gchar group (gc[7])", gel(gc,7));
   if (!flag)
   {
     long prec, prec0, nfprec, nfprec0;
@@ -960,6 +960,7 @@ gchar_algebraic_basis(GEN gc)
 }
 GEN
 gchar_algebraicoftype(GEN gc, GEN type)
+/* FIXME: wrong for mixed signature or real field */
 {
   long i, nt, nf, r2, nalg, n0, nm;
   GEN p, q, w, k, matk, chi;
@@ -975,16 +976,17 @@ gchar_algebraicoftype(GEN gc, GEN type)
   nalg = gchar_get_nalg(gc); /* number of generators of free algebraic chars */
 
   if (typ(type)!=t_VEC || lg(type) != r2+1)
-    pari_err_TYPE("gcharalgebraic", type);
+    pari_err_TYPE("gcharalgebraic (1)", type);
   for (i = 1; i<=r2; i++)
     if (typ(gel(type,i)) != t_VEC
         ||lg(gel(type,i)) != 3
         ||typ(gmael(type,i,1)) != t_INT
         ||typ(gmael(type,i,2)) != t_INT)
-      pari_err_TYPE("gcharalgebraic", type);
+      pari_err_TYPE("gcharalgebraic (2)", type);
 
   if (!nalg)
-    return cgetg(1,t_VEC);
+    return cgetg(1,t_VEC); /* FIXME: not correct if the type is trivial
+                              or that of a multiple of the norm */
 
   k = cgetg(r2+1,t_VEC);
   p = gmael(type, 1, 1);
@@ -1000,7 +1002,7 @@ gchar_algebraicoftype(GEN gc, GEN type)
   }
   /* block of k_s parameters of free algebraic */
   matk = matslice(gchar_get_basis(gc),n0+1,n0+nalg,nm-r2+1,nm);
-  chi = gtrans(inverseimage(gtrans(matk),gtrans(k)));
+  chi = gtrans(inverseimage(gtrans(matk),gtrans(k))); /* FIXME: need to solve integral system */
   if (lg(chi) == 1)
     return cgetg(1, t_VEC);
   chi = gconcat1(mkvec4(zerovec(nt),chi,zerovec(nf-nalg),gmul2n(w,-1)));
@@ -1517,9 +1519,10 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
       if (typ(x) == t_COMPLEX)
       {
         nnormcompo++;
-        /* 2 Pi Im(theta) / log N(pr) */
+        /* - 2 Pi Im(theta) / log N(pr) */
         normcompo = gadd(normcompo,
-          gdiv(gmul(Pi2n(1,prec),imag_i(x)), glog(idealnorm(bnf,gel(Lv,i)),prec)));
+          gneg(gdiv(gmul(Pi2n(1,prec),imag_i(x)),
+              glog(idealnorm(bnf,gel(Lv,i)),prec))));
         x = real_i(x);
         gel(Lchiv,i) = x;
       }
@@ -1538,7 +1541,7 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
       if (typ(x) == t_COMPLEX)
       {
         nnormcompo++;
-        normcompo = gadd(normcompo,gneg(imag_i(x)));
+        normcompo = gadd(normcompo,imag_i(x));
         x = real_i(x);
         gmael(Lchiv,i,2) = x;
       }
@@ -1653,7 +1656,7 @@ vecan_gchar(GEN an, long n, long prec)
   else if (typ(N) == t_MAT)
     NZ = gcoeff(N,1,1);
   else
-    pari_err_TYPE("gchar conductor not an ideal",N);
+    pari_err_BUG("gchar conductor not an ideal"); /*LCOV_EXCL_LINE*/
 
   /* FIXME: when many log of many primes are computed:
      - bnfisprincipal may not be improved
