@@ -724,18 +724,14 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
   if (DEBUGLEVEL>1) { pari_printf("cm cleaned"); outmat(gtrans(m_inv)); }
 
   /* normalize characters, parameters mod Z */
-  for(k = 1; k <= ns+nc; k++)
-    gel(m_inv, k) = gfrac(gel(m_inv, k));
+  for(k = 1; k <= ns+nc; k++) gel(m_inv, k) = gfrac(gel(m_inv, k));
 
   /* increase relative prec of real values */
-  m_inv = gprec_w(m_inv, prec);
-
-  gchar_set_basis(gc, m_inv);
+  gchar_set_basis(gc, gprec_w(m_inv, prec));
 }
 
 /* recompute matrix with precision increased */
-
-void
+static void
 vaffect_shallow(GEN x, long i0, GEN y)
 {
   long i;
@@ -747,60 +743,56 @@ vaffect_shallow(GEN x, long i0, GEN y)
 static GEN
 gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
 {
-    GEN bnf, m0, u0, sunits, fu, c, emb;
-    long k, ns, nc, nf, incrprec=0;
-    ns = gchar_get_ns(gc);
-    nc = gchar_get_nc(gc);
-    nf = gchar_get_r1(gc) + gchar_get_r2(gc) - 1;
-    bnf = gchar_get_bnf(gc);
-    sunits = gchar_get_Sunits(gc);
-    fu = gchar_get_fu(gc);
+  GEN bnf, m0, u0, sunits, fu, c, emb;
+  long k, ns, nc, nf, incrprec=0;
+  ns = gchar_get_ns(gc);
+  nc = gchar_get_nc(gc);
+  nf = gchar_get_r1(gc) + gchar_get_r2(gc) - 1;
+  bnf = gchar_get_bnf(gc);
+  sunits = gchar_get_Sunits(gc);
+  fu = gchar_get_fu(gc);
 
-    m0 = gchar_get_m0(gc);
-    u0 = gchar_get_u0(gc);
+  m0 = gchar_get_m0(gc);
+  u0 = gchar_get_u0(gc);
 
-    /* TODO: see how to return bnf */
-    /*if (DEBUGLEVEL) pari_warn(warnprec,"gcharinit",*nfprecptr);*/
-    c = getrand();
-    /* TODO: we only need nf prec to be increased */
-    bnf = bnfnewprec_shallow(bnf,*nfprecptr);
-    setrand(c);
+  /* TODO: see how to return bnf */
+  /*if (DEBUGLEVEL) pari_warn(warnprec,"gcharinit",*nfprecptr);*/
+  c = getrand();
+  /* TODO: we only need nf prec to be increased */
+  bnf = bnfnewprec_shallow(bnf,*nfprecptr);
+  setrand(c);
 
+  /* recompute the nfembedlogs of s-units and fundamental units */
+  for(k=1;k<=ns;k++) /* Lambda_S, s-units */
+  {
+    emb = nfembedlog(bnf,gel(sunits,k), *nfprecptr);
+    if (!emb) { incrprec = 1; break; }
+    vaffect_shallow(gel(m0, k), ns+nc, emb);
+  }
+  for(k=1;k<=nf && !incrprec;k++) /* Lambda_f, fundamental units */
+  {
+    emb = nfembedlog(bnf,gel(fu,k), *nfprecptr);
+    if (!emb) { incrprec = 1; break; }
+    vaffect_shallow(gel(m0,ns+k), ns+nc, emb);
+  }
 
-    /* recompute the nfembedlogs of s-units and fundamental units */
-    for(k=1;k<=ns;k++) /* Lambda_S, s-units */
-    {
-      emb = nfembedlog(bnf,gel(sunits,k), *nfprecptr);
-      if (!emb) { incrprec = 1; break; }
-      vaffect_shallow(gel(m0, k), ns+nc, emb);
-    }
-    for(k=1;k<=nf && !incrprec;k++) /* Lambda_f, fundamental units */
-    {
-      emb = nfembedlog(bnf,gel(fu,k), *nfprecptr);
-      if (!emb) { incrprec = 1; break; }
-      vaffect_shallow(gel(m0,ns+k), ns+nc, emb);
-    }
+  if (incrprec)
+  {
+    *nfprecptr = precdbl(*nfprecptr);
+    return  gcharmatnewprec_shallow(gc, nfprecptr);
+  }
 
-    if (incrprec)
-    {
-      *nfprecptr = precdbl(*nfprecptr);
-      return  gcharmatnewprec_shallow(gc, nfprecptr);
-    }
+  gchar_set_bnf(gc, bnf);
+  gchar_set_nfprec(gc, *nfprecptr);
+  gchar_set_m0(gc, m0); /* no need, shallow */
 
-    gchar_set_bnf(gc, bnf);
-    gchar_set_nfprec(gc, *nfprecptr);
-    gchar_set_m0(gc, m0); /* no need, shallow */
-
-    return gmul(m0, u0);
+  return gmul(m0, u0);
 }
 
 static void _check_gchar_group(GEN gc, long flag);
 
 void
-check_gchar_group(GEN gc)
-{
-  _check_gchar_group(gc, 0);
-}
+check_gchar_group(GEN gc) { _check_gchar_group(gc, 0); }
 
 /* increase prec if needed */
 GEN
