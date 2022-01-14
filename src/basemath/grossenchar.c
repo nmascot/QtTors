@@ -794,45 +794,39 @@ static void _check_gchar_group(GEN gc, long flag);
 void
 check_gchar_group(GEN gc) { _check_gchar_group(gc, 0); }
 
-/* increase prec if needed */
+/* increase prec if needed. FIXME: hardcodes gc[7] and gc[10] */
 GEN
 gcharnewprec(GEN gc, long newprec)
 {
   long prec, prec0, nfprec, nfprec0;
   pari_sp av = avma;
-  GEN gc2;
-  gc2 = gcopy(gc); /* TODO: leafcopy, gcopy ?? */
+  GEN gc2 = shallowcopy(gc);
 
   _check_gchar_group(gc2, 1); /* ignore illegal prec */
-
-  /* increase prec if prec < newprec */
   prec = gchar_get_prec(gc2);
   nfprec = gchar_get_nfprec(gc2);
 
   if (newprec > prec)
-  {
+  { /* increase precision */
     long incrprec = newprec - prec + 1;
     if (DEBUGLEVEL) pari_warn(warnprec,"gcharnewprec",newprec);
     prec += incrprec;
     nfprec += incrprec;
-    gchar_set_evalprec(gc2, newprec);
-    gchar_set_prec(gc2, prec);
-    gchar_set_nfprec(gc2, nfprec);
+    gel(gc2, 7) = shallowcopy(gel(gc,7));
+    gmael(gc2, 7, 1) = mkvecsmall3(newprec, prec, nfprec);
   }
-
   prec0 = gprecision(gchar_get_basis(gc2));
   nfprec0 = nf_get_prec(gchar_get_bnf(gc2));
 
-  if((prec0 && prec > prec0) || (nfprec0 && nfprec > nfprec0))
+  if ((prec0 && prec > prec0) || (nfprec0 && nfprec > nfprec0))
   {
     GEN m;
     if (DEBUGLEVEL) pari_warn(warnprec,"gcharnewprec",nfprec);
+    gel(gc2, 10) = shallowcopy(gel(gc2, 10));
     m = gcharmatnewprec_shallow(gc2, &nfprec);
     if (DEBUGLEVEL>2) { pari_printf("m0*u0 recomputed ->"); outmat(m); }
     gcharmat_tinverse(gc2, m, prec);
-    return gerepilecopy(av, gc2);
   }
-  /* TODO: no copy if unchanged? */
   return gerepilecopy(av, gc2);
 }
 
