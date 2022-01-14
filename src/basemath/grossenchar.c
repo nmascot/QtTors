@@ -16,7 +16,7 @@
 /*********************************************************************/
 /**                                                                 **/
 /**                         HECKE CHARACTERS                        **/
-/**         contributed by Pascal Molin and Aurel Page (2020)       **/
+/**         contributed by Pascal Molin and Aurel Page (2022)       **/
 /**                                                                 **/
 /*********************************************************************/
 
