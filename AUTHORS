@@ -32,17 +32,17 @@ Major contributors (large modules written or rewritten from scratch):
     number fields), LLL, primality and compositeness tests, number fields,
     polgalois, elliptic curves, qfsolve, transcendental
     functions, install(), extension of the GP language (next/break/return,
-    local, op=, default()), gphelp, gphtml fork, Configure, readline, man pages,
-    documentation layout, reference card and user's manuals, the FAQ, the
-    http://pari.math.u-bordeaux.fr website, Lfun module, ModularForms module,
-    nflist
+    local, op=, default()), gphelp, gphtml fork, Configure, readline, man
+    pages, documentation layout, reference card and user's manuals, the FAQ,
+    the http://pari.math.u-bordeaux.fr website, Lfun module, ModularForms
+    module, nflist, HGM package.
   Dominique BERNARDI: the original gp interpreter, ECM, original
     elliptic curves implementation
   Peter BRUIN: asymptotically fast linear algebra over finite fields
   Henri COHEN: original designer and project leader, native multiprecision
     kernel, arithmetic functions, LLL, transcendental functions, number fields,
     original elliptic curves implementation, numerical integration and
-    summation, Lfun module, ModularForms module, nflist
+    summation, Lfun module, ModularForms module, nflist, HGM package.
   Vincent DELECROIX: combinatorial algorithms (forperm, forsubset)
   Jeroen DEMEYER: SVG support
   Francisco DIAZ Y DIAZ: number fields (class groups, units)
@@ -60,14 +60,14 @@ Major contributors (large modules written or rewritten from scratch):
   Flj_ functions family.
   Pascal LETARD: basic number fields (round2, initial round4)
   Jean-Francois MESTRE: original elliptic curves implementation
-  Pascal MOLIN: Lfun module, numerical integration
+  Pascal MOLIN: Lfun module, numerical integration, Hecke characters
   Gerhard NIKLASCH: binary powering, integer extended gcd and rational
     reconstruction, primality and compositeness test, integer factorization,
     documentation layout, AIX and Solaris support, first PARI web site.
   Michel OLIVIER: 68k multiprecision kernel, number fields, original polgalois
     and nfsubfields implementation
   Aurel PAGE: Associative and central simple algebras module, linear algebra
-  over Z/NZ
+  over Z/NZ, Hecke characters
   Thomas PAPANIKOlAOU: MPQS integration, Pari-Lidia project
   Xavier ROBLOT: MPQS integration, Stark, original nffactor, padicfields
   Denis SIMON: Norm equations, S-units, Hilbert symbols, original qfsolve
