@@ -78,5 +78,21 @@ Doc:
 
  \item Monien summation (\tet{sumnummonien}) uses $O(b/\log b)$ evaluations
  but is even more brittle and also $O(b^3)$ initialization (\kbd{summonieninit}).
-
  \item To sum rational functions, use \tet{sumnumrat}.
+
+ All the function so far require $f$ to be be the restriction to integers
+ of a regular function on the reals, and even on the complex numbers for
+ Monien summation. The following algorithms allow functions defined
+ only on the integers, under asumptions that are hard to verify. They are
+ best used heuristically since they in fact are often valid when those
+ asumptions do not hold, and for instance often yield a result for divergent
+ series (e.g., Borel resummation).
+
+ \item To sum alternating series, use \tet{sumalt}, which requires
+ $O(b)$ function evaluations.
+
+ \item To sum functions of a fixed sign, \tet{sumpos}
+ uses van Wijngarten's trick to reduce to an alternating series,
+ for a cost of $O(b\log b)$ function evaluations but beware that $f$ must be
+ evaluated at large integers, of the order of $2^{b/\alpha}$ if we assume
+ that $f(n) = O(1 / n^{\alpha+1})$.
