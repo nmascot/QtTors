@@ -27,8 +27,8 @@ Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
  ? pr = idealprimedec(bnf,5)[1]; \\ @com prime $\goth{p}=(1-\zeta_5)$ above 5
  ? g = gcharinit(bnf,idealpow(bnf,pr,2)); \\ @com characters of modulus dividing $\goth{p}^2$
  ? g.cyc \\ @com structure as an abelian group
- % = [0,0,0]
- ? chi = [2,4,3]; \\ @com a character
+ % = [0,0,0,0.E-57]
+ ? chi = [2,4,3,0]; \\ @com a character
  ? gcharconductor(g,chi)[1]
  % =
  [5 4 4 4]
@@ -58,7 +58,8 @@ Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
  keeping precisions and various dimensions.
 
  $\var{g}[8]$ is a vector describing $\var{g}$ as a $\Z$-module
- via its SNF invariants (\kbd{\var{g}.cyc})
+ via its SNF invariants (\kbd{\var{g}.cyc}), the last component
+ representing the norm character.
 
  $\var{g}[9]$ is row vector \kbd{[R,U,Ui]} allowing to convert characters
  from SNF basis to internal combination of generators.
