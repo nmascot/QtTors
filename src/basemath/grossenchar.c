@@ -1274,12 +1274,7 @@ gchar_ideallog(GEN gc, GEN x, long prec)
 
 static GEN
 gcharlog_eval_raw(GEN logchi, GEN logx)
-{
-  GEN val;
-  val = gmul(logchi, logx);
-  val = gsub(val, ground(val));
-  return val;
-}
+{ GEN val = gmul(logchi, logx); return gsub(val, ground(val)); }
 
 /* if flag = 1 -> value in C, flag = 0 -> value in R/Z
  * assume gc (and logchi) has enough internal precision,
