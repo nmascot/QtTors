@@ -14929,8 +14929,9 @@ matrix whose rows are $A[p_1,],\dots, A[p_n,]$.
 
 \fun{GEN}{vecslice}{GEN A, long j1, long j2}, return $A[j_1], \dots,
 A[j_2]$. If $A$ is a \typ{MAT}, these correspond to \emph{columns} of $A$.
-The object returned has the same type as $A$ (\typ{VEC}, \typ{COL} or
-\typ{MAT}). Assume $j_1 \leq j_2$.
+The object returned has the same type as $A$ (\typ{VECSMALL}, \typ{VEC},
+\typ{COL} or \typ{MAT}). Assume $j_1 \leq j_2$ or $j_2 = j_1 - 1$ (return
+empty vector/matrix).
 
 \fun{GEN}{vecsplice}{GEN A, long j} return $A$ with $j$-th entry removed
 (\typ{VEC}, \typ{COL}) or $j$-th column removed (\typ{MAT}).

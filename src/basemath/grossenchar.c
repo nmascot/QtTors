@@ -325,14 +325,14 @@ GEN
 gcharinit(GEN bnf, GEN mod, long prec)
 {
   pari_sp av = avma;
-  GEN nfs, zm, zmcyc, clgen, S, valS, sfu, sunits, fu, logx;
+  GEN nfs, zm, zmcyc, clgen, S, valS, sfu, logx;
   GEN fa2, archp, z, C, gc;
   GEN cm, cyc, rel, U, Ui;
   GEN m, m_inv, m0, u0;
-  long n, k, r1, r2, ns, nc, nf, nm;
+  long n, k, r1, r2, ns, nc, nf, nm, lsfu;
   long order;
-  int incrprec; /* flag */
   long evalprec, nfprec, extraprec = 1;
+
   evalprec = prec;
   prec = evalprec + extraprec; /* default 1 extra word*/
   nfprec = prec + extraprec;
@@ -368,8 +368,15 @@ gcharinit(GEN bnf, GEN mod, long prec)
      default prec : one should call gcharnewprec then.
   */
 
-  /* impose that we have fundamental units */
-  bnf = bnfinit0(bnf, 1, NULL, nfprec); /* FIXME: this seems to recompute the bnf from scratch */
+  if (!checkbnf_i(bnf))
+     bnf = bnfinit0(bnf, 1, NULL, nfprec);
+  else
+  {
+    if (typ(bnf_build_units(bnf)) == t_MAT) /* impose fundamental units */
+      pari_err(e_MISC,"gcharinit: missing units in bnf");
+    if (nf_get_prec(bnf_get_nf(bnf)) < nfprec)
+      bnf = bnfnewprec_shallow(bnf, nfprec);
+  }
   nfs = bnf_get_nf(bnf);
 
   /* Dirichlet group + make sure mod contains archimedean places */
@@ -393,11 +400,8 @@ gcharinit(GEN bnf, GEN mod, long prec)
   nm = ns+nc+n; /* number of parameters = ns + nc + r1 + r2 + r2 */
 
   /* units and S-units */
-  sfu = gel(bnfunits(bnf,S),1);
-  if (ns>0) sunits = vecslice(sfu,1,ns);
-  else      sunits = cgetg(1,t_VEC);
-  if (r1+r2-1>0)    fu = vecslice(sfu,ns+1,ns+r1+r2-1);
-  else              fu = cgetg(1,t_VEC);
+  sfu = gel(bnfunits(bnf,S), 1); lsfu = lg(sfu)-1; /* remove torsion */
+  sfu = vecslice(sfu, 1, lsfu-1);
 
   /* root of unity */
   order = bnf_get_tuN(bnf);
@@ -413,46 +417,32 @@ gcharinit(GEN bnf, GEN mod, long prec)
           do not depend on precision.
 
    m0 is the matrix of units embeddings
-   u  is the HNF base change
-   m = m0*u
+   u  is the HNF base change, m = m0*u
 
-   subsequent steps may lead to precision increase, to that
-     we put everything in gc struct and modify it in place.
+   subsequent steps may lead to precision increase, we put everything in gc
+   struct and modify it in place.
 
      A) sets m0
-
      B) sets U, cyc, rel, U and Ui
-
      C) sets m_inv
-
   */
 
   /* A) make big matrix m0 of embeddings of units */
 
   if (DEBUGLEVEL>2) pari_printf("start matrix m\n");
   m = cgetg(nm + 1, t_MAT);
-  incrprec = 1;
-  while (incrprec)
+  if (lsfu > 1) for(;;)
   {
-    incrprec = 0;
-    for(k=1;k<=ns;k++) /* Lambda_S, s-units */
-    {
-      logx = gchar_nflog(bnf,zm,S,gel(sunits,k), nfprec);
-      if (!logx) { incrprec = 1; break; }
+    for (k = 1; k < lsfu; k++)
+    { /* Lambda_S (S-units) then Lambda_f, fund. units */
+      logx = gchar_nflog(bnf,zm,S,gel(sfu,k), nfprec);
+      if (!logx) break;
       gel(m, k) = logx;
     }
-    for(k=1;k<=nf && !incrprec;k++) /* Lambda_f, fundamental units */
-    {
-      logx = gchar_nflog(bnf,zm,S,gel(fu,k), nfprec);
-      if (!logx) { incrprec = 1; break; }
-      gel(m,ns+k) = logx;
-    }
-    if (incrprec)
-    {
-      extraprec = precdbl(extraprec);
-      nfprec = prec + extraprec;
-      bnf = bnfnewprec_shallow(bnf, nfprec);
-    }
+    if (k == lsfu) break;
+    extraprec *= 2;
+    nfprec = prec + extraprec;
+    bnf = bnfnewprec_shallow(bnf, nfprec);
   }
   for(k=1;k<=nc;k++) /* Gamma, structure of (Z/m)* */
   {
@@ -484,7 +474,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
               zm,    /* Zk/mod, nc components */
               S,     /* generators of clgp, ns components */
               valS,
-              mkvec2(sunits,fu),
+              mkvec2(vecslice(sfu,1,ns), vecslice(sfu,ns+1,ns+nf)),
               mkvec3(mkvecsmall3(evalprec,prec,nfprec),
                      mkvecsmall4(0,0,0,0), /* ntors, nfree, nalg */
                      mkvecsmall4(ns,nc,r1+r2,r2)),
@@ -493,20 +483,15 @@ gcharinit(GEN bnf, GEN mod, long prec)
               m0,                 /* embeddings of units */
               u0);                /* m_inv = (m0 u0)~^-1 */
 
-
   /* B) do HNF reductions + LLL (may increase precision) */
-
   m = gchar_hnfreduce_shallow(gc, cm, nfprec);
 
   /* C) compute snf basis of torsion subgroup */
-
   rel = gtrans(matslice(m, 1, ns+nc, 1, ns+nc));
   gchar_snfbasis_shallow(gc, rel);
 
   /* D) transpose inverse m_inv = (m0*u)~^-1 (may increase precision) */
-
   gcharmat_tinverse(gc, m, prec);
-
   return gerepilecopy(av, gc);
 
 }
