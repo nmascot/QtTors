@@ -2949,6 +2949,7 @@ lfundatatype(GEN data)
     case t_INTMOD: return t_LFUNMISC_CHICONREY;
     case t_POL: return t_LFUNMISC_POL;
     case t_VEC:
+    {
       long l = lg(data);
       if (checknf_i(data)) return t_LFUNMISC_POL;
       if (l == 17) return t_LFUNMISC_ELLINIT;
@@ -2956,6 +2957,7 @@ lfundatatype(GEN data)
         return is_gchar_group(gel(data,1))? t_LFUNMISC_HECKE
                                           : t_LFUNMISC_CHIGEN;
       break;
+    }
   }
   return -1;
 }
