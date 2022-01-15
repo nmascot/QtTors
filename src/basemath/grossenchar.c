@@ -627,7 +627,7 @@ gchar_snfbasis_shallow(GEN gc, GEN rel)
 
   gchar_set_nfree(gc, n-1);
   gchar_set_ntors(gc, (lg(cyc)-1) - (n-1));
-  gchar_set_cyc(gc, gconcat(cyc,stor(0,gchar_get_prec(gc))));
+  gchar_set_cyc(gc, shallowconcat(cyc, real_0(gchar_get_prec(gc))));
   gchar_set_HUUi(gc, rel, U, Ui);
 }
 
@@ -813,7 +813,7 @@ gcharnewprec(GEN gc, long newprec)
     if (DEBUGLEVEL>2) { pari_printf("m0*u0 recomputed ->"); outmat(m); }
     gcharmat_tinverse(gc2, m, prec);
     cyc = shallowcopy(gchar_get_cyc(gc2));
-    gel(cyc, lg(cyc)-1) = stor(0, prec);
+    gel(cyc, lg(cyc)-1) = real_0(prec);
     gchar_set_cyc(gc2, cyc);
   }
   return gerepilecopy(av, gc2);
@@ -994,7 +994,7 @@ gchar_algebraicoftype(GEN gc, GEN type)
   chi = shallowtrans(inverseimage(shallowtrans(matk),shallowtrans(k))); /* FIXME: need to solve integral system */
   if (lg(chi) == 1)
     return cgetg(1, t_VEC);
-  chi = gconcat1(mkvec4(zerovec(nt),chi,zerovec(nf-nalg),gmul2n(w,-1)));
+  chi = shallowconcat1(mkvec4(zerovec(nt),chi,zerovec(nf-nalg),gmul2n(w,-1)));
   return gerepilecopy(av, mkvec(chi));
 }
 
@@ -1269,7 +1269,7 @@ gchar_ideallog(GEN gc, GEN x, long prec)
   if (DEBUGLEVEL>2) pari_printf("arch log %Ps\n", arch_log);
   zm_log = gchar_logm(bnf,zm,alpha);
   if (DEBUGLEVEL>2) pari_printf("zm_log(alpha) %Ps\n", zm_log);
-  return gerepilecopy(av, gconcat1(mkvec3(vp,gneg(zm_log),gneg(arch_log))));
+  return gerepilecopy(av, shallowconcat1(mkvec3(vp,gneg(zm_log),gneg(arch_log))));
 }
 
 static GEN
@@ -1435,7 +1435,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   }
   j = npr+nk1+1;
   gel(M,j) = zerocol(dim);
-  eps = shiftr(stor(1,prec),-(7*s)/16);
+  eps = real2n(-(7*s)/16, prec);
   for (i=npr+nk1+1; i<=npr+nk1+r1+r2; i++) gcoeff(M,i,j) = eps;
   for (j=1; j<=nchi; j++)
   {
