@@ -369,11 +369,13 @@ gcharinit(GEN bnf, GEN mod, long prec)
   */
 
   if (!checkbnf_i(bnf))
-     bnf = bnfinit0(bnf, 1, NULL, nfprec);
+    bnf = bnfinit0(bnf, 1, NULL, nfprec);
   else
   {
-    if (typ(bnf_build_units(bnf)) == t_MAT) /* impose fundamental units */
-      pari_err(e_MISC,"gcharinit: missing units in bnf");
+    GEN fu = bnf_get_sunits(bnf);
+    if (!fu) fu = bnf_get_fu(bnf); /* impose fundamental units */
+    if (lg(fu) != 1) extraprec = nbits2extraprec(gexpo(fu)); /*compact or not*/
+    nfprec = prec + extraprec;
     if (nf_get_prec(bnf_get_nf(bnf)) < nfprec)
       bnf = bnfnewprec_shallow(bnf, nfprec);
   }
