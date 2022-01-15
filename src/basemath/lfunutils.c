@@ -2949,8 +2949,8 @@ lfundatatype(GEN data)
     case t_INTMOD: return t_LFUNMISC_CHICONREY;
     case t_POL: return t_LFUNMISC_POL;
     case t_VEC:
-      if (checknf_i(data)) return t_LFUNMISC_POL;
       long l = lg(data);
+      if (checknf_i(data)) return t_LFUNMISC_POL;
       if (l == 17) return t_LFUNMISC_ELLINIT;
       if (l == 3 && typ(gel(data,1)) == t_VEC)
         return is_gchar_group(gel(data,1))? t_LFUNMISC_HECKE
