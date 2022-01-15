@@ -489,7 +489,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
   m = gchar_hnfreduce_shallow(gc, cm, nfprec);
 
   /* C) compute snf basis of torsion subgroup */
-  rel = gtrans(matslice(m, 1, ns+nc, 1, ns+nc));
+  rel = shallowtrans(matslice(m, 1, ns+nc, 1, ns+nc));
   gchar_snfbasis_shallow(gc, rel);
 
   /* D) transpose inverse m_inv = (m0*u)~^-1 (may increase precision) */
@@ -659,7 +659,7 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
     mm = ncm ? shallowmatinsert(m, v0, nm) : shallowmatinsert(m, v0, ns+nc+r1+r2);
     if (DEBUGLEVEL>1) { pari_printf("add v0 ->"); outmat(mm); }
 
-    mm = gtrans(mm);
+    mm = shallowtrans(mm);
     if (DEBUGLEVEL>2) { pari_printf("transposed ->"); outmat(mm); }
 
     /* invert matrix, may need to increase prec */
@@ -667,14 +667,12 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
     m_inv = RgM_inv(mm);
     if (m_inv)
     {
-
       if (DEBUGLEVEL>1) { pari_printf("inverse: %Ps\n",m_inv);}
 
       /* remove v0 */
       m_inv = ncm ? vecsplice(m_inv, nm) : vecsplice(m_inv, nm-r2);
       if (DEBUGLEVEL>1) { pari_printf("v0 removed"); outmat(m_inv); }
-
-      m_inv = gtrans(m_inv);
+      m_inv = shallowtrans(m_inv);
 
       /* enough precision? */
       /* |B - A^(-1)| << |B|.|Id-B*A| */
@@ -930,7 +928,7 @@ gchar_algebraic_basis(GEN gc)
     for(k=1; k<r2; k++)
       gel(m,k) = gsub(gel(args,k+1),gel(args,1));
     if (DEBUGLEVEL>2) { pari_printf("block ks' ->"); outmat(m); }
-    alg_basis = gtrans(gel(matsolvemod(gtrans(m), gen_2, gen_0, 1), 2));
+    alg_basis = shallowtrans(gel(matsolvemod(shallowtrans(m),gen_2,gen_0,1),2));
     if (DEBUGLEVEL>2) { pari_printf("alg_basis ->"); outmat(alg_basis); }
     w = gmul(alg_basis, gel(args,1));
     if (DEBUGLEVEL>2) { pari_printf("w ->"); output(w); }
@@ -993,7 +991,7 @@ gchar_algebraicoftype(GEN gc, GEN type)
   }
   /* block of k_s parameters of free algebraic */
   matk = matslice(gchar_get_basis(gc),n0+1,n0+nalg,nm-r2+1,nm);
-  chi = gtrans(inverseimage(gtrans(matk),gtrans(k))); /* FIXME: need to solve integral system */
+  chi = shallowtrans(inverseimage(shallowtrans(matk),shallowtrans(k))); /* FIXME: need to solve integral system */
   if (lg(chi) == 1)
     return cgetg(1, t_VEC);
   chi = gconcat1(mkvec4(zerovec(nt),chi,zerovec(nf-nalg),gmul2n(w,-1)));
@@ -1239,11 +1237,11 @@ gchar_parameters(GEN gc, GEN chi)
     long k;
     GEN m, r;
     pari_sp av = avma;
-    m = gtrans(chi);
+    m = shallowtrans(chi);
     r = cgetg(lg(m), t_MAT);
     for (k = 1; k < lg(m); k++)
-      gel(r, k) = gchar_parameters(gc, gtrans(gel(m, k)));
-    return gerepilecopy(av, gtrans(r));
+      gel(r, k) = gchar_parameters(gc, shallowtrans(gel(m, k)));
+    return gerepilecopy(av, shallowtrans(r));
   }
   else
     return gchari_log(gc, gchar_internal(gc, chi, NULL), NULL);
