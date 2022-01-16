@@ -878,12 +878,12 @@ _check_gchar_group(GEN gc, long flag)
 }
 
 /* basis of algebraic characters + cyc vector */
-GEN
+static GEN
 gchar_algebraic_basis(GEN gc)
 {
   long nt, nf, nc, nm, r2, nalg, n0, k;
   GEN basis, args, m, w, normchar, alg_basis, tors_basis;
-  pari_sp av = avma;
+
   /* in snf basis */
   nt = gchar_get_ntors(gc); /* number of torsion generators */
   nf = gchar_get_nfree(gc);
@@ -906,7 +906,7 @@ gchar_algebraic_basis(GEN gc)
   if (!nalg)
   {
     if (DEBUGLEVEL>2) err_printf("nalg=0\n");
-    return gerepilecopy(av, shallowmatconcat(mkcol2(tors_basis,normchar)));
+    return shallowmatconcat(mkcol2(tors_basis,normchar));
   }
 
   /* block of k_s parameters of free algebraic */
@@ -944,16 +944,14 @@ gchar_algebraic_basis(GEN gc)
     basis = shallowmatconcat(mkmat22(tors_basis, gen_0, gen_0, alg_basis));
   else
     basis = alg_basis;
-  basis = shallowmatconcat(mkcol2(basis,normchar));
-  return gerepilecopy(av, basis);
+  return shallowmatconcat(mkcol2(basis,normchar));
 }
-GEN
+static GEN
 gchar_algebraicoftype(GEN gc, GEN type)
 /* FIXME: wrong for mixed signature or real field */
 {
   long i, nt, nf, r2, nalg, n0, nm;
   GEN p, q, w, k, matk, chi;
-  pari_sp av = avma;
   /* in snf basis */
   nt = gchar_get_ntors(gc);
   nf = gchar_get_nfree(gc);
@@ -973,38 +971,36 @@ gchar_algebraicoftype(GEN gc, GEN type)
         ||typ(gmael(type,i,2)) != t_INT)
       pari_err_TYPE("gcharalgebraic (2)", type);
 
-  if (!nalg)
-    return cgetg(1,t_VEC); /* FIXME: not correct if the type is trivial
-                              or that of a multiple of the norm */
-
+  if (!nalg) return NULL; /* FIXME: not correct if the type is trivial
+                             or that of a multiple of the norm */
   k = cgetg(r2+1,t_VEC);
   p = gmael(type, 1, 1);
-  q = gmael(type, 1, 2);
-  w = gadd(p, q);
+  q = gmael(type, 1, 2); w = addii(p, q);
   gel(k, 1) = subii(p, q);
   for(i=2; i<=r2; i++)
   {
     p = gmael(type, i, 1);
     q = gmael(type, i, 2);
-    if (!equalii(w,gadd(p, q))) return cgetg(1,t_VEC);
+    if (!equalii(w, addii(p, q))) return NULL;
     gel(k, i) = subii(p, q);
   }
   /* block of k_s parameters of free algebraic */
   matk = matslice(gchar_get_basis(gc),n0+1,n0+nalg,nm-r2+1,nm);
   chi = shallowtrans(inverseimage(shallowtrans(matk),shallowtrans(k))); /* FIXME: need to solve integral system */
-  if (lg(chi) == 1)
-    return cgetg(1, t_VEC);
+  if (lg(chi) == 1) return NULL;
   chi = shallowconcat1(mkvec4(zerovec(nt),chi,zerovec(nf-nalg),gmul2n(w,-1)));
-  return gerepilecopy(av, mkvec(chi));
+  return mkvec(chi);
 }
 
 GEN
 gcharalgebraic(GEN gc, GEN type)
 {
+  pari_sp av = avma;
+  GEN b;
   check_gchar_group(gc);
-  if (type == NULL)
-    return gchar_algebraic_basis(gc);
-  return gchar_algebraicoftype(gc, type);
+  b = type? gchar_algebraicoftype(gc, type): gchar_algebraic_basis(gc);
+  if (!b) { set_avma(av); return cgetg(1, t_VEC); }
+  return gerepilecopy(av, b);
 }
 
 /*********************************************************************/
