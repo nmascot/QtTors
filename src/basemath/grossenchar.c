@@ -1684,30 +1684,33 @@ vecan_gchar(GEN an, long n, long prec)
   return gerepilecopy(av, v);
 }
 
-/* prec = 0 if already exact */
 static GEN
 cleanup_vga(GEN vga, long prec)
 {
-  GEN ind, vi, vi1;
-  long bitprec, i;
-  if (!prec)
-    return vga; /* already int */
+  GEN ind;
+  long bitprec, i, l;
+  if (!prec) return vga; /* already exact */
   bitprec = bit_accuracy(prec);
-  vga = gcopy(vga);
-  for (i=1; i<lg(vga); i++)
-    if (iscomplex(gel(vga,i)) && gexpo(imag_i(gel(vga,i))) < -bitprec+20)
-      gel(vga,i) = real_i(gel(vga,i));
-  ind = indexsort(imag_i(vga));
-  for(i=2; i<lg(ind); i++)
+  vga = shallowcopy(vga); l = lg(vga);
+  for (i = 1; i < l; i++)
   {
-    vi = gel(vga,ind[i]);
-    vi1 = gel(vga,ind[i-1]);
-    if (iscomplex(vi) && gexpo(gsub(imag_i(vi),imag_i(vi1))) < -bitprec+20)
-      gel(vga,ind[i]) = mkcomplex(real_i(vi),imag_i(vi1));
+    GEN z = gel(vga,i);
+    if (typ(z) == t_COMPLEX && gexpo(gel(z,2)) < -bitprec+20)
+      gel(vga,i) = gel(z,1);
+  }
+  ind = indexsort(imag_i(vga));
+  for(i = 2; i < l; i++)
+  {
+    GEN z = gel(vga,ind[i]), z1 = gel(vga,ind[i-1]);
+    if (typ(z) == t_COMPLEX && gexpo(gsub(gel(z,2),imag_i(z1))) < -bitprec+20)
+      gel(vga,ind[i]) = mkcomplex(gel(z,1),imag_i(z1));
    }
-  for (i=1; i< lg(vga); i++)
-    if (iscomplex(gel(vga,i)))
-      gel(vga, i) = mkcomplex(real_i(gel(vga,i)),bestappr(imag_i(gel(vga,i)),int2n(bitprec/2)));
+  for (i = 1; i < l; i++)
+  {
+    GEN z = gel(vga,i);
+    if (typ(z) == t_COMPLEX)
+      gel(vga, i) = mkcomplex(gel(z,1), bestappr(gel(z,2), int2n(bitprec/2)));
+  }
   return vga;
 }
 
