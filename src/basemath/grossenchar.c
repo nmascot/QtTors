@@ -207,6 +207,18 @@ shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
   }
 }
 
+/* FIXME: export ? */
+static GEN
+rowreverse(GEN m)
+{
+  long i, l;
+  GEN v;
+  if (lg(m) == 1) return m;
+  l = lgcols(m); v = cgetg(l, t_VECSMALL);
+  for (i = 1; i < l; i++) v[i] = l - i;
+  return rowpermute(m, v);
+}
+
 /* lower-left hnf on subblock m[r0+1..r0+nr, c0+1..c0+nc]
  * return base change matrix U */
 static GEN
@@ -218,12 +230,7 @@ hnf_block(GEN m, long r0, long nr, long c0, long nc)
 
   block = matslice(m, r0+1, r0+nr, c0+1, c0+nc);
   block = Q_remove_denom(block, NULL);
-
-  /* reverse lines, ~matlinereverse */
-  block = shallowtrans(block);
-  vecreverse_inplace(block);
-  block = shallowtrans(block);
-  /* end reverse lines */
+  block = rowreverse(block);
 
   (void)ZM_hnfall(block, &u, 1);
   vecreverse_inplace(u);
