@@ -931,15 +931,13 @@ gchar_algebraic_basis(GEN gc)
   }
   /* add weight to infinite order characters, at position nc+1 */
   w = gdivgs(gmodgs(w, 2),2);
-  if (nf-nalg)
-    alg_basis = matconcat(mkvec2(alg_basis, zerovec(nf-nalg)));
-  alg_basis = matconcat(mkvec2(alg_basis, w));
+  alg_basis = shallowmatconcat(mkvec3(alg_basis, zerovec(nf-nalg), w));
 
   if (lg(tors_basis)>1)
-    basis = matconcat(mkmat22(tors_basis, gen_0, gen_0, alg_basis));
+    basis = shallowmatconcat(mkmat22(tors_basis, gen_0, gen_0, alg_basis));
   else
     basis = alg_basis;
-  basis = matconcat(mkcol2(basis,normchar));
+  basis = shallowmatconcat(mkcol2(basis,normchar));
   return gerepilecopy(av, basis);
 }
 GEN
