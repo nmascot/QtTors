@@ -524,7 +524,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 
     m0 = gchar_get_m0(gc);
     u0 = matid(nm);
-    m = gcopy(m0); /* keep m unchanged */
+    m = shallowcopy(m0); /* keep m unchanged */
 
     if (DEBUGLEVEL>1) err_printf("matrix m = %Ps\n", m);
 
