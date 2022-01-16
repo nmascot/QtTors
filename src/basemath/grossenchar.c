@@ -556,7 +556,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
         Nargs = gmul(v, rowslice(m, nc+ns+r1+r2+1, nm));
         if (DEBUGLEVEL>2) err_printf("Nargs -> %Ps\n", Nargs);
         Nargs = grndtoi(gmulgs(Nargs, 2 * order), &e);
-        if (e < nfprec+10) break;
+        if (e < nfprec+10) break; /* FIXME: e is a bitprec, nfprec is a prec ? */
         if (DEBUGLEVEL>1) err_printf("cm select: doubling prec\n");
         nfprec = precdbl(nfprec);
         m = gcharmatnewprec_shallow(gc, &nfprec);
