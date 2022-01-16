@@ -822,7 +822,7 @@ gcharnewprec(GEN gc, long newprec)
   return gerepilecopy(av, gc2);
 }
 
-void
+static void
 check_localstar(GEN x)
 {
   if (typ(x) != t_VEC || lg(x) != LOCS_LENGTH + 1)
