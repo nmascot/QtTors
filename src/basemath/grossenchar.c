@@ -518,7 +518,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
     nf = r1 + r2 - 1;
     ns = gchar_get_ns(gc);
     nc = gchar_get_nc(gc);
-    nm = ns+nc+n; // ns + nc + r1 + r2 + r2
+    nm = ns+nc+n; /* ns + nc + r1 + r2 + r2 */
 
     order = bnf_get_tuN(bnf);
 
