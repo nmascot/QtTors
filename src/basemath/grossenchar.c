@@ -199,7 +199,7 @@ shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
   for(k=k0; k<=k1; k++)
   {
     GEN rnd = grndtoi(gmul(gel(v, k), den),&e);
-    if (DEBUGLEVEL>1) pari_printf("[%Ps*%Ps=%Ps..e=%ld|prec=%ld]\n",
+    if (DEBUGLEVEL>1) err_printf("[%Ps*%Ps=%Ps..e=%ld|prec=%ld]\n",
                         gel(v,k),den,rnd,e,prec);
     if (e > -10)
       pari_err_BUG("gcharinit, non rational entry"); /*LCOV_EXCL_LINE*/
@@ -431,7 +431,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
 
   /* A) make big matrix m0 of embeddings of units */
 
-  if (DEBUGLEVEL>2) pari_printf("start matrix m\n");
+  if (DEBUGLEVEL>2) err_printf("start matrix m\n");
   m = cgetg(nm + 1, t_MAT);
   if (lsfu > 1) for(;;)
   {
@@ -461,7 +461,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
     gel(C, ns+nc+r1+r2+k) = gen_1;
     gel(m, ns+nf+nc+1+k) = C;
   }
-  if (DEBUGLEVEL>1) { pari_printf("matrix m ="); outmat(gcopy(m)); }
+  if (DEBUGLEVEL>1) err_printf("matrix m = %Ps\n", m);
 
   m0 = m;
   u0 = gen_0;
@@ -519,53 +519,52 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
     u0 = matid(nm);
     m = gcopy(m0); /* keep m unchanged */
 
-    if (DEBUGLEVEL>1) { pari_printf("matrix m ="); outmat(gcopy(m)); }
+    if (DEBUGLEVEL>1) err_printf("matrix m = %Ps\n", m);
 
     if (nc)
     {
       /* keep steps 1&2 to make sure we have zeta_m */
       u = hnf_block(m, ns,nc, ns+nf,nc+1);
       u0 = gmul(u0, u); m = gmul(m, u);
-      if (DEBUGLEVEL>2) { pari_printf("step 1 ->"); outmat(m); }
+      if (DEBUGLEVEL>2) err_printf("step 1 -> %Ps\n", m);
       u = hnf_block(m, ns,nc, ns,nf+nc);
       u0 = gmul(u0, u); m = gmul(m, u);
-      if (DEBUGLEVEL>2) { pari_printf("step 2 ->"); outmat(m); }
+      if (DEBUGLEVEL>2) err_printf("step 2 -> %Ps\n", m);
     }
     if (r2)
     {
       u = hnf_block(m, ns+nc+r1+r2,r2, ns+nc+r1+r2-1,r2+1);
       u0 = gmul(u0, u); m = gmul(m, u);
-      if (DEBUGLEVEL>2) { pari_printf("step 3 ->"); outmat(m); }
+      if (DEBUGLEVEL>2) err_printf("step 3 -> %Ps\n", m);
     }
     /* remove last column */
     setlg(m, nm);
     setlg(u0, nm);
-    if (DEBUGLEVEL>2) { pari_printf("remove last col ->"); outmat(m); }
+    if (DEBUGLEVEL>2) err_printf("remove last col -> %Ps\n", m);
 
     if (!gequal0(cm))
     {
       GEN v, Nargs;
       /* reduce on Norm arguments */
       v = cm_select(bnf, cm, nfprec);
-      if (DEBUGLEVEL>2) { pari_printf("cm_select ->"); outmat(v); }
+      if (DEBUGLEVEL>2) err_printf("cm_select -> %Ps\n", v);
       ncm = nbrows(v);
       gchar_set_u0(gc, u0);
       while (1)
       {
         long e;
         Nargs = gmul(v, rowslice(m, nc+ns+r1+r2+1, nm));
-        if (DEBUGLEVEL>2) { pari_printf("Nargs ->"); outmat(Nargs); }
+        if (DEBUGLEVEL>2) err_printf("Nargs -> %Ps\n", Nargs);
         Nargs = grndtoi(gmulgs(Nargs, 2 * order), &e);
-        if (e < nfprec+10)
-          break;
-        if (DEBUGLEVEL>1) { pari_printf("cm select: doubling prec"); }
+        if (e < nfprec+10) break;
+        if (DEBUGLEVEL>1) err_printf("cm select: doubling prec\n");
         nfprec = precdbl(nfprec);
         m = gcharmatnewprec_shallow(gc, &nfprec);
       }
-      if (DEBUGLEVEL>2) { pari_printf("rounded Nargs ->"); outmat(Nargs); }
+      if (DEBUGLEVEL>2) err_printf("rounded Nargs -> %Ps\n", Nargs);
       u = hnf_block(Nargs, 0, ncm, ns+nc, r1+2*r2-1);
       u0 = gmul(u0, u); m = gmul(m, u);
-      if (DEBUGLEVEL>2) { pari_printf("after cm reduction ->"); outmat(m); }
+      if (DEBUGLEVEL>2) err_printf("after cm reduction -> %Ps\n", m);
     }
 
     /* apply LLL on Lambda_m, may need to increase prec */
@@ -587,7 +586,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
       u0 = gmul(u0, u); m = gmul(m, u);
     }
 
-    if (DEBUGLEVEL>1) { pari_printf("after LLL reduction ->"); outmat(m); }
+    if (DEBUGLEVEL>1) err_printf("after LLL reduction -> %Ps\n", m);
 
     gchar_set_u0(gc, u0);
 
@@ -606,7 +605,7 @@ gchar_snfbasis_shallow(GEN gc, GEN rel)
   n = r1+2*r2;
 
   rel = ZM_hnf(rel);
-  if (DEBUGLEVEL>1) { pari_printf("relations after hnf"); outmat(rel); }
+  if (DEBUGLEVEL>1) err_printf("relations after hnf: %Ps\n", rel);
   cyc = ZM_snf_group(rel, &U, &Ui);
   if (lg(cyc)==1)
   {
@@ -657,21 +656,18 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
     /* insert v0 at column ns+nc+r1+r2, or last column if cm */
     v0 = vec_v0(nm, ns+nc+1, r1, r2);
     mm = ncm ? shallowmatinsert(m, v0, nm) : shallowmatinsert(m, v0, ns+nc+r1+r2);
-    if (DEBUGLEVEL>1) { pari_printf("add v0 ->"); outmat(mm); }
+    if (DEBUGLEVEL>1) err_printf("add v0 -> %Ps\n", mm);
 
     mm = shallowtrans(mm);
-    if (DEBUGLEVEL>2) { pari_printf("transposed ->"); outmat(mm); }
+    if (DEBUGLEVEL>2) err_printf("transposed -> %Ps\n", mm);
 
-    /* invert matrix, may need to increase prec */
-
-    m_inv = RgM_inv(mm);
+    m_inv = RgM_inv(mm); /* invert matrix, may need to increase prec */
     if (m_inv)
     {
-      if (DEBUGLEVEL>1) { pari_printf("inverse: %Ps\n",m_inv);}
-
+      if (DEBUGLEVEL>1) err_printf("inverse: %Ps\n",m_inv);
       /* remove v0 */
       m_inv = ncm ? vecsplice(m_inv, nm) : vecsplice(m_inv, nm-r2);
-      if (DEBUGLEVEL>1) { pari_printf("v0 removed"); outmat(m_inv); }
+      if (DEBUGLEVEL>1) err_printf("v0 removed: %Ps\n", m_inv);
       m_inv = shallowtrans(m_inv);
 
       /* enough precision? */
@@ -698,7 +694,7 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
     for(k=1;k<=nc;k++)
       shallow_clean_rat(gel(m_inv, ns+k), 1, nm - 1, /*zmcyc[k]*/ expo, prec);
   }
-  if (DEBUGLEVEL>1) { pari_printf("cyc cleaned"); outmat(gtrans(m_inv)); }
+  if (DEBUGLEVEL>1) err_printf("cyc cleaned: %Ps", shallowtrans(m_inv));
   if (ncm)
   {
     long i, j, k;
@@ -707,7 +703,7 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
       for(j=1;j<=ncm;j++)
         gcoeff(m_inv,ns+nc+j,ns+nc+i) = gen_0;
   }
-  if (DEBUGLEVEL>1) { pari_printf("cm cleaned"); outmat(gtrans(m_inv)); }
+  if (DEBUGLEVEL>1) err_printf("cm cleaned: %Ps", shallowtrans(m_inv));
 
   /* normalize characters, parameters mod Z */
   for(k = 1; k <= ns+nc; k++) gel(m_inv, k) = gfrac(gel(m_inv, k));
@@ -810,7 +806,7 @@ gcharnewprec(GEN gc, long newprec)
     if (DEBUGLEVEL) pari_warn(warnprec,"gcharnewprec",nfprec);
     gel(gc2, 10) = shallowcopy(gel(gc2, 10));
     m = gcharmatnewprec_shallow(gc2, &nfprec);
-    if (DEBUGLEVEL>2) { pari_printf("m0*u0 recomputed ->"); outmat(m); }
+    if (DEBUGLEVEL>2) err_printf("m0*u0 recomputed -> %Ps\n", m);
     gcharmat_tinverse(gc2, m, prec);
     cyc = shallowcopy(gchar_get_cyc(gc2));
     gel(cyc, lg(cyc)-1) = real_0(prec);
@@ -902,8 +898,8 @@ gchar_algebraic_basis(GEN gc)
 
   if (!nalg)
   {
-    if (DEBUGLEVEL>2) { pari_printf("nalg=0"); }
-    return gerepilecopy(av, matconcat(mkcol2(tors_basis,normchar)));
+    if (DEBUGLEVEL>2) err_printf("nalg=0\n");
+    return gerepilecopy(av, shallowmatconcat(mkcol2(tors_basis,normchar)));
   }
 
   /* block of k_s parameters of free algebraic */
@@ -912,7 +908,7 @@ gchar_algebraic_basis(GEN gc)
   if (r2 == 1)
   {
     /* no parity condition */
-    if (DEBUGLEVEL>2) { pari_printf("r2 = 1 -> args = "); outmat(args); }
+    if (DEBUGLEVEL>2) err_printf("r2 = 1 -> args = %Ps\n", args);
     alg_basis = matid(nalg);
     w = gel(args,1);
   }
@@ -923,17 +919,16 @@ gchar_algebraic_basis(GEN gc)
        x.K' = 0 mod 2 where K' = [ C-C0 ] (substract first column)
      */
     /* select block k_s in char parameters and */
-    if (DEBUGLEVEL>2) { pari_printf("block ks ->"); outmat(args); }
+    if (DEBUGLEVEL>2) err_printf("block ks -> %Ps\n", args);
     m = cgetg(r2, t_MAT);
     for(k=1; k<r2; k++)
       gel(m,k) = gsub(gel(args,k+1),gel(args,1));
-    if (DEBUGLEVEL>2) { pari_printf("block ks' ->"); outmat(m); }
+    if (DEBUGLEVEL>2) err_printf("block ks' -> %Ps", m);
     alg_basis = shallowtrans(gel(matsolvemod(shallowtrans(m),gen_2,gen_0,1),2));
-    if (DEBUGLEVEL>2) { pari_printf("alg_basis ->"); outmat(alg_basis); }
+    if (DEBUGLEVEL>2) err_printf("alg_basis -> %Ps\n", alg_basis);
     w = gmul(alg_basis, gel(args,1));
-    if (DEBUGLEVEL>2) { pari_printf("w ->"); output(w); }
+    if (DEBUGLEVEL>2) err_printf("w -> %Ps\n", w);
   }
-
   /* add weight to infinite order characters, at position nc+1 */
   w = gdivgs(gmodgs(w, 2),2);
   if (nf-nalg)
@@ -1264,11 +1259,11 @@ gchar_ideallog(GEN gc, GEN x, long prec)
   /* TODO: increase prec if alpha is large? */
   /* exponents on primes in S */
   vp = gmul(val_S, v);
-  if (DEBUGLEVEL>2) pari_printf("vp %Ps\n", vp);
+  if (DEBUGLEVEL>2) err_printf("vp %Ps\n", vp);
   arch_log = nfembedlog(bnf,alpha,prec);
-  if (DEBUGLEVEL>2) pari_printf("arch log %Ps\n", arch_log);
+  if (DEBUGLEVEL>2) err_printf("arch log %Ps\n", arch_log);
   zm_log = gchar_logm(bnf,zm,alpha);
-  if (DEBUGLEVEL>2) pari_printf("zm_log(alpha) %Ps\n", zm_log);
+  if (DEBUGLEVEL>2) err_printf("zm_log(alpha) %Ps\n", zm_log);
   return gerepilecopy(av, shallowconcat1(mkvec3(vp,gneg(zm_log),gneg(arch_log))));
 }
 
@@ -1319,7 +1314,7 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long
     GEN expo = gdiv(w2, PiI2(prec));
     val = gadd(val, gmul(expo, glog(norm, prec)));
   }
-  if (DEBUGLEVEL>1) pari_printf("char value %Ps\n", val);
+  if (DEBUGLEVEL>1) err_printf("char value %Ps\n", val);
   return gerepilecopy(av, val);
 }
 
@@ -1626,7 +1621,7 @@ vecan_gchar(GEN an, long n, long prec)
 
   /* prec increase: 1/n*log(N(pmax)) < log(pmax) */
   if (DEBUGLEVEL > 1)
-    pari_printf("vecan_gchar: need extra prec %ld\n", nbits2extraprec(expu(n)));
+    err_printf("vecan_gchar: need extra prec %ld\n", nbits2extraprec(expu(n)));
   gc = gcharnewprec(gc, prec + nbits2extraprec(expu(n)));
   chilog = gchari_log(gc, chi, &w2);
 
