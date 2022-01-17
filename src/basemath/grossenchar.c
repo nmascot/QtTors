@@ -331,14 +331,10 @@ gcharinit(GEN bnf, GEN mod, long prec)
 {
   pari_sp av = avma;
   GEN nfs, zm, zmcyc, clgen, S, valS, sfu, logx;
-  GEN fa2, archp, z, C, gc;
-  GEN cm, cyc, rel, U, Ui;
-  GEN m, m_inv, m0, u0;
-  long n, k, r1, r2, ns, nc, nu, nm, lsfu;
-  long order;
-  long evalprec, nfprec, extraprec = 1;
+  GEN fa2, archp, z, C, gc, cm, cyc, rel, U, Ui, m, m_inv, m0, u0;
+  long n, k, r1, r2, ns, nc, nu, nm, lsfu, order;
+  long nfprec, evalprec = prec, extraprec = 1;
 
-  evalprec = prec;
   prec = evalprec + extraprec; /* default 1 extra word*/
   nfprec = prec + extraprec;
 
@@ -867,13 +863,13 @@ _check_gchar_group(GEN gc, long flag)
 static GEN
 gchar_algebraic_basis(GEN gc)
 {
-  long nt, nf, nc, nm, r2, nalg, n0, k;
+  long ntors, nfree, nc, nm, r2, nalg, n0, k;
   GEN basis, args, m, w, normchar, alg_basis, tors_basis;
 
   /* in snf basis */
-  nt = gchar_get_ntors(gc); /* number of torsion generators */
-  nf = gchar_get_nfree(gc);
-  nc = nt + nf;
+  ntors = gchar_get_ntors(gc); /* number of torsion generators */
+  nfree = gchar_get_nfree(gc);
+  nc = ntors + nfree;
   /* in internal basis */
   n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion chars, internal basis */
   r2 = gchar_get_r2(gc);
@@ -882,7 +878,7 @@ gchar_algebraic_basis(GEN gc)
   nalg = gchar_get_nalg(gc); /* number of generators of free algebraic chars */
 
   /* finite order characters have weight 0 */
-  tors_basis = matid(nt);
+  tors_basis = matid(ntors);
 
   /* the norm is an algebraic character */
   normchar = vec_ei(nc+1,nc+1);
@@ -923,8 +919,8 @@ gchar_algebraic_basis(GEN gc)
     if (DEBUGLEVEL>2) err_printf("w -> %Ps\n", w);
   }
   /* add weight to infinite order characters, at position nc+1 */
-  w = gdivgs(gmodgs(w, 2),2);
-  alg_basis = shallowmatconcat(mkvec3(alg_basis, zerovec(nf-nalg), w));
+  w = gdivgs(gmodgs(w, 2), 2);
+  alg_basis = shallowmatconcat(mkvec3(alg_basis, zerovec(nfree-nalg), w));
 
   if (lg(tors_basis)>1)
     basis = shallowmatconcat(mkmat22(tors_basis, gen_0, gen_0, alg_basis));
@@ -936,11 +932,8 @@ static GEN
 gchar_algebraicoftype(GEN gc, GEN type)
 /* FIXME: wrong for mixed signature or real field */
 {
-  long i, nt, nf, r2, nalg, n0, nm;
+  long i, r2, nalg, n0, nm;
   GEN p, q, w, k, matk, chi;
-  /* in snf basis */
-  nt = gchar_get_ntors(gc);
-  nf = gchar_get_nfree(gc);
   /* in internal basis */
   n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion chars, internal basis */
   r2 = gchar_get_r2(gc);
@@ -974,8 +967,9 @@ gchar_algebraicoftype(GEN gc, GEN type)
   matk = matslice(gchar_get_basis(gc),n0+1,n0+nalg,nm-r2+1,nm);
   chi = shallowtrans(inverseimage(shallowtrans(matk),shallowtrans(k))); /* FIXME: need to solve integral system */
   if (lg(chi) == 1) return NULL;
-  chi = shallowconcat1(mkvec4(zerovec(nt),chi,zerovec(nf-nalg),gmul2n(w,-1)));
-  return mkvec(chi);
+  chi = mkvec4(zerovec(gchar_get_ntors(gc)), chi,
+               zerovec(gchar_get_nfree(gc) - nalg), gmul2n(w,-1));
+  return mkvec(shallowconcat1(chi));
 }
 
 GEN
@@ -1157,13 +1151,13 @@ gchar_conductor(GEN gc, GEN chi)
 int
 gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
 {
-  long i, nt, nf, n0, nalg, r2;
+  long i, ntors, nfree, n0, nalg, r2;
   GEN w, chii;
   pari_sp av = avma;
   check_gchar_group(gc);
   /* in snf basis */
-  nt = gchar_get_ntors(gc);
-  nf = gchar_get_nfree(gc);
+  ntors = gchar_get_ntors(gc);
+  nfree = gchar_get_nfree(gc);
   /* in internal basis */
   r2 = gchar_get_r2(gc);
   n0 = gchar_get_nm(gc) - r2; /* last index before k_s */
@@ -1172,14 +1166,12 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
 
   check_gchar(gc, chi, &w);
   /* check component are on algebraic generators */
-  for (i=nt+nalg+1;i<=nt+nf;i++)
-    if (!gequal0(gel(chi,i)))
-      return gc_bool(av, 0);
+  for (i=ntors+nalg+1;i<=ntors+nfree;i++)
+    if (!gequal0(gel(chi,i))) return gc_bool(av, 0);
   chii = gchar_parameters(gc, chi);
   /* condition is k_s + w = 0 mod 2 for all s */
   w = gmul2n(w, 1);
-  if (typ(w) != t_INT)
-    return gc_bool(av, 0);
+  if (typ(w) != t_INT) return gc_bool(av, 0);
   for (i = 1; i <= r2; i++)
     if (smodis(addii(gel(chii, n0 + i), w), 2))
       return gc_bool(av, 0);
