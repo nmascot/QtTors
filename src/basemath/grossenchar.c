@@ -82,28 +82,6 @@ localstar(GEN nf, GEN famod, GEN moo)
   return mkvec4(cyc, Lsprk, Lgenfil, mkvec2(famod,moo));
 }
 
-/* log_prk(alpha*pi_pr^{-v_pr(alpha)}), sign(sigma(alpha)) */
-static GEN
-locallog(GEN nf, GEN locs, GEN alpha)
-{
-  GEN moo, loga, Lsprk = locs_get_Lsprk(locs);
-  long i, l = lg(Lsprk);
-  nf = checknf(nf);
-  moo = locs_get_m_infty(locs);
-  if (typ(alpha) != t_MAT) alpha = to_famat_shallow(alpha, gen_1);
-  loga = cgetg(l+1, t_VEC);
-  for(i = 1; i < l; i++)
-  {
-    GEN sprk = gel(Lsprk, i), pr = sprk_get_pr(sprk);
-    GEN g = vec_append(gel(alpha,1), pr_get_gen(pr));
-    GEN v = famat_nfvalrem(nf, alpha, pr, NULL);
-    GEN e = vec_append(gel(alpha,2), gneg(v));
-    gel(loga, i) = famat_zlog_pr(nf, g, e, sprk, NULL);
-  }
-  gel(loga, i) = zc_to_ZC( nfsign_arch(nf, alpha, moo) );
-  return shallowconcat1(loga);
-}
-
 /* (nv * log|x^sigma|/norm, arg(x^sigma))/2*Pi
  * substract norm so that we project to the hyperplane
  * H : sum n_s x_s = 0 */
@@ -140,12 +118,28 @@ gchar_Sval(GEN nf, GEN S, GEN x)
   return res;
 }
 
-/* discretelog(x mod m) */
+/* log_prk(x*pi_pr^{-v_pr(x)}), sign(sigma(x)) */
 GEN
-gchar_logm(GEN bnf, GEN zm, GEN x)
+gchar_logm(GEN nf, GEN locs, GEN x)
 {
   pari_sp av = avma;
-  return gerepilecopy(av,locallog(bnf,zm,x));
+  GEN moo, loga, Lsprk = locs_get_Lsprk(locs);
+  long i, l = lg(Lsprk);
+
+  nf = checknf(nf);
+  moo = locs_get_m_infty(locs);
+  if (typ(x) != t_MAT) x = to_famat_shallow(x, gen_1);
+  loga = cgetg(l+1, t_VEC);
+  for(i = 1; i < l; i++)
+  {
+    GEN sprk = gel(Lsprk, i), pr = sprk_get_pr(sprk);
+    GEN g = vec_append(gel(x,1), pr_get_gen(pr));
+    GEN v = famat_nfvalrem(nf, x, pr, NULL);
+    GEN e = vec_append(gel(x,2), gneg(v));
+    gel(loga, i) = famat_zlog_pr(nf, g, e, sprk, NULL);
+  }
+  gel(loga, i) = zc_to_ZC( nfsign_arch(nf, x, moo) );
+  return gerepilecopy(av, shallowconcat1(loga));
 }
 
 static GEN
