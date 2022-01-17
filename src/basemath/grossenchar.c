@@ -1651,21 +1651,23 @@ cleanup_vga(GEN vga, long prec)
   for (i = 1; i < l; i++)
   {
     GEN z = gel(vga,i);
-    if (typ(z) == t_COMPLEX && gexpo(gel(z,2)) < -bitprec+20)
-      gel(vga,i) = gel(z,1);
+    if (typ(z) != t_COMPLEX) continue;
+    if (gexpo(gel(z,2)) < -bitprec+20) gel(vga,i) = gel(z,1);
   }
   ind = indexsort(imag_i(vga));
   for (i = 2; i < l; i++)
   {
-    GEN z = gel(vga,ind[i]), z1 = gel(vga,ind[i-1]);
-    if (typ(z) == t_COMPLEX && gexpo(gsub(gel(z,2),imag_i(z1))) < -bitprec+20)
-      gel(vga,ind[i]) = mkcomplex(gel(z,1),imag_i(z1));
+    GEN z = gel(vga,ind[i]), t;
+    if (typ(z) != t_COMPLEX) continue;
+    t = imag_i(gel(vga, ind[i-1]));
+    if (gexpo(gsub(gel(z,2), t)) < -bitprec+20)
+      gel(vga, ind[i]) = mkcomplex(gel(z,1), t);
    }
   for (i = 1; i < l; i++)
   {
     GEN z = gel(vga,i);
-    if (typ(z) == t_COMPLEX)
-      gel(vga, i) = mkcomplex(gel(z,1), bestappr(gel(z,2), int2n(bitprec/2)));
+    if (typ(z) != t_COMPLEX) continue;
+    gel(vga, i) = mkcomplex(gel(z,1), bestappr(gel(z,2), int2n(bitprec/2)));
   }
   return vga;
 }
