@@ -3084,11 +3084,9 @@ ldata_newprec(GEN ldata, long prec)
     case t_LFUN_CLOSURE0: return closure2ldata(an, prec);
     case t_LFUN_HECKE:
     {
-      /* warning chi in internal format */
       GEN gc = gel(an, 1), chiw = gel(an, 2);
       gc = gcharnewprec(gc, prec);
-      return gchari_lfun(gc, chiw, gen_0);
-      /*return lfungchar(gcharnewprec(gel(an, 1), prec), gel(an, 2));*/
+      return gchari_lfun(gc, chiw, gen_0); /* chi in internal format */
     }
     case t_LFUN_QF:
     {
