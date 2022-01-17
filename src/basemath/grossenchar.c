@@ -1376,18 +1376,14 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   /* index in Lchiv corresponding to the places */
   Lpr = cgetg(npr+1, t_VECSMALL); npr = 0;
   Lk1 = cgetg(nk1+1, t_VECSMALL); nk1 = 0;
-  Lphi1 = cgetg(r1+1, t_VECSMALL);
-  Lk2 = cgetg(r2+1, t_VECSMALL);
-  for (i=1; i<=r1; i++) Lphi1[i] = 0;
-  for (i=1; i<=r2; i++) Lk2[i] = 0;
+  Lphi1 = zero_zv(r1); Lk2 = zero_zv(r2);
   for (i=1; i<lg(Lv); i++)
   {
     if (typ(gel(Lv,i)) == t_INT)
     {
       v = itos(gel(Lv,i));
       if (v <= r1)
-      {
-        /* TODO don't put in k1 if not in conductor (but keep as phi) */
+      { /* TODO don't put in k1 if not in conductor (but keep as phi) */
         nk1++;
         Lk1[nk1] = i;
         Lphi1[v] = i;
