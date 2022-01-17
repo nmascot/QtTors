@@ -271,41 +271,35 @@ vec_v0(long n, long n0, long r1, long r2)
 static GEN
 cm_select(GEN bnf, GEN cm, long prec)
 {
-  long nc, r2, d_cm, r_cm, c, i, j;
-  GEN emb, keys, v, nf, m_sel;
-  pari_sp av = avma;
-  nf = bnf_get_nf(bnf);
-  r2 = nf_get_r2(nf);
-  /* degree of the cm field */
-  d_cm = poldegree(gel(cm, 1), -1);
-  if (d_cm % 2)
-    pari_err_BUG("cm_select: not a CM field (1)"); /*LCOV_EXCL_LINE*/
-  /* nb of clusters */
-  nc = d_cm / 2;
-  r_cm = poldegree(nf_get_pol(nf),-1) / d_cm; /* nb by cluster */
-  if (nc * r_cm != r2)
-    pari_err_BUG("cm_select: not a CM field (2)"); /*LCOV_EXCL_LINE*/
+  GEN emb, keys, v, m_sel, imag_emb, nf = bnf_get_nf(bnf);
+  long nc, d_cm, r_cm, c, i, j, r2 = nf_get_r2(nf);
+  pari_sp av;
+
+  d_cm = poldegree(gel(cm, 1), -1); /* degree of the cm field; even */
+  nc = d_cm / 2; /* nb of clusters */
+  r_cm = nf_get_degree(nf) / d_cm; /* nb by cluster; nc * r_cm = r2 */
+  m_sel = zeromatcopy(nc, r2); /* selection matrix */
+  av = avma;
   /* group complex embeddings */
   emb = nfeltembed(bnf, gel(cm, 2), NULL, prec);
   /* sort */
-  keys = gadd(gmul(mppi(prec), real_i(emb)), gabs(imag_i(emb), prec));
+  imag_emb = imag_i(emb);
+  keys = gadd(gmul(mppi(prec), real_i(emb)), gabs(imag_emb, prec));
   v = indexsort(keys);
 
-  /* selection matrix */
-  m_sel = zeromatcopy(nc, r2);
   for (j = c = 1; c <= nc; c++)
   {
-    int ref = gsigne(imag_i(gel(emb, v[j])));
+    int ref = gsigne(gel(imag_emb, v[j]));
     gcoeff(m_sel, c, v[j]) = gen_1;
     j++;
     for (i = 2; i <= r_cm; i++)
     {
-      int s = gsigne(imag_i(gel(emb, v[j])));
+      int s = gsigne(gel(imag_emb, v[j]));
       gcoeff(m_sel, c, v[j]) = (s == ref) ? gen_1 : gen_m1;
       j++;
     }
   }
-  return gerepilecopy(av, m_sel);
+  return gc_const(av, m_sel);
 }
 
 static GEN gchar_hnfreduce_shallow(GEN gc, GEN cm, long prec);
