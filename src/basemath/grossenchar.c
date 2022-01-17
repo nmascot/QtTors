@@ -275,7 +275,7 @@ cm_select(GEN bnf, GEN cm, long prec)
   long nc, d_cm, r_cm, c, i, j, r2 = nf_get_r2(nf);
   pari_sp av;
 
-  d_cm = poldegree(gel(cm, 1), -1); /* degree of the cm field; even */
+  d_cm = degpol(gel(cm, 1)); /* degree of the cm field; even */
   nc = d_cm / 2; /* nb of clusters */
   r_cm = nf_get_degree(nf) / d_cm; /* nb by cluster; nc * r_cm = r2 */
   m_sel = zeromatcopy(nc, r2); /* selection matrix */
