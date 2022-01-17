@@ -86,28 +86,21 @@ localstar(GEN nf, GEN famod, GEN moo)
 static GEN
 locallog(GEN nf, GEN locs, GEN alpha)
 {
-  long ip,i;
-  GEN Lsprk, moo, loga, sgn;
+  GEN moo, loga, Lsprk = locs_get_Lsprk(locs);
+  long i, l = lg(Lsprk);
   nf = checknf(nf);
-  Lsprk = locs_get_Lsprk(locs);
   moo = locs_get_m_infty(locs);
   if (typ(alpha) != t_MAT) alpha = to_famat_shallow(alpha, gen_1);
-  loga = cgetg(lg(Lsprk)+1, t_VEC);
-  for(ip = 1; ip < lg(Lsprk); ip++)
+  loga = cgetg(l+1, t_VEC);
+  for(i = 1; i < l; i++)
   {
-    GEN sprk = gel(Lsprk, ip), pr = sprk_get_pr(sprk);
+    GEN sprk = gel(Lsprk, i), pr = sprk_get_pr(sprk);
     GEN g = vec_append(gel(alpha,1), pr_get_gen(pr));
     GEN v = famat_nfvalrem(nf, alpha, pr, NULL);
     GEN e = vec_append(gel(alpha,2), gneg(v));
-    gel(loga, ip) = famat_zlog_pr(nf, g, e, sprk, NULL);
+    gel(loga, i) = famat_zlog_pr(nf, g, e, sprk, NULL);
   }
-  sgn = nfeltsign(nf, alpha, moo);
-  for (i=1; i<lg(sgn); i++)
-  {
-    if (signe(gel(sgn,i))>0) gel(sgn,i) = gen_0;
-    else                     gel(sgn,i) = gen_1;
-  }
-  settyp(sgn,t_COL); gel(loga, lg(Lsprk)) = sgn;
+  gel(loga, i) = zc_to_ZC( nfsign_arch(nf, alpha, moo) );
   return shallowconcat1(loga);
 }
 
