@@ -1099,7 +1099,7 @@ gcharlog_conductor_f(GEN gc, GEN chi)
     ic += ncp;
   }
   famod = mkmat2(gel(famod,1),expo);
-  nf = checknf(gchar_get_bnf(gc));
+  nf = bnf_get_nf(gchar_get_bnf(gc));
   return gerepilecopy(av, idealfactorback(nf, famod, NULL, 0)); /* red = 0 */
 }
 
@@ -1576,11 +1576,8 @@ vecan_gchar(GEN an, long n, long prec)
 {
   forprime_t iter;
   pari_sp av = avma;
-  GEN gc = gel(an,1);
-  GEN chi = gel(an,2);
-  GEN nf, N, NZ = NULL, chilog, w2;
-  GEN BOUND = stoi(n);
-  GEN gp = cgetipos(3), v = vec_ei(n, 1);
+  GEN gc = gel(an,1), chi = gel(an,2), BOUND = stoi(n), v = vec_ei(n, 1);
+  GEN gp = cgetipos(3), NZ = NULL, nf, N, chilog, w2;
   ulong p;
 
   /* prec increase: 1/n*log(N(pmax)) < log(pmax) */
@@ -1589,7 +1586,7 @@ vecan_gchar(GEN an, long n, long prec)
   gc = gcharnewprec(gc, prec + nbits2extraprec(expu(n)));
   chilog = gchari_log(gc, chi, &w2);
 
-  nf = checknf(gchar_get_bnf(gc));
+  nf = bnf_get_nf(gchar_get_bnf(gc));
   N = gcharlog_conductor_f(gc,chilog);
   if (typ(N) == t_INT)
     NZ = N;
@@ -1680,7 +1677,7 @@ gchari_lfun(GEN gc, GEN chi, GEN w)
   GEN nf, chilog, w2, cond_f, cond_oo, vga_r, vga_c, chiw;
   GEN v_phi, v_arg, sig, k, NN, L;
   long ns, nc, nm, r1, r2;
-  nf = checknf(gchar_get_bnf(gc));
+  nf = bnf_get_nf(gchar_get_bnf(gc));
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
   nm = gchar_get_nm(gc);
