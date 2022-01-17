@@ -64,15 +64,15 @@ localstar(GEN nf, GEN famod, GEN moo)
 
   Lsprk = cgetg(l, t_VEC);
   Lgenfil = cgetg(l, t_VEC);
-  for(i = 1; i < l; i++)
+  for (i = 1; i < l; i++)
   {
     long n, e, k = itos(gel(E,i));
-    GEN sprk = log_prk_init(nf, gel(P,i), k, NULL);
+    GEN v, sprk = log_prk_init(nf, gel(P,i), k, NULL);
     gel(Lsprk,i) = sprk; n = lg(sprk_get_cyc(sprk))-1;
-    gel(Lgenfil,i) = cgetg(k+1, t_VEC);
+    gel(Lgenfil,i) = v = cgetg(k+1, t_VEC);
     /* log on sprk of generators of U_{e-1}/U_e(pr) */
-    gmael(Lgenfil, i, 1) = col_ei(n, 1);
-    for(e = 2; e <= k; e++) gmael(Lgenfil, i, e) = sprk_log_gen_pr2(nf, sprk, e);
+    gel(v, 1) = col_ei(n, 1);
+    for (e = 2; e <= k; e++) gel(v, e) = sprk_log_gen_pr2(nf, sprk, e);
   }
   Lcyc = compute_Lcyc(Lsprk, moo);
   if (lg(Lcyc) > 1)
@@ -130,7 +130,7 @@ gchar_logm(GEN nf, GEN locs, GEN x)
   moo = locs_get_m_infty(locs);
   if (typ(x) != t_MAT) x = to_famat_shallow(x, gen_1);
   loga = cgetg(l+1, t_VEC);
-  for(i = 1; i < l; i++)
+  for (i = 1; i < l; i++)
   {
     GEN sprk = gel(Lsprk, i), pr = sprk_get_pr(sprk);
     GEN g = vec_append(gel(x,1), pr_get_gen(pr));
@@ -155,10 +155,10 @@ matvaluations(GEN bnf, GEN S, GEN g)
 {
   long i, j, li = lg(S), lj = lg(g);
   GEN m = cgetg(lj, t_MAT);
-  for(j = 1; j < lj; j++)
+  for (j = 1; j < lj; j++)
   {
     GEN c = cgetg(li, t_COL); gel(m,j) = c;
-    for(i = 1; i < li; i++)
+    for (i = 1; i < li; i++)
       gel(c,i) = stoi(idealval(bnf, gel(g,j), gel(S,i)));
   }
   return m;
@@ -176,7 +176,7 @@ embedcol(GEN v, long size, long shift)
 {
   long k;
   GEN w = zerocol(size);
-  for(k=1;k<lg(v);k++) gel(w, shift+k) = gel(v,k);
+  for (k = 1; k < lg(v); k++) gel(w, shift+k) = gel(v,k);
   return w;
 }
 
@@ -185,7 +185,7 @@ static void
 shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
 {
   long k, e;
-  for(k=k0; k<=k1; k++)
+  for (k = k0; k <= k1; k++)
   {
     GEN rnd = grndtoi(gmul(gel(v, k), den),&e);
     if (DEBUGLEVEL>1) err_printf("[%Ps*%Ps=%Ps..e=%ld|prec=%ld]\n",
@@ -225,7 +225,7 @@ hnf_block(GEN m, long r0, long nr, long c0, long nc)
   vecreverse_inplace(u);
   uu = matid(nm);
   /* embed in matid */
-  for(k=1; k <= nc; k++)
+  for (k = 1; k <= nc; k++)
     gel(uu,c0+k) = embedcol(gel(u,k),nm,c0);
   return gerepilecopy(av, uu);
 }
@@ -238,13 +238,10 @@ lll_block(GEN m, long r0, long nr, long c0, long nc)
   pari_sp av = avma;
 
   block = matslice(m, r0+1, r0+nr, c0+1, c0+nc);
-  u = lll(block);
-  vecreverse_inplace(u);
+  u = lll(block); vecreverse_inplace(u);
   if (lg(u) <= nc) return NULL;
-  /* embed in matid */
-  uu = matid(nm);
-  for(k=1; k <= nc; k++)
-    gel(uu,c0+k) = embedcol(gel(u,k),nm,c0);
+  uu = matid(nm); /* embed in matid */
+  for (k = 1; k <= nc; k++) gel(uu,c0+k) = embedcol(gel(u,k),nm,c0);
   return gerepilecopy(av, uu);
 }
 
@@ -265,8 +262,8 @@ vec_v0(long n, long n0, long r1, long r2)
 {
   long k;
   GEN C = zerocol(n);
-  for(k = 1; k <= r1; k++) gel(C, n0++) = gen_1;
-  for(k = 1; k <= r2; k++) gel(C, n0++) = utoi(2);
+  for (k = 1; k <= r1; k++) gel(C, n0++) = gen_1;
+  for (k = 1; k <= r2; k++) gel(C, n0++) = utoi(2);
   return C;
 }
 
@@ -281,12 +278,12 @@ cm_select(GEN bnf, GEN cm, long prec)
   r2 = nf_get_r2(nf);
   /* degree of the cm field */
   d_cm = poldegree(gel(cm, 1), -1);
-  if(d_cm % 2)
+  if (d_cm % 2)
     pari_err_BUG("cm_select: not a CM field (1)"); /*LCOV_EXCL_LINE*/
   /* nb of clusters */
   nc = d_cm / 2;
   r_cm = poldegree(nf_get_pol(nf),-1) / d_cm; /* nb by cluster */
-  if(nc * r_cm != r2)
+  if (nc * r_cm != r2)
     pari_err_BUG("cm_select: not a CM field (2)"); /*LCOV_EXCL_LINE*/
   /* group complex embeddings */
   emb = nfeltembed(bnf, gel(cm, 2), NULL, prec);
@@ -296,12 +293,12 @@ cm_select(GEN bnf, GEN cm, long prec)
 
   /* selection matrix */
   m_sel = zeromatcopy(nc, r2);
-  for(j=1,c=1; c<=nc; c++)
+  for (j = c = 1; c <= nc; c++)
   {
     int ref = gsigne(imag_i(gel(emb, v[j])));
     gcoeff(m_sel, c, v[j]) = gen_1;
     j++;
-    for(i=2;i<=r_cm;i++)
+    for (i = 2; i <= r_cm; i++)
     {
       int s = gsigne(imag_i(gel(emb, v[j])));
       gcoeff(m_sel, c, v[j]) = (s == ref) ? gen_1 : gen_m1;
@@ -434,7 +431,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
 
   if (DEBUGLEVEL>2) err_printf("start matrix m\n");
   m = cgetg(nm + 1, t_MAT);
-  if (lsfu > 1) for(;;)
+  for(;;)
   {
     for (k = 1; k < lsfu; k++)
     { /* Lambda_S (S-units) then Lambda_f, fund. units */
@@ -447,7 +444,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
     nfprec = prec + extraprec;
     bnf = bnf_nfnewprec_shallow(bnf, nfprec);
   }
-  for(k=1;k<=nc;k++) /* Gamma, structure of (Z/m)* */
+  for (k = 1; k <= nc; k++) /* Gamma, structure of (Z/m)* */
   {
     C = zerocol(nm);
     gel(C, ns+k) = gel(zmcyc, k);
@@ -456,7 +453,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
   /* zeta, root of unity */
   gel(m, ns+nu+nc+1) = gchar_nflog(bnf,zm,S,z,nfprec);
   shallow_clean_rat(gel(m, ns+nu+nc+1), 1, nm, stoi(order), prec);
-  for(k=1;k<=r2;k++) /* embed Z^r_2 */
+  for (k = 1; k <= r2; k++) /* embed Z^r_2 */
   {
     C = zerocol(nm);
     gel(C, ns+nc+r1+r2+k) = gen_1;
@@ -688,22 +685,22 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
     GEN zmcyc, expo;
     zmcyc = locs_get_cyc(gchar_get_zm(gc));
     expo = glcm0(zmcyc,NULL);
-    for(k=1;k<=nc;k++)
+    for (k = 1; k <= nc; k++)
       shallow_clean_rat(gel(m_inv, ns+k), 1, nm - 1, /*zmcyc[k]*/ expo, prec);
   }
   if (DEBUGLEVEL>1) err_printf("cyc cleaned: %Ps", shallowtrans(m_inv));
   if (ncm)
   {
     long i, j, k;
-    for(k=1;k<=r2;k++) shallow_clean_rat(gel(m_inv,nm-k+1),1,nm-1,gen_1,prec);
-    for(i=1;i<=r1+r2;i++)
-      for(j=1;j<=ncm;j++)
-        gcoeff(m_inv,ns+nc+j,ns+nc+i) = gen_0;
+    for (k = 1; k <= r2; k++)
+      shallow_clean_rat(gel(m_inv,nm-k+1), 1, nm-1, gen_1, prec);
+    for (i = 1; i<=r1+r2; i++)
+      for (j = 1; j <= ncm; j++) gcoeff(m_inv, ns+nc+j, ns+nc+i) = gen_0;
   }
   if (DEBUGLEVEL>1) err_printf("cm cleaned: %Ps", shallowtrans(m_inv));
 
   /* normalize characters, parameters mod Z */
-  for(k = 1; k <= ns+nc; k++) gel(m_inv, k) = gfrac(gel(m_inv, k));
+  for (k = 1; k <= ns+nc; k++) gel(m_inv, k) = gfrac(gel(m_inv, k));
 
   /* increase relative prec of real values */
   gchar_set_basis(gc, gprec_w(m_inv, prec));
@@ -741,13 +738,13 @@ gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
   setrand(c);
 
   /* recompute the nfembedlogs of s-units and fundamental units */
-  for(k=1;k<=ns;k++) /* Lambda_S, s-units */
+  for (k = 1; k <= ns; k++) /* Lambda_S, s-units */
   {
     emb = nfembedlog(bnf,gel(sunits,k), *nfprecptr);
     if (!emb) { incrprec = 1; break; }
     vaffect_shallow(gel(m0, k), ns+nc, emb);
   }
-  for(k=1;k<=nu && !incrprec;k++) /* Lambda_f, fundamental units */
+  for (k = 1; k <= nu && !incrprec; k++) /* Lambda_f, fundamental units */
   {
     emb = nfembedlog(bnf,gel(fu,k), *nfprecptr);
     if (!emb) { incrprec = 1; break; }
@@ -910,7 +907,7 @@ gchar_algebraic_basis(GEN gc)
     /* select block k_s in char parameters and */
     if (DEBUGLEVEL>2) err_printf("block ks -> %Ps\n", args);
     m = cgetg(r2, t_MAT);
-    for(k=1; k<r2; k++)
+    for (k = 1; k < r2; k++)
       gel(m,k) = gsub(gel(args,k+1),gel(args,1));
     if (DEBUGLEVEL>2) err_printf("block ks' -> %Ps", m);
     alg_basis = shallowtrans(gel(matsolvemod(shallowtrans(m),gen_2,gen_0,1),2));
@@ -956,7 +953,7 @@ gchar_algebraicoftype(GEN gc, GEN type)
   p = gmael(type, 1, 1);
   q = gmael(type, 1, 2); w = addii(p, q);
   gel(k, 1) = subii(p, q);
-  for(i=2; i<=r2; i++)
+  for (i = 2; i <= r2; i++)
   {
     p = gmael(type, i, 1);
     q = gmael(type, i, 2);
@@ -1664,7 +1661,7 @@ cleanup_vga(GEN vga, long prec)
       gel(vga,i) = gel(z,1);
   }
   ind = indexsort(imag_i(vga));
-  for(i = 2; i < l; i++)
+  for (i = 2; i < l; i++)
   {
     GEN z = gel(vga,ind[i]), z1 = gel(vga,ind[i-1]);
     if (typ(z) == t_COMPLEX && gexpo(gsub(gel(z,2),imag_i(z1))) < -bitprec+20)
