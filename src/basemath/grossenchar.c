@@ -1040,7 +1040,8 @@ check_gchari(GEN gc, GEN chi, GEN *w2)
   return check_gchar_i(chi, lg(gel(gchar_get_basis(gc),1)), w2);
 }
 
-/* from coordinates on snf basis, return coordinates on internal basis, set w2 to the norm component */
+/* from coordinates on snf basis, return coordinates on internal basis, set
+ * w2 to the norm component */
 static GEN
 gchar_internal(GEN gc, GEN chi, GEN *w2)
 {
@@ -1048,19 +1049,16 @@ gchar_internal(GEN gc, GEN chi, GEN *w2)
   return ZV_ZM_mul(chi, gchar_get_Ui(gc));
 }
 
-/* from internal basis form, return the R/Z components and set w2 to the R component */
+/* from internal basis form, return the R/Z components and set w2 to the R
+ * component */
 static GEN
 gchari_log(GEN gc, GEN chi, GEN *w2)
 {
-  long i, ns, nc;
+  long i, n;
   chi = check_gchari(gc, chi, w2);
   chi = RgV_RgM_mul(chi, gchar_get_basis(gc));
-
-  /* take exponents mod Z */
-  ns = gchar_get_ns(gc);
-  nc = gchar_get_nc(gc);
-  for (i = 1; i <= ns+nc; i++)
-    gel(chi,i) = gfrac(gel(chi,i));
+  n = gchar_get_ns(gc) + gchar_get_nc(gc); /* take exponents mod Z */
+  for (i = 1; i <= n; i++) gel(chi,i) = gfrac(gel(chi,i));
   return chi;
 }
 
