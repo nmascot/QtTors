@@ -1662,10 +1662,7 @@ vecan_gchar(GEN an, long n, long prec)
     GEN nw2 = dirpowers(n, w2, prec);
     long j;
     for (j = 1; j <= n; j++)
-    {
-      if (gel(v,j)!=gen_0)
-        gel(v, j) = gmul(gel(v,j),gel(nw2,j));
-    }
+      if (gel(v,j) != gen_0) gel(v, j) = gmul(gel(v,j),gel(nw2,j));
   }
   return gerepilecopy(av, v);
 }
@@ -1724,10 +1721,8 @@ gchari_lfun(GEN gc, GEN chi, GEN w)
   if (equali1(NN)) return gerepileupto(av, lfuncreate(gen_1));
   if (ZV_equal0(chi)) return gerepilecopy(av, lfuncreate(nf));
 
-  /*
-     vga_r = vector(r1,k,I*c[ns+nc+k]-w2 + cond_oo[k]);
-     vga_c = vector(r2,k,I*c[ns+nc+r1+k]+abs(c[ns+nc+r1+r2+k])/2-w2);
-  */
+  /* vga_r = vector(r1,k,I*c[ns+nc+k]-w2 + cond_oo[k]);
+   * vga_c = vector(r2,k,I*c[ns+nc+r1+k]+abs(c[ns+nc+r1+r2+k])/2-w2) */
   v_phi = gmul(vecslice(chilog, ns+nc+1, ns+nc+r1+r2), gen_I());
   v_arg = gdivgs(gabs(vecslice(chilog,ns+nc+r1+r2+1,nm),BITS_IN_LONG), 2);
   vga_r = gadd(vecslice(v_phi, 1, r1), cond_oo);
@@ -1746,9 +1741,7 @@ gchari_lfun(GEN gc, GEN chi, GEN w)
   }
 
 #define tag(x,t)  mkvec2(mkvecsmall(t),x)
-  L = mkvecn(6, tag(mkvec2(gc,chiw), t_LFUN_HECKE),
-        gen_1, sig, k, NN, gen_0);
-
+  L = mkvecn(6, tag(mkvec2(gc,chiw), t_LFUN_HECKE), gen_1, sig, k, NN, gen_0);
   return gerepilecopy(av, L);
 }
 
