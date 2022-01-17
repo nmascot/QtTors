@@ -779,8 +779,7 @@ gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
 }
 
 static void _check_gchar_group(GEN gc, long flag);
-
-void
+static void
 check_gchar_group(GEN gc) { _check_gchar_group(gc, 0); }
 
 /* increase prec if needed. FIXME: hardcodes gc[7] and gc[10] */
@@ -840,8 +839,7 @@ is_gchar_group(GEN gc)
       &&  typ(gmael(gc, 7, 1))  == t_VECSMALL
       &&  typ(gmael(gc, 7, 2))  == t_VECSMALL
       &&  typ(gmael(gc, 7, 3))  == t_VECSMALL
-      &&  (checkbnf_i(gchar_get_bnf(gc))  != NULL)
-      );
+      &&  (checkbnf_i(gchar_get_bnf(gc))  != NULL));
 }
 
 /* validates the structure format.
@@ -850,29 +848,24 @@ is_gchar_group(GEN gc)
 static void
 _check_gchar_group(GEN gc, long flag)
 {
+  GEN b, bnf;
   if (typ(gc) != t_VEC || lg(gc) != GC_LENGTH + 1)
     pari_err_TYPE("char group", gc);
   check_localstar(gchar_get_zm(gc));
-  if (typ(gchar_get_loccyc(gc)) != t_VEC
-      ||typ(gchar_get_basis(gc)) != t_MAT)
-  {
-    output(gchar_get_loccyc(gc));
-    output(gchar_get_basis(gc));
-    pari_err_TYPE("gchar group (locyc, basis)", gc);
-  }
-  checkbnf(gchar_get_bnf(gc));
-  /* modify prec inplace if incoherent */
-  if (typ(gel(gc,7)) != t_VEC
-      ||typ(gmael(gc,7,1)) != t_VECSMALL)
-    pari_err_TYPE("gchar group (gc[7])", gel(gc,7));
+  if (typ(gchar_get_loccyc(gc)) != t_VEC)
+    pari_err_TYPE("gchar group (loccyc)", gc);
+  b = gchar_get_basis(gc);
+  if (typ(b) != t_MAT) pari_err_TYPE("gchar group (basis)", gc);
+  bnf = gchar_get_bnf(gc); checkbnf(bnf);
+  if (typ(gel(gc,7)) != t_VEC ||typ(gmael(gc,7,1)) != t_VECSMALL)
+    pari_err_TYPE("gchar group (gc[7])", gc);
   if (!flag)
-  {
-    long prec, prec0, nfprec, nfprec0;
-    prec0 = gprecision(gchar_get_basis(gc));
-    nfprec0 = nf_get_prec(gchar_get_bnf(gc));
-    prec = gchar_get_prec(gc);
-    nfprec = gchar_get_nfprec(gc);
-    if((prec0 && prec > prec0) || (nfprec0 && nfprec > nfprec0))
+  { /* modify prec inplace if incoherent */
+    long prec0, nfprec0;
+    prec0 = gprecision(b);
+    nfprec0 = nf_get_prec(bnf);
+    if ((prec0 && gchar_get_prec(gc) > prec0)
+        || (nfprec0 && gchar_get_nfprec(gc) > nfprec0))
       pari_err_PREC("gchar group, please call gcharnewprec");
   }
 }

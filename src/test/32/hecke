@@ -184,14 +184,12 @@ bad inputs
   ***   at top-level: gcharnewprec(G)
   ***                 ^---------------
   *** gcharnewprec: incorrect type in char group (t_INT).
-[100]
-0
   ***   at top-level: gcharnewprec(G)
   ***                 ^---------------
-  *** gcharnewprec: incorrect type in gchar group (locyc, basis) (t_VEC).
+  *** gcharnewprec: incorrect type in gchar group (basis) (t_VEC).
   ***   at top-level: gcharnewprec(G)
   ***                 ^---------------
-  *** gcharnewprec: incorrect type in gchar group (gc[7]) (t_INT).
+  *** gcharnewprec: incorrect type in gchar group (gc[7]) (t_VEC).
   ***   at top-level: gcharidentify(G,[],[])
   ***                 ^----------------------
   *** gcharidentify: precision too low in gchar group, please call gcharnewprec.
@@ -223,4 +221,4 @@ wrong, this should be an invalid input:
 []
 wrong, this should be an invalid input:
 []
-Total time spent: 2150
+Total time spent: 2964
