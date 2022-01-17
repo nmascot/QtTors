@@ -263,7 +263,7 @@ vec_v0(long n, long n0, long r1, long r2)
   long k;
   GEN C = zerocol(n);
   for (k = 1; k <= r1; k++) gel(C, n0++) = gen_1;
-  for (k = 1; k <= r2; k++) gel(C, n0++) = utoi(2);
+  for (k = 1; k <= r2; k++) gel(C, n0++) = gen_2;
   return C;
 }
 
