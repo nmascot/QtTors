@@ -507,95 +507,91 @@ gcharinit(GEN bnf, GEN mod, long prec)
 static GEN
 gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 {
-    GEN bnf, u, u0, m, m0;
-    long order, r1, r2, ns, nc, n, nf, nm, ncm = 0;
+  GEN bnf, u, u0, m, m0;
+  long order, r1, r2, ns, nc, n, nf, nm, ncm = 0;
 
-    bnf = gchar_get_bnf(gc);
-    nf_get_sign(bnf_get_nf(bnf), &r1, &r2);
-    n = r1 + 2*r2;
-    nf = r1 + r2 - 1;
-    ns = gchar_get_ns(gc);
-    nc = gchar_get_nc(gc);
-    nm = ns+nc+n; /* ns + nc + r1 + r2 + r2 */
+  bnf = gchar_get_bnf(gc);
+  nf_get_sign(bnf_get_nf(bnf), &r1, &r2);
+  n = r1 + 2*r2;
+  nf = r1 + r2 - 1;
+  ns = gchar_get_ns(gc);
+  nc = gchar_get_nc(gc);
+  nm = ns+nc+n; /* ns + nc + r1 + r2 + r2 */
 
-    order = bnf_get_tuN(bnf);
+  order = bnf_get_tuN(bnf);
 
-    m0 = gchar_get_m0(gc);
-    u0 = matid(nm);
-    m = shallowcopy(m0); /* keep m unchanged */
+  m0 = gchar_get_m0(gc);
+  u0 = matid(nm);
+  m = shallowcopy(m0); /* keep m unchanged */
 
-    if (DEBUGLEVEL>1) err_printf("matrix m = %Ps\n", m);
+  if (DEBUGLEVEL>1) err_printf("matrix m = %Ps\n", m);
 
-    if (nc)
-    {
-      /* keep steps 1&2 to make sure we have zeta_m */
-      u = hnf_block(m, ns,nc, ns+nf,nc+1);
-      u0 = gmul(u0, u); m = gmul(m, u);
-      if (DEBUGLEVEL>2) err_printf("step 1 -> %Ps\n", m);
-      u = hnf_block(m, ns,nc, ns,nf+nc);
-      u0 = gmul(u0, u); m = gmul(m, u);
-      if (DEBUGLEVEL>2) err_printf("step 2 -> %Ps\n", m);
-    }
-    if (r2)
-    {
-      u = hnf_block(m, ns+nc+r1+r2,r2, ns+nc+r1+r2-1,r2+1);
-      u0 = gmul(u0, u); m = gmul(m, u);
-      if (DEBUGLEVEL>2) err_printf("step 3 -> %Ps\n", m);
-    }
-    /* remove last column */
-    setlg(m, nm);
-    setlg(u0, nm);
-    if (DEBUGLEVEL>2) err_printf("remove last col -> %Ps\n", m);
+  if (nc)
+  { /* keep steps 1&2 to make sure we have zeta_m */
+    u = hnf_block(m, ns,nc, ns+nf,nc+1);
+    u0 = gmul(u0, u); m = gmul(m, u);
+    if (DEBUGLEVEL>2) err_printf("step 1 -> %Ps\n", m);
+    u = hnf_block(m, ns,nc, ns,nf+nc);
+    u0 = gmul(u0, u); m = gmul(m, u);
+    if (DEBUGLEVEL>2) err_printf("step 2 -> %Ps\n", m);
+  }
+  if (r2)
+  {
+    u = hnf_block(m, ns+nc+r1+r2,r2, ns+nc+r1+r2-1,r2+1);
+    u0 = gmul(u0, u); m = gmul(m, u);
+    if (DEBUGLEVEL>2) err_printf("step 3 -> %Ps\n", m);
+  }
+  /* remove last column */
+  setlg(m, nm);
+  setlg(u0, nm);
+  if (DEBUGLEVEL>2) err_printf("remove last col -> %Ps\n", m);
 
-    if (!gequal0(cm))
-    {
-      GEN v, Nargs;
-      /* reduce on Norm arguments */
-      v = cm_select(bnf, cm, nfprec);
-      if (DEBUGLEVEL>2) err_printf("cm_select -> %Ps\n", v);
-      ncm = nbrows(v);
-      gchar_set_u0(gc, u0);
-      while (1)
-      {
-        long e;
-        Nargs = gmul(v, rowslice(m, nc+ns+r1+r2+1, nm));
-        if (DEBUGLEVEL>2) err_printf("Nargs -> %Ps\n", Nargs);
-        Nargs = grndtoi(gmulgs(Nargs, 2 * order), &e);
-        if (e < nfprec+10) break; /* FIXME: e is a bitprec, nfprec is a prec ? */
-        if (DEBUGLEVEL>1) err_printf("cm select: doubling prec\n");
-        nfprec = precdbl(nfprec);
-        m = gcharmatnewprec_shallow(gc, &nfprec);
-      }
-      if (DEBUGLEVEL>2) err_printf("rounded Nargs -> %Ps\n", Nargs);
-      u = hnf_block(Nargs, 0, ncm, ns+nc, r1+2*r2-1);
-      u0 = gmul(u0, u); m = gmul(m, u);
-      if (DEBUGLEVEL>2) err_printf("after cm reduction -> %Ps\n", m);
-    }
-
-    /* apply LLL on Lambda_m, may need to increase prec */
-
-    gchar_set_nalg(gc, ncm);
+  if (!gequal0(cm))
+  {
+    GEN v, Nargs;
+    /* reduce on Norm arguments */
+    v = cm_select(bnf, cm, nfprec);
+    if (DEBUGLEVEL>2) err_printf("cm_select -> %Ps\n", v);
+    ncm = nbrows(v);
     gchar_set_u0(gc, u0);
-
-    if (r1 + r2 - 1 > 0) {
-      GEN u = NULL;
-      while (1)
-      {
-         u = lll_block(m, ns+nc,r1+2*r2, ns+nc, r1+r2-1);
-         if (u)
-           break;
-         nfprec = precdbl(nfprec);
-         /* recompute m0 * u0 to higher prec */
-         m = gcharmatnewprec_shallow(gc, &nfprec);
-      }
-      u0 = gmul(u0, u); m = gmul(m, u);
+    while (1)
+    {
+      long e;
+      Nargs = gmul(v, rowslice(m, nc+ns+r1+r2+1, nm));
+      if (DEBUGLEVEL>2) err_printf("Nargs -> %Ps\n", Nargs);
+      Nargs = grndtoi(gmulgs(Nargs, 2 * order), &e);
+      if (e < nfprec+10) break; /* FIXME: e is a bitprec, nfprec is a prec ? */
+      if (DEBUGLEVEL>1) err_printf("cm select: doubling prec\n");
+      nfprec = precdbl(nfprec);
+      m = gcharmatnewprec_shallow(gc, &nfprec);
     }
+    if (DEBUGLEVEL>2) err_printf("rounded Nargs -> %Ps\n", Nargs);
+    u = hnf_block(Nargs, 0, ncm, ns+nc, r1+2*r2-1);
+    u0 = gmul(u0, u); m = gmul(m, u);
+    if (DEBUGLEVEL>2) err_printf("after cm reduction -> %Ps\n", m);
+  }
 
-    if (DEBUGLEVEL>1) err_printf("after LLL reduction -> %Ps\n", m);
+  /* apply LLL on Lambda_m, may need to increase prec */
 
-    gchar_set_u0(gc, u0);
+  gchar_set_nalg(gc, ncm);
+  gchar_set_u0(gc, u0);
 
-    return m;
+  if (r1 + r2 - 1 > 0)
+  {
+    GEN u = NULL;
+    while (1)
+    {
+      u = lll_block(m, ns+nc,r1+2*r2, ns+nc, r1+r2-1);
+      if (u)
+        break;
+      nfprec = precdbl(nfprec);
+      /* recompute m0 * u0 to higher prec */
+      m = gcharmatnewprec_shallow(gc, &nfprec);
+    }
+    u0 = gmul(u0, u); m = gmul(m, u);
+  }
+  if (DEBUGLEVEL>1) err_printf("after LLL reduction -> %Ps\n", m);
+  gchar_set_u0(gc, u0); return m;
 }
 
 /* convert to snf basis of torsion + Z^(r1+2*r2-1) */
