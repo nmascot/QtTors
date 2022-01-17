@@ -338,7 +338,7 @@ bnf_nfnewprec_shallow(GEN bnf, long prec)
   return bnf2;
 }
 
-/* compute basis of characters; gc[1] generating family, as lines */
+/* compute basis of characters; gc[1] generating family, as rows */
 GEN
 gcharinit(GEN bnf, GEN mod, long prec)
 {
@@ -489,7 +489,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
 
   /* only m and m_inv depend on precision and are recomputed under gcharnewprec. */
   gc = mkvecn(GC_LENGTH,
-              m_inv, /* internal basis, characters as lines */
+              m_inv, /* internal basis, characters as rows */
               bnf,
               zm,    /* Zk/mod, nc components */
               S,     /* generators of clgp, ns components */
@@ -1303,7 +1303,7 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long
 
   w2 = gadd(w,w2);
 
-  /* this line must be computed at prec0 */
+  /* this row  must be computed at prec0 */
   val = gcharlog_eval_raw(logchi, logx);
 
   if (!gequal0(w2)) norm = idealnorm(gchar_get_bnf(gc), x);
