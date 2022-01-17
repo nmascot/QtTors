@@ -334,7 +334,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
   GEN fa2, archp, z, C, gc;
   GEN cm, cyc, rel, U, Ui;
   GEN m, m_inv, m0, u0;
-  long n, k, r1, r2, ns, nc, nf, nm, lsfu;
+  long n, k, r1, r2, ns, nc, nu, nm, lsfu;
   long order;
   long evalprec, nfprec, extraprec = 1;
 
@@ -402,7 +402,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
   nf_get_sign(nfs, &r1, &r2);
   n = r1+2*r2;
   ns = lg(S) - 1;
-  nf = r1+r2-1;
+  nu = r1+r2-1;
   nc = lg(zmcyc) - 1;
   nm = ns+nc+n; /* number of parameters = ns + nc + r1 + r2 + r2 */
 
@@ -455,16 +455,16 @@ gcharinit(GEN bnf, GEN mod, long prec)
   {
     C = zerocol(nm);
     gel(C, ns+k) = gel(zmcyc, k);
-    gel(m, ns+nf+k) = C;
+    gel(m, ns+nu+k) = C;
   }
   /* zeta, root of unity */
-  gel(m, ns+nf+nc+1) = gchar_nflog(bnf,zm,S,z,nfprec);
-  shallow_clean_rat(gel(m, ns+nf+nc+1), 1, nm, stoi(order), prec);
+  gel(m, ns+nu+nc+1) = gchar_nflog(bnf,zm,S,z,nfprec);
+  shallow_clean_rat(gel(m, ns+nu+nc+1), 1, nm, stoi(order), prec);
   for(k=1;k<=r2;k++) /* embed Z^r_2 */
   {
     C = zerocol(nm);
     gel(C, ns+nc+r1+r2+k) = gen_1;
-    gel(m, ns+nf+nc+1+k) = C;
+    gel(m, ns+nu+nc+1+k) = C;
   }
   if (DEBUGLEVEL>1) err_printf("matrix m = %Ps\n", m);
 
@@ -481,7 +481,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
               zm,    /* Zk/mod, nc components */
               S,     /* generators of clgp, ns components */
               valS,
-              mkvec2(vecslice(sfu,1,ns), vecslice(sfu,ns+1,ns+nf)),
+              mkvec2(vecslice(sfu,1,ns), vecslice(sfu,ns+1,ns+nu)),
               mkvec3(mkvecsmall3(evalprec,prec,nfprec),
                      mkvecsmall4(0,0,0,0), /* ntors, nfree, nalg */
                      mkvecsmall4(ns,nc,r1+r2,r2)),
@@ -508,12 +508,12 @@ static GEN
 gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 {
   GEN bnf, u, u0, m, m0;
-  long order, r1, r2, ns, nc, n, nf, nm, ncm = 0;
+  long order, r1, r2, ns, nc, n, nu, nm, ncm = 0;
 
   bnf = gchar_get_bnf(gc);
   nf_get_sign(bnf_get_nf(bnf), &r1, &r2);
   n = r1 + 2*r2;
-  nf = r1 + r2 - 1;
+  nu = r1 + r2 - 1;
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
   nm = ns+nc+n; /* ns + nc + r1 + r2 + r2 */
@@ -528,10 +528,10 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 
   if (nc)
   { /* keep steps 1&2 to make sure we have zeta_m */
-    u = hnf_block(m, ns,nc, ns+nf,nc+1);
+    u = hnf_block(m, ns,nc, ns+nu,nc+1);
     u0 = gmul(u0, u); m = gmul(m, u);
     if (DEBUGLEVEL>2) err_printf("step 1 -> %Ps\n", m);
-    u = hnf_block(m, ns,nc, ns,nf+nc);
+    u = hnf_block(m, ns,nc, ns,nu+nc);
     u0 = gmul(u0, u); m = gmul(m, u);
     if (DEBUGLEVEL>2) err_printf("step 2 -> %Ps\n", m);
   }
@@ -727,10 +727,10 @@ static GEN
 gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
 {
   GEN bnf, m0, u0, sunits, fu, c, emb;
-  long k, ns, nc, nf, incrprec=0;
+  long k, ns, nc, nu, incrprec=0;
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
-  nf = gchar_get_r1(gc) + gchar_get_r2(gc) - 1;
+  nu = gchar_get_r1(gc) + gchar_get_r2(gc) - 1;
   bnf = gchar_get_bnf(gc);
   sunits = gchar_get_Sunits(gc);
   fu = gchar_get_fu(gc);
@@ -751,7 +751,7 @@ gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
     if (!emb) { incrprec = 1; break; }
     vaffect_shallow(gel(m0, k), ns+nc, emb);
   }
-  for(k=1;k<=nf && !incrprec;k++) /* Lambda_f, fundamental units */
+  for(k=1;k<=nu && !incrprec;k++) /* Lambda_f, fundamental units */
   {
     emb = nfembedlog(bnf,gel(fu,k), *nfprecptr);
     if (!emb) { incrprec = 1; break; }
