@@ -23,7 +23,7 @@ BEGINEXTERN
   ID(ell), ID(ellanal), ID(ellcard), ID(ellisogeny), ID(ellrank), \
   ID(ellsea), \
   ID(factor), ID(factorff), ID(factorint), ID(factormod), ID(fflog), \
-  ID(galois), ID(gammamellininv), ID(genus2red), \
+  ID(galois), ID(gammamellininv), ID(gchar), ID(genus2red), \
   ID(hensel), ID(hgm), ID(hyperell), \
   ID(intnum), ID(io), ID(isprime), \
   ID(lfun), \

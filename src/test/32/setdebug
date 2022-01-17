@@ -1,15 +1,15 @@
 
 ["alg" "arith" "bern" "bnf" "bnr" "bnrclassfield" "bb_group" "compiler" "ell
 " "ellanal" "ellcard" "ellisogeny" "ellrank" "ellsea" "factor" "factorff" "f
-actorint" "factormod" "fflog" "galois" "gammamellininv" "genus2red" "hensel"
- "hgm" "hyperell" "intnum" "io" "isprime" "lfun" "mat" "mathnf" "mf" "mod" "
-mpqs" "ms" "mt" "nf" "nffactor" "nflist" "nfsubfields" "padicfields" "pol" "
-polclass" "polgalois" "polmodular" "polroots" "qf" "qflll" "qfsolve" "qfisom
-" "quadclassunit" "rnf" "stark" "subcyclo" "subgrouplist" "thue" "trans" "ze
-tamult"]
+actorint" "factormod" "fflog" "galois" "gammamellininv" "gchar" "genus2red" 
+"hensel" "hgm" "hyperell" "intnum" "io" "isprime" "lfun" "mat" "mathnf" "mf"
+ "mod" "mpqs" "ms" "mt" "nf" "nffactor" "nflist" "nfsubfields" "padicfields"
+ "pol" "polclass" "polgalois" "polmodular" "polroots" "qf" "qflll" "qfsolve"
+ "qfisom" "quadclassunit" "rnf" "stark" "subcyclo" "subgrouplist" "thue" "tr
+ans" "zetamult"]
 
 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
- 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 
 2
 0

@@ -13,6 +13,8 @@
 #include "pari.h"
 #include "paripriv.h"
 
+#define DEBUGLEVEL DEBUGLEVEL_gchar
+
 /*********************************************************************/
 /**                                                                 **/
 /**                         HECKE CHARACTERS                        **/
