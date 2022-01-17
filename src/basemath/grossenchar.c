@@ -329,6 +329,15 @@ static void gchar_snfbasis_shallow(GEN gc, GEN rel);
 static void gcharmat_tinverse(GEN gc, GEN m, long prec);
 static GEN gcharmatnewprec_shallow(GEN gc, long *precptr);
 
+static GEN
+bnf_nfnewprec_shallow(GEN bnf, long prec)
+{
+  GEN bnf2;
+  bnf2 = shallowcopy(bnf);
+  gel(bnf2,7) = nfnewprec(bnf_get_nf(bnf2), prec);
+  return bnf2;
+}
+
 /* compute basis of characters; gc[1] generating family, as lines */
 GEN
 gcharinit(GEN bnf, GEN mod, long prec)
@@ -386,7 +395,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
     if (lg(fu) != 1) extraprec = nbits2extraprec(gexpo(fu)); /*compact or not*/
     nfprec = prec + extraprec;
     if (nf_get_prec(bnf_get_nf(bnf)) < nfprec)
-      bnf = bnfnewprec_shallow(bnf, nfprec);
+      bnf = bnf_nfnewprec_shallow(bnf, nfprec);
   }
   nfs = bnf_get_nf(bnf);
 
@@ -453,7 +462,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
     if (k == lsfu) break;
     extraprec *= 2;
     nfprec = prec + extraprec;
-    bnf = bnfnewprec_shallow(bnf, nfprec);
+    bnf = bnf_nfnewprec_shallow(bnf, nfprec);
   }
   for(k=1;k<=nc;k++) /* Gamma, structure of (Z/m)* */
   {
@@ -749,8 +758,7 @@ gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
   /* TODO: see how to return bnf */
   /*if (DEBUGLEVEL) pari_warn(warnprec,"gcharinit",*nfprecptr);*/
   c = getrand();
-  /* TODO: we only need nf prec to be increased */
-  bnf = bnfnewprec_shallow(bnf,*nfprecptr);
+  bnf = bnf_nfnewprec_shallow(bnf,*nfprecptr);
   setrand(c);
 
   /* recompute the nfembedlogs of s-units and fundamental units */
