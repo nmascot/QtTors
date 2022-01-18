@@ -83,7 +83,17 @@ typedef ulong ratpoints_bit_array __attribute__ ((vector_size (32)));
 
 #define EXT0(a) ((ulong)a[0])
 #define EXT(a,i) ((ulong)a[i])
-#define TEST(a) (EXT0(a) || EXT(a,1) || EXT(a,2) ||EXT(a,3))
+
+#include <immintrin.h>
+
+#ifdef __AVX2__
+#define TEST(a) ( _mm256_movemask_epi8(_mm256_cmpeq_epi8((__m256i)(a), (__m256i)RBA(0))) != 0xffffffffU )
+#elif defined(__AVX__)
+#define TEST(a) ( !_mm256_testz_si256((__m256i)(a), (__m256i)(a)) )
+#else
+#define TEST(a) (EXT(a,0) || EXT(a,1) || EXT(a,2) || EXT(a,3))
+#endif
+
 #define RBA(a) ((ratpoints_bit_array){((ulong) a), ((ulong) a), ((ulong) a), ((ulong) a)})
 #define RBA_SHIFT (8)
 #define MASKL(a,s) { unsigned long *survl = (unsigned long *)(a); long sh = (s); \
