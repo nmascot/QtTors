@@ -16,8 +16,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  * http://www.mathe2.uni-bayreuth.de/stoll/programs/
  * Original copyright / license: */
 /***********************************************************************
- * ratpoints-2.1.3                                                     *
- * Copyright (C) 2008, 2009  Michael Stoll                             *
+ * ratpoints-2.2.1                                                     *
+ * Copyright (C) 2008, 2009, 2022  Michael Stoll                       *
  *  - A program to find rational points on hyperelliptic curves        *
  *                                                                     *
  * This program is free software: you can redistribute it and/or       *
@@ -148,12 +148,22 @@ typedef ulong ratpoints_bit_array;
 #define RBA_PACK  (RBA_LENGTH>>TWOPOTBITS_IN_LONG)
 
 #ifdef RBA_USE_VX
-#define CODE_INIT_SIEVE_COPY { ulong k;  for (a = 0; a < p; a++) for(k=1; k<RBA_PACK; k++) si[a+k*p] = si[a]; }
+#define RATPOINTS_CHUNK 16
+#define CODE_INIT_SIEVE_COPY \
+{ ulong k; \
+      for (a = 0; a < p; a++) \
+        for(k = 1; k < RBA_PACK; k++) \
+          si[a+k*p] = si[a]; \
+      for(a = 0; a < (RATPOINTS_CHUNK-1)*RBA_PACK; a++) \
+         si[a+p*RBA_PACK] = si[a];\
+}
 #else
+#define RATPOINTS_CHUNK 1
 #define CODE_INIT_SIEVE_COPY
 #endif
 
-typedef struct { long p; long offset; ratpoints_bit_array *ptr; } sieve_spec;
+typedef struct { long p; long offset; ratpoints_bit_array *ptr;
+                 ratpoints_bit_array *start; ratpoints_bit_array *end; } sieve_spec;
 
 typedef enum { num_all, num_even, num_odd, num_none } bit_selection;
 
@@ -232,7 +242,7 @@ sieve_init1(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
       long a;
       ulong *si = (ulong *)args->ba_next;
 
-      args->ba_next += p;
+      args->ba_next += p + RATPOINTS_CHUNK-1;
       /* copy the first chunk into sieve[b][] */
       si[0] = help0;
       /* now keep repeating the bit pattern,
@@ -299,7 +309,7 @@ sieve_init2(long p, ratpoints_sieve_entry *se1, long b1, ratpoints_args *args1)
     long a1;
     long a;
 
-    args->ba_next += p;
+    args->ba_next += p + RATPOINTS_CHUNK-1;
     /* copy the first chunk from help[] into sieve[num][b][] */
     for (a = 0; a < wp; a++) si[a] = help[a];
     /* now keep repeating the bit pattern, rotating it in help */
@@ -373,7 +383,7 @@ gen_sieves0(GEN listprime)
   for (n = 1; n <= nbprime; n++)
   {
     ulong a, p = uel(listprime,n);
-    ulong *si = (ulong *) stack_malloc_align(p*RBA_SIZE, RBA_SIZE);
+    ulong *si = (ulong *) stack_malloc_align((p+RATPOINTS_CHUNK-1)*RBA_SIZE, RBA_SIZE);
     for (a = 0; a < p; a++) si[a] = ~0UL;
     for (a = 0; a < BITS_IN_LONG; a++)
       uel(si,(p*a)>>TWOPOTBITS_IN_LONG) &= ~(1UL<<((p*a) & LONG_MASK));
@@ -535,13 +545,85 @@ _ratpoints_sift0(long b, long w_low, long w_high,
            ratpoints_bit_array *survivors, sieve_spec *sieves, int *quit,
            int process(long, long, GEN, void*, int*), void *info)
 {
-  long range = w_high - w_low;
-  long sp1 = args->sp1;
-  long sp2 = args->sp2;
-  long i, n, nb = 0, absb = labs(b);
+  long sp1 = args->sp1, sp2 = args->sp2;
+  long i, n, nb = 0, absb = labs(b), base = 0;
   ratpoints_bit_array *surv0;
 
   /* now do the sieving (fast!) */
+#if (RATPOINTS_CHUNK == 16)
+  long w_low_new;
+  ratpoints_bit_array *surv = survivors;
+
+  /* first set the start fields for the first and second phases of sieving */
+  for(n = 0; n < sp2; n++)
+    sieves[n].start = sieves[n].ptr + mod(w_low + sieves[n].offset, sieves[n].p);
+  /* Take RATPOINTS_CHUNK bit-arrays and apply phase 1 to them,
+   * then repeat with the next RATPOINTS_CHUNK bit-arrays. */
+  for(w_low_new = w_low; w_low_new < w_high; surv += RATPOINTS_CHUNK, w_low_new += RATPOINTS_CHUNK)
+  {
+    /* read data from memory into registers */
+    ratpoints_bit_array reg0 = surv[0];
+    ratpoints_bit_array reg1 = surv[1];
+    ratpoints_bit_array reg2 = surv[2];
+    ratpoints_bit_array reg3 = surv[3];
+    ratpoints_bit_array reg4 = surv[4];
+    ratpoints_bit_array reg5 = surv[5];
+    ratpoints_bit_array reg6 = surv[6];
+    ratpoints_bit_array reg7 = surv[7];
+    ratpoints_bit_array reg8 = surv[8];
+    ratpoints_bit_array reg9 = surv[9];
+    ratpoints_bit_array reg10 = surv[10];
+    ratpoints_bit_array reg11 = surv[11];
+    ratpoints_bit_array reg12 = surv[12];
+    ratpoints_bit_array reg13 = surv[13];
+    ratpoints_bit_array reg14 = surv[14];
+    ratpoints_bit_array reg15 = surv[15];
+
+    for(n = 0; n < sp1; n++)
+    { /* retrieve the pointer to the beginning of the relevant bits */
+      ratpoints_bit_array *siv1 = sieves[n].start;
+      reg0 &= *siv1++;
+      reg1 &= *siv1++;
+      reg2 &= *siv1++;
+      reg3 &= *siv1++;
+      reg4 &= *siv1++;
+      reg5 &= *siv1++;
+      reg6 &= *siv1++;
+      reg7 &= *siv1++;
+      reg8 &= *siv1++;
+      reg9 &= *siv1++;
+      reg10 &= *siv1++;
+      reg11 &= *siv1++;
+      reg12 &= *siv1++;
+      reg13 &= *siv1++;
+      reg14 &= *siv1++;
+      reg15 &= *siv1++;
+
+      /* update the pointer for the next round
+       * (RATPOINTS_CHUNK-1 bit-arrays after sieves[n].end) */
+      while(siv1 >= sieves[n].end) siv1 -= sieves[n].p;
+      sieves[n].start = siv1;
+    }
+    /* store the contents of the registers back into memory */
+    surv[0] = reg0;
+    surv[1] = reg1;
+    surv[2] = reg2;
+    surv[3] = reg3;
+    surv[4] = reg4;
+    surv[5] = reg5;
+    surv[6] = reg6;
+    surv[7] = reg7;
+    surv[8] = reg8;
+    surv[9] = reg9;
+    surv[10] = reg10;
+    surv[11] = reg11;
+    surv[12] = reg12;
+    surv[13] = reg13;
+    surv[14] = reg14;
+    surv[15] = reg15;
+  }
+#else /* RATPOINTS_CHUNK not between 2 and 16 */
+  long range = w_high - w_low;
   for (n = 0; n < sp1; n++)
   {
     ratpoints_bit_array *sieve_n = sieves[n].ptr;
@@ -571,10 +653,15 @@ _ratpoints_sift0(long b, long w_low, long w_high,
       surv_end += p;
       while (surv < surv_end) { *surv &= *siv1++; surv++; }
     }
-  } /* for n */
+  }
+  /* initialize pointers in sieve for the second phase */
+  for(n = sp1; n < sp2; n++)
+    sieves[n].start = sieves[n].ptr + mod(w_low + sieves[n].offset, sieves[n].p);
+#endif /* RATPOINTS_CHUNK */
+
   /* 2nd phase of the sieve: test each surviving bit array with more primes */
   surv0 = &survivors[0];
-  for (i = w_low; i < w_high; i++)
+  for (i = w_low; i < w_high; i++, base++)
   {
     ratpoints_bit_array nums = *surv0++;
     sieve_spec *ssp = &sieves[sp1];
@@ -582,8 +669,10 @@ _ratpoints_sift0(long b, long w_low, long w_high,
 
     for (n = sp2-sp1; n && TEST(nums); n--)
     {
+      ratpoints_bit_array *ptr = (ssp->start) + base;
       long p = ssp->p;
-      nums &= ssp->ptr[mod(i + ssp->offset, p)];
+      while(ptr >= ssp->end) ptr -= p;
+      nums &= *ptr;
       ssp++;
     }
 
@@ -671,7 +760,7 @@ find_points_init(ratpoints_args *args, long bit_primes)
   for (n = 1; n <= nbprime; n++)
   {
     ulong p = args->listprime[n];
-    need += p*p;
+    need += p*(p + RATPOINTS_CHUNK-1);
   }
   args->ba_buffer = (ratpoints_bit_array*)
      stack_malloc_align(need*RBA_SIZE,RBA_SIZE);
@@ -1185,6 +1274,9 @@ sift(long b, ratpoints_bit_array *survivors, ratpoints_args *args,
         /* copy if already initialized, else initialize */
         ssp[n].ptr = sptr ? sptr : (p<BITS_IN_LONG?sieve_init1(p, se, bp, args)
                                                   :sieve_init2(p, se, bp, args));
+        ssp[n].start = ssp[n].ptr;
+        ssp[n].end = ssp[n].ptr + p;
+
       }
     }
 
@@ -1219,6 +1311,11 @@ sift(long b, ratpoints_bit_array *survivors, ratpoints_args *args,
           MASKL(survivors,low - RBA_LENGTH * w_low)
         if (w_high0 == w_high)
           MASKU(&survivors[range-1], RBA_LENGTH * w_high - high)
+
+#if (RATPOINTS_CHUNK > 1)
+        while(range%RATPOINTS_CHUNK != 0)
+          { survivors[range] = RBA(0); range++; w_high0++; }
+#endif
         nb += _ratpoints_sift0(b, w_low0, w_high0, args, which_bits,
                          survivors, &ssp[0], quit, process, info);
         if (*quit) return;
@@ -1283,6 +1380,9 @@ find_points_work(ratpoints_args *args,
     long s = 2*maxss(1,CEIL(height, BITS_IN_LONG));
     if (args->array_size > s) args->array_size = s;
   }
+  /* make sure that array size is a multiple of RATPOINTS_CHUNK */
+  args->array_size = CEIL(args->array_size, RATPOINTS_CHUNK)*RATPOINTS_CHUNK;
+
   /* Don't reverse if intervals are specified or limits for the denominator
      are given */
   if (args->num_inter > 0 || args->b_low > 1 || args->b_high != height)
