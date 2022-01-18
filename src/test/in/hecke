@@ -270,6 +270,9 @@ gcharalgebraic(gc,[[0,[]]]);
 gcharalgebraic(gc,[[[],0]]);
 chareval(gc,O(3^7),1);
 chareval(gc,[0,O(3^7)],1);
+\\ regression tests
+gc = gcharinit(bnfinit(x^2-x-276,1), [2,[0,1]]);
+
 gc = gcharinit(x^2-2,1);
 print("wrong, this should be an invalid input:");
 gcharalgebraic(gc,[])

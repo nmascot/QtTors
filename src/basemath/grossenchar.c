@@ -51,7 +51,7 @@ compute_Lcyc(GEN Lsprk, GEN moo)
   long i, l = lg(Lsprk), len = l+lg(moo)-1;
   GEN Lcyc = cgetg(len,t_VEC);
   for (i = 1; i < l; i++)   gel(Lcyc,i) = sprk_get_cyc(gel(Lsprk,i));
-  for (     ; i < len; i++) gel(Lcyc,i) = gen_2;
+  for (     ; i < len; i++) gel(Lcyc,i) = mkvec(gen_2);
   return Lcyc;
 }
 
