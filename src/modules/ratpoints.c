@@ -32,9 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define pel(a,b)  gel((a),(b)+2)
 
 #define RATPOINTS_ARRAY_SIZE 256           /* Array size in longs */
-#define RATPOINTS_DEFAULT_SP1 9            /* Default value for sp1 */
-#define RATPOINTS_DEFAULT_SP2 16           /* Default value for sp2 */
-#define RATPOINTS_DEFAULT_NUM_PRIMES 28    /* Default value for num_primes */
+#define RATPOINTS_DEFAULT_SP1 11           /* Default value for sp1 */
+#define RATPOINTS_DEFAULT_SP2 19           /* Default value for sp2 */
+#define RATPOINTS_DEFAULT_NUM_PRIMES 30    /* Default value for num_primes */
 #define RATPOINTS_DEFAULT_BIT_PRIMES 7     /* Default value for bit_primes */
 #define RATPOINTS_DEFAULT_MAX_FORBIDDEN 30 /* Default value for max_forbidden */
 
