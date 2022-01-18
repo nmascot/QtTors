@@ -71,7 +71,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #ifdef HAS_SSE2
 #include <emmintrin.h>
-#define AND(a,b) ((mpqs_bit_array)__builtin_ia32_andps((__v4sf)(a), (__v4sf)(b)))
+#define AND(a,b) ((a)&(b))
 #define EXT0(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 0))
 #define EXT1(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 1))
 #define TEST(a) (EXT0(a) || EXT1(a))

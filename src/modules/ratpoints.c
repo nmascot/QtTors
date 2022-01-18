@@ -89,7 +89,7 @@ typedef ulong ratpoints_bit_array __attribute__ ((vector_size (32)));
 /* Use SSE 128 bit registers for the bit arrays */
 typedef __v2di ratpoints_bit_array;
 
-#define AND(a,b) ((ratpoints_bit_array)__builtin_ia32_andps((__v4sf)(a), (__v4sf)(b)))
+#define AND(a,b) ((a)&(b))
 #define EXT0(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 0))
 #define EXT(a,i) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 1))
 #define TEST(a) (EXT0(a) || EXT(a,1))
