@@ -57,7 +57,33 @@ typedef struct {double low; double up;} ratpoints_interval;
 
 /* define RBA_USE_VX provisionnaly */
 #define RBA_USE_VX
-#ifdef HAS_SSE2
+#ifdef HAS_AVX
+ /* Use AVX 256 bit registers for the bit arrays */
+typedef ulong ratpoints_bit_array __attribute__ ((vector_size (32)));
+
+#define AND(a,b) ((a)&(b))
+#define EXT0(a) ((ulong)a[0])
+#define EXT(a,i) ((ulong)a[i])
+#define TEST(a) (EXT0(a) || EXT(a,1) || EXT(a,2) ||EXT(a,3))
+#define RBA(a) ((ratpoints_bit_array){((ulong) a), ((ulong) a), ((ulong) a), ((ulong) a)})
+#define RBA_SHIFT (8)
+#define MASKL(a,s) { unsigned long *survl = (unsigned long *)(a); long sh = (s); \
+                     if(sh >= 2*BITS_IN_LONG) \
+                     { survl[0] = 0UL; survl[1] = 0UL; \
+                       if(sh >= 3*BITS_IN_LONG) \
+                       { survl[2] = 0UL; survl[3] &= (~0UL)<<(sh - 3*BITS_IN_LONG); } \
+                       else { survl[2] &= (~0UL)<<(sh - 2*BITS_IN_LONG); } } \
+                     else if(sh >= BITS_IN_LONG) { survl[0] = 0UL; survl[1] &= (~0UL)<<(sh - BITS_IN_LONG); } \
+                     else { survl[0] &= (~0UL)<<sh; } }
+#define MASKU(a,s) { unsigned long *survl = (unsigned long *)(a); long sh = (s); \
+                     if(sh >= 2*BITS_IN_LONG) \
+                     { survl[3] = 0UL; survl[2] = 0UL; \
+                       if(sh >= 3*BITS_IN_LONG) \
+                       { survl[0] &= (~0UL)>>(sh - 3*BITS_IN_LONG); survl[1] = 0UL; } \
+                       else { survl[1] &= (~0UL)>>(sh - 2*BITS_IN_LONG); } } \
+                     else if(sh >= BITS_IN_LONG) { survl[2] &= (~0UL)>>(sh - BITS_IN_LONG); survl[3] = 0UL; } \
+                     else { survl[3] &= (~0UL)>>sh; } }
+#elif defined(HAS_SSE2)
 #include <emmintrin.h>
 
 /* Use SSE 128 bit registers for the bit arrays */
