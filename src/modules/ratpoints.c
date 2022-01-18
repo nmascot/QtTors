@@ -57,7 +57,28 @@ typedef struct {double low; double up;} ratpoints_interval;
 
 /* define RBA_USE_VX provisionnaly */
 #define RBA_USE_VX
-#ifdef HAS_AVX
+#ifdef HAS_AVX512
+ /* Use AVX512 512 bit registers for the bit arrays */
+typedef ulong ratpoints_bit_array __attribute__ ((vector_size (64)));
+
+#define AND(a,b) ((a)&(b))
+#define EXT0(a) ((ulong)a[0])
+#define EXT(a,i) ((ulong)a[i])
+#define TEST(a) (  EXT0(a)  || EXT(a,1) || EXT(a,2) ||EXT(a,3)\
+                || EXT(a,4) || EXT(a,5) || EXT(a,6) ||EXT(a,7) )
+
+#define RBA(a) ((ratpoints_bit_array) {((ulong) a), ((ulong) a), ((ulong) a), ((ulong) a)\
+                                     , ((ulong) a), ((ulong) a), ((ulong) a), ((ulong) a) })
+#define RBA_SHIFT (9)
+#define MASKL(a,s) { unsigned long *survl = (unsigned long *)(a); long sh = (s); \
+                     long l, qsh = sh>>TWOPOTBITS_IN_LONG, rsh = sh & (BITS_IN_LONG-1); \
+                     for(l = 0; l < qsh; l++) { *survl++ = 0UL; }; *survl &= (~0UL)<<rsh; }
+#define MASKU(a,s) { unsigned long *survl = (unsigned long *)(a); long sh = (s); \
+                     long l, qsh = RBA_PACK-1 - (sh>>TWOPOTBITS_IN_LONG), rsh = sh & (BITS_IN_LONG-1); \
+                     survl += qsh; *survl++ &= (~0UL)>>rsh; \
+                     for(l = qsh+1; l < RBA_PACK; l++) { *survl++ = 0UL; } }
+
+#elif defined(HAS_AVX)
  /* Use AVX 256 bit registers for the bit arrays */
 typedef ulong ratpoints_bit_array __attribute__ ((vector_size (32)));
 
