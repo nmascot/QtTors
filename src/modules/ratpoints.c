@@ -61,7 +61,6 @@ typedef struct {double low; double up;} ratpoints_interval;
  /* Use AVX512 512 bit registers for the bit arrays */
 typedef ulong ratpoints_bit_array __attribute__ ((vector_size (64)));
 
-#define AND(a,b) ((a)&(b))
 #define EXT0(a) ((ulong)a[0])
 #define EXT(a,i) ((ulong)a[i])
 #define TEST(a) (  EXT0(a)  || EXT(a,1) || EXT(a,2) ||EXT(a,3)\
@@ -82,7 +81,6 @@ typedef ulong ratpoints_bit_array __attribute__ ((vector_size (64)));
  /* Use AVX 256 bit registers for the bit arrays */
 typedef ulong ratpoints_bit_array __attribute__ ((vector_size (32)));
 
-#define AND(a,b) ((a)&(b))
 #define EXT0(a) ((ulong)a[0])
 #define EXT(a,i) ((ulong)a[i])
 #define TEST(a) (EXT0(a) || EXT(a,1) || EXT(a,2) ||EXT(a,3))
@@ -110,7 +108,6 @@ typedef ulong ratpoints_bit_array __attribute__ ((vector_size (32)));
 /* Use SSE 128 bit registers for the bit arrays */
 typedef __v2di ratpoints_bit_array;
 
-#define AND(a,b) ((a)&(b))
 #define EXT0(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 0))
 #define EXT(a,i) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 1))
 #define TEST(a) (EXT0(a) || EXT(a,1))
@@ -127,7 +124,6 @@ typedef __v2di ratpoints_bit_array;
 /* Use ulong for the bit arrays */
 typedef ulong ratpoints_bit_array;
 
-#define AND(a,b) ((a)&(b))
 #define EXT0(a) (a)
 #define TEST(a) (a)
 #define RBA(a) (a)
@@ -548,22 +544,22 @@ _ratpoints_sift0(long b, long w_low, long w_high,
       ratpoints_bit_array *siv1 = &sieve_n[p-r];
       ratpoints_bit_array *siv0 = siv1 + range;
 
-      while (siv1 != siv0) { *surv = AND(*surv, *siv1++); surv++; }
+      while (siv1 != siv0) { *surv &= *siv1++; surv++; }
     }
     else
     {
       ratpoints_bit_array *siv1 = &sieve_n[p-r];
       ratpoints_bit_array *surv_end = &survivors[range - p];
       long i;
-      for (i = r; i; i--) { *surv = AND(*surv, *siv1++); surv++; }
+      for (i = r; i; i--) { *surv &= *siv1++; surv++; }
       siv1 -= p;
       while (surv <= surv_end)
       {
-        for (i = p; i; i--) { *surv = AND(*surv, *siv1++); surv++; }
+        for (i = p; i; i--) { *surv &= *siv1++; surv++; }
         siv1 -= p;
       }
       surv_end += p;
-      while (surv < surv_end) { *surv = AND(*surv, *siv1++); surv++; }
+      while (surv < surv_end) { *surv &= *siv1++; surv++; }
     }
   } /* for n */
   /* 2nd phase of the sieve: test each surviving bit array with more primes */
@@ -577,7 +573,7 @@ _ratpoints_sift0(long b, long w_low, long w_high,
     for (n = sp2-sp1; n && TEST(nums); n--)
     {
       long p = ssp->p;
-      nums = AND(nums, ssp->ptr[mod(i + ssp->offset, p)]);
+      nums &= ssp->ptr[mod(i + ssp->offset, p)];
       ssp++;
     }
 

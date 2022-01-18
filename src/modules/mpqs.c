@@ -71,7 +71,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #ifdef HAS_SSE2
 #include <emmintrin.h>
-#define AND(a,b) ((a)&(b))
 #define EXT0(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 0))
 #define EXT1(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 1))
 #define TEST(a) (EXT0(a) || EXT1(a))
@@ -80,7 +79,6 @@ const mpqs_bit_array mpqs_mask = { (long) 0x8080808080808080L, (long) 0x80808080
 #else
 /* Use ulong for the bit arrays */
 typedef ulong mpqs_bit_array;
-#define AND(a,b) ((a)&(b))
 #define TEST(a) (a)
 
 #ifdef LONG_IS_64BIT
@@ -992,7 +990,7 @@ mpqs_eval_sieve(mpqs_handle_t *h)
   while (count < MPQS_CANDIDATE_ARRAY_SIZE - 1)
   {
     long j, y;
-    while (!TEST(AND(U[x],mpqs_mask))) x++;
+    while (!TEST(U[x]&mpqs_mask)) x++;
     y = x*sizemask;
     for (j=0; j<sizemask; j++, y++)
     {
