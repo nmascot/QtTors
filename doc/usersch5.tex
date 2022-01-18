@@ -1223,7 +1223,10 @@ value).
 \subsec{Garbage collection}
 See \secref{se:garbage} for a detailed explanation and many examples.
 
-\fun{void}{set_avma}{ulong av} reset \kbd{avma} to \kbd{av}.
+\fun{void}{set_avma}{ulong av} reset \kbd{avma} to \kbd{av}. You may think
+of this as a simple \kbd{avma = av} statement, but PARI developpers modify
+this statement in special code branches to detect garbage collecting
+issues (by invalidating the PARI stack below \kbd{av}).
 
 \fun{GEN}{gc_NULL}{pari_sp av} reset \kbd{avma} to \kbd{av} and return
 \kbd{NULL}.
@@ -1248,7 +1251,7 @@ to return \kbd{gc\_ulong(av, itou(z))}, whereas
 @eprog should be frowned upon since \kbd{set\_avma(av)} conceptually
 destroys everything from the reference point on, including $z$.
 
-\fun{long}{gc_const}{pari_sp av, GEN x} assumes that $x$ is either not on the
+\fun{GEN}{gc_const}{pari_sp av, GEN x} assumes that $x$ is either not on the
 stack (clone, universal constant such as \kbd{gen\_0}) or was defined
 before \kbd{av}.
 

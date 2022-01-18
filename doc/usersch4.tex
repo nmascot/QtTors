@@ -378,11 +378,12 @@ and restore it upon exit:
 pari_sp av = avma; /*@Ccom record initial avma */
 
 garbage ...
-avma = av; /*@Ccom restore it */
+set_avma(av); /*@Ccom restore it */
 @eprog
 \noindent All objects created in the \kbd{garbage} zone will eventually
 be overwritten: they should no longer be accessed after \kbd{avma} has been
-restored.
+restored. Think of the \kbd{set\_avma} call as a simple \kbd{avma = av}
+restoring the \kbd{avma} value.
 
 \noindent\item
 If you want to destroy (i.e.~give back the memory occupied by) the
@@ -483,7 +484,7 @@ Beware that
 \kbd{avma} is evaluated after or before the call to \kbd{anything()}: it
 depends on the compiler. If we are out of luck, it is \emph{after} the
 call, so the result belongs to the garbage zone and the \kbd{gerepile}
-statement becomes equivalent to \kbd{avma = ltop}. Thus we return a
+statement becomes equivalent to \kbd{set\_avma(ltop)}. Thus we return a
 pointer to random garbage.
 
 \subsec{Variants}
@@ -586,7 +587,7 @@ fitting into \kbd{DEFAULTPREC} words, we can program without using
 \bprog
   z = cgetr(DEFAULTPREC); ltop = avma;
   gaffect(gadd(gsqr(x), gsqr(y)), z);
-  avma = ltop;
+  set_avma(ltop);
 @eprog\noindent This is often \emph{slower} than a craftily used
 \kbd{gerepile} though, and certainly more cumbersome to use. As a rule,
 assignment statements should generally be avoided.
@@ -1631,8 +1632,8 @@ For that, you need a user variable.
 
 All objects created by \kbd{fetch\_var} are on the heap and not on the stack,
 thus they are not subject to standard garbage collecting (they are not
-destroyed by a \kbd{gerepile} or \kbd{avma = ltop} statement). When you do
-not need a variable number anymore, you can delete it using
+destroyed by a \kbd{gerepile} or \kbd{set\_avma(ltop)} statement).
+When you do not need a variable number anymore, you can delete it using
 
 \fun{long}{delete_var}{}
 
@@ -2187,13 +2188,13 @@ thus:
   {
     ...
     if ( prime_is_OK(p) ) break;
-    avma = av2; /* delete garbage accumulated in this iteration */
+    set_avma(av2); /* delete garbage accumulated in this iteration */
   }
-  avma = av; /* delete all */
-@eprog\noindent Of course, the final \kbd{avma = av} could be replaced
+  set_avma(av); /* delete all */
+@eprog\noindent Of course, the final \kbd{set\_avma(av)} could be replaced
 by a \kbd{gerepile} call. Beware that swapping the
 \kbd{av2 = avma} and \tet{forprime_init} call would be incorrect: the
-first \kbd{avma = av2} would delete the \tet{forprime_t} structure!
+first \kbd{set\_avma(av2)} would delete the \tet{forprime_t} structure!
 
 \subsec{Parallel iterators}
 
