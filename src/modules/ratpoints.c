@@ -55,8 +55,8 @@ typedef struct {double low; double up;} ratpoints_interval;
 
 #define CEIL(a,b) (((a) <= 0) ? -(-(a) / (b)) : 1 + ((a)-1) / (b))
 
-/* Some Macros for working with SSE registers */
-#define HAS_VX
+/* define RBA_USE_VX provisionnaly */
+#define RBA_USE_VX
 #ifdef HAS_SSE2
 #include <emmintrin.h>
 
@@ -65,8 +65,8 @@ typedef __v2di ratpoints_bit_array;
 
 #define AND(a,b) ((ratpoints_bit_array)__builtin_ia32_andps((__v4sf)(a), (__v4sf)(b)))
 #define EXT0(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 0))
-#define EXT1(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 1))
-#define TEST(a) (EXT0(a) || EXT1(a))
+#define EXT(a,i) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 1))
+#define TEST(a) (EXT0(a) || EXT(a,1))
 #define RBA(a) ((__v2di){((long) a), ((long) a)})
 #define RBA_SHIFT (7)
 #define MASKL(a,s) { unsigned long *survl = (unsigned long *)(a); long sh = (s); \
@@ -87,15 +87,15 @@ typedef ulong ratpoints_bit_array;
 #define RBA_SHIFT TWOPOTBITS_IN_LONG
 #define MASKL(a,s) { *(a) &= ~(0UL)<<(s); }
 #define MASKU(a,s) { *(a) &= ~(0UL)>>(s); }
-#undef HAS_VX
+#undef RBA_USE_VX
 #endif
 
 #define RBA_SIZE  (sizeof(ratpoints_bit_array))
 #define RBA_LENGTH  (RBA_SIZE<<3)
 #define RBA_PACK  (RBA_LENGTH>>TWOPOTBITS_IN_LONG)
 
-#ifdef HAS_VX
-#define CODE_INIT_SIEVE_COPY { long k;  for (a = 0; a < p; a++) for(k=1; k<RBA_PACK; k++) si[a+k*p] = si[a]; }
+#ifdef RBA_USE_VX
+#define CODE_INIT_SIEVE_COPY { ulong k;  for (a = 0; a < p; a++) for(k=1; k<RBA_PACK; k++) si[a+k*p] = si[a]; }
 #else
 #define CODE_INIT_SIEVE_COPY
 #endif
@@ -558,12 +558,12 @@ _ratpoints_sift0(long b, long w_low, long w_high,
           if (*quit) return nb;
         }
       }
-#ifdef HAS_VX
+#ifdef RBA_USE_VX
       {
-        long k, da = d<<TWOPOTBITS_IN_LONG;
+        ulong k, da = d<<TWOPOTBITS_IN_LONG;
         for (k = 1; k < RBA_PACK; k++)
         {
-          ulong nums1 = nums[k];
+          ulong nums1 = EXT(nums,k);
           for (a = a0 + k*da; nums1; a += d, nums1 >>= 1)
           { /* test one bit */
             if (odd(nums1) && ugcd(labs(a), absb)==1)
