@@ -323,7 +323,7 @@ GEN
 gcharinit(GEN bnf, GEN mod, long prec)
 {
   pari_sp av = avma;
-  GEN nfs, zm, zmcyc, clgen, S, valS, sfu, logx;
+  GEN nf, zm, zmcyc, clgen, S, valS, sfu, logx;
   GEN fa2, archp, z, C, gc, cm, cyc, rel, U, Ui, m, m_inv, m0, u0;
   long n, k, r1, r2, ns, nc, nu, nm, lsfu, order;
   long nfprec, evalprec = prec, extraprec = 1;
@@ -373,11 +373,11 @@ gcharinit(GEN bnf, GEN mod, long prec)
     if (nf_get_prec(bnf_get_nf(bnf)) < nfprec)
       bnf = bnf_nfnewprec_shallow(bnf, nfprec);
   }
-  nfs = bnf_get_nf(bnf);
+  nf = bnf_get_nf(bnf);
 
   /* Dirichlet group + make sure mod contains archimedean places */
-  mod = check_mod_factored(nfs,mod,NULL,&fa2,&archp,NULL);
-  zm = localstar(nfs, fa2, archp);
+  mod = check_mod_factored(nf,mod,NULL,&fa2,&archp,NULL);
+  zm = localstar(nf, fa2, archp);
   zmcyc = locs_get_cyc(zm);
 
   /* set of primes S */
@@ -388,7 +388,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
   /* valuations of generators */
   valS = matvaluations(bnf, S, clgen);
 
-  nf_get_sign(nfs, &r1, &r2);
+  nf_get_sign(nf, &r1, &r2);
   n = r1+2*r2;
   ns = lg(S) - 1;
   nu = r1+r2-1;
@@ -588,10 +588,10 @@ static void
 gchar_snfbasis_shallow(GEN gc, GEN rel)
 {
   long n, r1, r2;
-  GEN nfs, cyc, U, Ui;
+  GEN nf, cyc, U, Ui;
 
-  nfs = bnf_get_nf(gchar_get_bnf(gc));
-  nf_get_sign(nfs, &r1, &r2);
+  nf = bnf_get_nf(gchar_get_bnf(gc));
+  nf_get_sign(nf, &r1, &r2);
   n = r1+2*r2;
 
   rel = ZM_hnf(rel);
