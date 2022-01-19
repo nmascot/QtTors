@@ -140,4 +140,7 @@ dim=8
   ***                 ^----------------------------
   *** qfsolve: incorrect type in qfsolve [not symmetric] (t_MAT).
 [-1, -1, 5, 1, 0, 0, 2]~
-Total time spent: 1266
+  ***   at top-level: qfsolve(Q)
+  ***                 ^----------
+  *** qfsolve: sorry, qfsolve, dim >= 10 is not yet implemented.
+Total time spent: 1155

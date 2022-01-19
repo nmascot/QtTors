@@ -983,8 +983,10 @@ qfsolve_i(GEN G)
   /* |det(G2)| = 1, find a totally isotropic subspace for G2 */
   solG2 = qflllgram_indefgoon(G2);
   /* G2 must have a subspace of solutions of dimension > codim */
-  dim = codim+2;
+  dim = codim+1;
   while(gequal0(principal_minor(gel(solG2,1), dim))) dim ++;
+  if (dim == codim+1)
+    pari_err_IMPL("qfsolve, dim >= 10");
   solG2 = vecslice(gel(solG2,2), 1, dim-1);
 
   if (!M2) solG1 = solG2;
