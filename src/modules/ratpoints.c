@@ -98,20 +98,20 @@ typedef ulong ratpoints_bit_array __attribute__ ((vector_size (32)));
 #define RBA_SHIFT (8)
 #define MASKL(a,s) { unsigned long *survl = (unsigned long *)(a); long sh = (s); \
                      if(sh >= 2*BITS_IN_LONG) \
-                     { survl[0] = 0UL; survl[1] = 0UL; \
-                       if(sh >= 3*BITS_IN_LONG) \
-                       { survl[2] = 0UL; survl[3] &= (~0UL)<<(sh - 3*BITS_IN_LONG); } \
-                       else { survl[2] &= (~0UL)<<(sh - 2*BITS_IN_LONG); } } \
+                     { sh -= 2*BITS_IN_LONG; survl[0] = 0UL; survl[1] = 0UL; \
+                       if(sh >= BITS_IN_LONG) \
+                       { survl[2] = 0UL; survl[3] &= (~0UL)<<(sh - BITS_IN_LONG); } \
+                       else { survl[2] &= ~(0UL)<<sh; } } \
                      else if(sh >= BITS_IN_LONG) { survl[0] = 0UL; survl[1] &= (~0UL)<<(sh - BITS_IN_LONG); } \
-                     else { survl[0] &= (~0UL)<<sh; } }
+                     else { survl[0] &= ~(0UL)<<sh; } }
 #define MASKU(a,s) { unsigned long *survl = (unsigned long *)(a); long sh = (s); \
                      if(sh >= 2*BITS_IN_LONG) \
-                     { survl[3] = 0UL; survl[2] = 0UL; \
-                       if(sh >= 3*BITS_IN_LONG) \
-                       { survl[0] &= (~0UL)>>(sh - 3*BITS_IN_LONG); survl[1] = 0UL; } \
-                       else { survl[1] &= (~0UL)>>(sh - 2*BITS_IN_LONG); } } \
-                     else if(sh >= BITS_IN_LONG) { survl[2] &= (~0UL)>>(sh - BITS_IN_LONG); survl[3] = 0UL; } \
-                     else { survl[3] &= (~0UL)>>sh; } }
+                     { sh -= 2*BITS_IN_LONG; survl[3] = 0UL; survl[2] = 0UL; \
+                       if(sh >= BITS_IN_LONG) \
+                       { survl[0] &= ~(0UL)>>(sh - BITS_IN_LONG); survl[1] = 0UL; } \
+                       else { survl[1] &= ~(0UL)>>sh; } } \
+                     else if(sh >= BITS_IN_LONG) { survl[2] &= ~(0UL)>>(sh - BITS_IN_LONG); survl[3] = 0UL; } \
+                     else { survl[3] &= ~(0UL)>>sh; } }
 #elif defined(HAS_SSE2)
 #include <emmintrin.h>
 
@@ -617,7 +617,8 @@ _ratpoints_sift0(long b, long w_low, long w_high,
         for (k = 1; k < RBA_PACK; k++)
         {
           ulong nums1 = EXT(nums,k);
-          for (a = a0 + k*da; nums1; a += d, nums1 >>= 1)
+          a0 += da;
+          for (a = a0; nums1; a += d, nums1 >>= 1)
           { /* test one bit */
             if (odd(nums1) && ugcd(labs(a), absb)==1)
             {
