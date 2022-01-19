@@ -592,6 +592,7 @@ _ratpoints_sift0(long b, long w_low, long w_high,
     {
       long a0, a, d;
       ulong nums0 = EXT0(nums);
+      ulong k, da;
       /* a will be the numerator corresponding to the selected bit */
       if (which_bits == num_all)
       {
@@ -602,6 +603,7 @@ _ratpoints_sift0(long b, long w_low, long w_high,
         d = 2; a0 = i * 2 * RBA_LENGTH;
         if (which_bits == num_odd) a0++;
       }
+      da = d<<TWOPOTBITS_IN_LONG;
       for (a = a0; nums0; a += d, nums0 >>= 1)
       { /* test one bit */
         if (odd(nums0) && ugcd(labs(a), absb)==1)
@@ -612,20 +614,17 @@ _ratpoints_sift0(long b, long w_low, long w_high,
         }
       }
 #ifdef RBA_USE_VX
+      for (k = 1; k < RBA_PACK; k++)
       {
-        ulong k, da = d<<TWOPOTBITS_IN_LONG;
-        for (k = 1; k < RBA_PACK; k++)
-        {
-          ulong nums1 = EXT(nums,k);
-          a0 += da;
-          for (a = a0; nums1; a += d, nums1 >>= 1)
-          { /* test one bit */
-            if (odd(nums1) && ugcd(labs(a), absb)==1)
-            {
-              if (!args->bc) set_bc(b, args);
-              nb += _ratpoints_check_point(a, b, args, quit, process, info);
-              if (*quit) return nb;
-            }
+        ulong nums1 = EXT(nums,k);
+        a0 += da;
+        for (a = a0; nums1; a += d, nums1 >>= 1)
+        { /* test one bit */
+          if (odd(nums1) && ugcd(labs(a), absb)==1)
+          {
+            if (!args->bc) set_bc(b, args);
+            nb += _ratpoints_check_point(a, b, args, quit, process, info);
+            if (*quit) return nb;
           }
         }
       }
