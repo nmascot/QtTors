@@ -187,12 +187,14 @@ shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
   long k, e;
   for (k = k0; k <= k1; k++)
   {
-    GEN rnd = grndtoi(gmul(gel(v, k), den),&e);
+    GEN t = gel(v,k);
+    if (den) t = gmul(t, den);
+    t = grndtoi(t, &e);
     if (DEBUGLEVEL>1) err_printf("[%Ps*%Ps=%Ps..e=%ld|prec=%ld]\n",
-                        gel(v,k),den,rnd,e,prec);
+                                 gel(v,k), den? den: gen_1, t, e, prec);
     if (e > -10)
       pari_err_BUG("gcharinit, non rational entry"); /*LCOV_EXCL_LINE*/
-    gel(v, k) = gdiv(rnd,den);
+    gel(v, k) = den? gdiv(t, den): t;
   }
 }
 
@@ -636,66 +638,52 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
   ncm = gchar_get_nalg(gc);
-  nm = ns+nc+n; // ns + nc + r1 + r2 + r2
+  nm = ns+nc+n; /* ns + nc + r1 + r2 + r2 */
 
   while (1)
   {
     GEN v0, mm;
-    /* insert v0 at column ns+nc+r1+r2, or last column if cm */
+    /* insert at column ns+nc+r1+r2, or last column if cm */
     v0 = vec_v0(nm, ns+nc+1, r1, r2);
-    mm = ncm ? shallowmatinsert(m, v0, nm) : shallowmatinsert(m, v0, ns+nc+r1+r2);
+    mm = shallowmatinsert(m, v0, ncm? nm: nm-r2);
     if (DEBUGLEVEL>1) err_printf("add v0 -> %Ps\n", mm);
-
     mm = shallowtrans(mm);
     if (DEBUGLEVEL>2) err_printf("transposed -> %Ps\n", mm);
-
     m_inv = RgM_inv(mm); /* invert matrix, may need to increase prec */
     if (m_inv)
     {
       if (DEBUGLEVEL>1) err_printf("inverse: %Ps\n",m_inv);
-      /* remove v0 */
-      m_inv = ncm ? vecsplice(m_inv, nm) : vecsplice(m_inv, nm-r2);
+      m_inv = vecsplice(m_inv, ncm? nm: nm-r2); /* remove v0 */
       if (DEBUGLEVEL>1) err_printf("v0 removed: %Ps\n", m_inv);
       m_inv = shallowtrans(m_inv);
-
       /* enough precision? */
       /* |B - A^(-1)| << |B|.|Id-B*A| */
-      if (expo(gnorml2(m_inv)) + expo(gnorml2(gsub(gmul(m_inv, m),gen_1)))
-          + expu(lg(m)) <= -bitprec)
-        break;
+      if (gexpo(m_inv) + gexpo(gsub(RgM_mul(m_inv, m), gen_1))
+          + expu(lg(m)) <= -bitprec) break;
     }
-
     nfprec = precdbl(nfprec);
-    /* recompute m0 * u0 to higher prec */
-    m = gcharmatnewprec_shallow(gc, &nfprec);
+    m = gcharmatnewprec_shallow(gc, &nfprec); /* m0 * u0 to higher prec */
   }
-
   /* clean rationals */
-
   if (nc)
-  {
-    /* reduce mod exponent of the group, TODO could reduce on each component */
+  { /* reduce mod exponent of the group, TODO reduce on each component */
+    GEN zmcyc = locs_get_cyc(gchar_get_zm(gc));
+    GEN e = ZV_lcm(zmcyc);
     long k;
-    GEN zmcyc, expo;
-    zmcyc = locs_get_cyc(gchar_get_zm(gc));
-    expo = glcm0(zmcyc,NULL);
     for (k = 1; k <= nc; k++)
-      shallow_clean_rat(gel(m_inv, ns+k), 1, nm - 1, /*zmcyc[k]*/ expo, prec);
+      shallow_clean_rat(gel(m_inv, ns+k), 1, nm - 1, /*zmcyc[k]*/e, prec);
   }
-  if (DEBUGLEVEL>1) err_printf("cyc cleaned: %Ps", shallowtrans(m_inv));
   if (ncm)
   {
     long i, j, k;
     for (k = 1; k <= r2; k++)
-      shallow_clean_rat(gel(m_inv,nm-k+1), 1, nm-1, gen_1, prec);
+      shallow_clean_rat(gel(m_inv,nm-k+1), 1, nm-1, NULL, prec);
     for (i = 1; i<=r1+r2; i++)
       for (j = 1; j <= ncm; j++) gcoeff(m_inv, ns+nc+j, ns+nc+i) = gen_0;
   }
-  if (DEBUGLEVEL>1) err_printf("cm cleaned: %Ps", shallowtrans(m_inv));
-
+  if (DEBUGLEVEL>1) err_printf("cyc/cm cleaned: %Ps", shallowtrans(m_inv));
   /* normalize characters, parameters mod Z */
   for (k = 1; k <= ns+nc; k++) gel(m_inv, k) = gfrac(gel(m_inv, k));
-
   /* increase relative prec of real values */
   gchar_set_basis(gc, gprec_w(m_inv, prec));
 }
