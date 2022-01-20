@@ -1876,12 +1876,12 @@ GEN
 bnfisprincipal0(GEN bnf,GEN x,long flag)
 {
   pari_sp av = avma;
-  GEN arch, c, nf;
+  GEN c, nf;
   long pr;
 
   bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf);
-  switch( idealtyp(&x, &arch) )
+  switch( idealtyp(&x, NULL) )
   {
     case id_PRINCIPAL:
       if (gequal0(x)) pari_err_DOMAIN("bnfisprincipal","ideal","=",gen_0,x);

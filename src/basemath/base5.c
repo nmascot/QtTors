@@ -690,7 +690,7 @@ rnfidealup(GEN rnf,GEN x)
   n = rnf_get_degree(rnf);
   bas = rnf_get_zk(rnf); bas2 = gel(bas,2);
 
-  (void)idealtyp(&x, &I); /* I is junk */
+  (void)idealtyp(&x, NULL);
   x = Q_remove_denom(x, &dx);
   x2 = idealtwoelt(nf,x);
   I = cgetg(n+1,t_VEC);
@@ -725,7 +725,7 @@ rnfidealup0(GEN rnf,GEN x, long flag)
   proj = obj_check(rnf,rnf_MAPS);
   NF = obj_check(rnf,rnf_NFABS);
 
-  (void)idealtyp(&x, &d); /* d is junk */
+  (void)idealtyp(&x, NULL);
   x2 = idealtwoelt(nf,x);
   x2 = Q_remove_denom(x2,&d);
   if (typ(gel(x2,2)) == t_COL) gel(x2,2) = ZM_ZC_mul(gel(proj,1),gel(x2,2));
@@ -1273,9 +1273,8 @@ GEN
 nfreduce(GEN nf, GEN x, GEN I)
 {
   pari_sp av = avma;
-  GEN aI;
   x = nf_to_scalar_or_basis(checknf(nf), x);
-  if (idealtyp(&I,&aI) != id_MAT || lg(I)==1) pari_err_TYPE("nfreduce",I);
+  if (idealtyp(&I, NULL) != id_MAT || lg(I)==1) pari_err_TYPE("nfreduce",I);
   if (typ(x) != t_COL) x = scalarcol( gmod(x, gcoeff(I,1,1)), lg(I)-1 );
   else x = reducemodinvertible(x, I);
   return gerepileupto(av, x);

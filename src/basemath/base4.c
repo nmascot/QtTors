@@ -48,16 +48,17 @@ idealtyp(GEN *ideal, GEN *arch)
   GEN x = *ideal;
   long t,lx,tx = typ(x);
 
-  if (tx!=t_VEC || lg(x)!=3) *arch = NULL;
+  if (tx!=t_VEC || lg(x)!=3) { if (arch) *arch = NULL; }
   else
   {
     GEN a = gel(x,2);
     if (typ(a) == t_MAT && lg(a) != 3)
     { /* allow [;] */
       if (lg(a) != 1) pari_err_TYPE("idealtyp [extended ideal]",x);
-      a = trivial_fact();
+      if (arch) *arch = trivial_fact();
     }
-    *arch = a;
+    else
+      if (arch) *arch = a;
     x = gel(x,1); tx = typ(x);
   }
   switch(tx)
@@ -468,8 +469,7 @@ GEN
 idealtwoelt(GEN nf, GEN x)
 {
   pari_sp av;
-  GEN z;
-  long tx = idealtyp(&x,&z);
+  long tx = idealtyp(&x, NULL);
   nf = checknf(nf);
   if (tx == id_MAT) return mat_ideal_two_elt(nf,x);
   if (tx == id_PRIME) return mkvec2copy(gel(x,1), gel(x,2));
@@ -742,7 +742,7 @@ idealfactor_limit(GEN nf, GEN x, ulong lim)
 {
   pari_sp av = avma;
   GEN fa, y;
-  long tx = idealtyp(&x,&y);
+  long tx = idealtyp(&x, NULL);
 
   if (tx == id_PRIME)
   {
@@ -928,8 +928,8 @@ long
 idealval(GEN nf, GEN A, GEN P)
 {
   pari_sp av = avma;
-  GEN a, p, cA;
-  long vcA, v, Zval, tx = idealtyp(&A,&a);
+  GEN p, cA;
+  long vcA, v, Zval, tx = idealtyp(&A, NULL);
 
   if (tx == id_PRINCIPAL) return nfval(nf,A,P);
   checkprid(P);
@@ -965,8 +965,8 @@ idealadd(GEN nf, GEN x, GEN y)
   long tx, ty;
   GEN z, a, dx, dy, dz;
 
-  tx = idealtyp(&x,&z);
-  ty = idealtyp(&y,&z); nf = checknf(nf);
+  tx = idealtyp(&x, NULL);
+  ty = idealtyp(&y, NULL); nf = checknf(nf);
   if (tx != id_MAT) x = idealhnf_shallow(nf,x);
   if (ty != id_MAT) y = idealhnf_shallow(nf,y);
   if (lg(x) == 1) return gerepilecopy(av,y);
@@ -997,8 +997,8 @@ static GEN
 _idealaddtoone(GEN nf, GEN x, GEN y, long red)
 {
   GEN a;
-  long tx = idealtyp(&x, &a/*junk*/);
-  long ty = idealtyp(&y, &a/*junk*/);
+  long tx = idealtyp(&x, NULL);
+  long ty = idealtyp(&y, NULL);
   long ea;
   if (tx != id_MAT) x = idealhnf_shallow(nf, x);
   if (ty != id_MAT) y = idealhnf_shallow(nf, y);
@@ -1907,10 +1907,9 @@ GEN
 idealnorm(GEN nf, GEN x)
 {
   pari_sp av;
-  GEN y;
   long tx;
 
-  switch(idealtyp(&x,&y))
+  switch(idealtyp(&x, NULL))
   {
     case id_PRIME: return pr_norm(x);
     case id_MAT: return RgM_det_triangular(x);
@@ -1930,7 +1929,7 @@ idealdown(GEN nf, GEN x)
 {
   pari_sp av = avma;
   GEN y, c;
-  switch(idealtyp(&x,&y))
+  switch(idealtyp(&x, NULL))
   {
     case id_PRIME: return icopy(pr_get_p(x));
     case id_MAT: return gcopy(gcoeff(x,1,1));
@@ -1990,7 +1989,7 @@ idealismaximal_i(GEN nf, GEN x)
 {
   GEN L, p, pr, c;
   long i, l;
-  switch(idealtyp(&x,&c))
+  switch(idealtyp(&x, NULL))
   {
     case id_PRIME: return x;
     case id_MAT: return idealismaximal_mat(nf, x);
@@ -2111,8 +2110,8 @@ GEN
 idealnumden(GEN nf, GEN x)
 {
   pari_sp av = avma;
-  GEN x0, ax, c, d, A, B, J;
-  long tx = idealtyp(&x,&ax);
+  GEN x0, c, d, A, B, J;
+  long tx = idealtyp(&x, NULL);
   nf = checknf(nf);
   switch (tx)
   {
@@ -2305,9 +2304,8 @@ idealpow(GEN nf, GEN x, GEN n)
   av = avma;
   x = gerepileupto(av, idealpow_aux(checknf(nf), x, tx, n));
   if (!ax) return x;
-  ax = ext_pow(nf, ax, n);
   gel(res,1) = x;
-  gel(res,2) = ax;
+  gel(res,2) = ext_pow(nf, ax, n);
   return res;
 }
 
@@ -2637,7 +2635,7 @@ idealmin(GEN nf, GEN x, GEN vdir)
   pari_sp av = avma;
   GEN y, dx;
   nf = checknf(nf);
-  switch( idealtyp(&x,&y) )
+  switch( idealtyp(&x, NULL) )
   {
     case id_PRINCIPAL: return gcopy(x);
     case id_PRIME: x = pr_hnf(nf,x); break;

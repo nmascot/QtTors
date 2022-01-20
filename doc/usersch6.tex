@@ -133,16 +133,17 @@ raises an exception. Set $s$ to the name of the caller for a
 meaningful error message.
 
 \fun{long}{idealtyp}{GEN *ideal, GEN *fa} The input is \kbd{ideal}, a pointer
-to an ideal (or extended ideal), which is usually modified, \kbd{fa} being
-set as a side-effect. Returns the type of the underlying ideal among
-\tet{id_PRINCIPAL} (a number field element), \tet{id_PRIME} (a prime ideal)
-\tet{id_MAT} (an ideal in matrix form).
+to an ideal or extended ideal; returns the type of the underlying ideal
+among \tet{id_PRINCIPAL} (a number field element), \tet{id_PRIME} (a prime
+ideal) \tet{id_MAT} (an ideal in matrix form).
 
-If \kbd{ideal} pointed to an ideal, set \kbd{fa} to \kbd{NULL}, and
-possibly simplify \kbd{ideal} (for instance the zero ideal is replaced by
-\kbd{gen\_0}). If it pointed to an extended ideal, replace
-\kbd{ideal} by the underlying ideal and set \kbd{fa} to the factorization
-matrix component.
+As a first side effect, \kbd{*ideal} is set to the underlying ideal,
+possibly simplified (for instance the zero ideal represented by an empty
+matrix is replaced by \kbd{gen\_0}).
+
+If \kbd{fa} is not \kbd{NULL}, then \kbd{*fa} is set to the
+extended part in the input: either \kbd{NULL} (regular ideal)
+or the extended part of an extended ideal.
 
 \subsec{Extracting info from a \kbd{nf} structure}
 

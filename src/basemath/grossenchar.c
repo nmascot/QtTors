@@ -1297,7 +1297,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
 {
   pari_sp av = avma;
   GEN M, cyc, mult, pr, Lpr, Lk1, Lphi1, Lk2, Llog, C, logchi, chi_oo, eps, U;
-  GEN uni, y, famod1, bnf;
+  GEN uni, famod1, bnf;
   long r1, r2, npr, nk1, nchi, s, i, j, v, dim, ns, nc, ncol;
   check_gchar_group(gc);
   ns = gchar_get_ns(gc);
@@ -1328,7 +1328,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
     else
     {
       pr = gel(Lv,i);
-      if (idealtyp(&pr,&y) == id_PRINCIPAL)
+      if (idealtyp(&pr, NULL) == id_PRINCIPAL)
         pari_err_TYPE("gchar_identify_init [ideal]", gel(Lv,i));
       for (j=1; j<lg(famod1); j++)
         if (idealval(bnf, pr, gel(famod1,j))>0)
