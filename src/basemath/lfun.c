@@ -342,12 +342,13 @@ gammafactor(GEN Vga)
     GEN a = gel(Vga,i), r = gmul2n(real_i(a), -1);
     long q = itos(gfloor(r)); /* [Re a/2] */
     r = gmul2n(gsubgs(r, q), 1);
-    gel(F,i) = gadd(r, imag_i(a)); /* 2{Re a/2} + Im a/2 */
+    gel(F,i) = gequal0(imag_i(a)) ? r : mkcomplex(r, imag_i(a)); /* 2{Re a/2} + I*(Im a) */
     if (q) R = gmul(R, gammafrac(gel(F,i), q));
   }
   F = vec_reduce(F, &E); l = lg(E);
   v = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++) gel(v,i) = mkvec2(gfrac(gel(F,i)), stoi(E[i]));
+  for (i = 1; i < l; i++)
+      gel(v,i) = mkvec2(gsub(gel(F,i),gfloor(real_i(gel(F,i)))), stoi(E[i]));
   gen_sort_inplace(v, (void*)cmp_universal, cmp_nodata, &P);
   a = cgetg(l, t_VEC); e = cgetg(l, t_VECSMALL);
   b = cgetg(l, t_VEC); f = cgetg(l, t_VECSMALL);
