@@ -6,6 +6,7 @@ extra_flags=-lm
 
 if test "$arch" = "x86_64" && test "$sizeof_long" = "8"; then
   list=sse2; . ./look
+  list=avx; . ./look
 fi
 list=exp2; . ./look
 list=log2; . ./look

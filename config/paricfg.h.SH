@@ -108,6 +108,9 @@ esac
 case $has_sse2 in
 yes) echo '#define HAS_SSE2' >> $file;;
 esac
+case $has_avx in
+yes) echo '#define HAS_AVX' >> $file;;
+esac
 
 case "$has_exp2" in
 yes) echo '#define HAS_EXP2' >> $file;;
