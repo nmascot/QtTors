@@ -32,6 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #ifdef HAS_OPENDIR
 #include <dirent.h>
 #endif
+#ifdef HAS_WAITPID
+#  include <sys/wait.h>
+#endif
 
 #include "pari.h"
 #include "paripriv.h"
@@ -4036,16 +4039,21 @@ check_secure(const char *s)
     pari_err(e_MISC, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
 }
 
-void
+long
 gpsystem(const char *s)
 {
+  int x = -1;
 #ifdef HAS_SYSTEM
   check_secure(s);
-  if (system(s) < 0)
-    pari_err(e_MISC, "system(\"%s\") failed", s);
+  x = system(s);
+  if (x < 0) pari_err(e_MISC, "system(\"%s\") failed", s);
+#if (defined(WIFEXITED)&&defined(WEXITSTATUS))
+  x = WIFEXITED(x)? WEXITSTATUS(x): -1; /* POSIX */
+#  endif
 #else
   pari_err(e_ARCH,"system");
 #endif
+  return (long)x;
 }
 
 static GEN

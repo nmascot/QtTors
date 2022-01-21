@@ -3246,7 +3246,7 @@ GEN     ellmodulareqn(long l, long vx, long vy);
 GEN     externstr(const char *cmd);
 char    *gp_filter(const char *s);
 GEN     gpextern(const char *cmd);
-void    gpsystem(const char *s);
+long    gpsystem(const char *s);
 GEN     readstr(const char *s);
 GEN     GENtoGENstr_nospace(GEN x);
 GEN     GENtoGENstr(GEN x);
