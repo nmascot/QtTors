@@ -268,7 +268,7 @@ history_is_new(char *s)
   HIST_ENTRY *e;
   if (!*s) return 0;
   if (!history_length) return 1;
-  e = history_get(history_length);
+  e = history_get(history_base+history_length-1);
   /* paranoia: e != NULL, unless readline is in a weird state */
   return e? strcmp(s, e->line): 0;
 }
