@@ -154,7 +154,7 @@ typedef ulong ratpoints_bit_array;
       for (a = 0; a < p; a++) \
         for(k = 1; k < RBA_PACK; k++) \
           si[a+k*p] = si[a]; \
-      for(a = 0; a < (RATPOINTS_CHUNK-1)*RBA_PACK; a++) \
+      for(a = 0; (ulong)a < (RATPOINTS_CHUNK-1)*RBA_PACK; a++) \
          si[a+p*RBA_PACK] = si[a];\
 }
 #else
