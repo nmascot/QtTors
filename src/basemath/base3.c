@@ -2661,7 +2661,7 @@ sprk_get_AgL2(GEN s, GEN *A, GEN *g, GEN *L2)
 void
 sprk_get_U2(GEN s, GEN *U1, GEN *U2)
 { GEN v = gel(s,6); *U1 = gel(v,1); *U2 = gel(v,2); }
-int
+static int
 sprk_is_prime(GEN s) { return lg(s) == 5; }
 
 GEN
