@@ -61,6 +61,14 @@ send_request(enum PMPI_cmd ecmd, long dest)
 }
 
 static void
+send_request_all(enum PMPI_cmd ecmd, long n)
+{
+  long i;
+  for (i=1; i<=n; i++)
+    send_long((long)ecmd, i);
+}
+
+static void
 send_GEN(GEN elt, int dest)
 {
   pari_sp av = avma;
@@ -77,10 +85,35 @@ send_GEN(GEN elt, int dest)
 }
 
 static void
+send_GEN_all(GEN elt, long n)
+{
+  pari_sp av = avma;
+  int size;
+  long i;
+  GEN reloc = copybin_unlink(elt);
+  GENbin *buf = copy_bin_canon(mkvec2(elt,reloc));
+  size = sizeof(GENbin) + buf->len*sizeof(ulong);
+  for (i = 1; i <= n; i++)
+  {
+    BLOCK_SIGINT_START
+    MPI_Send(buf, size, MPI_CHAR, i, 0, MPI_COMM_WORLD);
+    BLOCK_SIGINT_END
+  }
+  pari_free(buf); set_avma(av);
+}
+
+static void
 send_request_GEN(enum PMPI_cmd ecmd, GEN elt, int dest)
 {
   send_request(ecmd, dest);
   send_GEN(elt, dest);
+}
+
+static void
+send_request_GEN_all(enum PMPI_cmd ecmd, GEN elt, long n)
+{
+  send_request_all(ecmd, n);
+  send_GEN_all(elt, n);
 }
 
 static void
@@ -305,18 +338,15 @@ void
 mt_export_add(const char *str, GEN val)
 {
   pari_sp av = avma;
-  long i, n = pari_MPI_size-1;
+  long n = pari_MPI_size-1;
   GEN s;
   if (pari_mt || pari_MPI_rank)
     pari_err(e_MISC,"export not allowed during parallel sections");
   export_add(str, val);
   s = strtoGENstr(str);
-  for (i=1; i <= n; i++)
-  {
-    send_request(PMPI_exportadd, i);
-    send_GEN(s, i);
-    send_GEN(val, i);
-  }
+  send_request_all(PMPI_exportadd, n);
+  send_GEN_all(s, n);
+  send_GEN_all(val, n);
   set_avma(av);
 }
 
@@ -324,24 +354,21 @@ void
 mt_export_del(const char *str)
 {
   pari_sp av = avma;
-  long i, n = pari_MPI_size-1;
+  long n = pari_MPI_size-1;
   GEN s;
   if (pari_MPI_rank)
     pari_err(e_MISC,"unexport not allowed during parallel sections");
   export_del(str);
   s = strtoGENstr(str);
-  for (i=1; i <= n; i++)
-    send_request_GEN(PMPI_exportdel, s, i);
+  send_request_GEN_all(PMPI_exportdel, s, n);
   set_avma(av);
 }
 
 void
 mt_broadcast(GEN code)
 {
-  long i;
   if (!pari_MPI_rank && !pari_mt)
-    for (i=1;i<pari_MPI_size;i++)
-      send_request_GEN(PMPI_eval, code, i);
+    send_request_GEN_all(PMPI_eval, code, pari_MPI_size-1);
 }
 
 void
@@ -447,9 +474,9 @@ mt_queue_start_lim(struct pari_mt *pt, GEN worker, long lim)
       send_request_long(PMPI_parisizemax, mtparisizemax, i);
       send_request_long(PMPI_precreal, get_localbitprec(), i);
       send_request_vlong(PMPI_varpriority,varpriority-1,MAXVARN+2, i);
-      send_request_GEN(PMPI_primetab, primetab, i);
-      send_request_GEN(PMPI_worker, worker, i);
     }
+    send_request_GEN_all(PMPI_primetab, primetab, n);
+    send_request_GEN_all(PMPI_worker, worker, n);
     mt->n = n;
     mt->nbint = 1;
     mt->source = 1;
