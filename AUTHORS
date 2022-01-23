@@ -24,7 +24,7 @@ Major contributors (large modules written or rewritten from scratch):
     subcyclo, black-box groups, elliptic curves, multithread model,
     PARI description system, FLTK support, Bug tracking system, administration
     of pari.math.u-bordeaux.fr, the http://pari.math.u-bordeaux.fr website,
-    finite fields, Lfun module, ratpoints port, ellrank port.
+    finite fields, Lfun module, ratpoints port, ellrank port, fplll port.
   Jared ASUNCION: ECPP
   Christian BATUT: 68k multiprecision kernel, Linear algebra, lattices
   Karim BELABAS: current project leader, native multiprecision kernel, modular
