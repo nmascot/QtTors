@@ -47,6 +47,24 @@ send_long(long a, long dest)
 }
 
 static void
+send_bcast_long(long a)
+{
+  BLOCK_SIGINT_START
+  MPI_Bcast(&a, 1, MPI_LONG, 0, MPI_COMM_WORLD);
+  BLOCK_SIGINT_END
+}
+
+static long
+recv_bcast_long(void)
+{
+  long a;
+  BLOCK_SIGINT_START
+  MPI_Bcast(&a, 1, MPI_LONG, 0, MPI_COMM_WORLD);
+  BLOCK_SIGINT_END
+  return a;
+}
+
+static void
 send_vlong(long *a, long n, long dest)
 {
   BLOCK_SIGINT_START
@@ -97,6 +115,23 @@ send_GEN_all(GEN elt, long n)
   {
     BLOCK_SIGINT_START
     MPI_Send(buf, size, MPI_CHAR, i, 0, MPI_COMM_WORLD);
+    BLOCK_SIGINT_END
+  }
+  pari_free(buf); set_avma(av);
+}
+
+static void
+send_bcast_GEN(GEN elt)
+{
+  pari_sp av = avma;
+  int size;
+  GEN reloc = copybin_unlink(elt);
+  GENbin *buf = copy_bin_canon(mkvec2(elt,reloc));
+  size = sizeof(GENbin) + buf->len*sizeof(ulong);
+  {
+    send_bcast_long(size);
+    BLOCK_SIGINT_START
+    MPI_Bcast(buf, size, MPI_CHAR, 0, MPI_COMM_WORLD);
     BLOCK_SIGINT_END
   }
   pari_free(buf); set_avma(av);
@@ -198,6 +233,26 @@ recvfrom_GEN(int src)
 }
 
 static GEN
+recv_bcast_GEN(void)
+{
+  GEN res;
+  GENbin *buf;
+  long size;
+
+  size=recv_bcast_long();
+  buf = (GENbin *)pari_malloc(size);
+
+  BLOCK_SIGINT_START
+  MPI_Bcast(buf, size, MPI_CHAR, 0, MPI_COMM_WORLD);
+  BLOCK_SIGINT_END
+
+  buf->rebase = &shiftaddress_canon;
+  res = bin_copy(buf);
+  bincopy_relink(gel(res,1),gel(res,2));
+  return gel(res,1);
+}
+
+static GEN
 recvany_GEN(int *source)
 {
   MPI_Status status;
@@ -283,8 +338,8 @@ pari_MPI_child(void)
       break;
     case PMPI_exportadd:
     {
-      GEN str = recvfrom_GEN(0);
-      GEN val = recvfrom_GEN(0);
+      GEN str = recv_bcast_GEN();
+      GEN val = recv_bcast_GEN();
       entree *ep = fetch_entry(GSTR(str));
       export_add(ep->name, val);
       set_avma(av);
@@ -345,8 +400,8 @@ mt_export_add(const char *str, GEN val)
   export_add(str, val);
   s = strtoGENstr(str);
   send_request_all(PMPI_exportadd, n);
-  send_GEN_all(s, n);
-  send_GEN_all(val, n);
+  send_bcast_GEN(s);
+  send_bcast_GEN(val);
   set_avma(av);
 }
 
