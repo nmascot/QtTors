@@ -1728,10 +1728,12 @@ ZV_mul(GEN x, GEN y)
   return z;
 }
 static int
-dump_gen(GEN x, long flag)
+dump_gen(GEN SUnits, GEN x, long flag)
 {
   GEN d;
-  if (!(flag & nf_GENMAT)) return 0;
+  long e;
+  if (!(flag & nf_GENMAT) || !SUnits) return 0;
+  e = gexpo(gel(SUnits,2)); if (e > 64) return 0; /* U large */
   x = Q_remove_denom(x, &d);
   return (d && expi(d) > 32) || gexpo(x) > 32;
 }
@@ -1791,7 +1793,7 @@ isprincipalall(GEN bnf, GEN x, long *pprec, long flag)
     if (nW) col = add(col, RgC_sub(act_arch(Q, bnf_get_GD(bnf)),
                                    act_arch(A, bnf_get_ga(bnf))));
     col = isprincipalarch(bnf, col, q, gen_1, d, &e);
-    if (col && ((SUnits && dump_gen(col, flag))
+    if (col && (dump_gen(SUnits, col, flag)
                 || !fact_ok(nf,x, col,gen,R))) col = NULL;
   }
   if (!col && (flag & nf_GENMAT))
