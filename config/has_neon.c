@@ -1,8 +1,7 @@
-#include <emmintrin.h>
-typedef __v2di bit_array;
+typedef ulong bit_array __attribute__ ((vector_size (16)));
+#define EXT0(a) ((ulong)a[0])
+#define EXT(a,i) ((ulong)a[i])
 #define AND(a,b) ((a)&(b))
-#define EXT0(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 0))
-#define EXT1(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 1))
 #define TEST(a) (EXT0(a) || EXT1(a))
 #define RBA(a) ((bit_array){((long) a), ((long) a)})
 

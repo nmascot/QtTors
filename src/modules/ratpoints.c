@@ -112,16 +112,22 @@ typedef ulong ratpoints_bit_array __attribute__ ((vector_size (32)));
                        else { survl[1] &= ~(0UL)>>sh; } } \
                      else if(sh >= BITS_IN_LONG) { survl[2] &= ~(0UL)>>(sh - BITS_IN_LONG); survl[3] = 0UL; } \
                      else { survl[3] &= ~(0UL)>>sh; } }
-#elif defined(HAS_SSE2)
-#include <emmintrin.h>
+#elif defined(HAS_SSE2) || defined(HAS_NEON)
 
+#ifdef HAS_SSE2
+#include <emmintrin.h>
 /* Use SSE 128 bit registers for the bit arrays */
 typedef __v2di ratpoints_bit_array;
-
 #define EXT0(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 0))
 #define EXT(a,i) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 1))
+#else
+typedef ulong ratpoints_bit_array __attribute__ ((vector_size (16)));
+#define EXT0(a) ((ulong)a[0])
+#define EXT(a,i) ((ulong)a[i])
+#endif
+
 #define TEST(a) (EXT0(a) || EXT(a,1))
-#define RBA(a) ((__v2di){((long) a), ((long) a)})
+#define RBA(a) ((ratpoints_bit_array){((long) a), ((long) a)})
 #define RBA_SHIFT (7)
 #define MASKL(a,s) { unsigned long *survl = (unsigned long *)(a); long sh = (s); \
                      if(sh >= BITS_IN_LONG) { survl[0] = 0UL; survl[1] &= (~0UL)<<(sh - BITS_IN_LONG); } \
