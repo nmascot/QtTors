@@ -200,6 +200,32 @@ gcharidentify(gc,[pr],[th])
 chiw = gcharidentify(gc,[pr],[th+I*5/7]);
 exponent(chareval(gc,chiw,pr)-th-I*5/7) < -100
 
+print("gcharlocal");
+bnf = bnfinit(x^2-5,1);
+gc = gcharinit(bnf,1);
+chi = gcharidentify(gc,[1],[[0,6.5285026052729938134630673568725898156]]);
+round(10^5*gcharlocal(gc,chi,1))
+round(10^5*gcharlocal(gc,chi,2))
+gc = gcharinit(bnf,[1,[1,0]]);
+chi = gcharidentify(gc,[1],[[0,6.5285026052729938134630673568725898156]]);
+round(10^5*gcharlocal(gc,chi,1))
+round(10^5*gcharlocal(gc,chi,2))
+gc = gcharinit(bnf,[2^2,[1,0]]);
+chi = gcharidentify(gc,[1],[[1,1.0]]);
+round(10^5*gcharlocal(gc,chi,1))
+round(10^5*gcharlocal(gc,chi,2))
+round(10^5*gcharlocal(gc,concat(chi,3.),1))
+round(10^5*gcharlocal(gc,concat(chi,-2.),2))
+pr = idealprimedec(bnf,2)[1];
+round(10^5*gcharlocal(gc,6*chi,pr))
+bnf = bnfinit(x^3-x^2+5*x+1,1);
+gc = gcharinit(bnf,1);
+pr = idealprimedec(bnf,3)[1];
+chi = gcharidentify(gc,[1,2,pr],[[0,1.],[2,-0.5],-0.11]);
+round(10^5*gcharlocal(gc,chi,1))
+round(10^5*gcharlocal(gc,chi,2))
+round(10^5*gcharlocal(gc,chi,pr))
+
 
 
 print("from doc");
@@ -279,4 +305,10 @@ gcharalgebraic(gc,[])
 gc = gcharinit(x^3-x-1,1);
 print("wrong, this should be an invalid input:");
 gcharalgebraic(gc,[[1,1]])
+bnf = bnfinit(x^2-5);
+gc = gcharinit(bnf,[4,[1,0]]);
+pr = idealprimedec(bnf,2)[1];
+gcharlocal(gc,[0,1],pr)
+gcharlocal(gc,[0,1],0)
+gcharlocal(gc,[0,1],3)
 \\don't put tests after the errors

@@ -15,9 +15,11 @@
 
 #define DEBUGLEVEL DEBUGLEVEL_gchar
 
+static GEN gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long prec);
+
 /*********************************************************************/
 /**                                                                 **/
-/**                         HECKE CHARACTERS                        **/
+/**                    HECKE GROSSENCHARACTERS                      **/
 /**         contributed by Pascal Molin and Aurel Page (2022)       **/
 /**                                                                 **/
 /*********************************************************************/
@@ -1169,6 +1171,56 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
     av = avma;
   }
   return gc_bool(av, 1);
+}
+
+GEN
+gcharlocal(GEN gc, GEN chi, GEN v, long prec)
+{
+  pari_sp av = avma;
+  GEN w2, chiv, k, phi, logchi, nf, moo, famod;
+  long s, r1, r2, i;
+  check_gchar_group(gc);
+  chi = gchar_internal(gc, chi, &w2);
+  logchi = gchari_log(gc, chi, NULL);
+  if (typ(v) == t_INT) /* v infinite */
+  {
+    s = itos(v);
+    r1 = gchar_get_r1(gc);
+    r2 = gchar_get_r2(gc);
+    if (s<=0) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", "<=", gen_0, v);
+    if (s>r1+r2) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", ">", stoi(r1+r2), v);
+    phi = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)+s);
+    if (s<=r1) /* v real */
+    {
+      moo = gel(gchar_get_mod(gc),2);
+      i = zv_search(moo,s);
+      if (i==0) k = gen_0;
+      else
+      {
+        k = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)-lg(moo)+1+i);
+        /* k == 0 or 1/2 */
+        if (!gequal0(k)) k = gen_1;
+      }
+    }
+    else /* v complex */
+      k = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)+r2+s);
+    if (w2) phi = mkcomplex(phi,w2);
+    chiv = mkvec2(k,phi);
+  }
+  else /* v finite */
+  {
+    checkprid(v);
+    nf = bnf_get_nf(gchar_get_bnf(gc));
+    famod = gel(gchar_get_mod(gc),1);
+    if (gen_search(gel(famod,1), v, (void*)cmp_prime_ideal, cmp_nodata))
+    {
+      if (idealval(nf, gcharlog_conductor_f(gc,logchi), v) > 0)
+        /* FIXME: only compute conductor at v */
+        pari_err_IMPL("local component of a Grossencharacter at a ramified prime");
+    }
+    chiv = mkvec(gchari_eval(gc, chi, v, 0, logchi, NULL, w2, prec));
+  }
+  return gerepilecopy(av, chiv);
 }
 
 

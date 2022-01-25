@@ -3923,6 +3923,7 @@ GEN     gcharalgebraic(GEN gc, GEN type);
 int     gcharisalgebraic(GEN gc, GEN chi, GEN *pq);
 GEN     gcharnewprec(GEN gc, long prec);
 GEN     gchareval(GEN gc, GEN chi, GEN x, long flag, GEN logx);
+GEN     gcharlocal(GEN gc, GEN chi, GEN v, long prec);
 GEN     gchar_conductor(GEN gc, GEN chi);
 GEN     lfungchar(GEN gc, GEN chi);
 GEN     gchari_lfun(GEN gc, GEN chi, GEN w);

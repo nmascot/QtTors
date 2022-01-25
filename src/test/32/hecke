@@ -116,6 +116,19 @@ gcharidentify 2
 [0, 0]
 [5]
 1
+gcharlocal
+[0, 652850]
+[0, -652850]
+[0, 652850]
+[0, -652850]
+[100000, 108808]
+[0, -108808]
+[100000, 108808 + 300000*I]
+[0, -108808 - 200000*I]
+[0]
+[0, 105380]
+[200000, -52690]
+[-11811]
 from doc
 13.057005210545987626926134713745179631
 0.30000006229129706787363344444425752636
@@ -221,4 +234,13 @@ wrong, this should be an invalid input:
 []
 wrong, this should be an invalid input:
 []
-Total time spent: 2964
+  ***   at top-level: gcharlocal(gc,[0,1],pr)
+  ***                 ^-----------------------
+  *** gcharlocal: sorry, local component of a Grossencharacter at a ramified prime is not yet implemented.
+  ***   at top-level: gcharlocal(gc,[0,1],0)
+  ***                 ^----------------------
+  *** gcharlocal: domain error in gcharlocal [index of an infinite place]: v <= 0
+  ***   at top-level: gcharlocal(gc,[0,1],3)
+  ***                 ^----------------------
+  *** gcharlocal: domain error in gcharlocal [index of an infinite place]: v > 2
+Total time spent: 1901
