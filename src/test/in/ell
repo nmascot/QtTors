@@ -471,6 +471,25 @@ E=ellinit([1,0,0,-24432,-1471934]);
 P=ellmul(E,[-36131/400,361313/8000],27);
 ellsaturation(E,[P],100)
 
+\\ elltrace
+E = ellinit([0,0,0,1,15]);
+x = 'x;
+T = x^3-135*x-408;
+P1 = Mod([x/8-1,1/32*x^2 - 11/32*x - 19/4],T);
+P2 = Mod([2,5],T);
+P3 = Mod([0,x],x^2-15);
+elltrace(E,[0])
+elltrace(E,P1)
+elltrace(E,P2)
+elltrace(E,P3)
+
+E=ellinit([-13^2,0]);
+elltrace(E,[-10*x^3+10*x-13,-16*x^3+16*x-34]*Mod(1,x^4-x^3+2*x-1))
+
+E=ellinit([2,3],19);
+P=[11*x^3+11*x^2+x+12,15*x^4+9*x^3+18*x^2+18*x+6]*Mod(1,x^5+x^4+15*x^3+16*x^2+3*x+1);
+elltrace(E,P)
+
 \\ ERRORS, keep at end of file
 ellK(1)
 ellinit([])

@@ -7631,3 +7631,112 @@ ellsaturation(GEN E, GEN P, long B, long prec)
   obj_free(E); return gerepilecopy(av, P);
 }
 
+/* elltrace */
+
+static GEN
+to_RgX(GEN P, long vx)
+{
+  return typ(P)==t_POL && varn(P) == vx ? P: scalarpol_shallow(P, vx);
+}
+
+GEN
+elltrace(GEN E, GEN P)
+{
+  pari_sp av = avma;
+  GEN xP,yP, T, lxP,lyP, Q, LP,LPj, M, K, U,V,R, xQ,yQ;
+  long var,n,i,j,d;
+
+  checkell(E);
+  checkellpt(P);
+  /* P == oo? */
+  if(ell_is_inf(P))
+    return gcopy(P);
+  /* More checks */
+  xP = gel(P,1);
+  yP = gel(P,2);
+  if(typ(xP)!=t_POLMOD)
+    pari_err_TYPE("elltrace",xP);
+  T = gel(xP,1);
+  if(typ(yP)!=t_POLMOD)
+    pari_err_TYPE("elltrace",yP);
+  if(!gequal(gel(yP,1),T))
+    pari_err_MODULUS("elltrace",xP,yP);
+  var = varn(T);
+  n = degpol(T);
+  lxP = to_RgX(gel(xP,2),var);
+  lyP = to_RgX(gel(yP,2),var);
+  /* Trivial cases */
+  if(n==1)
+    return gcopy(P);
+  if(degpol(lxP)==0 && degpol(lyP)==0)
+  {
+    gel(P,1) = gel(lxP,2);
+    gel(P,2) = gel(lyP,2);
+    Q = ellmul(E,P,stoi(n));
+    return gerepileupto(av,Q);
+  }
+  if(degpol(lxP)==0)
+    retmkvec(gen_0);
+  /* Strategy: we look for a function with divisor equal to
+  div = [P_1] + \dots + [P_n] + [-Tr(P)] - (n+1)[0].
+  Basis of the Riemann-Roch space evaluated at P: */
+  LP = cgetg(n+2,t_VEC);
+  gel(LP,1) = gen_1;
+  gel(LP,2) = xP;
+  gel(LP,3) = yP;
+  for(i=4;i<=n+1;i++)
+    gel(LP,i) = gmul(gel(LP,i-2),xP);
+  /* Subspace of functions defined over K vanishing at P */
+  M = cgetg(n+2,t_MAT);
+  for(j=1;j<=n+1;j++)
+  {
+    LPj = to_RgX(liftpol(gel(LP,j)),var);
+    d = degpol(LPj);
+    gel(M,j) = cgetg(n+1,t_COL);
+    for(i=1;i<=n;i++)
+      gcoeff(M,i,j) = i<=d+1 ? gel(LPj,i+1) : gen_0;
+  }
+  K = gel(ker(M),1);
+  /* Coords on 1,x,y,x^2,xy,.. of
+  function f of smallest degree vanishing at P
+  div f= [P_1] + \dots + [P_d] + [-Tr(P)] - (d+1)[0]
+  with deg(K(P)) = d+1 if Tr(P) != 0; = d otherwise.
+  f = U(x) + y*V(x) */
+  U = cgetg((n+1)/2+3,t_POL);
+  V = cgetg((n-2)/2+3,t_POL);
+  U[1] = V[1] = evalvarn(0);
+  gel(U,2) = gel(K,1); /* Coef of 1 */
+  for(i=1;2*i<=n+1;i++)
+    gel(U,i+2) = gel(K,2*i); /* Coef of x^i */
+  for(i=0;2*i+3<=n+1;i++)
+    gel(V,i+2) = gel(K,2*i+3); /* Coef of x^i*y */
+  U = normalizepol(U); V = normalizepol(V);
+  if(signe(V)==0)
+  { /* f does not depend on y, so trace = oo */
+    avma = av;
+    retmkvec(gen_0);
+  }
+  /* Plug y=-U(x)/V(x) into Weierstrass equation:
+  0 = ((x^3+a2x^2+a4x+a6)*V + (a1x+a3)*U)*V - U^2 */
+  R = mkpoln(4,gen_1,ell_get_a2(E),ell_get_a4(E),ell_get_a6(E));
+  R = gmul(R,V);
+  R = gadd(R,gmul(U,mkpoln(2,ell_get_a1(E),ell_get_a3(E))));
+  R = gmul(R,V);
+  R = gsub(R,gsqr(U));
+  /* Discard Galois orbit of P */
+  R = gdivexact(R,minpoly(xP,0));
+  /* Recover the trace */
+  xQ = gneg(gdiv(gel(R,2),gel(R,3)));
+  U = poleval(U,xQ);
+  V = poleval(V,xQ);
+  yQ = gneg(gdiv(U,V));
+  Q = mkvec2(xQ,yQ);
+  /* So far, we have computed the negative of the trace over the extension K(P)/K
+  -> we still need to compute [L:K(P)] */
+  d = 0;
+  for(i=1;i<=n+1;i++)
+    if(!gequal0(gel(K,i)))
+      d = i;
+  Q = ellmul(E,Q,stoi(-n/(d-1)));
+  return gerepileupto(av,Q);
+}

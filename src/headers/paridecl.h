@@ -3185,6 +3185,7 @@ GEN     elltatepairing(GEN E, GEN t, GEN s, GEN m);
 GEN     elltors(GEN e);
 GEN     elltors0(GEN e, long flag);
 GEN     elltors_psylow(GEN e, ulong p);
+GEN     elltrace(GEN e, GEN P);
 GEN     elltwist(GEN E, GEN D);
 GEN     ellweilpairing(GEN E, GEN t, GEN s, GEN m);
 GEN     ellwp(GEN w, GEN z, long prec);

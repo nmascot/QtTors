@@ -203,6 +203,7 @@ TF  63- new GP functions znsubgroupgenerators, subcyclohminus,
     67- new GP function intnumosc, sumnumsidi
 BA  68- [x86_64,arm64] AVX,NEON support for hyperellratpoints
 BA  69- new libpari functions ZX_digits, ZXV_ZX_fromdigits
+NM  70- new GP function elltrace
 
   Changed
 HC   1- faster implementation of eulervec + cache result
