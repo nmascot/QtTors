@@ -301,6 +301,15 @@ factmz(GEN Q, GEN p, long *maxord)
   *maxord = m;
   return (m >= 3)? FpX_oneroot(gel(z,m), p): NULL;
 }
+static long
+get_lambda(GEN H, GEN p)
+{
+  if (!dvdii(RgX_coeff(H,3), p)) return 3;
+  if (!dvdii(RgX_coeff(H,4), p)) return 2;
+  if (!dvdii(RgX_coeff(H,5), p)) return 1;
+  if (!dvdii(RgX_coeff(H,6), p)) return 0;
+  return -1;
+}
 
 /* H integral ZX of degree 5 or 6, p > 2. Modify until
  *   y^2 = p^alpha H is minimal over Z_p, alpha = 0,1
@@ -314,65 +323,56 @@ factmz(GEN Q, GEN p, long *maxord)
 static GEN
 polymini(GEN H, GEN p)
 {
-  GEN a0, a1, a2, a3, Hp, rac;
-  long t60, alpha, lambda, maxord, quad = 0, beta = 0;
+  long t60, alpha, lambda, quad = 0, beta = 0;
+  GEN Hp;
 
   alpha = ZX_pvalrem(H, p, &H) & 1;
-  RgX_to_03(H, &a0,&a1,&a2,&a3);
-  if (dvdii(a0,p) && dvdii(a1,p) && dvdii(a2,p) && dvdii(a3,p))
-  {
-    H = RgX_recip6(H);
-    RgX_to_03(H, &a0,&a1,&a2,&a3);
-  }
-  if (!dvdii(a3,p)) lambda = 3;
-  else if (!dvdii(a2,p)) lambda = 2;
-  else if (!dvdii(a1,p)) lambda = 1;
-  else lambda = 0;
-
+  lambda = get_lambda(H, p);
+  if (lambda < 0) { H = RgX_recip6(H); lambda = get_lambda(H, p); }
   for(;;)
-  { /* lambda <= 3, t60 = 60*theta */
-    long e;
-    t60 = theta_j(H,p,lambda); e = t60 / 60;
-    if (e)
-    {
-      GEN pe = powiu(p,e);
-      /* H <- H(p^e X) / p^(e(6-lambda)) */
-      H = ZX_unscale_divpow(H, pe, 6-lambda);
-      alpha = (alpha + lambda*e)&1;
-      beta += e;
-      t60 -= 60*e;
-    }
-    /* 0 <= t < 60 */
-    Hp = FpX_red(H, p);
-    if (t60) break;
+  {
+    for(;;)
+    { /* lambda <= 3, t60 = 60*theta */
+      GEN rac;
+      long e, maxord;
+      t60 = theta_j(H,p,lambda); e = t60 / 60;
+      if (e)
+      {
+        GEN pe = powiu(p,e);
+        /* H <- H(p^e X) / p^(e(6-lambda)) */
+        H = ZX_unscale_divpow(H, pe, 6-lambda);
+        alpha = (alpha + lambda*e)&1;
+        beta += e;
+        t60 -= 60*e;
+      }
+      /* 0 <= t < 60 */
+      Hp = FpX_red(H, p); if (t60) break;
 
-    rac = factmz(Hp,p, &maxord);
-    if (maxord <= 2)
-    {
-      if (degpol(Hp) <= 3) break;
-      goto end;
-    }
-    else
-    { /* maxord >= 3 */
+      rac = factmz(Hp,p, &maxord);
+      if (maxord <= 2)
+      {
+        if (degpol(Hp) <= 3) break;
+        goto end;
+      }
+      /* maxord >= 3 */
       if (!rac) { quad = 1; goto end; }
       if (signe(rac)) H = ZX_translate(H, rac);
-      lambda = 6-maxord;
+      lambda = 6 - maxord;
     }
-  }
-
-  if (lambda <= 2)
-  {
-    if (myval(RgX_coeff(H,2),p) > 1-alpha &&
-        myval(RgX_coeff(H,1),p) > 2-alpha &&
-        myval(RgX_coeff(H,0),p) > 3-alpha)
+    if (lambda <= 2)
     {
-      H = ZX_unscale(H, p);
-      if (alpha) H = ZX_Z_mul(H, p);
-      return polymini(H, p);
+      if (myval(RgX_coeff(H,2),p) > 1-alpha &&
+          myval(RgX_coeff(H,1),p) > 2-alpha &&
+          myval(RgX_coeff(H,0),p) > 3-alpha)
+      {
+        H = ZX_unscale(H, p);
+        if (alpha) H = ZX_Z_mul(H, p);
+        return polymini(H, p);
+      }
+      break;
     }
-  }
-  else if (lambda == 3 && alpha == 1)
-  {
+    /* lambda = 3 */
+    if (alpha == 0) break;
     if (degpol(Hp) == 3)
     {
       if (myval(RgX_coeff(H,6),p) >= 3 &&
@@ -383,29 +383,29 @@ polymini(GEN H, GEN p)
         H = ZX_Z_divexact(H, powiu(p, degpol(H)-3)); /* H(x/p)p^3 */
         t60 += 60; alpha = 0; beta--;
       }
+      break;
     }
-    else if (degpol(Hp) == 6 && t60)
+    if (degpol(Hp) != 6) break;
+    if (t60)
     {
-      rac = factmz(RgX_mulXn(Hp, -3), p, &maxord);
-      if (maxord == 3)
+      long m, maxord;
+      GEN v, T, rac = factmz(RgX_mulXn(Hp, -3), p, &maxord);
+      if (maxord <= 2) break;
+      T = ZX_affine(H, p, rac); /* H(rac + px) */
+      if (ZX_pval(T,p) < 3) break;
+
+      H = ZX_Z_divexact(T, powiu(p,3));
+      alpha = 0; beta++;
+      t60 = theta_j(H,p,3);
+      if (t60) break;
+      v = FpX_factor_squarefree(FpX_red(H,p), p);
+      m = lg(v)-1; /* maximal multiplicity */
+      if (m > 1)
       {
-        GEN T = ZX_affine(H, p, rac); /* H(rac + px) */
-        if (ZX_pval(T,p) >= 3)
-        {
-          H = ZX_Z_divexact(T, powiu(p,3));
-          alpha = 0; beta++;
-          t60 = theta_j(H,p,3);
-          if (!t60)
-          {
-            GEN v = FpX_factor_squarefree(FpX_red(H,p), p);
-            long m = lg(v)-1; /* maximal multiplicity */
-            if (m > 1)
-            {
-              rac = FpX_oneroot(gel(v,m), p); /* v[m] is linear */
-              t60 = theta_j(ZX_translate(H,rac),p,3);
-            }
-          }
-        }
+        rac = FpX_oneroot(gel(v,m), p); /* v[m] is linear */
+        H = ZX_translate(H,rac);
+        t60 = theta_j(H,p,3);
+        if (t60 < 60) break;
       }
     }
   }
