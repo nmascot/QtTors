@@ -267,8 +267,8 @@ discpart(GEN H, GEN p, long prec)
 static long
 theta_j(GEN B, GEN p, long j)
 {
-  long i, t = 60*myval(RgX_coeff(B,5-j), p);
-  for(i = 2+j; i <= 6; i++)
+  long i, t = VERYBIG;
+  for(i = 1+j; i <= 6; i++)
     t = minss(t, myval(RgX_coeff(B,6-i), p) * (60 / (i-j)));
   return t;
 }
