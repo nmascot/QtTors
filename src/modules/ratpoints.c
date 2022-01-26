@@ -413,7 +413,7 @@ ZX_positive_region(GEN P, long h, long bitprec)
 {
   long prec = nbits2prec(bitprec);
   GEN it = mkvec2(stoi(-h),stoi(h));
-  GEN R = ZX_Uspensky(P, it, 1, bitprec);
+  GEN R = realroots(P, it, prec);
   long nR = lg(R)-1;
   long s = signe(ZX_Z_eval(P,gel(it,1)));
   long i=1, j;
@@ -1752,8 +1752,6 @@ ZX_hyperellratpoints(GEN P, GEN h, long flag)
   struct points data;
   ulong flags = 0;
 
-  if (!ZX_is_squarefree(P))
-    pari_err_DOMAIN("hyperellratpoints","issquarefree(pol)","=",gen_0, P);
   if (!args_h(&args, h))
   {
     pari_err_TYPE("hyperellratpoints", h);
