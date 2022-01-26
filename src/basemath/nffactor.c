@@ -350,12 +350,13 @@ proper_nf(GEN nf)
 static GEN
 fix_nf(GEN *pnf, GEN *pT, GEN *pA)
 {
-  GEN nf, NF, P, Q, q, D, T = *pT;
+  GEN nf, NF, P, q, D, T = *pT;
   nfmaxord_t S;
-  long i, l;
+  long i, l, lim;
 
   if (*pnf) return gen_1;
-  nfmaxord(&S, T, nf_PARTIALFACT);
+  lim = GP_DATA->primelimit + 1;
+  nfmaxord(&S, mkvec2(T, utoipos(lim)), nf_PARTIALFACT);
   NF = nfinit_complete(&S, 0, DEFAULTPREC);
   *pnf = nf = proper_nf(NF);
   if (nf != NF) { /* t_POL defining base field changed (not monic) */
@@ -374,17 +375,13 @@ fix_nf(GEN *pnf, GEN *pT, GEN *pA)
     *pA = Q_primpart(a); /* need to update A */
   }
 
-  D = nf_get_disc(nf);
-  if (is_pm1(D)) return gen_1;
-  (void)absZ_factor_limit_strict(D, 0, &Q);
-  if (!Q) return gen_1;
+  D = nf_get_disc(nf); if (is_pm1(D)) return gen_1;
   /* D may be incorrect */
-  Q = gel(Q,1);
   P = nf_get_ramified_primes(nf); l = lg(P);
   for (i = 1, q = gen_1; i < l; i++)
   {
     GEN p = gel(P,i);
-    if (Z_pvalrem(Q, p, &Q) && !BPSW_psp(p)) q = mulii(q, p);
+    if (cmpiu(p, lim) >= 0 && !BPSW_psp(p)) q = mulii(q, p);
   }
   return q;
 }
