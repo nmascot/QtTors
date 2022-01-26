@@ -187,7 +187,9 @@ y
   ***   at top-level: nfmodpr(nfinit(x),[],[]~)
   ***                 ^-------------------------
   *** nfmodpr: incorrect type in checkprid (t_COL).
+2*t
+2*y
   ***   at top-level: nfmodpr(Kerr,[y,2;y^2/9,3],Perr)
   ***                 ^--------------------------------
   *** nfmodpr: impossible inverse in Rg_to_ff: Mod(0, 3).
-Total time spent: 186
+Total time spent: 84

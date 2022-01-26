@@ -2781,7 +2781,8 @@ nfmodprlift(GEN nf, GEN x, GEN pr)
       return y;
     default: pari_err_TYPE("nfmodprlit",x);
   }
-  x = FF_to_FpXQ_i(x);
+  x = FF_to_FpXQ(x);
+  setvarn(x, nf_get_varn(nf));
   d = degpol(x);
   if (d <= 0) { set_avma(av); return d? gen_0: icopy(gel(x,2)); }
   modpr = nf_to_Fq_init(nf, &pr, &T, &p);
