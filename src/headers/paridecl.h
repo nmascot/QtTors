@@ -1485,6 +1485,8 @@ GEN     ZX_add(GEN x, GEN y);
 GEN     ZX_affine(GEN P, GEN a, GEN b);
 GEN     ZX_copy(GEN x);
 GEN     ZX_deriv(GEN x);
+GEN     ZX_digits(GEN x, GEN T);
+GEN     ZXV_ZX_fromdigits(GEN x, GEN T);
 GEN     ZX_div_by_X_1(GEN a, GEN *r);
 GEN     ZX_divuexact(GEN y, ulong x);
 int     ZX_equal(GEN V, GEN W);

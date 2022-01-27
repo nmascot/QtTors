@@ -853,6 +853,40 @@ ZX_mod_Xnm1(GEN T, ulong n)
   return normalizepol_lg(S, l);
 }
 
+static GEN
+_ZX_mul(void* E, GEN x, GEN y)
+{ (void) E; return ZX_mul(x, y); }
+static GEN
+_ZX_sqr(void *E, GEN x)
+{ (void) E; return ZX_sqr(x); }
+
+static GEN
+_ZX_divrem(void * E, GEN x, GEN y, GEN *r)
+{ (void) E; return RgX_divrem(x, y, r); }
+
+static GEN
+_ZX_add(void * E, GEN x, GEN y)
+{ (void) E; return ZX_add(x, y); }
+
+static struct bb_ring ZX_ring = { _ZX_add,_ZX_mul,_ZX_sqr };
+
+GEN
+ZX_digits(GEN x, GEN T)
+{
+  pari_sp av = avma;
+  long d = degpol(T), n = (lgpol(x)+d-1)/d;
+  GEN z = gen_digits(x, T, n, NULL, &ZX_ring, _ZX_divrem);
+  return gerepileupto(av, z);
+}
+
+GEN
+ZXV_ZX_fromdigits(GEN x, GEN T)
+{
+  pari_sp av = avma;
+  GEN z = gen_fromdigits(x,T, NULL, &ZX_ring);
+  return gerepileupto(av, z);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                                ZXV                              */

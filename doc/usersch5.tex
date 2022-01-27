@@ -9664,6 +9664,13 @@ function.
 \fun{GEN}{ZX_div_by_X_1}{GEN T, GEN *r} return the quotient of $T$ by $X-1$.
 If $r$ is not \kbd{NULL} set it to $T(1)$.
 
+\fun{GEN}{ZX_digits}{GEN x, GEN B} returns a vector of \kbd{ZX}
+$[c_0,\ldots,c_n]$ of degree less than the degree of $B$ and such that
+$x=\sum_{i=0}^{n}{c_i\*B^i}$. Assume that $B$ is monic.
+
+\fun{GEN}{ZXV_ZX_fromdigits}{GEN v, GEN B} where $v=[c_0,\ldots,c_n]$
+is a vector of \kbd{ZX}, returns $\sum_{i=0}^{n}{c_i\*B^i}$.
+
 \fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of the \kbd{ZX} $x$ and $y$.
 Not memory-clean, but suitable for \kbd{gerepileupto}.
 
