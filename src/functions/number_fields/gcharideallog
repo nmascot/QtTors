@@ -2,10 +2,10 @@ Function: gcharideallog
 Section: number_fields
 C-Name: gchar_ideallog
 Prototype: GGp
-Help: gcharideallog(g,x): returns the internal representation of the ideal x
- suitable for computations in g, as a column vector.
+Help: gcharideallog(gc,x): returns the internal representation of the ideal x
+ suitable for computations in gc, as a column vector.
 Doc: Return the internal representation of the ideal $x$ suitable for
- computations in $g$, as a \typ{COL} in $\R^n$.
+ computations in $gc$, as a \typ{COL} in $\R^n$.
 
  Its $n = \kbd{ns+nc}+(r_1+r_2)+r_2$ components correspond to a
  logarithm map on the group of fractional ideals~${\cal L}: I \to \R^n$, see
@@ -15,8 +15,10 @@ Doc: Return the internal representation of the ideal $x$ suitable for
  principalization of $x$ on a set $S$ of primes generating
  the class group (see \kbd{bnfisprincipal}),
  then the logarithm of $x$ is the \typ{COL}
- $${\cal L}(x) = \left[ (a_i), \log_f(\alpha), \dfrac{\log|x/\alpha|_s}{2\pi},
- \dfrac{\arg(x/\alpha)_s}{2\pi} \right]$$
+ $$
+  {\cal L}(x) = \left[ (a_i), \log_f(\alpha), \dfrac{\log|x/\alpha|_\tau}{2\pi},
+ \dfrac{\arg(x/\alpha)_\tau}{2\pi} \right]
+ $$
  where
 
  \item the exponent vector $(a_i)$ has \kbd{ns} components, where
@@ -25,9 +27,9 @@ Doc: Return the internal representation of the ideal $x$ suitable for
  \item $\log_f(\alpha)$ is a discrete logarithm of
  $\alpha$ in the \kbd{idealstar} group $(\Z_K/f)^\times$, with \kbd{nc} components,
 
- \item $\log|x/\alpha|_s$ has $r_1+r_2$ components, one for each
- real embedding and pair of complex embeddings $s:K\to\C$
- (and $|z|_s=|z|^2$ for complex $s$).
+ \item $\log|x/\alpha|_\tau$ has $r_1+r_2$ components, one for each
+ real embedding and pair of complex embeddings $\tau\colon K\to\C$
+ (and $|z|_\tau=|z|^2$ for complex $\tau$).
 
- \item $\arg{(x/\alpha)_s}$ has $r_2$ components, one for each
- pair of complex embeddings $s:K\to\C$.
+ \item $\arg{(x/\alpha)_\tau}$ has $r_2$ components, one for each
+ pair of complex embeddings $\tau\colon K\to\C$.

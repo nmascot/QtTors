@@ -12,8 +12,12 @@ Doc: \var{gc} being the structure returned by \kbd{gcharinit}, return a \typ{MAT
  (Weil type A0). The last component is interpreted as a power of the norm.
 
  If \var{type} is a \typ{VEC} of length $\var{gc}\kbd{.r1}+\var{gc}\kbd{.r2}$,
- with values $(p_\tau,q_\tau)$ for complex embedding $\tau$, return a character
- whose infinity type is
- $$z \mapsto \prod_\tau z_\tau^{p_\tau}\bar{z}_{\tau}^{q_\tau}.$$
+ containing a pair of integers $[p_\tau,q_\tau]$ for each complex
+ embedding~$\tau$, return a \typ{VEC} containing a character whose infinity type
+ at~$\tau$ is
+ $$
+  z \mapsto z^{-p_\tau}\bar{z}^{-q_\tau}
+ $$
+ if such a character exists, or empty otherwise.
  The full set of characters of that infinity type is obtained by multiplying by
  the group of finite order characters.

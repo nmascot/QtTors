@@ -5,9 +5,12 @@ Prototype: iGGD&
 Help: gcharisalgebraic(gc,chi,{&type}): returns 1 if chi is an algebraic (type A0)
  character. If type is present, set it to the infinity type [p,q] of chi.
 Doc: \var{gc} being the structure returned by \kbd{gcharinit} and \var{chi}
- a character on \var{gc}, return 1 if chi is an algebraic (Weil type A0) character,
- so that its infinity type can be written
- $$ z \mapsto \prod_\tau z_\tau^{p_\tau}\bar{z}_{\tau}^{q_\tau} $$
- for pairs of integers $(p_\tau,q_\tau)$ for each complex embedding $\tau$.
+ a character on \var{gc}, return 1 if and only if chi is an algebraic (Weil type
+ A0) character, so that its infinity type at every complex embedding~$\tau$ can
+ be written
+ $$
+  z \mapsto z^{-p_\tau}\bar{z}^{-q_\tau}
+ $$
+ for some pair of integers $(p_\tau,q_\tau)$.
 
  If \var{type} is given, set it to the \typ{VEC} of exponents $[p_\tau,q_\tau]$.

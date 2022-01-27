@@ -38,7 +38,7 @@ print(-566351/758222 + 458771/690001*I)
 \\bestappr(cxchareval(g1,c,J),10^6)
 g2 = gcharinit(bnf,idealpow(bnf,pr,2));
 c = gcharidentify(g2,[1,2],[[-1,0],[3,0]]);
-c=concat(c,3/2);
+c=concat(c,-3/2);
 gcharconductor(g2,c)
 t = idealadd(bnf,11,x-5);
 bestappr(cxchareval(g2,c,t),10^6)
@@ -254,13 +254,22 @@ G = gcharinit(bnf,N);
 print("bug from Atelier demo");
 bnf = bnfinit(x^2+5,1);
 gc = gcharinit(bnf,1);
-chi = [1,0,1];
+chi = [1,0,-1];
 L = lfuncreate([gc,chi]);
 round(lfunan(L,5))
+
+print("norm component fix");
+bnf = bnfinit(x^2-5);
+gc = gcharinit(bnf,1);
+chi = [1,-1];
+L = lfuncreate([gc,chi]);
+round(10^6*lfunparams(L))
+round(lfunan(L,10))
 
 print("bad inputs");
 bnf = bnfinit(x^4 - x^3 + 3*x^2 + 2*x + 1, 1);
 G = gcharinit(bnf, 1);
 lfuncreate([G,[1]]);
 lfuncreate([G,[1,0,0,'x]]);
+lfuncreate([G,[1,0,0,0,I]]);
 \\don't put tests after the errors

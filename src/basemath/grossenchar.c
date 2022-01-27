@@ -936,20 +936,21 @@ gchar_algebraicoftype(GEN gc, GEN type)
   k = cgetg(r2+1,t_VEC);
   p = gmael(type, 1, 1);
   q = gmael(type, 1, 2); w = addii(p, q);
-  gel(k, 1) = subii(p, q);
+  gel(k, 1) = subii(q, p);
   for (i = 2; i <= r2; i++)
   {
     p = gmael(type, i, 1);
     q = gmael(type, i, 2);
     if (!equalii(w, addii(p, q))) return NULL;
-    gel(k, i) = subii(p, q);
+    gel(k, i) = subii(q, p);
   }
   /* block of k_s parameters of free algebraic */
   matk = matslice(gchar_get_basis(gc),n0+1,n0+nalg,nm-r2+1,nm);
-  chi = shallowtrans(inverseimage(shallowtrans(matk),shallowtrans(k))); /* FIXME: need to solve integral system */
+  chi = shallowtrans(inverseimage(shallowtrans(matk),shallowtrans(k)));
+  /* FIXME: need to solve integral system or check solution is integral */
   if (lg(chi) == 1) return NULL;
   chi = mkvec4(zerovec(gchar_get_ntors(gc)), chi,
-               zerovec(gchar_get_nfree(gc) - nalg), gmul2n(w,-1));
+               zerovec(gchar_get_nfree(gc) - nalg), gmul2n(negi(w),-1));
   return mkvec(shallowconcat1(chi));
 }
 
@@ -987,7 +988,8 @@ check_gchar_i(GEN chi, long l, GEN *w2)
       {
         case t_INT:
         case t_FRAC:
-        case t_REAL: break;
+        case t_REAL:
+        case t_COMPLEX: break;
         default: pari_err_TYPE("check_gchar_i [w2]", *w2);
       }
     }
@@ -1151,7 +1153,7 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
     if (!gequal0(gel(chi,i))) return gc_bool(av, 0);
   chii = gchar_parameters(gc, chi);
   /* condition is k_s + w = 0 mod 2 for all s */
-  w = gmul2n(w, 1);
+  w = gneg(gmul2n(w, 1));
   if (typ(w) != t_INT) return gc_bool(av, 0);
   for (i = 1; i <= r2; i++)
     if (smodis(addii(gel(chii, n0 + i), w), 2))
@@ -1163,8 +1165,8 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
     for (i = 1; i <= r2; i++)
     {
       GEN p, q;
-      p = gmul2n(addii(w, gel(chii, n0+i)), -1);
-      q = gmul2n(subii(w, gel(chii, n0+i)), -1);
+      q = gmul2n(addii(w, gel(chii, n0+i)), -1);
+      p = gmul2n(subii(w, gel(chii, n0+i)), -1);
       gel(v, i) = mkvec2(p, q);
     }
     *pq = gerepilecopy(av, v);
@@ -1177,23 +1179,23 @@ GEN
 gcharlocal(GEN gc, GEN chi, GEN v, long prec)
 {
   pari_sp av = avma;
-  GEN w2, chiv, k, phi, logchi, nf, moo, famod;
-  long s, r1, r2, i;
+  GEN s, chiv, k, phi, logchi, nf, moo, famod;
+  long tau, r1, r2, i;
   check_gchar_group(gc);
-  chi = gchar_internal(gc, chi, &w2);
+  chi = gchar_internal(gc, chi, &s);
   logchi = gchari_log(gc, chi, NULL);
   if (typ(v) == t_INT) /* v infinite */
   {
-    s = itos(v);
+    tau = itos(v);
     r1 = gchar_get_r1(gc);
     r2 = gchar_get_r2(gc);
-    if (s<=0) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", "<=", gen_0, v);
-    if (s>r1+r2) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", ">", stoi(r1+r2), v);
-    phi = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)+s);
-    if (s<=r1) /* v real */
+    if (tau<=0) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", "<=", gen_0, v);
+    if (tau>r1+r2) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", ">", stoi(r1+r2), v);
+    phi = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)+tau);
+    if (tau<=r1) /* v real */
     {
       moo = gel(gchar_get_mod(gc),2);
-      i = zv_search(moo,s);
+      i = zv_search(moo,tau);
       if (i==0) k = gen_0;
       else
       {
@@ -1203,8 +1205,8 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec)
       }
     }
     else /* v complex */
-      k = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)+r2+s);
-    if (w2) phi = mkcomplex(phi,w2);
+      k = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)+r2+tau);
+    if (s) phi = gsub(phi,gmul(gen_I(),s));
     chiv = mkvec2(k,phi);
   }
   else /* v finite */
@@ -1218,7 +1220,7 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec)
         /* FIXME: only compute conductor at v */
         pari_err_IMPL("local component of a Grossencharacter at a ramified prime");
     }
-    chiv = mkvec(gchari_eval(gc, chi, v, 0, logchi, NULL, w2, prec));
+    chiv = mkvec(gchari_eval(gc, chi, v, 0, logchi, NULL, s, prec));
   }
   return gerepilecopy(av, chiv);
 }
@@ -1315,11 +1317,11 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long
   if (flag)
   {
     val = gexp(mkcomplex(gen_0, gmul(Pi2n(1,prec), val)), prec);
-    if (norm) val = gmul(val, gpow(norm, w2, prec));
+    if (norm) val = gmul(val, gpow(norm, gneg(w2), prec));
   }
   else if (norm)
   {
-    GEN expo = gdiv(w2, PiI2(prec));
+    GEN expo = gdiv(gneg(w2), PiI2(prec));
     val = gadd(val, gmul(expo, glog(norm, prec)));
   }
   if (DEBUGLEVEL>1) err_printf("char value %Ps\n", val);
@@ -1501,10 +1503,10 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
       if (typ(x) == t_COMPLEX)
       {
         nnormcompo++;
-        /* - 2 Pi Im(theta) / log N(pr) */
+        /* 2 Pi Im(theta) / log N(pr) */
         normcompo = gadd(normcompo,
-          gneg(gdiv(gmul(Pi2n(1,prec),imag_i(x)),
-              glog(idealnorm(bnf,gel(Lv,i)),prec))));
+              gdiv(gmul(Pi2n(1,prec),imag_i(x)),
+              glog(idealnorm(bnf,gel(Lv,i)),prec)));
         x = real_i(x);
         gel(Lchiv,i) = x;
       }
@@ -1523,7 +1525,7 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
       if (typ(x) == t_COMPLEX)
       {
         nnormcompo++;
-        normcompo = gadd(normcompo,imag_i(x));
+        normcompo = gsub(normcompo,imag_i(x));
         x = real_i(x);
         gmael(Lchiv,i,2) = x;
       }
@@ -1669,7 +1671,7 @@ vecan_gchar(GEN an, long n, long prec)
   /* weight, could consider shifting s at eval instead */
   if (!gequal0(w2))
   {
-    GEN nw2 = dirpowers(n, w2, prec);
+    GEN nw2 = dirpowers(n, gneg(w2), prec);
     long j;
     for (j = 1; j <= n; j++)
       if (gel(v,j) != gen_0) gel(v, j) = gmul(gel(v,j),gel(nw2,j));
@@ -1724,6 +1726,7 @@ gchari_lfun(GEN gc, GEN chi, GEN w)
   nf_get_sign(nf, &r1, &r2);
   chilog = gchari_log(gc, chi, &w2);
   w2 = gadd(w,w2);
+  if (!gequal0(gimag(w2))) pari_err_IMPL("lfun for gchar with imaginary norm component");
   cond_f =  gcharlog_conductor_f(gc, chilog);
   cond_oo =  gcharlog_conductor_oo(gc, chilog);
   chiw = gchari_shift(gc,chi,w);
@@ -1748,8 +1751,8 @@ gchari_lfun(GEN gc, GEN chi, GEN w)
   {
     long j;
     for (j = 1; j < lg(sig); j++)
-      gel(sig, j) = gsub(gel(sig, j), w2);
-    k = gadd(k, gmulgs(w2,2));
+      gel(sig, j) = gadd(gel(sig, j), w2);
+    k = gsub(k, gmulgs(w2,2));
   }
 
 #define tag(x,t)  mkvec2(mkvecsmall(t),x)

@@ -2,6 +2,7 @@
 one large field
 [10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 non trivial cm subfield
+gcharalgebraic
 
 [1 0 0 0 0 0   0]
 
@@ -16,11 +17,11 @@ non trivial cm subfield
 [0 0 0 0 0 0   1]
 
 []
-[[0, 0, 0, -2, 1, 0, 1/2]]
+[[0, 0, 0, 2, -1, 0, -1/2]]
 1
 1
-[[1, 2], [2, 1]]
-[[1, 2]]
+[[2, 1], [1, 2]]
+[[-1, -2]]
 1
 [[4, 0]]
 need to increase prec
@@ -74,7 +75,7 @@ limit cases
 [0 1]
 
 wrong, this should be []:
-[[1/2, 1]]
+[[-1/2, -1]]
 
 [0 0 0 1]
 
@@ -112,6 +113,8 @@ gcharparameters
 
 chareval
 1
+169
+169
 gcharidentify 2
 [0, 0]
 [5]
@@ -123,8 +126,9 @@ gcharlocal
 [0, -652850]
 [100000, 108808]
 [0, -108808]
-[100000, 108808 + 300000*I]
-[0, -108808 - 200000*I]
+[100000, 108808 - 300000*I]
+[0, -108808 + 200000*I]
+[0, 891192]
 [0]
 [0, 105380]
 [200000, -52690]
@@ -243,4 +247,7 @@ wrong, this should be an invalid input:
   ***   at top-level: gcharlocal(gc,[0,1],3)
   ***                 ^----------------------
   *** gcharlocal: domain error in gcharlocal [index of an infinite place]: v > 2
-Total time spent: 1901
+  ***   at top-level: gcharlocal(gc,[0,1,O(5^2)],1)
+  ***                 ^-----------------------------
+  *** gcharlocal: incorrect type in check_gchar_i [w2] (t_PADIC).
+Total time spent: 2265

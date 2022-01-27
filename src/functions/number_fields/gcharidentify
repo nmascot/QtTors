@@ -51,8 +51,7 @@ Doc: \var{gc} being a Grossencharacter group as output by \kbd{gcharinit}, $Lv$ 
  % = 0.18476080328172203337331245154966763237
  @eprog
 
- The output may be a quasi-character when the parameters~$\varphi$ or~$\theta$
- have a nonzero imaginary part.
+ The output may be a quasi-character.
 
  \bprog
  ? bnf = bnfinit(x^2-2,1);
