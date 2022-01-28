@@ -1282,10 +1282,10 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec)
 /*******************************************************************/
 
 /* logarithm of a character */
+/* TODO document the fact that matrices are accepted as input? */
 GEN
 gchar_duallog(GEN gc, GEN chi)
 {
-  check_gchar_group(gc);
   if (typ(chi) == t_MAT)
   {
     long k;
@@ -1299,6 +1299,18 @@ gchar_duallog(GEN gc, GEN chi)
   }
   else
     return gchari_log(gc, gchar_internal(gc, chi, NULL), NULL);
+}
+
+/* gp version, with norm component */
+GEN
+gcharduallog(GEN gc, GEN chi)
+{
+  pari_sp av = avma;
+  GEN logchi, s;
+  check_gchar_group(gc);
+  check_gchar(gc, chi, &s);
+  logchi = gchar_duallog(gc, chi);
+  return gerepilecopy(av, shallowconcat1(mkvec2(logchi,s)));
 }
 
 /* complete log of ideal */
@@ -1324,6 +1336,18 @@ gchar_log(GEN gc, GEN x, long prec)
   zm_log = gchar_logm(bnf,zm,alpha);
   if (DEBUGLEVEL>2) err_printf("zm_log(alpha) %Ps\n", zm_log);
   return gerepilecopy(av, shallowconcat1(mkvec3(vp,gneg(zm_log),gneg(arch_log))));
+}
+
+/* gp version, with norm component */
+GEN
+gcharlog(GEN gc, GEN x, long prec)
+{
+  pari_sp av = avma;
+  GEN logx, norm;
+  logx = gchar_log(gc,x,prec);
+  norm = idealnorm(gchar_get_bnf(gc), x);
+  norm = mkcomplex(gen_0,gdiv(glog(norm,prec),Pi2n(1,prec)));
+  return gerepilecopy(av, shallowconcat1(mkvec2(logx,norm)));
 }
 
 static GEN

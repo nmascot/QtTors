@@ -111,11 +111,9 @@ gcharisalgebraic
 0
 0
 gcharduallog
-
-[     0       0   6291456 2097152]
-
-[934393 -934393 -13631488 1048576]
-
+[0, 0, 6291456, 2097152, 0]
+[934393, -934393, -13631488, 1048576, 0]
+1
 chareval
 1
 169
@@ -257,4 +255,4 @@ bad inputs
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)],1)
   ***                 ^-----------------------------
   *** gcharlocal: incorrect type in check_gchar_i [w2] (t_PADIC).
-Total time spent: 2090
+Total time spent: 1910

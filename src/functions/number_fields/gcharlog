@@ -1,13 +1,13 @@
 Function: gcharlog
 Section: number_fields
-C-Name: gchar_log
+C-Name: gcharlog
 Prototype: GGp
 Help: gcharlog(gc,x): returns the internal representation (logarithm) of the
  ideal x suitable for computations in gc, as a column vector.
-Doc: Return the internal representation of the ideal $x$ suitable for
- computations in $gc$, as a \typ{COL} in $\R^n$.
+Doc: Return the internal (logarithmic) representation of the ideal $x$ suitable
+ for computations in $gc$, as a \typ{COL} in $\R^n$.
 
- Its $n = \kbd{ns+nc}+(r_1+r_2)+r_2$ components correspond to a
+ Its $n = \kbd{ns+nc}+(r_1+r_2)+r_2+1$ components correspond to a
  logarithm map on the group of fractional ideals~${\cal L}: I \to \R^n$, see
  \kbd{gcharinit}.
 
@@ -17,7 +17,7 @@ Doc: Return the internal representation of the ideal $x$ suitable for
  then the logarithm of $x$ is the \typ{COL}
  $$
   {\cal L}(x) = \left[ (a_i), \log_f(\alpha), \dfrac{\log|x/\alpha|_\tau}{2\pi},
- \dfrac{\arg(x/\alpha)_\tau}{2\pi} \right]
+ \dfrac{\arg(x/\alpha)_\tau}{2\pi}, \dfrac{\log N(x)}{2\pi}\cdot i \right]
  $$
  where
 
@@ -33,3 +33,5 @@ Doc: Return the internal representation of the ideal $x$ suitable for
 
  \item $\arg{(x/\alpha)_\tau}$ has $r_2$ components, one for each
  pair of complex embeddings $\tau\colon K\to\C$.
+
+ \item $N(x)$ is the norm of the ideal~$x$.

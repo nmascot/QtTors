@@ -196,7 +196,16 @@ gcharisalgebraic(gc,[0,1,0,1/3])
 print("gcharduallog");
 bnf = bnfinit(polcompositum(x^2+1,x^2-2,2),1);
 gc = gcharinit(bnf,1);
-round(2^20*gcharduallog(gc,[1,1,0;-1,0,1]))
+round(2^20*gcharduallog(gc,[1,1,0]))
+round(2^20*gcharduallog(gc,[-1,0,1]))
+chi = [1,2,3,-2+I];
+pr = idealprimedec(bnf,2)[1];
+logchi = gcharduallog(gc,chi);
+logpr = gcharlog(gc,pr);
+ev1 = chareval(gc,chi,pr);
+ev2 = logchi*logpr;
+ev2 -= round(real(ev2));
+exponent(ev1-ev2) < -100
 
 print("chareval");
 bnf = bnfinit(x^2-5,1);
