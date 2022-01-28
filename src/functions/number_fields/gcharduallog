@@ -1,12 +1,13 @@
-Function: gcharparameters
+Function: gcharduallog
 Section: number_fields
-C-Name: gchar_parameters
+C-Name: gchar_duallog
 Prototype: GG
-Help: gcharparameters(gc,chi): return exponent vector of character chi
- in R^n. We have chareval(g,chi,x) = gcharparameters(g,chi)*gcharideallog(g,x)
-Doc: Return internal exponent vector of character \kbd{chi}
+Help: gcharduallog(gc,chi): return logarithm vector of character chi
+ in R^n. We have chareval(g,chi,x) = gcharduallog(g,chi)*gcharlog(g,x)
+Doc: Return internal logarithm vector of character \kbd{chi}
  in $\R^n$, so that for all \var{x}, we have
- \kbd{chareval(\var{gc},\var{chi},\var{x}) = gcharparameters(\var{gc},\var{chi})*gcharideallog(\var{gc},\var{x})}
+ \kbd{chareval(\var{gc},\var{chi},\var{x})
+ = gcharduallog(\var{gc},\var{chi})*gcharlog(\var{gc},\var{x})}
 
  The components are organized as follows:
 
@@ -25,4 +26,4 @@ Doc: Return internal exponent vector of character \kbd{chi}
  \item the last $r_2$ components are in $\Z$ and correspond to characters of
  $\R/\Z$ for each complex place: $k$ encodes~$z\mapsto (z/|z|)^k$.
 
- See also \kbd{gcharideallog}.
+ See also \kbd{gcharlog}.

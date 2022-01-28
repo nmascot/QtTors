@@ -1,9 +1,9 @@
-Function: gcharideallog
+Function: gcharlog
 Section: number_fields
-C-Name: gchar_ideallog
+C-Name: gchar_log
 Prototype: GGp
-Help: gcharideallog(gc,x): returns the internal representation of the ideal x
- suitable for computations in gc, as a column vector.
+Help: gcharlog(gc,x): returns the internal representation (logarithm) of the
+ ideal x suitable for computations in gc, as a column vector.
 Doc: Return the internal representation of the ideal $x$ suitable for
  computations in $gc$, as a \typ{COL} in $\R^n$.
 

@@ -3931,9 +3931,9 @@ GEN     gchari_lfun(GEN gc, GEN chi, GEN w);
 GEN     vecan_gchar(GEN an, long n, long prec);
 GEN     nfembedlog(GEN bnf, GEN x, long prec);
 GEN     gchar_logm(GEN bnf, GEN zm, GEN x);
-GEN     gchar_ideallog(GEN gc, GEN x, long prec);
+GEN     gchar_log(GEN gc, GEN x, long prec);
 GEN     gchar_identify(GEN gc, GEN Lv, GEN Lchiv, long prec);
-GEN     gchar_parameters(GEN gc, GEN chi);
+GEN     gchar_duallog(GEN gc, GEN chi);
 
 /* groupid.c */
 

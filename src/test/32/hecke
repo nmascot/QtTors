@@ -105,7 +105,7 @@ gcharisalgebraic
 1
 0
 0
-gcharparameters
+gcharduallog
 
 [     0       0   6291456 2097152]
 
@@ -250,4 +250,4 @@ wrong, this should be an invalid input:
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)],1)
   ***                 ^-----------------------------
   *** gcharlocal: incorrect type in check_gchar_i [w2] (t_PADIC).
-Total time spent: 2265
+Total time spent: 1937

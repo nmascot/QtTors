@@ -1151,7 +1151,7 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
   /* check component are on algebraic generators */
   for (i=ntors+nalg+1;i<=ntors+nfree;i++)
     if (!gequal0(gel(chi,i))) return gc_bool(av, 0);
-  chii = gchar_parameters(gc, chi);
+  chii = gchar_duallog(gc, chi);
   /* condition is k_s + w = 0 mod 2 for all s */
   w = gneg(gmul2n(w, 1));
   if (typ(w) != t_INT) return gc_bool(av, 0);
@@ -1232,9 +1232,9 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec)
 /*                                                                 */
 /*******************************************************************/
 
-/* parameters of a character */
+/* logarithm of a character */
 GEN
-gchar_parameters(GEN gc, GEN chi)
+gchar_duallog(GEN gc, GEN chi)
 {
   check_gchar_group(gc);
   if (typ(chi) == t_MAT)
@@ -1245,7 +1245,7 @@ gchar_parameters(GEN gc, GEN chi)
     m = shallowtrans(chi);
     r = cgetg(lg(m), t_MAT);
     for (k = 1; k < lg(m); k++)
-      gel(r, k) = gchar_parameters(gc, shallowtrans(gel(m, k)));
+      gel(r, k) = gchar_duallog(gc, shallowtrans(gel(m, k)));
     return gerepilecopy(av, shallowtrans(r));
   }
   else
@@ -1255,7 +1255,7 @@ gchar_parameters(GEN gc, GEN chi)
 /* complete log of ideal */
 /* TODO handle nfembedlog()==NULL loss of precision */
 GEN
-gchar_ideallog(GEN gc, GEN x, long prec)
+gchar_log(GEN gc, GEN x, long prec)
 {
   GEN bnf, zm, val_S, v, vp, alpha, t, arch_log, zm_log;
   pari_sp av = avma;
@@ -1293,7 +1293,7 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long
 
   prec0 = gchar_get_prec(gc);
 
-  if (!logx) logx = gchar_ideallog(gc, x, prec0);
+  if (!logx) logx = gchar_log(gc, x, prec0);
   if (!logchi) logchi = gchari_log(gc, chi, &w2);
 
   /* check if precision is sufficient, take care of gexpo = -infty */
@@ -1303,7 +1303,7 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long
   {
     prec0 = prec + extraprec;
     gc = gcharnewprec(gc, prec0);
-    logx = gchar_ideallog(gc, x, prec0);
+    logx = gchar_log(gc, x, prec0);
     logchi = gchari_log(gc, chi, &w2);
   }
 
@@ -1414,7 +1414,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
       pr = gel(Lv,i);
       npr++;
       Lpr[npr] = i;
-      gel(Llog,npr) = gchar_ideallog(gc, pr, prec);
+      gel(Llog,npr) = gchar_log(gc, pr, prec);
     }
   }
 
@@ -1436,7 +1436,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   for (j=1; j<=nchi; j++)
   {
     C = cgetg(dim+1, t_COL);
-    logchi = gchar_parameters(gc, vec_ei(nchi,j));
+    logchi = gchar_duallog(gc, vec_ei(nchi,j));
     for (i=1; i<=npr; i++)
       gel(C,i) = gcharlog_eval_raw(logchi, gel(Llog,i));
     chi_oo = gcharlog_conductor_oo(gc, logchi);
