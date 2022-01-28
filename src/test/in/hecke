@@ -169,26 +169,19 @@ gcharalgebraic(gc)
 bnf = bnfinit(x^2+1,1);
 gc = gcharinit(bnf,1);
 gcharalgebraic(gc)
-print("wrong, this should be []:");
 gcharalgebraic(gc,[[2,0]])
 gc = gcharinit(x^4+x^2+x+1,1);
 gcharalgebraic(gc)
 gcharalgebraic(gc,[[1,0],[1,0]])
-print("wrong, this should be [0,0,0,0]:");
 gcharalgebraic(gc,[[0,0],[0,0]])
-print("wrong, this should be [0,0,0,1]:");
 gcharalgebraic(gc,[[1,1],[1,1]])
 bnf = bnfinit(x^2-15,1);
 gc = gcharinit(bnf,1);
-print("wrong, this should be [[0,0,0]]:");
 gcharalgebraic(gc,[[0,0],[0,0]])
-print("wrong, this should be [[0,0,1]]:");
 gcharalgebraic(gc,[[1,0],[0,1]])
 bnf = bnfinit(x^3-x-1,1);
 gc = gcharinit(bnf,1);
-print("wrong, this should be [[0,0,1]]:");
 gcharalgebraic(gc,[[1,0],[1,1]])
-print("wrong, this should be []:");
 gcharalgebraic(gc,[[1,0],[1,0]])
 
 print("gcharisalgebraic");
@@ -330,10 +323,8 @@ chareval(gc,[0,O(3^7)],1);
 gc = gcharinit(bnfinit(x^2-x-276,1), [2,[0,1]]);
 
 gc = gcharinit(x^2-2,1);
-print("wrong, this should be an invalid input:");
 gcharalgebraic(gc,[])
 gc = gcharinit(x^3-x-1,1);
-print("wrong, this should be an invalid input:");
 gcharalgebraic(gc,[[1,1]])
 bnf = bnfinit(x^2-5);
 gc = gcharinit(bnf,[4,[1,0]]);

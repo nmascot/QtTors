@@ -94,32 +94,17 @@ limit cases
 
 [0 1]
 
-wrong, this should be []:
-[[-1/2, -1]]
+[]
 
 [0 0 0 1]
 
 []
-wrong, this should be [0,0,0,0]:
+[[0, 0, 0, 0]]
+[[0, 0, 0, -1]]
+[[0, 0, 0]]
+[[0, 0, -1]]
+[[0, 0, -1]]
 []
-wrong, this should be [0,0,0,1]:
-[]
-wrong, this should be [[0,0,0]]:
-  ***   at top-level: gcharalgebraic(gc,[[0,0],[0,0]])
-  ***                 ^--------------------------------
-  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
-wrong, this should be [[0,0,1]]:
-  ***   at top-level: gcharalgebraic(gc,[[1,0],[0,1]])
-  ***                 ^--------------------------------
-  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
-wrong, this should be [[0,0,1]]:
-  ***   at top-level: gcharalgebraic(gc,[[1,0],[1,1]])
-  ***                 ^--------------------------------
-  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
-wrong, this should be []:
-  ***   at top-level: gcharalgebraic(gc,[[1,0],[1,0]])
-  ***                 ^--------------------------------
-  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
 gcharisalgebraic
 0
 1
@@ -254,10 +239,12 @@ bad inputs
   ***   at top-level: chareval(gc,[0,O(3^7)],1)
   ***                 ^-------------------------
   *** chareval: incorrect type in check_gchar_i [w2] (t_PADIC).
-wrong, this should be an invalid input:
-[]
-wrong, this should be an invalid input:
-[]
+  ***   at top-level: gcharalgebraic(gc,[])
+  ***                 ^---------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
+  ***   at top-level: gcharalgebraic(gc,[[1,1]])
+  ***                 ^--------------------------
+  *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
   ***   at top-level: gcharlocal(gc,[0,1],pr)
   ***                 ^-----------------------
   *** gcharlocal: sorry, local component of a Grossencharacter at a ramified prime is not yet implemented.
@@ -270,4 +257,4 @@ wrong, this should be an invalid input:
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)],1)
   ***                 ^-----------------------------
   *** gcharlocal: incorrect type in check_gchar_i [w2] (t_PADIC).
-Total time spent: 2004
+Total time spent: 2090

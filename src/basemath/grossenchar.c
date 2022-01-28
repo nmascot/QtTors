@@ -910,29 +910,56 @@ gchar_algebraic_basis(GEN gc)
   return shallowmatconcat(mkcol2(basis,normchar));
 }
 static GEN
-gchar_algebraicoftype(GEN gc, GEN type)
-/* FIXME: wrong for mixed signature or real field */
+gchar_algebraicnormtype(GEN gc, GEN type)
 {
-  long i, r2, nalg, n0, nm;
+  GEN w = NULL, w1, v;
+  long i, r1, r2, n;
+  r1 = gchar_get_r1(gc);
+  r2 = gchar_get_r2(gc);
+  for (i=1; i<=r1; i++)
+  {
+    w1 = addii(gmael(type,i,1),gmael(type,i,2));
+    if (!w) w = w1;
+    else if (!equalii(w,w1)) return NULL;
+  }
+  for (i=r1+1; i<=r1+r2; i++)
+  {
+    w1 = gmael(type,i,1);
+    if (!w) w = w1;
+    else if (!equalii(w,w1)) return NULL;
+    if (!equalii(w,gmael(type,i,2))) return NULL;
+  }
+  n = lg(gchar_get_cyc(gc))-1;
+  v = zerovec(n);
+  gel(v,n) = negi(w);
+  return mkvec(v);
+}
+static GEN
+gchar_algebraicoftype(GEN gc, GEN type)
+{
+  long i, r1, r2, nalg, n0, nm;
   GEN p, q, w, k, matk, chi;
   /* in internal basis */
   n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion chars, internal basis */
+  r1 = gchar_get_r1(gc);
   r2 = gchar_get_r2(gc);
   nm = gchar_get_nm(gc);
   /* in both */
   nalg = gchar_get_nalg(gc); /* number of generators of free algebraic chars */
 
-  if (typ(type)!=t_VEC || lg(type) != r2+1)
+  if (typ(type)!=t_VEC || lg(type) != r1+r2+1)
     pari_err_TYPE("gcharalgebraic (1)", type);
-  for (i = 1; i<=r2; i++)
+  for (i = 1; i<=r1+r2; i++)
     if (typ(gel(type,i)) != t_VEC
         ||lg(gel(type,i)) != 3
         ||typ(gmael(type,i,1)) != t_INT
         ||typ(gmael(type,i,2)) != t_INT)
       pari_err_TYPE("gcharalgebraic (2)", type);
 
-  if (!nalg) return NULL; /* FIXME: not correct if the type is trivial
-                             or that of a multiple of the norm */
+  chi = gchar_algebraicnormtype(gc, type);
+  if (chi) return chi;
+
+  if (!nalg) return NULL;
   k = cgetg(r2+1,t_VEC);
   p = gmael(type, 1, 1);
   q = gmael(type, 1, 2); w = addii(p, q);
@@ -947,8 +974,8 @@ gchar_algebraicoftype(GEN gc, GEN type)
   /* block of k_s parameters of free algebraic */
   matk = matslice(gchar_get_basis(gc),n0+1,n0+nalg,nm-r2+1,nm);
   chi = shallowtrans(inverseimage(shallowtrans(matk),shallowtrans(k)));
-  /* FIXME: need to solve integral system or check solution is integral */
   if (lg(chi) == 1) return NULL;
+  for (i=1; i<lg(chi); i++) if (typ(gel(chi,i)) != t_INT) return NULL;
   chi = mkvec4(zerovec(gchar_get_ntors(gc)), chi,
                zerovec(gchar_get_nfree(gc) - nalg), gmul2n(negi(w),-1));
   return mkvec(shallowconcat1(chi));
