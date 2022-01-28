@@ -56,6 +56,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  * power.  We never sieve on 2 and always pull out the power of 2 directly. The
  * prime factors of k show up whenever 2Ax + B has a factor in common with k;
  * we don't sieve on these either but easily recognize them in a candidate. */
+
+#include "paricfg.h"
+#ifdef HAS_SSE2
+#include <emmintrin.h>
+#endif
+
 #include "pari.h"
 #include "paripriv.h"
 
@@ -70,7 +76,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define MAX_PE_PAIR 60
 
 #ifdef HAS_SSE2
-#include <emmintrin.h>
 #define EXT0(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 0))
 #define EXT1(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 1))
 #define TEST(a) (EXT0(a) || EXT1(a))

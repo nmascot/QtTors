@@ -26,6 +26,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  * the License, or (at your option) any later version.                 *
  ***********************************************************************/
 
+#include "paricfg.h"
+#ifdef HAS_AVX
+#include <immintrin.h>
+#elif defined(HAS_SSE2)
+#include <emmintrin.h>
+#endif
+
 #include "pari.h"
 #include "paripriv.h"
 
@@ -84,8 +91,6 @@ typedef ulong ratpoints_bit_array __attribute__ ((vector_size (32)));
 #define EXT0(a) ((ulong)a[0])
 #define EXT(a,i) ((ulong)a[i])
 
-#include <immintrin.h>
-
 #ifdef __AVX2__
 #define TEST(a) ( _mm256_movemask_epi8(_mm256_cmpeq_epi8((__m256i)(a), (__m256i)RBA(0))) != 0xffffffffU )
 #elif defined(__AVX__)
@@ -115,7 +120,6 @@ typedef ulong ratpoints_bit_array __attribute__ ((vector_size (32)));
 #elif defined(HAS_SSE2) || defined(HAS_NEON)
 
 #ifdef HAS_SSE2
-#include <emmintrin.h>
 /* Use SSE 128 bit registers for the bit arrays */
 typedef __v2di ratpoints_bit_array;
 #define EXT0(a) ((ulong)__builtin_ia32_vec_ext_v2di((__v2di)(a), 0))
