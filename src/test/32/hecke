@@ -24,6 +24,26 @@ gcharalgebraic
 [[-1, -2]]
 1
 [[4, 0]]
+gcharisalgebraic r1>0
+1
+[[0, 0], [0, 0]]
+1
+[[0, 0], [0, 0]]
+0
+1
+[[1, 0], [1, 0]]
+0
+1
+[[0, 0], [0, 0]]
+1
+[[0, 0], [0, 0]]
+1
+[[0, 0], [0, 0]]
+0
+0
+1
+[[1, 0], [1, 1]]
+0
 need to increase prec
 larger fields
 r2 = 5, clno = 5
@@ -250,4 +270,4 @@ wrong, this should be an invalid input:
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)],1)
   ***                 ^-----------------------------
   *** gcharlocal: incorrect type in check_gchar_i [w2] (t_PADIC).
-Total time spent: 1937
+Total time spent: 2004

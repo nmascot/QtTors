@@ -36,6 +36,31 @@ gc = gcharinit(x^2+1,1);
 [chi]=gcharalgebraic(gc,[[4,0]])
 gcharisalgebraic(gc,chi,&pq)
 pq
+print("gcharisalgebraic r1>0");
+bnf = bnfinit(x^2-5);
+gc = gcharinit(bnf,8);
+gcharisalgebraic(gc,[0,0],&pq)
+pq
+gcharisalgebraic(gc,[1,0],&pq)
+pq
+gcharisalgebraic(gc,[0,1],&pq)
+gcharisalgebraic(gc,[0,0,-1],&pq)
+pq
+gcharisalgebraic(gc,[0,0,-1/2],&pq)
+bnf = bnfinit(x^3-x-1);
+gc = gcharinit(bnf,9);
+gcharisalgebraic(gc,[0,0,0,0],&pq)
+pq
+gcharisalgebraic(gc,[1,0,0,0],&pq)
+pq
+gcharisalgebraic(gc,[0,2,0,0],&pq)
+pq
+gcharisalgebraic(gc,[0,0,1,0],&pq)
+gcharisalgebraic(gc,[0,0,0,1],&pq)
+gcharisalgebraic(gc,[0,1,0,0,-1],&pq)
+pq
+gcharisalgebraic(gc,[0,1,0,0,-1/2],&pq)
+
 
 print("need to increase prec");
 pol = x^4 - 2*x^3 + 5*x^2 - 2*x - 1;
