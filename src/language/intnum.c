@@ -2687,15 +2687,14 @@ GEN
 sumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec)
 {
   pari_sp av;
-  GEN M = cgetg(1, t_VEC), N = cgetg(1, t_VEC);
-  GEN Wkeep = gen_0, _1, S, t, Wp, W = NULL, fn;
+  GEN M, N, Wkeep = gen_0, _1, S, t, Wp, W = NULL;
   long bit = prec2nbits(prec), newbit = (long)(mu * bit) + 33;
-  long n, s, fail = 0, BIG = LONG_MAX, EX = LONG_MAX, EXkeep = 0;
+  long n, s, fail = 0, BIG = LONG_MAX, ekeep = LONG_MAX;
 
-  prec = nbits2prec(newbit); _1 = real_1(prec); S = real_0(prec);
-  av = avma;
-  fn = f(E, a, prec); t = fn; Wp = fn;
-  for (n = 1;; n++) /* fn = f(n) */
+  prec = nbits2prec(newbit); _1 = real_1(prec);
+  av = avma; S = real_0(prec); t = Wp = f(E, a, prec);
+  M = N = cgetg(1, t_VEC);
+  for (n = 1;; n++)
   {
     long e = BIG;
     GEN c;
@@ -2722,16 +2721,16 @@ sumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec)
     if (++fail >= 10)
     {
       if (DEBUGLEVEL)
-        err_printf("sumsidi: reached accuracy of %ld bits.", -EXkeep);
-      bit = -EXkeep; W = Wkeep; break;
+        err_printf("sumsidi: reached accuracy of %ld bits.", -ekeep);
+      bit = -ekeep; W = Wkeep; break;
     }
-    if (e < EX) { fail = 0; EX = e; EXkeep = EX; Wkeep = W; }
-    Wp = W;
+    if (e < ekeep) { fail = 0; ekeep = e; Wkeep = W; }
     if (gc_needed(av,2))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"sumsidi");
-      gerepileall(av, 6, &Wp, &W, &Wkeep, &S, &M, &N);
+      gerepileall(av, 6, &W, &Wkeep, &S, &t, &M, &N);
     }
+    Wp = W;
   }
   return gprec_w(W, nbits2prec(bit));
 }
