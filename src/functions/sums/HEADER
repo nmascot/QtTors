@@ -45,18 +45,23 @@ Doc:
  derivative of the function. For instance, the point $0$ is a singularity of
  $\text{abs}(x)$.
 
- Assume the bitprecision is $b$, so we try to achieve an absolute error less than
- $2^{-b}$. DE methods use $O(b \log b)$ function evaluations and should work
- for both compact and non-compact intervals as long as the integrand is the
- restriction of an analytic function to a suitable domain and its behaviour at
- infinity is correctly described.
+ Assume the bitprecision is $b$, so we try to achieve an absolute error less
+ than $2^{-b}$. DE methods use $O(b \log b)$ function evaluations and should
+ work for both compact and non-compact intervals as long as the integrand is
+ the restriction of an analytic function to a suitable domain and its behaviour
+ at infinity is correctly described.
  When integrating regular functions on a \emph{compact} interval, away from
  poles of the integrand, Gauss-Legendre integration (\tet{intnumgauss})
  is the best choice, using $O(b)$ function evaluations. To integrate
  oscillating functions on non-compact interval, the slower but robust
  \tet{intnumosc} is available, performing Gaussian integration on intervals of
- length the half-period (or quasi-period) and using Sidi's mW algorithm to
- extrapolate their sum. For maximal efficiency, abscissas and integration
+ length the half-period (or quasi-period) and using Sidi's $mW$ algorithm to
+ extrapolate their sum. If poles are close to the integration interval,
+ Gaussian integration may run into difficiulties and it is then advisable to
+ split the integral using \kbd{intnum} to get away from poles, then
+ \kbd{intnumosc} for the remainder.
+
+ For maximal efficiency, abscissas and integration
  weights can be precomputed, respectively using \tet{intnuminit} ($O(b^2)$)
  or \tet{intnumgaussinit} ($O(b^3)$).
 
@@ -65,19 +70,25 @@ Doc:
  Many numerical summation methods are available to approximate
  $\sum_{n\geq n_0} f(n)$ at accuracy $2^{-b}$: the overall best choice should
  be \tet{sumnum}, which uses Euler-MacLaurin (and $O(b\log b)$ function
- evaluations). Also available are
+ evaluations); initialization time (\tet{sumnuminit}) is $O(b^3).
+ Also available are
 
  \item Abel-Plana summation (\tet{sumnumap}),
- also $O(b\log b)$ function evaluations but slowest $O(b^3)$ initialization
- (\tet{sumnumapinit});
+ also $O(b\log b)$ function evaluations and $O(b^3)$ initialization
+ (\tet{sumnumapinit}) with a larger implied constant;
 
  \item Lagrange summation (\tet{sumnumlagrange}) uses $O(b)$ evaluations
  but more brittle and the asymptotic behaviour of $f$ must be correctly
  indicated. Initialization (\tet{sumnumlagrangeinit}) can vary from $O(b^2)$
  to $O(b^3)$ depending on the asymptotic behaviour.
 
+ \item Sidi summation (\tet{sumnumsidi}) uses $O(b)$ evaluations and should
+ be more robust than Lagrange summation. No initialization is needed.
+
  \item Monien summation (\tet{sumnummonien}) uses $O(b/\log b)$ evaluations
- but is even more brittle and also $O(b^3)$ initialization (\kbd{summonieninit}).
+ but is even more brittle than Lagrange and also has a $O(b^3)$ initialization
+ (\kbd{summonieninit}).
+
  \item To sum rational functions, use \tet{sumnumrat}.
 
  All the function so far require $f$ to be be the restriction to integers
@@ -95,4 +106,4 @@ Doc:
  uses van Wijngarten's trick to reduce to an alternating series,
  for a cost of $O(b\log b)$ function evaluations but beware that $f$ must be
  evaluated at large integers, of the order of $2^{b/\alpha}$ if we assume
- that $f(n) = O(1 / n^{\alpha+1})$.
+ that $f(n) = O(1 / n^{\alpha+1})$ for some $\alpha > 0$.

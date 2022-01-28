@@ -13,18 +13,22 @@
 -38
 -38
 -40
+-38
 (n)->log(1+1/n)/n
 +oo
 -38
 -36
+-38
 (n)->lngamma(1+1/n)/n
 +oo
 +oo
 -37
+-39
 (n)->sin(1/sqrt(n))/n^(3/2)
 +oo
 +oo
 -36
++oo
 2.3979771206715998375659850036324914715
 2.3979771206715998375659850036324914714
 +oo
@@ -109,4 +113,4 @@
   ***   at top-level: sumpos(n=0,1,2)
   ***                 ^---------------
   *** sumpos: invalid flag in sumpos.
-Total time spent: 2380
+Total time spent: 1795

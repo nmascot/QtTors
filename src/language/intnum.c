@@ -2687,7 +2687,7 @@ GEN
 sumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec)
 {
   pari_sp av;
-  GEN M, N, Wkeep = gen_0, _1, S, t, Wp, W = NULL;
+  GEN M, N, Wkeep = gen_0, W = gen_0, _1, S, t, Wp;
   long bit = prec2nbits(prec), newbit = (long)(mu * bit) + 33;
   long n, s, fail = 0, BIG = LONG_MAX, ekeep = LONG_MAX;
 
@@ -2735,6 +2735,10 @@ sumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec)
   return gprec_w(W, nbits2prec(bit));
 }
 
+GEN
+sumnumsidi0(GEN a, GEN code, long safe, long prec)
+{ EXPR_WRAP(code, sumsidi(EXPR_ARGPREC, a, safe ? 1.56 : 1., prec)); }
+
 struct _osc_wrap
 {
   void *E;
@@ -2770,7 +2774,7 @@ intnumosc(void *E, GEN (*f)(void*, GEN), GEN a, GEN H, long flag, GEN tab,
   pari_sp av = avma;
   struct _osc_wrap D;
   GEN S;
-  if (flag < 0 || flag > 2) pari_err_FLAG("intnumosc");
+  if (flag < 0 || flag > 4) pari_err_FLAG("intnumosc");
   if (!tab) tab = intnumgaussinit(0, prec + (flag == 0? (prec>>1): 0));
   if (gequal0(a)) a = NULL;
   D.E = E; D.f = f; D.a = a; D.H = H; D.tab = tab; D.prec = prec;
@@ -2778,7 +2782,10 @@ intnumosc(void *E, GEN (*f)(void*, GEN), GEN a, GEN H, long flag, GEN tab,
   {
     case 0: S = sumsidi((void*)&D, osc_wrap_prec, gen_0, 1.56, prec); break;
     case 1: S = sumsidi((void*)&D, osc_wrap_prec, gen_0, 1.0, prec); break;
-    default:S = sumalt((void*)&D, osc_wrap, gen_0, prec); break; /* 2*/
+    case 2: S = sumalt((void*)&D, osc_wrap, gen_0, prec); break;
+    case 3: S = sumnumlagrange((void*)&D, osc_wrap_prec, gen_0, NULL, prec);
+            break;
+    default: S = sumpos((void*)&D, osc_wrap, gen_0, prec); break;
   }
   return gerepilecopy(av, S);
 }

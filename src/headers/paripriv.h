@@ -139,6 +139,7 @@ GEN  sumnum0(GEN a, GEN code, GEN tab, long prec);
 GEN  sumnumap0(GEN a, GEN code, GEN tab, long prec);
 GEN  sumnumlagrange0(GEN a, GEN code, GEN tab, long prec);
 GEN  sumnummonien0(GEN a, GEN code, GEN tab, long prec);
+GEN  sumnumsidi0(GEN a, GEN code, long safe, long prec);
 GEN  sumpos0(GEN a, GEN code, long flag,long prec);
 GEN  vecexpr0(GEN nmax, GEN code, GEN pred);
 GEN  vecexpr1(GEN nmax, GEN code, GEN pred);

@@ -3,8 +3,7 @@ Done for version 2.14.0 (released ??/??/2020):
   Fixed
      1- slowdown in zeta (e.g. zeta(Pi) at \p500)
      2- GC error in idealinv [#2258]
-     3- qfminim inefficiency (initial bound from non-LLL-reduced matrix)
-     4- mfshimura in weight 3/2 => oo loop
+     3- qfminim inefficiency (initial bound from non-LLL-reduced matrix) 4- mfshimura in weight 3/2 => oo loop
      5- zetahurwitz(s, huge x) => overflow or very slow
      6- matsolve([1,1,1/2; 1,0,1/2; 2,1,0], [-1;1;-1]) -> SEGV [#2261]
      7- qfminim(Mat(1),,,2) -> precision error [#2262]
@@ -197,7 +196,7 @@ TF  63- new GP functions znsubgroupgenerators, subcyclohminus,
     64- new GP function bnrcompositum
     65- [libpari] gdivgu, gdivgunextu, divrunextu, gmulgu, gmulug
     66- [libpari] Zp_log, Zp_exp
-    67- new GP function intnumosc
+    67- new GP function intnumosc, sumnumsidi
 BA  68- [x86_64,arm64] AVX,NEON support for hyperellratpoints
 BA  69- new libpari functions ZX_digits, ZXV_ZX_fromdigits
 
