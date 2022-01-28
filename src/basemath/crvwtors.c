@@ -24,6 +24,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 INLINE ulong
 Fl_mul4(ulong x, ulong p) { return Fl_double(Fl_double(x, p), p); }
 
+/* p odd */
+INLINE ulong
+Fl_inv4(ulong p)
+{
+  if ((p & 3UL) == 3) return (p + 1) >> 2;
+  return p - (p >> 2);
+}
+/* p > 3 */
+INLINE ulong
+Fl_inv3(ulong p)
+{
+  if ((p % 3) == 1) return p - p / 3;
+  return (p + 1) / 3;
+}
+
 INLINE ulong
 Fl_div4(ulong x, ulong p) { return Fl_halve(Fl_halve(x, p), p); }
 
@@ -296,15 +311,14 @@ E_general_X1(
     break;
   case T_MAP:
   {
-    ulong inv3 = Fl_inv(3L, p), inv4 = Fl_div4(1L, p);
-    ulong inv9 = Fl_sqr_pre(inv3, p, pi);
+    ulong inv3 = Fl_inv3(p), inv4 = Fl_inv4(p), inv9 = Fl_sqr_pre(inv3, p, pi);
     while (ncurves--)
       t_to_a4a6_and_tors(a4++,a6++, tx++,ty++, *r++,*s++, p, pi, inv3, inv4, inv9);
     break;
   }
   case TQ_MAP:
   {
-    ulong inv3 = Fl_inv(3L, p);
+    ulong inv3 = Fl_inv3(p);
     while (ncurves--)
       tq_to_a4a6_and_tors(a4++, a6++, tx++, ty++, *r++, *s++, p, pi, inv3);
     break;
@@ -335,7 +349,7 @@ E_11_torsion(
     ulong r, s, den;
 
 #if 0
-    /* FIXME: it's faster * to generate random points on the curve than to
+    /* FIXME: it's faster to generate random points on the curve than to
      * compute random multiples of a point. Disabled for now. */
     /* Must guard against the possibility that [n]Q = 0 */
     do {
@@ -369,7 +383,7 @@ INLINE void
 E_2_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
-  const ulong m1 = p - 1, inv3 = Fl_inv(3L, p);
+  const ulong m1 = p - 1, inv3 = Fl_inv3(p);
   while (ncurves) {
     ulong A2 = random_Fl(m1) + 1;  /* nonzero */
     ulong A4 = random_Fl(m1) + 1;  /* nonzero */
@@ -387,16 +401,16 @@ INLINE void
 E_3_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
-  const ulong m1 = p - 1;
-  const ulong inv3 = Fl_inv(3, p), inv4 = Fl_inv(4, p);
+  const ulong m1 = p - 1, _27 = 27 % p;
+  const ulong inv3 = Fl_inv3(p), inv4 = Fl_inv4(p);
   const ulong inv9 = Fl_sqr_pre(inv3, p, pi);
 
   while (ncurves) {
     ulong a1 = random_Fl(m1) + 1;  /* nonzero */
     ulong a3 = random_Fl(m1) + 1;  /* nonzero */
-    /* a1^3 - 27 a^3 != 0 */
-    if (!Fl_sub(Fl_mul_pre(a1, Fl_sqr_pre(a1, p, pi), p, pi),
-                Fl_mul_pre(27 % p, a3, p, pi), p)) continue;
+    /* a1^3 - 27 a3 != 0 */
+    if (Fl_mul_pre(a1, Fl_sqr_pre(a1, p, pi), p, pi)
+        == Fl_mul_pre(_27, a3, p, pi)) continue;
     a1a3_to_a4a6(a4++, a6++, a1, a3, inv3, inv4, inv9, p, pi);
     /* [0,0] is a 3-torsion point on y^2 + a1xy + a3y = x^3 which
      * is mapped to [a1^2/12, a3/2] on y^2 = x^3 + a4x + a6. */
@@ -412,7 +426,7 @@ E_4_torsion(
   const ulong m1 = p - 1;
   while (ncurves) {
     ulong b = random_Fl(m1) + 1;  /* nonzero */
-    if (!Fl_add(b, Fl_sqr_pre(Fl_mul4(b, p), p, pi), p)) continue;
+    if (Fl_mul4(Fl_mul4(b, p), p) == m1) continue; /* need b(16b+1) != 0 */
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, 0L, p, pi);
     ncurves--;
   }
@@ -422,10 +436,10 @@ INLINE void
 E_5_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
-  const ulong m1 = p - 1;
+  const ulong m1 = p - 1, _11 = 11 % p;
   while (ncurves) {
     ulong b = random_Fl(m1) + 1;  /* nonzero */
-    if (Fl_mul_pre(b, Fl_sub(b, 11 % p, p), p, pi) == 1UL) continue;
+    if (Fl_mul_pre(b, Fl_sub(b, _11, p), p, pi) == 1UL) continue;
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, b, p, pi);
     ncurves--;
   }
@@ -435,10 +449,10 @@ INLINE void
 E_6_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
-  const ulong m2 = p - 2;
+  const ulong m2 = p - 2, _9 = 9 % p;
   while (ncurves) {
     ulong b, c = random_Fl(m2) + 1; /* in [1, p - 2] */
-    if (!Fl_add(Fl_mul_pre(c, 9 % p, p, pi), 1, p)) continue;
+    if (!Fl_add(Fl_mul_pre(c, _9, p, pi), 1, p)) continue;
     b = Fl_add(c, Fl_sqr_pre(c, p, pi), p); /* b = c + c^2 */
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, c, p, pi);
     ncurves--;
@@ -449,12 +463,12 @@ INLINE void
 E_7_torsion(
   ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, ulong p, ulong pi)
 {
-  const ulong m2 = p - 2;
+  const ulong m2 = p - 2, _7 = 7 % p;
   while (ncurves) {
     ulong d = random_Fl(m2) + 2; /* in [2, p - 1] */
     ulong c = Fl_sub(Fl_sqr_pre(d, p, pi), d, p); /* c = d^2 - d */
     ulong b = Fl_mul_pre(c, d, p, pi); /* b = d^3 - d^2 */
-    if (Fl_sub(Fl_sub(b, Fl_mul(c, 7 % p, p), p), Fl_double(d, p), p) == m2+1)
+    if (Fl_mul_pre(Fl_sub(d, _7, p), c, p, pi) == Fl_double(d, p) - 1)
       continue;
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, c, p, pi);
     ncurves--;
