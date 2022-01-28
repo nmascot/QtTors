@@ -425,7 +425,7 @@ E_5_torsion(
   const ulong m1 = p - 1;
   while (ncurves) {
     ulong b = random_Fl(m1) + 1;  /* nonzero */
-    if (!Fl_sub(b, Fl_mul_pre(b, Fl_sub(b, 11 % p, p), p, pi), p)) continue;
+    if (Fl_mul_pre(b, Fl_sub(b, 11 % p, p), p, pi) == 1UL) continue;
     bc_to_a4a6_and_tors(a4++, a6++, tx++, ty++, b, b, p, pi);
     ncurves--;
   }
