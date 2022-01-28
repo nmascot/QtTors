@@ -2939,7 +2939,7 @@ lfunzetakinit_artin(GEN nf, GEN gal, GEN dom, long der, long bitprec)
 /********************************************************************/
 enum { t_LFUNMISC_POL, t_LFUNMISC_CHIQUAD, t_LFUNMISC_CHICONREY,
        t_LFUNMISC_CHIGEN, t_LFUNMISC_ELLINIT, t_LFUNMISC_ETAQUO,
-       t_LFUNMISC_HECKE };
+       t_LFUNMISC_GCHAR };
 static long
 lfundatatype(GEN data)
 {
@@ -2954,7 +2954,7 @@ lfundatatype(GEN data)
       if (checknf_i(data)) return t_LFUNMISC_POL;
       if (l == 17) return t_LFUNMISC_ELLINIT;
       if (l == 3 && typ(gel(data,1)) == t_VEC)
-        return is_gchar_group(gel(data,1))? t_LFUNMISC_HECKE
+        return is_gchar_group(gel(data,1))? t_LFUNMISC_GCHAR
                                           : t_LFUNMISC_CHIGEN;
       break;
     }
@@ -2991,7 +2991,7 @@ lfunmisc_to_ldata_i(GEN ldata, long shallow)
       }
     }
     break;
-    case t_LFUNMISC_HECKE: return lfungchar(gel(ldata,1), gel(ldata,2));
+    case t_LFUNMISC_GCHAR: return lfungchar(gel(ldata,1), gel(ldata,2));
     case t_LFUNMISC_ELLINIT: return lfunell(ldata);
   }
   if (shallow != 2) pari_err_TYPE("lfunmisc_to_ldata",ldata);
