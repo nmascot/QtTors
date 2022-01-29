@@ -98,7 +98,7 @@ Doc: numerical integration from $a$ to $\infty$ of oscillating
  ? exponent(intnumosc(x=0,sinc(x),Pi,4) - Pi/2)
  time = 17,961 ms.
  %9 = 7 \\ junk; slow
- ? exponent(intnumosc(x=0,sinc(x),Pi,4) - Pi/2)
+ ? exponent(intnumosc(x=0,sinc(x),2*Pi,4) - Pi/2)
  time = 19,105 ms.
  %10 = -4 \\ still junk
  @eprog
