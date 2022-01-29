@@ -873,19 +873,13 @@ static struct bb_ring ZX_ring = { _ZX_add,_ZX_mul,_ZX_sqr };
 GEN
 ZX_digits(GEN x, GEN T)
 {
-  pari_sp av = avma;
   long d = degpol(T), n = (lgpol(x)+d-1)/d;
-  GEN z = gen_digits(x, T, n, NULL, &ZX_ring, _ZX_divrem);
-  return gerepileupto(av, z);
+  return gen_digits(x, T, n, NULL, &ZX_ring, _ZX_divrem);
 }
 
 GEN
 ZXV_ZX_fromdigits(GEN x, GEN T)
-{
-  pari_sp av = avma;
-  GEN z = gen_fromdigits(x,T, NULL, &ZX_ring);
-  return gerepileupto(av, z);
-}
+{ return gen_fromdigits(x,T, NULL, &ZX_ring); }
 
 /*******************************************************************/
 /*                                                                 */
