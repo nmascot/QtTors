@@ -15,7 +15,7 @@
 
 #define DEBUGLEVEL DEBUGLEVEL_gchar
 
-static GEN gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long prec);
+static GEN gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN s0, long prec);
 
 /*********************************************************************/
 /**                                                                 **/
@@ -862,7 +862,7 @@ gchar_algebraic_basis(GEN gc)
   tors_basis = matid(ntors);
 
   /* the norm is an algebraic character */
-  normchar = vec_ei(nc+1,nc+1);
+  normchar = gneg(vec_ei(nc+1,nc+1));
 
   /* add sublattice of algebraic */
 
@@ -900,7 +900,7 @@ gchar_algebraic_basis(GEN gc)
     if (DEBUGLEVEL>2) err_printf("w -> %Ps\n", w);
   }
   /* add weight to infinite order characters, at position nc+1 */
-  w = gdivgs(gmodgs(w, 2), 2);
+  w = gneg(gdivgs(gmodgs(w, 2), 2));
   alg_basis = shallowmatconcat(mkvec3(alg_basis, zerovec(nfree-nalg), w));
 
   if (lg(tors_basis)>1)
@@ -999,7 +999,7 @@ gcharalgebraic(GEN gc, GEN type)
 /*********************************************************************/
 
 static GEN
-check_gchar_i(GEN chi, long l, GEN *w2)
+check_gchar_i(GEN chi, long l, GEN *s)
 {
   long i, lchi=lg(chi)-1;
   if (typ(chi)!=t_VEC)
@@ -1008,54 +1008,54 @@ check_gchar_i(GEN chi, long l, GEN *w2)
     pari_err_DIM("check_gchar_i [chi]");
   if (lchi==l)
   {
-    if (w2)
+    if (s)
     {
-      *w2 = gel(chi,l);
-      switch(typ(*w2))
+      *s = gel(chi,l);
+      switch(typ(*s))
       {
         case t_INT:
         case t_FRAC:
         case t_REAL:
         case t_COMPLEX: break;
-        default: pari_err_TYPE("check_gchar_i [w2]", *w2);
+        default: pari_err_TYPE("check_gchar_i [s]", *s);
       }
     }
     chi = vecslice(chi,1,l-1);
   }
-  else if (w2) *w2 = gen_0;
+  else if (s) *s = gen_0;
   for (i=1; i<l; i++) if (typ(gel(chi,i))!=t_INT)
     pari_err_TYPE("check_gchar_i [coefficient]", gel(chi,i));
   return chi;
 }
 
 static GEN
-check_gchar(GEN gc, GEN chi, GEN *w2)
+check_gchar(GEN gc, GEN chi, GEN *s)
 {
-  return check_gchar_i(chi, lg(gchar_get_cyc(gc))-1, w2);
+  return check_gchar_i(chi, lg(gchar_get_cyc(gc))-1, s);
 }
 
 static GEN
-check_gchari(GEN gc, GEN chi, GEN *w2)
+check_gchari(GEN gc, GEN chi, GEN *s)
 {
-  return check_gchar_i(chi, lg(gel(gchar_get_basis(gc),1)), w2);
+  return check_gchar_i(chi, lg(gel(gchar_get_basis(gc),1)), s);
 }
 
 /* from coordinates on snf basis, return coordinates on internal basis, set
- * w2 to the norm component */
+ * s to the norm component */
 static GEN
-gchar_internal(GEN gc, GEN chi, GEN *w2)
+gchar_internal(GEN gc, GEN chi, GEN *s)
 {
-  chi = check_gchar(gc, chi, w2);
+  chi = check_gchar(gc, chi, s);
   return ZV_ZM_mul(chi, gchar_get_Ui(gc));
 }
 
-/* from internal basis form, return the R/Z components and set w2 to the R
+/* from internal basis form, return the R/Z components and set s to the R
  * component */
 static GEN
-gchari_log(GEN gc, GEN chi, GEN *w2)
+gchari_log(GEN gc, GEN chi, GEN *s)
 {
   long i, n;
-  chi = check_gchari(gc, chi, w2);
+  chi = check_gchari(gc, chi, s);
   chi = RgV_RgM_mul(chi, gchar_get_basis(gc));
   n = gchar_get_ns(gc) + gchar_get_nc(gc); /* take exponents mod Z */
   for (i = 1; i <= n; i++) gel(chi,i) = gfrac(gel(chi,i));
@@ -1065,10 +1065,10 @@ gchari_log(GEN gc, GEN chi, GEN *w2)
 static GEN
 gchari_shift(GEN gc, GEN chi, GEN w)
 {
-  GEN w2;
+  GEN s;
   check_gchar_group(gc);
-  chi = check_gchari(gc, chi, &w2);
-  return shallowconcat(chi, gadd(w,w2));
+  chi = check_gchari(gc, chi, &s);
+  return shallowconcat(chi, gadd(w,s));
 }
 
 /* chip has ncp = #zm[1][i].cyc components */
@@ -1358,16 +1358,16 @@ gcharlog_eval_raw(GEN logchi, GEN logx)
  * assume gc (and logchi) has enough internal precision,
  * but increase precision if log is large */
 static GEN
-gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long prec)
+gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN s0, long prec)
 {
-  GEN val, w2 = gen_0, norm = NULL;
+  GEN val, s = gen_0, norm = NULL;
   long prec0, extraprec;
   pari_sp av = avma;
 
   prec0 = gchar_get_prec(gc);
 
   if (!logx) logx = gchar_log(gc, x, prec0);
-  if (!logchi) logchi = gchari_log(gc, chi, &w2);
+  if (!logchi) logchi = gchari_log(gc, chi, &s);
 
   /* check if precision is sufficient, take care of gexpo = -infty */
   extraprec = gexpo(logx) + gexpo(logchi);
@@ -1377,24 +1377,24 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long
     prec0 = prec + extraprec;
     gc = gcharnewprec(gc, prec0);
     logx = gchar_log(gc, x, prec0);
-    logchi = gchari_log(gc, chi, &w2);
+    logchi = gchari_log(gc, chi, &s);
   }
 
-  w2 = gadd(w,w2);
+  s = gadd(s0,s);
 
   /* this row  must be computed at prec0 */
   val = gcharlog_eval_raw(logchi, logx);
 
-  if (!gequal0(w2)) norm = idealnorm(gchar_get_bnf(gc), x);
+  if (!gequal0(s)) norm = idealnorm(gchar_get_bnf(gc), x);
 
   if (flag)
   {
     val = gexp(mkcomplex(gen_0, gmul(Pi2n(1,prec), val)), prec);
-    if (norm) val = gmul(val, gpow(norm, gneg(w2), prec));
+    if (norm) val = gmul(val, gpow(norm, gneg(s), prec));
   }
   else if (norm)
   {
-    GEN expo = gdiv(gneg(w2), PiI2(prec));
+    GEN expo = gdiv(gneg(s), PiI2(prec));
     val = gadd(val, gmul(expo, glog(norm, prec)));
   }
   if (DEBUGLEVEL>1) err_printf("char value %Ps\n", val);
@@ -1404,13 +1404,13 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN w, long
 GEN
 gchareval(GEN gc, GEN chi, GEN x, long flag, GEN logx)
 {
-  GEN w2;
+  GEN s;
   long prec;
   pari_sp av = avma;
   check_gchar_group(gc);
   prec = gchar_get_evalprec(gc);
-  chi = gchar_internal(gc, chi, &w2);
-  return gerepilecopy(av, gchari_eval(gc, chi, x, flag, NULL, logx, w2, prec));
+  chi = gchar_internal(gc, chi, &s);
+  return gerepilecopy(av, gchari_eval(gc, chi, x, flag, NULL, logx, s, prec));
 }
 
 /*******************************************************************/
@@ -1692,14 +1692,14 @@ vecan_gchar(GEN an, long n, long prec)
   forprime_t iter;
   pari_sp av = avma;
   GEN gc = gel(an,1), chi = gel(an,2), BOUND = stoi(n), v = vec_ei(n, 1);
-  GEN gp = cgetipos(3), NZ = NULL, nf, N, chilog, w2;
+  GEN gp = cgetipos(3), NZ = NULL, nf, N, chilog, s;
   ulong p;
 
   /* prec increase: 1/n*log(N(pmax)) < log(pmax) */
   if (DEBUGLEVEL > 1)
     err_printf("vecan_gchar: need extra prec %ld\n", nbits2extraprec(expu(n)));
   gc = gcharnewprec(gc, prec + nbits2extraprec(expu(n)));
-  chilog = gchari_log(gc, chi, &w2);
+  chilog = gchari_log(gc, chi, &s);
 
   nf = bnf_get_nf(gchar_get_bnf(gc));
   N = gcharlog_conductor_f(gc,chilog);
@@ -1742,12 +1742,12 @@ vecan_gchar(GEN an, long n, long prec)
     }
   }
   /* weight, could consider shifting s at eval instead */
-  if (!gequal0(w2))
+  if (!gequal0(s))
   {
-    GEN nw2 = dirpowers(n, gneg(w2), prec);
+    GEN ns = dirpowers(n, gneg(s), prec);
     long j;
     for (j = 1; j <= n; j++)
-      if (gel(v,j) != gen_0) gel(v, j) = gmul(gel(v,j),gel(nw2,j));
+      if (gel(v,j) != gen_0) gel(v, j) = gmul(gel(v,j),gel(ns,j));
   }
   return gerepilecopy(av, v);
 }
@@ -1786,10 +1786,10 @@ cleanup_vga(GEN vga, long prec)
 
 /* TODO: move to lfunutils, use lfunzeta and lfunzetak */
 GEN
-gchari_lfun(GEN gc, GEN chi, GEN w)
+gchari_lfun(GEN gc, GEN chi, GEN s0)
 {
   pari_sp av = avma;
-  GEN nf, chilog, w2, cond_f, cond_oo, vga_r, vga_c, chiw;
+  GEN nf, chilog, s, cond_f, cond_oo, vga_r, vga_c, chiw;
   GEN v_phi, v_arg, sig, k, NN, L;
   long ns, nc, nm, r1, r2;
   nf = bnf_get_nf(gchar_get_bnf(gc));
@@ -1797,20 +1797,20 @@ gchari_lfun(GEN gc, GEN chi, GEN w)
   nc = gchar_get_nc(gc);
   nm = gchar_get_nm(gc);
   nf_get_sign(nf, &r1, &r2);
-  chilog = gchari_log(gc, chi, &w2);
-  w2 = gadd(w,w2);
-  if (!gequal0(gimag(w2))) pari_err_IMPL("lfun for gchar with imaginary norm component");
+  chilog = gchari_log(gc, chi, &s);
+  s = gadd(s0,s);
+  if (!gequal0(gimag(s))) pari_err_IMPL("lfun for gchar with imaginary norm component");
   cond_f =  gcharlog_conductor_f(gc, chilog);
   cond_oo =  gcharlog_conductor_oo(gc, chilog);
-  chiw = gchari_shift(gc,chi,w);
+  chiw = gchari_shift(gc,chi,s0);
 
   NN = mulii(idealnorm(nf, cond_f), absi_shallow(nf_get_disc(nf)));
-  /* FIXME: shift by w2 */
+  /* FIXME: shift by s */
   if (equali1(NN)) return gerepileupto(av, lfuncreate(gen_1));
   if (ZV_equal0(chi)) return gerepilecopy(av, lfuncreate(nf));
 
-  /* vga_r = vector(r1,k,I*c[ns+nc+k]-w2 + cond_oo[k]);
-   * vga_c = vector(r2,k,I*c[ns+nc+r1+k]+abs(c[ns+nc+r1+r2+k])/2-w2) */
+  /* vga_r = vector(r1,k,I*c[ns+nc+k]-s + cond_oo[k]);
+   * vga_c = vector(r2,k,I*c[ns+nc+r1+k]+abs(c[ns+nc+r1+r2+k])/2-s) */
   v_phi = gmul(vecslice(chilog, ns+nc+1, ns+nc+r1+r2), gen_I());
   v_arg = gdivgs(gabs(vecslice(chilog,ns+nc+r1+r2+1,nm),BITS_IN_LONG), 2);
   vga_r = gadd(vecslice(v_phi, 1, r1), cond_oo);
@@ -1820,12 +1820,12 @@ gchari_lfun(GEN gc, GEN chi, GEN w)
   sig = cleanup_vga(sig, gchar_get_prec(gc));
   k = gen_1;
 
-  if (!gequal0(w2))
+  if (!gequal0(s))
   {
     long j;
     for (j = 1; j < lg(sig); j++)
-      gel(sig, j) = gadd(gel(sig, j), w2);
-    k = gsub(k, gmulgs(w2,2));
+      gel(sig, j) = gadd(gel(sig, j), s);
+    k = gsub(k, gmulgs(s,2));
   }
 
 #define tag(x,t)  mkvec2(mkvecsmall(t),x)
@@ -1837,8 +1837,8 @@ GEN
 lfungchar(GEN gc, GEN chi)
 {
   pari_sp av = avma;
-  GEN w2;
+  GEN s;
   check_gchar_group(gc);
-  chi = gchar_internal(gc, chi, &w2);
-  return gerepilecopy(av, gchari_lfun(gc, chi, w2));
+  chi = gchar_internal(gc, chi, &s);
+  return gerepilecopy(av, gchari_lfun(gc, chi, s));
 }

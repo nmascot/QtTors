@@ -4,17 +4,17 @@ one large field
 non trivial cm subfield
 gcharalgebraic
 
-[1 0 0 0 0 0   0]
+[1 0 0 0 0 0    0]
 
-[0 1 0 0 0 0   0]
+[0 1 0 0 0 0    0]
 
-[0 0 1 0 0 0   0]
+[0 0 1 0 0 0    0]
 
-[0 0 0 1 0 0   0]
+[0 0 0 1 0 0    0]
 
-[0 0 0 0 1 0 1/2]
+[0 0 0 0 1 0 -1/2]
 
-[0 0 0 0 0 0   1]
+[0 0 0 0 0 0   -1]
 
 []
 [[0, 0, 0, 2, -1, 0, -1/2]]
@@ -57,27 +57,27 @@ gcharidentify
 [0, 0, 0, 0]
 [0, 0, 0, 0]
 
-[1 0 0]
+[1 0  0]
 
-[0 1 0]
+[0 1  0]
 
-[0 0 1]
+[0 0 -1]
 
 [129024, 12, 12, 12, 6, 0, 0, 0, 0, 0, 0]
 
-[1 0 0 0 0 0 0 0 0 0 0]
+[1 0 0 0 0 0 0 0 0 0  0]
 
-[0 1 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0  0]
 
-[0 0 1 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0  0]
 
-[0 0 0 1 0 0 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0 0  0]
 
-[0 0 0 0 1 0 0 0 0 0 0]
+[0 0 0 0 1 0 0 0 0 0  0]
 
-[0 0 0 0 0 2 0 0 0 0 0]
+[0 0 0 0 0 2 0 0 0 0  0]
 
-[0 0 0 0 0 0 0 0 0 0 1]
+[0 0 0 0 0 0 0 0 0 0 -1]
 
 prec increase
 [444, 12, 2, 2, 0, 0, 0]
@@ -87,16 +87,16 @@ prec increase
 1
 limit cases
 
-[0 1]
+[0 -1]
 
 
-[1 0]
+[1  0]
 
-[0 1]
+[0 -1]
 
 []
 
-[0 0 0 1]
+[0 0 0 -1]
 
 []
 [[0, 0, 0, 0]]
@@ -236,7 +236,7 @@ bad inputs
   *** chareval: incorrect type in check_gchar_i [chi] (t_PADIC).
   ***   at top-level: chareval(gc,[0,O(3^7)],1)
   ***                 ^-------------------------
-  *** chareval: incorrect type in check_gchar_i [w2] (t_PADIC).
+  *** chareval: incorrect type in check_gchar_i [s] (t_PADIC).
   ***   at top-level: gcharalgebraic(gc,[])
   ***                 ^---------------------
   *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
@@ -254,5 +254,5 @@ bad inputs
   *** gcharlocal: domain error in gcharlocal [index of an infinite place]: v > 2
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)],1)
   ***                 ^-----------------------------
-  *** gcharlocal: incorrect type in check_gchar_i [w2] (t_PADIC).
-Total time spent: 1910
+  *** gcharlocal: incorrect type in check_gchar_i [s] (t_PADIC).
+Total time spent: 1968
