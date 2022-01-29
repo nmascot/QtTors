@@ -125,4 +125,25 @@ Doc: numerical integration from $a$ to $\infty$ of oscillating
  time = 2,315 ms.
  %8 = -382 \\ Sumpos is perfect but slow
  @eprog\noindent Again, Sidi extrapolation behaves well, especially in safe
- mode, but $2H$ is required here.
+ mode, but $2H$ is required here. Finally, if the integrand has singularities
+ close to the interval of integration, it is advisable to split the integral
+ in two: use the more robust \kbd{intnum} to handle the singularities, then
+ \kbd{intnumosc} for the remainder:
+ \bprog
+ ? \p38
+ ? f(x) = besselj(0,x)^3 * log(x); \\ mild singularity at 0
+ ? g() = intnumosc(x = 0, f(x), Pi); \\ direct
+ ? h() = intnum(x = 0, Pi, f(x)) + intnumosc(x = Pi, f(x), Pi); \\ split at Pi
+ ? G = g();
+ time = 293 ms.
+ ? H = h();
+ time = 320 ms. \\ about as fast
+ ? exponent(G-H)
+ %6 = -12 \\ at least one of them is junk
+ ? \p77 \\ increase accuracy
+ ? G2=g(); H2=h();
+ ? exponent(G - G2)
+ %8 = -13  \\ g() is not consistent
+ ? exponent(H - H2)
+ %9 = -128  \\ not a proof, but h() looks good
+ @eprog

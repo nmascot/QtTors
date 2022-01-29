@@ -70,7 +70,7 @@ Doc:
  Many numerical summation methods are available to approximate
  $\sum_{n\geq n_0} f(n)$ at accuracy $2^{-b}$: the overall best choice should
  be \tet{sumnum}, which uses Euler-MacLaurin (and $O(b\log b)$ function
- evaluations); initialization time (\tet{sumnuminit}) is $O(b^3).
+ evaluations); initialization time (\tet{sumnuminit}) is $O(b^3)$.
  Also available are
 
  \item Abel-Plana summation (\tet{sumnumap}),
