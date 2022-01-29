@@ -1220,24 +1220,18 @@ static struct bb_ring FpXQX_ring = { _FpXQX_add, _FpXQX_mul, _FpXQX_sqr };
 GEN
 FpXQX_digits(GEN x, GEN B, GEN T, GEN p)
 {
-  pari_sp av = avma;
   long d = degpol(B), n = (lgpol(x)+d-1)/d;
-  GEN z;
   struct _FpXQXQ D;
   D.T = T; D.p = p;
-  z = gen_digits(x, B, n, (void *)&D, &FpXQX_ring, _FpXQX_divrem);
-  return gerepileupto(av, z);
+  return gen_digits(x, B, n, (void *)&D, &FpXQX_ring, _FpXQX_divrem);
 }
 
 GEN
 FpXQXV_FpXQX_fromdigits(GEN x, GEN B, GEN T, GEN p)
 {
-  pari_sp av = avma;
   struct _FpXQXQ D;
-  GEN z;
   D.T = T; D.p = p;
-  z = gen_fromdigits(x,B,(void *)&D, &FpXQX_ring);
-  return gerepileupto(av, z);
+  return gen_fromdigits(x,B,(void *)&D, &FpXQX_ring);
 }
 
 /* Q an FpXY (t_POL with FpX coeffs), evaluate at X = x */

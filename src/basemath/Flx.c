@@ -1648,24 +1648,18 @@ static struct bb_ring Flx_ring = { _Flx_add,_Flx_mul,_Flx_sqr };
 GEN
 Flx_digits(GEN x, GEN T, ulong p)
 {
-  pari_sp av = avma;
   struct _Flxq D;
   long d = degpol(T), n = (lgpol(x)+d-1)/d;
-  GEN z;
   D.p = p;
-  z = gen_digits(x,T,n,(void *)&D, &Flx_ring, _Flx_divrem);
-  return gerepileupto(av, z);
+  return gen_digits(x,T,n,(void *)&D, &Flx_ring, _Flx_divrem);
 }
 
 GEN
 FlxV_Flx_fromdigits(GEN x, GEN T, ulong p)
 {
-  pari_sp av = avma;
   struct _Flxq D;
-  GEN z;
   D.p = p;
-  z = gen_fromdigits(x,T,(void *)&D, &Flx_ring);
-  return gerepileupto(av, z);
+  return gen_fromdigits(x,T,(void *)&D, &Flx_ring);
 }
 
 long

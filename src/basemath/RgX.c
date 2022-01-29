@@ -219,10 +219,8 @@ _RgX_divrem(void *E, GEN x, GEN y, GEN *r)
 GEN
 RgX_digits(GEN x, GEN T)
 {
-  pari_sp av = avma;
   long d = degpol(T), n = (lgpol(x)+d-1)/d;
-  GEN z = gen_digits(x,T,n,NULL, &Rg_ring, _RgX_divrem);
-  return gerepileupto(av, z);
+  return gen_digits(x,T,n,NULL, &Rg_ring, _RgX_divrem);
 }
 
 /*******************************************************************/

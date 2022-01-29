@@ -555,24 +555,18 @@ static struct bb_ring FpX_ring = { _FpX_add,_FpX_mul,_FpX_sqr };
 GEN
 FpX_digits(GEN x, GEN T, GEN p)
 {
-  pari_sp av = avma;
   struct _FpX D;
   long d = degpol(T), n = (lgpol(x)+d-1)/d;
-  GEN z;
   D.p = p;
-  z = gen_digits(x,T,n,(void *)&D, &FpX_ring, _FpX_divrem);
-  return gerepileupto(av, z);
+  return gen_digits(x,T,n,(void *)&D, &FpX_ring, _FpX_divrem);
 }
 
 GEN
 FpXV_FpX_fromdigits(GEN x, GEN T, GEN p)
 {
-  pari_sp av = avma;
   struct _FpX D;
-  GEN z;
   D.p = p;
-  z = gen_fromdigits(x,T,(void *)&D, &FpX_ring);
-  return gerepileupto(av, z);
+  return gen_fromdigits(x,T,(void *)&D, &FpX_ring);
 }
 
 long
