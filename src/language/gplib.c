@@ -483,12 +483,21 @@ gphelp_keyword_list(void)
   "bnr",
   "ell",
   "rnf",
+  "hgm",
+  "HGM",
+  "ideal",
+  "idele",
+  "CFT",
   "bid",
   "modulus",
   "prototype",
   "Lmath",
   "Ldata",
   "Linit",
+  "character",
+  "sums",
+  "products",
+  "integrals",
   NULL};
   return L;
 }

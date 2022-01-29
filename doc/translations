@@ -203,3 +203,6 @@ Ldata           @Data structures describing $L$ and theta functions
 Linit           @Data structures describing $L$ and theta functions
 L-function      @Data structures describing $L$ and theta functions
 character       @Dirichlet characters
+sums            @Sums, products, integrals and similar functions
+products        @Sums, products, integrals and similar functions
+integrals       @Sums, products, integrals and similar functions
