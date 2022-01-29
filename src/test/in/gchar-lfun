@@ -254,14 +254,14 @@ G = gcharinit(bnf,N);
 print("bug from Atelier demo");
 bnf = bnfinit(x^2+5,1);
 gc = gcharinit(bnf,1);
-chi = [1,0,-1];
+chi = [1,0,-1]~;
 L = lfuncreate([gc,chi]);
 round(lfunan(L,5))
 
 print("norm component fix");
 bnf = bnfinit(x^2-5);
 gc = gcharinit(bnf,1);
-chi = [1,-1];
+chi = [1,-1]~;
 L = lfuncreate([gc,chi]);
 round(10^6*lfunparams(L))
 round(lfunan(L,10))
@@ -269,7 +269,7 @@ round(lfunan(L,10))
 print("bad inputs");
 bnf = bnfinit(x^4 - x^3 + 3*x^2 + 2*x + 1, 1);
 G = gcharinit(bnf, 1);
-lfuncreate([G,[1]]);
-lfuncreate([G,[1,0,0,'x]]);
-lfuncreate([G,[1,0,0,0,I]]);
+lfuncreate([G,[1]~]);
+lfuncreate([G,[1,0,0,'x]~]);
+lfuncreate([G,[1,0,0,0,I]~]);
 \\don't put tests after the errors

@@ -36,13 +36,13 @@ Doc: \var{gc} being a Grossencharacter group as output by \kbd{gcharinit}, $Lv$ 
  ? gc = gcharinit(bnf,1);
  ? pr = idealprimedec(bnf,11)[1];
  ? chi = gcharidentify(gc,[pr],[0.184760])
- % = [-420226] \\ @com unlikely to be meaningful
+ % = [-420226]~ \\ @com unlikely to be meaningful
  ? chareval(gc,chi,pr)
  % = 0.18475998070331376194260927294721168954
  ? \p 10
    realprecision = 19 significant digits (10 digits displayed)
  ? chi = gcharidentify(gc,[pr],[0.184760])
- % = [-7] \\ @com probably what we were looking for
+ % = [-7]~ \\ @com probably what we were looking for
  ? chareval(gc,chi,pr)
  % = 0.1847608033
  ? \p 38
@@ -58,5 +58,5 @@ Doc: \var{gc} being a Grossencharacter group as output by \kbd{gcharinit}, $Lv$ 
  ? gc = gcharinit(bnf,1); gc.cyc
  % = [0]
  ? gcharidentify(gc,[1,2],[[0,3.5+1/3*I],[0,-3.5+1/3*I]])
- % = [-1, 1/3]
+ % = [-1, 1/3]~
  @eprog

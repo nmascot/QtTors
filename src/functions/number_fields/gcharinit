@@ -28,7 +28,7 @@ Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
  ? g = gcharinit(bnf,idealpow(bnf,pr,2)); \\ @com characters of modulus dividing $\goth{p}^2$
  ? g.cyc \\ @com structure as an abelian group
  % = [0,0,0,0.E-57]
- ? chi = [2,4,3,0]; \\ @com a character
+ ? chi = [2,4,3,0]~; \\ @com a character
  ? gcharconductor(g,chi)[1]
  % =
  [5 4 4 4]

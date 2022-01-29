@@ -26,9 +26,9 @@ static GEN gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, 
 
 /*
   characters can be represented by:
-   - their coordinates on the snf basis (mostly for gp use): prefix gchar_
-   - their coordinates on the internal basis: prefix gchari_
-   - their R/Z components (logs): prefix gcharlog_
+   - t_COL of coordinates on the snf basis (mostly for gp use): prefix gchar_
+   - t_VEC of coordinates on the internal basis: prefix gchari_
+   - t_VEC of R/Z components (logs): prefix gcharlog_
 
    see gchar_internal for SNF -> internal
    and gchari_log for internal -> R/Z components
@@ -862,14 +862,14 @@ gchar_algebraic_basis(GEN gc)
   tors_basis = matid(ntors);
 
   /* the norm is an algebraic character */
-  normchar = gneg(vec_ei(nc+1,nc+1));
+  normchar = gneg(col_ei(nc+1,nc+1));
 
   /* add sublattice of algebraic */
 
   if (!nalg)
   {
     if (DEBUGLEVEL>2) err_printf("nalg=0\n");
-    return shallowmatconcat(mkcol2(tors_basis,normchar));
+    return shallowmatconcat(mkvec2(tors_basis,normchar));
   }
 
   /* block of k_s parameters of free algebraic */
@@ -907,7 +907,7 @@ gchar_algebraic_basis(GEN gc)
     basis = shallowmatconcat(mkmat22(tors_basis, gen_0, gen_0, alg_basis));
   else
     basis = alg_basis;
-  return shallowmatconcat(mkcol2(basis,normchar));
+  return shallowmatconcat(mkvec2(shallowtrans(basis),normchar));
 }
 static GEN
 gchar_algebraicnormtype(GEN gc, GEN type)
@@ -930,7 +930,7 @@ gchar_algebraicnormtype(GEN gc, GEN type)
     if (!equalii(w,gmael(type,i,2))) return NULL;
   }
   n = lg(gchar_get_cyc(gc))-1;
-  v = zerovec(n);
+  v = zerocol(n);
   gel(v,n) = negi(w);
   return mkvec(v);
 }
@@ -973,11 +973,11 @@ gchar_algebraicoftype(GEN gc, GEN type)
   }
   /* block of k_s parameters of free algebraic */
   matk = matslice(gchar_get_basis(gc),n0+1,n0+nalg,nm-r2+1,nm);
-  chi = shallowtrans(inverseimage(shallowtrans(matk),shallowtrans(k)));
+  chi = inverseimage(shallowtrans(matk),shallowtrans(k));
   if (lg(chi) == 1) return NULL;
   for (i=1; i<lg(chi); i++) if (typ(gel(chi,i)) != t_INT) return NULL;
-  chi = mkvec4(zerovec(gchar_get_ntors(gc)), chi,
-               zerovec(gchar_get_nfree(gc) - nalg), gmul2n(negi(w),-1));
+  chi = mkvec4(zerocol(gchar_get_ntors(gc)), chi,
+               zerocol(gchar_get_nfree(gc) - nalg), gmul2n(negi(w),-1));
   return mkvec(shallowconcat1(chi));
 }
 
@@ -1002,9 +1002,7 @@ static GEN
 check_gchar_i(GEN chi, long l, GEN *s)
 {
   long i, lchi=lg(chi)-1;
-  if (typ(chi)!=t_VEC)
-    pari_err_TYPE("check_gchar_i [chi]", chi);
-  if (lchi!=l && lchi!=l-1) /* allow missing weight component */
+  if (lchi!=l && lchi!=l-1) /* allow missing norm component */
     pari_err_DIM("check_gchar_i [chi]");
   if (lchi==l)
   {
@@ -1031,12 +1029,14 @@ check_gchar_i(GEN chi, long l, GEN *s)
 static GEN
 check_gchar(GEN gc, GEN chi, GEN *s)
 {
+  if (typ(chi)!=t_COL) pari_err_TYPE("check_gchar [chi]", chi);
   return check_gchar_i(chi, lg(gchar_get_cyc(gc))-1, s);
 }
 
 static GEN
 check_gchari(GEN gc, GEN chi, GEN *s)
 {
+  if (typ(chi)!=t_VEC) pari_err_TYPE("check_gchari [chi]", chi);
   return check_gchar_i(chi, lg(gel(gchar_get_basis(gc),1)), s);
 }
 
@@ -1046,7 +1046,7 @@ static GEN
 gchar_internal(GEN gc, GEN chi, GEN *s)
 {
   chi = check_gchar(gc, chi, s);
-  return ZV_ZM_mul(chi, gchar_get_Ui(gc));
+  return ZV_ZM_mul(shallowtrans(chi), gchar_get_Ui(gc));
 }
 
 /* from internal basis form, return the R/Z components and set s to the R
@@ -1056,19 +1056,19 @@ gchari_log(GEN gc, GEN chi, GEN *s)
 {
   long i, n;
   chi = check_gchari(gc, chi, s);
-  chi = RgV_RgM_mul(chi, gchar_get_basis(gc));
+  chi = RgV_RgM_mul(shallowtrans(chi), gchar_get_basis(gc));
   n = gchar_get_ns(gc) + gchar_get_nc(gc); /* take exponents mod Z */
   for (i = 1; i <= n; i++) gel(chi,i) = gfrac(gel(chi,i));
   return chi;
 }
 
 static GEN
-gchari_shift(GEN gc, GEN chi, GEN w)
+gchari_shift(GEN gc, GEN chi, GEN s0)
 {
   GEN s;
   check_gchar_group(gc);
   chi = check_gchari(gc, chi, &s);
-  return shallowconcat(chi, gadd(w,s));
+  return shallowconcat(chi, gadd(s0,s));
 }
 
 /* chip has ncp = #zm[1][i].cyc components */
@@ -1289,12 +1289,11 @@ gchar_duallog(GEN gc, GEN chi)
   if (typ(chi) == t_MAT)
   {
     long k;
-    GEN m, r;
+    GEN r;
     pari_sp av = avma;
-    m = shallowtrans(chi);
-    r = cgetg(lg(m), t_MAT);
-    for (k = 1; k < lg(m); k++)
-      gel(r, k) = gchar_duallog(gc, shallowtrans(gel(m, k)));
+    r = cgetg(lg(chi), t_MAT);
+    for (k = 1; k < lg(chi); k++)
+      gel(r, k) = gchar_duallog(gc, gel(chi, k));
     return gerepilecopy(av, shallowtrans(r));
   }
   else
@@ -1310,7 +1309,7 @@ gcharduallog(GEN gc, GEN chi)
   check_gchar_group(gc);
   check_gchar(gc, chi, &s);
   logchi = gchar_duallog(gc, chi);
-  return gerepilecopy(av, shallowconcat1(mkvec2(logchi,s)));
+  return gerepilecopy(av, shallowconcat1(mkcol2(logchi,s)));
 }
 
 /* complete log of ideal */
@@ -1509,7 +1508,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   for (j=1; j<=nchi; j++)
   {
     C = cgetg(dim+1, t_COL);
-    logchi = gchar_duallog(gc, vec_ei(nchi,j));
+    logchi = gchar_duallog(gc, col_ei(nchi,j));
     for (i=1; i<=npr; i++)
       gel(C,i) = gcharlog_eval_raw(logchi, gel(Llog,i));
     chi_oo = gcharlog_conductor_oo(gc, logchi);
@@ -1651,7 +1650,7 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
     normcompo = gdivgu(normcompo,lg(Lv)-1);
     x = shallowconcat(x,normcompo);
   }
-  return shallowtrans(x);
+  return x;
 }
 
 /* TODO export the init interface */
