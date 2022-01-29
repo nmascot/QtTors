@@ -16,20 +16,43 @@ Doc: numerical integration from $a$ to $\infty$ of oscillating
  by summing the integral between two consecutive multiples of $H$;
  \fl determines the summation algorithm used: either $0$ (Sidi extrapolation,
  safe mode), 1 (Sidi extrapolation, unsafe mode), 2 (\kbd{sumalt}),
- 3 (\kbd{sumnumlagrange}) or 4 (\kbd{sumpos}).
+ 3 (\kbd{sumnumlagrange}) or 4 (\kbd{sumpos}). For the last two modes
+ (Lagrange and Sumpos), one should input the period $2H$ instead of the
+ half-period $H$.
+
  The default is $\fl = 0$; Sidi summation should be the most
- robust alorithm; you can try it in unsafe mode when the integrals between
+ robust algorithm; you can try it in unsafe mode when the integrals between
  two consecutive multiples of $H$ form an alternating series, this should be
  about twice faster than the default and not lose accuracy. Sumpos should be
- by far the slowest, Sumalt should be fast but often wrong,
+ by far the slowest method, but also very robust and may be able to handle
+ integrals where Sidi fails. Sumalt should be fast but often wrong,
  especially when the integrals between two consecutive multiples of $H$
  do not form an alternating series), and Lagrange should be as fast as Sumalt
  but more often wrong.
 
+ When one of the Sidi modes runs into difficulties, it will return the result
+ to the accuracy believed to be correct (the other modes do not perform
+ extrapolation and do not have this property) :
+ \bprog
+ ? f(x)=besselj(0,x)^4*log(x+1);
+ ? \pb384
+ ? intnumosc(x = 0, f(x), Pi)
+ %1 = 0.4549032054850867417 \\ fewer digits than expected !
+ ? bitprecision(%)
+ %2 = 64
+ ? \g1 \\ increase debug level to see diagnostics
+ ? intnumosc(x = 0, f(x), Pi)
+ sumsidi: reached accuracy of 23 bits.
+ %2 = 0.4549032054850867417
+ @eprog\noindent The algorithm could extrapolate the series to 23 bits of
+ accuracy, then diverged. So only the absolute error is likely to be
+ around $2^{-23}$ instead of the possible $2^{-64}$ (or the requested
+ $2^{-384}$). We'll come back to this example at the end.
+
  In case of difficulties, you may try to replace the half-(quasi)-period $H$
  by a multiple, such as the quasi-period $2H$: since we do not expect
  alternating behaviour, \kbd{sumalt} mode will almost surely be broken, but
- others may improve, in particular Lagrange.
+ others may improve, in particular Lagrange or Sumpos.
 
  \kbd{tab} is either omitted or precomputed with \kbd{intnumgaussinit};
  if using Sidi summation in safe mode ($\fl = 0$) \emph{and} precompute
@@ -125,10 +148,11 @@ Doc: numerical integration from $a$ to $\infty$ of oscillating
  time = 2,315 ms.
  %8 = -382 \\ Sumpos is perfect but slow
  @eprog\noindent Again, Sidi extrapolation behaves well, especially in safe
- mode, but $2H$ is required here. Finally, if the integrand has singularities
- close to the interval of integration, it is advisable to split the integral
- in two: use the more robust \kbd{intnum} to handle the singularities, then
- \kbd{intnumosc} for the remainder:
+ mode, but $2H$ is required here.
+
+ If the integrand has singularities close to the interval of integration,
+ it is advisable to split the integral in two: use the more robust \kbd{intnum}
+ to handle the singularities, then \kbd{intnumosc} for the remainder:
  \bprog
  ? \p38
  ? f(x) = besselj(0,x)^3 * log(x); \\ mild singularity at 0
@@ -146,4 +170,16 @@ Doc: numerical integration from $a$ to $\infty$ of oscillating
  %8 = -13  \\ g() is not consistent
  ? exponent(H - H2)
  %9 = -128  \\ not a proof, but h() looks good
+ @eprog\noindent Finally, here is an exemple where all methods fail, even
+ when splitting the integral, except Sumpos:
+ \bprog
+ ? \p38
+ ? f(x)=besselj(0,x)^4*log(x+1);
+ ? F = intnumosc(x=0,f(x), Pi, 4)
+ time = 2,437 ms.
+ %2 = 0.45489838778971732178155161172638343214
+ ? \p76 \\ double accuracy to check
+ ? exponent(F - intnumosc(x = 0,f(x), Pi, 4))
+ time = 18,817 ms.
+ %3 = -122 \\ F was almost perfect
  @eprog
