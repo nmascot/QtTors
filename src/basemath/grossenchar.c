@@ -273,9 +273,9 @@ vec_v0(long n, long n0, long r1, long r2)
 
 /* select cm embeddings; return a matrix */
 static GEN
-cm_select(GEN bnf, GEN cm, long prec)
+cm_select(GEN nf, GEN cm, long prec)
 {
-  GEN emb, keys, v, m_sel, imag_emb, nf = bnf_get_nf(bnf);
+  GEN emb, keys, v, m_sel, imag_emb;
   long nc, d_cm, r_cm, c, i, j, r2 = nf_get_r2(nf);
   pari_sp av;
 
@@ -285,7 +285,7 @@ cm_select(GEN bnf, GEN cm, long prec)
   m_sel = zeromatcopy(nc, r2); /* selection matrix */
   av = avma;
   /* group complex embeddings */
-  emb = nfeltembed(bnf, gel(cm, 2), NULL, prec);
+  emb = nfeltembed(nf, gel(cm, 2), NULL, prec);
   /* sort */
   imag_emb = imag_i(emb);
   keys = gadd(gmul(mppi(prec), real_i(emb)), gabs(imag_emb, prec));
@@ -498,83 +498,75 @@ gcharinit(GEN bnf, GEN mod, long prec)
 static GEN
 gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 {
-  GEN bnf, u, u0, m, m0;
+  GEN bnf = gchar_get_bnf(gc), nf = bnf_get_nf(bnf), u, u0, m, m0;
   long order, r1, r2, ns, nc, n, nu, nm, ncm = 0;
 
-  bnf = gchar_get_bnf(gc);
-  nf_get_sign(bnf_get_nf(bnf), &r1, &r2);
+  nf_get_sign(nf, &r1, &r2);
   n = r1 + 2*r2;
   nu = r1 + r2 - 1;
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
   nm = ns+nc+n; /* ns + nc + r1 + r2 + r2 */
-
   order = bnf_get_tuN(bnf);
-
   m0 = gchar_get_m0(gc);
   u0 = matid(nm);
   m = shallowcopy(m0); /* keep m unchanged */
-
   if (DEBUGLEVEL>1) err_printf("matrix m = %Ps\n", m);
-
   if (nc)
   { /* keep steps 1&2 to make sure we have zeta_m */
     u = hnf_block(m, ns,nc, ns+nu,nc+1);
-    u0 = gmul(u0, u); m = gmul(m, u);
+    u0 = ZM_mul(u0, u); m = RgM_ZM_mul(m, u);
     if (DEBUGLEVEL>2) err_printf("step 1 -> %Ps\n", m);
     u = hnf_block(m, ns,nc, ns,nu+nc);
-    u0 = gmul(u0, u); m = gmul(m, u);
+    u0 = ZM_mul(u0, u); m = RgM_ZM_mul(m, u);
     if (DEBUGLEVEL>2) err_printf("step 2 -> %Ps\n", m);
   }
   if (r2)
   {
-    u = hnf_block(m, ns+nc+r1+r2,r2, ns+nc+r1+r2-1,r2+1);
-    u0 = gmul(u0, u); m = gmul(m, u);
+    u = hnf_block(m, nm-r2,r2, nm-r2-1,r2+1);
+    u0 = ZM_mul(u0, u); m = RgM_ZM_mul(m, u);
     if (DEBUGLEVEL>2) err_printf("step 3 -> %Ps\n", m);
   }
   /* remove last column */
-  setlg(m, nm);
-  setlg(u0, nm);
+  setlg(u0, nm); setlg(m, nm);
   if (DEBUGLEVEL>2) err_printf("remove last col -> %Ps\n", m);
 
   if (!gequal0(cm))
   {
     GEN v, Nargs;
+    long bit = - prec2nbits(nfprec) + 16 + expu(order);
     /* reduce on Norm arguments */
-    v = cm_select(bnf, cm, nfprec);
+    v = cm_select(nf, cm, nfprec);
     if (DEBUGLEVEL>2) err_printf("cm_select -> %Ps\n", v);
     ncm = nbrows(v);
     gchar_set_u0(gc, u0);
-    while (1)
+    for(;;)
     {
       long e;
-      Nargs = gmul(v, rowslice(m, nc+ns+r1+r2+1, nm));
+      Nargs = gmul(v, rowslice(m, nc+ns+nu+2, nm));
       if (DEBUGLEVEL>2) err_printf("Nargs -> %Ps\n", Nargs);
       Nargs = grndtoi(gmulgs(Nargs, 2 * order), &e);
-      if (e < nfprec+10) break; /* FIXME: e is a bitprec, nfprec is a prec ? */
+      if (e < bit) break;
       if (DEBUGLEVEL>1) err_printf("cm select: doubling prec\n");
       nfprec = precdbl(nfprec);
       m = gcharmatnewprec_shallow(gc, &nfprec);
     }
     if (DEBUGLEVEL>2) err_printf("rounded Nargs -> %Ps\n", Nargs);
-    u = hnf_block(Nargs, 0, ncm, ns+nc, r1+2*r2-1);
-    u0 = gmul(u0, u); m = gmul(m, u);
+    u = hnf_block(Nargs, 0, ncm, ns+nc, n-1);
+    u0 = ZM_mul(u0, u); m = RgM_ZM_mul(m, u);
     if (DEBUGLEVEL>2) err_printf("after cm reduction -> %Ps\n", m);
   }
 
   /* apply LLL on Lambda_m, may need to increase prec */
-
   gchar_set_nalg(gc, ncm);
   gchar_set_u0(gc, u0);
 
-  if (r1 + r2 - 1 > 0)
+  if (nu > 0)
   {
     GEN u = NULL;
     while (1)
     {
-      u = lll_block(m, ns+nc,r1+2*r2, ns+nc, r1+r2-1);
-      if (u)
-        break;
+      u = lll_block(m, ns+nc, n, ns+nc, nu); if (u) break;
       nfprec = precdbl(nfprec);
       /* recompute m0 * u0 to higher prec */
       m = gcharmatnewprec_shallow(gc, &nfprec);
