@@ -507,7 +507,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
   nm = ns+nc+n; /* ns + nc + r1 + r2 + r2 */
-  order = bnf_get_tuN(bnf);
+  order = 2*bnf_get_tuN(bnf);
   m0 = gchar_get_m0(gc);
   u0 = matid(nm);
   m = shallowcopy(m0); /* keep m unchanged */
@@ -542,11 +542,16 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
     gchar_set_u0(gc, u0);
     for(;;)
     {
-      long e;
+      long e, emax, i;
       Nargs = gmul(v, rowslice(m, nc+ns+nu+2, nm));
       if (DEBUGLEVEL>2) err_printf("Nargs -> %Ps\n", Nargs);
-      Nargs = grndtoi(gmulgs(Nargs, 2 * order), &e);
-      if (e < bit) break;
+      emax = bit-1;
+      for (i = ns+nc+1; i < lg(Nargs); i++)
+      {
+        gel(Nargs,i) = grndtoi(gmulgs(gel(Nargs,i), order), &e);
+        emax = maxss(emax,e);
+      }
+      if (emax < bit) break;
       if (DEBUGLEVEL>1) err_printf("cm select: doubling prec\n");
       nfprec = precdbl(nfprec);
       m = gcharmatnewprec_shallow(gc, &nfprec);
