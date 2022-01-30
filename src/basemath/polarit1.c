@@ -585,10 +585,10 @@ factorpadic(GEN f, GEN p, long r)
     y = trivial_fact();
   else
   {
-    GEN P, lead, lt;
+    GEN P, lead;
     long i, l, pr;
 
-    f = QpX_to_ZX(f, p); (void)Z_pvalrem(leading_coeff(f), p, &lt);
+    f = QpX_to_ZX(f, p);
     f = pnormalize(f, p, NULL, r, n-1, &lead, &pr, &reverse);
     y = ZpX_monic_factor(f, p, pr);
     P = gel(y,1); l = lg(P);
@@ -600,7 +600,6 @@ factorpadic(GEN f, GEN p, long r)
       if (reverse) t = RgX_recip_shallow(t);
       gel(P,i) = ZX_to_ZpX_normalized(t,p,ppow,r);
     }
-    if (!gequal1(lt)) gel(P,1) = gmul(gel(P,1), lt);
   }
   if (v)
   { /* v > 0 */
