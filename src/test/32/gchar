@@ -2,6 +2,37 @@
 one large field
 [10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 non trivial cm subfield
+
+[1 0  0]
+
+[0 1  0]
+
+[0 0  0]
+
+[0 0  0]
+
+[0 0  0]
+
+[0 0  0]
+
+[0 0  0]
+
+[0 0 -1]
+
+1
+[[0, 16], [8, 8], [0, 16], [16, 0]]
+[16, 8*I]
+[0, 8*I]
+[16, 8*I]
+[-16, 8*I]
+8
+1
+[[5, 5], [5, 5], [0, 10], [10, 0]]
+[0, 5*I]
+[0, 5*I]
+[10, 5*I]
+[-10, 5*I]
+5
 gcharalgebraic
 
 [1 0 0 0    0  0]
@@ -286,4 +317,4 @@ bad inputs
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)]~,1)
   ***                 ^------------------------------
   *** gcharlocal: incorrect type in check_gchar_i [s] (t_PADIC).
-Total time spent: 1887
+Total time spent: 1948
