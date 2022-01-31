@@ -543,7 +543,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
     for(;;)
     {
       long e, emax, i;
-      Nargs = gmul(v, rowslice(m, nc+ns+nu+2, nm));
+      Nargs = gmul(v, rowslice(m, nm-r2+1, nm));
       if (DEBUGLEVEL>2) err_printf("Nargs -> %Ps\n", Nargs);
       emax = bit-1;
       for (i = ns+nc+1; i < lg(Nargs); i++)
