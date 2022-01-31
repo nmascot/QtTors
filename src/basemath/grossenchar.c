@@ -498,7 +498,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
 static GEN
 gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
 {
-  GEN bnf = gchar_get_bnf(gc), nf = bnf_get_nf(bnf), u, u0, m, m0;
+  GEN bnf = gchar_get_bnf(gc), nf = bnf_get_nf(bnf), u, u0, m;
   long order, r1, r2, ns, nc, n, nu, nm, ncm = 0;
 
   nf_get_sign(nf, &r1, &r2);
@@ -508,9 +508,8 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
   nc = gchar_get_nc(gc);
   nm = ns+nc+n; /* ns + nc + r1 + r2 + r2 */
   order = 2*bnf_get_tuN(bnf);
-  m0 = gchar_get_m0(gc);
   u0 = matid(nm);
-  m = shallowcopy(m0); /* keep m unchanged */
+  m = shallowcopy(gchar_get_m0(gc)); /* keep m0 unchanged */
   if (DEBUGLEVEL>1) err_printf("matrix m = %Ps\n", m);
   if (nc)
   { /* keep steps 1&2 to make sure we have zeta_m */
