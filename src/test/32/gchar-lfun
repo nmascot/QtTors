@@ -88,13 +88,13 @@ norm component fix
 [5000000, 3000000, [-1000000 + 6528503*I, -1000000 - 6528503*I]]
 [1, 0, 0, 4, 5, 0, 0, 0, 9, 0]
 bad inputs
-  ***   at top-level: lfuncreate([G,[1]~])
-  ***                 ^--------------------
+  ***   at top-level: lfuncreate([gc,[1]~])
+  ***                 ^---------------------
   *** lfuncreate: inconsistent dimensions in check_gchar_i [chi].
-  ***   at top-level: lfuncreate([G,[1,0,0,'x]~])
-  ***                 ^---------------------------
-  *** lfuncreate: incorrect type in check_gchar_i [coefficient] (t_POL).
-  ***   at top-level: lfuncreate([G,[1,0,0,0,I]~])
+  ***   at top-level: lfuncreate([gc,[1,0,0,'x]~])
   ***                 ^----------------------------
+  *** lfuncreate: incorrect type in check_gchar_i [coefficient] (t_POL).
+  ***   at top-level: lfuncreate([gc,[1,0,0,0,I]~])
+  ***                 ^-----------------------------
   *** lfuncreate: sorry, lfun for gchar with imaginary norm component is not yet implemented.
-Total time spent: 51133
+Total time spent: 49468

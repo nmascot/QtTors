@@ -1,6 +1,6 @@
 default(parisize,"16M");
 default(realprecision,38);
-cxchareval(g,c,x) = exp(2*I*Pi*chareval(g,c,x));
+cxchareval(gc,chi,x) = exp(2*I*Pi*chareval(gc,chi,x));
 
 gcharinit(bnfinit('y),1);
 
@@ -10,19 +10,19 @@ p1 = idealadd(bnf, 13, x^4-4*x^3-4*x+1);
 p2 = idealadd(bnf, 17, x-1);
 p3=idealadd(bnf ,19, x^8-6*x^7-4*x^6-3*x^5+8*x^4-3*x^3-4*x^2-6*x+1);
 N=idealfactorback(bnf,[p1,p2,p3],[1,0,0]);
-g=gcharinit(bnf,N);
-round(g.cyc)
+gc=gcharinit(bnf,N);
+round(gc.cyc)
 
 print("non trivial cm subfield"); /* does not work yet */
 pol = rnfequation(polcyclo(5,'y),'x^2-'y-1);
 bnf = bnfinit(pol,1);
-g = gcharinit(bnf,1);
-\\gcharalgebraic(g)
+gc = gcharinit(bnf,1);
+\\gcharalgebraic(gc)
 /* TODO: check values! */
 \\c1 = [1,0,0,0,0,0,0];
-\\vecan_gchar([g,c1],50);
+\\vecan_gchar([gc,c1],50);
 \\c2 = [0,1,0,0,0,0,0];
-\\vecan_gchar([g,c2],50);
+\\vecan_gchar([gc,c2],50);
 
 print("gcharalgebraic");
 gc = gcharinit(polcyclo(5),25);
@@ -66,20 +66,20 @@ print("need to increase prec");
 pol = x^4 - 2*x^3 + 5*x^2 - 2*x - 1;
 bnf = bnfinit(pol);
 N = (2*3*7*11)^2;
-G = gcharinit(bnf,N);
+gc = gcharinit(bnf,N);
 
 print("larger fields");
 print("r2 = 5, clno = 5");
 pol = x^12 + 8*x^10 + 6*x^8 - 268*x^6 - 1438*x^4 - 3420*x^2 - 3078;
 bnf = bnfinit(pol);
-g = gcharinit(bnf,1);
-g = gcharinit(bnf,2*3*7);
+gc = gcharinit(bnf,1);
+gc = gcharinit(bnf,2*3*7);
 
 print("r2 = 4, clno = 3");
 pol = x^8 - 3*x^5 - x^4 + 8*x^2 - 10*x + 6;
 bnf = bnfinit(pol);
-g = gcharinit(bnf,1);
-g = gcharinit(bnf,3^4*117*1009);
+gc = gcharinit(bnf,1);
+gc = gcharinit(bnf,3^4*117*1009);
 
 print("r2 = 8, clno = 16");
 \\ WARNING.... LONG
@@ -109,31 +109,31 @@ bnf = bnfinit(pol);
 p5 = idealfactor(bnf,p5)[1,1];
 p101 = idealadd(bnf, 101, x^2-18*x-28);
 p101 = idealfactor(bnf, p101)[1,1];
-g = gcharinit(bnf,[p5,[0,0,0,0]]);
+gc = gcharinit(bnf,[p5,[0,0,0,0]]);
 default(parisize,"16m");
-g = gcharinit(bnf,[[p5,1;p101,3],[0,1,0,1]]);
+gc = gcharinit(bnf,[[p5,1;p101,3],[0,1,0,1]]);
 
 print("gcharidentify");
 bnf = bnfinit(x^4 - x^3 + 3*x^2 + 2*x + 1, 1);
-G = gcharinit(bnf, 1);
-round(G.cyc)
-gcharidentify(G,[],[])
+gc = gcharinit(bnf, 1);
+round(gc.cyc)
+gcharidentify(gc,[],[])
 pr = idealadd(bnf, 101, x-48);
 idl = idealadd(bnf, 140788137003612377, 6496*x^3-6496*x^2+19489*x-35497622602420127);
 B=2;
 {forvec(V=[[0,1],[-B,B],[-B,B],[-B,B]],
   chi = V~;
-  param = gcharduallog(G,chi);
-  if(gcharidentify(G,[pr],[chareval(G,chi,pr)])!=chi,print("FAIL a: chi=",chi));
-  if(gcharidentify(G,[pr,1,2],[chareval(G,chi,pr),
+  param = gcharduallog(gc,chi);
+  if(gcharidentify(gc,[pr],[chareval(gc,chi,pr)])!=chi,print("FAIL a: chi=",chi));
+  if(gcharidentify(gc,[pr,1,2],[chareval(gc,chi,pr),
     [param[4],param[2]],[param[5],param[3]]])!=chi,print("FAIL b: chi=",chi));
-  if(gcharidentify(G,[idl,1,2],[chareval(G,chi,idl),
+  if(gcharidentify(gc,[idl,1,2],[chareval(gc,chi,idl),
     [param[4],param[2]],[param[5],param[3]]])!=chi,print("FAIL c: chi=",chi));
 )};
-gcharidentify(G,[1,2],[[0,1],[0,0]])
-gcharidentify(G,[1,2],[[0,1/2],[0,0]])
-gcharidentify(G,[1,2],[[0,0.7],[0,0]])
-gcharidentify(G,[1],[[0,0]])
+gcharidentify(gc,[1,2],[[0,1],[0,0]])
+gcharidentify(gc,[1,2],[[0,1/2],[0,0]])
+gcharidentify(gc,[1,2],[[0,0.7],[0,0]])
+gcharidentify(gc,[1],[[0,0]])
 \\ TODO init interface
 
 /* bigger units, cm, etc. */
@@ -147,20 +147,20 @@ gcharalgebraic(gc)
 /* big class number, precision */
 print("prec increase");
 f = x^3 - 5929*x^2 - 5932*x - 1;
-g = gcharinit(f,1);
-round(g.cyc)
+gc = gcharinit(f,1);
+round(gc.cyc)
 /* increase prec */
-localbitprec(64);bitprecision(gcharnewprec(g)[1])>=64
-localbitprec(764);bitprecision(gcharnewprec(g)[1])>=764
+localbitprec(64);bitprecision(gcharnewprec(gc)[1])>=64
+localbitprec(764);bitprecision(gcharnewprec(gc)[1])>=764
 /* evaluate */
-p=idealprimedec(g.nf,13)[1];
-localbitprec(64); v1 = chareval(g,[137,7,1,0,-1283,1233]~,p);
-localbitprec(2048); v2 = chareval(g,[137,7,1,0,-1283,1233]~,p);
+p=idealprimedec(gc.nf,13)[1];
+localbitprec(64); v1 = chareval(gc,[137,7,1,0,-1283,1233]~,p);
+localbitprec(2048); v2 = chareval(gc,[137,7,1,0,-1283,1233]~,p);
 exponent(v1-v2) < -100
-p=idealprimedec(g.nf,nextprime(1<<32))[1];
-\\gcharlog(g,p);
-localbitprec(132); v1 = chareval(g,[137,7,1,0,-1283,1233]~,p);
-localbitprec(2048); v2 = chareval(g,[137,7,1,0,-1283,1233]~,p);
+p=idealprimedec(gc.nf,nextprime(1<<32))[1];
+\\gcharlog(gc,p);
+localbitprec(132); v1 = chareval(gc,[137,7,1,0,-1283,1233]~,p);
+localbitprec(2048); v2 = chareval(gc,[137,7,1,0,-1283,1233]~,p);
 exponent(v1-v2) < -132
 
 print("limit cases");
@@ -278,48 +278,53 @@ localprec(10); chi = gcharidentify(gc,[pr],[0.184760])
 bnf = bnfinit(x^2-2,1);
 gc = gcharinit(bnf,1); round(gc.cyc)
 gcharidentify(gc,[1,2],[[0,3.5-1/3*I],[0,-3.5-1/3*I]])
-
+bnf = bnfinit(polcyclo(5),1);
+pr = idealprimedec(bnf,5)[1];
+gc = gcharinit(bnf,idealpow(bnf,pr,2));
+gc.cyc
+chi = [2,4,3,0]~;
+gcharconductor(gc,chi)[1]
 
 print("bad inputs");
 gcharinit([],1)
 gcharinit(bnfinit(x),[])
 gcharinit(bnfinit(x),[1,[]])
 gcharidentify([],[1],[[0,0]]);
-gcharidentify('G,[1],[[0,0]]);
+gcharidentify('gc,[1],[[0,0]]);
 bnf = bnfinit(x^4 - x^3 + 3*x^2 + 2*x + 1, 1);
-G = gcharinit(bnf, 1);
+gc = gcharinit(bnf, 1);
 pr = idealadd(bnf, 101, x-48);
-gcharidentify(G,[1,1],[[0,0],[0,0]]);
-gcharidentify(G,[1,0],[[0,0],[0,0]]);
-gcharidentify(G,[1,3],[[0,0],[0,0]]);
-gcharidentify(G,[1,[]],[[0,0],[0,0]]);
-gcharidentify(G,[1,'x],[[0,0],[0,0]]);
-gcharidentify(G,[[]],[1.]);
-gcharidentify(G,[pr],[1+O(3^7)]);
-gcharidentify(G,[pr],['x]);
-gcharidentify(G,[1],['x]);
-gcharidentify(G,[1],[[]]);
-gcharidentify(G,[1],[[0.1,0]]);
-gcharidentify(G,[1],[[0,O(3^7)]]);
-gcharidentify(G,[1],[0,0]);
-G = gcharinit(bnf, pr);
-gcharidentify(G,[pr],[0]);
-tmp = G[3];
-G[3] = 0;
-gcharnewprec(G);
-G[3] = tmp;
-tmp = G[1];
-G[1] = 0;
-gcharnewprec(G);
-G[1] = tmp;
-tmp = G[7];
-G[7] = 0;
-gcharnewprec(G);
-G[7] = tmp;
-tmp = G[7][1][2];
-G[7][1][2] = 2^20;
-gcharidentify(G,[],[]);
-G[7][1][2] = tmp;
+gcharidentify(gc,[1,1],[[0,0],[0,0]]);
+gcharidentify(gc,[1,0],[[0,0],[0,0]]);
+gcharidentify(gc,[1,3],[[0,0],[0,0]]);
+gcharidentify(gc,[1,[]],[[0,0],[0,0]]);
+gcharidentify(gc,[1,'x],[[0,0],[0,0]]);
+gcharidentify(gc,[[]],[1.]);
+gcharidentify(gc,[pr],[1+O(3^7)]);
+gcharidentify(gc,[pr],['x]);
+gcharidentify(gc,[1],['x]);
+gcharidentify(gc,[1],[[]]);
+gcharidentify(gc,[1],[[0.1,0]]);
+gcharidentify(gc,[1],[[0,O(3^7)]]);
+gcharidentify(gc,[1],[0,0]);
+gc = gcharinit(bnf, pr);
+gcharidentify(gc,[pr],[0]);
+tmp = gc[3];
+gc[3] = 0;
+gcharnewprec(gc);
+gc[3] = tmp;
+tmp = gc[1];
+gc[1] = 0;
+gcharnewprec(gc);
+gc[1] = tmp;
+tmp = gc[7];
+gc[7] = 0;
+gcharnewprec(gc);
+gc[7] = tmp;
+tmp = gc[7][1][2];
+gc[7][1][2] = 2^20;
+gcharidentify(gc,[],[]);
+gc[7][1][2] = tmp;
 gc = gcharinit(x^2+1,1);
 gcharalgebraic(gc,0);
 gcharalgebraic(gc,[1..10]);

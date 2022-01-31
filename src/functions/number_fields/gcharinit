@@ -5,7 +5,7 @@ Prototype: GGp
 Help: gcharinit(bnf,f): given a bnf as output by bnfinit and a modulus f, initializes data
  related to the group of Grossencharacters of conductor dividing this modulus.
 Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
- fundamental units), $f$ a modulus, initializes a structure (\kbd{g})
+ fundamental units), $f$ a modulus, initializes a structure (\kbd{gc})
  describing the group of Hecke Grossencharacters of modulus $f$.
  (As in \tet{idealstar}, the finite part of the conductor may be given
  by a factorization into prime ideals, as produced by \tet{idealfactor}.)
@@ -25,11 +25,11 @@ Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
  \bprog
  ? bnf = bnfinit(polcyclo(5),1); \\ @com initialize number field $\Q(\zeta_5)$
  ? pr = idealprimedec(bnf,5)[1]; \\ @com prime $\goth{p}=(1-\zeta_5)$ above 5
- ? g = gcharinit(bnf,idealpow(bnf,pr,2)); \\ @com characters of modulus dividing $\goth{p}^2$
- ? g.cyc \\ @com structure as an abelian group
+ ? gc = gcharinit(bnf,idealpow(bnf,pr,2)); \\ @com characters of modulus dividing $\goth{p}^2$
+ ? gc.cyc \\ @com structure as an abelian group
  % = [0,0,0,0.E-57]
  ? chi = [2,4,3,0]~; \\ @com a character
- ? gcharconductor(g,chi)[1]
+ ? gcharconductor(gc,chi)[1]
  % =
  [5 4 4 4]
  [0 1 0 0]
@@ -37,37 +37,37 @@ Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
  [0 0 0 1]
  @eprog
 
- Currently, \kbd{g} is a row vector with 11 components:
+ Currently, \kbd{gc} is a row vector with 11 components:
 
- $\var{g}[1]$ is a matrix whose rows describe a system of generators
+ $\var{gc}[1]$ is a matrix whose rows describe a system of generators
  of the characters as vectors of $\R^n$, under the above description.
 
- $\var{g}[2]$ contains the underlying number field \var{bnf} (\kbd{\var{g}.bnf}).
+ $\var{gc}[2]$ contains the underlying number field \var{bnf} (\kbd{\var{gc}.bnf}).
 
- $\var{g}[3]$ contains data for computing in $(\Z_K/f)^\times$.
+ $\var{gc}[3]$ contains data for computing in $(\Z_K/f)^\times$.
 
- $\var{g}[4]$ is a vector $S$ of prime ideals which generate the class group.
+ $\var{gc}[4]$ is a vector $S$ of prime ideals which generate the class group.
 
- $\var{g}[5]$ is a matrix of valuations of class group generators on
+ $\var{gc}[5]$ is a matrix of valuations of class group generators on
  primes in $S$.
 
- $\var{g}[6]$ is a vector \kbd{[Sunits,m]}, where \kbd{Sunits} describes
+ $\var{gc}[6]$ is a vector \kbd{[Sunits,m]}, where \kbd{Sunits} describes
  the $S$-units of $\var{bnf}$ and $m$ is a relation matrix for internal usage.
 
- $\var{g}[7]$ is \kbd{[Vecsmall([evalprec,prec,nfprec]),Vecsmall([n,nt,nf,ncm])]}
+ $\var{gc}[7]$ is \kbd{[Vecsmall([evalprec,prec,nfprec]),Vecsmall([n,nt,nf,ncm])]}
  keeping precisions and various dimensions.
 
- $\var{g}[8]$ is a vector describing $\var{g}$ as a $\Z$-module
- via its SNF invariants (\kbd{\var{g}.cyc}), the last component
+ $\var{gc}[8]$ is a vector describing $\var{gc}$ as a $\Z$-module
+ via its SNF invariants (\kbd{\var{gc}.cyc}), the last component
  representing the norm character.
 
- $\var{g}[9]$ is row vector \kbd{[R,U,Ui]} allowing to convert characters
+ $\var{gc}[9]$ is row vector \kbd{[R,U,Ui]} allowing to convert characters
  from SNF basis to internal combination of generators.
 
  Specifically, a character \kbd{chi} in SNF basis has coordinates
- \kbd{chi*Ui} in internal basis (the rows of $\var{g}[1]$).
+ \kbd{chi*Ui} in internal basis (the rows of $\var{gc}[1]$).
 
- $\var{g}[10]=m$ is the matrix of ${\cal L}(v)$ for all $S$-units $v$.
+ $\var{gc}[10]=m$ is the matrix of ${\cal L}(v)$ for all $S$-units $v$.
 
- $\var{g}[11]=u$ is an integral base change matrix such that $\var{g}[1]$
+ $\var{gc}[11]=u$ is an integral base change matrix such that $\var{gc}[1]$
  corresponds to $(mu)^{-1}$.
