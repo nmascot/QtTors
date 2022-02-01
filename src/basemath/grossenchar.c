@@ -1222,7 +1222,7 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
 }
 
 GEN
-gcharlocal(GEN gc, GEN chi, GEN v, long prec)
+gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
 {
   pari_sp av = avma;
   GEN s, chiv, k, phi, logchi, nf, moo, famod;
@@ -1260,11 +1260,39 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec)
     checkprid(v);
     nf = bnf_get_nf(gchar_get_bnf(gc));
     famod = gel(gchar_get_mod(gc),1);
-    if (gen_search(gel(famod,1), v, (void*)cmp_prime_ideal, cmp_nodata))
+    if (gen_search(gel(famod,1), v, (void*)cmp_prime_ideal, cmp_nodata) > 0)
     {
-      if (idealval(nf, gcharlog_conductor_f(gc,logchi), v) > 0)
-        /* FIXME: only compute conductor at v */
-        pari_err_IMPL("local component of a Grossencharacter at a ramified prime");
+      GEN Lsprk, sprk = NULL, bid, chip = NULL, cyc;
+      long i, ic, ns;
+      ns = gchar_get_ns(gc);
+      Lsprk = locs_get_Lsprk(gchar_get_zm(gc));
+      for (i=1, ic = ns; i < lg(Lsprk); i++)
+      {
+        long ncp;
+        sprk = gel(Lsprk, i);
+        ncp = lg(sprk_get_cyc(sprk)) - 1;
+        if (!cmp_prime_ideal(v,gcoeff(famod,i,1)))
+        {
+          chip = vecslice(logchi, ic + 1, ic + ncp);
+          break;
+        }
+        ic += ncp;
+      }
+      if (!chip) pari_err_BUG("gcharlocal (chip not found)");
+      bid = sprk_to_bid(nf, sprk, nf_INIT);
+      /* TODO store bid instead of recomputing? */
+      cyc = bid_get_cyc(bid);
+      chiv = RgV_RgM_mul(chip,gel(bid_get_U(bid),1));
+      for (i=1; i<lg(chiv); i++)
+        gel(chiv,i) = modii(gmul(gel(chiv,i),gel(cyc,i)),gel(cyc,i));
+      chiv = shallowconcat(chiv, gchari_eval(gc,chi,v,0,logchi,NULL,s,prec));
+      if (ptbid)
+      {
+        *ptbid = bid;
+        gerepileall(av, 2, &chiv, ptbid);
+      }
+      else chiv = gerepilecopy(av, chiv);
+      return chiv;
     }
     chiv = mkvec(gchari_eval(gc, chi, v, 0, logchi, NULL, s, prec));
   }

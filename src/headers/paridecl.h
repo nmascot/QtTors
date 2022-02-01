@@ -3928,7 +3928,7 @@ GEN     gchareval(GEN gc, GEN chi, GEN x, long flag, GEN logx);
 GEN     gchari_lfun(GEN gc, GEN chi, GEN w);
 GEN     gcharinit(GEN bnf, GEN mod, long prec);
 int     gcharisalgebraic(GEN gc, GEN chi, GEN *pq);
-GEN     gcharlocal(GEN gc, GEN chi, GEN v, long prec);
+GEN     gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN *ptbid);
 GEN     gcharlog(GEN gc, GEN x, long prec);
 GEN     gcharnewprec(GEN gc, long prec);
 int     is_gchar_group(GEN gc);
