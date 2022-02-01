@@ -30,3 +30,19 @@ Doc: Return internal logarithm vector of character \kbd{chi}
  power~$\|\cdot\|^s$ of the ad\'elic norm.
 
  See also \kbd{gcharlog}.
+
+ \bprog
+ ? bnf = bnfinit(x^3+4*x-1,1);
+ ? gc = gcharinit(bnf,[1,[1]]);
+ ? gc.cyc
+ % = [2, 0, 0, 0.E-57]
+ ? chi = [0,1,0]~;
+ ? f = gcharduallog(gc,chi)
+ % = [0.996650294602707059, 0, -2.989127012833967, 1.494563506416983, 0, 0]
+ ? pr = idealprimedec(bnf,2)[1];
+ ? v = gcharlog(gc,pr);
+ ? exp(2*I*Pi*f*v)
+ % = -0.0988001990813817223040103836 - 0.995107291030208128218440796*I
+ ? exp(2*I*Pi*chareval(gc,chi,pr))
+ % = -0.0988001990813817223040103836 - 0.995107291030208128218440796*I
+ @eprog

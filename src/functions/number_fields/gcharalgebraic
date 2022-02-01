@@ -22,3 +22,21 @@ Doc: \var{gc} being the structure returned by \kbd{gcharinit}, return a \typ{MAT
  if such a character exists, or empty otherwise.
  The full set of characters of that infinity type is obtained by multiplying by
  the group of finite order characters.
+
+ \bprog
+ ? bnf = bnfinit(x^4-2*x^3+23*x^2-22*x+6,1);
+ ? gc = gcharinit(bnf,1);
+ ? gc.cyc
+ % = [6, 0, 0, 0, 0.E-57]
+ ? gcharalgebraic(gc)
+ % =
+ [1 0    0  0]
+ [0 1    0  0]
+ [0 0    1  0]
+ [0 0    0  0]
+ [0 0 -1/2 -1]
+ ? gcharalgebraic(gc,[[1,1],[0,1]])
+ % = [] \\ @com $p_\tau+q_\tau$ must be constant for an algebraic character to exist
+ ? gcharalgebraic(gc,[[1,1],[0,2]])
+ % = [[0, 1, 2, 0, -1]~]
+ @eprog

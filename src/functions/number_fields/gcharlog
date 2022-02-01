@@ -35,3 +35,20 @@ Doc: Return the internal (logarithmic) representation of the ideal $x$ suitable
  pair of complex embeddings $\tau\colon K\to\C$.
 
  \item $N(x)$ is the norm of the ideal~$x$.
+
+ \bprog
+ ? bnf = bnfinit(x^3-x^2+5*x+1,1);
+ ? gc = gcharinit(bnf,3);
+ ? gc.cyc
+ % = [3, 0, 0, 0.E-57]
+ ? chi = [1,1,0,-1]~;
+ ? f = gcharduallog(gc,chi);
+ ? pr = idealprimedec(bnf,5)[1];
+ ? v = gcharlog(gc,pr)
+ % = [2, -5, -1, 0.0188115475004995312411, -0.0188115475004995312411,
+      -0.840176314833856764413, 0.256149999363388073738*I]~
+ ? exp(2*I*Pi*f*v)
+ % = -4.5285995080704456583673312 + 2.1193835177957097598574507*I
+ ? exp(2*I*Pi*chareval(gc,chi,pr))
+ % = -4.5285995080704456583673312 + 2.1193835177957097598574507*I
+ @eprog

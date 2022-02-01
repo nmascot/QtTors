@@ -13,3 +13,18 @@ Doc: \kbd{gc} being a gchar structure initialised by \kbd{gcharinit}, returns
  \goth{p}$ is a finite place at which~$\chi$ is unramified, $\chi_v(\goth{p}) =
  \exp(2i\pi \theta)$ is encoded as~$[\theta]$. Currently not implemented for
  ramified finite primes.
+
+ \bprog
+ ? bnf = bnfinit(x^3-x-1);
+ ? gc = gcharinit(bnf,1);
+ ? gc.cyc
+ % = [0, 0, 0.E-57]
+ ? chi = [0,1,1/3]~;
+ ? pr = idealprimedec(bnf,5)[1];
+ ? gcharlocal(gc,chi,1)
+ % = [0, -11.558741690405464133474606107738923957 - 1/3*I]
+ ? gcharlocal(gc,chi,2)
+ % = [2, 5.7793708452027320667373030538694619785 - 1/3*I]
+ ? gcharlocal(gc,chi,pr)
+ % = [-0.497560803385796977571752274 + 0.0853833331211293579127218326*I]
+ @eprog
