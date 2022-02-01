@@ -3202,7 +3202,7 @@ sprk_get_k(GEN sprk)
 }
 /* true nf, L a sprk */
 GEN
-sprk_to_bid(GEN nf, GEN L, GEN x, long flag, GEN MOD)
+sprk_to_bid(GEN nf, GEN L, long flag)
 {
   GEN y, cyc, U, u1 = NULL, fa, fa2, arch, sarch, gen, sprk;
 
@@ -3214,10 +3214,10 @@ sprk_to_bid(GEN nf, GEN L, GEN x, long flag, GEN MOD)
   cyc = shallowconcat(sprk_get_cyc(L), sarch_get_cyc(sarch));
   gen = sprk_get_gen(L);
   cyc = ZV_snf_group(cyc, &U, (flag & nf_GEN)? &u1: NULL);
-  y = bid_grp(nf, u1, cyc, gen, x, sarch);
+  y = bid_grp(nf, u1, cyc, gen, NULL, sarch);
   if (!(flag & nf_INIT)) return y;
-  U = split_U(U, sprk);
-  return mkvec5(mkvec2(x, arch), y, mkvec2(fa,fa2), mkvec2(sprk, sarch), U);
+  return mkvec5(mkvec2(sprk_get_prk(L), arch), y, mkvec2(fa,fa2),
+                mkvec2(sprk, sarch), split_U(U, sprk));
 }
 GEN
 Idealstarmod(GEN nf, GEN ideal, long flag, GEN MOD)
