@@ -129,7 +129,7 @@ Doc:
  A_n)$, this data defines the torsion-free (projective) $\Z_K$-module
  $\goth{a}_1 A_1\oplus \goth{a}_n A_n$.
 
- \item An \tev{integral pseudo-matrix} is a 3-component row vector w$(A,I,J)$
+ \item An \tev{integral pseudo-matrix} is a 3-component row vector $(A,I,J)$
  where $A = (a_{i,j})$ is an $m\times n$ relative matrix and $I =
  (\goth{b}_1,\dots, \goth{b}_m)$, $J = (\goth{a}_1,\dots, \goth{a}_n)$ are ideal
  lists, such that $a_{i,j} \in \goth{b}_i \goth{a}_j^{-1}$ for all $i,j$. This
@@ -143,7 +143,7 @@ Doc:
  \item Any \emph{projective} $\Z_K$-module\varsidx{projective module} $M$
  of finite type in $K^m$ can be given by a pseudo matrix $(A,I)$.
 
- \item An arbitrary $\Z_K$ modules of finite type in $K^m$, with nontrivial
+ \item An arbitrary $\Z_K$ module of finite type in $K^m$, with nontrivial
  torsion, is given by an integral pseudo-matrix $(A,I,J)$
 
  \misctitle{Algebraic numbers in relative extension}
