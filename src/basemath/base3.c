@@ -3149,7 +3149,6 @@ Idealstarmod_i(GEN nf, GEN ideal, long flag, GEN MOD)
   arch = gel(x_arch, 2);
 
   sarch = nfarchstar(nf, x, archp);
-  fa2 = famat_strip2(fa);
   P = gel(fa2,1);
   E = gel(fa2,2);
   nbp = lg(P)-1;
@@ -3179,6 +3178,42 @@ Idealstarmod_i(GEN nf, GEN ideal, long flag, GEN MOD)
     U = matid(lg(cyc)-1);
     if (flag & nf_GEN) u1 = U;
   }
+  y = bid_grp(nf, u1, cyc, gen, x, sarch);
+  if (!(flag & nf_INIT)) return y;
+  U = split_U(U, sprk);
+  return mkvec5(mkvec2(x, arch), y, mkvec2(fa,fa2), mkvec2(sprk, sarch), U);
+}
+
+static long
+idealHNF_norm_pval(GEN x, GEN p)
+{
+  long i, v = 0, l = lg(x);
+  for (i = 1; i < l; i++) v += Z_pval(gcoeff(x,i,i), p);
+  return v;
+}
+static long
+sprk_get_k(GEN sprk)
+{
+  GEN pr, prk;
+  if (sprk_is_prime(sprk)) return 1;
+  pr = sprk_get_pr(sprk);
+  prk = sprk_get_prk(sprk);
+  return idealHNF_norm_pval(prk, pr_get_p(pr)) / pr_get_f(pr);
+}
+/* true nf, L a sprk */
+GEN
+sprk_to_bid(GEN nf, GEN L, GEN x, long flag, GEN MOD)
+{
+  GEN y, cyc, U, u1 = NULL, fa, fa2, arch, sarch, gen, sprk;
+
+  arch = zerovec(nf_get_r1(nf));
+  fa = to_famat_shallow(sprk_get_pr(L), utoipos(sprk_get_k(L)));
+  sarch = nfarchstar(nf, NULL, cgetg(1, t_VECSMALL));
+  fa2 = famat_strip2(fa);
+  sprk = mkvec(L);
+  cyc = shallowconcat(sprk_get_cyc(L), sarch_get_cyc(sarch));
+  gen = sprk_get_gen(L);
+  cyc = ZV_snf_group(cyc, &U, (flag & nf_GEN)? &u1: NULL);
   y = bid_grp(nf, u1, cyc, gen, x, sarch);
   if (!(flag & nf_INIT)) return y;
   U = split_U(U, sprk);

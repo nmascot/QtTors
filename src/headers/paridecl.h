@@ -2366,6 +2366,7 @@ GEN     rnfbasistoalg(GEN rnf, GEN x);
 GEN     rnfeltnorm(GEN rnf, GEN x);
 GEN     rnfelttrace(GEN rnf, GEN x);
 GEN     set_sign_mod_divisor(GEN nf, GEN x, GEN y, GEN sarch);
+GEN     sprk_to_bid(GEN nf, GEN L, GEN x, long flag, GEN MOD);
 GEN     tablemul(GEN TAB, GEN x, GEN y);
 GEN     tablemul_ei(GEN M, GEN x, long i);
 GEN     tablemul_ei_ej(GEN M, long i, long j);
