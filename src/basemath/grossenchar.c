@@ -16,6 +16,7 @@
 #define DEBUGLEVEL DEBUGLEVEL_gchar
 
 static GEN gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN s0, long prec);
+static GEN gchar_duallog(GEN gc, GEN chi);
 
 /*********************************************************************/
 /**                                                                 **/
@@ -87,7 +88,7 @@ localstar(GEN nf, GEN famod, GEN moo)
 /* (nv * log|x^sigma|/norm, arg(x^sigma))/2*Pi
  * substract norm so that we project to the hyperplane
  * H : sum n_s x_s = 0 */
-GEN
+static GEN
 nfembedlog(GEN bnf, GEN x, long prec)
 {
   pari_sp av = avma;
@@ -121,7 +122,7 @@ gchar_Sval(GEN nf, GEN S, GEN x)
 }
 
 /* log_prk(x*pi_pr^{-v_pr(x)}), sign(sigma(x)) */
-GEN
+static GEN
 gchar_logm(GEN nf, GEN locs, GEN x)
 {
   pari_sp av = avma;
@@ -1279,7 +1280,7 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec)
 
 /* logarithm of a character */
 /* TODO document the fact that matrices are accepted as input? */
-GEN
+static GEN
 gchar_duallog(GEN gc, GEN chi)
 {
   if (typ(chi) == t_MAT)
@@ -1310,7 +1311,7 @@ gcharduallog(GEN gc, GEN chi)
 
 /* complete log of ideal */
 /* TODO handle nfembedlog()==NULL loss of precision */
-GEN
+static GEN
 gchar_log(GEN gc, GEN x, long prec)
 {
   GEN bnf, zm, val_S, v, vp, alpha, t, arch_log, zm_log;
