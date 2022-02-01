@@ -20,7 +20,7 @@ Doc: \var{gc} being a Grossencharacter group as output by \kbd{gcharinit}, $Lv$ 
  ? bnf = bnfinit(x^2-5,1);
  ? gc = gcharinit(bnf,1);
  ? chi = gcharidentify(gc,[2],[[0,13.]]);
- ? gcharparameters(gc,chi)[2]
+ ? gcharduallog(gc,chi)[2]
  % = 13.057005210545987626926134713745179631
  ? pr = idealprimedec(bnf,11)[1];
  ? chi = gcharidentify(gc,[pr],[0.3]);

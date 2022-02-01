@@ -273,8 +273,8 @@ Doc:
  ? gc = gcharinit(x^3+4*x-1,[5,[1]]); \\ mod = 5.oo
  ? gc.cyc
  %3 = [4, 2, 0, 0]
- ? gcharideallog(gc,idealprimedec(gc.bnf,5)[1]) \\@com logarithm map $C_K(\goth{m})\to \R^n$
- ? gcharparameters(gc,[1,0,0,1]) \\@com row vector of exponents in $\R^n$
+ ? gcharlog(gc,idealprimedec(gc.bnf,5)[1]) \\@com logarithm map $C_K(\goth{m})\to \R^n$
+ ? gcharduallog(gc,[1,0,0,1]) \\@com row vector of exponents in $\R^n$
  ? lfunzeros([gc,[1,0,0,1]],1) \\@com non algebraic $L$-function
  @eprog
 
