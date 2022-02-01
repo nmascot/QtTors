@@ -27,6 +27,14 @@ rnfconductor(Q,[T, [2,3,7,41]],2)
 rnfconductor(Q,galoissubcyclo(117,116),2)
 K=bnfinit(quadpoly(1596,y),1); rnfbasis(K,rnfsteinitz(K,rnfpseudobasis(K,quadray(K,1))));
 
+\\#2353
+M=[[1,0;0,3],[1,1],[1,1]];
+nfsnf(Q,M)
+nfsnf(Q,M,1)
+M=[[2,0;0,2],[2,2],[1,1]];
+nfsnf(Q,M)
+nfsnf(Q,M,1)
+
 \\ oo loop after bnrmod commit 2b72fbfbf
 rnfconductor(bnfinit(a^3-a^2-6*a+7),x^3-a*x^2+(5*a^2-35)*x+(8*a^2+6*a-35))[3]
 

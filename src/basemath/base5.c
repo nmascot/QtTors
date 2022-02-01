@@ -1526,13 +1526,13 @@ nfhnf0(GEN nf, GEN x, long flag)
 GEN
 nfhnf(GEN nf, GEN x) { return nfhnf0(nf, x, 0); }
 
-static GEN
+static long
 RgV_find_denom(GEN x)
 {
   long i, l = lg(x);
   for (i = 1; i < l; i++)
-    if (Q_denom(gel(x,i)) != gen_1) return gel(x,i);
-  return NULL;
+    if (Q_denom(gel(x,i)) != gen_1) return i;
+  return 0;
 }
 /* A torsion module M over Z_K will be given by a row vector [A,I,J] with
  * three components. I=[b_1,...,b_n] is a row vector of n fractional ideals
@@ -1645,8 +1645,9 @@ nfsnf0(GEN nf, GEN x, long flag)
         /* find d in D = I[k]/I[i] not in J[i]/(A[k,l] J[l]) */
         D = idealdiv(nf,gel(I,k),gel(I,i));
         p2 = idealdiv(nf,gel(J,i), p1);
-        d = RgV_find_denom(QM_gauss(p2, D));
-        if (!d) pari_err_BUG("nfsnf");
+        t = RgV_find_denom(QM_gauss(p2, D));
+        if (!t) pari_err_BUG("nfsnf");
+        d = gel(D,t);
         p1 = element_mulvecrow(nf,d,A,k,i);
         for (t=1; t<=i; t++) gcoeff(A,i,t) = gadd(gcoeff(A,i,t),gel(p1,t));
         if (U)
