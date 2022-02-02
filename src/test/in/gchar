@@ -263,10 +263,16 @@ round(10^5*gcharlocal(gc,concat(chi,3.),1))
 round(10^5*gcharlocal(gc,concat(chi,-2.),2))
 round(10^5*gcharlocal(gc,concat(chi,10.*I),2))
 pr = idealprimedec(bnf,2)[1];
-gcharlocal(gc,chi,pr,&bid)
+loc = gcharlocal(gc,chi,pr,&bid);
 bid.cyc
-gcharlocal(gc,2*chi,pr)
-gcharlocal(gc,3*chi,pr)
+charorder(bid.cyc,loc[1..-2])
+loc[#loc]
+loc = gcharlocal(gc,2*chi,pr);
+charorder(bid.cyc,loc[1..-2])
+loc[#loc]
+loc = gcharlocal(gc,3*chi,pr);
+charorder(bid.cyc,loc[1..-2])
+loc[#loc]
 gcharlocal(gc,6*chi,pr)
 bnf = bnfinit(x^3-x^2+5*x+1,1);
 gc = gcharinit(bnf,1);
@@ -278,8 +284,12 @@ round(10^5*gcharlocal(gc,chi,pr))
 bnf = bnfinit(x^2-5);
 gc = gcharinit(bnf,[4,[1,0]]);
 pr = idealprimedec(bnf,2)[1];
-gcharlocal(gc,[0,1]~,pr,&bid)
+pr2 = idealprimedec(bnf,3)[1];
+chi = gcharidentify(gc,[1,pr2],[[0,-1.],0]);
+loc = gcharlocal(gc,chi,pr,&bid);
 bid.cyc
+charorder(bid.cyc,loc[1..-2])
+loc[#loc]
 
 
 
@@ -360,11 +370,18 @@ pr3 = idealprimedec(bnf,3)[1];
 pr5 = idealprimedec(bnf,5)[1];
 gc = gcharinit(bnf,[pr3,2;pr5,3]);
 round(gc.cyc)
-chi = [1,1,1]~;
-gcharlocal(gc,chi,pr3,&bid)
+pr2 = idealprimedec(bnf,2)[1];
+pr13 = idealprimedec(bnf,13)[1];
+chi = gcharidentify(gc,[1,pr2,pr13],[[1,0],-0.446666666,0.3097498124]);
+\\chi = [1,1,1]~;
+loc = gcharlocal(gc,chi,pr3,&bid);
 bid.cyc
-gcharlocal(gc,chi,pr5,&bid)
+charorder(bid.cyc,loc[1..-2])
+loc[#loc]
+loc = gcharlocal(gc,chi,pr5,&bid);
 bid.cyc
+charorder(bid.cyc,loc[1..-2])
+loc[#loc]
 
 print("doc gcharlog");
 bnf = bnfinit(x^3-x^2+5*x+1,1);
