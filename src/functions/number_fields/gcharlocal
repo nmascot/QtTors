@@ -2,22 +2,32 @@ Function: gcharlocal
 Section: number_fields
 C-Name: gcharlocal
 Prototype: GGGpD&
-Help: gcharlocal(gc,chi,v,&ptbid): if v is a place, return the local character
- chi_v. Set ptbid to the corresponding idealstar structure when v is a prime
- dividing the modulus.
+Help: gcharlocal(gc,chi,v,{&BID}): if v is a place, return the local character
+ chi_v. If v is a prime dividing the modulus and the optional argument 'BID'
+ is present, set BID to the corresponding idealstar structure.
 Doc: \kbd{gc} being a gchar structure initialised by \kbd{gcharinit}, returns
- the local component $\chi_v$, where $v$ is either a \typ{INT} between~$1$
+ the local component $\chi_v$, where $v$ is either an integer between~$1$
  and~$r_1+r_2$ encoding an infinite place, or a prime ideal structure encoding a
- finite place. If~$v$ is a real place, $\chi_v(x) = {\rm sign}(x)^k
- |x|^{i\varphi}$ is encoded as~$[k,\varphi]$; if~$v$ is a complex place,
- $\chi_v(z) = (z/|z|)^k |z|^{2i\varphi}$ is encoded as~$[k,\varphi]$; if~$v =
- \goth{p}$ is a finite place not dividing~\var{gc}\kbd{.mod}, $\chi_v(\pi_v)
- = \exp(2i\pi \theta)$ is encoded as~$[\theta]$; if~$v = \goth{p}$ is a finite
- place dividing~\var{gc}\kbd{.mod}, set~\var{ptbid} to the idealstar~\var{bid}
- of modulus $\goth{p}^k||gc$\kbd{.mod}, and~$\chi_v$ is encoded
- as~$[c_1,\dots,c_n,\theta]$ where~$[c_1,\dots,c_n]$ defines a character
- of~\var{bid} (see \kbd{chareval}) and~$\chi_v(\pi_v) = \exp(2i\pi\theta)$.
+ finite place.
 
+ \item if~$v$ is a real place, $\chi_v(x) = {\rm sign}(x)^k
+ |x|^{i\varphi}$ is encoded as~$[k,\varphi]$;
+
+ \item if~$v$ is a complex place, $\chi_v(z) = (z/|z|)^k |z|^{2i\varphi}$ is
+ encoded as~$[k,\varphi]$;
+
+ \item if~$v = \goth{p}$ is a finite place not dividing~\var{gc}\kbd{.mod},
+ $\chi_v(\pi_v) = \exp(2i\pi \theta)$ is encoded as~$[\theta]$;
+
+ \item if~$v = \goth{p}$ is a finite place dividing~\var{gc}\kbd{.mod},
+ we can define a \var{bid} structure attached to the multiplicative group
+ $G = (\Z_K/\goth{p}^k)^*$, where $\goth{p}^k$ divides exactly
+ \var{gc}\kbd{.mod} (see \kbd{idealstar}).
+ Then~$\chi_v$ is encoded as~$[c_1,\dots,c_n,\theta]$ where~$[c_1,\dots,c_n]$
+ defines a character on $G$
+ (see \kbd{chareval}) and~$\chi_v(\pi_v) = \exp(2i\pi\theta)$. This \var{bid}
+ structure only depends on \kbd{gc} and $v$ (and not on the character $\chi$);
+ it can be recovered through the optional argument \var{BID}.
  \bprog
  ? bnf = bnfinit(x^3-x-1);
  ? gc = gcharinit(bnf,1);
