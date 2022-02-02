@@ -30,13 +30,13 @@ Doc: \var{gc} being the structure returned by \kbd{gcharinit}, return a \typ{MAT
  % = [6, 0, 0, 0, 0.E-57]
  ? gcharalgebraic(gc)
  % =
- [1 0    0  0]
- [0 1    0  0]
- [0 0    1  0]
- [0 0    0  0]
- [0 0 -1/2 -1]
+ [1    0    0  0]
+ [0    1    0  0]
+ [0    0    1  0]
+ [0    0    0  0]
+ [0 -1/2 -1/2 -1]
  ? gcharalgebraic(gc,[[1,1],[0,1]])
  % = [] \\ @com $p_\tau+q_\tau$ must be constant for an algebraic character to exist
  ? gcharalgebraic(gc,[[1,1],[0,2]])
- % = [[0, 1, 2, 0, -1]~]
+ % = [[0, 1, 1, 0, -1]~]
  @eprog

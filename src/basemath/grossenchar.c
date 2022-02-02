@@ -567,19 +567,35 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
   gchar_set_nalg(gc, ncm);
   gchar_set_u0(gc, u0);
 
+  /* TODO factor these two LLL reduction codes in a function? */
+  if (ncm > 0)
+  {
+    GEN u = NULL;
+    while (1)
+    {
+      u = lll_block(m, ns+nc, n, ns+nc, ncm); if (u) break;
+      nfprec = precdbl(nfprec);
+      /* recompute m0 * u0 to higher prec */
+      m = gcharmatnewprec_shallow(gc, &nfprec);
+    }
+    u0 = ZM_mul(u0, u); m = RgM_ZM_mul(m, u);
+    if (DEBUGLEVEL>1) err_printf("after LLL reduction (CM block) -> %Ps\n", m);
+  }
+  gchar_set_u0(gc, u0);
+
   if (nu > 0)
   {
     GEN u = NULL;
     while (1)
     {
-      u = lll_block(m, ns+nc, n, ns+nc, nu); if (u) break;
+      u = lll_block(m, ns+nc, n, ns+nc+ncm, n-1-ncm); if (u) break;
       nfprec = precdbl(nfprec);
       /* recompute m0 * u0 to higher prec */
       m = gcharmatnewprec_shallow(gc, &nfprec);
     }
-    u0 = gmul(u0, u); m = gmul(m, u);
+    u0 = ZM_mul(u0, u); m = RgM_ZM_mul(m, u);
+    if (DEBUGLEVEL>1) err_printf("after LLL reduction (trans block) -> %Ps\n", m);
   }
-  if (DEBUGLEVEL>1) err_printf("after LLL reduction -> %Ps\n", m);
   gchar_set_u0(gc, u0); return m;
 }
 
@@ -673,13 +689,22 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
     for (k = 1; k <= nc; k++)
       shallow_clean_rat(gel(m_inv, ns+k), 1, nm - 1, /*zmcyc[k]*/e, prec);
   }
-  if (ncm)
+  if (r2)
   {
-    long i, j, k;
     for (k = 1; k <= r2; k++)
       shallow_clean_rat(gel(m_inv,nm-k+1), 1, nm-1, NULL, prec);
+  }
+  if (ncm)
+  {
+    long i, j, e;
     for (i = 1; i<=r1+r2; i++)
-      for (j = 1; j <= ncm; j++) gcoeff(m_inv, ns+nc+j, ns+nc+i) = gen_0;
+      for (j = 1; j <= ncm; j++)
+      {
+        e = gexpo(gcoeff(m_inv, ns+nc+j, ns+nc+i));
+        if (e > -20) /* TODO is this bound too permissive? */
+          pari_err_BUG("gcharinit, nonzero entry"); /*LCOV_EXCL_LINE*/
+        gcoeff(m_inv, ns+nc+j, ns+nc+i) = gen_0;
+      }
   }
   if (DEBUGLEVEL>1) err_printf("cyc/cm cleaned: %Ps", shallowtrans(m_inv));
   /* normalize characters, parameters mod Z */
