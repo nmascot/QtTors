@@ -264,6 +264,8 @@ doc gcharlog
 135170*I
 -4.5285995080704456583673312416031761736 + 2.1193835177957097598574507313417
 135161*I
+prime sort bug
+1
 bad inputs
   ***   at top-level: gcharinit([],1)
   ***                 ^---------------
@@ -376,4 +378,4 @@ bad inputs
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)]~,1)
   ***                 ^------------------------------
   *** gcharlocal: incorrect type in check_gchar_i [s] (t_PADIC).
-Total time spent: 1964
+Total time spent: 3258

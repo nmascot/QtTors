@@ -377,6 +377,13 @@ v = gcharlog(gc,pr)
 exp(2*I*Pi*f*v)
 exp(2*I*Pi*chareval(gc,chi,pr))
 
+print("prime sort bug");
+bnf = bnfinit(x,1);
+p2 = idealprimedec(bnf,2)[1];
+p3 = idealprimedec(bnf,3)[1];
+gc = gcharinit(bnf,[p3,1;p2,2]);
+chi = [1]~;
+#gcharlocal(gc,chi,p2) == 2
 
 
 

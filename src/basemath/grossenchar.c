@@ -380,6 +380,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
 
   /* Dirichlet group + make sure mod contains archimedean places */
   mod = check_mod_factored(nf,mod,NULL,&fa2,&archp,NULL);
+  sort_factor(fa2, (void*)&cmp_prime_ideal, &cmp_nodata);
   zm = localstar(nf, fa2, archp);
   zmcyc = locs_get_cyc(zm);
 
