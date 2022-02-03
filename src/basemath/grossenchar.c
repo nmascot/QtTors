@@ -701,7 +701,7 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
       {
         e = gexpo(gcoeff(m_inv, ns+nc+j, ns+nc+i));
         if (e > -20) /* TODO is this bound too permissive? */
-          pari_err_BUG("gcharinit, nonzero entry"); /*LCOV_EXCL_LINE*/
+          pari_err_BUG("gcharinit (nonzero entry)"); /*LCOV_EXCL_LINE*/
         gcoeff(m_inv, ns+nc+j, ns+nc+i) = gen_0;
       }
   }
@@ -710,6 +710,19 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
   for (k = 1; k <= ns+nc; k++) gel(m_inv, k) = gfrac(gel(m_inv, k));
   /* increase relative prec of real values */
   gchar_set_basis(gc, gprec_w(m_inv, prec));
+}
+
+/* make sure same argument determination is chosen */
+static void
+same_arg(GEN v1, GEN v2, long s1, long s2)
+{
+  long i1, i2, e;
+  GEN diff;
+  for (i1=s1, i2=s2; i1<lg(v1); i1++,i2++)
+  {
+    diff = grndtoi(gsub(gel(v2,i2),gel(v1,i1)), &e);
+    if (signe(diff)) gel(v1,i1) = gadd(gel(v1,i1), diff);
+  }
 }
 
 /* recompute matrix with precision increased */
@@ -726,13 +739,14 @@ static GEN
 gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
 {
   GEN bnf, m0, u0, sunits, fu, c, emb;
-  long k, ns, nc, nu, incrprec=0;
+  long k, ns, nc, nu, incrprec=0, r1, r2;
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
   nu = gchar_get_r1(gc) + gchar_get_r2(gc) - 1;
   bnf = gchar_get_bnf(gc);
   sunits = gchar_get_Sunits(gc);
   fu = gchar_get_fu(gc);
+  nf_get_sign(bnf_get_nf(bnf), &r1, &r2);
 
   m0 = gchar_get_m0(gc);
   u0 = gchar_get_u0(gc);
@@ -748,12 +762,14 @@ gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
   {
     emb = nfembedlog(bnf_get_nf(bnf),gel(sunits,k), *nfprecptr);
     if (!emb) { incrprec = 1; break; }
+    same_arg(emb, gel(m0,k),  r1+r2, ns+nc+r1+r2);
     vaffect_shallow(gel(m0, k), ns+nc, emb);
   }
   for (k = 1; k <= nu && !incrprec; k++) /* Lambda_f, fundamental units */
   {
     emb = nfembedlog(bnf_get_nf(bnf),gel(fu,k), *nfprecptr);
     if (!emb) { incrprec = 1; break; }
+    same_arg(emb, gel(m0,ns+k), r1+r2, ns+nc+r1+r2);
     vaffect_shallow(gel(m0,ns+k), ns+nc, emb);
   }
 
