@@ -424,6 +424,17 @@ v = vAB - vA - vB;
 v -= round(v);
 exponent(v) < -100
 
+print("precision SEGV");
+default(parisize,"64M");
+pol = x^8 + 9748*x^6 - 9748*x^5 + 23738821*x^4 - 47472768*x^3 + 35604576*x^2 - 11868192*x + 1483524;
+bnf = bnfinit(pol,1);
+gc = gcharinit(bnf,[1,[]]);
+round(gc.cyc)
+pr = idealprimedec(bnf,29)[1];
+chi = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]~;
+gc.cyc[1] % denominator(chareval(gc,chi,pr)) == 0
+default(parisize,"16M");
+
 
 
 print("bad inputs");
