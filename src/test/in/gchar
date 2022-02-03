@@ -300,7 +300,7 @@ print("doc gcharidentify");
 bnf = bnfinit(x^2-5,1);
 gc = gcharinit(bnf,1);
 chi = gcharidentify(gc,[2],[[0,13.]]);
-gcharduallog(gc,chi)[2]
+gcharlocal(gc,chi,2)
 pr = idealprimedec(bnf,11)[1];
 chi = gcharidentify(gc,[pr],[0.3]);
 chareval(gc,chi,pr)

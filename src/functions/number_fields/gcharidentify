@@ -15,13 +15,16 @@ Doc: \var{gc} being a Grossencharacter group as output by \kbd{gcharinit}, $Lv$ 
  representing~$\goth{p} \mapsto \exp(2i\pi \theta)$ (finite place),
  returns a Grossencharacter~$\psi$ belonging to~$g$ such that~$\psi_v \approx
  \chi_v$ for all~$v$.
+ To ensure proper identification, it is recommended to provide all infinite
+ places together with a set of primes that generate the ray class group of
+ modulus \var{gc}\kbd{.mod}.
 
  \bprog
  ? bnf = bnfinit(x^2-5,1);
  ? gc = gcharinit(bnf,1);
  ? chi = gcharidentify(gc,[2],[[0,13.]]);
- ? gcharduallog(gc,chi)[2]
- % = 13.057005210545987626926134713745179631
+ ? gcharlocal(gc,chi,2)
+ % = [0, 13.057005210545987626926134713745179631]
  ? pr = idealprimedec(bnf,11)[1];
  ? chi = gcharidentify(gc,[pr],[0.3]);
  ? chareval(gc,chi,pr)
