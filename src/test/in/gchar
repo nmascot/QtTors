@@ -20,7 +20,8 @@ gc = gcharinit(bnf,1);
 gcharalgebraic(gc)
 /* TODO: better check for values */
 pr = idealprimedec(bnf,11)[1];
-c1 = [1,0,0,0,0,0,0,-8]~;
+\\c1 = [1,0,0,0,0,0,0,-8]~;
+c1 = gcharidentify(gc,[1,2,3,4],[[-2,8*I],[2,8*I],[16,8*I],[-16,8*I]]);
 gcharisalgebraic(gc,c1,&pq)
 pq
 gcharlocal(gc,c1,1)
@@ -28,7 +29,8 @@ gcharlocal(gc,c1,2)
 gcharlocal(gc,c1,3)
 gcharlocal(gc,c1,4)
 bestappr(log(abs(cxchareval(gc,c1,pr)))/log(11))
-c2 = [0,1,0,0,0,0,0,-5]~;
+\\c2 = [0,1,0,0,0,0,0,-5]~;
+c2 = gcharidentify(gc,[1,2,3,4],[[0,5*I],[0,5*I],[10,5*I],[-10,5*I]]);
 gcharisalgebraic(gc,c2,&pq)
 pq
 gcharlocal(gc,c2,1)
