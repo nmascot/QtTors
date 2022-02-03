@@ -725,13 +725,12 @@ vaffect_shallow(GEN x, long i0, GEN y)
 static GEN
 gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
 {
-  GEN bnf, nf, m0, u0, sunits, fu, c, emb;
+  GEN bnf, m0, u0, sunits, fu, c, emb;
   long k, ns, nc, nu, incrprec=0;
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
   nu = gchar_get_r1(gc) + gchar_get_r2(gc) - 1;
   bnf = gchar_get_bnf(gc);
-  nf = bnf_get_nf(bnf);
   sunits = gchar_get_Sunits(gc);
   fu = gchar_get_fu(gc);
 
@@ -747,13 +746,13 @@ gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
   /* recompute the nfembedlogs of s-units and fundamental units */
   for (k = 1; k <= ns; k++) /* Lambda_S, s-units */
   {
-    emb = nfembedlog(nf,gel(sunits,k), *nfprecptr);
+    emb = nfembedlog(bnf_get_nf(bnf),gel(sunits,k), *nfprecptr);
     if (!emb) { incrprec = 1; break; }
     vaffect_shallow(gel(m0, k), ns+nc, emb);
   }
   for (k = 1; k <= nu && !incrprec; k++) /* Lambda_f, fundamental units */
   {
-    emb = nfembedlog(nf,gel(fu,k), *nfprecptr);
+    emb = nfembedlog(bnf_get_nf(bnf),gel(fu,k), *nfprecptr);
     if (!emb) { incrprec = 1; break; }
     vaffect_shallow(gel(m0,ns+k), ns+nc, emb);
   }
