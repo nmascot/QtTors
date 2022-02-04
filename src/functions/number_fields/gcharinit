@@ -42,32 +42,36 @@ Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
  $\var{gc}[1]$ is a matrix whose rows describe a system of generators
  of the characters as vectors of $\R^n$, under the above description.
 
- $\var{gc}[2]$ contains the underlying number field \var{bnf} (\kbd{\var{gc}.bnf}).
+ $\var{gc}[2]$ contains the underlying number field \var{bnf}
+ (\kbd{\var{gc}.bnf}.
 
- $\var{gc}[3]$ contains data for computing in $(\Z_K/f)^\times$.
+ $\var{gc}[3]$ contains the underlying number field \var{nf}]
+ (\kbd{\var{gc}.nf}), possibly stored at higher precision than \var{bnf}.
 
- $\var{gc}[4]$ is a vector $S$ of prime ideals which generate the class group.
+ $\var{gc}[4]$ contains data for computing in $(\Z_K/f)^\times$.
 
- $\var{gc}[5]$ is a matrix of valuations of class group generators on
+ $\var{gc}[5]$ is a vector $S$ of prime ideals which generate the class group.
+
+ $\var{gc}[6]$ is a matrix of valuations of class group generators on
  primes in $S$.
 
- $\var{gc}[6]$ is a vector \kbd{[Sunits,m]}, where \kbd{Sunits} describes
+ $\var{gc}[7]$ is a vector \kbd{[Sunits,m]}, where \kbd{Sunits} describes
  the $S$-units of $\var{bnf}$ and $m$ is a relation matrix for internal usage.
 
- $\var{gc}[7]$ is \kbd{[Vecsmall([evalprec,prec,nfprec]),Vecsmall([n,nt,nf,ncm])]}
+ $\var{gc}[8]$ is \kbd{[Vecsmall([evalprec,prec,nfprec]),Vecsmall([n,nt,nf,ncm])]}
  keeping precisions and various dimensions.
 
- $\var{gc}[8]$ is a vector describing $\var{gc}$ as a $\Z$-module
+ $\var{gc}[9]$ is a vector describing $\var{gc}$ as a $\Z$-module
  via its SNF invariants (\kbd{\var{gc}.cyc}), the last component
  representing the norm character.
 
- $\var{gc}[9]$ is row vector \kbd{[R,U,Ui]} allowing to convert characters
+ $\var{gc}[10]$ is row vector \kbd{[R,U,Ui]} allowing to convert characters
  from SNF basis to internal combination of generators.
 
  Specifically, a character \kbd{chi} in SNF basis has coordinates
  \kbd{chi*Ui} in internal basis (the rows of $\var{gc}[1]$).
 
- $\var{gc}[10]=m$ is the matrix of ${\cal L}(v)$ for all $S$-units $v$.
+ $\var{gc}[11]=m$ is the matrix of ${\cal L}(v)$ for all $S$-units $v$.
 
- $\var{gc}[11]=u$ is an integral base change matrix such that $\var{gc}[1]$
+ $\var{gc}[12]=u$ is an integral base change matrix such that $\var{gc}[1]$
  corresponds to $(mu)^{-1}$.

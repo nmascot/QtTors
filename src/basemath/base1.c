@@ -37,7 +37,7 @@ static int
 v11checkbnf(GEN v) { return rawchecknf(bnf_get_nf(v)); }
 /* v a t_VEC, lg(v) = 12, sanity check for true bnf */
 static int
-v12checkgchar(GEN v) { return rawcheckbnf(gchar_get_bnf(v)); }
+v13checkgchar(GEN v) { return rawcheckbnf(gchar_get_bnf(v)); }
 /* v a t_VEC, lg(v) = 10, sanity check for true nf */
 static int
 v10checknf(GEN v) { return typ(gel(v,1))==t_POL; }
@@ -211,10 +211,8 @@ get_bnf(GEN x, long *t)
         case 11:
           if (!v11checkbnf(x)) break;
           *t = typ_BNF; return x;
-        case 12:
-          if (!v12checkgchar(x)) break;
-          *t = typ_GCHAR; return gchar_get_bnf(x);
         case 13:
+          if (v13checkgchar(x)) { *t = typ_GCHAR; return gchar_get_bnf(x); }
           if (!v13checkrnf(x)) break;
           *t = typ_RNF; return NULL;
         case 17: *t = typ_ELL; return NULL;
@@ -257,12 +255,8 @@ get_nf(GEN x, long *t)
         case 11:
           if (!rawchecknf(x = bnf_get_nf(x))) break;
           *t = typ_BNF; return x;
-        case 12:
-          if (!v12checkgchar(x)) break;
-          x = gchar_get_bnf(x);
-          if (!rawcheckbnf(x) || !rawchecknf(x = bnf_get_nf(x))) break;
-          *t = typ_GCHAR; return x;
         case 13:
+          if (v13checkgchar(x)) { *t = typ_GCHAR; return gchar_get_nf(x); }
           if (!v13checkrnf(x)) break;
           *t = typ_RNF; return NULL;
         case 17: *t = typ_ELL; return NULL;
@@ -287,6 +281,7 @@ nftyp(GEN x)
       switch(lg(x))
       {
         case 13:
+          if (v13checkgchar(x)) return typ_GCHAR;
           if (!v13checkrnf(x)) break;
           return typ_RNF;
         case 10:
@@ -299,9 +294,6 @@ nftyp(GEN x)
           x = bnr_get_bnf(x);
           if (!rawcheckbnf(x) || !v11checkbnf(x)) break;
           return typ_BNR;
-        case 12:
-          if (!v12checkgchar(x)) break;
-          return typ_GCHAR;
         case 6:
           return typv6(x);
         case 9:

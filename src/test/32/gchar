@@ -348,7 +348,7 @@ bad inputs
   *** gcharnewprec: incorrect type in gchar group (basis) (t_VEC).
   ***   at top-level: gcharnewprec(gc)
   ***                 ^----------------
-  *** gcharnewprec: incorrect type in gchar group (gc[7]) (t_VEC).
+  *** gcharnewprec: incorrect type in gchar group (gc[8]) (t_VEC).
   ***   at top-level: gcharidentify(gc,[],[])
   ***                 ^-----------------------
   *** gcharidentify: precision too low in gchar group, please call gcharnewprec.
@@ -394,4 +394,4 @@ bad inputs
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)]~,1)
   ***                 ^------------------------------
   *** gcharlocal: incorrect type in check_gchar_i [s] (t_PADIC).
-Total time spent: 11175
+Total time spent: 12142

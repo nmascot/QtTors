@@ -272,7 +272,7 @@ print("bug");
 bnf = bnfinit(y,1);
 gc = gcharinit(bnf,2^5*3^2);
 /* FIXME workaround bug 2335 */
-localbitprec(gc[7][1][2]*64);gc[2][7][6] = [0.];
+localbitprec(gc[8][1][2]*64);gc[2][7][6] = [0.];
 p1 = idealprimedec(bnf,101)[1];
 p2 = idealprimedec(bnf,127)[1];
 c = gcharidentify(gc,[p1,p2],[1/4,0]);
