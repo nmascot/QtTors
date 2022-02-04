@@ -453,7 +453,6 @@ round(gc.cyc)
 default(parisize,"16M");
 
 
-
 print("bad inputs");
 gcharinit([],1)
 gcharinit(bnfinit(x),[])

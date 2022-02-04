@@ -89,18 +89,45 @@ localstar(GEN nf, GEN famod, GEN moo)
  * substract norm so that we project to the hyperplane
  * H : sum n_s x_s = 0 */
 static GEN
-nfembedlog(GEN nf, GEN x, long prec)
+nfembedlog(GEN nf, GEN x, long prec, long *ptnfprec)
 {
   pari_sp av = avma;
   GEN logs, cxlogs;
-  long k, r1, r2, n;
+  long k, r1, r2, n, extraprec, extranfprec, nfprec, logprec;
 
   nf_get_sign(nf, &r1, &r2);
-  cxlogs = nf_cxlog(nf, x, prec);
+  n = r1 + 2*r2;
+  logprec = prec;
+  extraprec = expu(n) + 10;
+  if (typ(x) == t_MAT)
+  {
+    extraprec += expu(lg(gel(x,2)));
+    extraprec += gexpo(gel(x,2));
+    extranfprec = gexpo(gel(x,1));
+  }
+  else
+  {
+    x = nf_to_scalar_or_basis(nf,x);
+    extranfprec = gexpo(x);
+  }
+  if (DEBUGLEVEL>3)
+    err_printf("  nfembedlog: prec=%d extraprec=%d nfprec=%d extralogprec=%d\n",
+                prec, nbits2extraprec(extraprec + extranfprec), *ptnfprec,
+                nbits2extraprec(extraprec));
+  nfprec = prec + nbits2extraprec(extraprec + extranfprec);
+  logprec = prec + nbits2extraprec(extraprec);
+  if (*ptnfprec < nfprec)
+  {
+    if (DEBUGLEVEL>3)
+      err_printf("  nfembedlog: increasing prec %d -> %d\n", *ptnfprec, nfprec);
+    nf = nfnewprec_shallow(nf, nfprec);
+    *ptnfprec = nfprec;
+  }
+  cxlogs = nf_cxlog(nf, x, logprec);
   if (!cxlogs) return NULL;
   cxlogs = nf_cxlog_normalize(nf, cxlogs, prec);
   if (!cxlogs) return NULL;
-  n = r1 + 2*r2; logs = cgetg(n+1,t_COL);
+  logs = cgetg(n+1,t_COL);
   for (k = 1; k <= r1+r2; k++) gel(logs,k) = real_i(gel(cxlogs,k));
   for (     ; k <= n; k++) gel(logs,k) = gmul2n(imag_i(gel(cxlogs,k-r2)), -1);
   return gerepileupto(av, gdiv(logs, Pi2n(1,prec)));
@@ -145,11 +172,11 @@ gchar_logm(GEN nf, GEN locs, GEN x)
 }
 
 static GEN
-gchar_nflog(GEN nf, GEN zm, GEN S, GEN x, long prec)
+gchar_nflog(GEN nf, GEN zm, GEN S, GEN x, long prec, long* nfprec)
 {
-  GEN emb = nfembedlog(nf,x,prec);
+  GEN emb = nfembedlog(nf, x, prec, nfprec);
   if (!emb) return NULL;
-  return shallowconcat1(mkvec3(gchar_Sval(nf,S,x),gchar_logm(nf,zm,x),emb));
+  return shallowconcat1(mkvec3(gchar_Sval(nf,S,x), gchar_logm(nf,zm,x), emb));
 }
 
 static GEN
@@ -194,7 +221,7 @@ shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
     t = grndtoi(t, &e);
     if (DEBUGLEVEL>1) err_printf("[%Ps*%Ps=%Ps..e=%ld|prec=%ld]\n",
                                  gel(v,k), den? den: gen_1, t, e, prec);
-    if (e > -10)
+    if (e > -10) /* TODO is this bound too permissive? */
       pari_err_BUG("gcharinit, non rational entry"); /*LCOV_EXCL_LINE*/
     gel(v, k) = den? gdiv(t, den): t;
   }
@@ -307,10 +334,10 @@ cm_select(GEN nf, GEN cm, long prec)
   return gc_const(av, m_sel);
 }
 
-static GEN gchar_hnfreduce_shallow(GEN gc, GEN cm, long prec);
+static GEN gchar_hnfreduce_shallow(GEN gc, GEN cm);
 static void gchar_snfbasis_shallow(GEN gc, GEN rel);
 static void gcharmat_tinverse(GEN gc, GEN m, long prec);
-static GEN gcharmatnewprec_shallow(GEN gc, long *precptr);
+static GEN gcharmatnewprec_shallow(GEN gc, long mprec);
 
 /* compute basis of characters; gc[1] generating family, as rows */
 GEN
@@ -320,10 +347,9 @@ gcharinit(GEN bnf, GEN mod, long prec)
   GEN nf, zm, zmcyc, clgen, S, valS, sfu, logx;
   GEN fa2, archp, z, C, gc, cm, cyc, rel, U, Ui, m, m_inv, m0, u0;
   long n, k, r1, r2, ns, nc, nu, nm, lsfu, order;
-  long nfprec, evalprec = prec, extraprec = 1;
+  long nfprec, nfprecneeded = 0, evalprec = prec, mprec, embprec;
 
-  prec = evalprec + extraprec; /* default 1 extra word */
-  nfprec = prec + extraprec;
+  prec = evalprec + 1; /* default 1 extra word */
 
   /* note on precision:
 
@@ -334,10 +360,8 @@ gcharinit(GEN bnf, GEN mod, long prec)
             = (relative) precision of evaluation of small chars
               if no cancellation
 
-     - nfprec = internal bnf precision used for
+     - nfprec = internal nf precision used for
        the embedding matrix m
-       nfprec = prec + log(h*reg) + log( |u0|_1 ) + invprec
-              = prec + extraprec
 
      In the structure we store [evalprec,prec,nfprec]
 
@@ -358,18 +382,16 @@ gcharinit(GEN bnf, GEN mod, long prec)
 
   if (!checkbnf_i(bnf))
   {
+    nfprec = prec;
     bnf = bnfinit0(bnf, 1, NULL, nfprec);
-    nf = bnf_get_nf(bnf);
+    nf = shallowcopy(bnf_get_nf(bnf));
   }
   else
   {
     GEN fu = bnf_get_sunits(bnf);
     if (!fu) fu = bnf_get_fu(bnf); /* impose fundamental units */
-    if (lg(fu) != 1) extraprec = nbits2extraprec(gexpo(fu)); /* compact or not */
-    nfprec = prec + extraprec;
     nf = shallowcopy(bnf_get_nf(bnf));
-    if (nf_get_prec(nf) < nfprec)
-      nf = nfnewprec_shallow(nf, nfprec);
+    nfprec = nf_get_prec(nf);
   }
 
   /* Dirichlet group + make sure mod contains archimedean places */
@@ -425,18 +447,29 @@ gcharinit(GEN bnf, GEN mod, long prec)
 
   if (DEBUGLEVEL>2) err_printf("start matrix m\n");
   m = cgetg(nm + 1, t_MAT);
+  mprec = 3 + nbits2extraprec(nm+10);
+  embprec = mprec;
   for(;;)
   {
     for (k = 1; k < lsfu; k++)
     { /* Lambda_S (S-units) then Lambda_f, fund. units */
-      logx = gchar_nflog(nf,zm,S,gel(sfu,k), nfprec);
+      nfprecneeded = nfprec;
+      logx = gchar_nflog(nf,zm,S,gel(sfu,k), embprec, &nfprecneeded);
       if (!logx) break;
+      if (nfprecneeded > nfprec)
+      {
+        if (DEBUGLEVEL>3)
+          err_printf("gcharinit [1]: increasing nfprec %d -> %d\n",
+                      nfprec, nfprecneeded);
+        nfprec = nfprecneeded;
+        nf = nfnewprec_shallow(nf, nfprec);
+      }
       gel(m, k) = logx;
     }
     if (k == lsfu) break;
-    extraprec *= 2;
-    nfprec = prec + extraprec;
-    nf = nfnewprec_shallow(nf, nfprec);
+    if (DEBUGLEVEL>3) err_printf("gcharinit [2]: increasing embprec %d -> %d\n",
+                                  embprec, precdbl(embprec));
+    embprec = precdbl(embprec);
   }
   for (k = 1; k <= nc; k++) /* Gamma, structure of (Z/m)* */
   {
@@ -445,8 +478,16 @@ gcharinit(GEN bnf, GEN mod, long prec)
     gel(m, ns+nu+k) = C;
   }
   /* zeta, root of unity */
-  gel(m, ns+nu+nc+1) = gchar_nflog(nf,zm,S,z,nfprec);
-  shallow_clean_rat(gel(m, ns+nu+nc+1), 1, nm, stoi(order), prec);
+  nfprecneeded = nfprec;
+  gel(m, ns+nu+nc+1) = gchar_nflog(nf, zm, S, z, mprec, &nfprecneeded);
+  if (nfprecneeded > nfprec)
+  {
+    if (DEBUGLEVEL>3) err_printf("gcharinit [3]: increasing nfprec %d -> %d\n",
+                                  nfprec, nfprecneeded);
+    nfprec = nfprecneeded;
+    nf = nfnewprec_shallow(nf, nfprec);
+  }
+  shallow_clean_rat(gel(m, ns+nu+nc+1), 1, nm, stoi(order), mprec);
   for (k = 1; k <= r2; k++) /* embed Z^r_2 */
   {
     C = zerocol(nm);
@@ -478,7 +519,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
               u0);                /* m_inv = (m0 u0)~^-1 */
 
   /* B) do HNF reductions + LLL (may increase precision) */
-  m = gchar_hnfreduce_shallow(gc, cm, nfprec);
+  m = gchar_hnfreduce_shallow(gc, cm);
 
   /* C) compute snf basis of torsion subgroup */
   rel = shallowtrans(matslice(m, 1, ns+nc, 1, ns+nc));
@@ -490,12 +531,12 @@ gcharinit(GEN bnf, GEN mod, long prec)
 
 }
 
-/* b) do HNF reductions + LLL + SNF form, keep base change u0 */
+/* b) do HNF reductions + LLL, keep base change u0 */
 static GEN
-gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
+gchar_hnfreduce_shallow(GEN gc, GEN cm)
 {
   GEN bnf = gchar_get_bnf(gc), nf = gchar_get_nf(gc), u, u0, m;
-  long order, r1, r2, ns, nc, n, nu, nm, ncm = 0;
+  long order, r1, r2, ns, nc, n, nu, nm, ncm = 0, mprec;
 
   nf_get_sign(nf, &r1, &r2);
   n = r1 + 2*r2;
@@ -506,6 +547,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
   order = 2*bnf_get_tuN(bnf);
   u0 = matid(nm);
   m = shallowcopy(gchar_get_m0(gc)); /* keep m0 unchanged */
+  mprec = gprecision(m);
   if (DEBUGLEVEL>1) err_printf("matrix m = %Ps\n", m);
   if (nc)
   { /* keep steps 1&2 to make sure we have zeta_m */
@@ -529,9 +571,9 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
   if (!gequal0(cm))
   {
     GEN v, Nargs;
-    long bit = - prec2nbits(nfprec) + 16 + expu(order);
+    long bit = - prec2nbits(mprec) + 16 + expu(order);
     /* reduce on Norm arguments */
-    v = cm_select(nf, cm, nfprec);
+    v = cm_select(nf, cm, gchar_get_nfprec(gc));
     if (DEBUGLEVEL>2) err_printf("cm_select -> %Ps\n", v);
     ncm = nbrows(v);
     gchar_set_u0(gc, u0);
@@ -548,8 +590,8 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
       }
       if (emax < bit) break;
       if (DEBUGLEVEL>1) err_printf("cm select: doubling prec\n");
-      nfprec = precdbl(nfprec);
-      m = gcharmatnewprec_shallow(gc, &nfprec);
+      mprec = precdbl(mprec);
+      m = gcharmatnewprec_shallow(gc, mprec);
     }
     if (DEBUGLEVEL>2) err_printf("rounded Nargs -> %Ps\n", Nargs);
     u = hnf_block(Nargs, 0, ncm, ns+nc, n-1);
@@ -568,9 +610,9 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
     while (1)
     {
       u = lll_block(m, ns+nc, n, ns+nc, ncm); if (u) break;
-      nfprec = precdbl(nfprec);
+      mprec = precdbl(mprec);
       /* recompute m0 * u0 to higher prec */
-      m = gcharmatnewprec_shallow(gc, &nfprec);
+      m = gcharmatnewprec_shallow(gc, mprec);
     }
     u0 = ZM_mul(u0, u); m = RgM_ZM_mul(m, u);
     if (DEBUGLEVEL>1) err_printf("after LLL reduction (CM block) -> %Ps\n", m);
@@ -583,9 +625,9 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm, long nfprec)
     while (1)
     {
       u = lll_block(m, ns+nc, n, ns+nc+ncm, n-1-ncm); if (u) break;
-      nfprec = precdbl(nfprec);
+      mprec = precdbl(mprec);
       /* recompute m0 * u0 to higher prec */
-      m = gcharmatnewprec_shallow(gc, &nfprec);
+      m = gcharmatnewprec_shallow(gc, mprec);
     }
     u0 = ZM_mul(u0, u); m = RgM_ZM_mul(m, u);
     if (DEBUGLEVEL>1) err_printf("after LLL reduction (trans block) -> %Ps\n", m);
@@ -630,17 +672,22 @@ gchar_snfbasis_shallow(GEN gc, GEN rel)
   gchar_set_HUUi(gc, rel, U, Ui);
 }
 
+static long
+mextraprec(GEN m_inv, GEN m, GEN gc)
+{
+  return nbits2extraprec(2*maxss(gexpo(m_inv),1) + expu(lg(m))
+          + gexpo(gchar_get_u0(gc)) + 10);
+}
 
 /* c) transpose inverse + clean rationals.
-   prec = target prec,
-   internal prec = nfprec */
+   prec = target prec for m^-1,
+   mprec = prec of m */
 static void
 gcharmat_tinverse(GEN gc, GEN m, long prec)
 {
   GEN m_inv;
-  long k, n, r1, r2, ns, nc, ncm, nm, nfprec, bitprec;
+  long k, n, r1, r2, ns, nc, ncm, nm, bitprec, mprec, targetmprec = 0;
   bitprec = prec2nbits(prec);
-  nfprec = gchar_get_nfprec(gc);
 
   nf_get_sign(gchar_get_nf(gc), &r1, &r2);
   n = r1+2*r2;
@@ -648,6 +695,7 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
   nc = gchar_get_nc(gc);
   ncm = gchar_get_nalg(gc);
   nm = ns+nc+n; /* ns + nc + r1 + r2 + r2 */
+  mprec = gprecision(m);
 
   while (1)
   {
@@ -667,11 +715,18 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
       m_inv = shallowtrans(m_inv);
       /* enough precision? */
       /* |B - A^(-1)| << |B|.|Id-B*A| */
-      if (gexpo(m_inv) + gexpo(gsub(RgM_mul(m_inv, m), gen_1))
-          + expu(lg(m)) <= -bitprec) break;
+      if (gexpo(m_inv) + gexpo(gsub(RgM_mul(m_inv, m), gen_1)) + expu(lg(m))
+          <= -bitprec)
+      {
+        /* |A^(-1) - (A+H)^(-1)| << |H|.|A^(-1)|^2 */
+        targetmprec = prec + mextraprec(m_inv,m,gc);
+        if (mprec >= targetmprec) break;
+      }
+      else targetmprec = 0;
     }
-    nfprec = precdbl(nfprec);
-    m = gcharmatnewprec_shallow(gc, &nfprec); /* m0 * u0 to higher prec */
+    mprec = maxss(precdbl(mprec), targetmprec);
+    if (mprec == 2) mprec = 3;
+    m = gcharmatnewprec_shallow(gc, mprec); /* m0 * u0 to higher prec */
   }
   /* clean rationals */
   if (nc)
@@ -729,11 +784,12 @@ vaffect_shallow(GEN x, long i0, GEN y)
 }
 
 /* u0 the base change, returns m0 * u0 */
+/* mprec: requested precision for m0 */
 static GEN
-gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
+gcharmatnewprec_shallow(GEN gc, long mprec)
 {
   GEN nf, m0, u0, sunits, fu, emb;
-  long k, ns, nc, nu, incrprec=0, r1, r2;
+  long k, ns, nc, nu, incrprec, r1, r2, nfprec, nfprecneeded, embprec;
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
   nu = gchar_get_r1(gc) + gchar_get_r2(gc) - 1;
@@ -741,37 +797,62 @@ gcharmatnewprec_shallow(GEN gc, long *nfprecptr)
   sunits = gchar_get_Sunits(gc);
   fu = gchar_get_fu(gc);
   nf_get_sign(nf, &r1, &r2);
+  nfprec = nf_get_prec(gchar_get_nf(gc));
 
   m0 = gchar_get_m0(gc);
   u0 = gchar_get_u0(gc);
 
-  nf = nfnewprec_shallow(nf,*nfprecptr);
+  if (DEBUGLEVEL>3) err_printf("gcharmatnewprec_shallow mprec=%d nfprec=%d\n", mprec, nfprec);
 
-  /* recompute the nfembedlogs of s-units and fundamental units */
-  for (k = 1; k <= ns; k++) /* Lambda_S, s-units */
+  embprec = mprec;
+  while(1)
   {
-    emb = nfembedlog(nf,gel(sunits,k), *nfprecptr);
-    if (!emb) { incrprec = 1; break; }
-    same_arg(emb, gel(m0,k),  r1+r2, ns+nc+r1+r2);
-    vaffect_shallow(gel(m0, k), ns+nc, emb);
-  }
-  for (k = 1; k <= nu && !incrprec; k++) /* Lambda_f, fundamental units */
-  {
-    emb = nfembedlog(nf,gel(fu,k), *nfprecptr);
-    if (!emb) { incrprec = 1; break; }
-    same_arg(emb, gel(m0,ns+k), r1+r2, ns+nc+r1+r2);
-    vaffect_shallow(gel(m0,ns+k), ns+nc, emb);
-  }
+    incrprec = 0;
 
-  if (incrprec)
-  {
-    *nfprecptr = precdbl(*nfprecptr);
-    return  gcharmatnewprec_shallow(gc, nfprecptr);
+    /* recompute the nfembedlogs of s-units and fundamental units */
+    for (k = 1; k <= ns; k++) /* Lambda_S, s-units */
+    {
+      nfprecneeded = nfprec;
+      emb = nfembedlog(nf, gel(sunits,k), embprec, &nfprecneeded);
+      if (!emb) { incrprec = 1; break; }
+      same_arg(emb, gel(m0,k),  r1+r2, ns+nc+r1+r2);
+      vaffect_shallow(gel(m0, k), ns+nc, emb);
+      if (nfprecneeded > nfprec)
+      {
+        if (DEBUGLEVEL>3)
+          err_printf("gcharmatnewprec_shallow [1]: increasing nfprec %d -> %d\n",
+                      nfprec, nfprecneeded);
+        nfprec = nfprecneeded;
+        nf = nfnewprec_shallow(nf, nfprec);
+      }
+    }
+    for (k = 1; k <= nu && !incrprec; k++) /* Lambda_f, fundamental units */
+    {
+      nfprecneeded = nfprec;
+      emb = nfembedlog(nf, gel(fu,k), embprec, &nfprecneeded);
+      if (!emb) { incrprec = 1; break; }
+      same_arg(emb, gel(m0,ns+k), r1+r2, ns+nc+r1+r2);
+      vaffect_shallow(gel(m0,ns+k), ns+nc, emb);
+      if (nfprecneeded > nfprec)
+      {
+        if (DEBUGLEVEL>3)
+          err_printf("gcharmatnewprec_shallow [2]: increasing nfprec %d -> %d\n",
+                      nfprec, nfprecneeded);
+        nfprec = nfprecneeded;
+        nf = nfnewprec_shallow(nf, nfprec);
+      }
+    }
+
+    if (!incrprec) break;
+
+    if (DEBUGLEVEL>3)
+      err_printf("gcharmatnewprec_shallow [3]: increasing embprec %d -> %d\n",
+                  embprec, precdbl(embprec));
+    embprec = precdbl(embprec);
   }
 
   gchar_set_nf(gc, nf);
-  gchar_set_nfprec(gc, *nfprecptr);
-  gchar_set_m0(gc, m0); /* no need, shallow */
+  gchar_set_nfprec(gc, nfprec);
 
   return gmul(m0, u0);
 }
@@ -781,11 +862,11 @@ static void
 check_gchar_group(GEN gc) { _check_gchar_group(gc, 0); }
 
 /* increase prec if needed. FIXME: hardcodes gc[8] and gc[11] */
-GEN
-gcharnewprec(GEN gc, long newprec)
+/* newprec: requested precision for m_inv */
+static GEN
+gcharnewprec_i(GEN gc, long newprec)
 {
-  long prec, prec0, nfprec, nfprec0;
-  pari_sp av = avma;
+  long prec, prec0, nfprec, nfprec0, mprec;
   GEN gc2 = shallowcopy(gc);
 
   _check_gchar_group(gc2, 1); /* ignore illegal prec */
@@ -794,28 +875,46 @@ gcharnewprec(GEN gc, long newprec)
 
   if (newprec > prec)
   { /* increase precision */
-    long incrprec = newprec - prec + 1;
     if (DEBUGLEVEL) pari_warn(warnprec,"gcharnewprec",newprec);
-    prec += incrprec;
-    nfprec += incrprec;
-    gel(gc2, 8) = shallowcopy(gel(gc,8));
-    gmael(gc2, 8, 1) = mkvecsmall3(newprec, prec, nfprec);
+    nfprec += newprec - prec;
+    prec = newprec;
+    gel(gc2, 8) = gcopy(gel(gc,8));
+    gchar_set_prec(gc2, prec);
+    gchar_set_nfprec(gc2, nfprec);
   }
-  prec0 = gprecision(gchar_get_basis(gc2));
-  nfprec0 = nf_get_prec(gchar_get_nf(gc2));
 
-  if ((prec0 && prec > prec0) || (nfprec0 && nfprec > nfprec0))
+  nfprec0 = nf_get_prec(gchar_get_nf(gc2));
+  if (nfprec0 && nfprec > nfprec0)
+  {
+    if (DEBUGLEVEL) pari_warn(warnprec,"gcharnewprec (nf)", nfprec);
+    gchar_set_nf(gc2, nfnewprec_shallow(gchar_get_nf(gc2), nfprec));
+  }
+
+  prec0 = gprecision(gchar_get_basis(gc2));
+  if (prec0 && prec > prec0)
   {
     GEN m, cyc;
-    if (DEBUGLEVEL) pari_warn(warnprec,"gcharnewprec",nfprec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"gcharnewprec (minv)", prec);
     gel(gc2, 11) = shallowcopy(gel(gc2, 11));
-    m = gcharmatnewprec_shallow(gc2, &nfprec);
+    mprec = prec + mextraprec(gchar_get_basis(gc), gchar_get_m0(gc), gc);
+    m = gcharmatnewprec_shallow(gc2, mprec);
     if (DEBUGLEVEL>2) err_printf("m0*u0 recomputed -> %Ps\n", m);
     gcharmat_tinverse(gc2, m, prec);
     cyc = shallowcopy(gchar_get_cyc(gc2));
     gel(cyc, lg(cyc)-1) = real_0(prec);
     gchar_set_cyc(gc2, cyc);
   }
+  return gc2;
+}
+
+/* newprec: requested evalprec */
+GEN
+gcharnewprec(GEN gc, long newprec)
+{
+  pari_sp av = avma;
+  GEN gc2;
+  gc2 = gcharnewprec_i(gc, newprec+1);
+  gchar_set_evalprec(gc2, newprec);
   return gerepilecopy(av, gc2);
 }
 
@@ -1374,12 +1473,14 @@ gchar_log(GEN gc, GEN x, long prec)
 {
   GEN bnf, zm, val_S, v, vp, alpha, t, arch_log = NULL, zm_log, nf;
   pari_sp av = avma;
+  long nfprec;
   check_gchar_group(gc);
 
   bnf = gchar_get_bnf(gc);
   nf = gchar_get_nf(gc);
   zm = gchar_get_zm(gc);
   val_S = gchar_get_valS(gc);
+  nfprec = gchar_get_nfprec(gc);
   t = bnfisprincipal0(bnf, x, nf_GENMAT);
   v = gel(t, 1); alpha = gel(t, 2);
   /* TODO: increase prec if alpha is large? */
@@ -1388,7 +1489,7 @@ gchar_log(GEN gc, GEN x, long prec)
   if (DEBUGLEVEL>2) err_printf("vp %Ps\n", vp);
   while(1)
   {
-    arch_log = nfembedlog(nf,alpha,prec);
+    arch_log = nfembedlog(nf, alpha, prec, &nfprec); /* TODO do something with nfprec */
     if (arch_log) break;
     prec = precdbl(prec);
     nf = nfnewprec_shallow(nf, prec);
