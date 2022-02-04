@@ -470,9 +470,8 @@ gcharinit(GEN bnf, GEN mod, long prec)
               S,     /* generators of clgp, ns components */
               valS,
               mkvec2(vecslice(sfu,1,ns), vecslice(sfu,ns+1,ns+nu)),
-              mkvec3(mkvecsmall3(evalprec,prec,nfprec),
-                     mkvecsmall4(0,0,0,0), /* ntors, nfree, nalg */
-                     mkvecsmall4(ns,nc,r1+r2,r2)),
+              mkvec2(mkvecsmall3(evalprec,prec,nfprec),
+                     mkvecsmall4(0,0,0,0)), /* ntors, nfree, nalg */
               cyc, /* reduced components */
               mkvec3(rel, U, Ui), /* internal / SNF base change */
               m0,                 /* embeddings of units */
@@ -834,10 +833,9 @@ is_gchar_group(GEN gc)
   return (typ(gc) == t_VEC
       &&  lg(gc) == GC_LENGTH + 1
       &&  typ(gel(gc, 8)) == t_VEC
-      &&  lg(gel(gc, 8)) == 4
+      &&  lg(gel(gc, 8)) == 3
       &&  typ(gmael(gc, 8, 1))  == t_VECSMALL
       &&  typ(gmael(gc, 8, 2))  == t_VECSMALL
-      &&  typ(gmael(gc, 8, 3))  == t_VECSMALL
       &&  (checkbnf_i(gchar_get_bnf(gc)) != NULL)
       &&  (checknf_i(gchar_get_nf(gc)) != NULL));
 }
