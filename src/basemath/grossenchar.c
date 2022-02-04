@@ -32,7 +32,7 @@ static GEN gchar_duallog(GEN gc, GEN chi);
    - t_VEC of R/Z components (logs): prefix gcharlog_
 
    see gchar_internal for SNF -> internal
-   and gchari_log for internal -> R/Z components
+   and gchari_duallog for internal -> R/Z components
 */
 
 /*
@@ -1090,7 +1090,7 @@ gchar_internal(GEN gc, GEN chi, GEN *s)
 /* from internal basis form, return the R/Z components and set s to the R
  * component */
 static GEN
-gchari_log(GEN gc, GEN chi, GEN *s)
+gchari_duallog(GEN gc, GEN chi, GEN *s)
 {
   long i, n;
   chi = check_gchari(gc, chi, s);
@@ -1184,7 +1184,7 @@ static GEN
 gchari_conductor(GEN gc, GEN chi)
 {
   pari_sp av = avma;
-  chi = gchari_log(gc, chi, NULL);
+  chi = gchari_duallog(gc, chi, NULL);
   return gerepilecopy(av, mkvec2(gcharlog_conductor_f(gc, chi), gcharlog_conductor_oo(gc, chi)));
 }
 
@@ -1270,7 +1270,7 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
   long tau, r1, r2, i;
   check_gchar_group(gc);
   chi = gchar_internal(gc, chi, &s);
-  logchi = gchari_log(gc, chi, NULL);
+  logchi = gchari_duallog(gc, chi, NULL);
   if (typ(v) == t_INT) /* v infinite */
   {
     tau = itos(v);
@@ -1363,7 +1363,7 @@ gchar_duallog(GEN gc, GEN chi)
     return gerepilecopy(av, shallowtrans(r));
   }
   else
-    return gchari_log(gc, gchar_internal(gc, chi, NULL), NULL);
+    return gchari_duallog(gc, gchar_internal(gc, chi, NULL), NULL);
 }
 
 /* gp version, with norm component */
@@ -1439,7 +1439,7 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN s0, lon
   prec0 = gchar_get_prec(gc);
 
   if (!logx) logx = gchar_log(gc, x, prec0);
-  if (!logchi) logchi = gchari_log(gc, chi, &s);
+  if (!logchi) logchi = gchari_duallog(gc, chi, &s);
 
   /* check if precision is sufficient, take care of gexpo = -infty */
   extraprec = gexpo(logx) + gexpo(logchi);
@@ -1449,7 +1449,7 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN s0, lon
     prec0 = prec + extraprec;
     gc = gcharnewprec(gc, prec0);
     logx = gchar_log(gc, x, prec0);
-    logchi = gchari_log(gc, chi, &s);
+    logchi = gchari_duallog(gc, chi, &s);
   }
 
   s = gadd(s0,s);
@@ -1771,7 +1771,7 @@ vecan_gchar(GEN an, long n, long prec)
   if (DEBUGLEVEL > 1)
     err_printf("vecan_gchar: need extra prec %ld\n", nbits2extraprec(expu(n)));
   gc = gcharnewprec(gc, prec + nbits2extraprec(expu(n)));
-  chilog = gchari_log(gc, chi, &s);
+  chilog = gchari_duallog(gc, chi, &s);
 
   nf = bnf_get_nf(gchar_get_bnf(gc));
   N = gcharlog_conductor_f(gc,chilog);
@@ -1869,7 +1869,7 @@ gchari_lfun(GEN gc, GEN chi, GEN s0)
   nc = gchar_get_nc(gc);
   nm = gchar_get_nm(gc);
   nf_get_sign(nf, &r1, &r2);
-  chilog = gchari_log(gc, chi, &s);
+  chilog = gchari_duallog(gc, chi, &s);
   s = gadd(s0,s);
   if (!gequal0(gimag(s))) pari_err_IMPL("lfun for gchar with imaginary norm component");
   cond_f =  gcharlog_conductor_f(gc, chilog);
