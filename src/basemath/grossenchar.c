@@ -841,8 +841,7 @@ is_gchar_group(GEN gc)
 }
 
 /* validates the structure format.
- * Raise error if inconsistent precision, unless flag=1.
- */
+ * Raise error if inconsistent precision, unless flag=1. */
 static void
 _check_gchar_group(GEN gc, long flag)
 {
@@ -861,10 +860,8 @@ _check_gchar_group(GEN gc, long flag)
   if (typ(gel(gc,8)) != t_VEC ||typ(gmael(gc,8,1)) != t_VECSMALL)
     pari_err_TYPE("gchar group (gc[8])", gc);
   if (!flag)
-  { /* modify prec inplace if incoherent */
-    long prec0, nfprec0;
-    prec0 = gprecision(b);
-    nfprec0 = nf_get_prec(nf);
+  {
+    long prec0 = gprecision(b), nfprec0 = nf_get_prec(nf);
     if ((prec0 && gchar_get_prec(gc) > prec0)
         || (nfprec0 && gchar_get_nfprec(gc) > nfprec0))
       pari_err_PREC("gchar group, please call gcharnewprec");
