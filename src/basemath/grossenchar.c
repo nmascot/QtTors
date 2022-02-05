@@ -510,7 +510,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
               zm,    /* Zk/mod, nc components */
               S,     /* generators of clgp, ns components */
               valS,
-              mkvec2(vecslice(sfu,1,ns), vecslice(sfu,ns+1,ns+nu)),
+              sfu,
               mkvec2(mkvecsmall3(evalprec,prec,nfprec),
                      mkvecsmall4(0,0,0,0)), /* ntors, nfree, nalg */
               cyc, /* reduced components */
@@ -765,12 +765,11 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
 static void
 same_arg(GEN v1, GEN v2, long s1, long s2)
 {
-  long i1, i2, e;
-  GEN diff;
-  for (i1=s1, i2=s2; i1<lg(v1); i1++,i2++)
+  long i1, i2, e, l = lg(v1);
+  for (i1 = s1, i2 = s2; i1 < l; i1++,i2++)
   {
-    diff = grndtoi(gsub(gel(v2,i2),gel(v1,i1)), &e);
-    if (signe(diff)) gel(v1,i1) = gadd(gel(v1,i1), diff);
+    GEN d = grndtoi(gsub(gel(v2,i2),gel(v1,i1)), &e);
+    if (signe(d)) gel(v1,i1) = gadd(gel(v1,i1), d);
   }
 }
 
@@ -788,14 +787,13 @@ vaffect_shallow(GEN x, long i0, GEN y)
 static GEN
 gcharmatnewprec_shallow(GEN gc, long mprec)
 {
-  GEN nf, m0, u0, sunits, fu, emb;
-  long k, ns, nc, nu, incrprec, r1, r2, nfprec, nfprecneeded, embprec;
+  GEN nf, m0, u0, sfu;
+  long k, l, ns, nc, r1, r2, nfprec, embprec;
+
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
-  nu = gchar_get_r1(gc) + gchar_get_r2(gc) - 1;
   nf = gchar_get_nf(gc);
-  sunits = gchar_get_Sunits(gc);
-  fu = gchar_get_fu(gc);
+  sfu = gchar_get_sfu(gc);
   nf_get_sign(nf, &r1, &r2);
   nfprec = nf_get_prec(gchar_get_nf(gc));
 
@@ -804,56 +802,33 @@ gcharmatnewprec_shallow(GEN gc, long mprec)
 
   if (DEBUGLEVEL>3) err_printf("gcharmatnewprec_shallow mprec=%d nfprec=%d\n", mprec, nfprec);
 
-  embprec = mprec;
+  embprec = mprec; l = lg(sfu);
   while(1)
-  {
-    incrprec = 0;
-
-    /* recompute the nfembedlogs of s-units and fundamental units */
-    for (k = 1; k <= ns; k++) /* Lambda_S, s-units */
+  { /* recompute the nfembedlogs of s-units and fundamental units */
+    for (k = 1; k < l; k++) /* ns s-units, then r1+r2-1 fundamental units */
     {
-      nfprecneeded = nfprec;
-      emb = nfembedlog(nf, gel(sunits,k), embprec, &nfprecneeded);
-      if (!emb) { incrprec = 1; break; }
+      long nfprecneeded = nfprec;
+      GEN emb = nfembedlog(nf, gel(sfu,k), embprec, &nfprecneeded);
+      if (!emb) break;
       same_arg(emb, gel(m0,k),  r1+r2, ns+nc+r1+r2);
       vaffect_shallow(gel(m0, k), ns+nc, emb);
       if (nfprecneeded > nfprec)
       {
         if (DEBUGLEVEL>3)
-          err_printf("gcharmatnewprec_shallow [1]: increasing nfprec %d -> %d\n",
+          err_printf("gcharmatnewprec_shallow: increasing nfprec %d -> %d\n",
                       nfprec, nfprecneeded);
         nfprec = nfprecneeded;
         nf = nfnewprec_shallow(nf, nfprec);
       }
     }
-    for (k = 1; k <= nu && !incrprec; k++) /* Lambda_f, fundamental units */
-    {
-      nfprecneeded = nfprec;
-      emb = nfembedlog(nf, gel(fu,k), embprec, &nfprecneeded);
-      if (!emb) { incrprec = 1; break; }
-      same_arg(emb, gel(m0,ns+k), r1+r2, ns+nc+r1+r2);
-      vaffect_shallow(gel(m0,ns+k), ns+nc, emb);
-      if (nfprecneeded > nfprec)
-      {
-        if (DEBUGLEVEL>3)
-          err_printf("gcharmatnewprec_shallow [2]: increasing nfprec %d -> %d\n",
-                      nfprec, nfprecneeded);
-        nfprec = nfprecneeded;
-        nf = nfnewprec_shallow(nf, nfprec);
-      }
-    }
-
-    if (!incrprec) break;
-
+    if (k == l) break;
     if (DEBUGLEVEL>3)
-      err_printf("gcharmatnewprec_shallow [3]: increasing embprec %d -> %d\n",
+      err_printf("gcharmatnewprec_shallow: increasing embprec %d -> %d\n",
                   embprec, precdbl(embprec));
     embprec = precdbl(embprec);
   }
-
   gchar_set_nf(gc, nf);
   gchar_set_nfprec(gc, nfprec);
-
   return gmul(m0, u0);
 }
 

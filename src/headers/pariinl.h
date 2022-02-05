@@ -2951,9 +2951,7 @@ gchar_get_S(GEN gc)      { return  gel(gc, 5); }
 INLINE GEN
 gchar_get_valS(GEN gc)   { return  gel(gc, 6); }
 INLINE GEN
-gchar_get_Sunits(GEN gc) { return  gmael(gc, 7, 1); }
-INLINE GEN
-gchar_get_fu(GEN gc)    { return  gmael(gc, 7, 2); }
+gchar_get_sfu(GEN gc) { return  gel(gc, 7); }
 INLINE GEN
 gchar_get_cyc(GEN gc)    { return  gel(gc, 9); }
 INLINE GEN
