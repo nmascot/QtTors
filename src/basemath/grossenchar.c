@@ -99,11 +99,16 @@ nfembedlog(GEN nf, GEN x, long prec, long *ptnfprec)
   n = r1 + 2*r2;
   logprec = prec;
   extraprec = expu(n) + 10;
+  extranfprec = 0;
   if (typ(x) == t_MAT)
   {
-    extraprec += expu(lg(gel(x,2)));
-    extraprec += gexpo(gel(x,2));
-    extranfprec = gexpo(gel(x,1));
+    long l = lg(gel(x,2));
+    if (l>1)
+    {
+      extraprec += expu(l);
+      extraprec += gexpo(gel(x,2));
+      extranfprec = gexpo(gel(x,1));
+    }
   }
   else
   {

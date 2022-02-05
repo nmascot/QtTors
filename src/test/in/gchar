@@ -433,6 +433,16 @@ round(gc.cyc)
 pr = idealprimedec(bnf,29)[1];
 chi = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]~;
 gc.cyc[1] % denominator(chareval(gc,chi,pr)) == 0
+chi = vectorv(#gc.cyc-1,i,1);
+/*
+p2 = idealprimedec(bnf,2);
+localbitprec(256); v1 = chareval(gc,chi,p2);
+localbitprec(512); v2 = chareval(gc,chi,p2);
+print("should be ~ 256: ", exponent(v1-v2)); \\FIXME
+localbitprec(1024); v3 = chareval(gc,chi,p2);
+print("should be ~ 512: ", exponent(v2-v3)); \\FIXME
+*/
+chareval(gc,chi,idealhnf(bnf,1)) == 0
 default(parisize,"16M");
 
 print("argument determination bug");
