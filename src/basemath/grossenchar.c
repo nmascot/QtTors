@@ -89,49 +89,46 @@ localstar(GEN nf, GEN famod, GEN moo)
  * substract norm so that we project to the hyperplane
  * H : sum n_s x_s = 0 */
 static GEN
-nfembedlog(GEN nf, GEN x, long prec, long *ptnfprec)
+nfembedlog(GEN *pnf, GEN x, long prec)
 {
   pari_sp av = avma;
-  GEN logs, cxlogs;
-  long k, r1, r2, n, extraprec, extranfprec, nfprec, logprec;
+  GEN logs, cxlogs, nf = *pnf;
+  long k, r1, r2, n, extrabit, extranfbit, nfprec, nfprec0, logprec;
 
+  nfprec0 = nf_get_prec(nf);
   nf_get_sign(nf, &r1, &r2);
   n = r1 + 2*r2;
   logprec = prec;
-  extraprec = expu(n) + 10;
-  extranfprec = 0;
+  extrabit = expu(n) + 10;
   if (typ(x) == t_MAT)
   {
     long l = lg(gel(x,2));
-    if (l>1)
+    if (l > 1)
     {
-      extraprec += expu(l);
-      extraprec += gexpo(gel(x,2));
-      extranfprec = gexpo(gel(x,1));
+      extrabit += expu(l) + gexpo(gel(x,2));
+      extranfbit = gexpo(gel(x,1));
     }
   }
   else
   {
     x = nf_to_scalar_or_basis(nf,x);
-    extranfprec = gexpo(x);
+    extranfbit = gexpo(x);
   }
   if (DEBUGLEVEL>3)
-    err_printf("  nfembedlog: prec=%d extraprec=%d nfprec=%d extralogprec=%d\n",
-                prec, nbits2extraprec(extraprec + extranfprec), *ptnfprec,
-                nbits2extraprec(extraprec));
-  nfprec = prec + nbits2extraprec(extraprec + extranfprec);
-  logprec = prec + nbits2extraprec(extraprec);
-  if (*ptnfprec < nfprec)
+    err_printf("  nfembedlog: prec=%d extrabit=%d nfprec=%d extralogprec=%d\n",
+               prec, nbits2extraprec(extrabit + extranfbit), nfprec0,
+               nbits2extraprec(extrabit));
+  nfprec = prec + nbits2extraprec(extrabit + extranfbit);
+  logprec = prec + nbits2extraprec(extrabit);
+  if (nfprec0 < nfprec)
   {
-    if (DEBUGLEVEL>3)
-      err_printf("  nfembedlog: increasing prec %d -> %d\n", *ptnfprec, nfprec);
-    nf = nfnewprec_shallow(nf, nfprec);
-    *ptnfprec = nfprec;
+    if (DEBUGLEVEL)
+      err_printf("  nfembedlog: increasing prec %d -> %d\n", nfprec0, nfprec);
+    *pnf = nf = nfnewprec_shallow(nf, nfprec);
+    av = avma;
   }
-  cxlogs = nf_cxlog(nf, x, logprec);
-  if (!cxlogs) return NULL;
-  cxlogs = nf_cxlog_normalize(nf, cxlogs, prec);
-  if (!cxlogs) return NULL;
+  if (!(cxlogs = nf_cxlog(nf, x, logprec))) return gc_NULL(av);
+  if (!(cxlogs = nf_cxlog_normalize(nf, cxlogs, prec))) return gc_NULL(av);
   logs = cgetg(n+1,t_COL);
   for (k = 1; k <= r1+r2; k++) gel(logs,k) = real_i(gel(cxlogs,k));
   for (     ; k <= n; k++) gel(logs,k) = gmul2n(imag_i(gel(cxlogs,k-r2)), -1);
@@ -177,11 +174,12 @@ gchar_logm(GEN nf, GEN locs, GEN x)
 }
 
 static GEN
-gchar_nflog(GEN nf, GEN zm, GEN S, GEN x, long prec, long* nfprec)
+gchar_nflog(GEN *pnf, GEN zm, GEN S, GEN x, long prec)
 {
-  GEN emb = nfembedlog(nf, x, prec, nfprec);
+  GEN emb = nfembedlog(pnf, x, prec);
   if (!emb) return NULL;
-  return shallowconcat1(mkvec3(gchar_Sval(nf,S,x), gchar_logm(nf,zm,x), emb));
+  return shallowconcat1(mkvec3(gchar_Sval(*pnf,S,x),
+                               gchar_logm(*pnf,zm,x), emb));
 }
 
 static GEN
@@ -352,7 +350,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
   GEN nf, zm, zmcyc, clgen, S, valS, sfu, logx;
   GEN fa2, archp, z, C, gc, cm, cyc, rel, U, Ui, m, m_inv, m0, u0;
   long n, k, r1, r2, ns, nc, nu, nm, lsfu, order;
-  long nfprec, nfprecneeded = 0, evalprec = prec, mprec, embprec;
+  long evalprec = prec, nfprec, mprec, embprec;
 
   prec = evalprec + 1; /* default 1 extra word */
 
@@ -458,22 +456,13 @@ gcharinit(GEN bnf, GEN mod, long prec)
   {
     for (k = 1; k < lsfu; k++)
     { /* Lambda_S (S-units) then Lambda_f, fund. units */
-      nfprecneeded = nfprec;
-      logx = gchar_nflog(nf,zm,S,gel(sfu,k), embprec, &nfprecneeded);
+      logx = gchar_nflog(&nf, zm, S, gel(sfu,k), embprec);
       if (!logx) break;
-      if (nfprecneeded > nfprec)
-      {
-        if (DEBUGLEVEL>3)
-          err_printf("gcharinit [1]: increasing nfprec %d -> %d\n",
-                      nfprec, nfprecneeded);
-        nfprec = nfprecneeded;
-        nf = nfnewprec_shallow(nf, nfprec);
-      }
       gel(m, k) = logx;
     }
     if (k == lsfu) break;
-    if (DEBUGLEVEL>3) err_printf("gcharinit [2]: increasing embprec %d -> %d\n",
-                                  embprec, precdbl(embprec));
+    if (DEBUGLEVEL) err_printf("gcharinit: increasing embprec %d -> %d\n",
+                               embprec, precdbl(embprec));
     embprec = precdbl(embprec);
   }
   for (k = 1; k <= nc; k++) /* Gamma, structure of (Z/m)* */
@@ -483,15 +472,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
     gel(m, ns+nu+k) = C;
   }
   /* zeta, root of unity */
-  nfprecneeded = nfprec;
-  gel(m, ns+nu+nc+1) = gchar_nflog(nf, zm, S, z, mprec, &nfprecneeded);
-  if (nfprecneeded > nfprec)
-  {
-    if (DEBUGLEVEL>3) err_printf("gcharinit [3]: increasing nfprec %d -> %d\n",
-                                  nfprec, nfprecneeded);
-    nfprec = nfprecneeded;
-    nf = nfnewprec_shallow(nf, nfprec);
-  }
+  gel(m, ns+nu+nc+1) = gchar_nflog(&nf, zm, S, z, mprec);
   shallow_clean_rat(gel(m, ns+nu+nc+1), 1, nm, stoi(order), mprec);
   for (k = 1; k <= r2; k++) /* embed Z^r_2 */
   {
@@ -507,7 +488,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
   cyc = gen_0;
   m_inv = gen_0;
 
-  /* only m and m_inv depend on precision and are recomputed under gcharnewprec. */
+  /* only m and m_inv depend on prec and are recomputed under gcharnewprec. */
   gc = mkvecn(GC_LENGTH,
               m_inv, /* internal basis, characters as rows */
               bnf,
@@ -710,7 +691,6 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
     mm = shallowmatinsert(m, v0, ncm? nm: nm-r2);
     if (DEBUGLEVEL>1) err_printf("add v0 -> %Ps\n", mm);
     mm = shallowtrans(mm);
-    if (DEBUGLEVEL>2) err_printf("transposed -> %Ps\n", mm);
     m_inv = RgM_inv(mm); /* invert matrix, may need to increase prec */
     if (m_inv)
     {
@@ -778,7 +758,6 @@ same_arg(GEN v1, GEN v2, long s1, long s2)
   }
 }
 
-/* recompute matrix with precision increased */
 static void
 vaffect_shallow(GEN x, long i0, GEN y)
 {
@@ -787,6 +766,7 @@ vaffect_shallow(GEN x, long i0, GEN y)
     gel(x, i+i0) = gel(y, i);
 }
 
+/* recompute matrix with precision increased */
 /* u0 the base change, returns m0 * u0 */
 /* mprec: requested precision for m0 */
 static GEN
@@ -812,24 +792,15 @@ gcharmatnewprec_shallow(GEN gc, long mprec)
   { /* recompute the nfembedlogs of s-units and fundamental units */
     for (k = 1; k < l; k++) /* ns s-units, then r1+r2-1 fundamental units */
     {
-      long nfprecneeded = nfprec;
-      GEN emb = nfembedlog(nf, gel(sfu,k), embprec, &nfprecneeded);
+      GEN emb = nfembedlog(&nf, gel(sfu,k), embprec);
       if (!emb) break;
       same_arg(emb, gel(m0,k),  r1+r2, ns+nc+r1+r2);
       vaffect_shallow(gel(m0, k), ns+nc, emb);
-      if (nfprecneeded > nfprec)
-      {
-        if (DEBUGLEVEL>3)
-          err_printf("gcharmatnewprec_shallow: increasing nfprec %d -> %d\n",
-                      nfprec, nfprecneeded);
-        nfprec = nfprecneeded;
-        nf = nfnewprec_shallow(nf, nfprec);
-      }
     }
     if (k == l) break;
-    if (DEBUGLEVEL>3)
+    if (DEBUGLEVEL)
       err_printf("gcharmatnewprec_shallow: increasing embprec %d -> %d\n",
-                  embprec, precdbl(embprec));
+                 embprec, precdbl(embprec));
     embprec = precdbl(embprec);
   }
   gchar_set_nf(gc, nf);
@@ -1447,20 +1418,16 @@ gcharduallog(GEN gc, GEN chi)
 }
 
 /* complete log of ideal */
-/* TODO handle nfembedlog()==NULL loss of precision */
 static GEN
 gchar_log(GEN gc, GEN x, long prec)
 {
   GEN bnf, zm, val_S, v, vp, alpha, t, arch_log = NULL, zm_log, nf;
   pari_sp av = avma;
-  long nfprec;
-  check_gchar_group(gc);
 
   bnf = gchar_get_bnf(gc);
   nf = gchar_get_nf(gc);
   zm = gchar_get_zm(gc);
   val_S = gchar_get_valS(gc);
-  nfprec = gchar_get_nfprec(gc);
   t = bnfisprincipal0(bnf, x, nf_GENMAT);
   v = gel(t, 1); alpha = gel(t, 2);
   /* TODO: increase prec if alpha is large? */
@@ -1469,7 +1436,7 @@ gchar_log(GEN gc, GEN x, long prec)
   if (DEBUGLEVEL>2) err_printf("vp %Ps\n", vp);
   while(1)
   {
-    arch_log = nfembedlog(nf, alpha, prec, &nfprec); /* TODO do something with nfprec */
+    arch_log = nfembedlog(&nf, alpha, prec);
     if (arch_log) break;
     prec = precdbl(prec);
     nf = nfnewprec_shallow(nf, prec);
@@ -1486,6 +1453,8 @@ gcharlog(GEN gc, GEN x, long prec)
 {
   pari_sp av = avma;
   GEN logx, norm;
+
+  check_gchar_group(gc);
   logx = gchar_log(gc,x,prec);
   norm = idealnorm(gchar_get_nf(gc), x);
   norm = mkcomplex(gen_0,gdiv(glog(norm,prec),Pi2n(1,prec)));
@@ -1507,7 +1476,6 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN s0, lon
   pari_sp av = avma;
 
   prec0 = gchar_get_prec(gc);
-
   if (!logx) logx = gchar_log(gc, x, prec0);
   if (!logchi) logchi = gchari_duallog(gc, chi, &s);
 
@@ -1568,6 +1536,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   GEN M, cyc, mult, pr, Lpr, Lk1, Lphi1, Lk2, Llog, C, logchi, chi_oo, eps, U;
   GEN uni, famod1, nf;
   long r1, r2, npr, nk1, nchi, s, i, j, v, dim, ns, nc, ncol;
+
   check_gchar_group(gc);
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
