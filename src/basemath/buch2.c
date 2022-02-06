@@ -1377,9 +1377,6 @@ static GEN
 init_famat(GEN x) { return mkvec2(x, trivial_fact()); }
 /* optimized idealfactorback + reduction; z = init_famat() */
 static GEN
-powred(GEN z, GEN nf, GEN p, GEN e)
-{ gel(z,1) = p; return idealpowred(nf, z, e); }
-static GEN
 genback(GEN z, GEN nf, GEN P, GEN E)
 {
   long i, l = lg(E);
@@ -1387,7 +1384,9 @@ genback(GEN z, GEN nf, GEN P, GEN E)
   for (i = 1; i < l; i++)
     if (signe(gel(E,i)))
     {
-      GEN J = powred(z, nf, gel(P,i), gel(E,i));
+      GEN J;
+      gel(z,1) = gel(P,i);
+      J = idealpowred(nf, z, gel(E,i));
       I = I? idealHNF_mulred(nf, I, J): J;
     }
   return I; /* != NULL since a generator */
