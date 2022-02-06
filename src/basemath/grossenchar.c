@@ -514,7 +514,6 @@ gcharinit(GEN bnf, GEN mod, long prec)
   /* D) transpose inverse m_inv = (m0*u)~^-1 (may increase precision) */
   gcharmat_tinverse(gc, m, prec);
   return gerepilecopy(av, gc);
-
 }
 
 /* b) do HNF reductions + LLL, keep base change u0 */
