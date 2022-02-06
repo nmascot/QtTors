@@ -345,12 +345,46 @@ static void gchar_snfbasis_shallow(GEN gc, GEN rel);
 static void gcharmat_tinverse(GEN gc, GEN m, long prec);
 static GEN gcharmatnewprec_shallow(GEN gc, long mprec);
 
+/* return a set S of prime ideals such that Cl_S(K) = 1 */
+static GEN
+bestS(GEN bnf)
+{
+  GEN v, S, hw, hv = bnf_get_no(bnf);
+  long i, lS;
+  ulong l;
+  forprime_t P;
+
+  if (equali1(hv)) return cgetg(1, t_VEC);
+  v = diagonal_shallow(bnf_get_cyc(bnf));
+  S = cgetg(expi(hv)+2, t_VEC); lS = 1;
+  u_forprime_init(&P,2,ULONG_MAX);
+  while ((l = u_forprime_next(&P)))
+  {
+    pari_sp av = avma;
+    GEN w, Sl = idealprimedec(bnf, utoi(l));
+    long nSl = lg(Sl)-1;
+    for (i = 1; i < nSl; i++) /* remove one prime ideal */
+    {
+      w = ZM_hnf(shallowconcat(v, isprincipal(bnf, gel(Sl,i))));
+      hw = ZM_det(w);
+      if (cmpii(hw, hv) < 0)
+      {
+        gel(S,lS++) = gel(Sl,i);
+        hv = hw; v = w; av = avma;
+        if (equali1(hv)) { setlg(S, lS); return S; }
+      }
+    }
+    set_avma(av);
+  }
+  return NULL;/*LCOV_EXCL_LINE*/
+}
+
 /* compute basis of characters; gc[1] generating family, as rows */
 GEN
 gcharinit(GEN bnf, GEN mod, long prec)
 {
   pari_sp av = avma;
-  GEN nf, zm, zmcyc, clgen, S, valS, sfu, logx;
+  GEN nf, zm, zmcyc, S, valS, sfu, logx;
   GEN fa2, archp, z, C, gc, cm, cyc, rel, U, Ui, m, m_inv, m0, u0;
   long n, k, r1, r2, ns, nc, nu, nm, order;
   long evalprec = prec, nfprec, mprec, embprec;
@@ -406,13 +440,9 @@ gcharinit(GEN bnf, GEN mod, long prec)
   zm = localstar(nf, fa2, archp);
   zmcyc = locs_get_cyc(zm);
 
-  /* set of primes S */
-  /* FIXME: use gen_mat format instead [KB] */
-  clgen = bnf_get_gen(bnf);
-  S = gel(idealfactor(nf, idealfactorback(nf,clgen,NULL,0)),1);
-
-  /* valuations of generators */
-  valS = matvaluations(nf, S, clgen);
+  /* set of primes S and valuations of generators */
+  S = bestS(bnf);
+  valS = matvaluations(nf, S, bnf_get_gen(bnf));
 
   nf_get_sign(nf, &r1, &r2);
   n = r1+2*r2;

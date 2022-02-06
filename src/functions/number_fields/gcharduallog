@@ -38,7 +38,7 @@ Doc: Return internal logarithm vector of character \kbd{chi}
  % = [2, 0, 0, 0.E-57]
  ? chi = [0,1,0]~;
  ? f = gcharduallog(gc,chi)
- % = [0.231827992252703, 1/2, 0.776369647248353, -0.388184823624176, 1, 0]
+ % = [0.153497221319231, 1/2, 0.776369647248353, -0.388184823624176, 1, 0]
  ? pr = idealprimedec(bnf,2)[1];
  ? v = gcharlog(gc,pr);
  ? exp(2*I*Pi*f*v)
