@@ -2623,9 +2623,8 @@ idealred0(GEN nf, GEN I, GEN vdir)
   yZ = Q_denom(yi); /* (y) \cap Z */
   I = hnfmodid(I, yZ);
   if (!aI) return gerepileupto(av, I);
-  if (typ(aI) == t_MAT)
+  if (typ(aI) == t_MAT) /* yi is not integral and usually larger than y */
     aI = famat_div(aI, y);
-
   else
     c1 = RgC_Rg_mul(yi, c1);
 END:
