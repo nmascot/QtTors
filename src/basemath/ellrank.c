@@ -1445,7 +1445,7 @@ bestS(GEN bnf,GEN S, ulong p)
   if (!S)
   {
     v = diagonal_shallow(cyc);
-    vD = Z_lval(h, 2);
+    vD = Z_lval(h, p);
   }
   else
   {
