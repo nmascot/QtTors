@@ -2574,7 +2574,7 @@ GEN
 idealred0(GEN nf, GEN I, GEN vdir)
 {
   pari_sp av = avma;
-  GEN G, aI, IZ, J, y, yZ, my, c1 = NULL;
+  GEN G, aI, IZ, J, y, yZ, my, yi, c1 = NULL;
   long N;
 
   nf = checknf(nf);
@@ -2619,11 +2619,15 @@ idealred0(GEN nf, GEN I, GEN vdir)
   my = zk_multable(nf, y);
   I = ZM_Z_divexact(ZM_mul(my, I), IZ); /* y I / (I\cap Z), integral */
   c1 = mul_content(c1, IZ);
-  my = ZM_gauss(my, col_ei(N,1)); /* y^-1 */
-  yZ = Q_denom(my); /* (y) \cap Z */
+  yi = ZM_gauss(my, col_ei(N,1)); /* y^-1 */
+  yZ = Q_denom(yi); /* (y) \cap Z */
   I = hnfmodid(I, yZ);
   if (!aI) return gerepileupto(av, I);
-  c1 = RgC_Rg_mul(my, c1);
+  if (typ(aI) == t_MAT)
+    aI = famat_div(aI, y);
+
+  else
+    c1 = RgC_Rg_mul(yi, c1);
 END:
   if (c1) aI = ext_mul(nf, aI,c1);
   return gerepilecopy(av, mkvec2(I, aI));
