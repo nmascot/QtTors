@@ -3924,7 +3924,7 @@ GEN     gchar_conductor(GEN gc, GEN chi);
 GEN     gchar_identify(GEN gc, GEN Lv, GEN Lchiv, long prec);
 GEN     gcharalgebraic(GEN gc, GEN type);
 GEN     gcharduallog(GEN gc, GEN chi);
-GEN     gchareval(GEN gc, GEN chi, GEN x, long flag, GEN logx);
+GEN     gchareval(GEN gc, GEN chi, GEN x, long flag);
 GEN     gchari_lfun(GEN gc, GEN chi, GEN w);
 GEN     gcharinit(GEN bnf, GEN mod, long prec);
 int     gcharisalgebraic(GEN gc, GEN chi, GEN *pq);

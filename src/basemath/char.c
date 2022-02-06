@@ -307,7 +307,7 @@ chareval(GEN G, GEN chi, GEN x, GEN z)
       /* don't implement chars on general bid: need an nf... */
     case typ_GCHAR:
       if (z == NULL)
-        return gerepilecopy(av, gchareval(G, chi, x, 0, NULL));
+        return gerepilecopy(av, gchareval(G, chi, x, 0));
       else
         pari_err_IMPL("evaluation of grossenchar only given in R/Z");
     default:

@@ -15,7 +15,7 @@
 
 #define DEBUGLEVEL DEBUGLEVEL_gchar
 
-static GEN gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN s0, long prec);
+static GEN gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN s0, long prec);
 static GEN gchar_duallog(GEN gc, GEN chi);
 
 /*********************************************************************/
@@ -1364,7 +1364,7 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
       chiv = RgV_RgM_mul(chip,gel(bid_get_U(bid),1));
       for (i=1; i<lg(chiv); i++)
         gel(chiv,i) = modii(gmul(gel(chiv,i),gel(cyc,i)),gel(cyc,i));
-      chiv = shallowconcat(chiv, gchari_eval(gc,chi,v,0,logchi,NULL,s,prec));
+      chiv = shallowconcat(chiv, gchari_eval(gc,chi,v,0,logchi,s,prec));
       if (ptbid)
       {
         *ptbid = bid;
@@ -1373,7 +1373,7 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
       else chiv = gerepilecopy(av, chiv);
       return chiv;
     }
-    chiv = mkvec(gchari_eval(gc, chi, v, 0, logchi, NULL, s, prec));
+    chiv = mkvec(gchari_eval(gc, chi, v, 0, logchi, s, prec));
   }
   return gerepilecopy(av, chiv);
 }
@@ -1468,14 +1468,14 @@ gcharlog_eval_raw(GEN logchi, GEN logx)
  * assume gc (and logchi) has enough internal precision,
  * but increase precision if log is large */
 static GEN
-gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN s0, long prec)
+gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN s0, long prec)
 {
-  GEN val, s = gen_0, norm = NULL;
+  GEN val, s = gen_0, norm = NULL, logx;
   long prec0, extraprec;
   pari_sp av = avma;
 
   prec0 = gchar_get_prec(gc);
-  if (!logx) logx = gchar_log(gc, x, prec0);
+  logx = gchar_log(gc, x, prec0);
   if (!logchi) logchi = gchari_duallog(gc, chi, &s);
 
   /* check if precision is sufficient, take care of gexpo = -infty */
@@ -1511,7 +1511,7 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN logx, GEN s0, lon
 }
 
 GEN
-gchareval(GEN gc, GEN chi, GEN x, long flag, GEN logx)
+gchareval(GEN gc, GEN chi, GEN x, long flag)
 {
   GEN s;
   long prec;
@@ -1519,7 +1519,7 @@ gchareval(GEN gc, GEN chi, GEN x, long flag, GEN logx)
   check_gchar_group(gc);
   prec = gchar_get_evalprec(gc);
   chi = gchar_internal(gc, chi, &s);
-  return gerepilecopy(av, gchari_eval(gc, chi, x, flag, NULL, logx, s, prec));
+  return gerepilecopy(av, gchari_eval(gc, chi, x, flag, NULL, s, prec));
 }
 
 /*******************************************************************/
@@ -1844,7 +1844,7 @@ vecan_gchar(GEN an, long n, long prec)
       ulong k, q;
       if (check && idealval(nf, N, pr)) continue;
       /* TODO: extract code and use precom sprk? */
-      ch = gchari_eval(gc, chi, pr, 1, chilog, NULL, gen_0, prec);
+      ch = gchari_eval(gc, chi, pr, 1, chilog, gen_0, prec);
       q = upr_norm(pr);
       gel(v, q) = gadd(gel(v, q), ch);
       for (k = 2*q; k <= (ulong)n; k += q)
