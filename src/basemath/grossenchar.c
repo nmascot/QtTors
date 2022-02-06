@@ -93,7 +93,7 @@ nfembedlog(GEN *pnf, GEN x, long prec)
 {
   pari_sp av = avma;
   GEN logs, cxlogs, nf = *pnf;
-  long k, r1, r2, n, extrabit, extranfbit, nfprec, nfprec0, logprec;
+  long k, r1, r2, n, extrabit, extranfbit = 0, nfprec, nfprec0, logprec;
 
   nfprec0 = nf_get_prec(nf);
   nf_get_sign(nf, &r1, &r2);
