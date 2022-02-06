@@ -349,7 +349,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
   pari_sp av = avma;
   GEN nf, zm, zmcyc, clgen, S, valS, sfu, logx;
   GEN fa2, archp, z, C, gc, cm, cyc, rel, U, Ui, m, m_inv, m0, u0;
-  long n, k, r1, r2, ns, nc, nu, nm, lsfu, order;
+  long n, k, r1, r2, ns, nc, nu, nm, order;
   long evalprec = prec, nfprec, mprec, embprec;
 
   prec = evalprec + 1; /* default 1 extra word */
@@ -414,13 +414,13 @@ gcharinit(GEN bnf, GEN mod, long prec)
   nf_get_sign(nf, &r1, &r2);
   n = r1+2*r2;
   ns = lg(S) - 1;
-  nu = r1+r2-1;
+  nu = r1+r2-1 + ns;
   nc = lg(zmcyc) - 1;
   nm = ns+nc+n; /* number of parameters = ns + nc + r1 + r2 + r2 */
 
   /* units and S-units */
-  sfu = gel(bnfunits(bnf,S), 1); lsfu = lg(sfu)-1; /* remove torsion */
-  sfu = vecslice(sfu, 1, lsfu-1);
+  sfu = gel(bnfunits(bnf,S), 1);
+  sfu = vec_shorten(sfu, nu); /* remove torsion */
 
   /* root of unity */
   order = bnf_get_tuN(bnf);
@@ -454,13 +454,13 @@ gcharinit(GEN bnf, GEN mod, long prec)
   embprec = mprec;
   for(;;)
   {
-    for (k = 1; k < lsfu; k++)
+    for (k = 1; k <= nu; k++)
     { /* Lambda_S (S-units) then Lambda_f, fund. units */
       logx = gchar_nflog(&nf, zm, S, gel(sfu,k), embprec);
       if (!logx) break;
       gel(m, k) = logx;
     }
-    if (k == lsfu) break;
+    if (k > nu) break;
     if (DEBUGLEVEL) err_printf("gcharinit: increasing embprec %d -> %d\n",
                                embprec, precdbl(embprec));
     embprec = precdbl(embprec);
@@ -469,16 +469,16 @@ gcharinit(GEN bnf, GEN mod, long prec)
   {
     C = zerocol(nm);
     gel(C, ns+k) = gel(zmcyc, k);
-    gel(m, ns+nu+k) = C;
+    gel(m, nu+k) = C;
   }
   /* zeta, root of unity */
-  gel(m, ns+nu+nc+1) = gchar_nflog(&nf, zm, S, z, mprec);
-  shallow_clean_rat(gel(m, ns+nu+nc+1), 1, nm, stoi(order), mprec);
+  gel(m, nu+nc+1) = gchar_nflog(&nf, zm, S, z, mprec);
+  shallow_clean_rat(gel(m, nu+nc+1), 1, nm, stoi(order), mprec);
   for (k = 1; k <= r2; k++) /* embed Z^r_2 */
   {
     C = zerocol(nm);
     gel(C, ns+nc+r1+r2+k) = gen_1;
-    gel(m, ns+nu+nc+1+k) = C;
+    gel(m, nu+nc+1+k) = C;
   }
   if (DEBUGLEVEL>1) err_printf("matrix m = %Ps\n", m);
 
