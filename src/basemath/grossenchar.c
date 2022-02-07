@@ -58,6 +58,9 @@ compute_Lcyc(GEN Lsprk, GEN moo)
   return Lcyc;
 }
 
+static long
+sprk_get_ncp(GEN sprk) { return lg(sprk_get_cyc(sprk)) - 1; }
+
 /* true nf; modulus = [ factor(m_f), m_oo ] */
 static GEN
 localstar(GEN nf, GEN famod, GEN moo)
@@ -71,7 +74,7 @@ localstar(GEN nf, GEN famod, GEN moo)
   {
     long n, e, k = itos(gel(E,i));
     GEN v, sprk = log_prk_init(nf, gel(P,i), k, NULL);
-    gel(Lsprk,i) = sprk; n = lg(sprk_get_cyc(sprk))-1;
+    gel(Lsprk,i) = sprk; n = sprk_get_ncp(sprk);
     gel(Lgenfil,i) = v = cgetg(k+1, t_VEC);
     /* log on sprk of generators of U_{e-1}/U_e(pr) */
     gel(v, 1) = col_ei(n, 1);
@@ -1232,8 +1235,8 @@ gcharlog_conductor_f(GEN gc, GEN chi)
   l = lg(Lsprk); E = cgetg(l, t_VEC);
   for (i = 1, ic = gchar_get_ns(gc); i < l ; i++)
   {
-    GEN sprk = gel(Lsprk, i), gens = gel(ufil, i), chip;
-    long ncp = lg(sprk_get_cyc(sprk)) - 1;
+    GEN gens = gel(ufil, i), chip;
+    long ncp = sprk_get_ncp(gel(Lsprk,i));
 
     chip = vecslice(chi, ic + 1, ic + ncp);
     gel(E, i) = conductor_expo_pr(gens, chip);
@@ -1371,20 +1374,17 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
   }
   else /* v finite */
   {
-    GEN nf = gchar_get_nf(gc), famod = gel(gchar_get_mod(gc),1);
+    GEN nf = gchar_get_nf(gc), P = gchar_get_modP(gc);
     checkprid(v);
-    if (gen_search(gel(famod,1), v, (void*)cmp_prime_ideal, cmp_nodata) > 0)
+    if (gen_search(P, v, (void*)cmp_prime_ideal, cmp_nodata) > 0)
     {
-      GEN Lsprk, sprk = NULL, bid, chip = NULL, cyc;
-      long i, ic, ns;
-      ns = gchar_get_ns(gc);
+      GEN Lsprk, bid, chip = NULL, cyc;
+      long i, ic, l = lg(P);
       Lsprk = locs_get_Lsprk(gchar_get_zm(gc));
-      for (i=1, ic = ns; i < lg(Lsprk); i++)
+      for (i=1, ic = gchar_get_ns(gc); i < l; i++)
       {
-        long ncp;
-        sprk = gel(Lsprk, i);
-        ncp = lg(sprk_get_cyc(sprk)) - 1;
-        if (!cmp_prime_ideal(v,gcoeff(famod,i,1)))
+        long ncp = sprk_get_ncp(gel(Lsprk,i));
+        if (!cmp_prime_ideal(v, gel(P,i)))
         {
           chip = vecslice(logchi, ic + 1, ic + ncp);
           break;
@@ -1392,7 +1392,7 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
         ic += ncp;
       }
       if (!chip) pari_err_BUG("gcharlocal (chip not found)");
-      bid = sprk_to_bid(nf, sprk, nf_INIT);
+      bid = sprk_to_bid(nf, gel(Lsprk,i), nf_INIT);
       /* TODO store bid instead of recomputing? */
       cyc = bid_get_cyc(bid);
       chiv = RgV_RgM_mul(chip,gel(bid_get_U(bid),1));
@@ -1582,7 +1582,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
 {
   pari_sp av = avma;
   GEN M, cyc, mult, pr, Lpr, Lk1, Lphi1, Lk2, Llog, C, logchi, chi_oo, eps, U;
-  GEN uni, famod1, nf;
+  GEN uni, P, nf;
   long r1, r2, npr, nk1, nchi, s, i, j, v, dim, ns, nc, ncol;
 
   check_gchar_group(gc);
@@ -1591,7 +1591,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   r1 = gchar_get_r1(gc);
   r2 = gchar_get_r2(gc);
   cyc = gchar_get_cyc(gc);
-  famod1 = gmael(gchar_get_mod(gc),1,1);
+  P = gchar_get_modP(gc);
   nf = gchar_get_nf(gc);
   nchi = lg(cyc)-2; /* ignore norm */
   if (nchi>=r1+2*r2)    mult = gel(cyc,1);
@@ -1616,9 +1616,9 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
       pr = gel(Lv,i);
       if (idealtyp(&pr, NULL) == id_PRINCIPAL)
         pari_err_TYPE("gchar_identify_init [ideal]", gel(Lv,i));
-      for (j=1; j<lg(famod1); j++)
-        if (idealval(nf, pr, gel(famod1,j))>0)
-          pari_err_DOMAIN("gchar_identify_init", "valuation at prime dividing the modulus", ">", gen_0, gpidealval(nf, pr, gel(famod1,j)));
+      for (j=1; j<lg(P); j++)
+        if (idealval(nf, pr, gel(P,j))>0)
+          pari_err_DOMAIN("gchar_identify_init", "valuation at prime dividing the modulus", ">", gen_0, gpidealval(nf, pr, gel(P,j)));
       npr++;
     }
   }

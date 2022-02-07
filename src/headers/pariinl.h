@@ -2947,6 +2947,8 @@ gchar_get_zm(GEN gc)     { return  gel(gc, 4); }
 INLINE GEN
 gchar_get_mod(GEN gc)    { return  locs_get_mod(gchar_get_zm(gc)); }
 INLINE GEN
+gchar_get_modP(GEN gc)    { return gmael(gchar_get_mod(gc),1,1); }
+INLINE GEN
 gchar_get_S(GEN gc)      { return  gel(gc, 5); }
 INLINE GEN
 gchar_get_DLdata(GEN gc)   { return  gel(gc, 6); }
