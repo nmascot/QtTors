@@ -1339,22 +1339,22 @@ GEN
 gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
 {
   pari_sp av = avma;
-  GEN s, chiv, k, phi, logchi, nf, moo, famod;
-  long tau, r1, r2, i;
+  GEN s, chiv, logchi;
+  long i;
+
   check_gchar_group(gc);
   chi = gchar_internal(gc, chi, &s);
   logchi = gchari_duallog(gc, chi, NULL);
   if (typ(v) == t_INT) /* v infinite */
   {
-    tau = itos(v);
-    r1 = gchar_get_r1(gc);
-    r2 = gchar_get_r2(gc);
+    long tau = itos(v), r1 = gchar_get_r1(gc), r2 = gchar_get_r2(gc);
+    GEN phi, k;
     if (tau<=0) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", "<=", gen_0, v);
     if (tau>r1+r2) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", ">", stoi(r1+r2), v);
     phi = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)+tau);
     if (tau<=r1) /* v real */
     {
-      moo = gel(gchar_get_mod(gc),2);
+      GEN moo = gel(gchar_get_mod(gc),2);
       i = zv_search(moo,tau);
       if (i==0) k = gen_0;
       else
@@ -1367,13 +1367,12 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
     else /* v complex */
       k = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)+r2+tau);
     if (s) phi = gsub(phi,gmul(gen_I(),s));
-    chiv = mkvec2(k,phi);
+    chiv = mkvec2(k, phi);
   }
   else /* v finite */
   {
+    GEN nf = gchar_get_nf(gc), famod = gel(gchar_get_mod(gc),1);
     checkprid(v);
-    nf = gchar_get_nf(gc);
-    famod = gel(gchar_get_mod(gc),1);
     if (gen_search(gel(famod,1), v, (void*)cmp_prime_ideal, cmp_nodata) > 0)
     {
       GEN Lsprk, sprk = NULL, bid, chip = NULL, cyc;
@@ -1400,11 +1399,7 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
       for (i=1; i<lg(chiv); i++)
         gel(chiv,i) = modii(gmul(gel(chiv,i),gel(cyc,i)),gel(cyc,i));
       chiv = shallowconcat(chiv, gchari_eval(gc,chi,v,0,logchi,s,prec));
-      if (ptbid)
-      {
-        *ptbid = bid;
-        gerepileall(av, 2, &chiv, ptbid);
-      }
+      if (ptbid) { *ptbid = bid; gerepileall(av, 2, &chiv, ptbid); }
       else chiv = gerepilecopy(av, chiv);
       return chiv;
     }
