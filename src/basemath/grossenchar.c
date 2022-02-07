@@ -1206,13 +1206,12 @@ conductor_expo_pr(GEN gens_fil, GEN chip)
   long i;
   for (i = lg(gens_fil) - 1; i > 0; i--)
   {
-    long j;
     GEN gens = gel(gens_fil, i);
+    long j;
     for (j = 1; j < lg(gens); j++)
     {
       GEN v = gmul(chip, gel(gens, j));
-      if (denom_i(v) != gen_1)
-        return stoi(i);
+      if (denom_i(v) != gen_1) return stoi(i);
     }
   }
   return gen_0;
@@ -1224,7 +1223,6 @@ gcharlog_conductor_f(GEN gc, GEN chi)
 {
   GEN zm, P, E, Lsprk, ufil;
   long i, l, ic;
-  pari_sp av = avma;
 
   if (gchar_get_nc(gc) == 0) return gen_1;
   zm = gchar_get_zm(gc);
@@ -1241,7 +1239,7 @@ gcharlog_conductor_f(GEN gc, GEN chi)
     gel(E, i) = conductor_expo_pr(gens, chip);
     ic += ncp;
   }
-  return gerepileupto(av, idealfactorback(gchar_get_nf(gc), P, E, 0)); /*red=0*/
+  return idealfactorback(gchar_get_nf(gc), P, E, 0); /* red = 0 */
 }
 
 /* ={sigma} s.t. k_sigma = 1 */
@@ -1250,6 +1248,7 @@ gcharlog_conductor_oo(GEN gc, GEN chi)
 {
   long ns, nc, noo, i;
   GEN k_real, chi_oo, moo, den;
+
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
   moo = locs_get_m_infty(gchar_get_zm(gc));
@@ -1267,9 +1266,8 @@ gcharlog_conductor_oo(GEN gc, GEN chi)
 static GEN
 gchari_conductor(GEN gc, GEN chi)
 {
-  pari_sp av = avma;
   chi = gchari_duallog(gc, chi, NULL);
-  return gerepilecopy(av, mkvec2(gcharlog_conductor_f(gc, chi), gcharlog_conductor_oo(gc, chi)));
+  return mkvec2(gcharlog_conductor_f(gc, chi), gcharlog_conductor_oo(gc, chi));
 }
 
 GEN
