@@ -2619,13 +2619,14 @@ idealred0(GEN nf, GEN I, GEN vdir)
   my = zk_multable(nf, y);
   I = ZM_Z_divexact(ZM_mul(my, I), IZ); /* y I / (I\cap Z), integral */
   c1 = mul_content(c1, IZ);
+  if (equali1(c1)) c1 = NULL; /* can be simplified with IZ */
   yi = ZM_gauss(my, col_ei(N,1)); /* y^-1 */
   yZ = Q_denom(yi); /* (y) \cap Z */
   I = hnfmodid(I, yZ);
   if (!aI) return gerepileupto(av, I);
   if (typ(aI) == t_MAT) /* yi is not integral and usually larger than y */
     aI = famat_div(aI, y);
-  else
+  else if (c1)
     c1 = RgC_Rg_mul(yi, c1);
 END:
   if (c1) aI = ext_mul(nf, aI,c1);
