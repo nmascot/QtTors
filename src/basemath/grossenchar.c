@@ -1284,6 +1284,7 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
   long i, ntors, nfree, n0, nalg, r1, r2;
   GEN w, chii, v;
   pari_sp av = avma;
+
   check_gchar_group(gc);
   /* in snf basis */
   ntors = gchar_get_ntors(gc);
@@ -1304,43 +1305,33 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
   if (r1) /* not totally complex: finite order * integral power of norm */
   {
     if (typ(w) != t_INT) return gc_bool(av, 0);
-    w = gneg(w);
+    w = negi(w);
     if (pq)
-    {
-      /* set the infinity type */
+    { /* set the infinity type */
       v = cgetg(r1+r2+1, t_VEC);
-      for (i = 1; i <= r1; i++)
-        gel(v, i) = mkvec2(w, gen_0);
-      for (i = r1+1; i <= r1+r2; i++)
-        gel(v, i) = mkvec2(w, w);
+      for (i = 1; i <= r1; i++) gel(v, i) = mkvec2(w, gen_0);
+      for (  ; i <= r1+r2; i++) gel(v, i) = mkvec2(w, w);
     }
   }
   else /* totally complex */
   {
-    /* condition is k_s + w = 0 mod 2 for all s */
+    int w2;
     w = gneg(gmul2n(w, 1));
     if (typ(w) != t_INT) return gc_bool(av, 0);
-    for (i = 1; i <= r2; i++)
-      if (smodis(addii(gel(chii, n0 + i), w), 2))
-        return gc_bool(av, 0);
+    w2 = mpodd(w);
+    for (i = 1; i <= r2; i++) /* need k_s + w = 0 mod 2 for all s */
+      if (mpodd(gel(chii, n0 + i)) != w2) return gc_bool(av, 0);
     if (pq)
-    {
-      /* set the infinity type */
+    { /* set the infinity type */
       v = cgetg(r2+1, t_VEC);
       for (i = 1; i <= r2; i++)
       {
-        GEN p, q;
-        q = gmul2n(addii(w, gel(chii, n0+i)), -1);
-        p = gmul2n(subii(w, gel(chii, n0+i)), -1);
-        gel(v, i) = mkvec2(p, q);
+        GEN p = gmul2n(subii(w, gel(chii, n0+i)), -1);
+        gel(v, i) = mkvec2(p, subii(w, p));
       }
     }
   }
-  if (pq)
-  {
-    *pq = gerepilecopy(av, v);
-    av = avma;
-  }
+  if (pq) { *pq = gerepilecopy(av, v); av = avma; }
   return gc_bool(av, 1);
 }
 
