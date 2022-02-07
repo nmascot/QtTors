@@ -99,7 +99,7 @@ nfembedlog(GEN *pnf, GEN x, long prec)
   nf_get_sign(nf, &r1, &r2);
   n = r1 + 2*r2;
   logprec = prec;
-  extrabit = expu(n) + 10;
+  extrabit = expu(n) + gexpo(nf_get_M(nf)) + 10;
   if (typ(x) == t_MAT)
   {
     long l = lg(gel(x,2));
@@ -128,10 +128,13 @@ nfembedlog(GEN *pnf, GEN x, long prec)
     av = avma;
   }
   if (!(cxlogs = nf_cxlog(nf, x, logprec))) return gc_NULL(av);
-  if (!(cxlogs = nf_cxlog_normalize(nf, cxlogs, prec))) return gc_NULL(av);
+  if (!(cxlogs = nf_cxlog_normalize(nf, cxlogs, logprec))) return gc_NULL(av);
   logs = cgetg(n+1,t_COL);
   for (k = 1; k <= r1+r2; k++) gel(logs,k) = real_i(gel(cxlogs,k));
   for (     ; k <= n; k++) gel(logs,k) = gmul2n(imag_i(gel(cxlogs,k-r2)), -1);
+  extrabit = gexpo(logs);
+  if (extrabit < 0) extrabit = 0;
+  prec += nbits2extraprec(extrabit);
   return gerepileupto(av, gdiv(logs, Pi2n(1,prec)));
 }
 
@@ -1429,7 +1432,6 @@ gchar_log(GEN gc, GEN x, long prec)
   val_S = gchar_get_valS(gc);
   t = bnfisprincipal0(bnf, x, nf_GENMAT);
   v = gel(t, 1); alpha = gel(t, 2);
-  /* TODO: increase prec if alpha is large? */
   /* exponents on primes in S */
   vp = gmul(val_S, v);
   if (DEBUGLEVEL>2) err_printf("vp %Ps\n", vp);
@@ -1438,7 +1440,6 @@ gchar_log(GEN gc, GEN x, long prec)
     arch_log = nfembedlog(&nf, alpha, prec);
     if (arch_log) break;
     prec = precdbl(prec);
-    nf = nfnewprec_shallow(nf, prec);
   }
   if (DEBUGLEVEL>2) err_printf("arch log %Ps\n", arch_log);
   zm_log = gchar_logm(nf,zm,alpha);
@@ -1465,33 +1466,43 @@ gcharlog_eval_raw(GEN logchi, GEN logx)
 { GEN val = gmul(logchi, logx); return gsub(val, ground(val)); }
 
 /* if flag = 1 -> value in C, flag = 0 -> value in R/Z
- * assume gc (and logchi) has enough internal precision,
- * but increase precision if log is large */
+ * if logchi is provided, assume it has enough precision
+ * TODO check that logchi argument is indeed used correctly by callers */
 static GEN
 gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN s0, long prec)
 {
   GEN val, s = gen_0, norm = NULL, logx;
-  long prec0, extraprec;
+  long prec0, preclog, precgc, extrabit, recomputelogchi = 0, e;
   pari_sp av = avma;
 
   prec0 = gchar_get_prec(gc);
   logx = gchar_log(gc, x, prec0);
-  if (!logchi) logchi = gchari_duallog(gc, chi, &s);
+  if (!logchi)
+  {
+    logchi = gchari_duallog(gc, chi, &s);
+    recomputelogchi = 1;
+  }
 
   /* check if precision is sufficient, take care of gexpo = -infty */
-  extraprec = gexpo(logx) + gexpo(logchi);
-  extraprec = extraprec > 0 ? nbits2extraprec(extraprec) : 0;
-  if (prec + extraprec > prec0)
+  extrabit = expu(lg(logx)) + 5;
+  e = gexpo(logchi); if (e>0) extrabit += e;
+  e = gexpo(logx); if (e>0) extrabit += e;
+  preclog = prec + nbits2extraprec(extrabit);
+  if (preclog > prec0) logx = gchar_log(gc, x, preclog);
+  if (recomputelogchi)
   {
-    prec0 = prec + extraprec;
-    gc = gcharnewprec(gc, prec0);
-    logx = gchar_log(gc, x, prec0);
-    logchi = gchari_duallog(gc, chi, &s);
+    extrabit += expu(lg(chi));
+    e = gexpo(chi); if (e>0) extrabit += e;
+    precgc = prec + nbits2extraprec(extrabit);
+    if (precgc > prec0)
+    {
+      gc = gcharnewprec(gc, precgc);
+      logchi = gchari_duallog(gc, chi, NULL);
+    }
   }
 
   s = gadd(s0,s);
 
-  /* this row  must be computed at prec0 */
   val = gcharlog_eval_raw(logchi, logx);
 
   if (!gequal0(s)) norm = idealnorm(gchar_get_nf(gc), x);

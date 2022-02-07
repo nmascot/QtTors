@@ -433,15 +433,22 @@ round(gc.cyc)
 pr = idealprimedec(bnf,29)[1];
 chi = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]~;
 gc.cyc[1] % denominator(chareval(gc,chi,pr)) == 0
+print("chareval precision bug");
 chi = vectorv(#gc.cyc-1,i,1);
-/*
 p2 = idealprimedec(bnf,2);
-localbitprec(256); v1 = chareval(gc,chi,p2);
-localbitprec(512); v2 = chareval(gc,chi,p2);
-print("should be ~ 256: ", exponent(v1-v2)); \\FIXME
-localbitprec(1024); v3 = chareval(gc,chi,p2);
-print("should be ~ 512: ", exponent(v2-v3)); \\FIXME
-*/
+logp = gcharlog(gc,p2);
+localbitprec(2^8); logp1 = gcharlog(gc,p2);
+localbitprec(2^9); logp2 = gcharlog(gc,p2);
+localbitprec(2^10); logp3 = gcharlog(gc,p2);
+exponent(logp-logp3) < -128 + 5
+exponent(logp1-logp3) < -256 + 5
+exponent(logp2-logp3) < -512 + 5
+v = chareval(gc, chi, p2);
+localbitprec(256); gc1 = gcharnewprec(gc); v1 = chareval(gc1,chi,p2);
+localbitprec(512); gc2 = gcharnewprec(gc); v2 = chareval(gc2,chi,p2);
+exponent(v-v2) < -128 + 5
+exponent(v1-v2) < -256 + 5
+print("trivial ideal bug");
 chareval(gc,chi,idealhnf(bnf,1)) == 0
 default(parisize,"16M");
 
@@ -449,14 +456,6 @@ print("argument determination bug");
 default(parisize,"64M");
 {pol = x^8 - 4*x^7 + 16222*x^6 - 48652*x^5 + 71214421*x^4 - 142347760*x^3 +
 44175759480*x^2 - 44104593708*x + 7360689434427};
-{mod = [Mat([[6521, [-1514, 0, -1, 0, 0, 1, 0, 0]~, 1, 1, [823, -6792, 64962,
-1396500, 13435530, -2627700, -341140725, 8911323630; -2191, 769, 6718970,
--2385450, -64962, 1112925, -4447872450, -341205687; -54, 11174, 769, -283575,
-6792, 7398600, -1112925, 2634492; 980, -1844, 239397, -157, 6244132, -4948,
-174435, 13435530; 2991, -145, 517, 3696309, -157, 283720, -2384933, 1396500;
--1674, 781, 3121314, -517, -239397, -12, -3597656, -64962; 199, -5192, -781,
--145, -1844, -5982, -12, -6792; 2596, 199, 1674, 2991, 980, -145, -517, 823]],
-5]), []]};
 bnf = bnfinit(pol,1);
 gc = gcharinit(bnf,1);
 round(gc.cyc)

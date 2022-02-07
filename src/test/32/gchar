@@ -277,6 +277,13 @@ precision SEGV
   ***   Warning: new stack size = 64000000 (61.035 Mbytes).
 [160, 8, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0]
 1
+chareval precision bug
+1
+1
+1
+1
+1
+trivial ideal bug
 1
   ***   Warning: new stack size = 16000000 (15.259 Mbytes).
 argument determination bug
@@ -395,4 +402,4 @@ bad inputs
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)]~,1)
   ***                 ^------------------------------
   *** gcharlocal: incorrect type in check_gchar_i [s] (t_PADIC).
-Total time spent: 19096
+Total time spent: 21069
