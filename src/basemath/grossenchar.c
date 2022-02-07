@@ -1146,7 +1146,6 @@ static GEN
 gchari_shift(GEN gc, GEN chi, GEN s0)
 {
   GEN s;
-  check_gchar_group(gc);
   chi = check_gchari(gc, chi, &s);
   return shallowconcat(chi, gadd(s0,s));
 }
