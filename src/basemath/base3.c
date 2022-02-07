@@ -1366,37 +1366,10 @@ cxlog_m1(GEN nf, long prec)
   return v;
 }
 static GEN
-famat_cxlog(GEN nf, GEN fa, long prec)
-{
-  GEN g, e, y = NULL;
-  long i, l;
-
-  if (typ(fa) != t_MAT) pari_err_TYPE("famat_cxlog",fa);
-  if (lg(fa) == 1) return cxlog_1(nf);
-  g = gel(fa,1);
-  e = gel(fa,2); l = lg(e);
-  for (i = 1; i < l; i++)
-  {
-    GEN t, x = nf_to_scalar_or_basis(nf, gel(g,i));
-    /* multiplicative arch would be better (save logs), but exponents overflow
-     * [ could keep track of expo separately, but not worth it ] */
-    t = nf_cxlog(nf,x,prec); if (!t) return NULL;
-    if (gel(t,1) == gen_0) continue; /* positive rational */
-    t = RgC_Rg_mul(t, gel(e,i));
-    y = y? RgV_add(y,t): t;
-  }
-  return y ? y: cxlog_1(nf);
-}
-/* Archimedean components: [e_i Log( sigma_i(X) )], where X = primpart(x),
- * and e_i = 1 (resp 2.) for i <= R1 (resp. > R1) */
-GEN
-nf_cxlog(GEN nf, GEN x, long prec)
+ZC_cxlog(GEN nf, GEN x, long prec)
 {
   long i, l, r1;
   GEN v;
-  if (typ(x) == t_MAT) return famat_cxlog(nf,x,prec);
-  x = nf_to_scalar_or_basis(nf,x);
-  if (typ(x) != t_COL) return gsigne(x) > 0? cxlog_1(nf): cxlog_m1(nf, prec);
   x = RgM_RgC_mul(nf_get_M(nf), Q_primpart(x));
   l = lg(x); r1 = nf_get_r1(nf);
   for (i = 1; i <= r1; i++)
@@ -1407,6 +1380,52 @@ nf_cxlog(GEN nf, GEN x, long prec)
   for (i = 1; i <= r1; i++) gel(v,i) = glog(gel(x,i),prec);
   for (     ; i <  l;  i++) gel(v,i) = gmul2n(glog(gel(x,i),prec),1);
   return v;
+}
+static GEN
+famat_cxlog(GEN nf, GEN fa, long prec)
+{
+  GEN G, E, y = NULL;
+  long i, l;
+
+  if (typ(fa) != t_MAT) pari_err_TYPE("famat_cxlog",fa);
+  if (lg(fa) == 1) return cxlog_1(nf);
+  G = gel(fa,1);
+  E = gel(fa,2); l = lg(E);
+  for (i = 1; i < l; i++)
+  {
+    GEN t, e = gel(E,i), x = nf_to_scalar_or_basis(nf, gel(G,i));
+    /* multiplicative arch would be better (save logs), but exponents overflow
+     * [ could keep track of expo separately, but not worth it ] */
+    switch(typ(x))
+    { /* ignore positive rationals */
+      case t_FRAC: x = gel(x,1); /* fall through */
+      case t_INT: if (signe(x) > 0) continue;
+        if (!mpodd(e)) continue;
+        t = cxlog_m1(nf, prec); /* we probably should not reach this line */
+        break;
+      default: /* t_COL */
+        t = ZC_cxlog(nf,x,prec); if (!t) return NULL;
+        t = RgC_Rg_mul(t, e);
+    }
+    y = y? RgV_add(y,t): t;
+  }
+  return y ? y: cxlog_1(nf);
+}
+/* Archimedean components: [e_i Log( sigma_i(X) )], where X = primpart(x),
+ * and e_i = 1 (resp 2.) for i <= R1 (resp. > R1) */
+GEN
+nf_cxlog(GEN nf, GEN x, long prec)
+{
+  if (typ(x) == t_MAT) return famat_cxlog(nf,x,prec);
+  x = nf_to_scalar_or_basis(nf,x);
+  switch(typ(x))
+  {
+    case t_FRAC: x = gel(x,1); /* fall through */
+    case t_INT:
+      return signe(x) > 0? cxlog_1(nf): cxlog_m1(nf, prec);
+    default:
+      return ZC_cxlog(nf, x, prec);
+  }
 }
 GEN
 nfV_cxlog(GEN nf, GEN x, long prec)
