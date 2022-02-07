@@ -52,8 +52,8 @@ Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
 
  $\var{gc}[5]$ is a vector $S$ of prime ideals which generate the class group.
 
- $\var{gc}[6]$ is a matrix of valuations of class group generators on
- primes in $S$.
+ $\var{gc}[6]$ contains data to compute discrete logarithms with respect to $S$
+ in the class group.
 
  $\var{gc}[7]$ is a vector \kbd{[Sunits,m]}, where \kbd{Sunits} describes
  the $S$-units of $\var{bnf}$ and $m$ is a relation matrix for internal usage.

@@ -185,20 +185,6 @@ gchar_nflog(GEN *pnf, GEN zm, GEN S, GEN x, long prec)
                                gchar_logm(*pnf,zm,x), emb));
 }
 
-static GEN
-matvaluations(GEN nf, GEN S, GEN g)
-{
-  long i, j, li = lg(S), lj = lg(g);
-  GEN m = cgetg(lj, t_MAT);
-  for (j = 1; j < lj; j++)
-  {
-    GEN c = cgetg(li, t_COL); gel(m,j) = c;
-    for (i = 1; i < li; i++)
-      gel(c,i) = stoi(idealval(nf, gel(g,j), gel(S,i)));
-  }
-  return m;
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                        CHARACTER GROUP                          */
@@ -349,14 +335,15 @@ static GEN gcharmatnewprec_shallow(GEN gc, long mprec);
 static GEN
 bestS(GEN bnf)
 {
-  GEN v, S, hw, hv = bnf_get_no(bnf);
+  GEN v, S, hw, hv = bnf_get_no(bnf), DL, dl;
   long i, lS;
   ulong l;
   forprime_t P;
 
-  if (equali1(hv)) return cgetg(1, t_VEC);
+  if (equali1(hv)) return mkvec2(cgetg(1,t_VEC), cgetg(1,t_VEC));
   v = diagonal_shallow(bnf_get_cyc(bnf));
   S = cgetg(expi(hv)+2, t_VEC); lS = 1;
+  DL = cgetg(expi(hv)+2, t_VEC);
   u_forprime_init(&P,2,ULONG_MAX);
   while ((l = u_forprime_next(&P)))
   {
@@ -365,13 +352,15 @@ bestS(GEN bnf)
     long nSl = lg(Sl)-1;
     for (i = 1; i < nSl; i++) /* remove one prime ideal */
     {
-      w = ZM_hnf(shallowconcat(v, isprincipal(bnf, gel(Sl,i))));
+      dl = isprincipal(bnf, gel(Sl,i));
+      w = ZM_hnf(shallowconcat(v, dl));
       hw = ZM_det(w);
       if (cmpii(hw, hv) < 0)
       {
+        gel(DL,lS) = dl;
         gel(S,lS++) = gel(Sl,i);
         hv = hw; v = w; av = avma;
-        if (equali1(hv)) { setlg(S, lS); return S; }
+        if (equali1(hv)) { setlg(S, lS); setlg(DL, lS); return mkvec2(S,DL); }
       }
     }
     set_avma(av);
@@ -379,12 +368,40 @@ bestS(GEN bnf)
   return NULL;/*LCOV_EXCL_LINE*/
 }
 
+static GEN
+gcharDLdata(GEN bnf, GEN S, GEN DL)
+{
+  GEN M, h, Minv, Lalpha, t, dl, alpha, gen, cyc = bnf_get_cyc(bnf);
+  long i;
+  M = shallowmatconcat(DL);
+  h = bnf_get_no(bnf);
+  gen = shallowtrans(bnf_get_gen(bnf));
+
+  /* compute right inverse of M modulo cyc */
+  M = shallowtrans(M);
+  M = shallowmatconcat(mkcol2(M,diagonal_shallow(cyc)));
+  Minv = matinvmod(M,h);
+  Minv = vecslice(Minv,1,lg(Minv)-lg(cyc));
+  Minv = shallowtrans(Minv);
+
+  Lalpha = cgetg(lg(Minv),t_VEC);
+  for (i=1; i<lg(Minv); i++)
+  {
+    /* gen[i] = (alpha) * prod_j S[j]^Minv[j,i] */
+    t = isprincipalfact(bnf, gel(gen,i), S, gneg(gel(Minv,i)), nf_GENMAT);
+    dl = gel(t, 1); alpha = gel(t, 2);
+    if (!gequal0(dl)) pari_err_BUG("gcharDLdata (non-principal ideal)");
+    gel(Lalpha,i) = alpha;
+  }
+  return mkvec2(Minv, Lalpha);
+}
+
 /* compute basis of characters; gc[1] generating family, as rows */
 GEN
 gcharinit(GEN bnf, GEN mod, long prec)
 {
   pari_sp av = avma;
-  GEN nf, zm, zmcyc, S, valS, sfu, logx;
+  GEN nf, zm, zmcyc, S, DLdata, sfu, logx;
   GEN fa2, archp, z, C, gc, cm, cyc, rel, U, Ui, m, m_inv, m0, u0;
   long n, k, r1, r2, ns, nc, nu, nm, order;
   long evalprec = prec, nfprec, mprec, embprec;
@@ -442,7 +459,9 @@ gcharinit(GEN bnf, GEN mod, long prec)
 
   /* set of primes S and valuations of generators */
   S = bestS(bnf);
-  valS = matvaluations(nf, S, bnf_get_gen(bnf));
+  DLdata = gel(S,2);
+  S = gel(S,1);
+  DLdata = gcharDLdata(bnf, S, DLdata);
 
   nf_get_sign(nf, &r1, &r2);
   n = r1+2*r2;
@@ -528,7 +547,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
               nf,
               zm,    /* Zk/mod, nc components */
               S,     /* generators of clgp, ns components */
-              valS,
+              DLdata,
               sfu,
               mkvec2(mkvecsmall3(evalprec,prec,nfprec),
                      mkvecsmall4(0,0,0,0)), /* ntors, nfree, nalg */
@@ -1443,22 +1462,33 @@ gcharduallog(GEN gc, GEN chi)
   return gerepilecopy(av, shallowconcat1(mkcol2(logchi,s)));
 }
 
+static GEN
+gcharisprincipal(GEN gc, GEN x)
+{
+  GEN bnf, DLdata, t, v, alpha, Lalpha;
+  bnf = gchar_get_bnf(gc);
+  DLdata = gchar_get_DLdata(gc);
+  t = bnfisprincipal0(bnf, x, nf_GENMAT);
+  v = gel(t, 1); alpha = gel(t, 2);
+  Lalpha = gel(DLdata, 2);
+  alpha = nffactorback(bnf, shallowconcat(Lalpha,mkvec(alpha)), shallowconcat(v,gen_1));
+  alpha = famat_reduce(alpha);
+  v = ZM_ZC_mul(gel(DLdata,1), v);
+  return mkvec2(v, alpha);
+}
+
 /* complete log of ideal */
 static GEN
 gchar_log(GEN gc, GEN x, long prec)
 {
-  GEN bnf, zm, val_S, v, vp, alpha, t, arch_log = NULL, zm_log, nf;
+  GEN zm, v, alpha, t, arch_log = NULL, zm_log, nf;
   pari_sp av = avma;
 
-  bnf = gchar_get_bnf(gc);
   nf = gchar_get_nf(gc);
   zm = gchar_get_zm(gc);
-  val_S = gchar_get_valS(gc);
-  t = bnfisprincipal0(bnf, x, nf_GENMAT);
+  t = gcharisprincipal(gc, x);
   v = gel(t, 1); alpha = gel(t, 2);
-  /* exponents on primes in S */
-  vp = gmul(val_S, v);
-  if (DEBUGLEVEL>2) err_printf("vp %Ps\n", vp);
+  if (DEBUGLEVEL>2) err_printf("v %Ps\n", v);
   while(1)
   {
     arch_log = nfembedlog(&nf, alpha, prec);
@@ -1468,7 +1498,7 @@ gchar_log(GEN gc, GEN x, long prec)
   if (DEBUGLEVEL>2) err_printf("arch log %Ps\n", arch_log);
   zm_log = gchar_logm(nf,zm,alpha);
   if (DEBUGLEVEL>2) err_printf("zm_log(alpha) %Ps\n", zm_log);
-  return gerepilecopy(av, shallowconcat1(mkvec3(vp,gneg(zm_log),gneg(arch_log))));
+  return gerepilecopy(av, shallowconcat1(mkvec3(v,gneg(zm_log),gneg(arch_log))));
 }
 
 /* gp version, with norm component */

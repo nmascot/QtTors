@@ -2949,7 +2949,7 @@ gchar_get_mod(GEN gc)    { return  locs_get_mod(gchar_get_zm(gc)); }
 INLINE GEN
 gchar_get_S(GEN gc)      { return  gel(gc, 5); }
 INLINE GEN
-gchar_get_valS(GEN gc)   { return  gel(gc, 6); }
+gchar_get_DLdata(GEN gc)   { return  gel(gc, 6); }
 INLINE GEN
 gchar_get_sfu(GEN gc) { return  gel(gc, 7); }
 INLINE GEN
