@@ -1173,31 +1173,26 @@ conductor_expo_pr(GEN gens_fil, GEN chip)
 static GEN
 gcharlog_conductor_f(GEN gc, GEN chi)
 {
-  GEN zm, expo, Lsprk, ufil, famod;
-  long i, np, ns, ic;
+  GEN zm, P, E, Lsprk, ufil;
+  long i, l, ic;
   pari_sp av = avma;
-  if (gchar_get_nc(gc) == 0)
-    return gen_1;
+
+  if (gchar_get_nc(gc) == 0) return gen_1;
   zm = gchar_get_zm(gc);
-  ns = gchar_get_ns(gc);
   Lsprk = locs_get_Lsprk(zm);
   ufil = locs_get_Lgenfil(zm);
-  famod = locs_get_famod(zm);
-  np = lg(Lsprk) - 1;
-  expo = cgetg(np + 1, t_VEC);
-  for (i = 1, ic = ns; i <= np ; i++)
+  P = gel(locs_get_famod(zm), 1);
+  l = lg(Lsprk); E = cgetg(l, t_VEC);
+  for (i = 1, ic = gchar_get_ns(gc); i < l ; i++)
   {
-    long ncp;
-    GEN sprk, gens, chip;
-    sprk = gel(Lsprk, i);
-    gens = gel(ufil, i);
-    ncp = lg(sprk_get_cyc(sprk)) - 1;
+    GEN sprk = gel(Lsprk, i), gens = gel(ufil, i), chip;
+    long ncp = lg(sprk_get_cyc(sprk)) - 1;
+
     chip = vecslice(chi, ic + 1, ic + ncp);
-    gel(expo, i) = conductor_expo_pr(gens, chip);
+    gel(E, i) = conductor_expo_pr(gens, chip);
     ic += ncp;
   }
-  famod = mkmat2(gel(famod,1),expo);
-  return gerepilecopy(av, idealfactorback(gchar_get_nf(gc), famod, NULL, 0)); /* red = 0 */
+  return gerepileupto(av, idealfactorback(gchar_get_nf(gc), P, E, 0)); /*red=0*/
 }
 
 /* ={sigma} s.t. k_sigma = 1 */
