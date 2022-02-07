@@ -72,12 +72,12 @@ localstar(GEN nf, GEN famod, GEN moo)
   Lgenfil = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
   {
-    long n, e, k = itos(gel(E,i));
+    long e, k = itos(gel(E,i));
     GEN v, sprk = log_prk_init(nf, gel(P,i), k, NULL);
-    gel(Lsprk,i) = sprk; n = sprk_get_ncp(sprk);
+    gel(Lsprk,i) = sprk;
     gel(Lgenfil,i) = v = cgetg(k+1, t_VEC);
     /* log on sprk of generators of U_{e-1}/U_e(pr) */
-    gel(v, 1) = col_ei(n, 1);
+    gel(v, 1) = col_ei(sprk_get_ncp(sprk), 1);
     for (e = 2; e <= k; e++) gel(v, e) = sprk_log_gen_pr2(nf, sprk, e);
   }
   Lcyc = compute_Lcyc(Lsprk, moo);
@@ -1375,20 +1375,18 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
   else /* v finite */
   {
     GEN nf = gchar_get_nf(gc), P = gchar_get_modP(gc);
+    long iv;
     checkprid(v);
-    if (gen_search(P, v, (void*)cmp_prime_ideal, cmp_nodata) > 0)
+    iv = gen_search(P, v, (void*)cmp_prime_ideal, cmp_nodata);
+    if (iv > 0)
     {
       GEN Lsprk, bid, chip = NULL, cyc;
       long i, ic, l = lg(P);
       Lsprk = locs_get_Lsprk(gchar_get_zm(gc));
-      for (i=1, ic = gchar_get_ns(gc); i < l; i++)
+      for (i = 1, ic = gchar_get_ns(gc); i < l; i++)
       {
         long ncp = sprk_get_ncp(gel(Lsprk,i));
-        if (!cmp_prime_ideal(v, gel(P,i)))
-        {
-          chip = vecslice(logchi, ic + 1, ic + ncp);
-          break;
-        }
+        if (i == iv) { chip = vecslice(logchi, ic + 1, ic + ncp); break; }
         ic += ncp;
       }
       if (!chip) pari_err_BUG("gcharlocal (chip not found)");
