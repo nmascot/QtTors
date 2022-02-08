@@ -1222,12 +1222,16 @@ conductor_expo_pr(GEN gens_fil, GEN chip)
 
 /* assume chi in log form */
 static GEN
-gcharlog_conductor_f(GEN gc, GEN chi)
+gcharlog_conductor_f(GEN gc, GEN chi, GEN *faN)
 {
   GEN zm, P, E, Lsprk, ufil;
   long i, l, ic;
 
-  if (gchar_get_nc(gc) == 0) return gen_1;
+  if (gchar_get_nc(gc) == 0)
+  {
+    if (faN) *faN = trivial_fact();
+    return gen_1;
+  }
   zm = gchar_get_zm(gc);
   Lsprk = locs_get_Lsprk(zm);
   ufil = locs_get_Lgenfil(zm);
@@ -1242,6 +1246,7 @@ gcharlog_conductor_f(GEN gc, GEN chi)
     gel(E, i) = conductor_expo_pr(gens, chip);
     ic += ncp;
   }
+  if (faN) *faN = famat_remove_trivial(mkmat2(P,E));
   return idealfactorback(gchar_get_nf(gc), P, E, 0); /* red = 0 */
 }
 
@@ -1270,7 +1275,8 @@ static GEN
 gchari_conductor(GEN gc, GEN chi)
 {
   chi = gchari_duallog(gc, chi, NULL);
-  return mkvec2(gcharlog_conductor_f(gc, chi), gcharlog_conductor_oo(gc, chi));
+  return mkvec2(gcharlog_conductor_f(gc, chi, NULL),
+                gcharlog_conductor_oo(gc, chi));
 }
 
 GEN
@@ -1840,8 +1846,9 @@ vecan_gchar(GEN an, long n, long prec)
 {
   forprime_t iter;
   pari_sp av = avma;
-  GEN gc = gel(an,1), chi = gel(an,2), BOUND = stoi(n), v = vec_ei(n, 1);
-  GEN gp = cgetipos(3), NZ = NULL, nf, N, chilog, s;
+  GEN gc = gel(an,1), chi = gel(an,2), P = gel(an,3), PZ = gel(an,4);
+  GEN BOUND = stoi(n), v = vec_ei(n, 1);
+  GEN gp = cgetipos(3), nf, chilog, s;
   ulong p;
 
   /* prec increase: 1/n*log(N(pmax)) < log(pmax) */
@@ -1851,16 +1858,6 @@ vecan_gchar(GEN an, long n, long prec)
   chilog = gchari_duallog(gc, chi, &s);
 
   nf = gchar_get_nf(gc);
-  N = gcharlog_conductor_f(gc,chilog);
-  if (typ(N) == t_INT)
-    NZ = N;
-  else if (typ(N) == t_VEC)
-    NZ = gel(N,1);
-  else if (typ(N) == t_MAT)
-    NZ = gcoeff(N,1,1);
-  else
-    pari_err_BUG("gchar conductor not an ideal"); /*LCOV_EXCL_LINE*/
-
   /* FIXME: when many log of many primes are computed:
      - bnfisprincipal may not be improved
      - however we can precompute the logs of generators
@@ -1874,14 +1871,15 @@ vecan_gchar(GEN an, long n, long prec)
   {
     GEN L;
     long j;
-    int check = !umodiu(NZ,p);
+    int check = !umodiu(PZ,p);
     gp[2] = p;
     L = idealprimedec_limit_norm(nf, gp, BOUND);
     for (j = 1; j < lg(L); j++)
     {
       GEN pr = gel(L, j), ch;
       ulong k, q;
-      if (check && idealval(nf, N, pr)) continue;
+      if (check && gen_search(P, pr, (void*)cmp_prime_ideal, cmp_nodata) > 0)
+        continue;
       /* TODO: extract code and use precom sprk? */
       ch = gchari_eval(gc, chi, pr, 1, chilog, gen_0, prec);
       q = upr_norm(pr);
@@ -1939,7 +1937,7 @@ gchari_lfun(GEN gc, GEN chi, GEN s0)
 {
   pari_sp av = avma;
   GEN nf, chilog, s, cond_f, cond_oo, vga_r, vga_c, chiw;
-  GEN v_phi, v_arg, sig, k, NN, L;
+  GEN v_phi, v_arg, sig, k, NN, L, faN, P;
   long ns, nc, nm, r1, r2;
 
   nf = gchar_get_nf(gc);
@@ -1951,7 +1949,8 @@ gchari_lfun(GEN gc, GEN chi, GEN s0)
   s = gadd(s0,s);
   if (!gequal0(imag_i(s)))
     pari_err_IMPL("lfun for gchar with imaginary norm component");
-  cond_f =  gcharlog_conductor_f(gc, chilog);
+  cond_f =  gcharlog_conductor_f(gc, chilog, &faN);
+  P = gel(faN, 1); /* prime ideals dividing cond(chi) */
   cond_oo =  gcharlog_conductor_oo(gc, chilog);
   chiw = gchari_shift(gc,chi,s0);
 
@@ -1978,7 +1977,9 @@ gchari_lfun(GEN gc, GEN chi, GEN s0)
   }
 
 #define tag(x,t)  mkvec2(mkvecsmall(t),x)
-  L = mkvecn(6, tag(mkvec2(gc,chiw), t_LFUN_HECKE), gen_1, sig, k, NN, gen_0);
+  L = mkvecn(6, tag(mkvec4(gc, chiw, P, prV_lcm_capZ(P)),
+                    t_LFUN_HECKE),
+             gen_1, sig, k, NN, gen_0);
   return gerepilecopy(av, L);
 }
 
