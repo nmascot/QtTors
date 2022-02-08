@@ -1420,13 +1420,10 @@ gchar_duallog(GEN gc, GEN chi)
 {
   if (typ(chi) == t_MAT)
   {
+    GEN r = cgetg(lg(chi), t_MAT);
     long k;
-    GEN r;
-    pari_sp av = avma;
-    r = cgetg(lg(chi), t_MAT);
-    for (k = 1; k < lg(chi); k++)
-      gel(r, k) = gchar_duallog(gc, gel(chi, k));
-    return gerepilecopy(av, shallowtrans(r));
+    for (k = 1; k < lg(chi); k++) gel(r, k) = gchar_duallog(gc, gel(chi, k));
+    return shallowtrans(r);
   }
   else
     return gchari_duallog(gc, gchar_internal(gc, chi, NULL), NULL);
@@ -1574,12 +1571,12 @@ gchareval(GEN gc, GEN chi, GEN x, long flag)
 /*                         IDENTIFICATION                          */
 /*                                                                 */
 /*******************************************************************/
-
+static GEN
+col_2ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_2; return e; }
 static GEN
 gchar_identify_init(GEN gc, GEN Lv, long prec)
 {
-  pari_sp av = avma;
-  GEN M, cyc, mult, pr, Lpr, Lk1, Lphi1, Lk2, Llog, C, logchi, chi_oo, eps, U;
+  GEN M, cyc, mult, pr, Lpr, Lk1, Lphi1, Lk2, Llog, eps, U;
   GEN uni, P, nf;
   long r1, r2, npr, nk1, nchi, s, i, j, v, dim, ns, nc, ncol;
 
@@ -1651,42 +1648,37 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   /* build matrix M */
   dim = npr+nk1+r1+2*r2;
   ncol = npr+nk1+1+nchi;
-  M = cgetg(npr+nk1+1+nchi+1, t_MAT);
-  for (j=1; j<=npr; j++)
-    gel(M,j) = col_ei(dim, j);
-  for (j=npr+1; j<=npr+nk1; j++)
-  {
-    gel(M,j) = zerocol(dim);
-    gcoeff(M,j,j) = gen_2;
-  }
-  j = npr+nk1+1;
+  M = cgetg(ncol+1, t_MAT);
+  for (j = 1; j <= npr; j++) gel(M,j) = col_ei(dim, j);
+  for (;  j <= npr+nk1; j++) gel(M,j) = col_2ei(dim, j);
   gel(M,j) = zerocol(dim);
   eps = real2n(-(7*s)/16, prec);
   for (i=npr+nk1+1; i<=npr+nk1+r1+r2; i++) gcoeff(M,i,j) = eps;
   for (j=1; j<=nchi; j++)
   {
-    C = cgetg(dim+1, t_COL);
-    logchi = gchar_duallog(gc, col_ei(nchi,j));
-    for (i=1; i<=npr; i++)
-      gel(C,i) = gcharlog_eval_raw(logchi, gel(Llog,i));
-    chi_oo = gcharlog_conductor_oo(gc, logchi);
-    for (i=1; i<=nk1; i++)
-      gel(C,npr+i) = gel(chi_oo, itos(gel(Lv,Lk1[i])));
-    for (i=1; i<=r1+2*r2; i++)
-      gel(C,npr+nk1+i) = gel(logchi,ns+nc+i);
+    GEN logchi = gchar_duallog(gc, col_ei(nchi,j));
+    GEN chi_oo = gcharlog_conductor_oo(gc, logchi), C = cgetg(dim+1, t_COL);
+    for (i=1; i<=npr; i++) gel(C,i) = gcharlog_eval_raw(logchi, gel(Llog,i));
+    for (i=1; i<=nk1; i++) gel(C,npr+i) = gel(chi_oo, itos(gel(Lv,Lk1[i])));
+    for (i=1; i<=r1+2*r2; i++) gel(C,npr+nk1+i) = gel(logchi,ns+nc+i);
     gel(M,npr+nk1+1+j) = C;
   }
-  for (i=1; i<=r1; i++)
+  for (i = 1; i <= r1; i++)
     if (!Lphi1[i])
-      for (j=1; j<=ncol; j++)
-        gcoeff(M,npr+nk1+i,j) = gmul(gcoeff(M,npr+nk1+i,j),eps);
+    {
+      long a = npr + nk1 + i;
+      for (j = 1; j <= ncol; j++) gcoeff(M,a,j) = gmul(gcoeff(M,a,j), eps);
+    }
   for (i=1; i<=r2; i++)
     if (!Lk2[i])
+    {
+      long a = npr + nk1 + r1 + i;
       for (j=1; j<=ncol; j++)
       {
-        gcoeff(M,npr+nk1+r1+i,j) = gmul(gcoeff(M,npr+nk1+r1+i,j),eps);
-        gcoeff(M,npr+nk1+r1+r2+i,j) = gmul(gcoeff(M,npr+nk1+r1+r2+i,j),eps);
+        gcoeff(M, a, j) = gmul(gcoeff(M, a, j), eps);
+        gcoeff(M, a+r2, j) = gmul(gcoeff(M, a+r2, j),eps);
       }
+    }
 
   /* multiply and truncate M */
   M = gtrunc(RgM_Rg_mul(M,mult));
@@ -1696,7 +1688,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   M = ZM_mul(M,U);
   U = rowslice(U, npr+nk1+2, npr+nk1+1+nchi);
 
-  return gerepilecopy(av, mkvecn(10,M,U,Lpr,Lk1,Lphi1,Lk2,mult,eps,Lv,mkvecsmall(prec)));
+  return mkvecn(10,M,U,Lpr,Lk1,Lphi1,Lk2,mult,eps,Lv,mkvecsmall(prec));
 }
 
 /* TODO return the distance between the character found and the conditions? */
