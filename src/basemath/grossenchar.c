@@ -378,7 +378,7 @@ gcharDLdata(GEN bnf, GEN S, GEN DL)
   long i;
   M = shallowmatconcat(DL);
   h = bnf_get_no(bnf);
-  gen = shallowtrans(bnf_get_gen(bnf));
+  gen = bnf_get_gen(bnf);
 
   /* compute right inverse of M modulo cyc */
   M = shallowtrans(M);
@@ -1178,7 +1178,7 @@ static GEN
 gchar_internal(GEN gc, GEN chi, GEN *s)
 {
   chi = check_gchar(gc, chi, s);
-  return ZV_ZM_mul(shallowtrans(chi), gchar_get_Ui(gc));
+  return ZV_ZM_mul(chi, gchar_get_Ui(gc));
 }
 
 /* from internal basis form, return the R/Z components and set s to the R
@@ -1188,7 +1188,7 @@ gchari_duallog(GEN gc, GEN chi, GEN *s)
 {
   long i, n;
   chi = check_gchari(gc, chi, s);
-  chi = RgV_RgM_mul(shallowtrans(chi), gchar_get_basis(gc));
+  chi = RgV_RgM_mul(chi, gchar_get_basis(gc));
   n = gchar_get_ns(gc) + gchar_get_nc(gc); /* take exponents mod Z */
   for (i = 1; i <= n; i++) gel(chi,i) = gfrac(gel(chi,i));
   return chi;
