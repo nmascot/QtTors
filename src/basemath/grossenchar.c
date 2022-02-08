@@ -1941,6 +1941,7 @@ gchari_lfun(GEN gc, GEN chi, GEN s0)
   GEN nf, chilog, s, cond_f, cond_oo, vga_r, vga_c, chiw;
   GEN v_phi, v_arg, sig, k, NN, L;
   long ns, nc, nm, r1, r2;
+
   nf = gchar_get_nf(gc);
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
@@ -1948,7 +1949,8 @@ gchari_lfun(GEN gc, GEN chi, GEN s0)
   nf_get_sign(nf, &r1, &r2);
   chilog = gchari_duallog(gc, chi, &s);
   s = gadd(s0,s);
-  if (!gequal0(gimag(s))) pari_err_IMPL("lfun for gchar with imaginary norm component");
+  if (!gequal0(imag_i(s)))
+    pari_err_IMPL("lfun for gchar with imaginary norm component");
   cond_f =  gcharlog_conductor_f(gc, chilog);
   cond_oo =  gcharlog_conductor_oo(gc, chilog);
   chiw = gchari_shift(gc,chi,s0);
@@ -1968,12 +1970,10 @@ gchari_lfun(GEN gc, GEN chi, GEN s0)
   /* TODO: remove cleanup when gammamellinv takes ldata*/
   sig = cleanup_vga(sig, gchar_get_prec(gc));
   k = gen_1;
-
   if (!gequal0(s))
   {
     long j;
-    for (j = 1; j < lg(sig); j++)
-      gel(sig, j) = gadd(gel(sig, j), s);
+    for (j = 1; j < lg(sig); j++) gel(sig, j) = gadd(gel(sig, j), s);
     k = gsub(k, gmulgs(s,2));
   }
 
