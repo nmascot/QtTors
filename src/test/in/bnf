@@ -1,5 +1,5 @@
 default(realprecision,38);
-default(parisize,"40M");
+default(parisize,"120M");
 setrand(1429412696);bnfinit(x^2+29051222508*x-12).clgp
 setrand(1); bnfinit(x^8 + 12*x^6 + 30*x^4 + 24*x^2 + 4).reg
 setrand(1); bnfinit(x^4 - 3*x^2 + 49).reg
@@ -119,5 +119,8 @@ P=x^7-22*x^6+169*x^5-568*x^4+1263*x^3-1506*x^2+2295*x+2;
 localbitprec(128); bnfinit(P,1).no
 
 localbitprec(128); bitprecision(bnfinit(x).nf)
+
+\\ #2355
+bnfinit(x^3+x^2-300718516569853095954224822736606480534192*x+63469622412272370773369114880921263373233288077845073732447296,1).cyc
 
 \\ ERRORS: keep at end of file
