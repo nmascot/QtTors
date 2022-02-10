@@ -1511,10 +1511,8 @@ static GEN
 gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN s0, long prec)
 {
   GEN val, s = gen_0, norm = NULL, logx;
-  long prec0, preclog, precgc, extrabit, recomputelogchi = 0, e;
-  pari_sp av = avma;
+  long preclog, extrabit, recomputelogchi = 0, e, prec0 = gchar_get_prec(gc);
 
-  prec0 = gchar_get_prec(gc);
   logx = gchar_log(gc, x, prec0);
   if (!logchi)
   {
@@ -1530,6 +1528,7 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN s0, long prec)
   if (preclog > prec0) logx = gchar_log(gc, x, preclog);
   if (recomputelogchi)
   {
+    long precgc;
     extrabit += expu(lg(chi));
     e = gexpo(chi); if (e>0) extrabit += e;
     precgc = prec + nbits2extraprec(extrabit);
@@ -1539,11 +1538,8 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN s0, long prec)
       logchi = gchari_duallog(gc, chi, NULL);
     }
   }
-
   s = gadd(s0,s);
-
   val = gcharlog_eval_raw(logchi, logx);
-
   if (!gequal0(s)) norm = idealnorm(gchar_get_nf(gc), x);
 
   if (flag)
@@ -1557,7 +1553,7 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN s0, long prec)
     val = gadd(val, gmul(expo, glog(norm, prec)));
   }
   if (DEBUGLEVEL>1) err_printf("char value %Ps\n", val);
-  return gerepilecopy(av, val);
+  return val;
 }
 
 GEN
