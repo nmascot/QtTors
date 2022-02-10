@@ -1582,7 +1582,7 @@ col_2ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_2; return e; }
 static GEN
 gchar_identify_init(GEN gc, GEN Lv, long prec)
 {
-  GEN M, cyc, mult, Lpr, Lk1, Lphi1, Lk2, Llog, eps, U, P, nf;
+  GEN M, cyc, mult, Lpr, Lk1, Lphi1, Lk2, Llog, eps, U, P, nf, moo;
   long r1, r2, npr, nk1, nchi, s, i, j, l, dim, ns, nc, ncol;
 
   check_gchar_group(gc);
@@ -1592,6 +1592,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   r2 = gchar_get_r2(gc);
   cyc = gchar_get_cyc(gc);
   P = gchar_get_modP(gc);
+  moo = gel(gchar_get_mod(gc), 2);
   nf = gchar_get_nf(gc);
   nchi = lg(cyc)-2; /* ignore norm */
   if (nchi>=r1+2*r2)    mult = gel(cyc,1);
@@ -1617,9 +1618,8 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
       if (v > r1+r2)
         pari_err_DOMAIN("gcharidentify", "v", ">", stoi(r1+r2), stoi(v));
       if (v <= r1)
-      { /* TODO don't put in k1 if not in conductor (but keep as phi) */
-        nk1++;
-        Lk1[nk1] = i;
+      { /* don't put in k1 if not in conductor (but keep as phi) */
+        if (zv_search(moo, v)) { nk1++; Lk1[nk1] = i; }
         Lphi1[v] = i;
       }
       else Lk2[v-r1] = i;
