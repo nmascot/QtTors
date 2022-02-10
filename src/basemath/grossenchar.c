@@ -1582,9 +1582,8 @@ col_2ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_2; return e; }
 static GEN
 gchar_identify_init(GEN gc, GEN Lv, long prec)
 {
-  GEN M, cyc, mult, pr, Lpr, Lk1, Lphi1, Lk2, Llog, eps, U;
-  GEN uni, P, nf;
-  long r1, r2, npr, nk1, nchi, s, i, j, v, dim, ns, nc, ncol;
+  GEN M, cyc, mult, Lpr, Lk1, Lphi1, Lk2, Llog, eps, U, P, nf;
+  long r1, r2, npr, nk1, nchi, s, i, j, l, dim, ns, nc, ncol;
 
   check_gchar_group(gc);
   ns = gchar_get_ns(gc);
@@ -1599,41 +1598,24 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   else                  mult = gen_1;
   s = (8*prec2nbits(prec))/10;
   mult = shifti(mult,s);
-  npr = 0;
-  nk1 = 0;
-  uni = gen_sort_uniq(Lv, (void*)cmp_universal, cmp_nodata);
-  if (lg(uni) < lg(Lv)) pari_err(e_MISC, "components of Lv must be distinct");
-  for (i = 1; i < lg(Lv); i++)
-  {
-    if (typ(gel(Lv,i)) == t_INT)
-    {
-      v = itos(gel(Lv,i));
-      if (v <= 0) pari_err_DOMAIN("gchar_identify_init", "v", "<=", gen_0, stoi(v));
-      if (v > r1+r2) pari_err_DOMAIN("gchar_identify_init", "v", ">", stoi(r1+r2), stoi(v));
-      if (v <= r1) nk1++;
-    }
-    else
-    {
-      pr = gel(Lv,i);
-      if (idealtyp(&pr, NULL) == id_PRINCIPAL)
-        pari_err_TYPE("gchar_identify_init [ideal]", gel(Lv,i));
-      for (j=1; j<lg(P); j++)
-        if (idealval(nf, pr, gel(P,j))>0)
-          pari_err_DOMAIN("gchar_identify_init", "valuation at prime dividing the modulus", ">", gen_0, gpidealval(nf, pr, gel(P,j)));
-      npr++;
-    }
-  }
+  l = lg(Lv);
+  if (lg(gen_sort_uniq(Lv, (void*)cmp_universal, cmp_nodata)) != l)
+    pari_err(e_MISC, "components of Lv must be distinct");
   /* log of prime ideals */
-  Llog = cgetg(npr+1, t_VEC);
+  Llog = cgetg(l, t_VEC);
   /* index in Lchiv corresponding to the places */
-  Lpr = cgetg(npr+1, t_VECSMALL); npr = 0;
-  Lk1 = cgetg(nk1+1, t_VECSMALL); nk1 = 0;
-  Lphi1 = zero_zv(r1); Lk2 = zero_zv(r2);
-  for (i=1; i<lg(Lv); i++)
+  Lpr = cgetg(l, t_VECSMALL);
+  Lk1 = cgetg(l+1, t_VECSMALL);
+  Lphi1 = zero_zv(r1);
+  Lk2 = zero_zv(r2);
+  for (i = 1, npr = nk1 = 0; i < l; i++)
   {
     if (typ(gel(Lv,i)) == t_INT)
     {
-      v = itos(gel(Lv,i));
+      long v = itos(gel(Lv,i));
+      if (v <= 0) pari_err_DOMAIN("gcharidentify", "v", "<=", gen_0, stoi(v));
+      if (v > r1+r2)
+        pari_err_DOMAIN("gcharidentify", "v", ">", stoi(r1+r2), stoi(v));
       if (v <= r1)
       { /* TODO don't put in k1 if not in conductor (but keep as phi) */
         nk1++;
@@ -1644,12 +1626,20 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
     }
     else
     {
-      pr = gel(Lv,i);
+      GEN pr = gel(Lv,i);
+      if (idealtyp(&pr, NULL) == id_PRINCIPAL)
+        pari_err_TYPE("gcharidentify [ideal]", gel(Lv,i));
+      for (j=1; j<lg(P); j++)
+        if (idealval(nf, pr, gel(P,j)) > 0)
+          pari_err_COPRIME("gcharidentify", pr, gel(gchar_get_mod(gc), 1));
       npr++;
       Lpr[npr] = i;
       gel(Llog,npr) = gchar_log(gc, pr, prec);
     }
   }
+  setlg(Llog, npr+1);
+  setlg(Lpr, npr+1);
+  setlg(Lk1, nk1+1);
 
   /* build matrix M */
   dim = npr+nk1+r1+2*r2;

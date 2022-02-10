@@ -298,16 +298,16 @@ bad inputs
   *** gcharidentify: components of Lv must be distinct.
   ***   at top-level: gcharidentify(gc,[1,0],[[0,0],[0,0]])
   ***                 ^-------------------------------------
-  *** gcharidentify: domain error in gchar_identify_init: v <= 0
+  *** gcharidentify: domain error in gcharidentify: v <= 0
   ***   at top-level: gcharidentify(gc,[1,3],[[0,0],[0,0]])
   ***                 ^-------------------------------------
-  *** gcharidentify: domain error in gchar_identify_init: v > 2
+  *** gcharidentify: domain error in gcharidentify: v > 2
   ***   at top-level: gcharidentify(gc,[1,[]],[[0,0],[0,0]])
   ***                 ^--------------------------------------
   *** gcharidentify: incorrect type in idealtyp (t_VEC).
   ***   at top-level: gcharidentify(gc,[1,'x],[[0,0],[0,0]])
   ***                 ^--------------------------------------
-  *** gcharidentify: incorrect type in gchar_identify_init [ideal] (t_POL).
+  *** gcharidentify: incorrect type in gcharidentify [ideal] (t_POL).
   ***   at top-level: gcharidentify(gc,[[]],[1.])
   ***                 ^---------------------------
   *** gcharidentify: incorrect type in idealtyp (t_VEC).
@@ -334,7 +334,9 @@ bad inputs
   *** gcharidentify: inconsistent dimensions in gchar_identify_i [lg(Lv) != lg(Lchiv)].
   ***   at top-level: gcharidentify(gc,[pr],[0])
   ***                 ^--------------------------
-  *** gcharidentify: domain error in gchar_identify_init: valuation at prime dividing the modulus > 0
+  *** gcharidentify: elements not coprime in gcharidentify:
+    [101, 41, 53, 25; 0, 1, 0, 0; 0, 0, 1, 0; 0, 0, 0, 1]
+    Mat([[101, [-48, 0, 1, 0]~, 1, 1, [12, 114, -30, 3; 49, 11, 29, -114; -19, -29, -104, -30; 48, -49, -19, 12]], 1])
   ***   at top-level: gcharnewprec(gc)
   ***                 ^----------------
   *** gcharnewprec: incorrect type in char group (t_INT).
@@ -389,4 +391,4 @@ bad inputs
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)]~,1)
   ***                 ^------------------------------
   *** gcharlocal: incorrect type in check_gchar_i [s] (t_PADIC).
-Total time spent: 3178
+Total time spent: 3813
