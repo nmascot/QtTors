@@ -313,25 +313,25 @@ bad inputs
   *** gcharidentify: incorrect type in idealtyp (t_VEC).
   ***   at top-level: gcharidentify(gc,[pr],[1+O(3^7)])
   ***                 ^---------------------------------
-  *** gcharidentify: incorrect type in gchar_identify_i [character value: should be real or complex] (t_PADIC).
+  *** gcharidentify: incorrect type in gcharidentify [character value: should be real or complex] (t_PADIC).
   ***   at top-level: gcharidentify(gc,[pr],['x])
   ***                 ^---------------------------
-  *** gcharidentify: incorrect type in gchar_identify_i [character value: should be real or complex] (t_POL).
+  *** gcharidentify: incorrect type in gcharidentify [character value: should be real or complex] (t_POL).
   ***   at top-level: gcharidentify(gc,[1],['x])
   ***                 ^--------------------------
-  *** gcharidentify: incorrect type in gchar_identify_i [character at infinite place: should be a t_VEC] (t_POL).
+  *** gcharidentify: incorrect type in gcharidentify [character at infinite place: should be a t_VEC] (t_POL).
   ***   at top-level: gcharidentify(gc,[1],[[]])
   ***                 ^--------------------------
-  *** gcharidentify: inconsistent dimensions in gchar_identify_i [character at infinite place: should have two components].
+  *** gcharidentify: inconsistent dimensions in gcharidentify [character at infinite place: should have two components].
   ***   at top-level: gcharidentify(gc,[1],[[0.1,0]])
   ***                 ^-------------------------------
-  *** gcharidentify: incorrect type in gchar_identify_i [k parameter at infinite place: should be a t_INT] (t_REAL).
+  *** gcharidentify: incorrect type in gcharidentify [k parameter at infinite place: should be a t_INT] (t_REAL).
   ***   at top-level: gcharidentify(gc,[1],[[0,O(3^7)]])
   ***                 ^----------------------------------
-  *** gcharidentify: incorrect type in gchar_identify_i [phi parameter at infinite place: should be real or complex] (t_PADIC).
+  *** gcharidentify: incorrect type in gcharidentify [phi parameter at infinite place: should be real or complex] (t_PADIC).
   ***   at top-level: gcharidentify(gc,[1],[0,0])
   ***                 ^---------------------------
-  *** gcharidentify: inconsistent dimensions in gchar_identify_i [lg(Lv) != lg(Lchiv)].
+  *** gcharidentify: inconsistent dimensions in gcharidentify [#Lv != #Lchiv].
   ***   at top-level: gcharidentify(gc,[pr],[0])
   ***                 ^--------------------------
   *** gcharidentify: elements not coprime in gcharidentify:
@@ -391,4 +391,4 @@ bad inputs
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)]~,1)
   ***                 ^------------------------------
   *** gcharlocal: incorrect type in check_gchar_i [s] (t_PADIC).
-Total time spent: 3813
+Total time spent: 3645

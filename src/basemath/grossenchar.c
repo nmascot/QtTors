@@ -1682,8 +1682,8 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
 static GEN
 gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
 {
-  GEN M, U, Lpr, Lk1, Lphi1, Lk2, mult, eps, cyc, y, x, sumphi, Lv, normcompo, nf;
-  long i, r1, r2, npr, nk1, nmiss, nnormcompo, prec;
+  GEN M, U, Lpr, Lk1, Lphi1, Lk2, mult, eps, cyc, y, x, sumphi, Lv, Norm, nf;
+  long i, l, r1, r2, npr, nk1, n, nmiss, nnorm, prec;
   M = gel(idinit,1);
   U = gel(idinit,2);
   Lpr = gel(idinit,3);
@@ -1695,98 +1695,86 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
   Lv = gel(idinit,9);
   prec = gel(idinit,10)[1];
   npr = lg(Lpr)-1;
-  nk1 = lg(Lk1)-1;
+  nk1 = lg(Lk1)-1; n = npr + nk1;
   r1 = gchar_get_r1(gc);
   r2 = gchar_get_r2(gc);
   cyc = gchar_get_cyc(gc);
   nf = gchar_get_nf(gc);
-  nnormcompo = 0;
-  normcompo = gen_0;
+  nnorm = 0;
+  Norm = gen_0;
 
-  if (lg(Lv) != lg(Lchiv)) pari_err_DIM("gchar_identify_i [lg(Lv) != lg(Lchiv)]");
-  for (i=1; i<lg(Lchiv); i++)
+  l = lg(Lchiv); Lchiv = shallowcopy(Lchiv);
+  if (lg(Lv) != l) pari_err_DIM("gcharidentify [#Lv != #Lchiv]");
+  for (i = 1; i < l; i++)
   {
+    x = gel(Lchiv,i);
     if (typ(gel(Lv,i)) != t_INT)
     {
-      x = gel(Lchiv,i);
       if (typ(x) == t_COMPLEX)
       {
-        nnormcompo++;
+        nnorm++;
         /* 2 Pi Im(theta) / log N(pr) */
-        normcompo = gadd(normcompo,
-              gdiv(gmul(Pi2n(1,prec),imag_i(x)),
-              glog(idealnorm(nf,gel(Lv,i)),prec)));
-        x = real_i(x);
-        gel(Lchiv,i) = x;
+        Norm = gadd(Norm, gdiv(gmul(Pi2n(1,prec), gel(x,2)),
+                               glog(idealnorm(nf,gel(Lv,i)),prec)));
+        gel(Lchiv,i) = x = gel(x,1);
       }
       if (!is_real_t(typ(x)))
-        pari_err_TYPE("gchar_identify_i [character value: should be real or complex]", x);
+        pari_err_TYPE("gcharidentify [character value: should be real or complex]", x);
     }
     else
     {
-      if (typ(gel(Lchiv,i)) != t_VEC)
-        pari_err_TYPE("gchar_identify_i [character at infinite place: should be a t_VEC]", gel(Lchiv,i));
-      if (lg(gel(Lchiv,i)) != 3)
-        pari_err_DIM("gchar_identify_i [character at infinite place: should have two components]");
-      if (typ(gmael(Lchiv,i,1)) != t_INT)
-        pari_err_TYPE("gchar_identify_i [k parameter at infinite place: should be a t_INT]", gmael(Lchiv,i,1));
-      x = gmael(Lchiv,i,2);
+      if (typ(x) != t_VEC)
+        pari_err_TYPE("gcharidentify [character at infinite place: should be a t_VEC]", x);
+      if (lg(x) != 3)
+        pari_err_DIM("gcharidentify [character at infinite place: should have two components]");
+      if (typ(gel(x,1)) != t_INT)
+        pari_err_TYPE("gcharidentify [k parameter at infinite place: should be a t_INT]", gel(x,1));
+      x = gel(x,2);
       if (typ(x) == t_COMPLEX)
       {
-        nnormcompo++;
-        normcompo = gsub(normcompo,imag_i(x));
-        x = real_i(x);
-        gmael(Lchiv,i,2) = x;
+        nnorm++;
+        Norm = gsub(Norm, gel(x,2));
+        gmael(Lchiv,i,2) = x = gel(x,1);
       }
       if (!is_real_t(typ(x)))
-        pari_err_TYPE("gchar_identify_i [phi parameter at infinite place: should be real or complex]", x);
+        pari_err_TYPE("gcharidentify [phi parameter at infinite place: should be real or complex]", x);
     }
   }
 
   /* construct vector */
-  y = zerocol(npr+nk1+r1+2*r2);
+  y = zerocol(n + r1 + 2*r2);
   sumphi = gen_0;
   nmiss = 0;
-  for (i=1; i<=npr; i++)
-    gel(y,i) = gel(Lchiv,Lpr[i]);
-  for (i=1; i<=nk1; i++)
-    gel(y,npr+i) = gmael(Lchiv,Lk1[i],1);
+  for (i=1; i<=npr; i++) gel(y,i) = gel(Lchiv, Lpr[i]);
+  for (i=1; i<=nk1; i++) gel(y,npr+i) = gmael(Lchiv,Lk1[i],1);
   for (i=1; i<=r1; i++)
     if (Lphi1[i])
     {
-      x =  gmael(Lchiv,Lphi1[i],2);
-      gel(y,npr+nk1+i) = x;
+      gel(y, n+i) = x =  gmael(Lchiv,Lphi1[i],2);
       sumphi = gadd(sumphi, x);
     }
     else nmiss++;
   for (i=1; i<=r2; i++)
     if (Lk2[i])
     {
-      gel(y,npr+nk1+r1+r2+i) = gmael(Lchiv,Lk2[i],1);
-      x =  gmael(Lchiv,Lk2[i],2);
-      gel(y,npr+nk1+r1+i) = x;
+      gel(y, n + r1+r2+i) = gmael(Lchiv,Lk2[i],1);
+      gel(y, n + r1+i) = x =  gmael(Lchiv,Lk2[i],2);
       sumphi = gadd(sumphi, gshift(x,1));
     }
-    else nmiss+=2;
+    else nmiss += 2;
   if (nmiss)
   {
-    sumphi = gneg(gdiv(sumphi,stoi(nmiss)));
-    sumphi = gmul(sumphi,eps);
-    for (i=1; i<=r1; i++) if (!Lphi1[i]) gel(y,npr+nk1+i) = sumphi;
-    for (i=1; i<=r2; i++) if (!Lk2[i])   gel(y,npr+nk1+r1+i) = sumphi;
+    sumphi = gmul(gdivgs(sumphi, -nmiss), eps);
+    for (i = 1; i <= r1; i++) if (!Lphi1[i]) gel(y, n + i) = sumphi;
+    for (i = 1; i <= r2; i++) if (!Lk2[i])   gel(y, n + r1+i) = sumphi;
   }
-  y = gtrunc(RgC_Rg_mul(y,mult));
+  y = gtrunc(RgC_Rg_mul(y, mult));
 
   /* find approximation */
-  x = RgM_Babai(M, y);
-  x = ZM_ZC_mul(U, x);
-  for (i=1; i<lg(cyc)-1; i++) /* ignore norm */
+  x = ZM_ZC_mul(U, RgM_Babai(M, y));
+  for (i = 1; i < lg(cyc)-1; i++) /* ignore norm */
     if (signe(gel(cyc,i))) gel(x,i) = modii(gel(x,i), gel(cyc,i));
-  if (nnormcompo>0)
-  {
-    normcompo = gdivgu(normcompo,lg(Lv)-1);
-    x = shallowconcat(x,normcompo);
-  }
+  if (nnorm > 0) x = vec_append(x, gdivgu(Norm, lg(Lv)-1));
   return x;
 }
 
