@@ -1420,20 +1420,9 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
 /*******************************************************************/
 
 /* logarithm of a character */
-/* TODO document the fact that matrices are accepted as input? */
 static GEN
 gchar_duallog(GEN gc, GEN chi)
-{
-  if (typ(chi) == t_MAT)
-  {
-    GEN r = cgetg(lg(chi), t_MAT);
-    long k;
-    for (k = 1; k < lg(chi); k++) gel(r, k) = gchar_duallog(gc, gel(chi, k));
-    return shallowtrans(r);
-  }
-  else
-    return gchari_duallog(gc, gchar_internal(gc, chi, NULL), NULL);
-}
+{ return gchari_duallog(gc, gchar_internal(gc, chi, NULL), NULL); }
 
 /* gp version, with norm component */
 GEN
