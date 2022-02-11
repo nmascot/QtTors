@@ -1778,7 +1778,6 @@ GEN
 vecan_gchar(GEN an, long n, long prec)
 {
   forprime_t iter;
-  pari_sp av = avma;
   GEN gc = gel(an,1), chi = gel(an,2), P = gel(an,3), PZ = gel(an,4);
   GEN BOUND = stoi(n), v = vec_ei(n, 1);
   GEN gp = cgetipos(3), nf, chilog, s;
@@ -1829,7 +1828,7 @@ vecan_gchar(GEN an, long n, long prec)
     for (j = 1; j <= n; j++)
       if (gel(v,j) != gen_0) gel(v, j) = gmul(gel(v,j),gel(ns,j));
   }
-  return gerepilecopy(av, v);
+  return v;
 }
 
 static GEN
