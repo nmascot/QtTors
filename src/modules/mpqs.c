@@ -50,7 +50,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  * Q(x0)/(4A) takes values roughly between -|C| and 3|C|.
  *
  * Refinements. We do not use the smallest FB primes for sieving, incorporating
- * them only after selecting candidates).  The substition of 2Ax+B into
+ * them only after selecting candidates).  The substitution of 2Ax+B into
  * X^2 - kN, with odd B, forces 2 to occur; when kN is 1 mod 8, it occurs at
  * least to the 3rd power; when kN = 5 mod 8, it occurs exactly to the 2nd
  * power.  We never sieve on 2 and always pull out the power of 2 directly. The
@@ -407,7 +407,7 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
  * compensation we were multiplying by 2 when the fbe_logp fields were being
  * filled in, making all those bytes even.  Tradeoff: the extra bit of
  * precision is helpful, but interferes with a possible sieving optimization
- * (artifically shift right the logp's of primes in A, and just run over both
+ * (artificially shift right the logp's of primes in A, and just run over both
  * arithmetical progressions  (which coincide in this case)  instead of
  * skipping the second one, to avoid the conditional branch in the
  * mpqs_sieve() loops).  We could still do this, but might lose a little bit
@@ -498,7 +498,7 @@ mpqs_locate_A_range(mpqs_handle_t *h)
 
 #ifdef MPQS_DEBUG
 /* Debug-only helper routine: check correctness of the root z mod p_i
- * by evaluting A * z^2 + B * z + C mod p_i  (which should be 0). */
+ * by evaluating A * z^2 + B * z + C mod p_i  (which should be 0). */
 static void
 check_root(mpqs_handle_t *h, GEN mC, long p, long start)
 {

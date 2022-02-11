@@ -397,7 +397,7 @@ static void CharNewPrec(GEN dataCR, long prec);
  * we either have
  * - chi(log_gen_pr(pr,1)) != 1 [pr | cond(chi) => ramified in KH]
  * - or [pr \nmid cond(chi)] chi lifted to Clk(m/pr^oo) is not trivial at pr.
- * We want the map from Clk(m)/D given by the vector of such caracters to have
+ * We want the map from Clk(m)/D given by the vector of such characters to have
  * trivial kernel. Return bnr(m), D, Ck(m)/D and Clk(m)/Cm */
 static GEN
 FindModulus(GEN bnr, GEN dtQ, long *newprec)
@@ -794,7 +794,7 @@ sortChars(GEN ch)
 }
 
 /* Given a list [chi, F = cond(chi)] of characters over Cl(bnr), return
- * [vChar, dataCR], where vChar containes the equivalence classes of
+ * [vChar, dataCR], where vChar contains the equivalence classes of
  * characters with the same conductor, and dataCR contains for each character:
  * - bnr(F)
  * - the constant C(F) [t_REAL]
@@ -1539,7 +1539,7 @@ LABrcf: ct++;
   return NULL;
 }
 
-/* Using linear dependance relations */
+/* Using linear dependence relations */
 static GEN
 RecCoeff2(GEN nf,  RC_data *d,  long prec)
 {

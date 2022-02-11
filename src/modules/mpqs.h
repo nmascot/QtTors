@@ -259,7 +259,7 @@ typedef struct mpqs_handle {
  * XXX When using it (kN large enough),
  * XXX - M must become a multiple of the (cache block) segment size
  * XXX   (or to keep things simple: a multiple of 32K)
- * XXX - we need index3_FB to seperate (smaller) primes used for normal
+ * XXX - we need index3_FB to separate (smaller) primes used for normal
  * XXX   sieving from larger ones used with transaction buffers
  * XXX   (and the locate_A_range and attached logic must be changed to
  * XXX   cap index2_FB below index3_FB instead of below size_of_FB)

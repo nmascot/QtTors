@@ -432,7 +432,7 @@ algtensor(GEN al1, GEN al2, long maxord) {
   d1=alg_get_degree(al1);
   d2=alg_get_degree(al2);
   if (ugcd(d1,d2) != 1)
-    pari_err_IMPL("tensor of cylic algebras of noncoprime degrees"); /* TODO */
+    pari_err_IMPL("tensor of cyclic algebras of noncoprime degrees"); /* TODO */
 
   if (d1==1) return gcopy(al2);
   if (d2==1) return gcopy(al1);
@@ -3224,7 +3224,7 @@ localextdeg(GEN nf, GEN pr, GEN cnd, long d, long ell, long n)
 }
 
 /* Ld[i] must be nontrivial powers of the same prime ell */
-/* pl : -1 at real places at which the extention must ramify, 0 elsewhere */
+/* pl : -1 at real places at which the extension must ramify, 0 elsewhere */
 GEN
 nfgwkummer(GEN nf, GEN Lpr, GEN Ld, GEN pl, long var)
 {

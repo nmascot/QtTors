@@ -239,7 +239,7 @@ RgX_to_03(GEN q, GEN *a0, GEN *a1, GEN *a2, GEN *a3)
   }
 }
 
-/* deg(H mod p) = 3, return v_p( disc(correspondig p-adic factor) ) */
+/* deg(H mod p) = 3, return v_p( disc(corresponding p-adic factor) ) */
 static long
 discpart(GEN H, GEN p, long prec)
 {

@@ -131,7 +131,7 @@ ellcondfile(long n)
     ellcondfile_cache_cond = -1; /* disable cache until update */
     if (ellcondfile_cache) gunclone(ellcondfile_cache);
     ellcondfile_cache = gclone(V);
-    ellcondfile_cache_cond = n; /* reenable cache */
+    ellcondfile_cache_cond = n; /* re-enable cache */
     pari_fclose(F); return V;
   }
 }

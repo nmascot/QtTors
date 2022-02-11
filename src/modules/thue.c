@@ -162,7 +162,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
   *eps5 = mulur(r, eps3); return A;
 }
 
-/* find a few large primes such that p Z_K = P1 P2 P3 Q, whith f(Pi/p) = 1
+/* find a few large primes such that p Z_K = P1 P2 P3 Q, with f(Pi/p) = 1
  * From x - \alpha y = \prod u_i^b_i we will deduce 3 equations in F_p
  * in check_prinfo. Eliminating x,y we get a stringent condition on (b_i). */
 static GEN
