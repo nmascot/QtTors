@@ -2414,16 +2414,13 @@ static GEN
 rfrac_logderiv(GEN N, GEN D)
 {
   GEN a;
-  if (typ(N) != t_POL || varn(N) != varn(D)) return gdiv(gneg(RgX_deriv(D)), D);
+  if (typ(N) != t_POL || varn(N) != varn(D) || !degpol(N))
+    return gdiv(gneg(RgX_deriv(D)), D);
   if (!degpol(D))
-    a = RgX_deriv(N);
-  else
-  {
-    a = RgX_sub(RgX_mul(RgX_deriv(N), D), RgX_mul(RgX_deriv(D), N));
-    N = RgX_mul(N, D);
-    if (lg(a) > 2) gel(a,2) = gen_0;
-  }
-  return gdiv(a, N);
+    return gdiv(RgX_deriv(N), N);
+  a = RgX_sub(RgX_mul(RgX_deriv(N), D), RgX_mul(RgX_deriv(D), N));
+  if (lg(a) > 3) gel(a,2) = gen_0;
+  return gdiv(a, RgX_mul(N, D));
 }
 
 /* prod_{p prime, p >= a} F(p^s), F rational function */
