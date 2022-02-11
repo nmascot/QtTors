@@ -16,7 +16,6 @@
 #define DEBUGLEVEL DEBUGLEVEL_gchar
 
 static GEN gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN s0, long prec);
-static GEN gchar_duallog(GEN gc, GEN chi);
 
 /*********************************************************************/
 /**                                                                 **/
@@ -1182,16 +1181,19 @@ gchar_internal(GEN gc, GEN chi, GEN *s)
   return ZV_ZM_mul(chi, gchar_get_Ui(gc));
 }
 
-/* from internal basis form, return the R/Z components and set s to the R
- * component */
+static GEN
+RgV_frac_inplace(GEN v, long n)
+{
+  long i;
+  for (i = 1; i <= n; i++) gel(v,i) = gfrac(gel(v,i));
+  return v;
+}
+/* from internal basis form, return the R/Z components */
 static GEN
 gchari_duallog(GEN gc, GEN chi)
 {
-  long i, n;
-  chi = RgV_RgM_mul(chi, gchar_get_basis(gc));
-  n = gchar_get_ns(gc) + gchar_get_nc(gc); /* take exponents mod Z */
-  for (i = 1; i <= n; i++) gel(chi,i) = gfrac(gel(chi,i));
-  return chi;
+  chi = RgV_RgM_mul(chi, gchar_get_basis(gc)); /* take exponents mod Z */
+  return RgV_frac_inplace(chi, gchar_get_ns(gc) + gchar_get_nc(gc));
 }
 
 /* chip has ncp = #zm[1][i].cyc components */
@@ -1296,11 +1298,11 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
   /* in both */
   nalg = gchar_get_nalg(gc); /* number of generators of free algebraic chars */
 
-  check_gchar(gc, chi, &w);
+  chii = gchar_internal(gc, chi, &w);
   /* check component are on algebraic generators */
   for (i = ntors+nalg+1; i <= ntors+nfree; i++)
     if (!gequal0(gel(chi,i))) return gc_bool(av, 0);
-  chii = gchar_duallog(gc, chi);
+  chii = gchari_duallog(gc, chii);
 
   if (r1) /* not totally complex: finite order * integral power of norm */
   {
@@ -1409,21 +1411,13 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
 /*                EVALUATION OF CHARACTERS                         */
 /*                                                                 */
 /*******************************************************************/
-
-/* logarithm of a character */
-static GEN
-gchar_duallog(GEN gc, GEN chi)
-{ return gchari_duallog(gc, gchar_internal(gc, chi, NULL)); }
-
-/* gp version, with norm component */
 GEN
 gcharduallog(GEN gc, GEN chi)
 {
   pari_sp av = avma;
   GEN logchi, s;
   check_gchar_group(gc);
-  check_gchar(gc, chi, &s);
-  logchi = gchar_duallog(gc, chi);
+  logchi = gchari_duallog(gc, gchar_internal(gc, chi, &s));
   return gerepilecopy(av, shallowconcat1(mkcol2(logchi,s)));
 }
 
@@ -1557,12 +1551,11 @@ col_2ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_2; return e; }
 static GEN
 gchar_identify_init(GEN gc, GEN Lv, long prec)
 {
-  GEN M, cyc, mult, Lpr, Lk1, Lphi1, Lk2, Llog, eps, U, P, nf, moo;
-  long beps, r1, r2, n, npr, nk1, nchi, s, i, j, l, dim, ns, nc, ncol;
+  GEN M, cyc, mult, Lpr, Lk1, Lphi1, Lk2, Llog, eps, U, P, nf, moo, vlogchi;
+  long beps, r1, r2, n, npr, nk1, nchi, s, i, j, l, dim, nsnc, ncol;
 
   check_gchar_group(gc);
-  ns = gchar_get_ns(gc);
-  nc = gchar_get_nc(gc);
+  nsnc = gchar_get_ns(gc) + gchar_get_nc(gc);
   r1 = gchar_get_r1(gc);
   r2 = gchar_get_r2(gc);
   cyc = gchar_get_cyc(gc);
@@ -1620,13 +1613,14 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   for (;  j <= n; j++) gel(M,j) = col_2ei(dim, j);
   gel(M,j) = zerocol(dim);
   for (i = n+1; i <= n+r1+r2; i++) gcoeff(M,i,j) = eps;
+  vlogchi = RgM_mul(gchar_get_Ui(gc), gchar_get_basis(gc));
   for (j=1; j<=nchi; j++)
   {
-    GEN logchi = gchar_duallog(gc, col_ei(nchi,j));
+    GEN logchi = RgV_frac_inplace(row(vlogchi, j), nsnc); /* duallog(e_j) */
     GEN chi_oo = gcharlog_conductor_oo(gc, logchi), C = cgetg(dim+1, t_COL);
     for (i=1; i<=npr; i++) gel(C,i) = gcharlog_eval_raw(logchi, gel(Llog,i));
     for (i=1; i<=nk1; i++) gel(C,npr+i) = gel(chi_oo, itos(gel(Lv,Lk1[i])));
-    for (i=1; i<=r1+2*r2; i++) gel(C,n+i) = gel(logchi,ns+nc+i);
+    for (i=1; i<=r1+2*r2; i++) gel(C,n+i) = gel(logchi, nsnc + i);
     gel(M,n+1+j) = C;
   }
   for (i = 1; i <= r1; i++)
@@ -1635,7 +1629,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
       long a = n + i;
       for (j = 1; j <= ncol; j++) gcoeff(M,a,j) = gmul2n(gcoeff(M,a,j), beps);
     }
-  for (i=1; i<=r2; i++)
+  for (i = 1; i <= r2; i++)
     if (!Lk2[i])
     {
       long a = n + r1 + i, b = a + r2;
