@@ -982,7 +982,7 @@ gchar_algebraic_basis(GEN gc)
   nfree = gchar_get_nfree(gc);
   nc = ntors + nfree;
   /* in internal basis */
-  n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion chars, internal basis */
+  n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion char */
   r2 = gchar_get_r2(gc);
   nm = gchar_get_nm(gc);
   /* in both */
@@ -1070,7 +1070,7 @@ gchar_algebraicoftype(GEN gc, GEN type)
   long i, r1, r2, nalg, n0, nm;
   GEN p, q, w, k, matk, chi;
   /* in internal basis */
-  n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion chars, internal basis */
+  n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion chars */
   r1 = gchar_get_r1(gc);
   r2 = gchar_get_r2(gc);
   nm = gchar_get_nm(gc);
@@ -1248,14 +1248,12 @@ gcharlog_conductor_f(GEN gc, GEN chi, GEN *faN)
 static GEN
 gcharlog_conductor_oo(GEN gc, GEN chi)
 {
-  long ns, nc, noo, i;
+  long noo, i, n0 = gchar_get_ns(gc) + gchar_get_nc(gc);
   GEN k_real, chi_oo, moo, den;
 
-  ns = gchar_get_ns(gc);
-  nc = gchar_get_nc(gc);
   moo = locs_get_m_infty(gchar_get_zm(gc));
   noo = lg(moo)-1;
-  k_real = vecslice(chi, ns+nc-noo+1, ns+nc);
+  k_real = vecslice(chi, n0-noo+1, n0);
   chi_oo = zerovec(gchar_get_r1(gc));
   for (i=1; i<=noo; i++)
   {
@@ -1341,7 +1339,7 @@ GEN
 gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
 {
   pari_sp av = avma;
-  GEN s, chiv, logchi;
+  GEN nf = gchar_get_nf(gc), s, chiv, logchi;
   long i;
 
   check_gchar_group(gc);
@@ -1349,11 +1347,12 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
   logchi = gchari_duallog(gc, chi);
   if (typ(v) == t_INT) /* v infinite */
   {
-    long tau = itos(v), r1 = gchar_get_r1(gc), r2 = gchar_get_r2(gc);
+    long r1, r2, tau = itos(v), n0 = gchar_get_ns(gc) + gchar_get_nc(gc);
     GEN phi, k;
+    nf_get_sign(nf, &r1, &r2);
     if (tau<=0) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", "<=", gen_0, v);
     if (tau>r1+r2) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", ">", stoi(r1+r2), v);
-    phi = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)+tau);
+    phi = gel(logchi, n0 + tau);
     if (tau<=r1) /* v real */
     {
       GEN moo = gel(gchar_get_mod(gc),2);
@@ -1361,19 +1360,18 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
       if (i==0) k = gen_0;
       else
       {
-        k = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)-lg(moo)+1+i);
-        /* k == 0 or 1/2 */
+        k = gel(logchi, n0 - lg(moo) + 1 + i); /* 0 or 1/2 */
         if (!gequal0(k)) k = gen_1;
       }
     }
     else /* v complex */
-      k = gel(logchi, gchar_get_ns(gc)+gchar_get_nc(gc)+r2+tau);
-    if (s) phi = gsub(phi,gmul(gen_I(),s));
+      k = gel(logchi, n0 + r2 + tau);
+    if (s) phi = gsub(phi, gmul(gen_I(),s));
     chiv = mkvec2(k, phi);
   }
   else /* v finite */
   {
-    GEN nf = gchar_get_nf(gc), P = gchar_get_modP(gc);
+    GEN P = gchar_get_modP(gc);
     long iv;
     checkprid(v);
     iv = gen_search(P, v, (void*)cmp_prime_ideal, cmp_nodata);
@@ -1552,16 +1550,14 @@ static GEN
 gchar_identify_init(GEN gc, GEN Lv, long prec)
 {
   GEN M, cyc, mult, Lpr, Lk1, Lphi1, Lk2, Llog, eps, U, P, nf, moo, vlogchi;
-  long beps, r1, r2, n, npr, nk1, nchi, s, i, j, l, dim, nsnc, ncol;
+  long beps, r1, r2, n, npr, nk1, nchi, s, i, j, l, dim, n0, ncol;
 
   check_gchar_group(gc);
-  nsnc = gchar_get_ns(gc) + gchar_get_nc(gc);
-  r1 = gchar_get_r1(gc);
-  r2 = gchar_get_r2(gc);
+  n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion char */
   cyc = gchar_get_cyc(gc);
   P = gchar_get_modP(gc);
   moo = gel(gchar_get_mod(gc), 2);
-  nf = gchar_get_nf(gc);
+  nf = gchar_get_nf(gc); nf_get_sign(nf, &r1, &r2);
   nchi = lg(cyc)-2; /* ignore norm */
   if (nchi>=r1+2*r2)    mult = gel(cyc,1);
   else                  mult = gen_1;
@@ -1616,11 +1612,11 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   vlogchi = RgM_mul(gchar_get_Ui(gc), gchar_get_basis(gc));
   for (j=1; j<=nchi; j++)
   {
-    GEN logchi = RgV_frac_inplace(row(vlogchi, j), nsnc); /* duallog(e_j) */
+    GEN logchi = RgV_frac_inplace(row(vlogchi, j), n0); /* duallog(e_j) */
     GEN chi_oo = gcharlog_conductor_oo(gc, logchi), C = cgetg(dim+1, t_COL);
     for (i=1; i<=npr; i++) gel(C,i) = gcharlog_eval_raw(logchi, gel(Llog,i));
     for (i=1; i<=nk1; i++) gel(C,npr+i) = gel(chi_oo, itos(gel(Lv,Lk1[i])));
-    for (i=1; i<=r1+2*r2; i++) gel(C,n+i) = gel(logchi, nsnc + i);
+    for (i=1; i<=r1+2*r2; i++) gel(C,n+i) = gel(logchi, n0 + i);
     gel(M,n+1+j) = C;
   }
   for (i = 1; i <= r1; i++)
@@ -1665,10 +1661,9 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
   prec = gel(idinit,10)[1];
   npr = lg(Lpr)-1;
   nk1 = lg(Lk1)-1; n = npr + nk1;
-  r1 = gchar_get_r1(gc);
-  r2 = gchar_get_r2(gc);
   cyc = gchar_get_cyc(gc);
   nf = gchar_get_nf(gc);
+  nf_get_sign(nf, &r1, &r2);
   nnorm = 0;
   Norm = gen_0;
 
