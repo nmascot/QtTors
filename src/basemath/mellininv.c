@@ -455,14 +455,14 @@ get_SMd(GEN Vga)
  * If status = 2, the asymptotic expansion is finite so return only
  * the necessary number of terms nlim <= nlimmax + d. */
 static GEN
-Klargeinit(GEN Vga, long nlimmax, long *status)
+Klargeinit(GEN Vga, long nlimmax, long *status, long prec)
 {
   long d = lg(Vga) - 1, p, n, cnt;
   GEN M, SMd, se, vsinh, vd;
 
   if (Vgaeasytheta(Vga)) { *status = 2; return mkvec(gen_1); }
   /* d >= 2 */
-  *status = 0;
+  *status = 0; prec += prec >> 1;
   SMd = get_SMd(Vga);
   se = gsinh(RgX_to_ser(pol_x(0), d+2), 0); setvalp(se,0);
   se = gdeflate(se, 0, 2); /* se(x^2) = sinh(x)/x */
@@ -479,6 +479,7 @@ Klargeinit(GEN Vga, long nlimmax, long *status)
       GEN z = vp(p, 2*n-1-p, gel(SMd, p-1), gel(vsinh, d-p+1));
       s = gadd(s, gmul(gdiv(z, gel(vd, p+1)), gel(M, n+1-p)));
     }
+    if (prec && !isinexact(s)) s = gtofp(s, prec);
     gel(M,n) = s = gerepileupto(av, gdivgs(s, 1-n));
     if (gequal0(s))
     {
@@ -508,12 +509,12 @@ stripzeros(GEN M)
  * nlimmax. If status = 2, the asymptotic expansion is finite so return only
  * the necessary number of terms nlim <= nlimmax + d. */
 static GEN
-gammamellininvasymp_i(GEN Vga, long nlimmax, long m, long *status)
+gammamellininvasymp_i(GEN Vga, long nlimmax, long m, long *status, long prec)
 {
   GEN M, A, Aadd;
   long d, i, nlim, n;
 
-  M = Klargeinit(Vga, nlimmax, status);
+  M = Klargeinit(Vga, nlimmax, status, prec);
   if (!m) return M;
   d = lg(Vga)-1;
   /* half the exponent of t in asymptotic expansion. */
@@ -543,7 +544,7 @@ gammamellininvasymp(GEN Vga, long nlim, long m)
   Vga = get_Vga(Vga, &ldata);
   if (!is_vec_t(typ(Vga)) || lg(Vga) == 1)
     pari_err_TYPE("gammamellininvasymp",Vga);
-  return gerepilecopy(av, gammamellininvasymp_i(Vga, nlim, m, &status));
+  return gerepilecopy(av, gammamellininvasymp_i(Vga, nlim, m, &status, 0));
 }
 
 /* Does the continued fraction of the asymptotic expansion M at oo of inverse
@@ -583,7 +584,7 @@ gammamellininvinit(GEN Vga, long m, long bitprec)
   A2 = gaddsg(m*(2-d) + 1-d, sumVga(Vga));
   cd = (d <= 2)? gen_2: gsqrt(gdivgu(int2n(d+1), d), nbits2prec(bitprec));
   /* if in Klarge, we have |t| > tmax = E/C2, thus nlim < E*C2/D. */
-  M = gammamellininvasymp_i(Vga, nlimmax, m, &status);
+  M = gammamellininvasymp_i(Vga, nlimmax, m, &status, prec);
   if (status == 2)
   {
     tmax = -1.; /* only use Klarge */
