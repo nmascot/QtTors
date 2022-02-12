@@ -1482,7 +1482,7 @@ gcharlog_eval_raw(GEN logchi, GEN logx)
 static GEN
 gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN s, long prec)
 {
-  GEN val, norm = NULL, logx;
+  GEN z, norm, logx;
   long preclog, extrabit, recomputelogchi = 0, e, prec0 = gchar_get_prec(gc);
 
   logx = gchar_log(gc, x, prec0);
@@ -1509,21 +1509,17 @@ gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN s, long prec)
       logchi = gchari_duallog(gc, chi);
     }
   }
-  val = gcharlog_eval_raw(logchi, logx);
-  if (!gequal0(s)) norm = idealnorm(gchar_get_nf(gc), x);
-
+  z = gcharlog_eval_raw(logchi, logx);
+  norm = gequal0(s)? NULL: idealnorm(gchar_get_nf(gc), x);
   if (flag)
   {
-    val = gexp(mkcomplex(gen_0, gmul(Pi2n(1,prec), val)), prec);
-    if (norm) val = gmul(val, gpow(norm, gneg(s), prec));
+    z = expIPiC(gmul2n(z, 1), prec);
+    if (norm) z = gmul(z, gpow(norm, gneg(s), prec));
   }
   else if (norm)
-  {
-    GEN expo = gdiv(gneg(s), PiI2(prec));
-    val = gadd(val, gmul(expo, glog(norm, prec)));
-  }
-  if (DEBUGLEVEL>1) err_printf("char value %Ps\n", val);
-  return val;
+    z = gadd(z, mulcxI(gdiv(gmul(s, glog(norm,prec)), Pi2n(1,prec))));
+  if (DEBUGLEVEL>1) err_printf("char value %Ps\n", z);
+  return z;
 }
 
 GEN
