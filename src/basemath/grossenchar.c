@@ -1463,18 +1463,17 @@ GEN
 gcharlog(GEN gc, GEN x, long prec)
 {
   pari_sp av = avma;
-  GEN logx, norm;
+  GEN norm;
 
   check_gchar_group(gc);
-  logx = gchar_log(gc,x,prec);
   norm = idealnorm(gchar_get_nf(gc), x);
   norm = mkcomplex(gen_0,gdiv(glog(norm,prec),Pi2n(1,prec)));
-  return gerepilecopy(av, shallowconcat1(mkvec2(logx,norm)));
+  return gerepilecopy(av, vec_append(gchar_log(gc, x, prec), norm));
 }
 
 static GEN
 gcharlog_eval_raw(GEN logchi, GEN logx)
-{ GEN val = gmul(logchi, logx); return gsub(val, ground(val)); }
+{ GEN v = RgV_dotproduct(logchi, logx); return gsub(v, ground(v)); }
 
 /* if flag = 1 -> value in C, flag = 0 -> value in R/Z
  * chi in chari format without norm component (given in s)
