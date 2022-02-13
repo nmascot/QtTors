@@ -1237,9 +1237,18 @@ Q_lvalrem(GEN x, ulong p, GEN *y)
 long
 gvaluation(GEN x, GEN p)
 {
-  long tx = typ(x), tp = typ(p);
+  long tx = typ(x), tp;
   pari_sp av;
 
+  if (!p)
+    switch(tx)
+    {
+      case t_PADIC: return valp(x);
+      case t_POL: return RgX_val(x);
+      case t_SER: return valp(x);
+      default: pari_err_TYPE("gvaluation", x);
+    }
+  tp  = typ(p);
   switch(tp)
   {
     case t_INT:

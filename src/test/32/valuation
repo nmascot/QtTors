@@ -32,4 +32,10 @@ O(x)
 -oo
 -oo
 -oo
-Total time spent: 0
+2
+2
+2
+  ***   at top-level: valuation(Pi)
+  ***                 ^-------------
+  *** valuation: incorrect type in gvaluation (t_REAL).
+Total time spent: 1

@@ -30,3 +30,10 @@ valuation(0*x,3) == oo
 poldegree(0)
 poldegree(Pol(Mod(0,3)))
 poldegree(0./x)
+
+valuation(x^2)
+valuation(x^2+O(x^3))
+valuation(2^2+O(2^3))
+
+\\ ERRORS
+valuation(Pi)

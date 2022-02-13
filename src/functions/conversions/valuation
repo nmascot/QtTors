@@ -1,8 +1,8 @@
 Function: valuation
 Section: conversions
 C-Name: gpvaluation
-Prototype: GG
-Help: valuation(x,p): valuation of x with respect to p.
+Prototype: GDG
+Help: valuation(x,{p}): valuation of x with respect to p.
 Doc:
  computes the highest
  exponent of $p$ dividing $x$. If $p$ is of type integer, $x$ must be an
@@ -18,6 +18,9 @@ Doc:
  If $x=0$, the result is \kbd{+oo} if $x$ is an exact object. If $x$ is a
  $p$-adic numbers or power series, the result is the exponent of the zero.
  Any other type combinations gives an error.
+
+ Finally, $p$ can be omitted if $x$ is a \typ{PADIC} (taken to be the
+ underlying prime), a \typ{SER} or a \typ{POL} (taken to be the main variable).
 
 Variant: Also available is
  \fun{long}{gvaluation}{GEN x, GEN p}, which returns \tet{LONG_MAX} if $x = 0$
