@@ -2780,8 +2780,8 @@ gdiv(GEN x, GEN y)
           long v = valp(x);
           lx = lg(x);
           if (lx == 2) return zeroser(vx, v - RgX_val(y));
-          x = ser2pol_i(x, lx);
-          av = avma; v -= RgX_valrem_inexact(y, &y);
+          av = avma;
+          x = ser2pol_i(x, lx); v -= RgX_valrem_inexact(y, &y);
           z = init_ser(lx, vx, v);
           if (!signe(x)) setsigne(z,0);
           return gerepilecopy(av, fill_ser(z, RgXn_div(x, y, lx - 2)));
