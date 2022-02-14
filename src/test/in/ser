@@ -134,8 +134,13 @@ f=q^32000+O(q^32001); h=subst(f,q,g)
 exp(1.*x + O(x^2))
 exp(.*x)
 1/(0.+x)+O(x^2)
+polcoef(0.+O(x),0)
+polcoef(Mod(0,2)+O(x),0)
+
 
 \\ Errors. Keep at end of file
+polcoef(0.+O(x),1)
+polcoef(Mod(0,2)+O(x),1)
 subst(x^-1+O(x),x,Mod(0,3))
 subst(O(x^-1),x,Mod(0,3))
 subst(x^-1+O(x),x,0*x)

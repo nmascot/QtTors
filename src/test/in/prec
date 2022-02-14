@@ -22,6 +22,8 @@ serprec(1,x)
 serprec(x+O(x^3),x)
 serprec(x+O(x^3),y)
 serprec((1+O(y^2))*x+y + O(y^3), y)
+serprec(0.+O(x),x)
+serprec(Mod(0,2)+O(x),x)
 
 padicprec(0,2)
 padicprec(0,"")

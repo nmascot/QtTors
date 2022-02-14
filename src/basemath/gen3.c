@@ -342,7 +342,12 @@ serprec(GEN x, long v)
       return vec_serprec(x, v, 2);
     case t_SER:
       w = varn(x);
-      if (w == v) return lg(x)-2+valp(x);
+      if (w == v)
+      {
+        long l = lg(x); /* Mod(0,2) + O(x) */
+        if (l == 3 && !signe(x) && !isinexact(gel(x,2))) l--;
+        return l - 2 + valp(x);
+      }
       if (varncmp(v,w) < 0) return LONG_MAX;
       return vec_serprec(x, v, 2);
     case t_POLMOD: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
@@ -3533,6 +3538,7 @@ _sercoef(GEN x, long n, long v)
   }
   if (v == w)
   {
+    if (!dx && !signe(x) && !isinexact(gel(x,2))) dx = -1;
     if (N > dx)
       pari_err_DOMAIN("polcoef", "degree", ">", stoi(dx+valp(x)), stoi(n));
     return (N < 0)? gen_0: gel(x,N+2);
