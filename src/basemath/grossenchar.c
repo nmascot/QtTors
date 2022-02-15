@@ -154,15 +154,13 @@ gchar_Sval(GEN nf, GEN S, GEN x)
   return res;
 }
 
-/* log_prk(x*pi_pr^{-v_pr(x)}), sign(sigma(x)) */
+/* true nf; log_prk(x*pi_pr^{-v_pr(x)}), sign(sigma(x)) */
 static GEN
 gchar_logm(GEN nf, GEN locs, GEN x)
 {
-  pari_sp av = avma;
   GEN moo, loga, Lsprk = locs_get_Lsprk(locs);
   long i, l = lg(Lsprk);
 
-  nf = checknf(nf);
   moo = locs_get_m_infty(locs);
   if (typ(x) != t_MAT) x = to_famat_shallow(x, gen_1);
   loga = cgetg(l+1, t_VEC);
@@ -175,7 +173,7 @@ gchar_logm(GEN nf, GEN locs, GEN x)
     gel(loga, i) = famat_zlog_pr(nf, g, e, sprk, NULL);
   }
   gel(loga, i) = zc_to_ZC( nfsign_arch(nf, x, moo) );
-  return gerepilecopy(av, shallowconcat1(loga));
+  return shallowconcat1(loga);
 }
 
 static GEN
@@ -1428,34 +1426,42 @@ gcharisprincipal(GEN gc, GEN x)
   t = bnfisprincipal0(bnf, x, nf_GENMAT);
   v = gel(t, 1); alpha = gel(t, 2);
   Lalpha = gel(DLdata, 2);
-  alpha = nffactorback(bnf, shallowconcat(Lalpha,mkvec(alpha)), shallowconcat(v,gen_1));
+  alpha = nffactorback(bnf, vec_append(Lalpha,alpha), vec_append(v,gen_1));
   alpha = famat_reduce(alpha);
   v = ZM_ZC_mul(gel(DLdata,1), v);
   return mkvec2(v, alpha);
 }
 
-/* complete log of ideal */
+/* complete log of ideal; if logchi != NULL make sure precision is
+ * sufficient to evaluate gcharlog_eval_raw to attain 'prec' */
 static GEN
-gchar_log(GEN gc, GEN x, long prec)
+gchar_log(GEN gc, GEN x, GEN logchi, long prec)
 {
   GEN zm, v, alpha, t, arch_log = NULL, zm_log, nf;
-  pari_sp av = avma;
 
   nf = gchar_get_nf(gc);
   zm = gchar_get_zm(gc);
   t = gcharisprincipal(gc, x);
-  v = gel(t, 1); alpha = gel(t, 2);
+  v = gel(t, 1); alpha = gel(t, 2); /* alpha a GENMAT */
   if (DEBUGLEVEL>2) err_printf("v %Ps\n", v);
-  while(1)
+  zm_log = gchar_logm(nf, zm, alpha);
+  if (DEBUGLEVEL>2) err_printf("zm_log(alpha) %Ps\n", zm_log);
+
+  if (logchi)
+  { /* check if precision is sufficient, take care of gexpo = -infty */
+    long e, bit = expu(nf_get_degree(nf) + lg(zm_log)-1) + 3;
+    e = gexpo(logchi); if (e > 0) bit += e;
+    e = gexpo(gel(alpha,1)); if (e > 0) bit += e;
+    prec += nbits2extraprec(bit);
+  }
+  for(;;)
   {
     arch_log = nfembedlog(&nf, alpha, prec);
     if (arch_log) break;
     prec = precdbl(prec);
   }
   if (DEBUGLEVEL>2) err_printf("arch log %Ps\n", arch_log);
-  zm_log = gchar_logm(nf,zm,alpha);
-  if (DEBUGLEVEL>2) err_printf("zm_log(alpha) %Ps\n", zm_log);
-  return gerepilecopy(av, shallowconcat1(mkvec3(v,gneg(zm_log),gneg(arch_log))));
+  return shallowconcat1(mkvec3(v, gneg(zm_log), gneg(arch_log)));
 }
 
 /* gp version, with norm component */
@@ -1467,8 +1473,8 @@ gcharlog(GEN gc, GEN x, long prec)
 
   check_gchar_group(gc);
   norm = idealnorm(gchar_get_nf(gc), x);
-  norm = mkcomplex(gen_0,gdiv(glog(norm,prec),Pi2n(1,prec)));
-  return gerepilecopy(av, vec_append(gchar_log(gc, x, prec), norm));
+  norm = mkcomplex(gen_0, gdiv(glog(norm,prec), Pi2n(1,prec)));
+  return gerepilecopy(av, vec_append(gchar_log(gc, x, NULL, prec), norm));
 }
 
 static GEN
@@ -1483,34 +1489,20 @@ static GEN
 gchari_eval(GEN gc, GEN chi, GEN x, long flag, GEN logchi, GEN s, long prec)
 {
   GEN z, norm, logx;
-  long preclog, extrabit, recomputelogchi = 0, e, prec0 = gchar_get_prec(gc);
-
-  logx = gchar_log(gc, x, prec0);
   if (!logchi)
   {
+    long e, precgc = prec, prec0 = gchar_get_prec(gc);
     logchi = gchari_duallog(gc, chi);
-    recomputelogchi = 1;
-  }
-  /* check if precision is sufficient, take care of gexpo = -infty */
-  extrabit = expu(lg(logx)) + 5;
-  e = gexpo(logchi); if (e>0) extrabit += e;
-  e = gexpo(logx); if (e>0) extrabit += e;
-  preclog = prec + nbits2extraprec(extrabit);
-  if (preclog > prec0) logx = gchar_log(gc, x, preclog);
-  if (recomputelogchi)
-  {
-    long precgc;
-    extrabit += expu(lg(chi));
-    e = gexpo(chi); if (e>0) extrabit += e;
-    precgc = prec + nbits2extraprec(extrabit);
+    e = gexpo(logchi); if (e > 0) precgc += nbits2extraprec(e);
     if (precgc > prec0)
     {
       gc = gcharnewprec(gc, precgc);
       logchi = gchari_duallog(gc, chi);
     }
   }
-  z = gcharlog_eval_raw(logchi, logx);
+  logx = gchar_log(gc, x, logchi, prec);
   norm = gequal0(s)? NULL: idealnorm(gchar_get_nf(gc), x);
+  z = gcharlog_eval_raw(logchi, logx);
   if (flag)
   {
     z = expIPiC(gmul2n(z, 1), prec);
@@ -1531,7 +1523,7 @@ gchareval(GEN gc, GEN chi, GEN x, long flag)
   check_gchar_group(gc);
   prec = gchar_get_evalprec(gc);
   chi = gchar_internal(gc, chi, &s);
-  return gerepilecopy(av, gchari_eval(gc, chi, x, flag, NULL, s, prec));
+  return gerepileupto(av, gchari_eval(gc, chi, x, flag, NULL, s, prec));
 }
 
 /*******************************************************************/
@@ -1592,7 +1584,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
           pari_err_COPRIME("gcharidentify", pr, gel(gchar_get_mod(gc), 1));
       npr++;
       Lpr[npr] = i;
-      gel(Llog,npr) = gchar_log(gc, pr, prec);
+      gel(Llog,npr) = gchar_log(gc, pr, NULL, prec);
     }
   setlg(Llog, npr+1); setlg(Lpr, npr+1); setlg(Lk1, nk1+1);
   /* build matrix M */
@@ -1804,11 +1796,14 @@ vecan_gchar(GEN an, long n, long prec)
     for (j = 1; j < lg(L); j++)
     {
       GEN pr = gel(L, j), ch;
+      pari_sp av;
       ulong k, q;
       if (check && gen_search(P, pr, (void*)cmp_prime_ideal, cmp_nodata) > 0)
         continue;
       /* TODO: extract code and use precom sprk? */
+      av = avma;
       ch = gchari_eval(gc, chi, pr, 1, chilog, gen_0, prec);
+      ch = gerepileupto(av, ch);
       q = upr_norm(pr);
       gel(v, q) = gadd(gel(v, q), ch);
       for (k = 2*q; k <= (ulong)n; k += q)
