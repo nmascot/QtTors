@@ -45,29 +45,21 @@ send_long(long a, long dest)
 }
 
 static void
-send_bcast_long(long a)
+send_bcast_long(long a, MPI_Comm comm)
 {
   BLOCK_SIGINT_START
-  MPI_Bcast(&a, 1, MPI_LONG, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&a, 1, MPI_LONG, 0, comm);
   BLOCK_SIGINT_END
 }
 
 static long
-recv_bcast_long(void)
+recv_bcast_long(MPI_Comm comm)
 {
   long a;
   BLOCK_SIGINT_START
-  MPI_Bcast(&a, 1, MPI_LONG, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&a, 1, MPI_LONG, 0, comm);
   BLOCK_SIGINT_END
   return a;
-}
-
-static void
-send_vlong(long *a, long n, long dest)
-{
-  BLOCK_SIGINT_START
-  MPI_Send(a, n, MPI_LONG, dest, 0, MPI_COMM_WORLD);
-  BLOCK_SIGINT_END
 }
 
 static void
@@ -101,38 +93,28 @@ send_GEN(GEN elt, int dest)
 }
 
 static void
-send_GEN_all(GEN elt, long n)
+send_bcast_GEN(GEN elt, MPI_Comm comm)
 {
   pari_sp av = avma;
   int size;
-  long i;
   GEN reloc = copybin_unlink(elt);
   GENbin *buf = copy_bin_canon(mkvec2(elt,reloc));
   size = sizeof(GENbin) + buf->len*sizeof(ulong);
-  for (i = 1; i <= n; i++)
   {
+    send_bcast_long(size, comm);
     BLOCK_SIGINT_START
-    MPI_Send(buf, size, MPI_CHAR, i, 0, MPI_COMM_WORLD);
+    MPI_Bcast(buf, size, MPI_CHAR, 0, comm);
     BLOCK_SIGINT_END
   }
   pari_free(buf); set_avma(av);
 }
 
 static void
-send_bcast_GEN(GEN elt)
+send_bcast_vlong(long *a, long n, MPI_Comm comm)
 {
-  pari_sp av = avma;
-  int size;
-  GEN reloc = copybin_unlink(elt);
-  GENbin *buf = copy_bin_canon(mkvec2(elt,reloc));
-  size = sizeof(GENbin) + buf->len*sizeof(ulong);
-  {
-    send_bcast_long(size);
-    BLOCK_SIGINT_START
-    MPI_Bcast(buf, size, MPI_CHAR, 0, MPI_COMM_WORLD);
-    BLOCK_SIGINT_END
-  }
-  pari_free(buf); set_avma(av);
+  BLOCK_SIGINT_START
+  MPI_Bcast(a, n, MPI_LONG, 0, comm);
+  BLOCK_SIGINT_END
 }
 
 static void
@@ -140,13 +122,6 @@ send_request_GEN(enum PMPI_cmd ecmd, GEN elt, int dest)
 {
   send_request(ecmd, dest);
   send_GEN(elt, dest);
-}
-
-static void
-send_request_GEN_all(enum PMPI_cmd ecmd, GEN elt, long n)
-{
-  send_request_all(ecmd, n);
-  send_GEN_all(elt, n);
 }
 
 static long
@@ -157,14 +132,6 @@ recvfrom_long(int src)
   MPI_Recv(&a, 1, MPI_LONG, src, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   BLOCK_SIGINT_END
   return a;
-}
-
-static void
-recvfrom_vlong(long *a, long n, int src)
-{
-  BLOCK_SIGINT_START
-  MPI_Recv(a, n, MPI_LONG, src, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  BLOCK_SIGINT_END
 }
 
 static enum PMPI_cmd
@@ -217,23 +184,31 @@ recvfrom_GEN(int src)
 }
 
 static GEN
-recv_bcast_GEN(void)
+recv_bcast_GEN(MPI_Comm comm)
 {
   GEN res;
   GENbin *buf;
   long size;
 
-  size=recv_bcast_long();
+  size = recv_bcast_long(comm);
   buf = (GENbin *)pari_malloc(size);
 
   BLOCK_SIGINT_START
-  MPI_Bcast(buf, size, MPI_CHAR, 0, MPI_COMM_WORLD);
+  MPI_Bcast(buf, size, MPI_CHAR, 0, comm);
   BLOCK_SIGINT_END
 
   buf->rebase = &shiftaddress_canon;
   res = bin_copy(buf);
   bincopy_relink(gel(res,1),gel(res,2));
   return gel(res,1);
+}
+
+static void
+recv_bcast_vlong(long *a, long n, MPI_Comm comm)
+{
+  BLOCK_SIGINT_START
+  MPI_Bcast(a, n, MPI_LONG, 0, comm);
+  BLOCK_SIGINT_END
 }
 
 static GEN
@@ -278,28 +253,39 @@ pari_MPI_child(void)
     switch (recvfrom_request(0))
     {
     case PMPI_worker:
-      rsize = recvfrom_long(0);
-      vsize = recvfrom_long(0);
-      precreal = recvfrom_long(0);
-      recvfrom_vlong(varpriority-1,MAXVARN+2,0);
       {
-        pari_sp ltop = avma;
-        GEN tab = recvfrom_GEN(0);
-        if (!gequal(tab, primetab))
+        MPI_Comm comm;
+        long n = recv_bcast_long(MPI_COMM_WORLD), status = pari_MPI_rank <= n;
+        MPI_Comm_split(MPI_COMM_WORLD, status, pari_MPI_rank, &comm);
+        if (status==0)
         {
-          long i, l = lg(tab);
-          GEN old = primetab, t = cgetg_block(l, t_VEC);
-          for (i = 1; i < l; i++) gel(t,i) = gclone(gel(tab,i));
-          primetab = t;
-          gunclone_deep(old);
+          MPI_Comm_free(&comm);
+          break;
         }
-        set_avma(ltop);
+        rsize = recv_bcast_long(comm);
+        vsize = recv_bcast_long(comm);
+        precreal = recv_bcast_long(comm);
+        recv_bcast_vlong(varpriority-1,MAXVARN+2,comm);
+        {
+          pari_sp ltop = avma;
+          GEN tab = recv_bcast_GEN(comm);
+          if (!gequal(tab, primetab))
+          {
+            long i, l = lg(tab);
+            GEN old = primetab, t = cgetg_block(l, t_VEC);
+            for (i = 1; i < l; i++) gel(t,i) = gclone(gel(tab,i));
+            primetab = t;
+            gunclone_deep(old);
+          }
+          set_avma(ltop);
+        }
+        paristack_setsize(rsize, vsize);
+        worker = recv_bcast_GEN(comm);
+        MPI_Comm_free(&comm);
+        gp_context_save(&rec);
+        av = avma;
+        break;
       }
-      paristack_setsize(rsize, vsize);
-      gp_context_save(&rec);
-      worker = recvfrom_GEN(0);
-      av = avma;
-      break;
     case PMPI_work:
       work = recvfrom_GEN(0);
       done = closure_callgenvec(worker, work);
@@ -307,13 +293,13 @@ pari_MPI_child(void)
       set_avma(av);
       break;
     case PMPI_eval:
-      (void) closure_evalgen(recv_bcast_GEN());
+      (void) closure_evalgen(recv_bcast_GEN(MPI_COMM_WORLD));
       set_avma(av);
       break;
     case PMPI_exportadd:
     {
-      GEN str = recv_bcast_GEN();
-      GEN val = recv_bcast_GEN();
+      GEN str = recv_bcast_GEN(MPI_COMM_WORLD);
+      GEN val = recv_bcast_GEN(MPI_COMM_WORLD);
       entree *ep = fetch_entry(GSTR(str));
       export_add(ep->name, val);
       set_avma(av);
@@ -321,7 +307,7 @@ pari_MPI_child(void)
     }
     case PMPI_exportdel:
     {
-      GEN str = recvfrom_GEN(0);
+      GEN str = recv_bcast_GEN(MPI_COMM_WORLD);
       entree *ep = fetch_entry(GSTR(str));
       export_del(ep->name);
       set_avma(av);
@@ -374,8 +360,8 @@ mt_export_add(const char *str, GEN val)
   export_add(str, val);
   s = strtoGENstr(str);
   send_request_all(PMPI_exportadd, n);
-  send_bcast_GEN(s);
-  send_bcast_GEN(val);
+  send_bcast_GEN(s, MPI_COMM_WORLD);
+  send_bcast_GEN(val, MPI_COMM_WORLD);
   set_avma(av);
 }
 
@@ -384,12 +370,11 @@ mt_export_del(const char *str)
 {
   pari_sp av = avma;
   long n = pari_MPI_size-1;
-  GEN s;
   if (pari_MPI_rank)
     pari_err(e_MISC,"unexport not allowed during parallel sections");
   export_del(str);
-  s = strtoGENstr(str);
-  send_request_GEN_all(PMPI_exportdel, s, n);
+  send_request_all(PMPI_exportdel, n);
+  send_bcast_GEN(strtoGENstr(str), MPI_COMM_WORLD);
   set_avma(av);
 }
 
@@ -399,7 +384,7 @@ mt_broadcast(GEN code)
   if (!pari_MPI_rank && !pari_mt)
   {
     send_request_all(PMPI_eval, pari_MPI_size-1);
-    send_bcast_GEN(code);
+    send_bcast_GEN(code, MPI_COMM_WORLD);
   }
 }
 
@@ -494,22 +479,23 @@ mt_queue_start_lim(struct pari_mt *pt, GEN worker, long lim)
     mtsingle_queue_start(pt, worker);
   else
   {
+    MPI_Comm comm;
     struct mt_mstate *mt = &pari_mt_data;
-    long i, n = minss(lim, pari_MPI_size-1);
+    long n = minss(lim, pari_MPI_size-1);
     long mtparisize = GP_DATA->threadsize? GP_DATA->threadsize: pari_mainstack->rsize;
     long mtparisizemax = GP_DATA->threadsizemax;
     pari_mt = mt;
     mt->workid = (long*) pari_malloc(sizeof(long)*(n+1));
-    for (i=1; i <= n; i++)
-    {
-      send_request(PMPI_worker, i);
-      send_long(mtparisize, i);
-      send_long(mtparisizemax, i);
-      send_long(get_localbitprec(), i);
-      send_vlong(varpriority-1,MAXVARN+2, i);
-    }
-    send_GEN_all(primetab, n);
-    send_GEN_all(worker, n);
+    send_request_all(PMPI_worker, pari_MPI_size-1);
+    send_bcast_long(n, MPI_COMM_WORLD);
+    MPI_Comm_split(MPI_COMM_WORLD, 1, 0, &comm);
+    send_bcast_long(mtparisize, comm);
+    send_bcast_long(mtparisizemax, comm);
+    send_bcast_long(get_localbitprec(), comm);
+    send_bcast_vlong(varpriority-1,MAXVARN+2, comm);
+    send_bcast_GEN(primetab, comm);
+    send_bcast_GEN(worker, comm);
+    MPI_Comm_free(&comm);
     mt->n = n;
     mt->nbint = 1;
     mt->source = 1;
