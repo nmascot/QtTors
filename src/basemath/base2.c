@@ -1448,10 +1448,12 @@ static int
 update_phi(decomp_t *S)
 {
   GEN PHI = NULL, prc, psc, X = pol_x(varn(S->f));
-  long k;
+  long k, vpsc;
   for (k = 1;; k++)
   {
     prc = ZpX_reduced_resultant_fast(S->chi, ZX_deriv(S->chi), S->p, S->vpsc);
+    /* if prc == S->psc then either chi is not separable or 
+       the reduced discriminant of chi is too large */
     if (!equalii(prc, S->psc)) break;
 
     /* increase precision */
@@ -1460,26 +1462,40 @@ update_phi(decomp_t *S)
 
     PHI = S->phi;
     if (S->phi0) PHI = compmod(S->p, PHI, S->phi0, S->f, S->psc, 0);
+    /* change phi (in case not separable) */
     PHI = gadd(PHI, ZX_Z_mul(X, mului(k, S->p)));
     S->chi = mycaract(S, S->f, PHI, S->psc, S->pdf);
   }
   psc = mulii(sqri(prc), S->p);
+  vpsc = 2*Z_pval(prc, S->p) + 1;
 
-  if (!PHI) /* ok above for k = 1 */
+  if (!PHI) /* k != 0 */
   {
     PHI = S->phi;
     if (S->phi0) PHI = compmod(S->p, PHI, S->phi0, S->f, psc, 0);
     if (S->phi0 || cmpii(psc,S->psc) > 0)
-      S->chi = mycaract(S, S->f, PHI, psc, S->pdf);
+    {
+      while (1)
+      {
+	S->chi = mycaract(S, S->f, PHI, psc, S->pdf);
+	prc = ZpX_reduced_resultant_fast(S->chi, ZX_deriv(S->chi), S->p, vpsc);
+	if (!equalii(prc, psc)) break;
+	psc = mulii(psc, S->p);
+	vpsc = vpsc+1;
+      }
+      psc = mulii(sqri(prc), S->p);
+      vpsc = 2*Z_pval(prc, S->p) + 1;
+    }
   }
   S->phi = PHI;
   S->chi = FpX_red(S->chi, psc);
 
   /* may happen if p is unramified */
   if (is_pm1(prc)) return 0;
+  S->prc = prc;
   S->psc = psc;
-  S->vpsc = 2*Z_pval(prc, S->p) + 1;
-  S->prc = mulii(prc, S->p); return 1;
+  S->vpsc = vpsc;
+  return 1;
 }
 
 /* return 1 if at least 2 factors mod p ==> chi splits
