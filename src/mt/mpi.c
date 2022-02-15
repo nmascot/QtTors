@@ -22,10 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 static THREAD int pari_MPI_size, pari_MPI_rank;
 static THREAD long nbreq = 0;
 
-enum PMPI_cmd { PMPI_close, PMPI_worker, PMPI_work, PMPI_parisizemax,
-                PMPI_parisize, PMPI_precreal, PMPI_primetab,
-                PMPI_varpriority, PMPI_eval,
-                PMPI_exportadd, PMPI_exportdel};
+enum PMPI_cmd { PMPI_close, PMPI_worker, PMPI_work,
+                PMPI_eval, PMPI_exportadd, PMPI_exportdel};
 
 struct mt_mstate
 {
@@ -149,20 +147,6 @@ send_request_GEN_all(enum PMPI_cmd ecmd, GEN elt, long n)
 {
   send_request_all(ecmd, n);
   send_GEN_all(elt, n);
-}
-
-static void
-send_request_long(enum PMPI_cmd ecmd, long elt, int dest)
-{
-  send_request(ecmd, dest);
-  send_long(elt, dest);
-}
-
-static void
-send_request_vlong(enum PMPI_cmd ecmd, long *a, long n, int dest)
-{
-  send_request(ecmd, dest);
-  send_vlong(a, n, dest);
 }
 
 static long
@@ -294,27 +278,10 @@ pari_MPI_child(void)
     switch (recvfrom_request(0))
     {
     case PMPI_worker:
-      paristack_setsize(rsize, vsize);
-      gp_context_save(&rec);
-      worker = recvfrom_GEN(0);
-      av = avma;
-      break;
-    case PMPI_work:
-      work = recvfrom_GEN(0);
-      done = closure_callgenvec(worker, work);
-      send_GEN(done, 0);
-      set_avma(av);
-      break;
-    case PMPI_parisizemax:
-      vsize = recvfrom_long(0);
-      break;
-    case PMPI_parisize:
       rsize = recvfrom_long(0);
-      break;
-    case PMPI_precreal:
+      vsize = recvfrom_long(0);
       precreal = recvfrom_long(0);
-      break;
-    case PMPI_primetab:
+      recvfrom_vlong(varpriority-1,MAXVARN+2,0);
       {
         pari_sp ltop = avma;
         GEN tab = recvfrom_GEN(0);
@@ -328,13 +295,20 @@ pari_MPI_child(void)
         }
         set_avma(ltop);
       }
+      paristack_setsize(rsize, vsize);
+      gp_context_save(&rec);
+      worker = recvfrom_GEN(0);
+      av = avma;
+      break;
+    case PMPI_work:
+      work = recvfrom_GEN(0);
+      done = closure_callgenvec(worker, work);
+      send_GEN(done, 0);
+      set_avma(av);
       break;
     case PMPI_eval:
       (void) closure_evalgen(recv_bcast_GEN());
       set_avma(av);
-      break;
-    case PMPI_varpriority:
-      recvfrom_vlong(varpriority-1,MAXVARN+2,0);
       break;
     case PMPI_exportadd:
     {
@@ -528,13 +502,14 @@ mt_queue_start_lim(struct pari_mt *pt, GEN worker, long lim)
     mt->workid = (long*) pari_malloc(sizeof(long)*(n+1));
     for (i=1; i <= n; i++)
     {
-      send_request_long(PMPI_parisize, mtparisize, i);
-      send_request_long(PMPI_parisizemax, mtparisizemax, i);
-      send_request_long(PMPI_precreal, get_localbitprec(), i);
-      send_request_vlong(PMPI_varpriority,varpriority-1,MAXVARN+2, i);
+      send_request(PMPI_worker, i);
+      send_long(mtparisize, i);
+      send_long(mtparisizemax, i);
+      send_long(get_localbitprec(), i);
+      send_vlong(varpriority-1,MAXVARN+2, i);
     }
-    send_request_GEN_all(PMPI_primetab, primetab, n);
-    send_request_GEN_all(PMPI_worker, worker, n);
+    send_GEN_all(primetab, n);
+    send_GEN_all(worker, n);
     mt->n = n;
     mt->nbint = 1;
     mt->source = 1;
