@@ -1452,7 +1452,7 @@ update_phi(decomp_t *S)
   for (k = 1;; k++)
   {
     prc = ZpX_reduced_resultant_fast(S->chi, ZX_deriv(S->chi), S->p, S->vpsc);
-    /* if prc == S->psc then either chi is not separable or 
+    /* if prc == S->psc then either chi is not separable or
        the reduced discriminant of chi is too large */
     if (!equalii(prc, S->psc)) break;
 
@@ -1477,11 +1477,11 @@ update_phi(decomp_t *S)
     {
       while (1)
       {
-	S->chi = mycaract(S, S->f, PHI, psc, S->pdf);
-	prc = ZpX_reduced_resultant_fast(S->chi, ZX_deriv(S->chi), S->p, vpsc);
-	if (!equalii(prc, psc)) break;
-	psc = mulii(psc, S->p);
-	vpsc = vpsc+1;
+        S->chi = mycaract(S, S->f, PHI, psc, S->pdf);
+        prc = ZpX_reduced_resultant_fast(S->chi, ZX_deriv(S->chi), S->p, vpsc);
+        if (!equalii(prc, psc)) break;
+        psc = mulii(psc, S->p);
+        vpsc = vpsc+1;
       }
       psc = mulii(sqri(prc), S->p);
       vpsc = 2*Z_pval(prc, S->p) + 1;
