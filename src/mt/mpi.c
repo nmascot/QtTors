@@ -330,7 +330,7 @@ pari_MPI_child(void)
       }
       break;
     case PMPI_eval:
-      (void) closure_evalgen(recvfrom_GEN(0));
+      (void) closure_evalgen(recv_bcast_GEN());
       set_avma(av);
       break;
     case PMPI_varpriority:
@@ -423,7 +423,10 @@ void
 mt_broadcast(GEN code)
 {
   if (!pari_MPI_rank && !pari_mt)
-    send_request_GEN_all(PMPI_eval, code, pari_MPI_size-1);
+  {
+    send_request_all(PMPI_eval, pari_MPI_size-1);
+    send_bcast_GEN(code);
+  }
 }
 
 void
