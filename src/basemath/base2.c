@@ -1469,19 +1469,18 @@ update_phi(decomp_t *S)
   psc = mulii(sqri(prc), S->p);
   vpsc = 2*Z_pval(prc, S->p) + 1;
 
-  if (!PHI) /* k != 0 */
+  if (!PHI) /* break out of above loop immediately (k = 1) */
   {
     PHI = S->phi;
     if (S->phi0) PHI = compmod(S->p, PHI, S->phi0, S->f, psc, 0);
     if (S->phi0 || cmpii(psc,S->psc) > 0)
     {
-      while (1)
+      for(;;)
       {
         S->chi = mycaract(S, S->f, PHI, psc, S->pdf);
         prc = ZpX_reduced_resultant_fast(S->chi, ZX_deriv(S->chi), S->p, vpsc);
         if (!equalii(prc, psc)) break;
-        psc = mulii(psc, S->p);
-        vpsc = vpsc+1;
+        psc = mulii(psc, S->p); vpsc++;
       }
       psc = mulii(sqri(prc), S->p);
       vpsc = 2*Z_pval(prc, S->p) + 1;
@@ -1494,8 +1493,7 @@ update_phi(decomp_t *S)
   if (is_pm1(prc)) return 0;
   S->prc = prc;
   S->psc = psc;
-  S->vpsc = vpsc;
-  return 1;
+  S->vpsc = vpsc; return 1;
 }
 
 /* return 1 if at least 2 factors mod p ==> chi splits
