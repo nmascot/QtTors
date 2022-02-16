@@ -80,13 +80,12 @@ static void
 send_GEN(GEN elt, int dest)
 {
   pari_sp av = avma;
-  int size;
   GEN reloc = copybin_unlink(elt);
   GENbin *buf = copy_bin_canon(mkvec2(elt,reloc));
-  size = sizeof(GENbin) + buf->len*sizeof(ulong);
+  long size = sizeof(GENbin) + buf->len*sizeof(ulong);
   {
     BLOCK_SIGINT_START
-    MPI_Send(buf, size, MPI_CHAR, dest, 0, MPI_COMM_WORLD);
+    MPI_Send(buf, size/sizeof(long), MPI_LONG, dest, 0, MPI_COMM_WORLD);
     BLOCK_SIGINT_END
   }
   pari_free(buf); set_avma(av);
@@ -96,14 +95,13 @@ static void
 send_bcast_GEN(GEN elt, MPI_Comm comm)
 {
   pari_sp av = avma;
-  int size;
   GEN reloc = copybin_unlink(elt);
   GENbin *buf = copy_bin_canon(mkvec2(elt,reloc));
-  size = sizeof(GENbin) + buf->len*sizeof(ulong);
+  long size = sizeof(GENbin) + buf->len*sizeof(ulong);
   {
     send_bcast_long(size, comm);
     BLOCK_SIGINT_START
-    MPI_Bcast(buf, size, MPI_CHAR, 0, comm);
+    MPI_Bcast(buf, size/sizeof(long), MPI_LONG, 0, comm);
     BLOCK_SIGINT_END
   }
   pari_free(buf); set_avma(av);
@@ -147,9 +145,9 @@ recvstatus_buf(int source, MPI_Status *status)
   GENbin *buf;
   BLOCK_SIGINT_START
 
-  MPI_Get_count(status, MPI_CHAR, &size);
-  buf = (GENbin *)pari_malloc(size);
-  MPI_Recv(buf, size, MPI_CHAR, source, 0/* tag */,
+  MPI_Get_count(status, MPI_LONG, &size);
+  buf = (GENbin *)pari_malloc(size*sizeof(long));
+  MPI_Recv(buf, size, MPI_LONG, source, 0/* tag */,
           MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   BLOCK_SIGINT_END
   return buf;
@@ -194,7 +192,7 @@ recv_bcast_GEN(MPI_Comm comm)
   buf = (GENbin *)pari_malloc(size);
 
   BLOCK_SIGINT_START
-  MPI_Bcast(buf, size, MPI_CHAR, 0, comm);
+  MPI_Bcast(buf, size/sizeof(long), MPI_LONG, 0, comm);
   BLOCK_SIGINT_END
 
   buf->rebase = &shiftaddress_canon;
