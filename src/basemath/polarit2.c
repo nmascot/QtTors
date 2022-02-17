@@ -246,12 +246,21 @@ ok_bloc(GEN f, GEN BLOC, ulong c)
   return issquarefree(c ? gmul(F,mkintmodu(1,c)): F)? F: NULL;
 }
 static GEN
+random_FpX_monic(long n, long v, GEN p)
+{
+  long i, d = n + 2;
+  GEN y = cgetg(d + 1, t_POL); y[1] = evalsigne(1) | evalvarn(v);
+  for (i = 2; i < d; i++) gel(y,i) = randomi(p);
+  gel(y,i) = gen_1; return y;
+}
+static GEN
 RgXY_factor_squarefree(GEN f, GEN dom)
 {
   pari_sp av = avma;
   ulong i, c = itou_or_0(residual_characteristic(f));
   long vy = gvar2(f), val = RgX_valrem(f, &f), n = RgXY_degreex(f);
   GEN y, Lmod, F = NULL, BLOC = NULL, Lfac = coltrunc_init(degpol(f)+2);
+  GEN gc = c? utoipos(c): NULL;
   if (val)
   {
     GEN x = pol_x(varn(f));
@@ -271,7 +280,7 @@ RgXY_factor_squarefree(GEN f, GEN dom)
       if ((F = ok_bloc(f, BLOC, c))) break;
       if (c)
       {
-        BLOC = ZX_add(random_FpX(n, vy, utoipos(c)), monomial(gen_1, n, vy));
+        BLOC = random_FpX_monic(n, vy, gc);
         if ((F = ok_bloc(f, BLOC, c))) break;
       }
     }
