@@ -638,7 +638,7 @@ divrr(GEN x, GEN y)
   ulong y0,y1;
   GEN r, r1;
 
-  if (!x) pari_err_INV("divrr",y);
+  if (!sy) pari_err_INV("divrr",y);
   e = expo(x) - expo(y);
   if (!sx) return real_0_bit(e);
   if (sy<0) sx = -sx;
