@@ -547,6 +547,7 @@ real(mfeval(mf2,f,z))
 
 mfpetersson(F)
 mf=mfinit([23,2],0); f = mfeigenbasis(mf)[1]; F = mfsymbol(mf, f);
+mfsymboleval(F,[217/554+1/554*I,oo]) \\ #2360
 mfslashexpansion(mf,f,[1,0;0,1],5,1)
 mfcuspisregular(mf,1/2);
 L=liftpol(mfmanin(F)); [v[1] | v<-L]

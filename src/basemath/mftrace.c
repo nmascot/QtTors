@@ -11605,6 +11605,9 @@ act_GL2(GEN P, GEN M, long k)
   }
   return P;
 }
+static GEN
+vecact_GL2(GEN x, GEN M, long k)
+{ pari_APPLY_same(act_GL2(gel(x,i), M, k)); }
 
 static GEN
 normalizeapprox(GEN R, long bit)
@@ -12290,15 +12293,18 @@ mfsymbolevalpartial(GEN fs, GEN A, GEN ga, long bit)
   P = get_P(k, fetch_var(), prec);
   if (lg(fs) != 3 && gtodouble(Y)*(2*N) < 1)
   { /* true symbol + low imaginary part: use GL_2 action to improve */
-    GEN U, ga2, czd, A2 = cxredga0N(N, A, &U, &czd, 1), oo = mkoo();
+    GEN U, ga2, czd, A2 = cxredga0N(N, A, &U, &czd, 1);
+    GEN vE = fs_get_vE(fs);
     ga2 = ZM_mul(ga, ZM_inv(U, NULL));
-    S = intAoo0(fs, A2, ga2, P, bit);
-    S = gsub(S, mfsymboleval(fs, mkvec2(mat2cusp(U), oo), ga2, bit));
-    S = act_GL2(S, U, k);
+    S = RgX_embedall(intAoo0(fs, A2, ga2, P, bit), vE);
+    S = gsub(S, mfsymboleval(fs, mkvec2(mat2cusp(U), mkoo()), ga2, bit));
+    S = typ(S) == t_VEC? vecact_GL2(S, U, k): act_GL2(S, U, k);
   }
   else
+  {
     S = intAoo0(fs, A, ga, P, bit);
-  S = RgX_embedall(S, F? mfgetembed(F,prec): fs_get_vE(fs));
+    S = RgX_embedall(S, F? mfgetembed(F,prec): fs_get_vE(fs));
+  }
   delete_var(); return normalizeapprox(S, bit-20);
 }
 
