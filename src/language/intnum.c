@@ -1464,14 +1464,13 @@ contfrac_Euler(GEN C)
 static GEN
 QD(GEN M, long lim)
 {
-  pari_sp av;
+  pari_sp av = avma;
+  long lim2 = lim / 2, j, k;
   GEN e, q, c;
-  long lim2, j, k;
   e = zerovec(lim);
   c = zerovec(lim+1); gel(c, 1) = gel(M, 1);
   q = cgetg(lim+1, t_VEC);
   for (k = 1; k <= lim; ++k) gel(q, k) = gdiv(gel(M, k+1), gel(M, k));
-  lim2 = lim/2; av = avma;
   for (j = 1; j <= lim2; ++j)
   {
     long l = lim - 2*j;
