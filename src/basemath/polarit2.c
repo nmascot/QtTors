@@ -271,8 +271,7 @@ RgXY_factor_squarefree(GEN f, GEN dom)
       if ((F = ok_bloc(f, BLOC, c))) break;
       if (c)
       {
-        BLOC = random_FpX(n+1, vy, utoipos(c));
-        gel(BLOC,lg(BLOC)-1) = gen_1;
+        BLOC = ZX_add(random_FpX(n, vy, utoipos(c)), monomial(gen_1, n, vy));
         if ((F = ok_bloc(f, BLOC, c))) break;
       }
     }
