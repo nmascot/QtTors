@@ -94,28 +94,27 @@ BA  75- concat(t_LIST,t_LIST) was leaking memory
     77- polsturm(-5500*x^4+440*x^3+21780*x^2-9680*x-29040,[-oo,-4])->corruption
     78- ellheight(E,,Q) -> SEGV
     79- besselj(80,66) -> oo loop
-    80- poltomonic(Pol(0)) -> SEGV [#2323]
-    81- lfun(1, 0.0) "normalizing a series with a 0 leading term" [#2329]
-    82- (0. + O(x) == 1) returned 'true'
-    83- lfun(1, 0., 1) -> division by 0
-    84- fix lfuncost when root number is unknown (more a_n are needed)
-    85- idealismaximal(nfinit(x),Mat(2)) -> 0 [#2333]
-    86- O(29^(-1)) == 1 was FALSE (same for -1)
-    87- Mod(0, 2*x^0)  == 1 was FALSE (same for -1)
-BA  88- [X11] resizing a window could keep traces of previous drawing
-    89- zetahurwitz(2, 21) inaccurate [more generally, Re(s) > 0 and large x]
-BA  90- x->x+0x1 was not displayed correctly
-    91- bnfinit(Q) was not using current precision [#2335]
-    92- lfuncreate(x^2 + 1/2) -> internal error. Allow rational coefficients.
-    93- polresultant(t_POL with t_RFRAC coefs,...) -> internal errors
-    94- znchardecompose(znstar(2,1),[],2) -> SEGV [#2339]
-    95- genus2red(150*x^6+180*x^5-270*x^4+2040*x^3-1350*x^2+3060*x+270)
+    80- lfun(1, 0.0) "normalizing a series with a 0 leading term" [#2329]
+    81- (0. + O(x) == 1) returned 'true'
+    82- lfun(1, 0., 1) -> division by 0
+    83- fix lfuncost when root number is unknown (more a_n are needed)
+    84- idealismaximal(nfinit(x),Mat(2)) -> 0 [#2333]
+    85- O(29^(-1)) == 1 was FALSE (same for -1)
+    86- Mod(0, 2*x^0)  == 1 was FALSE (same for -1)
+BA  87- [X11] resizing a window could keep traces of previous drawing
+    88- zetahurwitz(2, 21) inaccurate [more generally, Re(s) > 0 and large x]
+BA  89- x->x+0x1 was not displayed correctly
+    90- bnfinit(Q) was not using current precision [#2335]
+    91- lfuncreate(x^2 + 1/2) -> internal error. Allow rational coefficients.
+    92- polresultant(t_POL with t_RFRAC coefs,...) -> internal errors
+    93- znchardecompose(znstar(2,1),[],2) -> SEGV [#2339]
+    94- genus2red(150*x^6+180*x^5-270*x^4+2040*x^3-1350*x^2+3060*x+270)
         -> internal bug [#2331]
-    96- missing roots in nfroots(t_POL,) [#2345]
-    97- factorpadic: ensure leading coefs are powers of p [#2352]
-    98- nfsnf: wrong results [#2353]
-BA  99- factor((Mod(1,2)*((t^2+1)*x^4+(t^4+1)*x^2+1))) -> division by 0
-   100- internal type errors in mfsymboleval [#2360]
+    95- missing roots in nfroots(t_POL,) [#2345]
+    96- factorpadic: ensure leading coefs are powers of p [#2352]
+    97- nfsnf: wrong results [#2353]
+BA  98- factor((Mod(1,2)*((t^2+1)*x^4+(t^4+1)*x^2+1))) -> division by 0
+    99- internal type errors in mfsymboleval [#2360]
 
   Added
 HC   1- new GP function eulerreal
