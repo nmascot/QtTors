@@ -160,6 +160,14 @@ chargalois(G,4)
 chargalois(G,[1,4])
 chargalois([60,4], [12])
 chargalois([180,6], [30])
+chargalois(G,[])
+\\ #2341
+G = znstar(1,1);
+chargalois(G)
+chargalois(G, 1)
+chargalois(G, 2)
+chargalois(G, [1])
+chargalois(G, [2])
 
 \\ #2339
 znchardecompose(znstar(2,1),[],2)

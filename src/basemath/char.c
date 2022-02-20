@@ -468,11 +468,11 @@ cyc2elts_normal(GEN cyc, long maxord, GEN ORD)
 
   if (typ(cyc) != t_VECSMALL) cyc = vec_to_vecsmall(cyc);
   n = lg(cyc)-1;
-  if (n == 0) return cgetg(1, t_VEC);
   N = zv_prod(cyc);
   z = cgetg(N+1, t_VEC);
   if (1 <= maxord && (!ORD|| zv_search(ORD,1)))
     gel(z,j++) = zero_zv(n);
+  if (n == 0) { setlg(z, j); return z; }
   vcoprime = coprime_tables(cyc[1]);
   for (i = n; i > 0; i--)
   {
@@ -510,9 +510,8 @@ chargalois(GEN G, GEN ORD)
   pari_sp av = avma;
   long maxord, i, l;
   GEN v, cyc = (typ(G) == t_VEC && RgV_is_ZVpos(G))? G: member_cyc(G);
-  if (lg(cyc) == 1) retmkvec(cgetg(1,t_VEC));
+  if (lg(cyc) == 1 && !ORD) retmkvec(cgetg(1,t_VEC));
   maxord = itou(cyc_get_expo(cyc));
-  if (ORD && gequal0(ORD)) ORD = NULL;
   if (ORD)
     switch(typ(ORD))
     {
@@ -520,10 +519,13 @@ chargalois(GEN G, GEN ORD)
       case t_VEC:
         ORD = ZV_to_zv(ORD);
       case t_VECSMALL:
-        ORD = leafcopy(ORD);
-        vecsmall_sort(ORD);
         l = lg(ORD);
-        if (l == 1) return cgetg(1, t_VECSMALL);
+        if (l > 2)
+        {
+          ORD = leafcopy(ORD);
+          vecsmall_sort(ORD);
+        }
+        if (l == 1) { set_avma(av); return cgetg(1, t_VEC); }
         maxord = minss(maxord, ORD[l-1]);
         break;
       case t_INT:
