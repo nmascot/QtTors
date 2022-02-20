@@ -30,6 +30,7 @@
   ***                            ^--
   *** _<_: incorrect type in gsigne (t_QUAD).
 0.70710678118654752440084436210484903928
+2.5825756949558400065880471937280084890
 (a)->[sign(z)|z<-[a,a-1,a-2,1-a,2-a]]
 [1, 1, -1, -1, 1]
 [1, 1, -1, -1, 1]
@@ -54,4 +55,4 @@ w
   ***   at top-level: floor(Mod(0,3)*quadgen(5))
   ***                 ^--------------------------
   *** floor: incorrect type in gfloor (t_QUAD).
-Total time spent: 0
+Total time spent: 2
