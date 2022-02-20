@@ -1088,10 +1088,11 @@ an_msum(GEN an, long N, GEN vKm)
   GEN s = gen_0;
   long n;
   for (n = 1; n <= N; n++)
-  {
-    GEN c = mul_an(an, n, gel(vKm,n));
-    if (c) s = gadd(s, c);
-  }
+    if (gel(vKm,n))
+    {
+      GEN c = mul_an(an, n, gel(vKm,n));
+      if (c) s = gadd(s, c);
+    }
   return gerepileupto(av, s);
 }
 
@@ -1129,14 +1130,14 @@ lfuninit_worker(long r, GEN K, GEN L, GEN peh2d, GEN vroots, GEN dr, GEN di,
       for (mm=m,nn=n; mm >= M0;)
       {
         if (nn <= L[mm+1] && (gel(an, nn) || (bn && gel(bn, nn))))
-          p = maxuu(p, (ulong)c);
+          if (c > 0) p = maxuu(p, (ulong)c);
         nn <<= 1;
         mm -= m0; if (mm >= M0) c += c2; else { c += k1; break; }
       }
       /* mm < M0 || nn > L[mm+1] */
       for (         ; mm >= 0; nn<<=1,mm-=m0,c+=k1)
         if (nn <= L[mm+1] && (gel(an, nn) || (bn && gel(bn, nn))))
-          p = maxuu(p, (ulong)c);
+          if (c > 0) p = maxuu(p, (ulong)c);
       if (!p) continue; /* a_{n 2^v} = 0 for all v in range */
       av = avma;
       t2d = mpmul(gel(vroots,n), gel(peh2d,m+1));/*(n exp(mh)/sqrt(N))^(2/d)*/
@@ -1178,17 +1179,15 @@ lfuninit_ab(GEN theta, GEN h, struct lfunp *S)
   {
     GEN vroots, peh2d, d2;
     double sig0 = S->MAXs / S->m0, sub2 = S->sub / M_LN2;
-    /* For all 0<= m <= M, and all n <= L[m+1] such that a_n!=0, we must compute
+    /* For all 0<= m <= M, and all n <= L[m+1] such that a_n!=0, we compute
      *   k[m,n] = K(n exp(mh)/sqrt(N))
      * with ln(absolute error) <= E + max(mh sigma - sub, 0) + k1 * log(n).
-     * N.B. we use the 'rt' variant and pass argument (n exp(mh)/sqrt(N))^(2/d).
+     * N.B. we use the 'rt' variant and pass (n exp(mh)/sqrt(N))^(2/d).
      * Speedup: if n' = 2n and m' = m - m0 >= 0; then k[m,n] = k[m',n']. */
-    /* vroots[n] = n^(2/d) */
-    vroots = mkvroots(S->d, S->nmax, prec);
+    vroots = mkvroots(S->d, S->nmax, prec); /* vroots[n] = n^(2/d) */
     d2 = gdivgu(gen_2, S->d);
-    /* peh2d[m+1] = (exp(mh)/sqrt(N))^(2/d) */
     peh2d = gpowers0(gexp(gmul(d2,h), prec), M, gpow(isqN, d2, prec));
-    m0 = S->m0;
+    m0 = S->m0; /* peh2d[m+1] = (exp(mh)/sqrt(N))^(2/d) */
     worker = snm_closure(is_entry("_lfuninit_worker"),
                          mkvecn(8, theta_get_K(tech), S->L, peh2d, vroots,
                                 mkvec4(dbltor(sig0), dbltor(sub2),

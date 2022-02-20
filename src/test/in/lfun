@@ -448,6 +448,9 @@ lfun([R,[[1],[3]]],0,1)
 lfun([R,[2]],1)
 lfun([R,[[2]]],1)
 
+L=lfunshift(1,-100);
+lfun(L,-100+50*I); \\ SEGV at low accuracy
+
 \\ ERRORS: keep them at end of file
 lfuntheta(1,0)
 lfunhardy(1,I)
