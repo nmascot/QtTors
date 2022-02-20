@@ -58,8 +58,8 @@ Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
  $\var{gc}[7]$ is a vector \kbd{[Sunits,m]}, where \kbd{Sunits} describes
  the $S$-units of $\var{bnf}$ and $m$ is a relation matrix for internal usage.
 
- $\var{gc}[8]$ is \kbd{[Vecsmall([evalprec,prec,nfprec]),Vecsmall([n,nt,nf,ncm])]}
- keeping precisions and various dimensions.
+ $\var{gc}[8]$ is \kbd{[Vecsmall([evalprec,prec,nfprec]),
+ Vecsmall([ntors,nfree,nalg])]} keeping precisions and various dimensions.
 
  $\var{gc}[9]$ is a vector describing $\var{gc}$ as a $\Z$-module
  via its SNF invariants (\kbd{\var{gc}.cyc}), the last component

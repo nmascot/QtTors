@@ -550,7 +550,7 @@ gcharinit(GEN bnf, GEN mod, long prec)
               DLdata,
               sfu,
               mkvec2(mkvecsmall3(evalprec,prec,nfprec),
-                     mkvecsmall4(0,0,0,0)), /* ntors, nfree, nalg */
+                     mkvecsmall3(0,0,0)), /* ntors, nfree, nalg */
               cyc, /* reduced components */
               mkvec3(rel, U, Ui), /* internal / SNF base change */
               m0,                 /* embeddings of units */
