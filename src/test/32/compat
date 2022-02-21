@@ -1279,14 +1279,13 @@ A function with that name existed in GP-1.39.15. Please update your script.
 New syntax: hermite(x) ===> mathnf(x)
 
 mathnf(M,{flag=0}): (upper triangular) Hermite normal form of M, basis for the 
-lattice formed by the columns of M. flag is optional whose value range from 0 
-to 3 have a binary meaning. Bit 1: complete output, returns a 2-component 
-vector [H,U] such that H is the HNF of M, and U is an invertible matrix such 
-that MU=H. Bit 2: allow polynomial entries, otherwise assume that M is 
-integral. These use a naive algorithm; larger values correspond to more 
-involved algorithms and are restricted to integer matrices; flag = 4: returns 
-[H,U] using LLL reduction along the way; flag = 5: return [H,U,P] where P is a 
-permutation of row indices such that P applied to M U is H.
+lattice formed by the columns of M. Basic values of flag are 0 (default): only 
+return the Hermite normal form H, 1: return [H,U] such that H is the HNF of M, 
+and U is an invertible matrix such that MU=H. These two use a naive algorithm; 
+larger values of flag correspond to more involved algorithms and are restricted 
+to integer matrices; flag = 4: returns [H,U] using LLL reduction along the way; 
+flag = 5: return [H,U,P] where P is a permutation of row indices such that P 
+applied to M U is H.
 
 
   ***   at top-level: hermite2()
@@ -1297,14 +1296,13 @@ A function with that name existed in GP-1.39.15. Please update your script.
 New syntax: hermite2(x) ===> mathnf(x,1)
 
 mathnf(M,{flag=0}): (upper triangular) Hermite normal form of M, basis for the 
-lattice formed by the columns of M. flag is optional whose value range from 0 
-to 3 have a binary meaning. Bit 1: complete output, returns a 2-component 
-vector [H,U] such that H is the HNF of M, and U is an invertible matrix such 
-that MU=H. Bit 2: allow polynomial entries, otherwise assume that M is 
-integral. These use a naive algorithm; larger values correspond to more 
-involved algorithms and are restricted to integer matrices; flag = 4: returns 
-[H,U] using LLL reduction along the way; flag = 5: return [H,U,P] where P is a 
-permutation of row indices such that P applied to M U is H.
+lattice formed by the columns of M. Basic values of flag are 0 (default): only 
+return the Hermite normal form H, 1: return [H,U] such that H is the HNF of M, 
+and U is an invertible matrix such that MU=H. These two use a naive algorithm; 
+larger values of flag correspond to more involved algorithms and are restricted 
+to integer matrices; flag = 4: returns [H,U] using LLL reduction along the way; 
+flag = 5: return [H,U,P] where P is a permutation of row indices such that P 
+applied to M U is H.
 
 
   ***   at top-level: hermitehavas()
@@ -1346,14 +1344,13 @@ A function with that name existed in GP-1.39.15. Please update your script.
 New syntax: hermiteperm(x) ===> mathnf(x,3)
 
 mathnf(M,{flag=0}): (upper triangular) Hermite normal form of M, basis for the 
-lattice formed by the columns of M. flag is optional whose value range from 0 
-to 3 have a binary meaning. Bit 1: complete output, returns a 2-component 
-vector [H,U] such that H is the HNF of M, and U is an invertible matrix such 
-that MU=H. Bit 2: allow polynomial entries, otherwise assume that M is 
-integral. These use a naive algorithm; larger values correspond to more 
-involved algorithms and are restricted to integer matrices; flag = 4: returns 
-[H,U] using LLL reduction along the way; flag = 5: return [H,U,P] where P is a 
-permutation of row indices such that P applied to M U is H.
+lattice formed by the columns of M. Basic values of flag are 0 (default): only 
+return the Hermite normal form H, 1: return [H,U] such that H is the HNF of M, 
+and U is an invertible matrix such that MU=H. These two use a naive algorithm; 
+larger values of flag correspond to more involved algorithms and are restricted 
+to integer matrices; flag = 4: returns [H,U] using LLL reduction along the way; 
+flag = 5: return [H,U,P] where P is a permutation of row indices such that P 
+applied to M U is H.
 
 
   ***   at top-level: hess()

@@ -3,11 +3,10 @@ Section: linear_algebra
 C-Name: mathnf0
 Prototype: GD0,L,
 Help: mathnf(M,{flag=0}): (upper triangular) Hermite normal form of M, basis
- for the lattice formed by the columns of M. flag is optional whose value
- range from 0 to 3 have a binary meaning. Bit 1: complete output, returns
- a 2-component vector [H,U] such that H is the HNF of M, and U is an
- invertible matrix such that MU=H. Bit 2: allow polynomial entries, otherwise
- assume that M is integral. These use a naive algorithm; larger values
+ for the lattice formed by the columns of M. Basic values of flag are
+ 0 (default): only return the Hermite normal form H,
+ 1: return [H,U] such that H is the HNF of M, and U is an invertible matrix
+ such that MU=H. These two use a naive algorithm; larger values of flag
  correspond to more involved algorithms and are restricted to integer
  matrices; flag = 4: returns [H,U] using LLL reduction along the way;
  flag = 5: return [H,U,P] where P is a permutation of row indices such that
