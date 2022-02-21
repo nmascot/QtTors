@@ -46,7 +46,10 @@ Doc: ordinary class number of the quadratic order of discriminant $D$, for
  %3 = 1
  ? bnfnarrow(bnfinit(x^2 - 136)).cyc
  %4 = [4]  \\ narrow class group is cyclic ~ Z/4Z
- @eprog\noindent
+ @eprog\noindent Note that the use of \kbd{bnfnarrow} above is only valid
+ because $136$ is a fundamental discriminant: that function is asymptotically
+ faster (and returns the group structure, not only its order) but only supports
+ \emph{maximal} orders.
  Here are a few more examples:
  \bprog
  ? qfbclassno(400000028) \\ D > 0: slow
