@@ -17,7 +17,7 @@ Doc: extracts the $n^{\text{th}}$-component of $x$. This is to be understood
  $n^{\text{th}}$ coefficient (i.e.~of degree $n-1$), and for power series,
  the $n^{\text{th}}$ significant coefficient.
 
- For polynomials and power series, one should rather use \tet{polcoeff}, and
+ For polynomials and power series, one should rather use \tet{polcoef}, and
  for vectors and matrices, the \kbd{[$\,$]} operator. Namely, if $x$ is a
  vector, then \tet{x[n]} represents the $n^{\text{th}}$ component of $x$. If
  $x$ is a matrix, \tet{x[m,n]} represents the coefficient of row \kbd{m} and
