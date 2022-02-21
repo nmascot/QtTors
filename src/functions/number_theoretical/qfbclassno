@@ -37,9 +37,17 @@ Doc: ordinary class number of the quadratic order of discriminant $D$, for
  compatibility reasons. Use the following routine if you are only interested
  in the number of classes of forms:
  \bprog
- QFBclassno(D) = qfbclassno(D) * if (D > 0 && quadunitnorm(D) > 0, 2, 1)
+ ? QFBclassno(D) = qfbclassno(D) * if (D > 0 && quadunitnorm(D) > 0, 2, 1)
+ ? QFBclassno(136)
+ %1 = 4
+ ? qfbclassno(136)
+ %2 = 2
+ ? quadunitnorm(136)
+ %3 = 1
+ ? bnfnarrow(bnfinit(x^2 - 136)).cyc
+ %4 = [4]  \\ narrow class group is cyclic ~ Z/4Z
  @eprog\noindent
- Here are a few examples:
+ Here are a few more examples:
  \bprog
  ? qfbclassno(400000028) \\ D > 0: slow
  time = 3,140 ms.
