@@ -477,7 +477,7 @@ lfunthetacost(GEN ldata, GEN tdom, long m, long bitprec)
   pari_sp av = avma;
   GEN Vga = ldata_get_gammavec(ldata);
   long d = lg(Vga)-1;
-  long k1 = ldata_get_k1_dbl(ldata);
+  double k1 = maxdd(ldata_get_k1_dbl(ldata), 0.);
   double c = d/2., a, A, B, logC, al, rho, T;
   double N = gtodouble(ldata_get_conductor(ldata));
 
@@ -972,7 +972,7 @@ lfunp_set(GEN ldata, long der, long bitprec, struct lfunp *S)
   hd = M_LN2/S->m0;
 
   logC = d2*M_LN2 - log(d2)/2;
-  k1 = ldata_get_k1_dbl(ldata);
+  k1 = maxdd(ldata_get_k1_dbl(ldata), 0.);
   S->k1 = k1; /* assume |a_n| << n^k1 with small implied constant */
   A = gammavec_expo(d, suma);
 
