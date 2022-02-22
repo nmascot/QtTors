@@ -1334,8 +1334,10 @@ mul_ser_scal(GEN y, GEN x) {
   GEN z;
   if (isrationalzero(x)) return gmul(Rg_get_0(y), x);
   if (ser_isexactzero(y))
-    return scalarser(lg(y) == 2? Rg_get_0(x)
-                               : gmul(gel(y,2), x), varn(y), valp(y));
+  {
+    z = scalarser(lg(y) == 2? Rg_get_0(x): gmul(gel(y,2), x), varn(y), 1);
+    setvalp(z, valp(y)); return z;
+  }
   z = cgetg_copy(y, &l); z[1] = y[1];
   for (i = 2; i < l; i++) gel(z,i) = gmul(gel(y,i), x);
   return normalizeser(z);
