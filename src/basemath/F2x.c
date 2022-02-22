@@ -634,7 +634,9 @@ F2x_shiftneg(GEN y, ulong d)
 {
   long db, dl=dvmdsBIL(d, &db);
   long i, ly = lg(y), lx = ly-dl;
-  GEN x = cgetg(lx, t_VECSMALL);
+  GEN x;
+  if (lx <= 2) return zero_F2x(y[1]);
+  x = cgetg(lx, t_VECSMALL);
   x[1] = y[1];
   if (db)
   {

@@ -71,3 +71,6 @@ subst(p, x, x); \\ takes oo time if content(p) is computed
 
 \\#2267
 subst(O(y) + x + O(x^2), x, (1 - y + O(y^2))*x + O(x^2))
+
+\\#2364
+subst(Mod(y^4+y/t^3+1/t^6+1/t^12,2),y,t^-1+t^-3+O(t^100))
