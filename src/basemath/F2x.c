@@ -804,7 +804,7 @@ F2xn_div(GEN g, GEN f, long e)
     } else
     {
       GEN y = F2xn_mul(g, W, n), yt =  F2xn_red(y, n-n2);
-      u = F2xn_mul(yt, F2xn_mul(fr,  W, n), n-n2);
+      u = F2xn_mul(yt, F2x_shift(F2xn_mul(fr,  W, n), -n2), n-n2);
       W = F2x_add(y, F2x_shift(u, n2));
     }
     if (gc_needed(av2,2))
