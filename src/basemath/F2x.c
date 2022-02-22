@@ -797,7 +797,7 @@ F2xn_div(GEN g, GEN f, long e)
     n<<=1; if (mask & 1) n--;
     mask >>= 1;
     fr = F2xn_red(f, n);
-    if (mask<1 || !g)
+    if (mask>1 || !g)
     {
       u = F2x_shift(F2xn_mul(W, fr, n), -n2);
       W = F2x_add(W, F2x_shift(F2xn_mul(u, W, n-n2), n2));
