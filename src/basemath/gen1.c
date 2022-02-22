@@ -746,34 +746,35 @@ addsub_polmod_scal(GEN Y, GEN y, GEN x, GEN(*op)(GEN,GEN))
 static GEN
 add_ser_scal(GEN y, GEN x)
 {
-  long i, l, ly, vy;
+  long i, v, ly, vy;
   GEN z;
 
   if (isrationalzero(x)) return gcopy(y);
   ly = lg(y);
-  l = valp(y);
-  if (l < 3-ly) return gcopy(y);
-  /* l + ly >= 3 */
-  if (l < 0)
+  v = valp(y);
+  if (v < 3-ly) return gcopy(y);
+  /* v + ly >= 3 */
+  if (v < 0)
   {
     z = cgetg(ly,t_SER); z[1] = y[1];
-    for (i = 2; i <= 1-l; i++) gel(z,i) = gcopy(gel(y,i));
+    for (i = 2; i <= 1-v; i++) gel(z,i) = gcopy(gel(y,i));
     gel(z,i) = gadd(x,gel(y,i)); i++;
     for (     ; i < ly; i++)   gel(z,i) = gcopy(gel(y,i));
     return normalizeser(z);
   }
   vy = varn(y);
-  if (l > 0)
+  if (v > 0)
   {
     if (ser_isexactzero(y))
-      return scalarser(ly == 2? x: gadd(x,gel(y,2)), vy, l);
-    y -= l; ly += l;
+      return scalarser(ly == 2? x: gadd(x,gel(y,2)), vy, v);
+    y -= v; ly += v;
     z = cgetg(ly,t_SER);
     x = gcopy(x);
-    for (i=3; i<=l+1; i++) gel(z,i) = gen_0;
+    for (i=3; i<=v+1; i++) gel(z,i) = gen_0;
   }
+  else if (ser_isexactzero(y)) return gcopy(y);
   else
-  { /* l = 0, ly >= 3. Also OK if ser_isexactzero(y) */
+  { /* v = 0, ly >= 3 */
     z = cgetg(ly,t_SER);
     x = gadd(x, gel(y,2));
     i = 3;

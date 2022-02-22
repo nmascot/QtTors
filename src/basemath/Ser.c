@@ -123,7 +123,7 @@ RgV_to_ser_i(GEN x, long v, long l, int copy)
   long j, lx = minss(lg(x), l-1);
   GEN y;
   if (lx == 1) return zeroser(v, l-2);
-  y = cgetg(l, t_SER); y[1] = evalvarn(v)|evalvalp(0);
+  y = cgetg(l, t_SER); y[1] = evalsigne(1)|evalvarn(v)|evalvalp(0);
   x--;
   if (copy)
     for (j = 2; j <= lx; j++) gel(y,j) = gcopy(gel(x,j));
