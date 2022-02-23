@@ -29,39 +29,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 GEN
 map_proto_G(GEN (*f)(GEN), GEN x)
 {
-  if (is_matvec_t(typ(x)))
-  {
-    long lx, i;
-    GEN y = cgetg_copy(x, &lx);
-    for (i=1; i<lx; i++) gel(y,i) = map_proto_G(f, gel(x,i));
-    return y;
-  }
+  if (is_matvec_t(typ(x))) pari_APPLY_same(map_proto_G(f, gel(x,i)));
   return f(x);
 }
 
 GEN
 map_proto_lG(long (*f)(GEN), GEN x)
 {
-  if (is_matvec_t(typ(x)))
-  {
-    long lx, i;
-    GEN y = cgetg_copy(x, &lx);
-    for (i=1; i<lx; i++) gel(y,i) = map_proto_lG(f, gel(x,i));
-    return y;
-  }
+  if (is_matvec_t(typ(x))) pari_APPLY_same(map_proto_lG(f, gel(x,i)));
   return stoi(f(x));
 }
 
 GEN
 map_proto_lGL(long (*f)(GEN,long), GEN x, long y)
 {
-  if (is_matvec_t(typ(x)))
-  {
-    long l, i;
-    GEN t = cgetg_copy(x, &l);
-    for (i=1; i<l; i++) gel(t,i) = map_proto_lGL(f,gel(x,i),y);
-    return t;
-  }
+  if (is_matvec_t(typ(x))) pari_APPLY_same(map_proto_lGL(f,gel(x,i),y));
   return stoi(f(x,y));
 }
 

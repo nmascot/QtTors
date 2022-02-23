@@ -413,14 +413,10 @@ ZX_unscale_divpow(GEN P, GEN h, long k)
 }
 
 GEN
-RgXV_unscale(GEN v, GEN h)
+RgXV_unscale(GEN x, GEN h)
 {
-  long i, l;
-  GEN w;
-  if (!h || isint1(h)) return v;
-  w = cgetg_copy(v, &l);
-  for (i=1; i<l; i++) gel(w,i) = RgX_unscale(gel(v,i), h);
-  return w;
+  if (!h || isint1(h)) return x;
+  pari_APPLY_same(RgX_unscale(gel(x,i), h));
 }
 
 /* Return h^degpol(P) P(x / h), not memory clean */
@@ -850,14 +846,7 @@ RgXY_degreex(GEN b)
 }
 
 GEN
-RgXY_derivx(GEN x)
-{
-  long i,lx;
-  GEN y = cgetg_copy(x,&lx);
-  for (i=2; i<lx ; i++)
-    gel(y,i) = RgX_deriv(gel(x,i));
-  y[1] = x[1]; return normalizepol_lg(y,i);
-}
+RgXY_derivx(GEN x) { pari_APPLY_pol(RgX_deriv(gel(x,i))); }
 
 /* return (x % X^n). Shallow */
 GEN
@@ -1675,12 +1664,7 @@ RgX_normalize(GEN x)
   gel(z,n) = Rg_get_1(d); return z;
 }
 GEN
-RgX_divs(GEN x, long y) {
-  long i, lx;
-  GEN z = cgetg_copy(x, &lx); z[1] = x[1];
-  for (i=2; i<lx; i++) gel(z,i) = gdivgs(gel(x,i),y);
-  return normalizepol_lg(z, lx);
-}
+RgX_divs(GEN x, long y) { pari_APPLY_pol(gdivgs(gel(x,i),y)); }
 GEN
 RgX_div_by_X_x(GEN a, GEN x, GEN *r)
 {
