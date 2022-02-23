@@ -796,7 +796,10 @@ ser_add(GEN x, GEN y)
   /* valp(x) <= valp(y) */
   lx = _serprec(x);
   if (lx == 2) /* don't lose type information */
-    return scalarser(gadd(Rg_get_0(x), Rg_get_0(y)), varn(x), valp(x));
+  {
+    z = scalarser(gadd(Rg_get_0(x), Rg_get_0(y)), varn(x), 1);
+    setvalp(z, valp(x)); return z;
+  }
   ly = _serprec(y) + n; if (lx < ly) ly = lx;
   if (n)
   {

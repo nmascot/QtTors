@@ -3776,7 +3776,8 @@ lift0(GEN x, long v)
       if (ser_isexactzero(x))
       {
         if (lg(x) == 2) return gcopy(x);
-        return scalarser(lift0(gel(x,2),v), varn(x), valp(x));
+        y = scalarser(lift0(gel(x,2),v), varn(x), 1);
+        setvalp(y, valp(x)); return y;
       }
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
@@ -3803,7 +3804,8 @@ lift_shallow(GEN x)
       if (ser_isexactzero(x))
       {
         if (lg(x) == 2) return x;
-        return scalarser(lift_shallow(gel(x,2)), varn(x), valp(x));
+        y = scalarser(lift_shallow(gel(x,2)), varn(x), 1);
+        setvalp(y, valp(x)); return y;
       }
       y = cgetg_copy(x,&l); y[1] = x[1];
       for (i = 2; i < l; i++) gel(y,i) = lift_shallow(gel(x,i));
@@ -3843,7 +3845,8 @@ liftall_shallow(GEN x)
       if (ser_isexactzero(x))
       {
         if (lg(x) == 2) return x;
-        return scalarser(liftall_shallow(gel(x,2)), varn(x), valp(x));
+        y = scalarser(liftall_shallow(gel(x,2)), varn(x), 1);
+        setvalp(y, valp(x)); return y;
       }
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = liftall_shallow(gel(x,i));
@@ -3878,7 +3881,8 @@ liftint_shallow(GEN x)
       if (ser_isexactzero(x))
       {
         if (lg(x) == 2) return x;
-        return scalarser(liftint_shallow(gel(x,2)), varn(x), valp(x));
+        y = scalarser(liftint_shallow(gel(x,2)), varn(x), 1);
+        setvalp(y, valp(x)); return y;
       }
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = liftint_shallow(gel(x,i));
@@ -3913,7 +3917,8 @@ liftpol_shallow(GEN x)
       if (ser_isexactzero(x))
       {
         if (lg(x) == 2) return x;
-        return scalarser(liftpol_shallow(gel(x,2)), varn(x), valp(x));
+        y = scalarser(liftpol(gel(x,2)), varn(x), 1);
+        setvalp(y, valp(x)); return y;
       }
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = liftpol_shallow(gel(x,i));
