@@ -746,17 +746,12 @@ GEN
 gmod(GEN x, GEN y)
 {
   pari_sp av;
-  long i, lx, ty, tx;
+  long ty, tx;
   GEN z;
 
   tx = typ(x); if (tx == t_INT && !is_bigint(x)) return gmodsg(itos(x),y);
   ty = typ(y); if (ty == t_INT && !is_bigint(y)) return gmodgs(x,itos(y));
-  if (is_matvec_t(tx))
-  {
-    z = cgetg_copy(x, &lx);
-    for (i=1; i<lx; i++) gel(z,i) = gmod(gel(x,i),y);
-    return z;
-  }
+  if (is_matvec_t(tx)) pari_APPLY_same(gmod(gel(x,i), y));
   if (tx == t_POL || ty == t_POL) return grem(x,y);
   if (!is_scalar_t(tx) || !is_scalar_t(ty)) pari_err_TYPE2("%",x,y);
   switch(ty)
@@ -791,14 +786,9 @@ GEN
 gmodgs(GEN x, long y)
 {
   ulong u;
-  long i, lx, tx = typ(x);
+  long i, tx = typ(x);
   GEN z;
-  if (is_matvec_t(tx))
-  {
-    z = cgetg_copy(x, &lx);
-    for (i=1; i<lx; i++) gel(z,i) = gmodgs(gel(x,i),y);
-    return z;
-  }
+  if (is_matvec_t(tx)) pari_APPLY_same(gmodgs(gel(x,i), y));
   if (!y) pari_err_INV("gmodgs",gen_0);
   switch(tx)
   {
@@ -884,13 +874,7 @@ gmodulo(GEN x,GEN y)
 {
   long tx = typ(x), vx, vy;
   if (tx == t_INT && !is_bigint(x)) return gmodulsg(itos(x), y);
-  if (is_matvec_t(tx))
-  {
-    long l, i;
-    GEN z = cgetg_copy(x, &l);
-    for (i=1; i<l; i++) gel(z,i) = gmodulo(gel(x,i),y);
-    return z;
-  }
+  if (is_matvec_t(tx)) pari_APPLY_same(gmodulo(gel(x,i), y));
   switch(typ(y))
   {
     case t_INT:
@@ -918,13 +902,7 @@ gdivent(GEN x, GEN y)
   long tx, ty;
   tx = typ(x); if (tx == t_INT && !is_bigint(x)) return gdiventsg(itos(x),y);
   ty = typ(y); if (ty == t_INT && !is_bigint(y)) return gdiventgs(x,itos(y));
-  if (is_matvec_t(tx))
-  {
-    long i, lx;
-    GEN z = cgetg_copy(x, &lx);
-    for (i=1; i<lx; i++) gel(z,i) = gdivent(gel(x,i),y);
-    return z;
-  }
+  if (is_matvec_t(tx)) pari_APPLY_same(gdivent(gel(x,i), y));
   if (tx == t_POL || ty == t_POL) return gdeuc(x,y);
   switch(ty)
   {
@@ -2383,13 +2361,25 @@ integ(GEN x, long v)
 /*                             FLOOR                               */
 /*                                                                 */
 /*******************************************************************/
-
+static GEN
+quad_floor(GEN x)
+{
+  GEN Q = gel(x,1), D = quad_disc(x), u, v, b, d, z;
+  if (signe(D) < 0) return NULL;
+  x = Q_remove_denom(x, &d);
+  u = gel(x,2);
+  v = gel(x,3); b = gel(Q,3);
+  if (typ(u) != t_INT || typ(v) != t_INT) return NULL;
+  /* x0 = (2u + v*(-b + sqrt(D))) / (2d) */
+  z = sqrti(mulii(D, sqri(v)));
+  if (signe(v) < 0) { z = addiu(z,1); togglesign(z); }
+  /* z = floor(v * sqrt(D)) */
+  z = addii(subii(shifti(u,1), mulii(v,b)), z);
+  return truedivii(z, d? shifti(d,1): gen_2);
+}
 GEN
 gfloor(GEN x)
 {
-  GEN y;
-  long i, lx;
-
   switch(typ(x))
   {
     case t_INT: return icopy(x);
@@ -2399,25 +2389,13 @@ gfloor(GEN x)
     case t_QUAD:
     {
       pari_sp av = avma;
-      GEN Q = gel(x,1), D = quad_disc(x), u, v, b, d, z;
-      if (signe(D) < 0) break;
-      x = Q_remove_denom(x, &d);
-      u = gel(x,2);
-      v = gel(x,3); b = gel(Q,3);
-      if (typ(u) != t_INT || typ(v) != t_INT) break;
-      /* x0 = (2u + v*(-b + sqrt(D))) / (2d) */
-      z = sqrti(mulii(D, sqri(v)));
-      if (signe(v) < 0) { z = addiu(z,1); togglesign(z); }
-      /* z = floor(v * sqrt(D)) */
-      z = addii(subii(shifti(u,1), mulii(v,b)), z);
-      d = d? shifti(d,1): gen_2;
-      return gerepileuptoint(av, truedivii(z, d));
+      GEN y;
+      if (!(y = quad_floor(x))) break;
+      return gerepileuptoint(av, y);
     }
     case t_RFRAC: return gdeuc(gel(x,1),gel(x,2));
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = gfloor(gel(x,i));
-      return y;
+      pari_APPLY_same(gfloor(gel(x,i)));
   }
   pari_err_TYPE("gfloor",x);
   return NULL; /* LCOV_EXCL_LINE */
@@ -2426,13 +2404,29 @@ gfloor(GEN x)
 GEN
 gfrac(GEN x)
 {
-  pari_sp av = avma;
-  return gerepileupto(av, gsub(x,gfloor(x)));
+  pari_sp av;
+  GEN y;
+  switch(typ(x))
+  {
+    case t_INT: return gen_0;
+    case t_POL: return pol_0(varn(x));
+    case t_REAL: av = avma; return gerepileuptoleaf(av, subri(x, floorr(x)));
+    case t_FRAC: retmkfrac(modii(gel(x,1),gel(x,2)), icopy(gel(x,2)));
+    case t_QUAD:
+      av = avma; if (!(y = quad_floor(x))) break;
+      return gerepileupto(av, gsub(x, y));
+    case t_RFRAC: retmkrfrac(grem(gel(x,1),gel(x,2)), gcopy(gel(x,2)));
+    case t_VEC: case t_COL: case t_MAT:
+      pari_APPLY_same(gfrac(gel(x,i)));
+  }
+  pari_err_TYPE("gfrac",x);
+  return NULL; /* LCOV_EXCL_LINE */
 }
 
 /* assume x t_REAL */
 GEN
-ceilr(GEN x) {
+ceilr(GEN x)
+{
   pari_sp av = avma;
   GEN y = floorr(x);
   if (cmpri(x, y)) return gerepileuptoint(av, addui(1,y));
@@ -2442,10 +2436,8 @@ ceilr(GEN x) {
 GEN
 gceil(GEN x)
 {
-  GEN y;
-  long i, lx;
   pari_sp av;
-
+  GEN y;
   switch(typ(x))
   {
     case t_INT: return icopy(x);
@@ -2461,11 +2453,8 @@ gceil(GEN x)
       av = avma; return gerepileupto(av, addiu(gfloor(x), 1));
     case t_RFRAC:
       return gdeuc(gel(x,1),gel(x,2));
-
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = gceil(gel(x,i));
-      return y;
+      pari_APPLY_same(gceil(gel(x,i)));
   }
   pari_err_TYPE("gceil",x);
   return NULL; /* LCOV_EXCL_LINE */
@@ -2591,9 +2580,7 @@ ground(GEN x)
       av = avma;
       return gerepileupto(av, gdiv(ground(gel(x,1)), ground(gel(x,2))));
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = ground(gel(x,i));
-      return y;
+      pari_APPLY_same(ground(gel(x,i)));
   }
   pari_err_TYPE("ground",x);
   return NULL; /* LCOV_EXCL_LINE */
@@ -2893,13 +2880,7 @@ gtrunc(GEN x)
     case t_POL: return RgX_copy(x);
     case t_RFRAC: return gdeuc(gel(x,1),gel(x,2));
     case t_SER: return ser2rfrac(x);
-    case t_VEC: case t_COL: case t_MAT:
-    {
-      long i, lx;
-      GEN y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = gtrunc(gel(x,i));
-      return y;
-    }
+    case t_VEC: case t_COL: case t_MAT: pari_APPLY_same(gtrunc(gel(x,i)));
   }
   pari_err_TYPE("gtrunc",x);
   return NULL; /* LCOV_EXCL_LINE */
@@ -3784,9 +3765,7 @@ lift0(GEN x, long v)
       return normalizeser(y);
     case t_COMPLEX: case t_QUAD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
-      return y;
+      pari_APPLY_same(lift0(gel(x,i), v));
     default: return gcopy(x);
   }
 }
@@ -3816,9 +3795,7 @@ lift_shallow(GEN x)
       return normalizepol(y);
     case t_COMPLEX: case t_QUAD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x,&l);
-      for (i = 1; i < l; i++) gel(y,i) = lift_shallow(gel(x,i));
-      return y;
+      pari_APPLY_same(lift_shallow(gel(x,i)));
     default: return x;
   }
 }
@@ -3853,9 +3830,7 @@ liftall_shallow(GEN x)
       return normalizeser(y);
     case t_COMPLEX: case t_QUAD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = liftall_shallow(gel(x,i));
-      return y;
+      pari_APPLY_same(liftall_shallow(gel(x,i)));
     default: return x;
   }
 }
@@ -3889,9 +3864,7 @@ liftint_shallow(GEN x)
       return normalizeser(y);
     case t_POLMOD: case t_COMPLEX: case t_QUAD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = liftint_shallow(gel(x,i));
-      return y;
+      pari_APPLY_same(liftint_shallow(gel(x,i)));
     default: return x;
   }
 }
@@ -3924,9 +3897,7 @@ liftpol_shallow(GEN x)
       for (i=2; i<lx; i++) gel(y,i) = liftpol_shallow(gel(x,i));
       return normalizeser(y);
     case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = liftpol_shallow(gel(x,i));
-      return y;
+      pari_APPLY_same(liftpol_shallow(gel(x,i)));
     default: return x;
   }
 }
@@ -3967,9 +3938,7 @@ centerlift(GEN x)
       return normalizeser(y);
    case t_COMPLEX: case t_QUAD: case t_RFRAC:
    case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = centerlift(gel(x,i));
-      return y;
+      pari_APPLY_same(centerlift(gel(x,i)));
     case t_PADIC:
       if (!signe(gel(x,4))) return gen_0;
       v = valp(x);
@@ -3998,7 +3967,7 @@ centerlift(GEN x)
 static GEN
 op_ReIm(GEN f(GEN), GEN x)
 {
-  long lx, i, j;
+  long lx, j;
   pari_sp av;
   GEN z;
 
@@ -4023,9 +3992,7 @@ op_ReIm(GEN f(GEN), GEN x)
     }
 
     case t_VEC: case t_COL: case t_MAT:
-      z = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(z,i) = f(gel(x,i));
-      return z;
+      pari_APPLY_same(f(gel(x, i)));
   }
   pari_err_TYPE("greal/gimag",x);
   return NULL; /* LCOV_EXCL_LINE */
@@ -4241,9 +4208,7 @@ geval_gp(GEN x, GEN t)
       return gerepileupto(av, gdiv(geval_gp(gel(x,1),t), geval_gp(gel(x,2),t)));
 
     case t_QFB: case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = geval_gp(gel(x,i),t);
-      return y;
+      pari_APPLY_same(geval_gp(gel(x,i),t));
 
     case t_CLOSURE:
       if (closure_arity(x) || closure_is_variadic(x))
@@ -4298,9 +4263,7 @@ simplify_shallow(GEN x)
       gel(y,2) = z; return y;
 
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = simplify_shallow(gel(x,i));
-      return y;
+      pari_APPLY_same(simplify_shallow(gel(x,i)));
   }
   pari_err_BUG("simplify_shallow, type unknown");
   return NULL; /* LCOV_EXCL_LINE */
