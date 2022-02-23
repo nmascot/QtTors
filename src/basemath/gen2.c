@@ -1996,9 +1996,9 @@ is_negative(GEN x) {
 GEN
 gabs(GEN x, long prec)
 {
-  long lx, i;
-  pari_sp av, tetpil;
-  GEN y,p1;
+  long lx;
+  pari_sp av;
+  GEN y, N;
 
   switch(typ(x))
   {
@@ -2009,21 +2009,20 @@ gabs(GEN x, long prec)
       return absfrac(x);
 
     case t_COMPLEX:
-      av=avma; p1=cxnorm(x);
-      switch(typ(p1))
+      av=avma; N=cxnorm(x);
+      switch(typ(N))
       {
         case t_INT:
-          if (!Z_issquareall(p1, &y)) break;
+          if (!Z_issquareall(N, &y)) break;
           return gerepileupto(av, y);
         case t_FRAC: {
           GEN a,b;
-          if (!Z_issquareall(gel(p1,1), &a)) break;
-          if (!Z_issquareall(gel(p1,2), &b)) break;
+          if (!Z_issquareall(gel(N,1), &a)) break;
+          if (!Z_issquareall(gel(N,2), &b)) break;
           return gerepileupto(av, gdiv(a,b));
         }
       }
-      tetpil=avma;
-      return gerepile(av,tetpil,gsqrt(p1,prec));
+      return gerepileupto(av, gsqrt(N,prec));
 
     case t_QUAD:
       av = avma;
@@ -2031,7 +2030,7 @@ gabs(GEN x, long prec)
 
     case t_POL:
       lx = lg(x); if (lx<=2) return RgX_copy(x);
-      return is_negative(gel(x,lx-1))? gneg(x): RgX_copy(x);
+      return is_negative(gel(x,lx-1))? RgX_neg(x): RgX_copy(x);
 
     case t_SER:
      if (!signe(x)) pari_err_DOMAIN("abs", "argument", "=", gen_0, x);
@@ -2039,9 +2038,7 @@ gabs(GEN x, long prec)
      return is_negative(gel(x,2))? gneg(x): gcopy(x);
 
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = gabs(gel(x,i),prec);
-      return y;
+      pari_APPLY_same(gabs(gel(x,i),prec));
   }
   pari_err_TYPE("gabs",x);
   return NULL; /* LCOV_EXCL_LINE */
@@ -2588,9 +2585,7 @@ gcvtop(GEN x, GEN p, long r)
       for (i=2; i<lx; i++) gel(y,i) = gcvtop(gel(x,i),p,r);
       return y;
     case t_POLMOD: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = gcvtop(gel(x,i),p,r);
-      return y;
+      pari_APPLY_same(gcvtop(gel(x,i),p,r));
   }
   return cvtop(x,p,r);
 }
