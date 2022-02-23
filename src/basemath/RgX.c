@@ -2203,41 +2203,18 @@ RgX_pseudodivrem(GEN x, GEN y, GEN *ptr)
 
 GEN
 RgXQX_mul(GEN x, GEN y, GEN T)
-{
-  return RgXQX_red(RgX_mul(x,y), T);
-}
+{ return RgXQX_red(RgX_mul(x,y), T); }
 GEN
-RgX_Rg_mul(GEN y, GEN x) {
-  long i, ly;
-  GEN z = cgetg_copy(y, &ly); z[1] = y[1];
-  if (ly == 2) return z;
-  for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
-  return normalizepol_lg(z,ly);
-}
+RgX_Rg_mul(GEN x, GEN y) { pari_APPLY_pol(gmul(y, gel(x,i))); }
 GEN
-RgX_muls(GEN y, long x) {
-  long i, ly;
-  GEN z = cgetg_copy(y, &ly); z[1] = y[1];
-  if (ly == 2) return z;
-  for (i = 2; i < ly; i++) gel(z,i) = gmulsg(x,gel(y,i));
-  return normalizepol_lg(z,ly);
-}
+RgX_muls(GEN x, long y) { pari_APPLY_pol(gmulsg(y, gel(x,i))); }
 GEN
-RgXQX_RgXQ_mul(GEN x, GEN y, GEN T)
-{
-  return RgXQX_red(RgX_Rg_mul(x,y), T);
-}
+RgXQX_RgXQ_mul(GEN x, GEN y, GEN T) { return RgXQX_red(RgX_Rg_mul(x,y), T); }
 GEN
-RgXQV_RgXQ_mul(GEN v, GEN x, GEN T)
-{
-  return RgXQV_red(RgV_Rg_mul(v,x), T);
-}
+RgXQV_RgXQ_mul(GEN v, GEN x, GEN T) { return RgXQV_red(RgV_Rg_mul(v,x), T); }
 
 GEN
-RgXQX_sqr(GEN x, GEN T)
-{
-  return RgXQX_red(RgX_sqr(x), T);
-}
+RgXQX_sqr(GEN x, GEN T) { return RgXQX_red(RgX_sqr(x), T); }
 
 GEN
 RgXQX_powers(GEN P, long n, GEN T)
