@@ -1418,7 +1418,7 @@ gcharduallog(GEN gc, GEN chi)
 }
 
 static GEN
-gcharisprincipal(GEN gc, GEN x)
+gcharisprincipal(GEN gc, GEN x, GEN *palpha)
 {
   GEN bnf, DLdata, t, v, alpha, Lalpha;
   bnf = gchar_get_bnf(gc);
@@ -1427,9 +1427,8 @@ gcharisprincipal(GEN gc, GEN x)
   v = gel(t, 1); alpha = gel(t, 2);
   Lalpha = gel(DLdata, 2);
   alpha = nffactorback(bnf, vec_append(Lalpha,alpha), vec_append(v,gen_1));
-  alpha = famat_reduce(alpha);
-  v = ZM_ZC_mul(gel(DLdata,1), v);
-  return mkvec2(v, alpha);
+  *palpha = famat_reduce(alpha);
+  return ZM_ZC_mul(gel(DLdata,1), v);
 }
 
 /* complete log of ideal; if logchi != NULL make sure precision is
@@ -1437,12 +1436,11 @@ gcharisprincipal(GEN gc, GEN x)
 static GEN
 gchar_log(GEN gc, GEN x, GEN logchi, long prec)
 {
-  GEN zm, v, alpha, t, arch_log = NULL, zm_log, nf;
+  GEN zm, v, alpha, arch_log = NULL, zm_log, nf;
 
   nf = gchar_get_nf(gc);
   zm = gchar_get_zm(gc);
-  t = gcharisprincipal(gc, x);
-  v = gel(t, 1); alpha = gel(t, 2); /* alpha a GENMAT */
+  v = gcharisprincipal(gc, x, &alpha); /* alpha a GENMAT */
   if (DEBUGLEVEL>2) err_printf("v %Ps\n", v);
   zm_log = gchar_logm(nf, zm, alpha);
   if (DEBUGLEVEL>2) err_printf("zm_log(alpha) %Ps\n", zm_log);
