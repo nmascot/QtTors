@@ -1334,27 +1334,28 @@ gcharisalgebraic(GEN gc, GEN chi, GEN *pq)
 }
 
 GEN
-gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
+gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* pbid)
 {
   pari_sp av = avma;
   GEN nf = gchar_get_nf(gc), s, chiv, logchi;
-  long i;
 
   check_gchar_group(gc);
   chi = gchar_internal(gc, chi, &s);
   logchi = gchari_duallog(gc, chi);
   if (typ(v) == t_INT) /* v infinite */
   {
-    long r1, r2, tau = itos(v), n0 = gchar_get_ns(gc) + gchar_get_nc(gc);
+    long i, r1, r2, tau = itos(v), n0 = gchar_get_ns(gc) + gchar_get_nc(gc);
     GEN phi, k;
     nf_get_sign(nf, &r1, &r2);
-    if (tau<=0) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", "<=", gen_0, v);
-    if (tau>r1+r2) pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", ">", stoi(r1+r2), v);
+    if (tau <= 0)
+      pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", "<=", gen_0, v);
+    if (tau > r1+r2)
+      pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", ">", stoi(r1+r2), v);
     phi = gel(logchi, n0 + tau);
-    if (tau<=r1) /* v real */
+    if (tau <= r1) /* v real */
     {
       GEN moo = gel(gchar_get_mod(gc),2);
-      i = zv_search(moo,tau);
+      i = zv_search(moo, tau);
       if (i==0) k = gen_0;
       else
       {
@@ -1364,7 +1365,7 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
     }
     else /* v complex */
       k = gel(logchi, n0 + r2 + tau);
-    if (s) phi = gsub(phi, gmul(gen_I(),s));
+    if (s) phi = gsub(phi, mulcxI(s));
     chiv = mkvec2(k, phi);
   }
   else /* v finite */
@@ -1373,9 +1374,11 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
     long iv;
     checkprid(v);
     iv = gen_search(P, v, (void*)cmp_prime_ideal, cmp_nodata);
-    if (iv > 0)
+    chiv = gchari_eval(gc, NULL, v, 0, logchi, s, prec);
+    if (iv <= 0) chiv = mkvec(chiv);
+    else
     {
-      GEN Lsprk, bid, chip = NULL, cyc;
+      GEN cyc, w, Lsprk, bid, chip = NULL;
       long i, ic, l = lg(P);
       Lsprk = locs_get_Lsprk(gchar_get_zm(gc));
       for (i = 1, ic = gchar_get_ns(gc); i < l; i++)
@@ -1385,18 +1388,15 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* ptbid)
         ic += ncp;
       }
       if (!chip) pari_err_BUG("gcharlocal (chip not found)");
-      bid = sprk_to_bid(nf, gel(Lsprk,i), nf_INIT);
       /* TODO store bid instead of recomputing? */
+      bid = sprk_to_bid(nf, gel(Lsprk,i), nf_INIT);
       cyc = bid_get_cyc(bid);
-      chiv = RgV_RgM_mul(chip,gel(bid_get_U(bid),1));
-      for (i=1; i<lg(chiv); i++)
-        gel(chiv,i) = modii(gmul(gel(chiv,i),gel(cyc,i)),gel(cyc,i));
-      chiv = shallowconcat(chiv, gchari_eval(gc,chi,v,0,logchi,s,prec));
-      if (ptbid) { *ptbid = bid; gerepileall(av, 2, &chiv, ptbid); }
-      else chiv = gerepilecopy(av, chiv);
-      return chiv;
+      w = RgV_RgM_mul(chip, gel(bid_get_U(bid),1));
+      for (i = 1; i < lg(w); i++)
+        gel(w,i) = modii(gmul(gel(w,i), gel(cyc,i)), gel(cyc,i));
+      chiv = vec_append(w, chiv);
+      if (pbid) { *pbid = bid; gerepileall(av, 2, &chiv, pbid); return chiv; }
     }
-    chiv = mkvec(gchari_eval(gc, chi, v, 0, logchi, s, prec));
   }
   return gerepilecopy(av, chiv);
 }
