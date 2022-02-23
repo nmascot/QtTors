@@ -2027,8 +2027,8 @@ Q_content_safe(GEN x)
     case t_RFRAC:
     {
       GEN a, b;
-      a = Q_content(gel(x,1)); if (!a) return NULL;
-      b = Q_content(gel(x,2)); if (!b) return NULL;
+      a = Q_content_safe(gel(x,1)); if (!a) return NULL;
+      b = Q_content_safe(gel(x,2)); if (!b) return NULL;
       return gdiv(a, b);
     }
   }

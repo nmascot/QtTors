@@ -81,6 +81,7 @@ x^2
 x - 1
 x - 1
 x - 1
+Mod(1, 2)*t^3*x^2 + Mod(1, 2)*t*x + (Mod(1, 2)*t + Mod(1, 2))
 []
 [[], [;]]
 
@@ -194,4 +195,4 @@ x - 1
   ***   at top-level: localbitprec(32);mateigen(merror*bitprecision(
   ***                                  ^-----------------------------
   *** mateigen: precision too low in mateigen.
-Total time spent: 73
+Total time spent: 58

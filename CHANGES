@@ -116,6 +116,7 @@ BA  89- x->x+0x1 was not displayed correctly
 BA  98- factor((Mod(1,2)*((t^2+1)*x^4+(t^4+1)*x^2+1))) -> division by 0
     99- internal type errors in mfsymboleval [#2360]
    100- incorrect chargalois for trivial group [#2341]
+   101- minpoly(Mod(1/(x-(t+1))*Mod(1,2),(t+1)*x^2+t*x+1)) -> error [#2363]
 
   Added
 HC   1- new GP function eulerreal
