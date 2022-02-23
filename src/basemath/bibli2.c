@@ -686,9 +686,7 @@ gprec_w(GEN x, long pr)
       for (i=2; i<lx; i++) gel(y,i) = gprec_w(gel(x,i),pr);
       break;
     case t_POLMOD: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = gprec_w(gel(x,i),pr);
-      break;
+      pari_APPLY_same(gprec_w(gel(x,i), pr));
     default: return x;
   }
   return y;
@@ -717,9 +715,7 @@ gprec_wensure(GEN x, long pr)
       for (i=2; i<lx; i++) gel(y,i) = gprec_wensure(gel(x,i),pr);
       break;
     case t_POLMOD: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = gprec_wensure(gel(x,i),pr);
-      break;
+      pari_APPLY_same(gprec_wensure(gel(x,i), pr));
     default: return x;
   }
   return y;
@@ -748,9 +744,7 @@ gprec_wtrunc(GEN x, long pr)
       for (i=2; i<lx; i++) gel(y,i) = gprec_wtrunc(gel(x,i),pr);
       break;
     case t_POLMOD: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = gprec_wtrunc(gel(x,i),pr);
-      break;
+      pari_APPLY_same(gprec_wtrunc(gel(x,i), pr));
     default: return x;
   }
   return y;

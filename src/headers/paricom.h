@@ -70,6 +70,22 @@ extern const long CATCH_ALL;
     return _y;\
   }
 
+#define pari_APPLY_pol(EXPR)\
+  { \
+    long i, _l; \
+    GEN _y = cgetg_copy(x, &_l); _y[1] = x[1];\
+    for (i=2; i<_l; i++) gel(_y,i) = EXPR;\
+    return normalizepol_lg(_y, _l);\
+  }
+
+#define pari_APPLY_ser(EXPR)\
+  { \
+    long i, _l; \
+    GEN _y = cgetg_copy(x, &_l); _y[1] = x[1];\
+    for (i=2; i<_l; i++) gel(_y,i) = EXPR;\
+    return normalizeser(_y);\
+  }
+
 #define pari_APPLY_type(TYPE, EXPR)\
   { \
     long i, _l = lg(x); \
