@@ -92,7 +92,7 @@ typedef ulong ratpoints_bit_array __attribute__ ((vector_size (32)));
 #define EXT(a,i) ((ulong)a[i])
 
 #ifdef __AVX2__
-#define TEST(a) ( _mm256_movemask_epi8(_mm256_cmpeq_epi8((__m256i)(a), (__m256i)RBA(0))) != 0xffffffffU )
+#define TEST(a) ( _mm256_movemask_epi8(_mm256_cmpeq_epi8((__m256i)(a), (__m256i)RBA(0))) != 0xffffffffL )
 #elif defined(__AVX__)
 #define TEST(a) ( !_mm256_testz_si256((__m256i)(a), (__m256i)(a)) )
 #else
