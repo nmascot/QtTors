@@ -1420,14 +1420,10 @@ gcharduallog(GEN gc, GEN chi)
 static GEN
 gcharisprincipal(GEN gc, GEN x, GEN *palpha)
 {
-  GEN bnf, DLdata, t, v, alpha, Lalpha;
-  bnf = gchar_get_bnf(gc);
-  DLdata = gchar_get_DLdata(gc);
-  t = bnfisprincipal0(bnf, x, nf_GENMAT);
-  v = gel(t, 1); alpha = gel(t, 2);
-  Lalpha = gel(DLdata, 2);
-  alpha = nffactorback(bnf, vec_append(Lalpha,alpha), vec_append(v,gen_1));
-  *palpha = famat_reduce(alpha);
+  GEN t, v, bnf = gchar_get_bnf(gc), DLdata = gchar_get_DLdata(gc);
+  t = bnfisprincipal0(bnf, x, nf_GENMAT); v = gel(t, 1);
+  *palpha = famat_reduce(famat_mul(nffactorback(bnf, gel(DLdata,2), v),
+                                   gel(t, 2)));
   return ZM_ZC_mul(gel(DLdata,1), v);
 }
 
