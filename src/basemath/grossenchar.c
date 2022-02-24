@@ -1531,7 +1531,7 @@ static GEN
 gchar_identify_init(GEN gc, GEN Lv, long prec)
 {
   GEN M, cyc, mult, Lpr, Lk1, Lphi1, Lk2, Llog, eps, U, P, nf, moo, vlogchi;
-  long beps, r1, r2, n, npr, nk1, nchi, s, i, j, l, dim, n0, ncol;
+  long beps, r1, r2, d, nmiss, n, npr, nk1, nchi, s, i, j, l, dim, n0, ncol;
 
   check_gchar_group(gc);
   n0 = gchar_get_ns(gc) + gchar_get_nc(gc); /* last index of torsion char */
@@ -1540,8 +1540,8 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   moo = gel(gchar_get_mod(gc), 2);
   nf = gchar_get_nf(gc); nf_get_sign(nf, &r1, &r2);
   nchi = lg(cyc)-2; /* ignore norm */
-  if (nchi>=r1+2*r2)    mult = gel(cyc,1);
-  else                  mult = gen_1;
+  d = r1 + 2*r2;
+  mult = (nchi >= d)? gel(cyc,1): gen_1;
   s = (8*prec2nbits(prec))/10; mult = shifti(mult, s);
   beps = -(7*s) / 16; eps = real2n(beps, prec);
   l = lg(Lv);
@@ -1553,7 +1553,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   Lpr = cgetg(l, t_VECSMALL);
   Lk1 = cgetg(l, t_VECSMALL);
   Lphi1 = zero_zv(r1);
-  Lk2 = zero_zv(r2);
+  Lk2 = zero_zv(r2); nmiss = d;
   for (i = 1, npr = nk1 = 0; i < l; i++)
     if (typ(gel(Lv,i)) == t_INT)
     {
@@ -1564,17 +1564,21 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
       if (v <= r1)
       { /* don't put in k1 if not in conductor (but keep as phi) */
         if (zv_search(moo, v)) { nk1++; Lk1[nk1] = i; }
-        Lphi1[v] = i;
+        Lphi1[v] = i; nmiss--;
       }
-      else Lk2[v-r1] = i;
+      else
+      {
+        Lk2[v-r1] = i; nmiss -= 2;
+      }
     }
     else
     {
       GEN pr = gel(Lv,i);
-      if (idealtyp(&pr, NULL) == id_PRINCIPAL)
-        pari_err_TYPE("gcharidentify [ideal]", gel(Lv,i));
-      for (j=1; j<lg(P); j++)
-        if (idealval(nf, pr, gel(P,j)) > 0)
+      long lP = lg(P);
+      if (idealtyp(&pr, NULL) != id_PRIME)
+        pari_err_TYPE("gcharidentify [ideal]", pr);
+      for (j = 1; j < lP; j++)
+        if (pr_equal(pr, gel(P,j)))
           pari_err_COPRIME("gcharidentify", pr, gel(gchar_get_mod(gc), 1));
       npr++;
       Lpr[npr] = i;
@@ -1582,9 +1586,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
     }
   setlg(Llog, npr+1); setlg(Lpr, npr+1); setlg(Lk1, nk1+1);
   /* build matrix M */
-  n = npr + nk1;
-  dim = n + r1 + 2*r2;
-  ncol = n + 1 + nchi;
+  n = npr + nk1; dim = n + d; ncol = n + 1 + nchi;
   M = cgetg(ncol+1, t_MAT);
   for (j = 1; j <= npr; j++) gel(M,j) = col_ei(dim, j);
   for (;  j <= n; j++) gel(M,j) = col_2ei(dim, j);
@@ -1597,7 +1599,7 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
     GEN chi_oo = gcharlog_conductor_oo(gc, logchi), C = cgetg(dim+1, t_COL);
     for (i=1; i<=npr; i++) gel(C,i) = gcharlog_eval_raw(logchi, gel(Llog,i));
     for (i=1; i<=nk1; i++) gel(C,npr+i) = gel(chi_oo, itos(gel(Lv,Lk1[i])));
-    for (i=1; i<=r1+2*r2; i++) gel(C,n+i) = gel(logchi, n0 + i);
+    for (i=1; i<=d; i++) gel(C,n+i) = gel(logchi, n0 + i);
     gel(M,n+1+j) = C;
   }
   for (i = 1; i <= r1; i++)
@@ -1621,15 +1623,16 @@ gchar_identify_init(GEN gc, GEN Lv, long prec)
   U = ZM_lll(M, 0.99, LLL_IM);
   M = ZM_mul(M, U);
   U = rowslice(U, n + 2, n + 1 + nchi);
-  return mkvecn(10,M, U, Lpr, Lk1, Lphi1, Lk2, mult, eps, Lv, mkvecsmall(prec));
+  return mkvecn(9, M, U, Lpr, Lk1, Lphi1, Lk2, mult, Lv,
+                   mkvecsmall3(prec, nmiss, beps));
 }
 
 /* TODO return the distance between the character found and the conditions? */
 static GEN
 gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
 {
-  GEN M, U, Lpr, Lk1, Lphi1, Lk2, mult, eps, cyc, y, x, sumphi, Lv, Norm, nf;
-  long i, l, r1, r2, npr, nk1, n, nmiss, nnorm, prec;
+  GEN M, U, Lpr, Lk1, Lphi1, Lk2, mult, cyc, y, x, sumphi, Lv, Norm, nf;
+  long i, l, r1, r2, beps, npr, nk1, n, nmiss, nnorm, prec;
   M = gel(idinit,1);
   U = gel(idinit,2);
   Lpr = gel(idinit,3);
@@ -1637,9 +1640,10 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
   Lphi1 = gel(idinit,5);
   Lk2 = gel(idinit,6);
   mult = gel(idinit,7);
-  eps = gel(idinit,8);
-  Lv = gel(idinit,9);
-  prec = gel(idinit,10)[1];
+  Lv = gel(idinit,8);
+  prec = gel(idinit,9)[1];
+  nmiss = gel(idinit,9)[2];
+  beps = gel(idinit,9)[3];
   npr = lg(Lpr)-1;
   nk1 = lg(Lk1)-1; n = npr + nk1;
   cyc = gchar_get_cyc(gc);
@@ -1657,8 +1661,7 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
     {
       if (typ(x) == t_COMPLEX)
       {
-        nnorm++;
-        /* 2 Pi Im(theta) / log N(pr) */
+        nnorm++; /* 2 Pi Im(theta) / log N(pr) */
         Norm = gadd(Norm, gdiv(gmul(Pi2n(1,prec), gel(x,2)),
                                glog(idealnorm(nf,gel(Lv,i)),prec)));
         gel(Lchiv,i) = x = gel(x,1);
@@ -1687,9 +1690,7 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
   }
 
   /* construct vector */
-  y = zerocol(n + r1 + 2*r2);
-  sumphi = gen_0;
-  nmiss = 0;
+  y = zerocol(n + r1 + 2*r2); sumphi = gen_0;
   for (i=1; i<=npr; i++) gel(y,i) = gel(Lchiv, Lpr[i]);
   for (i=1; i<=nk1; i++) gel(y,npr+i) = gmael(Lchiv,Lk1[i],1);
   for (i=1; i<=r1; i++)
@@ -1698,18 +1699,17 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
       gel(y, n+i) = x =  gmael(Lchiv,Lphi1[i],2);
       sumphi = gadd(sumphi, x);
     }
-    else nmiss++;
   for (i=1; i<=r2; i++)
     if (Lk2[i])
     {
-      gel(y, n + r1+r2+i) = gmael(Lchiv,Lk2[i],1);
-      gel(y, n + r1+i) = x =  gmael(Lchiv,Lk2[i],2);
+      long a = n + r1 + i;
+      gel(y, a + r2) = gmael(Lchiv,Lk2[i],1);
+      gel(y, a) = x =  gmael(Lchiv,Lk2[i],2);
       sumphi = gadd(sumphi, gshift(x,1));
     }
-    else nmiss += 2;
   if (nmiss)
   {
-    sumphi = gmul(gdivgs(sumphi, -nmiss), eps);
+    sumphi = gmul2n(gdivgs(sumphi, -nmiss), beps);
     for (i = 1; i <= r1; i++) if (!Lphi1[i]) gel(y, n + i) = sumphi;
     for (i = 1; i <= r2; i++) if (!Lk2[i])   gel(y, n + r1+i) = sumphi;
   }

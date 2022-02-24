@@ -76,7 +76,7 @@ gcharconductor(gc2,4*c)
 print("Watkins 3.7 & 6.1");
 bnf = bnfinit(x^2+23);
 gc = gcharinit(bnf,1);
-pr = idealadd(bnf,31,x-15);
+pr = idealprimedec(bnf,31)[2];
 c0 = gcharidentify(gc,[1,pr],[[0,0],1/3]); /* class group char, order 3 */
 J = idealprimedec(bnf,23)[1];
 bestappr(cxchareval(gc,c0,J),10^6)
@@ -146,10 +146,10 @@ round(10^20*lfun(L,2,2))
 print("S intersects mod");
 pol = x^3 + 4*x - 1;
 K = bnfinit(pol);
-pr2 = idealadd(K, 2, x+1);
+pr2 = idealprimedec(K, 2)[1];
 N1 = idealpow(K,pr2,2);
 gc1 = gcharinit(K,N1);
-pr = idealadd(K, 31, x+7);
+pr = idealprimedec(K, 31)[1];
 c1 = gcharidentify(gc1,[2,pr],[[0,0],1/2]);
 {c3 = gcharidentify(gc1,[2,pr],[
   [0,2.2418452596254755362005770232711966272],
@@ -250,9 +250,9 @@ pol = x^4 - 2*x^3 + 5*x^2 - 2*x - 1;
 bnf = bnfinit(pol);
 N = (2*5)^2;
 gc = gcharinit(bnf,N);
-pr1 = idealadd(bnf, 101, x+6);
-pr2 = idealadd(bnf, 103, x+22);
-pr3 = idealadd(bnf, 107, x+10);
+pr1 = idealprimedec(bnf,101)[1];
+pr2 = idealprimedec(bnf,103)[1];
+pr3 = idealprimedec(bnf,107)[1];
 {chi = gcharidentify(gc,[1,2,3,pr1,pr2,pr3],[
   [0,-0.35297367876409751322089068292993762448],
   [0,-0.041073660200364481585974033215524566169],

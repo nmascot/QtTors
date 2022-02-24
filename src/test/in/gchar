@@ -133,7 +133,7 @@ bnf = bnfinit(x^4 - x^3 + 3*x^2 + 2*x + 1, 1);
 gc = gcharinit(bnf, 1);
 round(gc.cyc)
 gcharidentify(gc,[],[])
-pr = idealadd(bnf, 101, x-48);
+pr = idealprimedec(bnf, 101)[1];
 idl = idealadd(bnf, 140788137003612377, 6496*x^3-6496*x^2+19489*x-35497622602420127);
 B=2;
 {forvec(V=[[0,1],[-B,B],[-B,B],[-B,B]],
@@ -141,10 +141,8 @@ B=2;
   param = gcharduallog(gc,chi);
   if(gcharidentify(gc,[pr],[chareval(gc,chi,pr)])!=chi,print("FAIL a: chi=",chi));
   if(gcharidentify(gc,[pr,1,2],[chareval(gc,chi,pr),
-    [param[4],param[2]],[param[5],param[3]]])!=chi,print("FAIL b: chi=",chi));
-  if(gcharidentify(gc,[idl,1,2],[chareval(gc,chi,idl),
-    [param[4],param[2]],[param[5],param[3]]])!=chi,print("FAIL c: chi=",chi));
-)};
+    [param[4],param[2]],[param[5],param[3]]])!=chi,print("FAIL b: chi=",chi)));
+};
 gcharidentify(gc,[1,2],[[0,1],[0,0]])
 gcharidentify(gc,[1,2],[[0,1/2],[0,0]])
 gcharidentify(gc,[1,2],[[0,0.7],[0,0]])
@@ -432,9 +430,6 @@ chi = [1,0]~;
 chareval(gc,chi,idealprimedec(bnf,2)[1]) != 0
 chareval(gc,chi,idealprimedec(bnf,3)[1]) != 0
 
-
-
-
 print("bad inputs");
 gcharinit([],1)
 gcharinit(bnfinit(x),[])
@@ -443,7 +438,7 @@ gcharidentify([],[1],[[0,0]]);
 gcharidentify('gc,[1],[[0,0]]);
 bnf = bnfinit(x^4 - x^3 + 3*x^2 + 2*x + 1, 1);
 gc = gcharinit(bnf, 1);
-pr = idealadd(bnf, 101, x-48);
+pr = idealprimedec(bnf, 101)[1];
 gcharidentify(gc,[1,1],[[0,0],[0,0]]);
 gcharidentify(gc,[1,0],[[0,0],[0,0]]);
 gcharidentify(gc,[1,3],[[0,0],[0,0]]);
