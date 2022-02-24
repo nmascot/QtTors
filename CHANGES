@@ -116,6 +116,7 @@ BA  97- factor((Mod(1,2)*((t^2+1)*x^4+(t^4+1)*x^2+1))) -> division by 0
     98- internal type errors in mfsymboleval [#2360]
     99- incorrect chargalois for trivial group [#2341]
    100- minpoly(Mod(1/(x-(t+1))*Mod(1,2),(t+1)*x^2+t*x+1)) -> error [#2363]
+BA 101- factor(Mod(1,2)*x^5+a*x^3) -> div by 0
 
   Added
 HC   1- new GP function eulerreal

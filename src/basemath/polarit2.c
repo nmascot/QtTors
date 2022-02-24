@@ -159,22 +159,27 @@ centermod(GEN x, GEN p) { return centermod_i(x,p,NULL); }
 static GEN
 RgX_Frobenius_deflate(GEN S, ulong p)
 {
-  GEN F = RgX_deflate(S, p);
-  long i, l = lg(F);
-  for (i=2; i<l; i++)
+  if (degpol(S)%p)
+    return NULL;
+  else
   {
-    GEN Fi = gel(F,i), R;
-    if (typ(Fi)==t_POL)
+    GEN F = RgX_deflate(S, p);
+    long i, l = lg(F);
+    for (i=2; i<l; i++)
     {
-      if (signe(RgX_deriv(Fi))==0)
-        gel(F,i) = RgX_Frobenius_deflate(gel(F, i), p);
+      GEN Fi = gel(F,i), R;
+      if (typ(Fi)==t_POL)
+      {
+        if (signe(RgX_deriv(Fi))==0)
+          gel(F,i) = RgX_Frobenius_deflate(gel(F, i), p);
+        else return NULL;
+      }
+      else if (ispower(Fi, utoi(p), &R))
+        gel(F,i) = R;
       else return NULL;
     }
-    else if (ispower(Fi, utoi(p), &R))
-      gel(F,i) = R;
-    else return NULL;
+    return F;
   }
-  return F;
 }
 
 static GEN
@@ -203,9 +208,8 @@ RgXY_squff(GEN f)
       if (degpol(r) == 0) break;
     }
     if (!p) break;
-    r = RgX_Frobenius_deflate(f, p);
-    if (!r) { gel(u, q) = f; break; }
-    f = r;
+    f = RgX_Frobenius_deflate(r, p);
+    if (!f) { gel(u, q) = r; break; }
   }
   for (i = n; i; i--)
     if (degpol(gel(u,i))) break;
