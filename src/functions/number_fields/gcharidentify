@@ -10,7 +10,7 @@ Doc: \var{gc} being a Grossencharacter group as output by \kbd{gcharinit}, $Lv$ 
  structure representing a prime not dividing the modulus of~$g$ (finite place),
  and $Lchiv$ being a \typ{VEC} of local characters~$\chi_v$ encoded by $[k,\varphi]$
  with~$k$ a \typ{INT} and $\varphi$ a \typ{REAL} representing~$x\mapsto
- {\rm sign}(x)^k|x|^{i\varphi}$ (real place) or~$z\mapsto
+ \text{sign}(x)^k|x|^{i\varphi}$ (real place) or~$z\mapsto
  (z/|z|)^k|z|^{2i\varphi}$(complex place) or by a \typ{REAL}~$\theta$
  representing~$\goth{p} \mapsto \exp(2i\pi \theta)$ (finite place),
  returns a Grossencharacter~$\psi$ belonging to~$g$ such that~$\psi_v \approx

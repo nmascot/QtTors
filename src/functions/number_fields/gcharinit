@@ -20,7 +20,7 @@ Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
  components vector $v$ via
  $\chi: a\in I \mapsto \exp(2i\pi v\cdot{{\cal L}(a)})$.
 
- See \kbd{gcharlog} for more details on the map $\cal L$.
+ See \kbd{gcharlog} for more details on the map ${\cal L}$.
 
  \bprog
  ? bnf = bnfinit(polcyclo(5),1); \\ @com initialize number field $\Q(\zeta_5)$
