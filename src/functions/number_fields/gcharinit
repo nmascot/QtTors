@@ -66,7 +66,7 @@ Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
  via its SNF invariants (\kbd{\var{gc}.cyc}), the last component
  representing the norm character.
 
- $\var{gc}[10]$ is row vector \kbd{[R,U,Ui]} allowing to convert characters
+ $\var{gc}[10]$ is a vector \kbd{[R,U,Ui]} allowing to convert characters
  from SNF basis to internal combination of generators.
 
  Specifically, a character \kbd{chi} in SNF basis has coordinates
