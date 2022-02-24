@@ -57,7 +57,7 @@ Doc:
  \tet{intnumosc} is available, performing Gaussian integration on intervals of
  length the half-period (or quasi-period) and using Sidi's $mW$ algorithm to
  extrapolate their sum. If poles are close to the integration interval,
- Gaussian integration may run into difficiulties and it is then advisable to
+ Gaussian integration may run into difficulties and it is then advisable to
  split the integral using \kbd{intnum} to get away from poles, then
  \kbd{intnumosc} for the remainder.
 
