@@ -1867,14 +1867,13 @@ nfcertify(GEN nf)
 static GEN
 get_red_G(nfmaxord_t *S, GEN *pro)
 {
+  pari_sp av = avma;
   GEN G, u, u0 = NULL;
-  pari_sp av;
   long i, prec, n = degpol(S->T);
   nffp_t F;
 
   prec = nbits2prec(n+32);
   nffp_init(&F, S, prec);
-  av = avma;
   for (i=1; ; i++)
   {
     F.prec = prec; make_M_G(&F, 0); G = F.G;
