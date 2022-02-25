@@ -3199,25 +3199,26 @@ bnfgwgeneric(GEN bnf, GEN Lpr, GEN Ld, GEN pl, long var)
   return NULL;/*LCOV_EXCL_LINE*/
 }
 
-/* no garbage collection */
+/* pr.p != ell */
 static GEN
-localextdeg(GEN nf, GEN pr, GEN cnd, long d, long ell, long n)
+localextdeg(GEN nf, GEN pr, long d, ulong ell, long n)
 {
-  long g = n/d;
-  GEN res, modpr, ppr = pr, T, p, gen, k;
-  if (d==1) return gen_1;
-  if (equalsi(ell,pr_get_p(pr))) { /* ell == p */
-    res = nfadd(nf, gen_1, pr_get_gen(pr));
-    res = nfpowmodideal(nf, res, stoi(g), cnd);
-  }
-  else { /* ell != p */
-    k = powis(stoi(ell),Z_lval(subiu(pr_norm(pr),1),ell));
-    k = divis(k,g);
-    modpr = nf_to_Fq_init(nf, &ppr, &T, &p);
-    (void)Fq_sqrtn(gen_1,k,T,p,&gen);
-    res = Fq_to_nf(gen, modpr);
-  }
-  return res;
+  GEN modpr, T, p, gen, k;
+  if (d == 1) return gen_1;
+  k = powuu(ell, Z_lval(subiu(pr_norm(pr),1), ell));
+  k = divis(k, n / d);
+  modpr = nf_to_Fq_init(nf, &pr, &T, &p);
+  (void)Fq_sqrtn(gen_1, k, T, p, &gen);
+  return Fq_to_nf(gen, modpr);
+}
+/* pr.p = ell */
+static GEN
+localextdegell(GEN nf, GEN pr, GEN E, long d, long n)
+{
+  GEN x;
+  if (d == 1) return gen_1;
+  x = nfadd(nf, gen_1, pr_get_gen(pr));
+  return nfpowmodideal(nf, x, stoi(n / d), idealpow(nf, pr, E));
 }
 
 /* Ld[i] must be nontrivial powers of the same prime ell */
@@ -3226,33 +3227,28 @@ GEN
 nfgwkummer(GEN nf, GEN Lpr, GEN Ld, GEN pl, long var)
 {
   const long n = (lg(Ld)==1)? 2: vecsmall_max(Ld);
-  pari_sp av = avma;
   ulong ell;
-  long i, v;
-  GEN cnd, y, x, pol;
-  v = uisprimepower(n, &ell);
-  cnd = zeromatcopy(lg(Lpr)-1,2);
+  long i, l = lg(Lpr), v = uisprimepower(n, &ell);
+  GEN E = cgetg(l, t_COL), y = cgetg(l, t_VEC);
 
-  y = vec_ei(lg(Lpr)-1,1);
-  for (i=1; i<lg(Lpr); i++) {
-    GEN pr = gel(Lpr,i), p = pr_get_p(pr), E;
-    long e = pr_get_e(pr);
-    gcoeff(cnd,i,1) = pr;
-
-    if (!absequalui(ell,p))
-      E = gen_1;
+  for (i = 1; i < l; i++)
+  {
+    GEN pr = gel(Lpr,i), p = pr_get_p(pr);
+    if (!absequalui(ell, p))
+    {
+      gel(E, i) = gen_1;
+      gel(y, i) = localextdeg(nf, pr, Ld[i], ell, n);
+    }
     else
-      E = addui(1 + v*e, divsi(e,subiu(p,1)));
-    gcoeff(cnd,i,2) = E;
-    gel(y,i) = localextdeg(nf, pr, idealpow(nf,pr,E), Ld[i], ell, n);
+    {
+      long e = pr_get_e(pr);
+      gel(E, i) = addui(1 + v*e, divsi(e, subiu(p,1)));
+      gel(y, i) = localextdegell(nf, pr, gel(E,i), Ld[i], n);
+    }
   }
-
   /* TODO use a factoredextchinese to ease computations afterwards ? */
-  x = idealchinese(nf, mkvec2(cnd,pl), y);
-  x = basistoalg(nf,x);
-  pol = gsub(gpowgs(pol_x(var),n),x);
-
-  return gerepileupto(av,pol);
+  y = idealchinese(nf, mkvec2(mkmat2(Lpr,E), pl), y);
+  return gsub(gpowgs(pol_x(var),n), basistoalg(nf, y));
 }
 
 static GEN
@@ -3312,10 +3308,11 @@ nfgrunwaldwang(GEN nf0, GEN Lpr, GEN Ld, GEN pl, long var)
   /* TODO choice between kummer and generic ? Let user choose between speed
    * and size */
   if (w%n==0 && lg(Ld)>1)
-    return gerepileupto(av,nfgwkummer(nf,Lpr,Ld,pl,var));
-  if (ell==n) {
+    return gerepileupto(av, nfgwkummer(nf,Lpr,Ld,pl,var));
+  if (ell==n)
+  {
     if (!bnf) bnf = Buchall(nf, nf_FORCE, 0);
-    return gerepileupto(av,bnfgwgeneric(bnf,Lpr,Ld,pl,var));
+    return gerepileupto(av, bnfgwgeneric(bnf,Lpr,Ld,pl,var));
   }
   pari_err_IMPL("nfgrunwaldwang for nonprime degree");
   return NULL; /*LCOV_EXCL_LINE*/
