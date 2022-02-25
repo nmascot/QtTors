@@ -327,7 +327,7 @@ Babai_fast(pari_sp av, long kappa, GEN *pB, GEN *pU, double **mu, double **r,
   long k, aa = (a > zeros)? a : zeros+1;
   long emaxmu = EX0, emax2mu = EX0;
   s64 xx;
-  int did_something = 0;
+  int did_something = 0, no_GC = 1;;
   /* N.B: we set d = 0 (resp. n = 0) to avoid updating U (resp. B) */
 
   for (;;) {
@@ -337,7 +337,7 @@ Babai_fast(pari_sp av, long kappa, GEN *pB, GEN *pU, double **mu, double **r,
     if (gc_needed(av,2))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"Babai[1], a=%ld", aa);
-      gc_lll(av,2,&B,&U);
+      if (no_GC) no_GC = 0; else gc_lll(av,2,&B,&U);
     }
     /* Step2: compute the GSO for stage kappa */
     emax2mu = emaxmu; emaxmu = EX0;
@@ -675,7 +675,7 @@ Babai_heuristic(pari_sp av, long kappa, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
   GEN B = *pB, U = *pU;
   const long n = nbrows(B), d = U ? lg(U)-1: 0, bit = prec2nbits(prec);
   long k, aa = (a > zeros)? a : zeros+1;
-  int did_something = 0;
+  int did_something = 0, no_GC = 1;
   long emaxmu = EX0, emax2mu = EX0;
   /* N.B: we set d = 0 (resp. n = 0) to avoid updating U (resp. B) */
 
@@ -686,7 +686,7 @@ Babai_heuristic(pari_sp av, long kappa, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
     if (gc_needed(av,2))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"Babai[1], a=%ld", aa);
-      gc_lll(av,2,&B,&U);
+      if (no_GC) no_GC = 0; else gc_lll(av,2,&B,&U);
     }
     /* Step2: compute the GSO for stage kappa */
     emax2mu = emaxmu; emaxmu = EX0;
@@ -1178,6 +1178,7 @@ Babai_dpe(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, dpe_t **mu, dpe_t *
   GEN G = *pG, B = *pB, U = *pU, ztmp;
   long k, d, n, aa = a > zeros? a: zeros+1;
   long emaxmu = EX0, emax2mu = EX0;
+  int no_GC = 1;
   /* N.B: we set d = 0 (resp. n = 0) to avoid updating U (resp. B) */
   d = U? lg(U)-1: 0;
   n = B? nbrows(B): 0;
@@ -1188,7 +1189,7 @@ Babai_dpe(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, dpe_t **mu, dpe_t *
     if (gc_needed(av,2))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"Babai[1], a=%ld", aa);
-      gc_lll(av,3,&G,&B,&U);
+      if (no_GC) no_GC = 0; else gc_lll(av,3,&G,&B,&U);
     }
     /* Step2: compute the GSO for stage kappa */
     emax2mu = emaxmu; emaxmu = EX0;
