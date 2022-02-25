@@ -3053,39 +3053,36 @@ get_phi0(GEN bnr, GEN Lpr, GEN Ld, GEN pl, long *pr, long *pn)
   *pn = n;
   *pr = r = lg(S)-1;
   if (!r) return NULL;
+  Sst = cgetg(r+1, t_VECSMALL); /* Z/n-dual */
+  for (i=1; i<=r; i++) Sst[i] = ugcdiu(gel(S,i), n);
+  if (Sst[1] != n) return NULL;
   Lconj = NULL;
   nbloc = nbfrob = lg(Lpr)-1;
   if (uispow2(n))
   {
-    long l = lg(pl), k = 1;
+    long l = lg(pl), k = 0;
     GEN real = cgetg(l, t_VECSMALL);
-    for (i=1; i<l; i++)
-      if (pl[i]==-1) real[k++] = i;
-    if (k > 1)
+    for (i = 1; i < l; i++)
+      if (pl[i] == -1) real[++k] = i;
+    if (k)
     {
       GEN nf = bnr_get_nf(bnr), I = bid_get_fact(bnr_get_bid(bnr));
       GEN v, y, C = idealchineseinit(bnr, I);
       long r1 = nf_get_r1(nf), n = nbrows(I);
-      nbloc += k-1;
-      Lconj = cgetg(k, t_VEC);
-      v = const_vecsmall(r1,1);
+      nbloc += k;
+      Lconj = cgetg(k+1, t_VEC);
+      v = const_vecsmall(r1, 1);
       y = const_vec(n, gen_1);
-      for (i = 1; i < k; i++)
+      for (i = 1; i <= k; i++)
       {
-        v[real[i]] = -1; gel(Lconj,i) = idealchinese(nf,mkvec2(C,v),y);
+        v[real[i]] = -1; gel(Lconj,i) = idealchinese(nf, mkvec2(C,v), y);
         v[real[i]] = 1;
       }
     }
   }
-
-  /* compute Z/n-dual */
-  Sst = cgetg(r+1, t_VECSMALL);
-  for (i=1; i<=r; i++) Sst[i] = ugcdiu(gel(S,i), n);
-  if (Sst[1] != n) return NULL;
-
   globGmod = cgetg(r+1,t_MAT);
   G = cgetg(r+1,t_VECSMALL);
-  for (i=1; i<=r; i++)
+  for (i = 1; i <= r; i++)
   {
     G[i] = n / Sst[i]; /* pairing between S and Sst */
     gel(globGmod,i) = cgetg(nbloc+1,t_VECSMALL);
@@ -3093,16 +3090,17 @@ get_phi0(GEN bnr, GEN Lpr, GEN Ld, GEN pl, long *pr, long *pn)
 
   /* compute images of Frobenius elements (and complex conjugation) */
   loc = cgetg(nbloc+1,t_VECSMALL);
-  for (i=1; i<=nbloc; i++) {
+  for (i = 1; i <= nbloc; i++)
+  {
     long L;
-    if (i<=nbfrob)
+    if (i <= nbfrob)
     {
-      X = gel(Lpr,i);
+      X = gel(Lpr, i);
       L = Ld[i];
     }
     else
     { /* X = 1 (mod f), sigma_i(x) < 0, positive at all other real places */
-      X = gel(Lconj,i-nbfrob);
+      X = gel(Lconj, i-nbfrob);
       L = 2;
     }
     X = ZV_to_Flv(isprincipalray(bnr,X), n);
@@ -3119,12 +3117,11 @@ get_phi0(GEN bnr, GEN Lpr, GEN Ld, GEN pl, long *pr, long *pn)
   /* try some random elements in the dual */
   Rglob = cgetg(r+1,t_VECSMALL);
   for (t=0; t<NTRY; t++) {
-    for (j=1; j<=r; j++) Rglob[j] = random_Fl(Sst[j]);
+    for (j = 1; j <= r; j++) Rglob[j] = random_Fl(Sst[j]);
     Rloc = zm_zc_mul(globGmod,Rglob);
-    for (i=1; i<=nbloc; i++)
+    for (i = 1; i <= nbloc; i++)
       if (Rloc[i] % loc[i] == 0) break;
-    if (i > nbloc)
-      return zv_to_ZV(Rglob);
+    if (i > nbloc) return zv_to_ZV(Rglob);
   }
 
   /* try to realize some random elements of the product of the local duals */
@@ -3132,9 +3129,9 @@ get_phi0(GEN bnr, GEN Lpr, GEN Ld, GEN pl, long *pr, long *pn)
                                 diagonal_shallow(zv_to_ZV(loc))), &U, 2);
   /* H,U nbloc x nbloc */
   Rloc = cgetg(nbloc+1,t_COL);
-  for (t=0; t<NTRY; t++) {
-    /* nonzero random coordinate */ /* TODO add special case ? */
-    for (i=1; i<=nbloc; i++) gel(Rloc,i) = stoi(1 + random_Fl(loc[i]-1));
+  for (t = 0; t < NTRY; t++)
+  { /* nonzero random coordinate */ /* TODO add special case ? */
+    for (i = 1; i <= nbloc; i++) gel(Rloc,i) = stoi(1 + random_Fl(loc[i]-1));
     Rglob = hnf_invimage(H, Rloc);
     if (Rglob)
     {
