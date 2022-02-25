@@ -3072,8 +3072,8 @@ get_phi0(GEN bnr, GEN Lpr, GEN Ld, GEN pl, long *pr, long *pn)
       y = const_vec(n, gen_1);
       for (i = 1; i < k; i++)
       {
-        v[i] = -1; gel(Lconj,i) = idealchinese(nf,mkvec2(C,v),y);
-        v[i] = 1;
+        v[real[i]] = -1; gel(Lconj,i) = idealchinese(nf,mkvec2(C,v),y);
+        v[real[i]] = 1;
       }
     }
   }
