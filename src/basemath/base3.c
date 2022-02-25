@@ -2268,7 +2268,8 @@ nfpowmodideal(GEN nf,GEN x,GEN k,GEN A)
   av = avma;
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) != t_COL) return Fp_pow(x, k, gcoeff(A,1,1));
-  if (s < 0) { x = nfinvmodideal(nf, x,A); k = negi(k); }
+  if (s < 0) { k = negi(k); x = nfinvmodideal(nf, x,A); }
+  if (equali1(k)) return gerepileupto(av, s > 0? zk_modHNF(x, A): x);
   for(y = NULL;;)
   {
     if (mpodd(k)) y = nfmulmodideal(nf,y,x,A);
