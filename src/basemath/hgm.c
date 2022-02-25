@@ -1929,11 +1929,11 @@ forvecsort(GEN vF, GEN v)
 }
 
 static GEN
-lfunhgmwild(GEN L, GEN H, GEN t, GEN BAD, long pole, long limdeg, long bitprec)
+lfunhgmwild(GEN L, GEN H, GEN t, GEN BAD, long pole, GEN hint, long bitprec)
 {
   GEN v, K, t0, t0r, t0ir, t0i, t0k, N0, vM, vD, val, PPOL, vF, achi;
   long d, lM, iN, iM, i, k, k2, prec = nbits2prec(bitprec), lB = lg(BAD);
-  long BADprod;
+  long BADprod, limdeg;
   ulong minN = 1, maxN = 2048;
 
   v = cgetg(lB, t_VECSMALL); PPOL = cgetg(lB, t_VEC);
@@ -1946,9 +1946,36 @@ lfunhgmwild(GEN L, GEN H, GEN t, GEN BAD, long pole, long limdeg, long bitprec)
   BADprod = zv_prod(BAD);
   achi = get_achi(H, t, BAD);
   if (pole) L = lfundivraw(L);
-  d = ldata_get_degree(L);
-  k = itos(ldata_get_k(L)); k2 = (k-1) >> 1;
+  limdeg = d = ldata_get_degree(L);
   N0 = ldata_get_conductor(L);
+  if (hint) switch(typ(hint))
+  {
+    long l;
+    case t_INT:
+      limdeg = itos(hint);
+      if (limdeg < 0 || limdeg > d) pari_err_TYPE("lfunhgm [bad hint]", hint);
+      break;
+    case t_VEC:
+      l = lg(hint);
+      if (l > 1 && l < 4)
+      {
+        GEN t = gel(hint,1), r;
+        if (typ(t) != t_INT || signe(t) <= 0)
+          pari_err_TYPE("lfunhgm [bad hint]", hint);
+        t = dvmdii(t, N0, &r);
+        if (r != gen_0)
+          pari_err_TYPE("lfunhgm [bad hint]", hint);
+        minN = maxN = itou(t);
+        if (l == 3)
+        {
+          t = gel(hint,2);
+          if (typ(t) != t_INT || signe(t) < 0 || cmpis(t, d) > 0)
+            pari_err_TYPE("lfunhgm [bad hint]", hint);
+          limdeg = itos(t);
+        }
+      }
+  }
+  k = itos(ldata_get_k(L)); k2 = (k-1) >> 1;
   K = gammamellininvinit(ldata_get_gammavec(L), 0, bitprec + 32);
   t0 = sstoQ(11, 10); t0i = ginv(t0); t0k = gpowgs(t0, k);
   t0r = gpow(t0, sstoQ(2,d), prec); t0ir = ginv(t0r);
@@ -1958,7 +1985,6 @@ lfunhgmwild(GEN L, GEN H, GEN t, GEN BAD, long pole, long limdeg, long bitprec)
   vF = cgetg(lB, t_VEC);
   vD = cgetg(lB, t_VEC); /* vD[k][l] = sum_j deg Fj * nj for F = vF[k][l] */
   v = cgetg(lB, t_VECSMALL);
-  if (limdeg < 0) limdeg = d;
   for (i = 1; i < lB; i++)
   {
     GEN W = cgetg(limdeg+2, t_VEC), D;
@@ -1977,11 +2003,23 @@ lfunhgmwild(GEN L, GEN H, GEN t, GEN BAD, long pole, long limdeg, long bitprec)
   if (DEBUGLEVEL) { err_printf(" lM = %ld ", lM); err_flush(); }
   L = shallowcopy(L);
   val = cgetg(lB, t_VECSMALL);
-  for(;;minN = maxN+1, maxN <<= 2)
+  for(;;)
   {
-    GEN z = listcond(BAD, achi, minN, maxN), vroots, an0, vN;
-    long lN = lg(z), lim;
+    GEN z, vroots, an0, vN;
+    long lN, lim;
 
+    z = listcond(BAD, achi, minN, maxN);
+    if (maxN == minN) /* from hint */
+    {
+      minN = 1; /* in case it fails */
+      maxN--;
+    }
+    else
+    {
+      minN = maxN+1;
+      maxN <<= 2;
+    }
+    lN = lg(z);
     if (lN == 1) continue;
     vN = cgetg(lN, t_VEC);
     for (i = 1; i < lN; i++) gel(vN, i) = muliu(N0, z[i]);
@@ -2103,7 +2141,7 @@ static GEN
 tag(GEN x, long t) { return mkvec2(mkvecsmall(t), x); }
 
 static GEN
-lfunhgm_i(GEN hgm, GEN t, long limdeg, long bitprec)
+lfunhgm_i(GEN hgm, GEN t, GEN hint, long bitprec)
 {
   GEN L, vr, v = hgmlfuninfty(hgm, t), vga = zv_to_ZV(gel(v,1)), k = gel(v,2);
   GEN BAD = gel(v,3), COND = gel(v, 4);
@@ -2130,7 +2168,7 @@ lfunhgm_i(GEN hgm, GEN t, long limdeg, long bitprec)
     if (pole) gel(L, 7) = gel(vr, 1);
     return L;
   }
-  v = lfunhgmwild(L, hgm, t, BAD, pole, limdeg, bitprec);
+  v = lfunhgmwild(L, hgm, t, BAD, pole, hint, bitprec);
   gel(L, 5) = gel(v, 1); /* N */
   gmael3(L, 1, 2, 2) = gel(v, 2); /* [t, PPOL] */
   gel(L, 6) = gel(v, 3); /* w */
@@ -2142,11 +2180,11 @@ lfunhgm_i(GEN hgm, GEN t, long limdeg, long bitprec)
   return L;
 }
 GEN
-lfunhgm(GEN hgm, GEN t, long lim, long bit)
+lfunhgm(GEN hgm, GEN t, GEN hint, long bit)
 {
   pari_sp av = avma;
   if (!checkhgm(hgm)) pari_err_TYPE("lfunhgm", hgm);
-  return gerepilecopy(av, lfunhgm_i(hgm, t, lim, bit));
+  return gerepilecopy(av, lfunhgm_i(hgm, t, hint, bit));
 }
 
 GEN
