@@ -207,9 +207,9 @@ get_prime_info(GEN bnf)
 static GEN
 inithue(GEN P, GEN bnf, long flag, long prec)
 {
-  GEN MatFU, x0, tnf, tmp, gpmin, dP, csts, ALH, eps5, ro, c1, c2, Ind = gen_1;
-  long k,j, n = degpol(P);
-  long s,t, prec_roots;
+  GEN fu, MatFU, x0, tnf, tmp, gpmin, dP, csts, ALH, eps5, ro, c1, c2;
+  GEN Ind = gen_1;
+  long s,t, k,j, prec_roots, n = degpol(P);
 
   if (!bnf)
   {
@@ -220,11 +220,12 @@ inithue(GEN P, GEN bnf, long flag, long prec)
   }
 
   nf_get_sign(bnf_get_nf(bnf), &s, &t);
-  prec_roots = prec;
+  fu = bnf_get_fu(bnf);
+  prec_roots = prec + nbits2extraprec(gexpo(Q_primpart(fu)));
   for(;;)
   {
     ro = tnf_get_roots(P, prec_roots, s, t);
-    MatFU = Conj_LH(bnf_get_fu(bnf), &ALH, ro, prec);
+    MatFU = Conj_LH(fu, &ALH, ro, prec);
     if (MatFU) break;
     prec_roots = precdbl(prec_roots);
     if (DEBUGLEVEL>1) pari_warn(warnprec, "inithue", prec_roots);
