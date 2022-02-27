@@ -391,7 +391,7 @@ extern char *current_psfile, *pari_datadir;
 #  define gc_needed(av,n) 1
 #else
 #  define low_stack(x,l) ((void)(x),avma < (pari_sp)(l))
-#  define gc_needed(av,n) (avma < (pari_sp)stack_lim(av,n))
+#  define gc_needed(av,n) (avma < (pari_sp)stack_lim(av,n) && (av) > ((pari_mainstack->bot >> 1) + (pari_mainstack->top >> 1)))
 #endif
 
 #define stack_lim(av,n) (pari_mainstack->bot+(((av)-pari_mainstack->bot)>>(n)))

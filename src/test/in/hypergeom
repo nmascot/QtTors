@@ -1,4 +1,5 @@
 default(realprecision,38);
+default(parisize,"15M")
 testF(v, D0, D) =
 {
   for(i=1,#v,

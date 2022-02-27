@@ -1,4 +1,4 @@
-default(parisize, "40M");
+default(parisize, "80M");
 default(realprecision, 38);
 getcache()
 Z4=znstar(4,1);

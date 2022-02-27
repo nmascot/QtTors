@@ -1,3 +1,4 @@
+  ***   Warning: new stack size = 15000000 (14.305 Mbytes).
 [[8, 4], [0, 0]]
 [[2, 4], [0, 0]]
 [[8, 4], [0, 0]]
@@ -18,7 +19,14 @@
 [[3, 3], [0, 0]]
 [[9, 3], [0, 0]]
 [[3, 11], [0, 0]]
-[[2, 2], [0, 0]]
+  ***   at top-level: lambdamu(E1483a1,5)
+  ***                 ^-------------------
+  ***   in function lambdamu: ellpadiclambdamu(e,p,d,i)
+  ***                         ^-------------------------
+  *** ellpadiclambdamu: the PARI stack overflows !
+  current stack size: 15000000 (14.305 Mbytes)
+  [hint] set 'parisizemax' to a nonzero value in your GPRC
+
 [[7, 5], [0, 0]]
 [[3, 1], [0, 0]]
 [[1, 3], [0, 0]]
@@ -64,4 +72,4 @@
   ***   in function lambdamu: ellpadiclambdamu(e,p,d,i)
   ***                         ^-------------------------
   *** ellpadiclambdamu: incorrect type in ellpadiclambdamu (t_VEC).
-Total time spent: 736
+Total time spent: 651

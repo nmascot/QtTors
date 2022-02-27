@@ -766,7 +766,11 @@ F21(GEN a, GEN b, GEN c, GEN z, long prec)
 
 static GEN
 F21taylor(GEN a, GEN b, GEN c, GEN z, long prec)
-{ return gdiv(Ftaylor(mkvec2(a,b), mkvec(c), z, prec), ggamma(c, prec)); }
+{
+  pari_sp av = avma;
+  GEN r = gdiv(Ftaylor(mkvec2(a,b), mkvec(c), z, prec), ggamma(c, prec));
+  return gerepileupto(av, r);
+}
 
 static GEN
 F21taylorlim(GEN N, long m, GEN z, GEN Z, long ind, long prec)

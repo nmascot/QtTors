@@ -1,4 +1,4 @@
-default(parisize,"15M");
+default(parisize,"25M");
 
 do(G, lim)=
 { my(B = [1, 10^lim], field, D, v, T);
