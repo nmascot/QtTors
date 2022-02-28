@@ -7697,6 +7697,10 @@ as \kbd{FpXQX\_divrem}. The parameter $q$ must be equal to $p^e$.
 \fun{GEN}{ZpXQX_digits}{GEN x, GEN B, GEN T, GEN q, GEN p, long e}
 As \kbd{FpXQX\_digits}. The parameter $q$ must be equal to $p^e$.
 
+\fun{GEN}{ZpXQX_ZpXQXQ_liftroot}{GEN f, GEN a, GEN S, GEN T, GEN p, long e}
+as \tet{ZpXQX_liftroot}, except that $a$ is an element of
+$\Z_p[X,Y]/(S(X,Y),T(X))$.
+
 \subsec{ZqX}
 
 \fun{GEN}{ZqX_roots}{GEN F, GEN T, GEN p, long e}

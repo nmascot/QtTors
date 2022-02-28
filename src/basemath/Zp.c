@@ -1330,6 +1330,62 @@ ZpXQM_prodFrobenius(GEN M, GEN T, GEN p, long e)
   return gerepilecopy(av, gel(z,2));
 }
 
+GEN
+ZpXQX_ZpXQXQ_liftroot(GEN P, GEN S, GEN U, GEN T, GEN p, long n)
+{
+  pari_sp ltop = avma, av;
+  long N, r;
+  long mask;
+  GEN  qn, q2, q, W, Q, Tq2, Tq, Pq, Uq, Uq2;
+  pari_timer ti;
+  qn = powiu(p, n);
+  T = FpX_get_red(T, qn);
+  U = FpXQX_get_red(U, T, qn);
+  if (n == 1) return gcopy(S);
+  mask = quadratic_prec_mask(n);
+  av = avma;
+  q2 = p; q = sqri(p); mask >>= 1; N = 2;
+  if (DEBUGLEVEL > 3) timer_start(&ti);
+  Tq = FpXT_red(T,q);
+  Uq = FpXQXT_red(U, Tq, q);
+  Tq2 = FpXT_red(Tq, q2);
+  Uq2 = FpXQXT_red(U, Tq2, q2);
+  Pq = FpXQX_red(P, Tq, q);
+  W = FpXQXQ_inv(FpXQX_FpXQXQ_eval(FpXX_deriv(P,q2), S, Uq2, Tq2, q2), Uq2, Tq2, q2);
+  Q  = ZXX_Z_divexact(FpXQX_FpXQXQ_eval(Pq, S, Uq, Tq, q), q2);
+  r = brent_kung_optpow(degpol(P), 4, 3);
+  if (DEBUGLEVEL > 3)
+    err_printf("ZpX_ZpXQ_liftroot: lifting to prec %ld\n",n);
+  for (;;)
+  {
+    GEN H, Sq, Wq, Spow, dP, qq, Pqq, Tqq, Uqq;
+    H  = FpXQXQ_mul(W, Q, Uq2, Tq2, q2);
+    Sq = FpXX_sub(S, ZXX_Z_mul(H, q2), q);
+    if (DEBUGLEVEL > 3)
+      timer_printf(&ti,"ZpX_ZpXQ_liftroot: reaching prec %ld",N);
+    if (mask==1)
+      return gerepileupto(ltop, Sq);
+    qq = sqri(q); N <<= 1;
+    if (mask&1UL) { qq = diviiexact(qq, p); N--; }
+    mask >>= 1;
+    Tqq  = FpXT_red(T, qq);
+    Uqq  = FpXQXT_red(U, Tqq, qq);
+    Pqq  = FpXQX_red(P, Tqq, qq);
+    Spow = FpXQXQ_powers(Sq, r, Uqq, Tqq, qq);
+    Q  = ZXX_Z_divexact(FpXQX_FpXQXQV_eval(Pqq, Spow, Uqq, Tqq, qq), q);
+    dP = FpXQX_FpXQXQV_eval(FpXX_deriv(Pq, q), FpXQXV_red(Spow, Tq, q), Uq, Tq, q);
+    Wq = ZXX_Z_divexact(gsub(FpXQXQ_mul(W, dP, Uq, Tq, q), gen_1), q2);
+    Wq = ZXX_Z_mul(FpXQXQ_mul(W, Wq, Uq2, Tq2, q2), q2);
+    Wq = FpXX_sub(W, Wq, q);
+    S = Sq; W = Wq; q2 = q; q = qq; Tq2 = Tq; Tq = Tqq; Uq2 = Uq; Uq = Uqq;  Pq = Pqq;
+    if (gc_needed(av, 1))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"ZpX_ZpXQ_Newton");
+      gerepileall(av, 10, &S, &W, &Q, &Uq2, &Uq, &Tq2, &Tq, &Pq, &q, &q2);
+    }
+  }
+}
+
 /* Canonical lift of polynomial */
 
 static GEN _can_invl(void *E, GEN V) {(void) E; return V; }
