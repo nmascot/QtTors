@@ -264,6 +264,19 @@ FpXQX_red(GEN z, GEN T, GEN p)
   return FpXQX_renormalize(res,l);
 }
 
+GEN
+FpXQXV_red(GEN x, GEN T, GEN p)
+{ pari_APPLY_type(t_VEC, FpXQX_red(gel(x,i), T, p)) }
+
+GEN
+FpXQXT_red(GEN x, GEN T, GEN p)
+{
+  if (typ(x) == t_POL)
+    return FpXQX_red(x, T, p);
+  else
+    pari_APPLY_type(t_VEC, FpXQXT_red(gel(x,i), T, p))
+}
+
 static GEN
 to_intmod(GEN x, GEN p) { retmkintmod(modii(x, p), p); }
 
