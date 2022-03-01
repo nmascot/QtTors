@@ -139,7 +139,7 @@ gc_lll(pari_sp av, int n, ...)
   if (av - avma > (s >> 2))
   {
     size_t t = avma - pari_mainstack->bot;
-    av = avma; new_chunk(s + t); set_avma(av); /* double size */
+    av = avma; new_chunk((s + t) / sizeof(long)); set_avma(av); /* double */
   }
 }
 
