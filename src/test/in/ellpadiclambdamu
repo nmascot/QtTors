@@ -1,4 +1,4 @@
-default(parisize, "15M");
+default(parisize, "18M");
 lambdamu(e,p,d=1,i=0)= ellpadiclambdamu(e, p, d, i);
 E11a1 = ellinit([0, -1, 1, -10, -20]);
 E11a2 = ellinit([0, -1, 1, -7820, -263580]);
