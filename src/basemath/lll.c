@@ -132,12 +132,15 @@ gc_lll(pari_sp av, int n, ...)
     GEN *x = va_arg(a,GEN*);
     if (*x) { gptr[j++] = x; *x = (GEN)copy_bin(*x); }
   }
-  va_end(a);
-  set_avma(av);
+  va_end(a); set_avma(av);
   for (--j; j>=0; j--) *gptr[j] = bin_copy((GENbin*)*gptr[j]);
   s = pari_mainstack->top - pari_mainstack->bot;
   /* size of saved objects ~ stacksize / 4 => overflow */
-  if (av - avma > (s >> 2)) { av = avma; new_chunk(s); set_avma(av); }
+  if (av - avma > (s >> 2))
+  {
+    size_t t = avma - pari_mainstack->bot;
+    av = avma; new_chunk(s + t); set_avma(av); /* double size */
+  }
 }
 
 /********************************************************************/
