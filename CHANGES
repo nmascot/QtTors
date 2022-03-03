@@ -112,13 +112,14 @@ BA  88- x->x+0x1 was not displayed correctly
     94- missing roots in nfroots(t_POL,) [#2345]
     95- factorpadic: ensure leading coefs are powers of p [#2352]
     96- nfsnf: wrong results [#2353]
-BA  97- factor((Mod(1,2)*((t^2+1)*x^4+(t^4+1)*x^2+1))) -> division by 0
-    98- internal type errors in mfsymboleval [#2360]
-    99- incorrect chargalois for trivial group [#2341]
-   100- minpoly(Mod(1/(x-(t+1))*Mod(1,2),(t+1)*x^2+t*x+1)) -> error [#2363]
-BA 101- factor(Mod(1,2)*x^5+a*x^3) -> div by 0
-AP 102- nfgrunwaldwang: fix infinite loop [#2343]
-   103- ti=thueinit(3*x^3 + 5*x^2 - 14*x + 54,1); thue(ti,1) -> error [#2365]
+XR  97- rare SEGV in nfdisc. [#2356]
+BA  98- factor((Mod(1,2)*((t^2+1)*x^4+(t^4+1)*x^2+1))) -> division by 0
+    99- internal type errors in mfsymboleval [#2360]
+   100- incorrect chargalois for trivial group [#2341]
+   101- minpoly(Mod(1/(x-(t+1))*Mod(1,2),(t+1)*x^2+t*x+1)) -> error [#2363]
+BA 102- factor(Mod(1,2)*x^5+a*x^3) -> div by 0
+AP 103- nfgrunwaldwang: fix infinite loop [#2343]
+   104- ti=thueinit(3*x^3 + 5*x^2 - 14*x + 54,1); thue(ti,1) -> error [#2365]
 
   Added
 HC   1- new GP function eulerreal
