@@ -1,4 +1,4 @@
-default(parisize,"8M");
+default(parisize,"7M");
 test2(p)=
 {
   ffgen(x*Mod(1,p));
