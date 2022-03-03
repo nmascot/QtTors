@@ -169,7 +169,10 @@ constbern(long nb)
     t = Flx_Laplace(Flxn_inv(t, n, p), p);
     for (i = 1; i <= nb; i++)
       if (Rg_to_Fl(bernfrac(2*i), p) != uel(t,2*i+2))
+      {
+        gunclone(bernzone); bernzone = NULL;
         pari_err_BUG(stack_sprintf("B_{2*%ld}", i));
+      }
     set_avma(av);
   }
 }
