@@ -205,7 +205,7 @@ embedcol(GEN v, long size, long shift)
 static void
 shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
 {
-  long k, e;
+  long k, e, bit = -prec2nbits(prec)/2;
   for (k = k0; k <= k1; k++)
   {
     GEN t = gel(v,k);
@@ -213,7 +213,7 @@ shallow_clean_rat(GEN v, long k0, long k1, GEN den, long prec)
     t = grndtoi(t, &e);
     if (DEBUGLEVEL>1) err_printf("[%Ps*%Ps=%Ps..e=%ld|prec=%ld]\n",
                                  gel(v,k), den? den: gen_1, t, e, prec);
-    if (e > -10) /* TODO is this bound too permissive? */
+    if (e > bit)
       pari_err_BUG("gcharinit, non rational entry"); /*LCOV_EXCL_LINE*/
     gel(v, k) = den? gdiv(t, den): t;
   }
