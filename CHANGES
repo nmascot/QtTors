@@ -120,6 +120,7 @@ BA  98- factor((Mod(1,2)*((t^2+1)*x^4+(t^4+1)*x^2+1))) -> division by 0
 BA 102- factor(Mod(1,2)*x^5+a*x^3) -> div by 0
 AP 103- nfgrunwaldwang: fix infinite loop [#2343]
    104- ti=thueinit(3*x^3 + 5*x^2 - 14*x + 54,1); thue(ti,1) -> error [#2365]
+   105- algdep(t_POLMOD x) -> x.mod instead of correct result
 
   Added
 HC   1- new GP function eulerreal

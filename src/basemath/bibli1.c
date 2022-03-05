@@ -874,7 +874,11 @@ algdep0(GEN x, long n, long bit)
   GEN y;
 
   if (! is_scalar_t(tx)) pari_err_TYPE("algdep0",x);
-  if (tx==t_POLMOD) { y = RgX_copy(gel(x,1)); setvarn(y,0); return y; }
+  if (tx == t_POLMOD)
+  {
+    av = avma; y = minpoly(x, 0);
+    return (degpol(y) > n)? gc_const(av, gen_1): y;
+  }
   if (gequal0(x)) return pol_x(0);
   if (n <= 0)
   {
