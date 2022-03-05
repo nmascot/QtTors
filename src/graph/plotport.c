@@ -168,9 +168,13 @@ check_rect(long ne)
 {
   const char *f = "graphic function";
   const long m = NUMRECT-1;
-  if (ne < 0) pari_err_DOMAIN(f, "rectwindow", "<", gen_0, stoi(ne));
-  if (ne > m) pari_err_DOMAIN(f, "rectwindow", ">", stoi(m), stoi(ne));
-  return &rectgraph[ne];
+  if (ne < 0)
+    pari_err_DOMAIN(f, "rectwindow", "<", gen_0, stoi(ne));
+  else if (ne > m)
+    pari_err_DOMAIN(f, "rectwindow", ">", stoi(m), stoi(ne));
+  else
+    return &rectgraph[ne];
+  return NULL;/*LCOV_EXCL_LINE*/
 }
 
 static PariRect *
