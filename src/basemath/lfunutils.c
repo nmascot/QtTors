@@ -3116,6 +3116,7 @@ ldata_eulerf(GEN van, GEN p, long prec)
       f = mkrfrac(gen_1, deg1pol_shallow(stoi(-kronecker(an, p)), gen_1, 0)); break;
     case t_LFUN_CHIZ: f = eulerf_chiZ(an, p, prec); break;
     case t_LFUN_CHIGEN: f = eulerf_chigen(an, p, prec); break;
+    case t_LFUN_HECKE: f = eulerf_gchar(an, p, prec); break;
     case t_LFUN_ARTIN: f = eulerf_artin(an, p, prec); break;
     case t_LFUN_DIV: f = eulerf_div(an, p, prec); break;
     case t_LFUN_MUL: f = eulerf_mul(an, p, prec); break;

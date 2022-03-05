@@ -1815,6 +1815,35 @@ vecan_gchar(GEN an, long n, long prec)
   return v;
 }
 
+GEN
+eulerf_gchar(GEN an, GEN p, long prec)
+{
+  GEN gc = gel(an,1), chi = gel(an,2), P = gel(an,3), PZ = gel(an,4);
+  GEN f, L, nf, chilog, s;
+  int check;
+  long j, l;
+
+  /* prec increase: 1/n*log(N(pmax)) < log(pmax) */
+  if (DEBUGLEVEL > 1)
+    err_printf("vecan_gchar: need extra prec %ld\n", nbits2extraprec(expi(p)));
+  gc = gcharnewprec(gc, prec + nbits2extraprec(expi(p)));
+  chilog = gchari_duallog(gc, check_gchari(gc, chi, &s));
+
+  nf = gchar_get_nf(gc);
+  f = pol_1(0);
+  check = dvdii(PZ, p);
+  L = idealprimedec(nf, p); l = lg(L);
+  for (j = 1; j < l; j++)
+  {
+    GEN pr = gel(L, j), ch;
+    if (check && gen_search(P, pr, (void*)cmp_prime_ideal, cmp_nodata) > 0)
+      continue;
+    ch =  gchari_eval(gc, chi, pr, 1, chilog, s, prec);
+    f = gmul(f, gsub(gen_1, monomial(ch, pr_get_f(pr), 0)));
+  }
+  return mkrfrac(gen_1,f);
+}
+
 static GEN
 cleanup_vga(GEN vga, long prec)
 {

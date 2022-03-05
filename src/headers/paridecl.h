@@ -3938,6 +3938,7 @@ GEN     gcharnewprec(GEN gc, long prec);
 int     is_gchar_group(GEN gc);
 GEN     lfungchar(GEN gc, GEN chi);
 GEN     vecan_gchar(GEN an, long n, long prec);
+GEN     eulerf_gchar(GEN an, GEN p, long prec);
 
 /* groupid.c */
 
