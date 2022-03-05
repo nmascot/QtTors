@@ -408,13 +408,15 @@ ZM_content_mul(GEN u, GEN c, GEN *pd)
   return u;
 }
 
-/* bnr natural generators: bnf gens made coprime to modulus + bid gens */
+/* bnr natural generators: bnf gens made coprime to modulus + bid gens.
+ * Beware: if bnr includes MOD, we may have #El < #bnf.ge*/
 static GEN
 get_Gen(GEN bnf, GEN bid, GEN El)
 {
-  GEN Gen = shallowconcat(bnf_get_gen(bnf), bid_get_gen(bid));
-  GEN nf = bnf_get_nf(bnf);
+  GEN nf = bnf_get_nf(bnf), gen = bnf_get_gen(bnf), Gen;
   long i, l = lg(El);
+  if (lg(gen) > l) gen = vec_shorten(gen, l-1);
+  Gen = shallowconcat(gen, bid_get_gen(bid));
   for (i = 1; i < l; i++)
   {
     GEN e = gel(El,i);
@@ -446,15 +448,16 @@ Buchraymod_i(GEN bnf, GEN module, long flag, GEN MOD)
   cycbid = bid_get_cyc(bid);
   if (MOD)
   {
-    cyc = ZV_snf_gcd(cyc, MOD);
+    cyc = ZV_snfclean(ZV_snf_gcd(cyc, MOD));
     cycbid = ZV_snf_gcd(cycbid, MOD);
   }
   Ri = lg(cycbid)-1;
   if (Ri || add_gen || do_init)
   {
     GEN fx = bid_get_fact(bid);
-    El = cgetg(ngen+1,t_VEC);
-    for (j=1; j<=ngen; j++)
+    long n = Ri? ngen: lg(cyc)-1;
+    El = cgetg(n+1, t_VEC);
+    for (j = 1; j <= n; j++)
     {
       GEN c = idealcoprimefact(nf, gel(gen,j), fx);
       gel(El,j) = nf_to_scalar_or_basis(nf,c);
@@ -462,8 +465,9 @@ Buchraymod_i(GEN bnf, GEN module, long flag, GEN MOD)
   }
   if (!Ri)
   {
-    GEN hK = bnf_get_no(bnf);
-    clg = add_gen? mkvec3(hK, cyc, get_Gen(bnf, bid, El)): mkvec2(hK, cyc);
+    GEN no, Gen = add_gen? get_Gen(bnf, bid, El): NULL;
+    if (MOD) { ngen = lg(cyc)-1; no = ZV_prod(cyc); } else no = bnf_get_no(bnf);
+    clg = add_gen? mkvec3(no, cyc, Gen): mkvec2(no, cyc);
     if (!do_init) return clg;
     U = matid(ngen);
     U = mkvec3(U, cgetg(1,t_MAT), U);
@@ -610,7 +614,11 @@ bnrisprincipalmod(GEN bnr, GEN x, GEN MOD, long flag)
   bnf = bnr_get_bnf(bnr); nf = bnf_get_nf(bnf);
   bid = bnr_get_bid(bnr);
   trivialbid = lg(bid_get_cyc(bid)) == 1;
-  if (trivialbid) ex = isprincipal(bnf, x);
+  if (trivialbid)
+  {
+    ex = isprincipal(bnf, x);
+    setlg(ex, lg(cycray)); /* can happen with MOD */
+  }
   else
   {
     GEN v = bnfisprincipal0(bnf, x, nf_FORCE|nf_GENMAT);

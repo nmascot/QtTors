@@ -2497,6 +2497,13 @@ smithall(GEN x)
   return z;
 }
 
+GEN
+ZV_snfclean(GEN d)
+{
+  long c, l = lg(d);
+  for (c = 1; c < l; c++) { GEN t = gel(d,c); if (is_pm1(t)) break; }
+  return c == l? d: vec_shorten(d, c-1);
+}
 void
 ZM_snfclean(GEN d, GEN u, GEN v)
 {

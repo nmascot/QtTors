@@ -4007,6 +4007,7 @@ GEN     ZM_snf(GEN x);
 GEN     ZM_snf_group(GEN H, GEN *newU, GEN *newUi);
 GEN     ZM_snfall(GEN x, GEN *ptU, GEN *ptV);
 GEN     ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, long flag);
+GEN     ZV_snfclean(GEN d);
 GEN     ZpM_echelon(GEN x, long early_abort, GEN p, GEN pm);
 GEN     gsmith(GEN x);
 GEN     gsmithall(GEN x);

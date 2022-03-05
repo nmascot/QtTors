@@ -121,6 +121,7 @@ BA 102- factor(Mod(1,2)*x^5+a*x^3) -> div by 0
 AP 103- nfgrunwaldwang: fix infinite loop [#2343]
    104- ti=thueinit(3*x^3 + 5*x^2 - 14*x + 54,1); thue(ti,1) -> error [#2365]
    105- algdep(t_POLMOD x) -> x.mod instead of correct result
+   106- bnrinit(,,,cycmod) failed to delete elementary divisors equal to 1
 
   Added
 HC   1- new GP function eulerreal
@@ -211,6 +212,7 @@ BA  69- new libpari functions ZX_digits, ZXV_ZX_fromdigits
 NM  70- new GP function elltrace
 BA  71- new libpari functions FpXQXV_red, FpXQXT_red
 BA  72- new libpari functions ZpXQX_ZpXQXQ_liftroot
+    73- new libpari function ZV_snfclean
 
   Changed
 HC   1- faster implementation of eulervec + cache result
