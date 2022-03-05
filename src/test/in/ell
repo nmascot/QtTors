@@ -449,6 +449,8 @@ ellheight(E,P)
 ellinit([0,0,0,0,1]).a1
 
 E=ellinit([-22032-15552*x,0], nfinit(x^2-2)); P=[-72*x-108,0];
+elltwist(E,1).nf.pol
+elltwist(E,-3).nf.pol
 ellpointtoz(E,P)
 
 E=ellinit([134199387,91266697],3031140653);

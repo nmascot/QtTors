@@ -1524,7 +1524,8 @@ GEN
 elltwist(GEN E, GEN P)
 {
   pari_sp av = avma;
-  GEN a1, a2, a3, a4, a6, a, b, c, ac, D, D2, V;
+  GEN a1, a2, a3, a4, a6, a, b, c, ac, D, D2, V, DOM = NULL;
+  long lE;
 
   if (!P)
   {
@@ -1548,9 +1549,12 @@ elltwist(GEN E, GEN P)
     }
   }
   if (typ(E) != t_VEC) pari_err_TYPE("elltwist",E);
+  lE = lg(E);
+  if (lE == 17 && t_ELL_NF)
+    if (!(DOM = ellnf_get_bnf(E))) DOM = ellnf_get_nf(E);
   if (typ(P) == t_INT)
   {
-    if (equali1(P)) return ellinit(E, NULL, DEFAULTPREC);
+    if (equali1(P)) return ellinit(E, DOM, DEFAULTPREC);
     P = quadpoly(P);
   }
   else
@@ -1559,7 +1563,7 @@ elltwist(GEN E, GEN P)
     if (degpol(P) != 2 )
       pari_err_DOMAIN("elltwist", "degree(P)", "!=", gen_2, P);
   }
-  switch(lg(E))
+  switch(lE)
   {
     case 3:
       a1 = a2 = a3 = gen_0;
@@ -1589,7 +1593,9 @@ elltwist(GEN E, GEN P)
     gel(V,4) = gsub(gmul(a4, D2), gmul(gmul(gmulsg(2, a3D), a1), ac));
     gel(V,5) = gmul(gsub(gmul(a6, D), gmul(gsqr(a3), ac)), D2);
   }
-  return gerepilecopy(av, ellinit_i(V, NULL, DEFAULTPREC));
+  E = ellinit_i(V, DOM, DEFAULTPREC);
+  if (!E) pari_err_TYPE("elltwist", V);
+  return gerepilecopy(av, E);
 }
 
 /********************************************************************/
