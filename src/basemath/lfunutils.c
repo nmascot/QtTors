@@ -3135,6 +3135,7 @@ GEN
 lfuneuler(GEN ldata, GEN p, long prec)
 {
   pari_sp av = avma;
+  if (typ(p)!=t_INT || signe(p)<=0) pari_err_TYPE("lfuneuler", p);
   ldata = ldata_newprec(lfunmisc_to_ldata_shallow(ldata), prec);
   return gerepilecopy(av, ldata_eulerf(ldata_get_an(ldata), p, prec));
 }

@@ -381,4 +381,7 @@ O(x^2)
   ***   at top-level: lfun([[],[""]],1)
   ***                 ^-----------------
   *** lfun: incorrect type in lfunmisc_to_ldata (t_VEC).
-Total time spent: 5443
+  ***   at top-level: lfuneuler(x^2+1,Pi)
+  ***                 ^-------------------
+  *** lfuneuler: incorrect type in lfuneuler (t_REAL).
+Total time spent: 5477
