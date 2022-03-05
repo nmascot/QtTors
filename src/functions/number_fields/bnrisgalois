@@ -12,7 +12,7 @@ Doc: check whether the class field attached to the subgroup $H$ is Galois
  given as output by \tet{galoisinit}, or as a matrix or a vector of matrices as
  output by \kbd{bnrgaloismatrix}, the second option being preferable, since it
  saves the recomputation of the matrices.  Note: The function assumes that the
- ray class field attached to bnr is Galois, which is not checked.
+ ray class field attached to \var{bnr} is Galois, which is not checked.
 
  In the following example, we lists the congruence subgroups of subextension of
  degree at most $3$ of the ray class field of conductor $9$ which are Galois
