@@ -43,7 +43,7 @@ Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
  of the characters as vectors of $\R^n$, under the above description.
 
  $\var{gc}[2]$ contains the underlying number field \var{bnf}
- (\kbd{\var{gc}.bnf}.
+ (\kbd{\var{gc}.bnf}).
 
  $\var{gc}[3]$ contains the underlying number field \var{nf}
  (\kbd{\var{gc}.nf}), possibly stored at higher precision than \var{bnf}.
