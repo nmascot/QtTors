@@ -163,15 +163,16 @@ delete_FB(FB_t *F)
 static void
 reallocate(RELCACHE_t *M, long len)
 {
-  REL_t *old = M->base;
   M->len = len;
-  pari_realloc_ip((void**)&M->base, (len+1) * sizeof(REL_t));
-  if (old)
+  if (!M->base)
+    M->base = (REL_t*)pari_malloc((len+1) * sizeof(REL_t));
+  else
   {
-    size_t last = M->last - old, chk = M->chk - old, end = M->end - old;
-    M->last = M->base + last;
-    M->chk  = M->base + chk;
-    M->end  = M->base + end;
+    size_t l = M->last - M->base, c = M->chk - M->base, e = M->end - M->base;
+    pari_realloc_ip((void**)&M->base, (len+1) * sizeof(REL_t));
+    M->last = M->base + l;
+    M->chk  = M->base + c;
+    M->end  = M->base + e;
   }
 }
 
