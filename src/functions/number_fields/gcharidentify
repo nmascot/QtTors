@@ -2,7 +2,7 @@ Function: gcharidentify
 Section: number_fields
 C-Name: gchar_identify
 Prototype: GGGp
-Help: gcharidentify(gc,Lv,Lchiv): returns a Grossencharacter chi belonging to g
+Help: gcharidentify(gc,Lv,Lchiv): returns a Grossencharacter chi belonging to gc
   that approximately satisfies the constraints that chi_v is Lchiv[i] at the
   place v=Lv[i].
 Doc: \var{gc} being a Grossencharacter group as output by \kbd{gcharinit}, $Lv$ being
