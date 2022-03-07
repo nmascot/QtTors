@@ -1550,7 +1550,7 @@ elltwist(GEN E, GEN P)
   }
   if (typ(E) != t_VEC) pari_err_TYPE("elltwist",E);
   lE = lg(E);
-  if (lE == 17 && t_ELL_NF)
+  if (lE == 17 && ell_get_type(E) == t_ELL_NF)
     if (!(DOM = ellnf_get_bnf(E))) DOM = ellnf_get_nf(E);
   if (typ(P) == t_INT)
   {
