@@ -17,20 +17,22 @@ Doc: returns all characters $\chi$ on $G$ such that
  For convenience, the vector of the $g_i$
  can be replaced by a matrix whose columns give their discrete logarithm
  in $G$, for instance as given by \kbd{bnrisprincipal} if $G$ is a \var{bnr};
- in this particular case, $G$ can be any finite abelian group affording a
- \kbd{.cyc} method, or even a vector of elementary divisors.
+ in this particular case, $G$ can be any finite abelian group
+ given by a vector of elementary divisors.
 
  \bprog
- ? bnr = bnrinit(bnfinit(x), [160,[1]], 1); /* (Z/160Z)^* */
- ? bnr.cyc
+ ? G = bnrinit(bnfinit(x), [160,[1]], 1); /* (Z/160Z)^* */
+ ? G.cyc
  %2 = [8, 4, 2]
- ? g = bnr.gen;
- ? bnrchar(bnr, g, [1/2,0,0])
+ ? g = G.gen;
+ ? bnrchar(G, g, [1/2,0,0])
  %4 = [[4, 0, 0]]  \\ a unique character
- ? bnrchar(bnr, [g[1],g[3]]) \\ all characters trivial on g[1] and g[3]
+ ? bnrchar(G, [g[1],g[3]]) \\ all characters trivial on g[1] and g[3]
  %5 = [[0, 1, 0], [0, 2, 0], [0, 3, 0], [0, 0, 0]]
- ? bnrchar(bnr, [1,0,0;0,1,0;0,0,2])
+ ? bnrchar(G, [1,0,0;0,1,0;0,0,2])
  %6 = [[0, 0, 1], [0, 0, 0]]  \\ characters trivial on given subgroup
+
+ ? G = znstar(75, 1);
+ ? bnrchar(G, [2, 7], [11/20, 1/4])
+ %8 = [[1, 1]] \\ Dirichlet char: chi(2) = e(11/20), chi(7) = e(1/4)
  @eprog
-
-
