@@ -111,6 +111,8 @@ chareval(G,chi,2, 20)
 chareval(G,chi,2, [x,10])
 chareval(G,chi,2, [x,20])
 chareval(G,chi,2, [[0..9], 10])
+bnrchar(G, [2], [1/10])
+bnrchar(G, [2,7], [1/10,0])
 
 log11 = ideallog(, 11, G);
 znconreylog(G,log11)

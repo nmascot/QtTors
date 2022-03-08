@@ -1299,22 +1299,31 @@ char_denormalize(GEN cyc, GEN D, GEN chic)
 static GEN
 bnrchar_i(GEN bnr, GEN g, GEN v)
 {
-  long i, h, l = lg(g);
-  GEN CH, D, U, U2, H, cyc, cycD, dv, dchi;
-  checkbnr(bnr);
+  long i, h, l = lg(g), t = typ_NULL;
+  GEN CH, D, U, U2, H, cycD, dv, dchi, cyc = NULL;
+
+  if (checkbnr_i(bnr)) { t = typ_BNR; cyc = bnr_get_cyc(bnr); }
+  else if (checkznstar_i(bnr)) { t = typ_BIDZ; cyc = znstar_get_cyc(bnr); }
+  else if (typ(bnr) == t_VEC && RgV_is_ZV(bnr)) cyc = bnr;
+  else pari_err_TYPE("bnrchar", bnr);
   switch(typ(g))
   {
     GEN G;
     case t_VEC:
       G = cgetg(l, t_MAT);
-      for (i = 1; i < l; i++) gel(G,i) = isprincipalray(bnr, gel(g,i));
+      if (t == typ_BNR)
+      {
+        for (i = 1; i < l; i++) gel(G,i) = isprincipalray(bnr, gel(g,i));
+        cyc = bnr_get_cyc(bnr);
+      }
+      else
+        for (i = 1; i < l; i++) gel(G,i) = Zideallog(bnr, gel(g,i));
       g = G; break;
     case t_MAT:
       if (RgM_is_ZM(g)) break;
     default:
       pari_err_TYPE("bnrchar",g);
   }
-  cyc = bnr_get_cyc(bnr);
   H = ZM_hnfall_i(shallowconcat(g,diagonal_shallow(cyc)), v? &U: NULL, 1);
   dv = NULL;
   if (v)
