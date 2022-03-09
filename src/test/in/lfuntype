@@ -59,7 +59,7 @@ lfunshift(x^2+1,-1/2),
 \\40
 lfunshift(x^2+1,1,1),
 lfunhgm(hgminit([5]),1),
-if(1,my(bnf=bnfinit(x^2-x+2), gc=gcharinit(bnf,idealprimedec(bnf,7)[1]),chi=[1,-1,-1/2]~);
+if(1,my(bnf=bnfinit(x^2-x+2), gc=gcharinit(bnf,idealprimedec(bnf,11)[1]),chi=[1,-1,-1/2]~);
   lfuncreate([gc,chi]))
 ];
 }
