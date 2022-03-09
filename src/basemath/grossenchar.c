@@ -442,15 +442,11 @@ gcharinit(GEN bnf, GEN mod, long prec)
     nfprec = prec;
     bnf = bnfinit0(bnf, 1, NULL, nfprec);
     nf = shallowcopy(bnf_get_nf(bnf));
-    nf_get_sign(nf, &r1, &r2);
-    n = r1+2*r2;
   }
   else
   {
-    nf_get_sign(bnf_get_nf(bnf), &r1, &r2);
-    n = r1+2*r2;
-    if (n>1 && !bnf_get_sunits(bnf)) /* impose fundamental units */
-      pari_err(e_MISC, "missing S-units in bnf, please use bnfinit(,1)");
+    GEN fu = bnf_get_sunits(bnf);
+    if (!fu) fu = bnf_get_fu(bnf); /* impose fundamental units */
     nf = shallowcopy(bnf_get_nf(bnf));
     nfprec = nf_get_prec(nf);
   }
@@ -467,6 +463,8 @@ gcharinit(GEN bnf, GEN mod, long prec)
   S = gel(S,1);
   DLdata = gcharDLdata(bnf, S, DLdata);
 
+  nf_get_sign(nf, &r1, &r2);
+  n = r1+2*r2;
   ns = lg(S) - 1;
   nu = r1+r2-1 + ns;
   nc = lg(zmcyc) - 1;

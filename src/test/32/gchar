@@ -376,9 +376,6 @@ bad inputs
   ***   at top-level: gcharisalgebraic(gc,[1])
   ***                 ^------------------------
   *** gcharisalgebraic: incorrect type in check_gchar [chi] (t_VEC).
-  ***   at top-level: gcharinit(bnfinit('x^2+1),1)
-  ***                 ^----------------------------
-  *** gcharinit: missing S-units in bnf, please use bnfinit(,1).
   ***   at top-level: gcharalgebraic(gc,[])
   ***                 ^---------------------
   *** gcharalgebraic: incorrect type in gcharalgebraic (1) (t_VEC).
@@ -394,4 +391,4 @@ bad inputs
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)]~,1)
   ***                 ^------------------------------
   *** gcharlocal: incorrect type in check_gchar_i [s] (t_PADIC).
-Total time spent: 7937
+Total time spent: 3496

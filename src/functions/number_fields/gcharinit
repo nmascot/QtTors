@@ -2,15 +2,13 @@ Function: gcharinit
 Section: number_fields
 C-Name: gcharinit
 Prototype: GGp
-Help: gcharinit(bnf,f): given a bnf as output by bnfinit(,1) and a modulus f,
- initializes data related to the group of Grossencharacters of conductor
- dividing this modulus.
-Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit(,1)}, $f$ a
- modulus, initializes a structure (\kbd{gc}) describing the group of Hecke
- Grossencharacters of modulus $f$. (As in \tet{idealstar}, the finite part of
- the conductor may be given by a factorization into prime ideals, as produced by
- \tet{idealfactor}.) The structure \var{bnf} must contain $S$-units in algebraic
- form, i.e. must be initialized with \kbd{bnfinit(,1)}.
+Help: gcharinit(bnf,f): given a bnf as output by bnfinit and a modulus f, initializes data
+ related to the group of Grossencharacters of conductor dividing this modulus.
+Doc: $\var{bnf}$ being a number field output by \kbd{bnfinit} (including
+ fundamental units), $f$ a modulus, initializes a structure (\kbd{gc})
+ describing the group of Hecke Grossencharacters of modulus $f$.
+ (As in \tet{idealstar}, the finite part of the conductor may be given
+ by a factorization into prime ideals, as produced by \tet{idealfactor}.)
 
  The following member functions are available
  on the result: \kbd{.bnf} is the underlying \var{bnf},
