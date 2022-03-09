@@ -74,7 +74,7 @@ gcharconductor(gc2,c)
 gcharconductor(gc2,4*c)
 
 print("Watkins 3.7 & 6.1");
-bnf = bnfinit(x^2+23);
+bnf = bnfinit(x^2+23,1);
 gc = gcharinit(bnf,1);
 pr = idealprimedec(bnf,31)[2];
 c0 = gcharidentify(gc,[1,pr],[[0,0],1/3]); /* class group char, order 3 */
@@ -128,7 +128,7 @@ round(10^10*cxchareval(gc,chi,p23))
 lfunrootres(lfuncreate([gc,chi]))[3] == 1
 
 print("Watkins examples 6.2");
-bnf = bnfinit(x^2+59);
+bnf = bnfinit(x^2+59,1);
 p59 = idealprimedec(bnf,59)[1];
 p3 = idealismaximal(bnf,idealadd(bnf,3,(x+1)/2));
 gc = gcharinit(bnf,p59);
@@ -145,7 +145,7 @@ round(10^20*lfun(L,2,2))
 
 print("S intersects mod");
 pol = x^3 + 4*x - 1;
-K = bnfinit(pol);
+K = bnfinit(pol,1);
 pr2 = idealprimedec(K, 2)[1];
 N1 = idealpow(K,pr2,2);
 gc1 = gcharinit(K,N1);
@@ -247,7 +247,7 @@ lfunrobustcheckfeq([gc,10*chi1-chi2]) < -90 /* FIXME: precision loss */
 print("need to increase prec II");
 default(parisize,128M);
 pol = x^4 - 2*x^3 + 5*x^2 - 2*x - 1;
-bnf = bnfinit(pol);
+bnf = bnfinit(pol,1);
 N = (2*5)^2;
 gc = gcharinit(bnf,N);
 pr1 = idealprimedec(bnf,101)[1];
@@ -288,7 +288,7 @@ print(gcharconductor(gc,c));
 L = lfuncreate([gc,c]);
 lfunrobustcheckfeq(L)+120<0
 
-bnf = bnfinit(y^2-5);
+bnf = bnfinit(y^2-5,1);
 N = idealadd(bnf, 10, y+5);
 gc = gcharinit(bnf,N);
 c = gcharidentify(gc,[1],[[0,-1.0880837675454989689105112261454316359]]);
@@ -306,7 +306,7 @@ L = lfuncreate([gc,chi]);
 round(lfunan(L,5))
 
 print("norm component fix");
-bnf = bnfinit(x^2-5);
+bnf = bnfinit(x^2-5,1);
 gc = gcharinit(bnf,1);
 chi = [1,-1]~;
 L = lfuncreate([gc,chi]);

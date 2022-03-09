@@ -2,10 +2,10 @@ default(parisize,"16M");
 default(realprecision,38);
 cxchareval(gc,chi,x) = exp(2*I*Pi*chareval(gc,chi,x));
 
-gcharinit(bnfinit('y),1);
+gcharinit(bnfinit('y,1),1);
 
 print("one large field");
-bnf=bnfinit(polcyclo(17));
+bnf=bnfinit(polcyclo(17),1);
 p1 = idealadd(bnf, 13, x^4-4*x^3-4*x+1);
 p2 = idealadd(bnf, 17, x-1);
 p3=idealadd(bnf ,19, x^8-6*x^7-4*x^6-3*x^5+8*x^4-3*x^3-4*x^2-6*x+1);
@@ -52,7 +52,7 @@ gc = gcharinit(x^2+1,1);
 gcharisalgebraic(gc,chi,&pq)
 pq
 print("gcharisalgebraic r1>0");
-bnf = bnfinit(x^2-5);
+bnf = bnfinit(x^2-5,1);
 gc = gcharinit(bnf,8);
 gcharisalgebraic(gc,[0,0]~,&pq)
 pq
@@ -62,7 +62,7 @@ gcharisalgebraic(gc,[0,1]~,&pq)
 gcharisalgebraic(gc,[0,0,-1]~,&pq)
 pq
 gcharisalgebraic(gc,[0,0,-1/2]~,&pq)
-bnf = bnfinit(x^3-x-1);
+bnf = bnfinit(x^3-x-1,1);
 gc = gcharinit(bnf,9);
 gcharisalgebraic(gc,[0,0,0,0]~,&pq)
 pq
@@ -79,27 +79,27 @@ gcharisalgebraic(gc,[0,1,0,0,-1/2]~,&pq)
 
 print("need to increase prec");
 pol = x^4 - 2*x^3 + 5*x^2 - 2*x - 1;
-bnf = bnfinit(pol);
+bnf = bnfinit(pol,1);
 N = (2*3*7*11)^2;
 gc = gcharinit(bnf,N);
 
 print("larger fields");
 print("r2 = 5, clno = 5");
 pol = x^12 + 8*x^10 + 6*x^8 - 268*x^6 - 1438*x^4 - 3420*x^2 - 3078;
-bnf = bnfinit(pol);
+bnf = bnfinit(pol,1);
 gc = gcharinit(bnf,1);
 gc = gcharinit(bnf,2*3*7);
 
 print("r2 = 4, clno = 3");
 pol = x^8 - 3*x^5 - x^4 + 8*x^2 - 10*x + 6;
-bnf = bnfinit(pol);
+bnf = bnfinit(pol,1);
 gc = gcharinit(bnf,1);
 gc = gcharinit(bnf,3^4*117*1009);
 
 print("r2 = 8, clno = 16");
 \\ WARNING.... LONG
 pol = x^20 - 4*x^19 + 2*x^18 + 12*x^17 - 248*x^16 + 577*x^15 - 2210*x^14 + 4900*x^13 - 1187*x^12 + 7487*x^11 + 23396*x^10 - 53786*x^9 - 64916*x^8 - 97158*x^7 - 267387*x^6 + 221033*x^5 + 460138*x^4 + 9786*x^3 + 481572*x^2 + 115934*x - 511901;
-bnf = bnfinit(pol);
+bnf = bnfinit(pol,1);
 {p5 = idealadd(bnf, 5,
 96965017807771961905683702603422608463328455154870010/9523197523984467081398524314103182597785758649553142622913*x^19
 -243702022593120105582606367863258391277124600413664280/9523197523984467081398524314103182597785758649553142622913*x^18
@@ -282,7 +282,7 @@ chi = gcharidentify(gc,[1,2,pr],[[0,1.],[2,-0.5],-0.11]);
 round(10^5*gcharlocal(gc,chi,1))
 round(10^5*gcharlocal(gc,chi,2))
 round(10^5*gcharlocal(gc,chi,pr))
-bnf = bnfinit(x^2-5);
+bnf = bnfinit(x^2-5,1);
 gc = gcharinit(bnf,[4,[1,0]]);
 pr = idealprimedec(bnf,2)[1];
 pr2 = idealprimedec(bnf,3)[1];
@@ -363,7 +363,7 @@ typ
 gcharlocal(gc,chi2,1)
 
 print("doc gcharlocal");
-bnf = bnfinit(x^3-x-1);
+bnf = bnfinit(x^3-x-1,1);
 gc = gcharinit(bnf,1);
 round(gc.cyc)
 chi = [0,1,1/3]~;
@@ -480,6 +480,7 @@ gcharalgebraic(gc,[[[],0]]);
 chareval(gc,O(3^7),1);
 chareval(gc,[0,O(3^7)],1);
 gcharisalgebraic(gc,[1]);
+gcharinit(bnfinit('x^2+1),1);
 \\ regression tests
 gc = gcharinit(bnfinit(x^2-x-276,1), [2,[0,1]]);
 
@@ -487,7 +488,7 @@ gc = gcharinit(x^2-2,1);
 gcharalgebraic(gc,[])
 gc = gcharinit(x^3-x-1,1);
 gcharalgebraic(gc,[[1,1]])
-bnf = bnfinit(x^2-5);
+bnf = bnfinit(x^2-5,1);
 gc = gcharinit(bnf,[4,[1,0]]);
 pr = idealprimedec(bnf,2)[1];
 gcharlocal(gc,[0,1]~,0)
