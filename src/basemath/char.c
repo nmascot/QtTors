@@ -85,16 +85,20 @@ char_normalize(GEN chi, GEN ncyc)
 static GEN
 get_cyc(GEN x, GEN chi, const char *s)
 {
-  if (nftyp(x) == typ_BIDZ)
+  switch(nftyp(x))
   {
-    if (!zncharcheck(x, chi)) pari_err_TYPE(s, chi);
-    return NULL;
-  }
-  else
-  {
-    if (typ(x) != t_VEC || !RgV_is_ZV(x)) x = member_cyc(x);
-    if (!char_check(x, chi)) pari_err_TYPE(s, chi);
-    return x;
+    case typ_BIDZ:
+      if (!zncharcheck(x, chi)) pari_err_TYPE(s, chi);
+      return NULL;
+    case typ_GCHAR:
+      x = gchar_get_cyc(x);
+      if (!is_vec_t(typ(chi)) || lg(chi) != lg(x) || !RgV_is_ZV(chi))
+        pari_err_TYPE(s, chi); /* FIXME: handle norm component */
+      return x;
+    default:
+      if (typ(x) != t_VEC || !RgV_is_ZV(x)) x = member_cyc(x);
+      if (!char_check(x, chi)) pari_err_TYPE(s, chi);
+      return x;
   }
 }
 
