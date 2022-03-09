@@ -1421,7 +1421,7 @@ static GEN
 gcharisprincipal(GEN gc, GEN x, GEN *palpha)
 {
   GEN t, v, bnf = gchar_get_bnf(gc), DLdata = gchar_get_DLdata(gc);
-  t = bnfisprincipal0(bnf, x, nf_GENMAT); v = gel(t, 1);
+  t = bnfisprincipal0(bnf, x, nf_GENMAT | nf_FORCE); v = gel(t, 1);
   *palpha = famat_reduce(famat_mul(nffactorback(bnf, gel(DLdata,2), v),
                                    gel(t, 2)));
   return ZM_ZC_mul(gel(DLdata,1), v);

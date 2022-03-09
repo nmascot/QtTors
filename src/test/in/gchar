@@ -430,6 +430,12 @@ chi = [1,0]~;
 chareval(gc,chi,idealprimedec(bnf,2)[1]) != 0
 chareval(gc,chi,idealprimedec(bnf,3)[1]) != 0
 
+print("bug #2373");
+bnf=bnfinit(a^6-3*a^5+19*a^4-31*a^3+121*a^2-143*a+307);
+gc=gcharinit(bnf,46);
+pr=idealprimedec(bnf,37723331332351742373432849364353603676875519354218200736622011846348771299073);
+gcharlog(gc,pr[2]);
+
 print("bad inputs");
 gcharinit([],1)
 gcharinit(bnfinit(x),[])
