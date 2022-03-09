@@ -443,7 +443,7 @@ Doc:
  they generalize classical Hecke characters on ray class groups obtained through
  the $\var{bnr}$ structure.
 
- Let $K$ be number field, $\A^\times$ its group of id\`eles.
+ Let $K$ be a number field, $\A^\times$ its group of id\`eles.
  Every Grossencharacter
  $$
     \chi \colon \A^\times/K^\times \to \C^\times
@@ -453,34 +453,33 @@ Doc:
  group~$\A^\times/(K^\times\cdot\R_{>0})$,
  where~$\|a\| = \prod_v |a_v|_v$ is the id\`ele norm.
 
- Let~$\goth{m}$ a modulus
- (an integral ideal and a finite set of real places). Let $U(\goth{m})$ be the subgroup
- of id\`eles congruent to $1$ modulo $\goth{m}$
+ Let~$\goth{m}$ be a modulus
+ (an integral ideal and a finite set of real places). Let $U(\goth{m})$ be the
+ subgroup of id\`eles congruent to $1$ modulo $\goth{m}$
  (units outside $\goth{m}$, positive at real places in $\goth{m}$).
- The Hecke Grossencharacters defined modulo $\goth{m}$ are the characters of the id\`ele
- class group
+ The Hecke Grossencharacters defined modulo $\goth{m}$ are the characters of
+ the id\`ele class group
  $$
-  C_K(\goth{m})=\A^\times/(K^\times\cdot U(\goth{m})),
+  C_K(\goth{m}) = \A^\times/(K^\times\cdot U(\goth{m})),
  $$
  that is, combinations of an archimedean
  character $\chi_\infty$ on the connected component $K_\infty^{\times \circ}$
- and a ray class group character
- $\chi_f$ satisfying a compatibility condition
+ and a ray class group character $\chi_f$ satisfying a compatibility condition
  $\chi_\infty(a)\chi_f(a)=1$ for all units $a$ congruent to 1 modulo $\goth{m}$.
 
  \varsidx{gchar} %
-
- \item \var{gc} denotes a structure allowing to compute with Hecke Grossencharacters.
+ \item \var{gc} denotes a structure allowing to compute with Hecke
+ Grossencharacters.
 
  \item \kbd{gcharinit(\var{bnf},\var{mod})} initializes the structure \var{gc}.
  The underlying number field and modulus can be accessed using
  \var{gc}\kbd{.bnf} and \var{gc}\kbd{.mod}.
 
- \item \var{gc}\kbd{.cyc} describes the finite abelian group structure of \var{gc},
- the torsion part corresponding to finite order ray class characters,
- the exact zeros corresponding to a lattice of infinite order Grossencharacters,
- and the approximate zero being a placeholder for the complex powers of the
- id\`ele norm.
+ \item \var{gc}\kbd{.cyc} describes the finite abelian group structure of
+ \var{gc}, the torsion part corresponding to finite order ray class
+ characters, the exact zeros corresponding to a lattice of infinite order
+ Grossencharacters, and the approximate zero being a placeholder for the
+ complex powers of the id\`ele norm.
 
  \item A Hecke character of modulus~$\goth{m}$ is described as a \typ{COL} of
  coordinates corresponding to~\var{gc}\kbd{.cyc}: all the coordinates are
