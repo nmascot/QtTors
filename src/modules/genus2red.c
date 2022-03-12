@@ -397,7 +397,6 @@ polymini(GEN H, GEN p)
       H = ZX_Z_divexact(T, powiu(p,3));
       alpha = 0; beta++;
       t60 = theta_j(H,p,3);
-      if (t60) break;
       v = FpX_factor_squarefree(FpX_red(H,p), p);
       m = lg(v)-1; /* maximal multiplicity */
       if (m > 1)
