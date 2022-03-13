@@ -1167,13 +1167,13 @@ log2fubound(GEN bnf)
   }
   return e / M_LN2;
 }
-/* bound for log2(|split_real_imag(M, y)|_oo / |y|_oo)*/
+/* bound for log2(|RgM_solve_realimag(M, y)|_oo / |y|_oo)*/
 static double
 log2Mbound(GEN nf)
 {
   GEN G = nf_get_G(nf), D = nf_get_disc(nf);
   long r2 = nf_get_r2(nf), l = lg(G), i;
-  double e, d = dbllog2(D)/2 - r2 * M_LN2; /* log2 |det(split_real_imag(M))| */
+  double e, d = dbllog2(D)/2 - r2 * M_LN2; /* log2 |det(split_realimag(M))| */
   e = log2(nf_get_degree(nf));
   for (i = 2; i < l; i++) e += dbllog2(gnorml2(gel(G,i))); /* Hadamard bound */
   return e / 2 - d;
