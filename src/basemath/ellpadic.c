@@ -913,10 +913,12 @@ ellpadicbsd(GEN E, GEN p, long n, GEN D)
 {
   const long MAXR = 30;
   pari_sp av = avma;
-  GEN W, ED, tam, ND, C, apD, U = NULL;/*-Wall*/
+  GEN D0, W, ED, tam, ND, C, apD, U = NULL;/*-Wall*/
   long r, vN;
   checkell(E);
   if (D && isint1(D)) D = NULL;
+  D0 = ellminimaltwistcond(E); if (isint1(D0)) D0 = NULL;
+  if (D0) { E = elltwist(E, D0); D = D? coredisc(mulii(D, D0)): D0; }
   W = ellpadicL_symbol(E, p, gen_0, D);
   ED = D? elltwist(E, D): E;
   ED = ellanal_globalred_all(ED, NULL, &ND, &tam);
