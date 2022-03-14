@@ -2338,6 +2338,7 @@ GEN     nfeltsign(GEN nf, GEN x, GEN ind0);
 GEN     nffactorback(GEN nf, GEN L, GEN e);
 GEN     nfinv(GEN nf, GEN x);
 GEN     nfinvmodideal(GEN nf, GEN x, GEN ideal);
+long    nfissquare(GEN nf, GEN z, GEN *px);
 GEN     nflogembed(GEN nf, GEN x, GEN *emb, long prec);
 GEN     nfM_det(GEN nf, GEN M);
 GEN     nfM_inv(GEN nf, GEN M);

@@ -214,6 +214,7 @@ BA  71- new libpari functions FpXQXV_red, FpXQXT_red
 BA  72- new libpari functions ZpXQX_ZpXQXQ_liftroot
     73- new libpari function ZV_snfclean
     74- allow bnrchar to construct a Dirichlet character (with a znstar input)
+    75- new GP function nfeltissquare
 
   Changed
 HC   1- faster implementation of eulervec + cache result

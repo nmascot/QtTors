@@ -687,6 +687,27 @@ nfpow_u(GEN nf, GEN z, ulong n)
   return gerepilecopy(av, x);
 }
 
+long
+nfissquare(GEN nf, GEN z, GEN *px)
+{
+  pari_sp av = avma;
+  long v = fetch_var_higher();
+  GEN R;
+  nf = checknf(nf);
+  if (nf_get_degree(nf) == 1)
+  {
+    z = algtobasis(nf, z); z = gel(z,1);
+    if (!issquareall(gel(z,1), px)) return gc_long(av, 0);
+    if (px) *px = gerepileupto(av, *px); else set_avma(av);
+    return 1;
+  }
+  R = nfroots(nf, deg2pol_shallow(gen_m1, gen_0, z, v));
+  delete_var(); if (lg(R) == 1) return gc_long(av, 0);
+  if (px) *px = gerepilecopy(av, nf_to_scalar_or_basis(nf, gel(R,1)));
+  else set_avma(av);
+  return 1;
+}
+
 static GEN
 idmulred(void *nf, GEN x, GEN y) { return idealmulred((GEN) nf, x, y); }
 static GEN

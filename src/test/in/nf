@@ -74,6 +74,14 @@ nfisisom(K,x^2-8)
 nfisisom(x^2-8,K)
 nfisisom(nfinit(y^2 + 1), z^2 + 1)
 K = nfinit(x^2 + 1); nfisisom(K, y^2 + 1); K.pol
+nfeltissquare(K, -1)
+nfeltissquare(K, -1, &t)
+t
+nfeltissquare(K, -2)
+nfeltissquare(K, 4)
+nfeltissquare(K, 4, &t)
+t
+
 \\#2144
 nfisincl(x^3+9,x^6+2187)
 nfisincl(x^3+9*27,x^6+2187*3^6)
