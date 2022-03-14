@@ -899,10 +899,13 @@ addRe_modIm(GEN x, GEN a, GEN m)
   GEN re, im, z;
   if (typ(x) == t_COMPLEX)
   {
+    long e;
     im = modRr_safe(gel(x,2), m);
     if (!im) return NULL;
     re = gadd(gel(x,1), a);
     z = gequal0(im)? re: mkcomplex(re, im);
+    e = gexpo(x);
+    if (e > 0 && e + 32 > prec2nbits(precision(z))) return NULL;
   }
   else
     z = gadd(x, a);
@@ -4103,7 +4106,7 @@ START:
       AU = RgM_ZM_mul(A, U);
       A = cleanarch(AU, N, PREC);
       if (DEBUGLEVEL) timer_printf(&T, "units LLL + cleanarch");
-      if (!A || lg(A) < RU || (lg(A) > 1 && gprecision(A) <= LOWDEFAULTPREC))
+      if (!A || lg(A) < RU)
       {
         long add = nbits2extraprec( gexpo(AU) + 64 ) - gprecision(AU);
         long t = maxss((PREC-2) * 0.15, add);
