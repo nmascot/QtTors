@@ -701,7 +701,37 @@ nfissquare(GEN nf, GEN z, GEN *px)
     if (px) *px = gerepileupto(av, *px); else set_avma(av);
     return 1;
   }
+  z = nf_to_scalar_or_alg(nf, z);
   R = nfroots(nf, deg2pol_shallow(gen_m1, gen_0, z, v));
+  delete_var(); if (lg(R) == 1) return gc_long(av, 0);
+  if (px) *px = gerepilecopy(av, nf_to_scalar_or_basis(nf, gel(R,1)));
+  else set_avma(av);
+  return 1;
+}
+
+long
+nfispower(GEN nf, GEN z, GEN n, GEN *px)
+{
+  pari_sp av = avma;
+  long v = fetch_var_higher();
+  GEN R;
+  nf = checknf(nf);
+  if (nf_get_degree(nf) == 1)
+  {
+    z = algtobasis(nf, z); z = gel(z,1);
+    if (!ispower(gel(z,1), n, px)) return gc_long(av, 0);
+    if (px) *px = gerepileupto(av, *px); else set_avma(av);
+    return 1;
+  }
+  if (typ(n) != t_INT || signe(n) <= 0)
+    pari_err_DOMAIN("nfeltispower","exponent","<=",gen_0,n);
+  z = nf_to_scalar_or_alg(nf, z);
+  if (equali1(n))
+  {
+    if (px) *px = gerepilecopy(av, z);
+    return 1;
+  }
+  R = nfroots(nf, gsub(pol_xn(itos(n), v), z));
   delete_var(); if (lg(R) == 1) return gc_long(av, 0);
   if (px) *px = gerepilecopy(av, nf_to_scalar_or_basis(nf, gel(R,1)));
   else set_avma(av);

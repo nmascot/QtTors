@@ -82,6 +82,14 @@ nfeltissquare(K, 4)
 nfeltissquare(K, 4, &t)
 t
 
+nfeltispower(K, x, 3)
+nfeltispower(K, x, 3, &t)
+t
+nfeltispower(K, -2, 3)
+nfeltispower(K, 8, 3)
+nfeltispower(K, 8, 3, &t)
+t
+
 \\#2144
 nfisincl(x^3+9,x^6+2187)
 nfisincl(x^3+9*27,x^6+2187*3^6)

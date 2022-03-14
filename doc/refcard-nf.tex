@@ -152,7 +152,11 @@ Number field elements are \typ{INT}, \typ{FRAC}, \typ{POL}, \typ{POLMOD}, or
 \li{absolute trace $\text{Tr}_{K/\QQ} (x)$}{nfelttrace$(\var{nf},x)$}
 \li{absolute norm $\text{N}_{K/\QQ} (x)$}{nfeltnorm$(\var{nf},x)$}
 
+\newcolumn
+\li{is $x$ a square?}{nfeltissquare$(\var{nf},x,\{\&y\})$}
+\li{\dots an $n$-th power?}{nfeltispower$(\var{nf},x,n,\{\&y\})$}
 \smallskip
+
 \subsec{Multiplicative structure of $K^*$; $K^*/(K^*)^n$}
 \li{valuation $v_\p(x)$}{nfeltval$(\var{nf},x,\p)$}
 \li{\dots write $x = \pi^{v_\p(x)} y$}{nfeltval$(\var{nf},x,\p,\&y)$}

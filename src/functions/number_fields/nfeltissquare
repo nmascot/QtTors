@@ -9,7 +9,7 @@ Doc: return $1$ if $x$ is a square (and set $y$ to a square root if the
 
  \bprog
  ? nf = nfinit(1+x^2);
- ? nfissquare(nf, -1, &y)
+ ? nfeltissquare(nf, -1, &y)
  %2 = 1
  ? y
  %3 = [0, -1]~
