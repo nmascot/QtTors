@@ -1379,12 +1379,10 @@ ellnf_isocrv(GEN nf, GEN E, GEN v, GEN PE, long flag)
 }
 
 static long
-nfispower(GEN nf, long d, GEN a, GEN b)
+nfispower_quo(GEN nf, long d, GEN a, GEN b)
 {
-  GEN N;
   if (gequal(a,b)) return 1;
-  N = nfroots(nf, gsub(monomial(b, d, 0), monomial(a,0,0)));
-  return lg(N) > 1;
+  return nfispower(nf, nfdiv(nf, a, b), utoi(d), NULL);
 }
 
 static long
@@ -1393,10 +1391,10 @@ isomat_eq(GEN nf, GEN e1, GEN e2)
   if (gequal(e1,e2)) return 1;
   if (!gequal(gel(e1,3), gel(e2,3))) return 0;
   if (gequal0(gel(e1,3)))
-    return nfispower(nf,6,gel(e1,2),gel(e2,2));
+    return nfispower_quo(nf,6,gel(e1,2),gel(e2,2));
   if (gequalgs(gel(e1,3),1728))
-    return nfispower(nf,4,gel(e1,1),gel(e2,1));
-  return nfispower(nf,2,gmul(gel(e1,1),gel(e2,2)),gmul(gel(e1,2),gel(e2,1)));
+    return nfispower_quo(nf,4,gel(e1,1),gel(e2,1));
+  return nfispower_quo(nf,2,gmul(gel(e1,1),gel(e2,2)),gmul(gel(e1,2),gel(e2,1)));
 }
 
 static long
