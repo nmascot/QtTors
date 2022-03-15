@@ -696,7 +696,7 @@ nfissquare(GEN nf, GEN z, GEN *px)
   nf = checknf(nf);
   if (nf_get_degree(nf) == 1)
   {
-    z = algtobasis(nf, z); z = gel(z,1);
+    z = algtobasis(nf, z);
     if (!issquareall(gel(z,1), px)) return gc_long(av, 0);
     if (px) *px = gerepileupto(av, *px); else set_avma(av);
     return 1;
@@ -718,7 +718,7 @@ nfispower(GEN nf, GEN z, GEN n, GEN *px)
   nf = checknf(nf);
   if (nf_get_degree(nf) == 1)
   {
-    z = algtobasis(nf, z); z = gel(z,1);
+    z = algtobasis(nf, z);
     if (!ispower(gel(z,1), n, px)) return gc_long(av, 0);
     if (px) *px = gerepileupto(av, *px); else set_avma(av);
     return 1;
