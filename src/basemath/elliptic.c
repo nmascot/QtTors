@@ -7699,6 +7699,8 @@ elltrace(GEN E, GEN P)
   R = gsub(R, gsqr(U));
   /* Discard Galois orbit of P */
   R = RgX_div(R, minpoly(xP,0));
+  /* What is left is either constant -> return oo, or deg 1 -> nontrivial trace. */
+  if(degpol(R)==0) { set_avma(av); retmkvec(gen_0); }
   /* Recover the trace */
   xQ = gneg(gdiv(gel(R,2), gel(R,3)));
   yQ = gneg(gdiv(poleval(U, xQ), poleval(V, xQ)));
