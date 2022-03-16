@@ -4443,3 +4443,9 @@ RgX_cxeval(GEN T, GEN u, GEN ui)
   }
   return gerepileupto(ltop, S);
 }
+
+GEN
+RgXY_cxevalx(GEN x, GEN u, GEN ui)
+{
+  pari_APPLY_pol(typ(gel(x,i))==t_POL? RgX_cxeval(gel(x,i), u, ui): gel(x,i));
+}
