@@ -604,12 +604,14 @@ Behaviour at endpoint for Double Exponential (DE) methods: either a scalar
 \subsec{Other integration methods}
 \li{$n$-point Gauss-Legendre}{intnumgauss$(x=a,b,f,\{n\})$}
 \li{weights for $n$-point Gauss-Legendre}{intnumgaussinit$(\{n\})$}
-\li{Romberg integration (low accuracy)}{intnumromb$(x=a,b,f,\{\fl\})$}
+\li{quasi-periodic function, period $2H$}{intnumosc$(x=a,f,H)$}
+\li{Romberg (low accuracy)}{intnumromb$(x=a,b,f,\{\fl\})$}
 
 \subsec{Numerical summation}
 \li{sum of series $f(n)$, $n\geq a$ (low accuracy)}{suminf$(n=a,\expr)$}
 \li{sum of alternating/positive series}{sumalt{\rm,} sumpos}
 \li{sum of series using Euler-Maclaurin}{sumnum$(n=a,f,\{T\})$}
+\li{\dots Sidi summation}{sumnum$(n=a,f)$}
 
 \li{$\sum_{n\geq a} F(n)$, $F$ rational function}{sumnumrat$(F,a)$}
 \li{\dots $\sum_{p\geq a} F(p^s)$}{sumeulerrat$(F, \{s = 1\}, \{a = 2\})$}
