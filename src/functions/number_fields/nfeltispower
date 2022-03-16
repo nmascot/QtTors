@@ -1,7 +1,7 @@
 Function: nfeltispower
 Section: number_fields
 C-Name: nfispower
-Prototype: lGGGD&
+Prototype: lGGLD&
 Help: nfeltispower(nf,x,n,{&y}): return 1 if x is an n-th power (and set y to
  an n-th root if present), else return 0.
 Doc: return $1$ if $x$ is an $n$-th power (and set $y$ to an $n$-th root if the

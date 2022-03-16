@@ -1382,7 +1382,7 @@ static long
 nfispower_quo(GEN nf, long d, GEN a, GEN b)
 {
   if (gequal(a,b)) return 1;
-  return nfispower(nf, nfdiv(nf, a, b), utoi(d), NULL);
+  return nfispower(nf, nfdiv(nf, a, b), d, NULL);
 }
 
 static long
