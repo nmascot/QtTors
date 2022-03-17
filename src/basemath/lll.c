@@ -17,6 +17,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #define DEBUGLEVEL DEBUGLEVEL_qflll
 
+static double
+pari_rint(double a)
+{
+#ifdef HAS_RINT
+  return rint(a);
+#else
+  const double two_to_52 = 4.5035996273704960e+15;
+  double fa = fabs(a);
+  double r = two_to_52 + fa;
+  if (fa >= two_to_52) {
+    r = a;
+  } else {
+    r = r - two_to_52;
+    if (a < 0) r = -r;
+  }
+  return r;
+#endif
+}
+
 /* default quality ratio for LLL */
 static const double LLLDFT = 0.99;
 
@@ -402,7 +421,7 @@ Babai_fast(pari_sp av, long kappa, GEN *pB, GEN *pU, double **mu, double **r,
         /* we have |X| >= 2 */
         if (atmp < 9007199254740992.)
         {
-          tmp = floor(tmp+.5);
+          tmp = pari_rint(tmp);
           for (k=zeros+1; k<j; k++)
             dmael(mu,kappa,k) -= ldexp(tmp * dmael(mu,j,k), e);
           xx = (s64) tmp;
@@ -1271,7 +1290,7 @@ Babai_dpe(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, dpe_t **mu, dpe_t *
         /* we have |X| >= 2 */
         if (tmp->e < BITS_IN_LONG-1)
         {
-          long xx = (long) floor(ldexp(tmp->d, tmp->e)+.5); /* X fits in an long */
+          long xx = (long) pari_rint(ldexp(tmp->d, tmp->e)); /* X fits in an long */
           if (xx > 0) /* = xx */
           {
             for (k=zeros+1; k<j; k++)
@@ -1315,7 +1334,7 @@ Babai_dpe(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, dpe_t **mu, dpe_t *
         else
         {
           long e = tmp->e - BITS_IN_LONG + 1;
-          long xx = (long) floor(ldexp(tmp->d, BITS_IN_LONG - 1)+.5);
+          long xx = (long) pari_rint(ldexp(tmp->d, BITS_IN_LONG - 1));
           if (xx > 0)
           {
             for (k=zeros+1; k<j; k++)

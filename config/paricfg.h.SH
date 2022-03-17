@@ -121,6 +121,9 @@ esac
 case "$has_log2" in
 yes) echo '#define HAS_LOG2' >> $file;;
 esac
+case "$has_rint" in
+yes) echo '#define HAS_RINT' >> $file;;
+esac
 case "$has_isatty" in
 yes) echo '#define HAS_ISATTY' >> $file;;
 esac

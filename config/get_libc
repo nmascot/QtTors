@@ -13,6 +13,7 @@ if test "$arch" = "aarch64" && test "$sizeof_long" = "8"; then
 fi
 list=exp2; . ./look
 list=log2; . ./look
+list=rint; . ./look
 extra_flags=
 list=strftime; . ./look
 if test "$timing_fun" = "clock_gettime"; then
