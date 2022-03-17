@@ -6658,6 +6658,12 @@ as \kbd{FpX\_ddf\_degree}.
 \fun{long}{FlxqX_nbfact_Frobenius}{GEN S, GEN Xq, GEN T, ulong p},
 as \kbd{FpX\_nbfact\_Frobenius}.
 
+\fun{GEN}{FlxqX_nbfact_by_degree}{GEN z, long *nb, GEN T, ulong p} Assume
+that the \kbd{FlxqX} $z$ is squarefree mod the prime $p$. Returns a
+\typ{VECSMALL} $D$ with $\deg z$ entries, such that $D[i]$ is the number of
+irreducible factors of degree $i$. Set \kbd{nb} to the total number of
+irreducible factors (the sum of the $D[i]$).
+
 \fun{GEN}{FlxqX_FlxqXQ_eval}{GEN Q, GEN x, GEN S, GEN T, ulong p} as
 \kbd{FpX\_FpXQ\_eval}.
 

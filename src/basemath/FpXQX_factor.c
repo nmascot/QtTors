@@ -2334,6 +2334,31 @@ FlxqX_factor_Cantor(GEN f, GEN T, ulong p)
   return sort_factor_pol(FE_concat(F,E,j), cmp_Flx);
 }
 
+/* T must be squarefree mod p*/
+GEN
+FlxqX_nbfact_by_degree(GEN f, long *nb, GEN T, ulong p)
+{
+  GEN Xq, D;
+  pari_timer ti;
+  long i, s, n = get_FlxqX_degree(f);
+  GEN V = const_vecsmall(n, 0);
+  pari_sp av = avma;
+  T = Flx_get_red(T, p);
+  f = FlxqX_get_red(f, T, p);
+  if (DEBUGLEVEL>=6) timer_start(&ti);
+  Xq = FlxqX_Frobenius(f, T, p);
+  if (DEBUGLEVEL>=6) timer_printf(&ti,"FlxqX_Frobenius");
+  D = FlxqX_ddf_Shoup(f, Xq, T, p);
+  if (DEBUGLEVEL>=6) timer_printf(&ti,"FlxqX_ddf_Shoup");
+  for (i = 1, s = 0; i <= n; i++)
+  {
+    V[i] = degpol(gel(D,i))/i;
+    s += V[i];
+  }
+  *nb = s;
+  set_avma(av); return V;
+}
+
 long
 FlxqX_nbfact_Frobenius(GEN S, GEN Xq, GEN T, ulong p)
 {

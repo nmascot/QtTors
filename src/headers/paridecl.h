@@ -857,6 +857,7 @@ long    FlxqX_ispower(GEN f, ulong k, GEN T, ulong p, GEN *pt_r);
 long    FlxqX_is_squarefree(GEN P, GEN T, ulong p);
 long    FlxqX_nbfact(GEN S, GEN T, ulong p);
 long    FlxqX_nbfact_Frobenius(GEN S, GEN Xq, GEN T, ulong p);
+GEN     FlxqX_nbfact_by_degree(GEN f, long *nb, GEN T, ulong p);
 long    FlxqX_nbroots(GEN f, GEN T, ulong p);
 GEN     FlxqX_roots(GEN S, GEN T, ulong p);
 GEN     FlxqXQ_halfFrobenius(GEN a, GEN S, GEN T, ulong p);
