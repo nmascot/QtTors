@@ -1665,7 +1665,7 @@ type_dim(GEN x)
     case t_MAT:
     {
       long l = lg(x), r = (l == 1)? 1: lgcols(x);
-      sprintf(v, "t_MAT (%ldx%ld)", r-1,l-1);
+      sprintf(v, "t_MAT (%ld x %ld)", r-1,l-1);
       break;
     }
     case t_COL:

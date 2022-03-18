@@ -640,17 +640,17 @@ INFINITY
   *** _^s: inconsistent multiplication t_POL * t_POL.
   ***   at top-level: matrank(M)
   ***                 ^----------
-  *** matrank: inconsistent rank t_MAT (2x2) , t_POL.
+  *** matrank: inconsistent rank t_MAT (2 x 2) , t_POL.
   ***   at top-level: matimage(M)
   ***                 ^-----------
-  *** matimage: inconsistent image t_MAT (2x2) , t_POL.
+  *** matimage: inconsistent image t_MAT (2 x 2) , t_POL.
   ***   at top-level: matker(M)
   ***                 ^---------
-  *** matker: inconsistent ker t_MAT (2x2) , t_POL.
+  *** matker: inconsistent ker t_MAT (2 x 2) , t_POL.
   ***   incorrect value for plothsizes: [
   ***                                    ^
   ***   incorrect value for plothsizes: 1
   ***                                   ^-
   ***   incorrect value for plothsizes: [2,
   ***                                      ^
-Total time spent: 16
+Total time spent: 25
