@@ -114,6 +114,14 @@ do(y^2-y+24,,,2)
 s=x^18-48*x^16+1566*x^14-23621*x^12+244113*x^10-19818*x^8-3170*x^6+17427*x^4-3258*x^2+199;
 do(y^2-y+50,,,2,s)
 
+
+\\#2371
+bnf=bnfinit(y^6-y^5-285*y^4+6485*y^3+42484*y^2-2039004*y+12574320,1);
+cond = idealfactorback(bnf,idealprimedec(bnf,53));
+sol=[x^2+3,x^2+(-1/34980*y^5-1/3498*y^4-1/132*y^3+89/583*y^2+3793/2915*y-1437/53),x^2+(549/652960*y^5+801/130592*y^4-23043/130592*y^3+585135/130592*y^2+24940233/326480*y-1679253/1484)];
+T=bnrclassfield(bnrinit(bnf,cond,,2));
+[checkvec(bnf,t,~sol) | t<-T];
+
 \\bug: correct absolute field, wrong extension
 print("correct absolute, incorrect relative extension");
 setrand(1);

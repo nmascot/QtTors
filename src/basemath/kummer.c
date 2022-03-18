@@ -65,6 +65,7 @@ reducebeta(GEN bnfz, GEN b, GEN gell)
 {
   GEN t, cb, fu, nf = bnf_get_nf(bnfz);
   long ell = itou(gell);
+  int b_is_cb = 0;
 
   if (DEBUGLEVEL>1) err_printf("reducing beta = %Ps\n",b);
   b = reduce_mod_Qell(nf, b, gell);
@@ -76,10 +77,10 @@ reducebeta(GEN bnfz, GEN b, GEN gell)
   {
     GEN y = nfroots(nf, gsub(monomial(gen_1, ell, fetch_var_higher()),
                          basistoalg(nf,b)));
-    if (lg(y) != 1) b = cb;
+    if (lg(y) != 1) { b = cb; b_is_cb = 1; }
     delete_var();
   }
-  if (b != cb && (fu = bnf_build_cheapfu(bnfz)))
+  if (!b_is_cb && (fu = bnf_build_cheapfu(bnfz)))
   { /* log. embeddings of fu^ell */
     GEN elllogfu = RgM_Rg_mul(real_i(bnf_get_logfu(bnfz)), gell);
     long prec = nf_get_prec(nf);
@@ -96,8 +97,8 @@ reducebeta(GEN bnfz, GEN b, GEN gell)
       if (DEBUGLEVEL) pari_warn(warnprec,"reducebeta",prec);
       nf = nfnewprec_shallow(nf,prec);
     }
-    if (cb) b = gmul(b, cb);
   }
+  if (!b_is_cb && cb) b = gmul(b, cb);
   if (DEBUGLEVEL>1) err_printf("beta LLL-reduced mod U^l = %Ps\n",b);
   return b;
 }
