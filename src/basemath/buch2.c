@@ -882,7 +882,7 @@ factorgen(FB_t *F, GEN nf, GEN I, GEN NI, GEN m, FACT *fact)
   GEN M = nf_get_M(nf);
   GEN N = divri(embed_norm(RgM_RgC_mul(M,m), r1), NI); /* ~ N(m/I) */
   N = grndtoi(N, &e);
-  if (e > -1)
+  if (e > -32)
   {
     if (DEBUGLEVEL > 1) err_printf("+");
     return 0;
