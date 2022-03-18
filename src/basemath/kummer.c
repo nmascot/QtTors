@@ -73,13 +73,7 @@ reducebeta(GEN bnfz, GEN b, GEN gell)
   if (!isint1(t)) b = nfmul(nf, b, nfpow_u(nf, t, ell));
   if (DEBUGLEVEL>1) err_printf("beta reduced via ell-th root = %Ps\n",b);
   b = Q_primitive_part(b, &cb);
-  if (cb)
-  {
-    GEN y = nfroots(nf, gsub(monomial(gen_1, ell, fetch_var_higher()),
-                         basistoalg(nf,b)));
-    if (lg(y) != 1) { b = cb; b_is_cb = 1; }
-    delete_var();
-  }
+  if (cb && nfispower(nf, b, ell, NULL)) { b = cb; b_is_cb = 1; }
   if (!b_is_cb && (fu = bnf_build_cheapfu(bnfz)))
   { /* log. embeddings of fu^ell */
     GEN elllogfu = RgM_Rg_mul(real_i(bnf_get_logfu(bnfz)), gell);
