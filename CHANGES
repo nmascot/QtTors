@@ -122,6 +122,8 @@ AP 103- nfgrunwaldwang: fix infinite loop [#2343]
    104- ti=thueinit(3*x^3 + 5*x^2 - 14*x + 54,1); thue(ti,1) -> error [#2365]
    105- algdep(t_POLMOD x) -> x.mod instead of correct result
    106- bnrinit(,,,cycmod) failed to delete elementary divisors equal to 1
+BA 107- bnrclassfield: incorrect result when fundamental units are large, e.g.
+        bnrclassfield(bnfinit(nfsplitting(a^3-a^2-202*a-3080),1),2)  [#2371]
 
   Added
 HC   1- new GP function eulerreal
