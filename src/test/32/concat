@@ -48,14 +48,14 @@
 [;]
   ***   at top-level: concat([;],[1])
   ***                 ^---------------
-  *** concat: inconsistent concatenation t_MAT (0x0) , t_VEC (1 elts).
+  *** concat: inconsistent concatenation t_MAT (0 x 0) , t_VEC (1 elts).
 
 [1]
 
 [;]
   ***   at top-level: concat([1],[;])
   ***                 ^---------------
-  *** concat: inconsistent concatenation t_VEC (1 elts) , t_MAT (0x0).
+  *** concat: inconsistent concatenation t_VEC (1 elts) , t_MAT (0 x 0).
 [1, 2]
 [1, 2]
 
@@ -63,13 +63,13 @@
 
   ***   at top-level: concat(1,A)
   ***                 ^-----------
-  *** concat: inconsistent concatenation t_INT , t_MAT (2x2).
+  *** concat: inconsistent concatenation t_INT , t_MAT (2 x 2).
 
 [2 1]
 
   ***   at top-level: concat(A,1)
   ***                 ^-----------
-  *** concat: inconsistent concatenation t_MAT (2x2) , t_INT.
+  *** concat: inconsistent concatenation t_MAT (2 x 2) , t_INT.
 [1, 2]
 [1, 2, 1]
   ***   at top-level: concat([1,2],[1,2]~)
