@@ -2995,11 +2995,9 @@ bad_check(GEN c)
  *
  * If c := Rz ~ 1, by Dirichlet's formula, then lambda is the full group of
  * units AND the full set of relations for the class group has been computed.
- *
  * In fact z is a very rough approximation and we only expect 0.75 < Rz < 1.3
- * bit is an estimate for the actual accuracy of lambda
  *
- * Output: *ptkR = R, *ptU = basis of fundamental units (in terms lambda) */
+ * Output: *ptkR = R, *ptL = numerator(units) (in terms of lambda) */
 static long
 compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
 {
@@ -3259,13 +3257,13 @@ bnf_build_cheapfu(GEN bnf)
 }
 
 static GEN
-get_regulator(GEN mun)
+get_regulator(GEN A)
 {
   pari_sp av = avma;
   GEN R;
 
-  if (lg(mun) == 1) return gen_1;
-  R = det( rowslice(real_i(mun), 1, lgcols(mun)-2) );
+  if (lg(A) == 1) return gen_1;
+  R = det( rowslice(real_i(A), 1, lgcols(A)-2) );
   setabssign(R); return gerepileuptoleaf(av, R);
 }
 
@@ -3304,7 +3302,7 @@ Sunits_archclean(GEN nf, GEN Sunits, GEN *pmun, GEN *pC, long prec)
 GEN
 bnfnewprec_shallow(GEN bnf, long prec)
 {
-  GEN nf0 = bnf_get_nf(bnf), nf, v, fu, matal, y, mun, C;
+  GEN nf0 = bnf_get_nf(bnf), nf, v, fu, matal, y, A, C;
   GEN Sunits = bnf_get_sunits(bnf), Ur, Ga, Ge, M1, M2;
   long r1, r2, prec0 = prec;
 
@@ -3331,22 +3329,22 @@ bnfnewprec_shallow(GEN bnf, long prec)
     pari_sp av = avma;
     nf = nfnewprec_shallow(nf0,prec);
     if (Sunits)
-      Sunits_archclean(nf, Sunits, &mun, &C, prec);
+      Sunits_archclean(nf, Sunits, &A, &C, prec);
     else
     {
-      mun = get_archclean(nf, fu, prec, 1);
-      if (mun) C = get_archclean(nf, matal, prec, 0);
+      A = get_archclean(nf, fu, prec, 1);
+      if (A) C = get_archclean(nf, matal, prec, 0);
     }
     if (C) break;
     set_avma(av); prec = precdbl(prec);
     if (DEBUGLEVEL) pari_warn(warnprec,"bnfnewprec(extra)",prec);
   }
   y = leafcopy(bnf);
-  gel(y,3) = mun;
+  gel(y,3) = A;
   gel(y,4) = C;
   gel(y,7) = nf;
   gel(y,8) = v = leafcopy(gel(bnf,8));
-  gel(v,2) = get_regulator(mun);
+  gel(v,2) = get_regulator(A);
   v = gel(bnf,9);
   if (lg(v) < 7) pari_err_TYPE("bnfnewprec [obsolete bnf format]", bnf);
   Ur = gel(v,1);
@@ -4106,7 +4104,7 @@ START:
       AU = RgM_ZM_mul(A, U);
       A = cleanarch(AU, N, PREC);
       if (DEBUGLEVEL) timer_printf(&T, "units LLL + cleanarch");
-      if (!A || lg(A) < RU)
+      if (!A || lg(A) < RU || expo(gsub(get_regulator(A), R)) > -1)
       {
         long add = nbits2extraprec( gexpo(AU) + 64 ) - gprecision(AU);
         long t = maxss((PREC-2) * 0.15, add);
