@@ -905,7 +905,7 @@ addRe_modIm(GEN x, GEN a, GEN m)
     re = gadd(gel(x,1), a);
     z = gequal0(im)? re: mkcomplex(re, im);
     e = gexpo(x);
-    if (e > 0 && e + 32 > prec2nbits(precision(z))) return NULL;
+    if (e > 0 && e + 64 > prec2nbits(precision(z))) return NULL;
   }
   else
     z = gadd(x, a);
