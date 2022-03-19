@@ -45,7 +45,7 @@ typedef struct {
 /* REDUCTION MOD ell-TH POWERS */
 /* make b integral by multiplying by t in (Q^*)^ell */
 static GEN
-reduce_mod_Qell(GEN nf, GEN b, GEN gell)
+reduce_mod_Qell(GEN nf, GEN b, ulong ell)
 {
   GEN c;
   b = nf_to_scalar_or_basis(nf, b);
@@ -53,30 +53,27 @@ reduce_mod_Qell(GEN nf, GEN b, GEN gell)
   if (c)
   {
     GEN d, fa = Q_factor_limit(c, 1000000);
-    gel(fa,2) = FpC_red(gel(fa,2), gell);
-    d = factorback(fa);
+    d = factorback2(gel(fa,1), ZV_to_Flv(gel(fa,2), ell));
     b = typ(b) == t_INT? mulii(b,d): ZC_Z_mul(b, d);
   }
   return b;
 }
 
 static GEN
-reducebeta(GEN bnfz, GEN b, GEN gell)
+reducebeta(GEN bnfz, GEN b, long ell)
 {
   GEN t, cb, fu, nf = bnf_get_nf(bnfz);
-  long ell = itou(gell);
-  int b_is_cb = 0;
 
   if (DEBUGLEVEL>1) err_printf("reducing beta = %Ps\n",b);
-  b = reduce_mod_Qell(nf, b, gell);
+  b = reduce_mod_Qell(nf, b, ell);
   t = idealredmodpower(nf, b, ell, 1000000);
   if (!isint1(t)) b = nfmul(nf, b, nfpow_u(nf, t, ell));
   if (DEBUGLEVEL>1) err_printf("beta reduced via ell-th root = %Ps\n",b);
   b = Q_primitive_part(b, &cb);
-  if (cb && nfispower(nf, b, ell, NULL)) { b = cb; b_is_cb = 1; }
-  if (!b_is_cb && (fu = bnf_build_cheapfu(bnfz)))
+  if (cb && nfispower(nf, b, ell, NULL)) return cb;
+  if ((fu = bnf_build_cheapfu(bnfz)))
   { /* log. embeddings of fu^ell */
-    GEN elllogfu = RgM_Rg_mul(real_i(bnf_get_logfu(bnfz)), gell);
+    GEN elllogfu = gmulgs(real_i(bnf_get_logfu(bnfz)), ell);
     long prec = nf_get_prec(nf);
     for (;;)
     {
@@ -84,7 +81,7 @@ reducebeta(GEN bnfz, GEN b, GEN gell)
       if (z && (ex = RgM_Babai(elllogfu, z)))
       {
         if (ZV_equal0(ex)) break;
-        y = nffactorback(nf, fu, RgC_Rg_mul(ex,gell));
+        y = nffactorback(nf, fu, ZC_z_mul(ex,ell));
         b = nfdiv(nf, b, y); break;
       }
       prec = precdbl(prec);
@@ -92,9 +89,7 @@ reducebeta(GEN bnfz, GEN b, GEN gell)
       nf = nfnewprec_shallow(nf,prec);
     }
   }
-  if (!b_is_cb && cb) b = gmul(b, cb);
-  if (DEBUGLEVEL>1) err_printf("beta LLL-reduced mod U^l = %Ps\n",b);
-  return b;
+  return cb? gmul(b, cb): b;
 }
 
 struct rnfkummer
@@ -301,7 +296,7 @@ compute_beta(GEN X, GEN vecWB, GEN ell, GEN bnfz)
     gel(be,2) = centermod(gel(be,2), ell);
     be = nffactorback(bnfz, be, NULL);
   }
-  be = reducebeta(bnfz, be, ell);
+  be = reducebeta(bnfz, be, itou(ell));
   if (DEBUGLEVEL>1) err_printf("beta reduced = %Ps\n",be);
   return be;
 }
