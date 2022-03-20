@@ -896,16 +896,13 @@ factorgen(FB_t *F, GEN nf, GEN I, GEN NI, GEN m, FACT *fact)
 static GEN
 addRe_modIm(GEN x, GEN a, GEN m)
 {
-  GEN re, im, z;
+  GEN z;
   if (typ(x) == t_COMPLEX)
   {
-    long e;
-    im = modRr_safe(gel(x,2), m);
+    GEN re, im = modRr_safe(gel(x,2), m);
     if (!im) return NULL;
     re = gadd(gel(x,1), a);
     z = gequal0(im)? re: mkcomplex(re, im);
-    e = gexpo(x);
-    if (e > 0 && e + 64 > prec2nbits(precision(z))) return NULL;
   }
   else
     z = gadd(x, a);
