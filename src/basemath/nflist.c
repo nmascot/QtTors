@@ -696,7 +696,11 @@ mynfsubfields(GEN pol, long d)
 }
 static GEN
 mynfsubfield(GEN pol, long d)
-{ return polredabs(gel(_nfsubfields(pol, d), 1)); }
+{
+  if (d == 2 && (degpol(pol) & 3) == 2)
+    return quadpoly_i(quaddisc(ZX_disc(pol)));
+  return polredabs(gel(_nfsubfields(pol, d), 1));
+}
 
 /* global checks to be done:
 -- in nflist: if s > deg / 2, return empty.
