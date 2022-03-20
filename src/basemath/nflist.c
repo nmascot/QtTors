@@ -2323,13 +2323,16 @@ makeS4(GEN N, GEN field, long s)
 static long
 gal_get_order(GEN G) { return degpol(gal_get_pol(G)); }
 
+/* P is monic */
 static GEN
-makeA4S4resolvent(long card, GEN pol, long flag)
+makeA4S4resolvent(GEN P, long flag)
 {
-  GEN R, G = galoissplittinginit(pol, utoipos(card));
-  if (gal_get_order(G) != card) pari_err_BUG("nfresolvent [Galois group]");
-  R = polredabs(galoisfixedfield(G, vecsplice(gal_get_gen(G), 3), 1, 0));
-  return flag? mkvec2(R, sqrti(divii(nfdisc(pol), nfdisc(R)))): R;
+  GEN R, a0 = gel(P,2), a1 = gel(P,3), a2 = gel(P,4), a3 = gel(P,5);
+  GEN b0 = subii(mulii(a0, subii(shifti(a2,2), sqri(a3))), sqri(a1));
+  GEN b1 = subii(mulii(a3, a1), shifti(a0,2));
+  R = mkpoln(4, gen_1, negi(a2), b1, b0); setvarn(R, varn(P));
+  R = polredabs(R);
+  return flag? mkvec2(R, sqrti(divii(nfdisc(P), nfdisc(R)))): R;
 }
 
 static GEN
@@ -5120,7 +5123,7 @@ nfresolvent_small(GEN pol, long flag)
     if (dP == 4) return s == -1? makeC4resolvent(pol, flag)
                                : makeV4resolvent(pol, flag);
     if (dP == 8) return condrelresolvent(pol, 2, flag); /*D4*/
-    return makeA4S4resolvent(dP, pol, flag);
+    return makeA4S4resolvent(pol, flag);
   }
   if (deg == 5)
   {
