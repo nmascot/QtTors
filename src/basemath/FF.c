@@ -2175,6 +2175,7 @@ GEN
 fforder(GEN x, GEN o)
 {
   if (typ(x)!=t_FFELT) pari_err_TYPE("fforder",x);
+  if (FF_equal0(x)) pari_err_DOMAIN("fforder", "x", "=", gen_0, x);
   return FF_order(x,o);
 }
 

@@ -358,5 +358,9 @@ error("incorrect type in ffextend (t_POL).")
   ***   at top-level: a=ffgen(3^3,'a);ffinvmap(ffextend(a,x^2+x+a))
   ***                                 ^-----------------------------
   *** ffinvmap: incorrect type in ffinvmap (t_VEC).
+? fforder(ffgen(8)*0)
+  ***   at top-level: fforder(ffgen(8)*0)
+  ***                 ^-------------------
+  *** fforder: domain error in fforder: x = 0
 ? print("Total time spent: ",gettime);
-Total time spent: 1012
+Total time spent: 971
