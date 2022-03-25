@@ -36,4 +36,11 @@ error("overflow in zeta [large negative argument].")
 0.0033002236853241028787385710594281869587 - 0.41815544914132167671675047169
 990486888*I
 -0.50000000000000000000000000000000000000 + O(x)
-Total time spent: 35
+  ***   at top-level: zeta(1)
+  ***                 ^-------
+  *** zeta: domain error in zeta: argument = 1
+   seriesprecision = 1 significant terms
+  ***   at top-level: zeta(1+t)
+  ***                 ^---------
+  *** zeta: domain error in zeta: argument = 1
+Total time spent: 8

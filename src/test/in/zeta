@@ -28,3 +28,9 @@ zeta([3/2,5/2,7/2])
 zeta([2])
 zeta(I+2^(-64))
 zeta(0.+O(x))
+
+\\ Errors
+zeta(1)
+\\#2375
+\ps1
+zeta(1+t)

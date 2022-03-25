@@ -2174,6 +2174,8 @@ gzeta(GEN x, long prec)
     }
     default:
       if (!(y = toser_i(x))) break;
+      if (gequal1(y))
+        pari_err_DOMAIN("zeta", "argument", "=", gen_1, y);
       return gerepileupto(av, lfun(gen_1,y,prec2nbits(prec)));
   }
   return trans_eval("zeta",gzeta,x,prec);
