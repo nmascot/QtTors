@@ -3201,7 +3201,7 @@ makeA56resolvent(GEN pol, long flag)
       for (j = 1; j < lg(L); j++)
       {
         GEN P = gel(L, j);
-        if (gequal(makeA5resolvent(P, 0), pol))
+        if (ZX_equal(makeA5resolvent(P, 0), pol))
           return odd(flag)? mkvec2(P, gen_1): P;
       }
     }
@@ -4671,7 +4671,7 @@ makeC3C3vec(GEN X, GEN Xinf, GEN field, long s)
     long c;
     if (!Z_issquareall(D3, &F3)) return NULL;
     for (j = c = 1; j < l; j++)
-      if (ok_intu(lcmiu(F3, F[j]), x, xinf) && !gequal(gel(v3,j), field))
+      if (ok_intu(lcmiu(F3, F[j]), x, xinf) && !ZX_equal(gel(v3,j), field))
         gel(v, c++) = polredabs(polcompositum0(field, gel(v3,j), 2));
     setlg(v, c);
   }
