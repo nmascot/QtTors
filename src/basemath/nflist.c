@@ -3035,24 +3035,37 @@ makeMgenvec(long ell, long a, GEN X, GEN Xinf, GEN field, long s)
 /*                        A5 by table lookup                          */
 /**********************************************************************/
 /* V a vector of [T, n] sorted wrt t_INT n. Return elts with Xinf <= n <= X.
- * If fl is set return only the T's. */
+ * If flag = 0 return only the T's. */
 static GEN
-vectrunc(GEN V, GEN Xinf, GEN X, long fl)
+vectrunc(GEN V, GEN Xinf, GEN X, long flag)
 {
   long l = lg(V), i = 1, c;
+  int to_pol;
   GEN W;
 
+  if (l == 1) return NULL;
+  to_pol = typ(gmael(V, 1, 1)) != t_POL;
   if (!equali1(Xinf)) /* frequent special case */
   {
     i = gen_search(V, mkvec2(NULL,Xinf), NULL, &cmp2);
     if (i > 0) /* found in list, rewind to first occurence */
     { while (i > 1 && equalii(gmael(V, i-1, 2), Xinf)) i--; }
     else /* not in list */
-    { i = -i; if (i >= lg(V)) return 0; }
+    { i = -i; if (i >= lg(V)) return NULL; }
   }
   W = cgetg(l, t_VEC);
-  for (c = 1; i < l && cmpii(gmael(V, i, 2), X) <= 0; i++)
-    gel(W, c++) = fl ? gel(V, i) : gmael(V, i, 1);
+  if (flag)
+    for (c = 1; i < l && cmpii(gmael(V, i, 2), X) <= 0; i++)
+    {
+      GEN x = gmael(V, i, 1);
+      gel(W, c++) = to_pol? mkvec2(RgV_to_RgX(x,0), gmael(V, i, 2)): gel(V, i);
+    }
+  else
+    for (c = 1; i < l && cmpii(gmael(V, i, 2), X) <= 0; i++)
+    {
+      GEN x = gmael(V, i, 1);
+      gel(W, c++) = to_pol? RgV_to_RgX(x,0): x;
+    }
   setlg(W, c); return W;
 }
 
@@ -3063,16 +3076,11 @@ nflistfile(const char *suf, long n, long t, long s)
   char *f = stack_malloc(strlen(pari_datadir) + strlen(suf)
                          + 1+10+1+1+1+3 + 5/*n/t*/ + 1);
   pariFILE *F;
-  long i, l;
   GEN z;
   sprintf(f, "%s/nflistdata/%ld/%ld/%ld%s.gp", pari_datadir, n, t,s, suf?suf:"");
   F = pari_fopengz(f);
   if (!F) pari_err_FILE("nflistdata file",f);
-  z = gp_readvec_stream(F->file); pari_fclose(F);
-  l = lg(z); if (l == 1) return z; /* paranoia */
-  if (typ(gmael(z,1,1)) != t_POL) /* t_VEC: convert to t_POL */
-    for (i = 1; i < l; i++) gmael(z, i, 1) = RgV_to_RgX(gmael(z, i, 1), 0);
-  return z;
+  z = gp_readvec_stream(F->file); pari_fclose(F); return z;
 }
 
 static GEN
@@ -3091,8 +3099,15 @@ A5vec(GEN X, GEN Xinf, long s, long fl)
   {
     case 2: return L1;
     case 0: return L5;
-    case -1: return shallowconcat(L1, L5);
-    default: return mkvec3(L5, cgetg(1, t_VEC), L1);
+    case -1:
+      if (!L1) return L5;
+      if (!L5) return L1;
+      return shallowconcat(L1, L5);
+    default:
+      if (!L1 && !L5) return NULL;
+      if (!L1) L1 = cgetg(1, t_VEC);
+      if (!L5) L5 = cgetg(1, t_VEC);
+      return mkvec3(L5, cgetg(1, t_VEC), L1);
   }
 }
 static GEN
