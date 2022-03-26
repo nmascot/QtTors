@@ -3063,11 +3063,16 @@ nflistfile(const char *suf, long n, long t, long s)
   char *f = stack_malloc(strlen(pari_datadir) + strlen(suf)
                          + 1+10+1+1+1+3 + 5/*n/t*/ + 1);
   pariFILE *F;
+  long i, l;
   GEN z;
   sprintf(f, "%s/nflistdata/%ld/%ld/%ld%s.gp", pari_datadir, n, t,s, suf?suf:"");
   F = pari_fopengz(f);
   if (!F) pari_err_FILE("nflistdata file",f);
-  z = gp_readvec_stream(F->file); pari_fclose(F); return z;
+  z = gp_readvec_stream(F->file); pari_fclose(F);
+  l = lg(z); if (l == 1) return z; /* paranoia */
+  if (typ(gmael(z,1,1)) != t_POL) /* t_VEC: convert to t_POL */
+    for (i = 1; i < l; i++) gmael(z, i, 1) = RgV_to_RgX(gmael(z, i, 1), 0);
+  return z;
 }
 
 static GEN
