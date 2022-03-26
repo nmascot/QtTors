@@ -165,8 +165,7 @@ nflistQTfile(long n, long t)
   GEN z;
   sprintf(f, "%s/nflistdata/%ld/%ld/QT", pari_datadir, n, t);
   F = pari_fopengz(f); if (!F) return NULL;
-  z = gp_read_stream(F->file); pari_fclose(F);
-  return z;
+  z = gp_read_stream(F->file); pari_fclose(F); return z;
 }
 
 static GEN
@@ -188,9 +187,9 @@ nfmakeQT(long deg, long k, long v)
   for (i = 1; i < l; i++)
   {
     GEN p = gel(P,i);
-    if (typ(p) != t_INT) gel(P,i) = gtopoly(p, v);
+    if (typ(p) != t_INT) gel(P,i) = RgV_to_RgX(p, v);
   }
-  return gtopoly(P, 0);
+  return RgV_to_RgX(P, 0);
 }
 
 static GEN

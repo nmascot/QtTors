@@ -82,6 +82,7 @@ Major contributors (large modules written or rewritten from scratch):
 All packages built by Bill ALLOMBERT and Karim BELABAS.
 Package contributors:
   John CREMONA: elldata (https://johncremona.github.io/ecdata/)
+  Tim DOKCHITSER: nflistdata (regular extensions of Q(t))
   David KOHEL: seadata (https://www.i2m.univ-amu.fr/perso/david.kohel/dbs/)
   Bill ALLOMBERT and Igor SCHEIN built the galpol contents
   Yves EICHENLAUB contributed the galdata contents
