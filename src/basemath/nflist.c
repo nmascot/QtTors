@@ -3040,11 +3040,11 @@ static GEN
 vectrunc(GEN V, GEN Xinf, GEN X, long flag)
 {
   long l = lg(V), i = 1, c;
-  int to_pol;
   GEN W;
 
   if (l == 1) return NULL;
-  to_pol = typ(gmael(V, 1, 1)) != t_POL;
+  if (typ(gmael(V,1,1)) == t_POL)
+    pari_err(e_MISC,"Versions mismatch. Please update the nflistdata package");
   if (!equali1(Xinf)) /* frequent special case */
   {
     i = gen_search(V, mkvec2(NULL,Xinf), NULL, &cmp2);
@@ -3058,13 +3058,13 @@ vectrunc(GEN V, GEN Xinf, GEN X, long flag)
     for (c = 1; i < l && cmpii(gmael(V, i, 2), X) <= 0; i++)
     {
       GEN x = gmael(V, i, 1);
-      gel(W, c++) = to_pol? mkvec2(RgV_to_RgX(x,0), gmael(V, i, 2)): gel(V, i);
+      gel(W, c++) = mkvec2(RgV_to_RgX(x,0), gmael(V, i, 2));
     }
   else
     for (c = 1; i < l && cmpii(gmael(V, i, 2), X) <= 0; i++)
     {
       GEN x = gmael(V, i, 1);
-      gel(W, c++) = to_pol? RgV_to_RgX(x,0): x;
+      gel(W, c++) = RgV_to_RgX(x,0);
     }
   setlg(W, c); return W;
 }
