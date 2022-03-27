@@ -28,8 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "paricfg.h"
 #ifdef HAS_STAT
 #include <sys/stat.h>
-#endif
-#ifdef HAS_OPENDIR
+#elif defined(HAS_OPENDIR)
 #include <dirent.h>
 #endif
 #ifdef HAS_WAITPID
@@ -3680,7 +3679,15 @@ pari_get_homedir(const char *user) { (void) user; return NULL; }
 /**                   GP STANDARD INPUT AND OUTPUT                **/
 /**                                                               **/
 /*******************************************************************/
-#ifdef HAS_OPENDIR
+#ifdef HAS_STAT
+static int
+is_dir_stat(const char *name)
+{
+  struct stat buf;
+  if (stat(name, &buf)) return 0;
+  return S_ISDIR(buf.st_mode);
+}
+#elif defined(HAS_OPENDIR)
 /* slow, but more portable than stat + S_ISDIR */
 static int
 is_dir_opendir(const char *name)
@@ -3691,15 +3698,6 @@ is_dir_opendir(const char *name)
 }
 #endif
 
-#ifdef HAS_STAT
-static int
-is_dir_stat(const char *name)
-{
-  struct stat buf;
-  if (stat(name, &buf)) return 0;
-  return S_ISDIR(buf.st_mode);
-}
-#endif
 
 /* Does name point to a directory? */
 int
@@ -3707,12 +3705,10 @@ pari_is_dir(const char *name)
 {
 #ifdef HAS_STAT
   return is_dir_stat(name);
-#else
-#  ifdef HAS_OPENDIR
+#elif defined(HAS_OPENDIR)
   return is_dir_opendir(name);
-#  else
+#else
   (void) name; return 0;
-#  endif
 #endif
 }
 
