@@ -326,6 +326,7 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
   mpqs_uint32_t k = h->_k->k;
   forprime_t S;
 
+  h->largest_FB_p = 0; /* -Wall */
   FB[2].fbe_p = 2;
   /* the fbe_logval and the fbe_sqrt_kN for 2 are never used */
   FB[2].fbe_flags = MPQS_FBE_CLEAR;
