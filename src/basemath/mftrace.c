@@ -1752,7 +1752,7 @@ induce(GEN G, GEN CHI)
   }
   return CHI;
 }
-/* induce mfchar CHI to znstar(G) */
+/* induce mfchar CHI to znstar(N) */
 static GEN
 induceN(long N, GEN CHI)
 {
@@ -7852,7 +7852,11 @@ mfatkininit_i(GEN mf, long Q, long flag, long prec)
   if (!isint1(s)) C = gmul(C, s);
   CHIAL = mfcharAL(CHI, Q);
   if (dk == 2)
-    CHIAL = mfcharmul(CHIAL, induce(gel(CHIAL,1), utoipos(odd(Q) ? Q<<2 : Q)));
+  {
+    ulong q = odd(Q)? Q << 2: Q, Nq = ulcm(q, mfcharmodulus(CHIAL));
+    CHIAL = induceN(Nq, CHIAL);
+    CHIAL = mfcharmul(CHIAL, induce(gel(CHIAL,1), utoipos(q)));
+  }
   CHIAL = mfchartoprimitive(CHIAL,NULL);
   mfB = gequal(CHIAL,CHI)? mf: mfinit_Nndkchi(N,nk,dk,CHIAL,MF_get_space(mf),0);
   Mindex = MF_get_Mindex(mfB);
