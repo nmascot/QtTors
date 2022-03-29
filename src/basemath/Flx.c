@@ -2794,7 +2794,7 @@ FlxC_FlxqV_eval(GEN x, GEN v, GEN T, ulong p)
 GEN
 FlxC_Flxq_eval(GEN x, GEN F, GEN T, ulong p)
 {
-  long d = brent_kung_optpow(degpol(T)-1,lg(x)-1,1);
+  long d = brent_kung_optpow(get_Flx_degree(T)-1,lg(x)-1,1);
   GEN Fp = Flxq_powers(F, d, T, p);
   return FlxC_FlxqV_eval(x, Fp, T, p);
 }
