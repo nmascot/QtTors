@@ -911,17 +911,17 @@ autom(struct group *G, struct qfauto *qf, struct fingerprint *fp,
       }
     }
     /* test, whether on step STAB some generators may be omitted */
-    if (step == STAB) for (tries = G->nsg[step]; tries <= G->ng[step]; tries++)
+    if (step == STAB) for (tries = G->nsg[step]+1; tries <= G->ng[step]; tries++)
     {
       nH = 0;
-      for (j = 1; j < tries; j++) gel(H,++nH) = gmael(G->g,step,j);
-      for (j = tries+1; j < G->ng[step]; j++) gel(H,++nH) = gmael(G->g,step,j);
+      for (j = 1; j < tries; j++)              gel(H,++nH) = gmael(G->g,step,j);
+      for (j = tries+1; j <= G->ng[step]; j++) gel(H,++nH) = gmael(G->g,step,j);
       for (i = step+1; i <= dim; i++)
         for (j = 1; j <= G->ng[i]; j++) gel(H,++nH) = gmael(G->g,i,j);
       if (orbitlen(fp->e[step], G->ord[step], H, nH, V) == G->ord[step])
       { /* generator g[step][tries] can be omitted */
         G->ng[step]--;
-        for (i = tries; i < G->ng[step]; ++i)
+        for (i = tries; i <= G->ng[step]; ++i)
           gmael(G->g,step,i) = gmael(G->g,step,i+1);
         tries--;
       }
