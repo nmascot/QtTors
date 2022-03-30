@@ -2060,21 +2060,22 @@ This initializes the distance to $0$.
 Now type  \kbd{f = qfbred(u, 1)}. This is the
 first form encountered along the principal cycle. For the moment, keep the
 precision low, for example the initial default precision. The distance from
-the identity of \kbd{f} is around 4.253. Since we want a
-distance of $R$, this should be encountered approximately at
-$R/f[2]=621$ times the distance of \kbd{f}. Hence, as a first try, we
+the identity to \kbd{f} is around 4.253, given by the second component.
+Since we want a distance of $R$, this should be encountered approximately at
+$R/f[2] \approx 621$ times the distance of \kbd{f}. Hence, as a first try, we
 type \kbd{qfbpow(f,621)} (\kbd{f \pow 621} will not accept extended forms).
-Oops, we overshot, since the distance is now $3173.02$.
-Now we can refine our initial estimate and believe that we should be close to
+Oops, we overshot, since the distance is now $3173.018\dots$.
+Now we can refine our initial estimate: we should be close to
 the correct distance if we raise \kbd{f} to the power $621*R/3173$ which
-is close to $517$. Now if we compute \kbd{qfbpow(f, 517)} we hit the principal
-form right on the dot. Note that this is not a lucky accident: we must land
-extremely close to the correct target using this method, and usually at most
-one reduction correction step is necessary. And the distance component can
-tell us where we are along the cycle.
+is a little less than $517$. Now if we compute \kbd{qfbpow(f, 516)} we hit the
+principal form right on the dot. Note that this is not a lucky accident: we
+must land extremely close to the correct target using this method, and
+usually at most one reduction correction step is necessary. And the distance
+component can tell us where we are along the cycle: starting from $u$, we
+need $516+1 = 517$ reductions.
 
 Up to now, we have only worked to low precision. The goal was to obtain this
-unknown integer $517$. Note that this number has absolutely no mathematical
+unknown integer $517$. Note that this number has no mathematical
 significance: indeed the notion of reduction of a form with positive
 discriminant is not well defined since there are usually many reduced forms
 equivalent to a given form. However, when PARI computes with extended forms,
@@ -2082,8 +2083,8 @@ the specific order and reductions that it performs are dictated entirely by
 the coefficients of the quadratic form itself, and not by the distance
 component, hence the precision used has no effect.
 
-Hence we now start again by setting the precision to (for example) 500,
-we retype the definition of \kbd{u} (why is this necessary?), and then
+We now start again by setting the precision to (for example) 500 decimal
+digits, we retype the definition of \kbd{u} (why is this necessary?), and then
 \kbd{qfbpow(qfbred(u, 1), 517)}. We already know that we land on the
 unit form, and the distance component gives us the regulator to 500 decimal
 places with no effort at all.
