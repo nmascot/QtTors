@@ -1885,22 +1885,11 @@ for example
 \bprog
   quadclassunit(-3299)
 @eprog\noindent
-Note that this function cheats a little and could still give a wrong answer,
-even assuming GRH: the forms given could generate a strict subgroup of the
-class group. If we want to use proven bounds under GRH, we have to type
-\bprog
-  quadclassunit(-3299,,[1,6])
-@eprog\noindent
-The double comma \kbd{,,} is not a typo, it means we omit an optional second
-argument. As we want to use the optional \emph{third} argument, we have to
-indicate to \kbd{gp} we skipped this one.
-
 Now, if we believe in GRH, the class group is as we thought (see Chapter 3
-for a complete description of this function).
-
-  Note that using the even more general function \kbd{bnfinit} (which handles
-general number fields and gives more complicated results), we could
-\emph{certify} this result, i.e~remove the GRH assumption. Let's do it, type
+for a complete description of this function). Note that using the even more
+general function \kbd{bnfinit} (which handles general number fields and gives
+more complicated results), we could \emph{certify} this result, i.e~remove
+the GRH assumption. Let's do it, type
 \bprog
   bnf = bnfinit(x^2 + 3299); bnfcertify(bnf)
 @eprog
