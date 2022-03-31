@@ -357,9 +357,10 @@ static GEN
 qfrsqr0(GEN x, long raw)
 {
   pari_sp av = avma;
-  GEN z = cgetg(5,t_QFB);
-  gel(z,4) = gel(x,4);
-  qfb_sqr(z,x);
+  GEN dx = NULL, z = cgetg(5,t_QFB);
+  if (typ(x) == t_VEC) { dx = gel(x,2); x = gel(x,1); }
+  gel(z,4) = gel(x,4); qfb_sqr(z,x);
+  if (dx) z = mkvec2(z, shiftr(dx,1));
   if (!raw) z = redreal(z);
   return gerepilecopy(av, z);
 }
@@ -1224,12 +1225,12 @@ qfrpowraw(GEN x, long n)
 {
   struct qfr_data S = { NULL, NULL, NULL };
   pari_sp av = avma;
-  if (!n) return qfr_1(x);
   if (n==1) return gcopy(x);
   if (n==-1) return qfrinvraw(x);
   if (typ(x)==t_QFB)
   {
     GEN D = qfb_disc(x);
+    if (!n) return qfr_1(x);
     if (n < 0) { x = qfb_inv(x); n = -n; }
     x = qfr3_powraw(x, n);
     x = qfr3_to_qfr(x, D);
@@ -1238,6 +1239,7 @@ qfrpowraw(GEN x, long n)
   {
     GEN d0 = gel(x,2);
     x = gel(x,1);
+    if (!n) retmkvec2(qfr_1(x), real_0(precision(d0)));
     if (n < 0) { x = qfb_inv(x); n = -n; }
     x = qfr5_init(x, d0, &S);
     if (labs(n) != 1) x = qfr5_powraw(x, n);
@@ -1251,9 +1253,9 @@ qfrpow(GEN x, GEN n)
   struct qfr_data S = { NULL, NULL, NULL };
   long s = signe(n);
   pari_sp av = avma;
-  if (!s) return qfr_1(x);
   if (typ(x)==t_QFB)
   {
+    if (!s) return qfr_1(x);
     if (s < 0) x = qfb_inv(x);
     x = qfr3_init(x, &S);
     x = is_pm1(n)? qfr3_red(x, &S): qfr3_pow(x, n, &S);
@@ -1263,6 +1265,7 @@ qfrpow(GEN x, GEN n)
   {
     GEN d0 = gel(x,2);
     x = gel(x,1);
+    if (!s) retmkvec2(qfr_1(x), real_0(precision(d0)));
     if (s < 0) x = qfb_inv(x);
     x = qfr5_init(x, d0, &S);
     x = is_pm1(n)? qfr5_red(x, &S): qfr5_pow(x, n, &S);
@@ -1284,6 +1287,12 @@ qfbpow(GEN x, GEN n)
 {
   GEN q = check_qfbext("qfbpow",x);
   return qfb_is_qfi(q)? qfipow(x,n): qfrpow(x,n);
+}
+GEN
+qfbpows(GEN x, long n)
+{
+  long N[] = { evaltyp(t_INT) | _evallg(3), 0, 0};
+  affsi(n, N); return qfbpow(x, N);
 }
 
 /* Prime forms attached to prime ideals of degree 1 */

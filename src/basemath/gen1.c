@@ -1879,6 +1879,7 @@ gmul(GEN x, GEN y)
       y = RgXn_mul(x, y, lx-2);
       return gerepilecopy(av, fill_ser(z,y));
     }
+    case t_VEC: /* handle extended t_QFB */
     case t_QFB: return qfbcomp(x,y);
     case t_RFRAC: return mul_rfrac(gel(x,1),gel(x,2), gel(y,1),gel(y,2));
     case t_MAT: return RgM_mul(x, y);
@@ -2213,6 +2214,7 @@ gsqr(GEN x)
       gel(z,2) = gsqr(gel(x,2)); return z;
 
     case t_MAT: return RgM_sqr(x);
+    case t_VEC: /* handle extended t_QFB */
     case t_QFB: return qfbsqr(x);
     case t_VECSMALL:
       z = cgetg_copy(x, &lx);
@@ -2494,6 +2496,7 @@ gdiv(GEN x, GEN y)
       }
       return div_rfrac(x,y);
 
+    case t_VEC: /* handle extended t_QFB */
     case t_QFB: av = avma; return gerepileupto(av, qfbcomp(x, ginv(y)));
 
     case t_MAT:
@@ -3337,6 +3340,7 @@ ginv(GEN x)
       return z;
     }
 
+    case t_VEC: /* handle extended t_QFB */
     case t_QFB:
       return qfbpow(x, gen_m1);
     case t_MAT:

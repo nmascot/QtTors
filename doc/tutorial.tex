@@ -1927,9 +1927,9 @@ indefinite quadratic form $ax^2+bxy+cy^2$, and $d\in \R$ is a ``distance''
 component, as defined by Shanks and Lenstra.
 
 The form $q$ can be multiplied, divided, powered, and they can be
-reduced using \kbd{qfbred}. But this time, to compose extended forms
-$[q,d]$ and $[q,d']$, one must use \kbd{qfbcomp} and \kbd{qfbpow} (since
-ordinary multiplication and powerings will not accept pairs)
+reduced using \kbd{qfbred}. To compose extended forms
+$[q,d]$ and $[q,d']$, one may use \kbd{qfbcomp} and \kbd{qfbpow} but
+ordinary multiplication and powerings also accept pairs.
 
 The \kbd{qfbred} function applies a succession of
 elementary reduction steps corresponding essentially to a continued fraction
@@ -1963,7 +1963,7 @@ Well, one way to check this, which is not the most efficient but will suffice
 for now, is to look at the complete cycle of reduced forms equivalent to
 \kbd{f}. Type
 \bprog
- g = f; for(i=1,20, g = qfbred(g, 1); print(g))
+ g = f; until(g == f, g = qfbred(g, 1); print(g))
 @eprog\noindent
 (the flag $1$ in \kbd{qfbred} means to perform a single reduction step). We
 see that we come back to the form \kbd{f} without meeting the principal form
@@ -2007,6 +2007,8 @@ numerical approximation to $\sigma(\alpha)$ is \kbd{$-$sa}. Thus we type
   p = x^2 - round(a-sa)*x - 8
 @eprog\noindent
 and this ($x^2 - 15221x - 8$) is the characteristic polynomial of $\alpha$.
+(A more user-friendly, but much less efficient, way to obtain the same result
+is \kbd{algdep(a,2)} or \kbd{algdep(sa,2)}.)
 We can check that the discriminant of this polynomial is a square multiple of
 \kbd{D} using \kbd{issquare(poldisc(p) / D)}, so $\alpha$ is indeed in our
 field. More precisely, solving for $\alpha$ and using the numerical
@@ -2030,12 +2032,14 @@ equal to $2641.5$. You may certify this with
   bnf = bnfinit(x^2 - D, 1);  \\ @com insist on finding fundamental unit
   bnfcertify(bnf);
 @eprog\noindent
-although it's a little inefficient. Indeed \kbd{bnfcertify} needs the
-fundamental unit, which is large: it needs about $R/\log(10)\approx 1147$
-digits of precision, see \kbd{bnf.fu}!
-(\kbd{bnfinit} would have given up had we not inserted the flag $1$.)
-On the other hand, you can try \kbd{quadunit(D,'w)}. Impressive, isn't it?
-(You can check that its logarithm is indeed equal to the regulator.)
+which is fast for small $D$ but costly in general. Indeed \kbd{bnfcertify}
+needs the fundamental unit, which is large: we expect coefficients of about
+$R/\log(10)\approx 1147$ digits, see \kbd{bnf.fu}! (We inserted the flag $1$
+so that \kbd{bnfinit} would at least compute this fundamental unit in
+factored form, which allows to reconstruct \kbd{bnf.fu}; \kbd{bnfcertify}
+will often fail without it.) On the other hand, you can also try
+\kbd{quadunit(D,'w)}. Impressive, isn't it? (You can check that its logarithm
+is indeed equal to the regulator.)
 
 Let's now assume that we want the regulator $R$ to 500 decimals, say.
 (Without cheating and computing the fundamental unit exactly first!)
@@ -2053,31 +2057,32 @@ the identity to \kbd{f} is around 4.253, given by the second component.
 The distance function is approximately additive.
 Since we want a total distance of $R$, this should be encountered
 approximately at $R/f[2] \approx 621$ times the distance of \kbd{f}. Hence,
-as a first try, we type \kbd{qfbpow(f,621)} (the direct command \kbd{f \pow
-621} does not accept extended forms). Oops, we overshoot: the distance is now
-$3173.018\dots > R$. Now we can refine our initial estimate: we should be
+as a first try, we type \kbd{f \pow 621}. Oops, we overshoot: the distance is
+now $3173.018\dots > R$. Now we can refine our initial estimate: we should be
 close to the correct distance if we raise \kbd{f} to the power $621*R/3173$
-which is a little less than $517$. Now if we compute \kbd{qfbpow(f, 517)} we
-hit the principal form right on the dot (actually, 516 would also work!).
-Note that this is not a lucky accident: we must land extremely close to the
-correct target using this method, and usually at most one reduction
-correction step is necessary. And the distance component can tell us where we
-are along the cycle.
+which is a little less than $517$. Now if we compute \kbd{f\pow 517} we
+hit the principal form right on the dot. This is not a lucky
+accident: we must land extremely close to the correct target using this
+method, and usually at most one reduction correction step is necessary.
+And the distance component can tell us where we are along the cycle.
 
 Up to now, we have only worked to low precision. The goal was to obtain this
 unknown integer $517$. Note that this number has no mathematical
 significance: indeed the notion of reduction of a form with positive
 discriminant is not well defined since there are usually many reduced forms
-equivalent to a given form. However, when PARI computes with extended forms,
-the specific order and reductions that it performs are dictated entirely by
-the coefficients of the quadratic form itself, and not by the distance
-component, hence the precision used has no effect.
+equivalent to a given form. (In fact, \kbd{f\pow 516} also yields the
+principal form, so you can replace $517$ by $516$ if you wish!)
+
+However, when PARI computes with extended forms, the specific order and
+reductions that it performs are dictated entirely by the coefficients of the
+quadratic form itself, and not by the distance component, hence the precision
+used has no effect.
 
 We now start again by setting the precision to (for example) 500 decimal
-digits, we retype the definition of \kbd{u} (why is this necessary?), and then
-\kbd{qfbpow(qfbred(u, 1), 517)}. We already know that we land on the
-unit form, and the distance component gives us the regulator to 500 decimal
-places with no effort at all.
+digits, we set \kbd{u = precision(u, 500)} (why is this necessary?), and then
+\kbd{qfbred(u, 1)\pow 517} (or to the power $516$). We already know that we
+land on the unit form, and the distance component gives us the regulator to
+500 decimal places with no effort at all.
 
 In a similar way, we could obtain the so-called \emph{compact representation}
 of the fundamental unit itself, or $p$-adic regulators. I leave this as

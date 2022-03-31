@@ -1946,6 +1946,7 @@ GEN     qfbcornacchia(GEN d, GEN p);
 GEN     qfbpow(GEN x, GEN n);
 GEN     qfbpow_i(GEN x, GEN n);
 GEN     qfbpowraw(GEN x, long n);
+GEN     qfbpows(GEN x, long n);
 GEN     qfbred(GEN x);
 GEN     qfbred_i(GEN x);
 GEN     qfbred0(GEN x, long flag, GEN isqrtD, GEN sqrtD);

@@ -33,6 +33,18 @@ qfbredsl2(q);
 p=2^64+13;
 qfbprimeform(-4,p)
 qfbprimeform(5,p)
+D=10^7+1;
+u=[qfbprimeform(D,1),0.]; f=qfbred(u,1);
+f^0
+qfbpow(f,0)
+f^1
+qfbpow(f,1)
+f^-1
+qfbpow(f,-1)
+f^6
+qfbpow(f,6)
+f*f
+f*f/f
 
 \\ Errors, keep at end of file
 qfbredsl2(q,1.);
