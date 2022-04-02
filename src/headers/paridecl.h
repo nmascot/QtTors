@@ -440,6 +440,7 @@ GEN     FlxM_Flx_add_shallow(GEN x, GEN y, ulong p);
 GEN     FlxM_eval_powers_pre(GEN z, GEN x, ulong p, ulong pi);
 GEN     FlxM_neg(GEN x, ulong p);
 GEN     FlxM_sub(GEN x, GEN y, ulong p);
+GEN     FlxM_to_FlxXV(GEN x, long v);
 GEN     FlxM_to_ZXM(GEN z);
 GEN     FlxT_red(GEN z, ulong p);
 GEN     FlxV_Flc_mul(GEN V, GEN W, ulong p);

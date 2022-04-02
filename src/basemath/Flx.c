@@ -127,6 +127,10 @@ FlxV_to_FlxX(GEN x, long v)
 }
 
 GEN
+FlxM_to_FlxXV(GEN x, long v)
+{ pari_APPLY_type(t_COL, FlxV_to_FlxX(gel(x,i), v)) }
+
+GEN
 FlxM_Flx_add_shallow(GEN x, GEN y, ulong p)
 {
   long l = lg(x), i, j;
