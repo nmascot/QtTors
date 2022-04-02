@@ -4215,6 +4215,7 @@ GEN     sumnumlagrange(void *E, GEN (*eval)(void*,GEN,long), GEN a, GEN tab, lon
 GEN     sumnummonien(void *E, GEN (*eval)(void*, GEN), GEN a, GEN tab, long prec);
 GEN     sumnummonieninit(GEN asymp, GEN w, GEN n0, long prec);
 GEN     sumnumrat(GEN F, GEN a, long prec);
+GEN     sumnumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec);
 
 /* ispower.c */
 
@@ -5311,7 +5312,6 @@ GEN     sumpos2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
 GEN     suminf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
 GEN     suminf_bitprec(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
 GEN     sumdivmultexpr(void *D, GEN (*fun)(void*, GEN), GEN num);
-GEN     sumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec);
 GEN     zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec);
 
 /* thue.c */

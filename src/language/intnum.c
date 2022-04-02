@@ -2680,7 +2680,7 @@ sumnumlagrange0(GEN a, GEN code, GEN tab, long prec)
 /********************************************************************/
 
 GEN
-sumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec)
+sumnumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec)
 {
   pari_sp av;
   GEN M, N, Wkeep = gen_0, W = gen_0, _1, S, t, Wp;
@@ -2717,13 +2717,13 @@ sumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec)
     if (++fail >= 10)
     {
       if (DEBUGLEVEL)
-        err_printf("sumsidi: reached accuracy of %ld bits.", -ekeep);
+        err_printf("sumnumsidi: reached accuracy of %ld bits.", -ekeep);
       bit = -ekeep; W = Wkeep; break;
     }
     if (e < ekeep) { fail = 0; ekeep = e; Wkeep = W; }
     if (gc_needed(av,2))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"sumsidi");
+      if (DEBUGMEM>1) pari_warn(warnmem,"sumnumsidi");
       gerepileall(av, 6, &W, &Wkeep, &S, &t, &M, &N);
     }
     Wp = W;
@@ -2733,7 +2733,7 @@ sumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec)
 
 GEN
 sumnumsidi0(GEN a, GEN code, long safe, long prec)
-{ EXPR_WRAP(code, sumsidi(EXPR_ARGPREC, a, safe ? 1.56 : 1., prec)); }
+{ EXPR_WRAP(code, sumnumsidi(EXPR_ARGPREC, a, safe ? 1.56 : 1., prec)); }
 
 struct _osc_wrap
 {
@@ -2776,8 +2776,8 @@ intnumosc(void *E, GEN (*f)(void*, GEN), GEN a, GEN H, long flag, GEN tab,
   D.E = E; D.f = f; D.a = a; D.H = H; D.tab = tab; D.prec = prec;
   switch(flag)
   {
-    case 0: S = sumsidi((void*)&D, osc_wrap_prec, gen_0, 1.56, prec); break;
-    case 1: S = sumsidi((void*)&D, osc_wrap_prec, gen_0, 1.0, prec); break;
+    case 0: S = sumnumsidi((void*)&D, osc_wrap_prec, gen_0, 1.56, prec); break;
+    case 1: S = sumnumsidi((void*)&D, osc_wrap_prec, gen_0, 1.0, prec); break;
     case 2: S = sumalt((void*)&D, osc_wrap, gen_0, prec); break;
     case 3: S = sumnumlagrange((void*)&D, osc_wrap_prec, gen_0, NULL, prec);
             break;
