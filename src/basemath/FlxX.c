@@ -161,19 +161,6 @@ FlxX_to_FlxC(GEN x, long N, long sv)
   return z;
 }
 
-static GEN
-FlxXV_to_FlxM_lg(GEN x, long m, long n, long sv)
-{
-  long i;
-  GEN y = cgetg(n+1, t_MAT);
-  for (i=1; i<=n; i++) gel(y,i) = FlxX_to_FlxC(gel(x,i), m, sv);
-  return y;
-}
-
-GEN
-FlxXV_to_FlxM(GEN v, long n, long sv)
-{ return FlxXV_to_FlxM_lg(v, n, lg(v)-1, sv); }
-
 /* matrix whose entries are given by the coeffs of the polynomial v in
  * two variables (considered as degree n polynomials) */
 GEN
@@ -615,6 +602,25 @@ FlxX_Laplace(GEN x, ulong p)
   }
   return FlxX_renormalize(y, d+3);
 }
+
+/***********************************************************************/
+/**                                                                   **/
+/**                               FlxXV                               **/
+/**                                                                   **/
+/***********************************************************************/
+
+static GEN
+FlxXV_to_FlxM_lg(GEN x, long m, long n, long sv)
+{
+  long i;
+  GEN y = cgetg(n+1, t_MAT);
+  for (i=1; i<=n; i++) gel(y,i) = FlxX_to_FlxC(gel(x,i), m, sv);
+  return y;
+}
+
+GEN
+FlxXV_to_FlxM(GEN v, long n, long sv)
+{ return FlxXV_to_FlxM_lg(v, n, lg(v)-1, sv); }
 
 /***********************************************************************/
 /**                                                                   **/
