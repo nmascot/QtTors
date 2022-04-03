@@ -1386,6 +1386,10 @@ ZpXQX_ZpXQXQ_liftroot(GEN P, GEN S, GEN U, GEN T, GEN p, long n)
   }
 }
 
+GEN
+ZqX_ZqXQ_liftroot(GEN f, GEN a, GEN P, GEN T, GEN p, long e)
+{ return T ? ZpXQX_ZpXQXQ_liftroot(f, a, P, T , p, e): ZpX_ZpXQ_liftroot(f, a, P, p, e); }
+
 /* Canonical lift of polynomial */
 
 static GEN _can_invl(void *E, GEN V) {(void) E; return V; }

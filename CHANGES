@@ -214,7 +214,7 @@ BA  68- [x86_64,arm64] AVX,NEON support for hyperellratpoints
 BA  69- [libpari functions ZX_digits, ZXV_ZX_fromdigits
 NM  70- new GP function elltrace
 BA  71- [libpari] FpXQXV_red, FpXQXT_red
-BA  72- [libpari] ZpXQX_ZpXQXQ_liftroot
+BA  72- [libpari] ZpXQX_ZpXQXQ_liftroot, ZqX_ZqXQ_liftroot
     73- [libpari] ZV_snfclean
     74- allow bnrchar to construct a Dirichlet character (with a znstar input)
     75- new GP functions nfeltissquare, nfeltispower
