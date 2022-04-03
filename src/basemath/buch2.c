@@ -32,7 +32,6 @@ static const long MINFAIL = 10;
 static const long BNF_RELPID = 4;
 static const long BMULT = 8;
 static const long maxtry_ELEMENT = 1000*1000;
-static const long maxtry_DEP = 20;
 static const long maxtry_FACT = 500;
 /* rnd_rel */
 static const long RND_REL_RELPID = 1;
@@ -2398,7 +2397,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M, GEN I,
   const long N = nf_get_degree(nf), R1 = nf_get_r1(nf);
   GEN G = nf_get_G(nf), G0 = nf_get_roundG(nf), r, u, gx, inc, ideal;
   double BOUND, B1, B2;
-  long j, k, skipfirst, relid=0, dependent=0, try_elt=0, try_factor=0;
+  long j, k, skipfirst, relid=0, try_elt=0, try_factor=0;
 
   inc = const_vecsmall(N, 1);
   u = ZM_lll(ZM_mul(G0, I), 0.99, LLL_IM);
@@ -2504,10 +2503,8 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M, GEN I,
     if (add_rel(cache, F, R, nz, gx, rr ? 1 : 0) <= 0)
     { /* probably Q-dependent from previous ones: forget it */
       if (DEBUGLEVEL>1) err_printf("*");
-      if (++dependent > maxtry_DEP) break;
       continue;
     }
-    dependent = 0;
     if (DEBUGLEVEL && Nfact) (*Nfact)++;
     if (cache->last >= cache->end) return 1; /* we have enough */
     if (++relid == Nrelid) break;
