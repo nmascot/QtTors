@@ -1303,7 +1303,7 @@ ZpX_ZpXQ_liftroot_ea(GEN P, GEN S, GEN T, GEN p, long n, void *E,
     S = Sq; W = Wq; q2 = q; q = qq; Tq2 = Tq; Tq = Tqq; Pq = Pqq;
     if (gc_needed(av, 1))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"ZpX_ZpXQ_Newton");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ZpX_ZpXQ_liftroot");
       gerepileall(av, 8, &S, &W, &Q, &Tq2, &Tq, &Pq, &q, &q2);
     }
   }
@@ -1355,14 +1355,14 @@ ZpXQX_ZpXQXQ_liftroot(GEN P, GEN S, GEN U, GEN T, GEN p, long n)
   Q  = ZXX_Z_divexact(FpXQX_FpXQXQ_eval(Pq, S, Uq, Tq, q), q2);
   r = brent_kung_optpow(degpol(P), 4, 3);
   if (DEBUGLEVEL > 3)
-    err_printf("ZpX_ZpXQ_liftroot: lifting to prec %ld\n",n);
+    err_printf("ZpXQX_ZpXQXQ_liftroot: lifting to prec %ld\n",n);
   for (;;)
   {
     GEN H, Sq, Wq, Spow, dP, qq, Pqq, Tqq, Uqq;
     H  = FpXQXQ_mul(W, Q, Uq2, Tq2, q2);
     Sq = FpXX_sub(S, ZXX_Z_mul(H, q2), q);
     if (DEBUGLEVEL > 3)
-      timer_printf(&ti,"ZpX_ZpXQ_liftroot: reaching prec %ld",N);
+      timer_printf(&ti,"ZpXQX_ZpXQXQ_liftroot: reaching prec %ld",N);
     if (mask==1)
       return gerepileupto(ltop, Sq);
     qq = sqri(q); N <<= 1;
@@ -1380,7 +1380,7 @@ ZpXQX_ZpXQXQ_liftroot(GEN P, GEN S, GEN U, GEN T, GEN p, long n)
     S = Sq; W = Wq; q2 = q; q = qq; Tq2 = Tq; Tq = Tqq; Uq2 = Uq; Uq = Uqq;  Pq = Pqq;
     if (gc_needed(av, 1))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"ZpX_ZpXQ_Newton");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ZpXQX_ZpXQXQ_liftroot");
       gerepileall(av, 10, &S, &W, &Q, &Uq2, &Uq, &Tq2, &Tq, &Pq, &q, &q2);
     }
   }
