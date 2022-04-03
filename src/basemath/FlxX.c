@@ -105,14 +105,6 @@ FlxX_to_ZXX(GEN B)
   b[1] = B[1]; return b;
 }
 
-GEN
-FlxXC_to_ZXXC(GEN x)
-{ pari_APPLY_type(t_COL, FlxX_to_ZXX(gel(x,i))) }
-
-GEN
-FlxXM_to_ZXXM(GEN x)
-{ pari_APPLY_same(FlxXC_to_ZXXC(gel(x,i))) }
-
 /* Note: v is used _only_ for the t_INT. It must match
  * the variable of any t_POL coefficients. */
 GEN
@@ -609,6 +601,10 @@ FlxX_Laplace(GEN x, ulong p)
 /**                                                                   **/
 /***********************************************************************/
 
+GEN
+FlxXC_sub(GEN x, GEN y, ulong p)
+{ pari_APPLY_same(FlxX_sub(gel(x, i), gel(y,i), p)) }
+
 static GEN
 FlxXV_to_FlxM_lg(GEN x, long m, long n, long sv)
 {
@@ -621,6 +617,14 @@ FlxXV_to_FlxM_lg(GEN x, long m, long n, long sv)
 GEN
 FlxXV_to_FlxM(GEN v, long n, long sv)
 { return FlxXV_to_FlxM_lg(v, n, lg(v)-1, sv); }
+
+GEN
+FlxXC_to_ZXXC(GEN x)
+{ pari_APPLY_type(t_COL, FlxX_to_ZXX(gel(x,i))) }
+
+GEN
+FlxXM_to_ZXXM(GEN x)
+{ pari_APPLY_same(FlxXC_to_ZXXC(gel(x,i))) }
 
 /***********************************************************************/
 /**                                                                   **/

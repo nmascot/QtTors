@@ -222,7 +222,7 @@ BA  76- [libpari] FlxqX_nbfact_by_degree
 BA  77- [libpari] RgXY_cxevalx
     78- allow f*g and f^n for qfbcomp/qfbpow also for extended (real) forms
     79- [libpari] qfbpows
-BA  80- [libpari] FlxM_to_FlxXV
+BA  80- [libpari] FlxM_to_FlxXV, FlxXC_sub
 
   Changed
 HC   1- faster implementation of eulervec + cache result

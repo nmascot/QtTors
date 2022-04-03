@@ -532,6 +532,7 @@ GEN     FlxX_to_FlxC(GEN x, long N, long sv);
 GEN     FlxX_to_ZXX(GEN B);
 GEN     FlxX_translate1(GEN P, long p, long n);
 GEN     FlxX_triple(GEN x, ulong p);
+GEN     FlxXC_sub(GEN x, GEN y, ulong p);
 GEN     FlxXC_to_ZXXC(GEN B);
 GEN     FlxXM_to_ZXXM(GEN B);
 GEN     FlxXV_to_FlxM(GEN v, long n, long sv);
