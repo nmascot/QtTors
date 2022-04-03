@@ -1850,6 +1850,18 @@ FlxqX_FlxqXQ_eval(GEN Q, GEN x, GEN S, GEN T, ulong p)
   return gerepileupto(av, z);
 }
 
+GEN
+FlxqXC_FlxqXQV_eval(GEN x, GEN v, GEN S, GEN T, ulong p)
+{ pari_APPLY_type(t_COL, FlxqX_FlxqXQV_eval(gel(x,i), v, S, T, p)) }
+
+GEN
+FlxqXC_FlxqXQ_eval(GEN x, GEN F, GEN S, GEN T, ulong p)
+{
+  long d = brent_kung_optpow(get_FlxqX_degree(S)-1,lg(x)-1,1);
+  GEN Fp = FlxqXQ_powers(F, d, S, T, p);
+  return FlxqXC_FlxqXQV_eval(x, Fp, S, T, p);
+}
+
 static GEN
 FlxqXQ_autpow_sqr(void * E, GEN x)
 {
