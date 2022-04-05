@@ -1239,6 +1239,7 @@ partmap_reverse_frac(GEN a, GEN b, GEN t, GEN la, GEN lb, long v)
   GEN C = ZX_ZXY_resultant_all(a, Q_remove_denom(t,&de), &k, &L);
   if (k || degpol(b) != degpol(C))
     { setvarn(b,v); pari_err_IRREDPOL("nfisincl", b); }
+  L =  Q_primpart(L);
   N = gel(L,1); if (!signe(N)) { set_avma(av); return pol_0(v); }
   D = gel(L,2);
   N = RgX_neg(N); setvarn(N, v); setvarn(D, v);
@@ -1336,42 +1337,62 @@ lastel(GEN x) { return gel(x, lg(x)-1); }
 static GEN
 RgF_to_Flxq(GEN F, GEN T, ulong p)
 {
-  return typ(F)==t_POL ? RgX_to_Flx(F, p)
-    : Flxq_div(RgX_to_Flx(gel(F,1), p), RgX_to_Flx(gel(F,2), p), T, p);
+  GEN N, D, iD;
+  if (typ(F)==t_POL) return RgX_to_Flx(F, p);
+  N = RgX_to_Flx(gel(F,1), p); D = RgX_to_Flx(gel(F,2), p);
+  iD = Flxq_invsafe(D, T, p);
+  if (!iD) return NULL;
+  return Flxq_mul(N, iD, T, p);
 }
+
+#define pari_APPLY_abort(EXPR)\
+  { \
+    long i, _l; \
+    GEN _y = cgetg_copy(x, &_l);\
+    for (i=1; i<_l; i++) \
+    { GEN _z = EXPR;\
+      if (!_z) return _z;\
+       gel(_y,i) = _z;\
+    } return _y;\
+  }
 
 static GEN
 RgFV_to_FlxqV(GEN x, GEN T, ulong p)
-{ pari_APPLY_same(RgF_to_Flxq(gel(x,i), T, p)) }
+{ pari_APPLY_abort(RgF_to_Flxq(gel(x,i), T, p)) }
 
 static GEN
 nfsplitting_auto(GEN g, GEN R)
 {
+  pari_sp av = avma;
   forprime_t T;
   long i, d = degpol(g);
   ulong p;
   GEN P, K, N, G, q, den = Q_denom(R), Rp, Gp;
   u_forprime_init(&T, d*maxss(expu(d)-3, 2), ULONG_MAX);
+  av = avma;
   for(;;)
   {
+    set_avma(av);
     p = u_forprime_next(&T);
     if (dvdiu(den,p)) continue;
     Gp = ZX_to_Flx(g, p);
-    if (Flx_is_totally_split(Gp, p)) break;
+    if (!Flx_is_totally_split(Gp, p)) continue;
+    P = Flx_roots(Gp, p);
+    Rp = RgFV_to_FlxqV(R, Gp, p);
+    if (!Rp) { if (DEBUGLEVEL) err_printf("nfsplitting_auto: bad p : %lu\n",p); continue; }
+    if (d == 1) return mkvec3(g, mkcol(gel(Rp,1)), utoi(p));
+    K = Flm_Flc_invimage(FlxV_to_Flm(Rp, d), vecsmall_ei(d, 2), p);
+    if (!K) pari_err_BUG("nfsplitting_auto");
+    N = Flm_transpose(FlxV_Flv_multieval(Rp, P, p));
+    q = perm_inv(vecsmall_indexsort(gel(N,1)));
+    G = cgetg(d+1, t_COL);
+    for (i=1; i<=d; i++)
+    {
+      GEN r = perm_mul(vecsmall_indexsort(gel(N,i)), q);
+      gel(G,i) = FlxV_Flc_mul(Rp, vecpermute(K, r), p);
+    }
+    return mkvec3(g, G, utoi(p));
   }
-  P = Flx_roots(Gp, p);
-  Rp = RgFV_to_FlxqV(R, Gp, p);
-  if (d == 1) return mkvec3(g, mkcol(gel(Rp,1)), utoi(p));
-  K = Flm_Flc_invimage(FlxV_to_Flm(Rp, d), vecsmall_ei(d, 2), p);
-  N = Flm_transpose(FlxV_Flv_multieval(Rp, P, p));
-  q = perm_inv(vecsmall_indexsort(gel(N,1)));
-  G = cgetg(d+1, t_COL);
-  for (i=1; i<=d; i++)
-  {
-    GEN r = perm_mul(vecsmall_indexsort(gel(N,i)), q);
-    gel(G,i) = FlxV_Flc_mul(Rp, vecpermute(K, r), p);
-  }
-  return mkvec3(g, G, utoi(p));
 }
 
 static GEN
