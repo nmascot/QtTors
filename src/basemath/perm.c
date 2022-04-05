@@ -1574,7 +1574,7 @@ groupelts_to_group(GEN G)
   {
     GEN t1 = gel(G,cyc[11]), t3 = gel(G,cyc[15]);
     return gerepilecopy(av,
-      mkvec2(mkvec3(t1, perm_conj(t3, t1), t3), mkvecsmall3(3,3,4)));
+      mkvec2(mkvec3(perm_conj(t3, t1), t1, t3), mkvecsmall3(3,3,4)));
   }
   return gc_NULL(av);
 }
