@@ -191,11 +191,15 @@ is described by its components modulo \var{gc}\kbd{.cyc}.
 \li{recompute \var{gc}\ using current precision}{gcharnewprec$(gc)$}
 \li{evaluate Hecke character \var{chi} at ideal \var{id}}{chareval$(\var{gc},\var{chi},\var{id})$}
 \li{exponent column of \var{id} in $\RR^n$}{gcharideallog$(\var{gc},\var{id})$}
+\li{log representation of ideal \var{id}}{gcharlog$(\var{gc}, \var{id})$}
+\li{\dots of character $\chi$}{gcharduallog$(\var{gc},\var{chi})$}
 \li{exponent vector of $\chi$ in $\RR^n$}{gcharparameters$(\var{gc},\var{chi})$}
 \li{conductor of~$\chi$}{gcharconductor$(gc,chi)$}
 \li{L-function of $\chi$}{lfuncreate$([\var{gc},\var{chi}])$}
-\li{$\chi$ s.t. $\chi_{v} \approx \var{Lchiv}\kbd{[i]}$ for~$v=\var{Lv}\kbd{[i]}$}{gcharidentify$(\var{gc},\var{Lv},\var{Lchiv})$}
-\li{basis of group of algebraic characters}{gcharalgebraic$(gc)$}
+\li{local component $\chi_v$ of $\chi$}{gcharlocal$(\var{gc},\var{chi},v)$}
+\li{$\chi$ s.t. $\chi_v \approx \var{Lchiv}\kbd{[i]}$ for~$v=\var{Lv}\kbd{[i]}$}{gcharidentify$(\var{gc},\var{Lv},\var{Lchiv})$}
+\li{basis of group of algebraic characters}{gcharalgebraic$(\var{gc})$}
+\li{is $\chi$ algebraic?}{gcharisalgebraic$(\var{gc},\var{chi})$}
 
 \smallskip
 \subsec{Dedekind Zeta Function $\zeta_K$, Hecke $L$ series}
@@ -223,15 +227,17 @@ $\var{bnr},H$ (congruence subgroup) or $\var{bnr},\chi$ (character on
 
 \li{units / $S$-units}{bnfunits$(\var{bnf},\{S\})$}
 \li{remove GRH assumption from \var{bnf}}{bnfcertify$(\var{bnf})$}
+\shortcopyrightnotice
+\newcolumn
+
 \li{expo.~of ideal $x$ on class gp}{bnfisprincipal$(\var{bnf},x,\{\fl\})$}
-\li{expo.~of ideal $x$ on ray class gp}{bnrisprincipal$(\var{bnr},x,\{\fl\})$}
+\li{\dots on ray class gp}{bnrisprincipal$(\var{bnr},x,\{\fl\})$}
 \li{expo.~of $x$ on fund.~units}{bnfisunit$(\var{bnf},x)$}
 \li{\dots on $S$-units, $U$ is \kbd{bnfunits}$(\var{bnf},S)$}
    {bnfisunit$(\var{bnfs},x,U)$}
 \li{signs of real embeddings of \kbd{\var{bnf}.fu}}{bnfsignunit$(\var{bnf})$}
 \li{narrow class group}{bnfnarrow$(\var{bnf})$}
 
-\smallskip
 \subsec{Class Field Theory}
 \li{ray class number for modulus $m$}{bnrclassno$(\var{bnf},m)$}
 \li{discriminant of class field}{bnrdisc$(a_1,\{a_2\})$}
@@ -255,8 +261,6 @@ $\var{bnr},H$ (congruence subgroup) or $\var{bnr},\chi$ (character on
 \li{subgroups of \var{bnr}, index $<=b$}{subgrouplist$(\var{bnr},b,\{\fl\})$}
 \li{compositum as \kbd{[bnr,H]}}
    {bnrcompositum$(\kbd{[bnr1,H1]}, \kbd{[bnr2,H2]})$}
-\shortcopyrightnotice
-\newcolumn
 \li{class field defined by $H < \text{Cl}_f$}{bnrclassfield$(\var{bnr},H)$}
 \li{\dots low level equivalent, prime degree}{rnfkummer$(\var{bnr},H)$}
 \li{same, using Stark units (real field)}{bnrstark$(\var{bnr},sub,\{\fl\})$}
@@ -296,6 +300,12 @@ where $G$ is \kbd{idealstar}$(f, 1)$, or a minimal polynomial.\hfil\break
 \li{$n$-th power of ideal $x$}{idealpow$(\var{nf},x,n,\{\fl\})$}
 \li{inverse of ideal $x$}{idealinv$(\var{nf},x)$}
 \li{divide ideal $x$ by $y$}{idealdiv$(\var{nf},x,y,\{\fl\})$}
+
+\newcolumn
+\title{\TITLE}
+\centerline{(PARI-GP version \PARIversion)}
+\smallskip
+
 \li{Find $(a,b)\in x\times y$, $a+b=1$}{idealaddtoone$(\var{nf},x,\{y\})$}
 \li{coprime integral $A,B$ such that $x=A/B$}{idealnumden$(\var{nf},x)$}
 
@@ -323,10 +333,6 @@ where $G$ is \kbd{idealstar}$(f, 1)$, or a minimal polynomial.\hfil\break
 \li{init \kbd{modpr} structure}{nfmodprinit$(\var{nf},\var{pr},\{v\})$}
 \li{project $t$ to $\ZZ_K/\var{pr}$}{nfmodpr$(\var{nf},t,\var{modpr})$}
 \li{lift from $\ZZ_K/\var{pr}$}{nfmodprlift$(\var{nf},t,\var{modpr})$}
-
-\newcolumn
-\title{\TITLE}
-\centerline{(PARI-GP version \PARIversion)}
 
 \medskip
 
@@ -426,6 +432,9 @@ Extension $L/K$ is defined by $T\in K[x]$.
 \li{$n$-basis of $M$, or $(n+1)$-generating set}{rnfbasis$(\var{bnf},M)$}
 \li{is $M$ a free $\ZZ_K$-module?}{rnfisfree$(\var{bnf},M)$}
 
+\copyrightnotice
+\newcolumn
+
 \section{Associative Algebras}
 $A$ is a general associative algebra given by a multiplication table \var{mt}
 (over $\QQ$ or $\FF_p$); represented by \var{al} from \kbd{algtableinit}.
@@ -435,7 +444,6 @@ $A$ is a general associative algebra given by a multiplication table \var{mt}
 \li{group algebra $\QQ[G]$ (or $\FF_p[G]$)}{alggroup$(G,\{p = 0\})$}
 \li{center of group algebra}{alggroupcenter$(G,\{p = 0\})$}
 
-\smallskip
 \subsec{Properties}
 \li{is $(\var{mt},p)$ OK for algtableinit?}
    {algisassociative$(\var{mt},\{p=0\})$}
@@ -468,9 +476,6 @@ $A$ is a general associative algebra given by a multiplication table \var{mt}
 \li{sum $lat1+lat2$ of the lattices}{alglatadd$(\var{al},\var{lat1},\var{lat2})$}
 \li{intersection $lat1\cap lat2$}{alglatinter$(\var{al},\var{lat1},\var{lat2})$}
 \li{test~$lat1\subset lat2$}{alglatsubset$(\var{al},\var{lat1},\var{lat2})$}
-
-\copyrightnotice
-\newcolumn
 \li{generalized index~$(lat2:lat1)$}{alglatindex$(\var{al},\var{lat1},\var{lat2})$}
 \li{$\{x\in al\mid x\cdot lat1\subset lat2\}$}{alglatlefttransporter$(\var{al},\var{lat1},\var{lat2})$}
 \li{$\{x\in al\mid lat1\cdot x\subset lat2\}$}{alglatrighttransporter$(\var{al},\var{lat1},\var{lat2})$}
