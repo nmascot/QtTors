@@ -3122,6 +3122,27 @@ makeA5(GEN N, long s) { return makeA5_i(N, s, 0); }
 static GEN
 makeA5cond(GEN N, long s) { return makeA5_i(N, s, 1); }
 
+GEN
+veccond_to_A5(GEN D, long s)
+{
+  GEN W, V = A5file("cond", s);
+  long l = lg(V), i, j, lD = lg(D), c = 1;
+  W = cgetg(lD, t_VEC);
+  for (i = 1, j = 1; i < l; i++)
+  {
+    ulong e = itou(gmael(V,i,2));
+    if (e < D[j]) continue;
+    while (j < lD && e > D[j]) j++;
+    if (j==lD) break;
+    if (e == D[j])
+    {
+      GEN x = gmael(V, i, 1);
+      gel(W, c++) = mkvec2(RgV_to_RgX(x,0), gmael(V, i, 2));
+    }
+  }
+  setlg(W, c); return W;
+}
+
 /* Sextic resolvent of A5 field */
 static GEN
 makeA5resolvent(GEN pol, long flag)

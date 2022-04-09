@@ -947,6 +947,10 @@ ulong   ZX_ZXY_ResBound(GEN A, GEN B, GEN dB);
 GEN     ffinit_Artin_Schreier(ulong p, long l);
 GEN     ffinit_rand(GEN p, long n);
 
+/* nflist.c */
+
+GEN veccond_to_A5(GEN L, long s);
+
 /* nflistQT.c */
 
 GEN nflistQT(long n, long k, long v);

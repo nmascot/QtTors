@@ -13081,6 +13081,42 @@ search_solvable(GEN LG, GEN mf, GEN F, long prec)
   delete_var(); setvarn(pol,0); return pol;
 }
 
+static GEN
+search_A5(GEN mf, GEN F, long prec)
+{
+  GEN CHI = MF_get_CHI(mf), O, P, L;
+  long N = MF_get_N(mf), i, j, lL, nd;
+  ulong bound = 1;
+  if (N > 1000000) pari_err_IMPL("mfgaloisprojrep for cond > 10^6");
+  L = veccond_to_A5(divisorsu(N), 2); lL = lg(L); nd = lL-1;
+  if (nd == 1) return gmael(L,1,1);
+  O = cgetg(1, t_VECSMALL); /* projective order of rho(Frob_p) */
+  P = cgetg(1, t_VECSMALL);
+  for(i = 1; nd > 1; )
+  {
+    long l;
+    moreorders(N, CHI, F, &P, &O, &bound);
+    l = lg(P);
+    for (   ; i < l; i++)
+    {
+      ulong p = P[i], f = O[i];
+      for (j = 1; j < lL; j++)
+        if(gel(L,j))
+        {
+          GEN pr = ZpX_primedec(gmael(L,j,1), utoi(p));
+          if (!equaliu(vecmax(gel(pr,1)), f))
+          {
+             gel(L,j) = NULL; nd--;
+          }
+        }
+      if (nd <= 1) break;
+    }
+  }
+  for (j = 1; j<lL; j++)
+    if (gel(L,j)) return gmael(L,j,1);
+  return NULL;
+}
+
 GEN
 mfgaloisprojrep(GEN mf, GEN F, long prec)
 {
@@ -13093,6 +13129,8 @@ mfgaloisprojrep(GEN mf, GEN F, long prec)
     LG = mkvec2(mkvecsmall2(3,1), mkvecsmall2(2,2));
   else if (mft == -24)
     LG = mkvec3(mkvecsmall2(2,1), mkvecsmall2(3,1), mkvecsmall2(2,2));
-  else pari_err_IMPL("mfgaloisprojrep for types other than A4 and S4");
+  else if (mft == -60)
+    return gerepilecopy(av, search_A5(mf, F, prec));
+  else pari_err_IMPL("mfgaloisprojrep for types D_n");
   return gerepilecopy(av, search_solvable(LG, mf, F, prec));
 }
