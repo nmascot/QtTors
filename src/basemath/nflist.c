@@ -3037,7 +3037,7 @@ makeMgenvec(long ell, long a, GEN X, GEN Xinf, GEN field, long s)
 /* V a vector of [T, n] sorted wrt t_INT n. Return elts with Xinf <= n <= X.
  * If flag = 0 return only the T's. */
 static GEN
-vectrunc(GEN V, GEN Xinf, GEN X, long flag)
+vecslicebyX(GEN V, GEN Xinf, GEN X, long flag)
 {
   long l = lg(V), i = 1, c;
   GEN W;
@@ -3093,8 +3093,8 @@ A5vec(GEN X, GEN Xinf, long s, long fl)
 
   if (!fl && cmpii(X, powuu(10,12)) > 0) pari_err(e_MISC, "A5 table too short");
   L1 = L5 = NULL;
-  if (s <= 0) L5 = vectrunc(A5file(suf, 0), Xinf, X, fl);
-  if (s) L1 = vectrunc(A5file(suf, 2), Xinf, X, fl);
+  if (s <= 0) L5 = vecslicebyX(A5file(suf, 0), Xinf, X, fl);
+  if (s) L1 = vecslicebyX(A5file(suf, 2), Xinf, X, fl);
   switch (s)
   {
     case 2: return L1;
@@ -3216,7 +3216,7 @@ makeA56resolvent(GEN pol, long flag)
     GEN D52 = sqri(gel(LD,i));
     if (dvdii(D52, D6))
     {
-      GEN L = vectrunc(V, D52, D52, 0);
+      GEN L = vecslicebyX(V, D52, D52, 0);
       long j;
       for (j = 1; j < lg(L); j++)
       {
