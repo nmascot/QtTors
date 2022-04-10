@@ -34,6 +34,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - the global variable DEBUGFILES is no longer available
   - nfinitall is now obsolete; use nfinit with the same arguments
   - renamed normalize -> normalizeser
+  - order is gone: use znorder
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.12 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   - the member function bnf.futu and .tufu (deprecated since 2.2) have been

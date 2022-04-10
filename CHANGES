@@ -285,3 +285,4 @@ BA  37- system now return the shell return value.
         qfisqr, redimag
      2- [libpari] obsolete types t_QFI, t_QFR
      3- [libpari] nfinitall is now obsolete; use nfinit with the same arguments
+     4- [libpari] order is now obsolete; use znorder

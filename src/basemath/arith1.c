@@ -2458,8 +2458,6 @@ znorder(GEN x, GEN o)
   }
   return Fp_order(a, o, b);
 }
-GEN
-order(GEN x) { return znorder(x, NULL); }
 
 /*********************************************************************/
 /**               DISCRETE LOGARITHM  in  (Z/nZ)*                   **/
