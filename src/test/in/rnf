@@ -40,14 +40,13 @@ rnfconductor(bnfinit(a^3-a^2-6*a+7),x^3-a*x^2+(5*a^2-35)*x+(8*a^2+6*a-35))[3]
 
 K = nfinit(x^2-x+2); M = [1, 0, x; 0, x, 0; 0,0,2+x]; N = [1, 1, 1];
 nfsnf(K, [M, N, N])
-rnfisabelian(y,x)
-rnfisabelian(y^2+23,x^3+x^2-1)
+rnfisabelian(nfinit(y),x)
+rnfisabelian(nfinit(y^2+23),x^3+x^2-1)
 T = polcyclo(7, x+Mod(y, nf.pol));
-rnfisabelian(nf.pol, T)
 rnfisabelian(nf, T)
-rnfisabelian(a^2+1,5*x^3+2)
-rnfisabelian(4*a^2+1, 9*x^2 + (12*a+3)*x + 2*a)
-rnfisabelian(y^4+2,polsubcyclo(13,6))
+rnfisabelian(nfinit(a^2+1),5*x^3+2)
+rnfisabelian(nfinit(y^4+2),polsubcyclo(13,6))
+rnfisabelian(nfinit(y^4+2),subst(polsubcyclo(13,6),x,7/6*x))
 
 pol = y^3+y^2-2*y-1;
 bnf = bnfinit(pol);

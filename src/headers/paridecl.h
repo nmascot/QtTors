@@ -4697,8 +4697,9 @@ GEN     nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew);
 int     nfissquarefree(GEN nf, GEN x);
 GEN     nfroots(GEN nf,GEN pol);
 GEN     nfroots_if_split(GEN *pnf, GEN pol);
-GEN     polfnf(GEN a, GEN t);
 GEN     nfrootsof1(GEN x);
+GEN     polfnf(GEN a, GEN t);
+GEN     rnfabelianconjgen(GEN nf, GEN P);
 
 /* paricfg.c */
 

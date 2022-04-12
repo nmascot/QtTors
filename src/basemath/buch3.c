@@ -1861,49 +1861,11 @@ nf_deg1_prime(GEN nf)
 static long
 rnfisabelian_i(GEN nf, GEN pol)
 {
-  GEN modpr, pr, T, Tnf, pp, ro, nfL, C, a, sig, eq;
-  long i, j, l, v;
-  ulong p, k, ka;
-
-  if (typ(nf) == t_POL)
-    Tnf = nf;
-  else {
-    nf = checknf(nf);
-    Tnf = nf_get_pol(nf);
-  }
-  v = varn(Tnf);
-  if (degpol(Tnf) != 1 && typ(pol) == t_POL && RgX_is_QX(pol)
-                       && rnfisabelian_i(pol_x(v), pol)) return 1;
-  pol = RgX_nffix("rnfisabelian",Tnf,pol,1);
-  eq = nf_rnfeq(nf,pol); /* init L := K[x]/(pol), nf attached to K */
-  C = gel(eq,1); setvarn(C, v); /* L = Q[t]/(C) */
-  a = gel(eq,2); setvarn(a, v); /* root of K.pol in L */
-  nfL = C;
-  ro = nfroots_if_split(&nfL, QXY_QXQ_evalx(pol, a, C));
-  if (!ro) return 0;
-  l = lg(ro)-1;
-  /* small groups are abelian, as are groups of prime order */
-  if (l < 6 || uisprime(l)) return 1;
-
-  pr = nf_deg1_prime(nfL);
-  modpr = nf_to_Fq_init(nfL, &pr, &T, &pp);
-  p = itou(pp);
-  k = umodiu(gel(eq,3), p);
-  ka = (k * itou(nf_to_Fq(nfL, a, modpr))) % p;
-  sig= cgetg(l+1, t_VECSMALL);
-  /* image of c = ro[1] + k a [distinguished root of C] by the l automorphisms
-   * sig[i]: ro[1] -> ro[i] */
-  for (i = 1; i <= l; i++)
-    sig[i] = Fl_add(ka, itou(nf_to_Fq(nfL, gel(ro,i), modpr)), p);
-  ro = Q_primpart(ro);
-  for (i=2; i<=l; i++) { /* start at 2, since sig[1] = identity */
-    gel(ro,i) = ZX_to_Flx(gel(ro,i), p);
-    for (j=2; j<i; j++)
-      if (Flx_eval(gel(ro,j), sig[i], p)
-       != Flx_eval(gel(ro,i), sig[j], p)) return 0;
-  }
-  return 1;
+  pari_sp av = avma;
+  GEN G = rnfabelianconjgen(nf, pol);
+  return gc_long(av, isintzero(G) ? 0: 1);
 }
+
 long
 rnfisabelian(GEN nf, GEN pol)
 { pari_sp av = avma; return gc_long(av, rnfisabelian_i(nf, pol)); }
