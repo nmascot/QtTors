@@ -724,19 +724,29 @@ hyperell_Weil_bound(GEN q, ulong g, GEN p)
   return gc_long(av, logint(w,p) + 1);
 }
 
+static GEN
+check_hyperell(GEN PQ)
+{
+  GEN H;
+  if (is_vec_t(typ(PQ)) && lg(PQ)==3)
+    H = gadd(gsqr(gel(PQ, 2)), gmul2n(gel(PQ, 1), 2));
+  else
+    H = gmul2n(PQ, 2);
+  if (typ(H)!=t_POL)
+    return NULL;
+  return H;
+}
+
 GEN
 hyperellcharpoly(GEN PQ)
 {
   pari_sp av = avma;
-  GEN H, M, R, T=NULL, pp=NULL, q;
+  GEN M, R, T=NULL, pp=NULL, q;
   long d, n, eps = 0;
   ulong p;
-  if (is_vec_t(typ(PQ)) && lg(PQ)==3)
-    H = gadd(gsqr(gel(PQ, 2)), gmul2n(gel(PQ, 1), 2));
-  else
-    H = PQ;
-  if (typ(H)!=t_POL || !RgX_is_FpXQX(H, &T, &pp) || !pp)
-    pari_err_TYPE("hyperellcharpoly",H);
+  GEN H = check_hyperell(PQ);
+  if (!H || !RgX_is_FpXQX(H, &T, &pp) || !pp)
+    pari_err_TYPE("hyperellcharpoly", PQ);
   p = itou(pp);
   if (!T)
   {
@@ -799,4 +809,17 @@ hyperellcharpoly(GEN PQ)
   }
   R = charpoly_funceq(R, q);
   return gerepilecopy(av, R);
+}
+
+GEN
+hyperelldisc(GEN PQ)
+{
+  pari_sp av = avma;
+  GEN D, H = check_hyperell(PQ);
+  long d, g;
+  if (!H || signe(H)==0) pari_err_TYPE("hyperelldisc",PQ);
+  d = degpol(H); g = ((d+1)>>1)-1;
+  D = gmul2n(RgX_disc(H),-4*(g+1));
+  if (odd(d)) D = gmul(D, gsqr(leading_coeff(H)));
+  return gerepileupto(av, D);
 }

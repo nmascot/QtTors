@@ -225,6 +225,7 @@ BA  77- [libpari] RgXY_cxevalx
 BA  80- [libpari] FlxM_to_FlxXV, FlxXC_sub
 BA  81- [libpari] FlxqXC_FlxqXQ_eval, FlxqXC_FlxqXQV_eval
 BA  82- new GP function qfminimize
+BA  83- new GP function hyperelldisc
 
   Changed
 HC   1- faster implementation of eulervec + cache result

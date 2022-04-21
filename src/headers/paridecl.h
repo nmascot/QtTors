@@ -3985,6 +3985,7 @@ ulong   hash_zv(GEN x);
 GEN     hyperellpadicfrobenius0(GEN x, GEN p, long e);
 GEN     hyperellpadicfrobenius(GEN x, ulong p, long e);
 GEN     hyperellcharpoly(GEN x);
+GEN     hyperelldisc(GEN x);
 GEN     nfhyperellpadicfrobenius(GEN H, GEN T, ulong p, long n);
 
 /* hypergeom.c */
