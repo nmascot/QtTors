@@ -2278,11 +2278,11 @@ static GEN
 rnfgaloisanalysis(GEN nf, GEN P, GEN aut, long m, GEN d, long *pt_o)
 {
   GEN T = nf_get_pol(nf), R = NULL, den = nf_get_zkden(nf);
-  long n = degpol(P), omax = 0, try = 0;
+  long n = degpol(P), omax = 0, ntry = 0;
   GEN daut = lg(aut) > 1 ? Q_denom(aut) : NULL;
   forprime_t S;
   u_forprime_init(&S, 2, ULONG_MAX);
-  while(try <= n || omax < 2)
+  while (ntry <= n || omax < 2)
   {
     ulong p = u_forprime_next(&S);
     GEN F, Tp;
@@ -2316,7 +2316,7 @@ rnfgaloisanalysis(GEN nf, GEN P, GEN aut, long m, GEN d, long *pt_o)
       if (o > omax) { omax = o; R = mkvec2(Flx_to_ZX(Fi), utoi(p)); }
       else set_avma(av);
     }
-    try++;
+    ntry++;
   }
   *pt_o = omax;
   return R;
