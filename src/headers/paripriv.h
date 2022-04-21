@@ -873,7 +873,6 @@ hashtable *hashstr_import_static(hashentry *e, ulong size);
 /* hyperell.c */
 
 GEN     ZlXQX_hyperellpadicfrobenius(GEN H, GEN T, ulong p, long n);
-GEN     hyperell_redsl2(GEN Q);
 
 /* ifactor1.c */
 
