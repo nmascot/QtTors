@@ -12229,13 +12229,11 @@ instead of \kbd{gcmp} as the underlying comparison routine.
 \fun{GEN}{indexvecsort}{GEN x, GEN k}, as \kbd{vecsort}, but only
 returns the permutation that would sort the vector \kbd{x}.
 
-\fun{long}{vecindexmin}{GEN x} returns the index for a maximal element of $x$
+\fun{long}{vecindexmin}{GEN x} returns the index for a minimal element of $x$
 (\typ{VEC}, \typ{COL} or \typ{VECSMALL}).
 
 \fun{long}{vecindexmax}{GEN x} returns the index for a maximal element of $x$
 (\typ{VEC}, \typ{COL} or \typ{VECSMALL}).
-
-\fun{long}{vecindexmax}{GEN x}
 
 \subsec{Generic sort and search} The following routines allow to use an
 arbitrary comparison function \kbd{int (*cmp)(void* data, GEN x, GEN y)},
