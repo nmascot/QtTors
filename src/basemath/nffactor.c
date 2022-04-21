@@ -2263,9 +2263,8 @@ static long
 fixedalg_order(GEN aut, GEN S, GEN T, ulong p)
 {
   pari_sp av = avma;
-  long d = get_Flx_degree(T);
-  long e, i, l = lg(aut);
-  for(e = 1; ; e++, set_avma(av))
+  long e, i, d = get_Flx_degree(T), l = lg(aut);
+  for (e = 1;;  e++, set_avma(av))
   {
     for (i = 1; i < l; i++, set_avma(av))
       if (!gequal(FlxqXQ_pow(gel(aut,i), powuu(p, d*e), S, T, p), gel(aut,i)))
@@ -2290,20 +2289,18 @@ rnfgaloisanalysis(GEN nf, GEN P, GEN aut, long m, GEN d, long *pt_o)
     if ((d && dvdiu(d,p)) || dvdiu(den, p) || (daut && dvdiu(daut,p))) continue;
     Tp = ZX_to_Flx(T, p);
     if (!Flx_is_squarefree(Tp,p)) continue;
-    F = gel(Flx_factor(Tp, p),1); lF = lg(F);
+    F = gel(Flx_factor(Tp, p), 1); lF = lg(F);
     for (i = 1; i < lF; i++)
     {
       pari_sp av = avma;
       long o, d;
-      GEN D, Fi = gel(F,i);
-      GEN Pp = RgX_to_FlxqX(P, Fi, p);
-      if (degpol(Pp) < n ||  !FlxqX_is_squarefree(Pp, Fi, p))
-        continue;
+      GEN D, Fi = gel(F,i), Pp = RgX_to_FlxqX(P, Fi, p);
+      if (degpol(Pp) < n ||  !FlxqX_is_squarefree(Pp, Fi, p)) continue;
       D = FlxqX_nbfact_by_degree(Pp, &d, Fi, p);
       o = n / d; /* d factors, all should have degree o */
       if (D[o] != d)
       {
-        if(DEBUGLEVEL) err_printf("rnfisabelian: not Galois at %lu: %Ps \n",p,D);
+        if(DEBUGLEVEL) err_printf("rnfisabelian: not Galois at %lu: %Ps\n",p,D);
         return NULL;
       }
       if (lg(aut) > 1)
@@ -2318,8 +2315,7 @@ rnfgaloisanalysis(GEN nf, GEN P, GEN aut, long m, GEN d, long *pt_o)
     }
     ntry++;
   }
-  *pt_o = omax;
-  return R;
+  *pt_o = omax; return R;
 }
 
 GEN
@@ -2343,12 +2339,12 @@ rnfabelianconjgen(GEN nf, GEN P)
   gen = vectrunc_init(expu(m));
   orders = cgetg(expu(m)+1,t_VECSMALL);
   setlg(gen,1);
-  for(i = 1; m > 1 ;i++)
+  for (i = 1; m > 1; i++)
   {
     long o;
     GEN S, Tp = rnfgaloisanalysis(nf, P, gen, m, d, &o);
     if (!Tp) return gc_const(av, gen_0);
-    S = rnffrobeniuslift(nf, P, gel(Tp,1), gel(Tp, 2), bnd, den, iden, T);
+    S = rnffrobeniuslift(nf, P, gel(Tp,1), gel(Tp,2), bnd, den, iden, T);
     if (!S) return gc_const(av, gen_0);
     vectrunc_append(gen,S);
     orders[i] = o;
