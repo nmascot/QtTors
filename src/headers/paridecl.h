@@ -3755,6 +3755,13 @@ long hgmissymmetrical(GEN hgm);
 GEN hgmbydegree(long n);
 GEN lfunhgm(GEN hgm, GEN t, GEN hint, long bit);
 
+/* lerch.c */
+
+GEN     Qp_zeta(GEN s);
+GEN     lerchphi(GEN z, GEN s, GEN a, long bitprec);
+GEN     lerchzeta(GEN s, GEN a, GEN lam, long bitprec);
+GEN     zetahurwitz(GEN s, GEN x, long der, long bitprec);
+
 /* Ser.c */
 
 GEN     RgX_to_ser(GEN x, long l);
@@ -5495,7 +5502,6 @@ GEN     weberf(GEN x, long prec);
 GEN     weberf1(GEN x, long prec);
 GEN     weberf2(GEN x, long prec);
 GEN     ybessel(GEN n, GEN z, long prec);
-GEN     zetahurwitz(GEN s, GEN x, long der, long bitprec);
 
 /* modsym.c */
 GEN     SL2_inv_shallow(GEN M);
