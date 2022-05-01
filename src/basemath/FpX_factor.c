@@ -1087,6 +1087,18 @@ FpX_factor_squarefree(GEN T, GEN p)
   return FpX_factor_Yun(T, p);
 }
 
+GEN
+FpX_roots_mult(GEN T, long n, GEN p)
+{
+  GEN V = FpX_factor_squarefree(T,p), W;
+  long l = lg(V), i;
+  if (l<=n) return cgetg(1,t_COL);
+  W = cgetg(l-n+1,t_VEC);
+  for (i = n; i < l; i++)
+    gel(W,i-n+1) = FpX_roots(gel(V,i), p);
+  return shallowconcat1(W);
+}
+
 long
 FpX_ispower(GEN f, ulong k, GEN p, GEN *pt_r)
 {

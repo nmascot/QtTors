@@ -228,6 +228,7 @@ BA  82- new GP function qfminimize
 BA  83- new GP function hyperelldisc
     84- new GP function setdelta
 BA  85- [libpari] RgX_homogenous_evalpow, QXQX_homogenous_evalpow
+BA  86- [libpari] FpX_roots_mult
 
   Changed
 HC   1- faster implementation of eulervec + cache result
