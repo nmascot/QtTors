@@ -1237,6 +1237,7 @@ GEN     RgX_addmulXn_shallow(GEN x, GEN y, long d);
 GEN     RgX_addmulXn(GEN x, GEN y, long d);
 GEN     RgX_addspec(GEN x, GEN y, long nx, long ny);
 GEN     RgX_addspec_shallow(GEN x, GEN y, long nx, long ny);
+GEN     RgX_affine(GEN P, GEN a, GEN b);
 GEN     RgX_blocks(GEN P, long n, long m);
 GEN     RgX_deflate(GEN x0, long d);
 GEN     RgX_deriv(GEN x);

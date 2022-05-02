@@ -567,6 +567,14 @@ RgX_translate(GEN P, GEN c)
   }
 }
 
+/* P(ax + b) */
+GEN
+RgX_affine(GEN P, GEN a, GEN b)
+{
+  if (signe(b)) P = RgX_translate(P, b);
+  return RgX_unscale(P, a);
+}
+
 /* return lift( P(X + c) ) using Horner, c in R[y]/(T) */
 GEN
 RgXQX_translate(GEN P, GEN c, GEN T)

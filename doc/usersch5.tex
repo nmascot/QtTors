@@ -10566,6 +10566,9 @@ of \kbd{RgX}.
 a polynomials whose main variable has lower priority than the main variable
 $X$ of $P$. Returns $P(X + c)$ (optimized for $c = \pm 1$).
 
+\fun{GEN}{RgX_affine}{GEN P, GEN a, GEN b} Return $P(aX + b)$
+(optimized for $b = \pm 1$). Not memory clean.
+
 \subsubsec{Function related to modular forms}
 
 \fun{GEN}{RgX_act_Gl2Q}{GEN g, long k} let $R$ be a commutative ring
