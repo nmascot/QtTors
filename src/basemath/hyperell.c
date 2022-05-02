@@ -841,3 +841,307 @@ hyperelldisc(GEN PQ)
   if (odd(d)) D = gmul(D, gsqr(leading_coeff(H)));
   return gerepileupto(av, D);
 }
+
+static long
+get_ep(GEN W)
+{
+  GEN P = gel(W,1), Q = gel(W,2);
+  if (signe(Q)==0) return ZX_lval(P,2);
+  return minss(ZX_lval(P,2), ZX_lval(Q,2));
+}
+
+static GEN
+algo51(GEN W, GEN M)
+{
+  GEN P = gel(W,1), Q = gel(W,2);
+  while(1)
+  {
+    long vP = ZX_lval(P,2);
+    long vQ = signe(Q) ? ZX_lval(Q,2): vP+1;
+    long r;
+    /* 1 */
+    if (vQ==0) break;
+    /* 2 */
+    if (vP==0)
+    {
+      GEN H, H1;
+      /* a */
+      RgX_even_odd(FpX_red(P,gen_2),&H, &H1);
+      if (signe(H1)) break;
+      /* b */
+      P = ZX_add(P, ZX_mul(H, ZX_sub(Q, H)));
+      Q = ZX_sub(Q, ZX_mulu(H, 2));
+      vP = ZX_lval(P,2);
+      vQ = signe(Q) ? ZX_lval(Q,2): vP+1;
+    }
+    /* 2c */
+    if (vP==1) break;
+    /* 2d */
+    r = minss(2*vQ, vP)>>1;
+    gel(M,1) = shifti(gel(M,1), r);
+    P = ZX_shifti(P, -2*r);
+    Q = ZX_shifti(Q, -r);
+  }
+  return mkvec2(P,Q);
+}
+
+static GEN
+algo52(GEN W, GEN c, GEN M, long *pt_lambda)
+{
+  long lambda;
+  GEN P = gel(W,1), Q = gel(W,2);
+  while(1)
+  {
+    GEN H, H1;
+    /* 1 */
+    GEN Pc = ZX_affine(P,gen_2,c), Qc = ZX_affine(Q,gen_2,c);
+    long mP = ZX_lval(Pc,2), mQ = signe(Qc) ? ZX_lval(Qc,2): mP+1;
+    /* 2 */
+    if (2*mQ <= mP) { lambda = 2*mQ; break; }
+    /* 3 */
+    if (mP%2 == 1) { lambda = mP; break; }
+    /* 4 */
+    RgX_even_odd(FpX_red(ZX_shifti(Pc, -mP),gen_2),&H, &H1);
+    if (signe(H1)) { lambda = mP; break; }
+    /* 5 */
+     P = ZX_add(P, ZX_mul(H, ZX_sub(Q, H)));
+     Q = ZX_sub(Q, ZX_mulu(H, 2));
+  }
+  *pt_lambda = lambda;
+  return mkvec2(P,Q);
+}
+
+static GEN
+algo541(GEN F, GEN p, long ep, long g)
+{
+  GEN Fe = FpX_red(ep ? ZX_Z_divexact(F,p): F, p);
+  return FpX_roots_mult(Fe, g+2-ep, p);
+}
+
+static long
+test53(long lambda, long ep, long g)
+{
+  return (lambda <= g+1) || (g%2 && lambda<g+3 && ep==1);
+}
+
+static long
+test55(GEN W, long ep, long g)
+{
+  GEN P = gel(W,1), Q = gel(W,2);
+  GEN Pe = FpX_red(ep ? ZX_shifti(P,-1): P, gen_2);
+  GEN Qe = FpX_red(ep ? ZX_shifti(Q,-1): Q, gen_2);
+  if (ep==0)
+  {
+    if (signe(Qe)!=0) return ZX_val(Qe) >= (g + 3)>>1;
+    else return ZX_val(FpX_deriv(Pe, gen_2)) >= g+1;
+  }
+  else
+    return ZX_val(Qe) >= (g+1)>>1 && ZX_val(Pe) >= g + 1;
+}
+
+static GEN
+reduce(GEN Wc, GEN Mc, GEN c, long lambda, GEN M)
+{
+  long r = lambda>>1;
+  gel(M,1) = shifti(gel(Mc,1), r);
+  gel(M,2) = ZM2_mul(gel(Mc,2), mkmat22(gen_2, c, gen_0, gen_1));
+  return mkvec2(ZX_shifti(ZX_affine(gel(Wc,1),gen_2,c),-2*r),
+                ZX_shifti(ZX_affine(gel(Wc,2),gen_2,c),-r));
+}
+
+static GEN
+hyperell_reverse(GEN W, long g)
+{
+  return mkvec2(RgXn_recip_shallow(gel(W,1),2*g+3),
+                RgXn_recip_shallow(gel(W,2),g+2));
+}
+
+static GEN
+algo56(GEN W, long g)
+{
+  long ep;
+  GEN M = mkvec2(gen_1, matid(2)), Woo;
+  W = algo51(W, M);
+  Woo = hyperell_reverse(W, g);
+  ep = get_ep(Woo);
+  if (test55(Woo,ep,g))
+  {
+    long lambda;
+    GEN Moo = mkvec2(gel(M,1), ZM2_mul(gel(M,2),mkmat22(gen_0,gen_1,gen_1,gen_0)));
+    Woo = algo52(Woo, gen_0, Moo, &lambda);
+    if (!test53(lambda,ep,g))
+      W = reduce(Woo, Moo, gen_0, lambda, M);
+  }
+  while(1)
+  {
+    long j, ep = get_ep(W);
+    for (j = 0; j<2; j++)
+    {
+      long lambda;
+      GEN c = utoi(j);
+      GEN Pc = ZX_affine(gel(W,1), gen_2, c), Qc = ZX_affine(gel(W,2), gen_2, c);
+      if (test55(mkvec2(Pc, Qc), ep, g))
+      {
+        GEN Mc = gcopy(M);
+        GEN Wc = algo52(W, c, Mc, &lambda);
+        if(!test53(lambda,ep,g))
+        {
+          W = reduce(Wc, Mc, c, lambda, M);
+          break;
+        }
+      }
+    }
+    if (j==2) break;
+  }
+  return mkvec2(W, M);
+}
+
+static GEN
+algo57(GEN F, long g, GEN pr)
+{
+  long i, l;
+  GEN C = content(F);
+  GEN e = gel(core2(shifti(C,-vali(C))),2);
+  GEN M = mkvec2(e, matid(2));
+  F = ZX_Z_divexact(F,sqri(e));
+  if (!pr)
+  {
+    GEN D = absi(ZX_disc(F));
+    D = shifti(D,-vali(D));
+    pr = gel(factor(D),1);
+  }
+  l = lg(pr);
+  for(i = 1; i < l; i++)
+  {
+    long ep;
+    GEN p = gel(pr, i), ps2 = shifti(p,-1), Fe;
+    if (equaliu(p,2)) continue;
+    ep = ZX_pval(F,p);
+    Fe = FpX_red(ep ? ZX_Z_divexact(F,p): F, p);
+    if (degpol(Fe) < g+1+ep)
+    {
+      GEN Fi = ZX_unscale(RgXn_recip_shallow(F,2*g+3), p);
+      long lambda = ZX_pval(Fi,p);
+      if (!test53(lambda,ep,g))
+      {
+        GEN ppr = powiu(p,lambda>>1);
+        F = ZX_Z_divexact(Fi,sqri(ppr));
+        gel(M,1) = mulii(gel(M,1), ppr);
+        gel(M,2) = ZM2_mul(gel(M,2), mkmat22(gen_0,gen_1,p,gen_0));
+      }
+    }
+    while(1)
+    {
+      long ep = ZX_pval(F,p);
+      GEN R = algo541(F, p, ep, g);
+      long j, lR = lg(R);
+      for (j = 1; j<lR; j++)
+      {
+        GEN c = Fp_center(gel(R,j), p, ps2);
+        GEN Fi = ZX_affine(F,p,c);
+        long lambda = ZX_pval(Fi,p);
+        if (!test53(lambda,ep,g))
+        {
+          GEN ppr = powiu(p,lambda>>1);
+          F = ZX_Z_divexact(Fi, sqri(ppr));
+          gel(M,1) = mulii(gel(M,1), ppr);
+          gel(M,2) = ZM2_mul(gel(M,2), mkmat22(p,c,gen_0,gen_1));
+          break;
+        }
+      }
+      if (j==lR) break;
+    }
+  }
+  return mkvec2(F, M);
+}
+
+static GEN
+RgX_RgM2_eval(GEN P, GEN A, GEN Bp, long d)
+{
+  if (signe(P)==0)
+    return P;
+  else
+  {
+    long dP = degpol(P);
+    GEN R = RgX_homogenous_evalpow(P, A, Bp);
+    if (d > dP)
+      R = gmul(R, gel(Bp,1+d-dP));
+    return R;
+  }
+}
+
+static GEN
+minimalmodel_merge(GEN W2, GEN Modd, long g, long v)
+{
+  GEN P = gel(W2,1), Q = gel(W2,2);
+  GEN e = gel(Modd,1), M = gel(Modd,2);
+  GEN A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
+  GEN B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
+  GEN Bp = gpowers(B, 2*g+2);
+  long f = mod4(e)==1 ? 1: -1;
+  GEN m = shifti(f > 0 ? subui(1,e): addui(1,e), -2);
+  GEN  m24 = subii(shifti(m,1), shifti(sqri(m),2));
+  P = RgX_RgM2_eval(P, A, Bp, 2*g+2);
+  Q = RgX_RgM2_eval(Q, A, Bp, g+1);
+  P = ZX_Z_divexact(ZX_add(P, ZX_Z_mul(ZX_sqr(Q), m24)),sqri(e));
+  if (f < 0) Q = ZX_neg(Q);
+  return mkvec2(P,Q);
+}
+
+static GEN
+hyperell_redQ(GEN W)
+{
+  GEN P = gel(W,1), Q = gel(W,2);
+  GEN H = ZX_shifti(Q,-1);
+  P = ZX_add(P, ZX_mul(H, ZX_sub(Q, H)));
+  Q = ZX_sub(Q, ZX_mulu(H, 2));
+  return mkvec2(P,Q);
+}
+
+static GEN
+minimalmodel_getH(GEN Qo, GEN Qn, GEN e, GEN M, long g, long v)
+{
+  GEN A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
+  GEN B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
+  GEN Bp = gpowers(B, 2*g+2);
+  return ZX_shifti(ZX_sub(ZX_Z_mul(Qn,e), RgX_RgM2_eval(Qo, A, Bp, g+1)), -1);
+}
+
+GEN
+hyperellminimalmodel(GEN W, GEN pr)
+{
+  pari_sp av = avma;
+  GEN F, WM2, F2, W2, M2, Modd, Wf, ef, Mf, Hf;
+  long d, g, v;
+  F = check_hyperell(W);
+  if (!F || signe(F)==0 || !RgX_is_ZX(F))
+    pari_err_TYPE("hyperellminimalmodel",W);
+  d = degpol(F); g = ((d+1)>>1)-1; v = varn(F);
+  if (signe(ZX_disc(F))==0)
+    pari_err_DOMAIN("hyperellminimalmodel","disc(W)","==",gen_0,W);
+  if (typ(W)==t_POL) W = mkvec2(W, pol_0(v));
+  else
+  {
+    GEN P = gel(W, 1), Q = gel(W, 2);
+    if( typ(P)!=t_POL) P = scalarpol(P, v);
+    if( typ(Q)!=t_POL) Q = scalarpol(Q, v);
+    if (!RgX_is_ZX(P) || !RgX_is_ZX(Q))
+      pari_err_TYPE("hyperellminimalmodel",F);
+    W = mkvec2(P, Q);
+  }
+  if (!pr || RgV_isin(pr, gen_2))
+  {
+    WM2 = algo56(W,g); W2 = gel(WM2, 1); M2 = gel(WM2, 2);
+    F2 = check_hyperell(W2);
+  }
+  else
+  {
+    W2 = W; F2 = F; M2 = mkvec2(gen_1, matid(2));
+  }
+  Modd = gel(algo57(F2, g, pr), 2);
+  Wf = hyperell_redQ(minimalmodel_merge(W2, Modd, g, v));
+  ef = mulii(gel(M2,1), gel(Modd,1));
+  Mf = ZM2_mul(gel(M2,2), gel(Modd,2));
+  Hf = minimalmodel_getH(gel(W,2), gel(Wf,2), ef, Mf, g, v);
+  return gerepilecopy(av, mkvec2(Wf, mkvec3(ef, Mf, Hf)));
+}
