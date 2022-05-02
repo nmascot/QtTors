@@ -10144,6 +10144,11 @@ multiple of $P/d$. If $P$ and $Q$ are both monic, then $d$ is monic and
 \fun{GEN}{QXQX_gcd}{GEN x, GEN y, GEN T} returns the gcd of $x$ and $y$,
 assuming that $x$ and $y$ are \kbd{QXQX}s and that $T$ is a monic \kbd{ZX}.
 
+\fun{GEN}{QXQX_homogenous_evalpow}{GEN P, GEN a, GEN B, GEN T}
+Evaluate the homogenous polynomial associated to the univariate polynomial
+$P$ on $(a,b)$ where $B$ is the vector of powers of $b$ with exponents
+$0$ to the degree of $P$ (\kbd{QXQ\_powers(b,degpol(P),T)}).
+
 \subsec{\kbd{QXQM}}
 
 \kbd{QXQM} are matrices of \kbd{QXQ}. All entries must be \typ{INT}, \typ{FRAC} or
@@ -10279,6 +10284,11 @@ so that all inexact entries are correctly rounded to 1 ulp.
 associated to $P$ in the secondary variable $v$, that is $y^d*P(x/y)$ where $d$
 is the degree of $P$, $x$ is the variable of $P$, and  $y$ is the variable with
 number $v$.
+
+\fun{GEN}{RgX_homogenous_evalpow}{GEN P, GEN a, GEN B}
+Evaluate the homogenous polynomial associated to the univariate polynomial
+$P$ on $(a,b)$ where $B$ is the vector of powers of $b$ with exponents
+$0$ to the degree of $P$ (\kbd{gpowers(b,degpol(P))}).
 
 \fun{GEN}{RgXX_to_Kronecker}{GEN P, long n} Assuming $P(X,Y)$ is a polynomial
 of degree in $X$ strictly less than $n$, returns $P(X,X^{2*n-1})$, the

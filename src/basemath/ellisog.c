@@ -48,6 +48,17 @@ get_isog_vars(GEN phi, long *vx, long *vy)
 /* x must be nonzero */
 INLINE long _degree(GEN x) { return typ(x)==t_POL ? degpol(x): 0; }
 
+static GEN
+RgH_eval(GEN P, GEN A, GEN B)
+{
+  if (typ(P)==t_POL)
+  {
+    if (signe(P)==0) return mkvec2(P, gen_1);
+    return mkvec2(RgX_homogenous_evalpow(P, A, B), gel(B,degpol(P)+1));
+  } else
+    return mkvec2(P, gen_1);
+}
+
 /* Given isogenies F:E' -> E and G:E'' -> E', return the composite
  * isogeny F o G:E'' -> E */
 static GEN
@@ -66,10 +77,10 @@ ellcompisog(GEN F, GEN G)
   d = maxss(maxss(degpol(gel(F,1)),_degree(gel(F,3))),
             maxss(_degree(F0),_degree(F1)));
   Gp = gpowers(Gh2, d);
-  f  = RgX_homogenous_evalpow(gel(F,1), gel(G,1), Gp);
-  g0 = RgX_homogenous_evalpow(F0, gel(G,1), Gp);
-  g1 = RgX_homogenous_evalpow(F1, gel(G,1), Gp);
-  h =  RgX_homogenous_evalpow(gel(F,3), gel(G,1), Gp);
+  f  = RgH_eval(gel(F,1), gel(G,1), Gp);
+  g0 = RgH_eval(F0, gel(G,1), Gp);
+  g1 = RgH_eval(F1, gel(G,1), Gp);
+  h =  RgH_eval(gel(F,3), gel(G,1), Gp);
   K = gmul(gel(h,1), Gh);
   K = RgX_normalize(RgX_div(K, RgX_gcd(K,RgX_deriv(K))));
   K2 = gsqr(K); K3 = gmul(K, K2);
@@ -104,6 +115,13 @@ divy(GEN P0, GEN P1, GEN Q, GEN T, long vy)
 }
 
 static GEN
+QXQH_eval(GEN P, GEN A, GEN B, GEN T)
+{
+  if (signe(P)==0) return mkvec2(P, pol_1(varn(P)));
+  return mkvec2(QXQX_homogenous_evalpow(P, A, B, T), gel(B,degpol(P)+1));
+}
+
+static GEN
 ellnfcompisog(GEN nf, GEN F, GEN G)
 {
   pari_sp av = avma;
@@ -127,10 +145,10 @@ ellnfcompisog(GEN nf, GEN F, GEN G)
   G1 = to_RgX(polcoef_i(gel(G,2), 1, vy), vx);
   d = maxss(maxss(degpol(gel(F,1)),degpol(gel(F,3))),maxss(degpol(F0),degpol(F1)));
   Gp = QXQX_powers(Gh2, d, T);
-  f  = QXQX_homogenous_evalpow(to_RgX(gel(F,1),vx), gel(G,1), Gp, T);
-  g0 = QXQX_homogenous_evalpow(F0, to_RgX(gel(G,1),vx), Gp, T);
-  g1 = QXQX_homogenous_evalpow(F1, to_RgX(gel(G,1),vx), Gp, T);
-  h  = QXQX_homogenous_evalpow(to_RgX(gel(F,3),vx), gel(G,1), Gp, T);
+  f  = QXQH_eval(to_RgX(gel(F,1),vx), gel(G,1), Gp, T);
+  g0 = QXQH_eval(F0, to_RgX(gel(G,1),vx), Gp, T);
+  g1 = QXQH_eval(F1, to_RgX(gel(G,1),vx), Gp, T);
+  h  = QXQH_eval(to_RgX(gel(F,3),vx), gel(G,1), Gp, T);
   K = Q_remove_denom(QXQX_mul(to_RgX(gel(h,1),vx), Gh, T), NULL);
   K = RgXQX_div(K, nfgcd(K, RgX_deriv(K), T, NULL), T);
   K = RgX_normalize(K);

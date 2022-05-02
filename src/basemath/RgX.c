@@ -160,12 +160,11 @@ GEN
 RgX_homogenous_evalpow(GEN P, GEN A, GEN B)
 {
   pari_sp av = avma;
-  long d, i;
+  long i, d = degpol(P);
   GEN s;
-  if (typ(P)!=t_POL)
-    return mkvec2(P, gen_1);
-  d = degpol(P);
+  if (signe(P)==0) return pol_0(varn(P));
   s = gel(P, d+2);
+  if (d == 0) return gcopy(s);
   for (i = d-1; i >= 0; i--)
   {
     s = gadd(gmul(s, A), gmul(gel(B,d+1-i), gel(P,i+2)));
@@ -175,8 +174,7 @@ RgX_homogenous_evalpow(GEN P, GEN A, GEN B)
       s = gerepileupto(av, s);
     }
   }
-  s = gerepileupto(av, s);
-  return mkvec2(s, gel(B,d+1));
+  return gerepileupto(av, s);
 }
 
 GEN
@@ -185,7 +183,8 @@ QXQX_homogenous_evalpow(GEN P, GEN A, GEN B, GEN T)
   pari_sp av = avma;
   long i, d = degpol(P), v = varn(A);
   GEN s;
-  if (signe(P)==0) return mkvec2(pol_0(v), pol_1(v));
+  if (signe(P)==0) return pol_0(v);
+  if (d == 0) return scalarpol(gel(P, d+2), v);
   s = scalarpol_shallow(gel(P, d+2), v);
   for (i = d-1; i >= 0; i--)
   {
@@ -197,8 +196,7 @@ QXQX_homogenous_evalpow(GEN P, GEN A, GEN B, GEN T)
       s = gerepileupto(av, s);
     }
   }
-  s = gerepileupto(av, s);
-  return mkvec2(s, gel(B,d+1));
+  return gerepileupto(av, s);
 }
 
 const struct bb_algebra *

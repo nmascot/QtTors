@@ -960,11 +960,6 @@ GEN     taugen_n_worker(GEN t, GEN pol, GEN p4);
 char**  pari_completion(pari_rl_interface *pari_rl, char *text, int START, int END);
 char**  pari_completion_matches(pari_rl_interface *pari_rl, const char *s, long pos, long *wordpos);
 
-/* RgX.c */
-
-GEN     RgX_homogenous_evalpow(GEN P, GEN A, GEN B);
-GEN     QXQX_homogenous_evalpow(GEN P, GEN A, GEN B, GEN T);
-
 /* subcyclo.c */
 
 GEN     galoiscyclo(long n, long v);

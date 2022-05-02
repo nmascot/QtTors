@@ -1166,7 +1166,7 @@ polreduce(GEN P, GEN M)
   long v = varn(P);
   GEN A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
   GEN B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
-  return gel(RgX_homogenous_evalpow(P, A, gpowers(B, degpol(P))),1);
+  return RgX_homogenous_evalpow(P, A, gpowers(B, degpol(P)));
 }
 
 static GEN
