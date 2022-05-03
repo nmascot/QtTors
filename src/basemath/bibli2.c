@@ -2147,6 +2147,24 @@ setunion(GEN x, GEN y)
 }
 
 GEN
+setdelta(GEN x, GEN y)
+{
+  long ix = 1, iy = 1, iz = 1, lx = lg(x), ly = lg(y);
+  pari_sp av = avma;
+  GEN z = cgetg(lx + ly - 1,t_VEC);
+  if (typ(x) != t_VEC) pari_err_TYPE("setdelta",x);
+  if (typ(y) != t_VEC) pari_err_TYPE("setdelta",y);
+  while (ix < lx && iy < ly)
+  {
+    int c = cmp_universal(gel(x,ix), gel(y,iy));
+    if      (c < 0) gel(z, iz++) = gel(x,ix++);
+    else if (c > 0) gel(z, iz++) = gel(y,iy++);
+    else { ix++; iy++; }
+  }
+  setlg(z,iz); return gerepilecopy(av,z);
+}
+
+GEN
 setintersect(GEN x, GEN y)
 {
   long ix = 1, iy = 1, iz = 1, lx = lg(x), ly = lg(y);

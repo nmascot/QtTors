@@ -2720,6 +2720,7 @@ GEN     polchebyshev1(long n, long v);
 GEN     polchebyshev2(long n, long v);
 GEN     polrecip(GEN x);
 GEN     setbinop(GEN f, GEN x, GEN y);
+GEN     setdelta(GEN x, GEN y);
 GEN     setintersect(GEN x, GEN y);
 long    setisset(GEN x);
 GEN     setminus(GEN x, GEN y);
