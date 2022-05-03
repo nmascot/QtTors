@@ -2161,6 +2161,8 @@ setdelta(GEN x, GEN y)
     else if (c > 0) gel(z, iz++) = gel(y,iy++);
     else { ix++; iy++; }
   }
+  while (ix<lx) gel(z,iz++) = gel(x,ix++);
+  while (iy<ly) gel(z,iz++) = gel(y,iy++);
   setlg(z,iz); return gerepilecopy(av,z);
 }
 
