@@ -1792,14 +1792,15 @@ QX_hyperellratpoints(GEN P, GEN h, long flag, GEN *den)
 }
 
 static GEN
-ZX_homogenous_evalpow(GEN Q, GEN A, GEN B)
+QX_homogenous_evalpow(GEN P, GEN A, GEN B)
 {
   pari_sp av = avma;
+  GEN den, Q = Q_remove_denom(P, &den);
   long i, d = degpol(Q);
   GEN s = gel(Q, d+2);
   for (i = d-1; i >= 0; i--)
     s = addii(mulii(s, A), mulii(gel(B,d+1-i), gel(Q,i+2)));
-  return gerepileuptoint(av, s);
+  return gerepileupto(av, den ? gdiv(s,den): s);
 }
 
 static GEN
@@ -1856,7 +1857,7 @@ hyperellratpoints(GEN PQ, GEN h, long flag)
   {
     GEN Li = gel(L,i), x = gel(Li,1), y = gel(Li,2), z = gel(Li,3);
     GEN B = gpowers(z, dQ);
-    GEN Qx = gdiv(ZX_homogenous_evalpow(Q, x, B), gel(B, dQ+1));
+    GEN Qx = gdiv(QX_homogenous_evalpow(Q, x, B), gel(B, dQ+1));
     GEN zdy = powiu(z, dy);
     if (den) zdy = mulii(zdy, den);
     gel(L,i) = mkvec2(gdiv(x,z), gmul2n(gsub(gdiv(y,zdy),Qx),-1));
