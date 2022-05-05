@@ -2262,27 +2262,6 @@ F2xqX_quad_nbroots(GEN b, GEN c, GEN T)
 }
 
 static GEN
-genus2_redmodel2(GEN P)
-{
-  GEN Q = pol_0(varn(P));
-  GEN P2 = ZX_to_F2x(P);
-  while (F2x_issquare(P2))
-  {
-    GEN H = F2x_to_ZX(F2x_sqrt(P2));
-    GEN P1 = ZX_sub(P, ZX_sqr(H));
-    GEN Q1 = ZX_add(Q, ZX_mulu(H, 2));
-    if ((signe(P1)==0 ||  ZX_lval(P1,2)>=2)
-     && (signe(Q1)==0 ||  ZX_lval(Q1,2)>=1))
-    {
-      P = ZX_shifti(P1, -2);
-      Q = ZX_shifti(Q1, -1);
-      P2= ZX_to_F2x(P);
-    } else break;
-  }
-  return mkvec2(P,Q);
-}
-
-static GEN
 genus2_eulerfact2(GEN PQ)
 {
   GEN V = F2x_genus_red(ZX_to_F2x(gel(PQ, 1)), ZX_to_F2x(gel(PQ, 2)));
@@ -2332,7 +2311,7 @@ lfungenus2(GEN G)
   GEN Ldata;
   GEN gr = genus2red(G, NULL);
   GEN N  = gel(gr, 1), M = gel(gr, 2), Q = gel(gr, 3), L = gel(gr, 4);
-  GEN PQ = genus2_redmodel2(Q);
+  GEN PQ = gel(hyperellminimalmodel(Q,mkvecs(2)),1);
   GEN e;
   long i, lL = lg(L), ram2;
   ram2 = absequaliu(gmael(M,1,1),2);
