@@ -308,9 +308,10 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
 GEN
 lerch_worker(GEN t, GEN E)
 {
-  GEN s = gel(E, 1), a = gel(E, 2), z = gel(E, 3), nt = gneg(t);
+  GEN s = gel(E, 1), a1 = gel(E, 2), z = gel(E, 3);
   long eps = itos(gel(E, 4)), prec = itos(gel(E, 5));
-  return gdiv(gmul(gpow(eps == 1 ? t : nt, s, prec), gexp(gmul(a, t), prec)), gaddsg(1, gmul(z, gexp(nt, prec))));
+  return gdiv(gmul(gpow(eps==1? t: gneg(t), s, prec), gexp(gmul(a1,t), prec)),
+              gadd(gexp(t, prec), z));
 }
 
 /* tab already computed with N = #tab[1] even */
@@ -365,12 +366,13 @@ parintnum(GEN E, GEN a, GEN tab)
     }
   }
   f = snm_closure(is_entry("_lerch_worker"), mkvec(E));
-  VP = parapply(f, VP); VM = parapply(f, VM);
-  av = avma;
+  VP = parapply(f, VP);
+  VM = parapply(f, VM); av = avma;
   S = gmul(tabw0, lerch_worker(x0, E));
   for (i = 1; i < L; i++)
   {
-    S = gadd(S, gadd(gmul(gel(tabwp, i), gel(VP, i)), gmul(gel(tabwm, i), gel(VM, i))));
+    S = gadd(S, gadd(gmul(gel(tabwp, i), gel(VP, i)),
+                     gmul(gel(tabwm, i), gel(VM, i))));
     if ((i & 0x7f) == 1) S = gerepileupto(av, S);
     S = gprec_wensure(S, prec);
   }
@@ -379,21 +381,20 @@ parintnum(GEN E, GEN a, GEN tab)
 }
 
 static GEN
-refine(GEN L)
+refine(GEN A)
 {
-  long ll = lg(L) - 1, i;
-  GEN LN = cgetg(2 * ll, t_VEC);
-  for (i = 1; i <= ll - 1; i++)
+  long n = lg(A) - 1, i;
+  GEN B = cgetg(2 * n, t_VEC);
+  for (i = 1; i < n; i++)
   {
-    gel(LN, 2 * i - 1) = gel(L, i);
-    gel(LN, 2 * i) = gmul2n(gadd(gel(L, i), gel(L, i + 1)), -1);
+    gel(B, 2 * i - 1) = gel(A, i);
+    gel(B, 2 * i) = gmul2n(gadd(gel(A, i), gel(A, i + 1)), -1);
   }
-  gel(LN, 2 * ll - 1) = gel(L, ll);
-  return LN;
+  gel(B, 2 * n - 1) = gel(A, n); return B;
 }
 
 /* Here L = [a1, a2, a3,...] integration vertices. Refine by splitting
-   intervals. */
+ * intervals. */
 static GEN
 parintnumgaussadapt(GEN E, GEN L, GEN tab, long bit)
 {
@@ -429,8 +430,7 @@ parintnumadapt(GEN E, GEN a, GEN b, GEN tab, long bit)
 }
 
 static int
-iscplx(GEN z)
-{ long t = typ(z); return is_real_t(t) || t == t_COMPLEX; }
+iscplx(GEN z) { long t = typ(z); return is_real_t(t) || t == t_COMPLEX; }
 
 static GEN
 lerch_easy(GEN z, GEN s, GEN a, long B)
@@ -448,83 +448,92 @@ lerch_easy(GEN z, GEN s, GEN a, long B)
 static GEN
 _lerchphi(GEN z, GEN s, GEN a, long prec)
 {
-  GEN L, LT, Is, J, rs, residue, left, right, top, c, w;
-  GEN Linf, topi, tabg, E1, Em1;
+  GEN L, LT, J, rs, residue, mleft, left, right, top, w, Linf, tabg, E, Em;
   long isreal, B = prec2nbits(prec), MB = 3 - B, NB, prec2;
 
   if (!iscplx(z)) pari_err_TYPE("lerchphi", z);
   if (!iscplx(s)) pari_err_TYPE("lerchphi", s);
   if (!iscplx(a)) pari_err_TYPE("lerchphi", a);
   if (gexpo(z) < MB) return gpow(a, gneg(s), prec);
-  if (gexpo(gsubgs(z, 1)) < MB) return zetahurwitz(s, a, 0, B);
-  if (gexpo(gaddgs(z, 1)) < MB)
+  if (gexpo(gsubgs(z, 1)) < MB) return zetahurwitz(s, a, 0, B); /* z ~ 1 */
+  if (gexpo(gaddgs(z, 1)) < MB) /* z ~ -1 */
   {
-    GEN tmp = gsub(zetahurwitz(s, gmul2n(a, -1), 0, B), zetahurwitz(s, gmul2n(gaddgs(a, 1), -1), 0, B));
+    GEN tmp = gsub(zetahurwitz(s, gmul2n(a, -1), 0, B),
+                   zetahurwitz(s, gmul2n(gaddgs(a, 1), -1), 0, B));
     return gmul(gpow(gen_2, gneg(s), prec), tmp);
   }
-  if (gcmpgs(gmulsg(10, gabs(z, prec)), 9) <= 0)
+  if (gcmpgs(gmulsg(10, gabs(z, prec)), 9) <= 0) /* |z| <= 9/10 */
     return lerch_easy(z, s, a, B);
   if (gcmpgs(greal(a), 2) < 0)
-    return gadd(gpow(a, gneg(s), prec), gmul(z, lerchphi(z, s, gaddgs(a, 1), prec)));
+    return gadd(gpow(a, gneg(s), prec),
+                gmul(z, lerchphi(z, s, gaddgs(a, 1), prec)));
   NB = (long)ceil(B + M_PI * labs(gtodouble(gimag(s))));
   prec2 = nbits2prec(NB);
-  tabg = intnumgaussinit(2*(NB >> 2) + 60, prec2);
-  z = bitprecision0(z, NB); s = bitprecision0(s, NB); a = bitprecision0(a, NB);
+  z = gprec_w(z, prec2);
+  s = gprec_w(s, prec2);
+  a = gprec_w(a, prec2);
   rs = ground(greal(s)); L = glog(z, prec2);
-  E1 = mkvec5(gsubgs(s, 1), gneg(a), gneg(z), gen_1, stoi(prec2));
-  Em1 = mkvec5(gsubgs(s, 1), gneg(a), gneg(z), gen_m1, stoi(prec2));
+  E = mkvec5(gsubgs(s, 1), gsubsg(1, a), gneg(z), gen_1, stoi(prec2));
+  Em = mkvec5(gsubgs(s, 1), gsubsg(1, a), gneg(z), gen_m1, stoi(prec2));
   Linf = mkvec2(mkoo(), greal(a));
   if (gexpo(gsub(s, rs)) < MB && gcmpgs(rs, 1) >= 0)
-  {
-    GEN LT1;
+  { /* real(s) ~ positive integer */
     if (gcmp(gabs(gimag(L), prec2), sstoQ(1, 4)) < 0 && gsigne(greal(L)) >= 0)
     {
-      Is = gen_I(); if (gsigne(gimag(z)) > 0) Is = gneg(Is);
-      LT1 = gaddgs(gabs(L, prec2), 1);
-      LT = mkvec4(gen_0, Is, gadd(Is, LT1), LT1);
-      J = parintnumgaussadapt(E1, LT, tabg, NB);
-      J = gadd(J, parintnumadapt(E1, LT1, Linf, NULL, NB));
+      GEN t = gsigne(imag_i(z)) > 0 ? gen_m1: gen_1;
+      GEN LT1 = gaddgs(gabs(L, prec2), 1);
+      LT = mkvec4(gen_0, mkcomplex(gen_0, t), mkcomplex(LT1, t), LT1);
+      tabg = intnumgaussinit(2*(NB >> 2) + 60, prec2);
+      J = parintnumgaussadapt(E, LT, tabg, NB);
+      J = gadd(J, parintnumadapt(E, LT1, Linf, NULL, NB));
     }
-    else J = parintnumadapt(E1, gen_0, Linf, NULL, NB);
+    else J = parintnumadapt(E, gen_0, Linf, NULL, NB);
     return gdiv(J, ggamma(s, prec2));
   }
+  tabg = intnumgaussinit(2*(NB >> 2) + 60, prec2);
   if (gcmp(greal(L), gneg(ghalf)) < 0)
   {
-    residue = gen_0; c = gmin(gmul2n(gabs(greal(L), prec2), -1), gen_1);
-    left = c; right = c; top = c;
+    residue = gen_0;
+    left = right = top = gmin(gmul2n(gabs(greal(L), prec2), -1), gen_1);
   }
   else if (gcmp(gabs(gimag(L), prec2), ghalf) > 0)
   {
-    residue = gen_0; c = gmin(gmul2n(gabs(gimag(L), prec2), -1), gen_1);
-    left = c; right = c; top = c;
+    residue = gen_0;
+    left = right = top = gmin(gmul2n(gabs(gimag(L), prec2), -1), gen_1);
   }
   else
   {
     residue = gdiv(gpow(gneg(L), s, prec2), gmul(L, gpow(z, a, prec2)));
     left = gaddgs(gmax(gen_0, gneg(greal(L))), 1);
-    top = gaddgs(gabs(gimag(L), prec2), 1); right = gaddgs(gabs(L, prec2), 1);
+    top = gaddgs(gabs(gimag(L), prec2), 1);
+    right = gaddgs(gabs(L, prec2), 1);
   }
-  isreal = gexpo(gimag(z)) < MB && gcmpgs(greal(z), 1) < 0 && gexpo(gimag(s)) < MB && gexpo(gimag(a)) < MB && gsigne(greal(a)) > 0;
+  isreal = gexpo(gimag(z)) < MB && gcmpgs(greal(z), 1) < 0
+                                && gexpo(gimag(s)) < MB
+                                && gexpo(gimag(a)) < MB && gsigne(greal(a)) > 0;
   w = gexp(gmul(PiI2n(0, prec2), gsubgs(s, 1)), prec2);
-  topi = gmul(top, gen_I());
+  mleft = gneg(left);
   if (isreal)
   {
-    LT = mkvec3(right, gadd(right, topi), gsub(topi, left));
-    J = gimag(gdiv(parintnumgaussadapt(E1, LT, tabg, NB), w));
-    LT = mkvec2(gsub(topi, left), gneg(left));
-    J = gmul(gmul2n(gen_I(), 1), gadd(J, gimag(parintnumgaussadapt(Em1, LT, tabg, NB))));
+    LT = mkvec3(right, mkcomplex(right, top), mkcomplex(mleft, top));
+    J = gimag(gdiv(parintnumgaussadapt(E, LT, tabg, NB), w));
+    LT = mkvec2(mkcomplex(mleft, top), mleft);
+    J = gmul(mkcomplex(gen_0, gen_2),
+             gadd(J, gimag(parintnumgaussadapt(Em, LT, tabg, NB))));
   }
   else
   {
-    LT = mkvec3(right, gadd(right, topi), gsub(topi, left));
-    J = gdiv(parintnumgaussadapt(E1, LT, tabg, NB), w);
-    LT = mkvec2(gsub(topi, left), gneg(gadd(left, topi)));
-    J = gadd(J, parintnumgaussadapt(Em1, LT, tabg, NB));
-    LT = mkvec3(gneg(gadd(left, topi)), gsub(right, topi), right);
-    J = gadd(J, gmul(parintnumgaussadapt(E1, LT, tabg, NB), w));
+    GEN mtop = gneg(top);
+    LT = mkvec3(right, mkcomplex(right, top), mkcomplex(mleft, top));
+    J = gdiv(parintnumgaussadapt(E, LT, tabg, NB), w);
+    LT = mkvec2(mkcomplex(mleft, top), mkcomplex(mleft, mtop));
+    J = gadd(J, parintnumgaussadapt(Em, LT, tabg, NB));
+    LT = mkvec3(mkcomplex(mleft, mtop), mkcomplex(right, mtop), right);
+    J = gadd(J, gmul(parintnumgaussadapt(E, LT, tabg, NB), w));
   }
-  J = gadd(J, gmul(gsub(w, ginv(w)), parintnumadapt(E1, right, Linf, NULL, NB)));
-  return gneg(gmul(ggamma(gsubsg(1, s), prec2), gadd(gdiv(J, PiI2(prec2)), residue)));
+  J = gadd(J, gmul(gsub(w, ginv(w)), parintnumadapt(E, right, Linf, NULL, NB)));
+  return gneg(gmul(ggamma(gsubsg(1, s), prec2),
+                   gadd(gdiv(J, PiI2(prec2)), residue)));
 }
 /* lerchphi(z,-k,a)=
  *  -1/(z-1)*sum(q=0,k,(z/(z-1))^q*sum(j=0,q,(-1)^j*(j+a)^k*binomial(q,j)))
