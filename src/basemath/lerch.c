@@ -308,17 +308,17 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
 GEN
 lerch_worker(GEN t, GEN E)
 {
-  GEN s = gel(E, 1), a1 = gel(E, 2), z = gel(E, 3);
-  long eps = itos(gel(E, 4)), prec = itos(gel(E, 5));
-  return gdiv(gmul(gpow(eps==1? t: gneg(t), s, prec), gexp(gmul(a1,t), prec)),
+  GEN s = gel(E,1), a1 = gel(E,2), z = gel(E,3);
+  long p = itos(gel(E,4)), prec = labs(p);
+  return gdiv(gmul(gpow(p > 0? t: gneg(t), s, prec), gexp(gmul(a1,t), prec)),
               gadd(gexp(t, prec), z));
 }
 
 /* tab already computed with N = #tab[1] even */
 static GEN
-parintnumgauss(GEN E, GEN a, GEN b, GEN tab, long prec)
+parintnumgauss(GEN f, GEN a, GEN b, GEN tab, long prec)
 {
-  GEN R = gel(tab, 1), W = gel(tab, 2), bma, bpa, S = gen_0, VP, VM, V, f;
+  GEN R = gel(tab, 1), W = gel(tab, 2), bma, bpa, S = gen_0, VP, VM, V;
   long n = lg(R) - 1, i, prec2 = prec + EXTRAPREC64;
   a = gprec_wensure(a, prec2); b = gprec_wensure(b, prec2);
   bma = gmul2n(gsub(b, a), -1); bpa = gadd(bma, a);
@@ -328,7 +328,6 @@ parintnumgauss(GEN E, GEN a, GEN b, GEN tab, long prec)
     GEN h = gmul(bma, gel(R, i));
     gel(VP, i) = gadd(bpa, h); gel(VM, i) = gsub(bpa, h);
   }
-  f = snm_closure(is_entry("_lerch_worker"), mkvec(E));
   V = gadd(parapply(f, VP), parapply(f, VM));
   for (i = 1; i <= n; i++)
   {
@@ -340,12 +339,12 @@ parintnumgauss(GEN E, GEN a, GEN b, GEN tab, long prec)
 
 /* Assume tab computed and a >= 0 */
 static GEN
-parintnum(GEN E, GEN a, GEN tab)
+parintnum(GEN f, GEN a, GEN tab)
 {
   pari_sp av;
   GEN tabx0 = gel(tab, 2), tabw0 = gel(tab, 3), tabxm = gel(tab, 6);
   GEN tabxp = gel(tab, 4), tabwp = gel(tab, 5), tabwm = gel(tab, 7);
-  GEN VP = tabxp, VM = tabxm, x0 = tabx0, f, S;
+  GEN VP = tabxp, VM = tabxm, x0 = tabx0, S;
   long prec = gprecision(tabw0), L = lg(tabxp), i, fla = 0;
   if (!gequal0(a))
   {
@@ -365,10 +364,9 @@ parintnum(GEN E, GEN a, GEN tab)
       }
     }
   }
-  f = snm_closure(is_entry("_lerch_worker"), mkvec(E));
   VP = parapply(f, VP);
   VM = parapply(f, VM); av = avma;
-  S = gmul(tabw0, lerch_worker(x0, E));
+  S = gmul(tabw0, closure_callgen1(f, x0));
   for (i = 1; i < L; i++)
   {
     S = gadd(S, gadd(gmul(gel(tabwp, i), gel(VP, i)),
@@ -396,7 +394,7 @@ refine(GEN A)
 /* Here L = [a1, a2, a3,...] integration vertices. Refine by splitting
  * intervals. */
 static GEN
-parintnumgaussadapt(GEN E, GEN L, GEN tab, long bit)
+parintnumgaussadapt(GEN f, GEN L, GEN tab, long bit)
 {
   GEN Rold = gen_0, Rnew;
   long i, ct = 0, prec = nbits2prec(bit);
@@ -404,7 +402,7 @@ parintnumgaussadapt(GEN E, GEN L, GEN tab, long bit)
   {
     Rnew = gen_0;
     for (i = 1; i < lg(L) - 1; i++)
-      Rnew = gadd(Rnew, parintnumgauss(E, gel(L, i), gel(L, i + 1), tab, prec));
+      Rnew = gadd(Rnew, parintnumgauss(f, gel(L, i), gel(L, i + 1), tab, prec));
     if (ct && gexpo(gsub(Rnew, Rold)) - gexpo(Rnew) < 10 - bit) return Rnew;
     ct++; Rold = Rnew; L = refine(L);
   }
@@ -414,14 +412,14 @@ parintnumgaussadapt(GEN E, GEN L, GEN tab, long bit)
 
 /* Here b = [oo, r], so refine by increasing integration step m */
 static GEN
-parintnumadapt(GEN E, GEN a, GEN b, GEN tab, long bit)
+parintnumadapt(GEN f, GEN a, GEN b, GEN tab, long bit)
 {
   GEN Rold = gen_0, Rnew;
   long m = 0, prec = nbits2prec(bit);
   if (!tab) tab = intnuminit(gen_0, b, 0, prec);
   while (m <= 5)
   {
-    Rnew = parintnum(E, a, tab);
+    Rnew = parintnum(f, a, tab);
     if (m && gexpo(gsub(Rnew, Rold)) - gexpo(Rnew) < 10 - bit) return Rnew;
     m++; Rold = Rnew; tab = intnuminit(gen_0, b, m, prec);
   }
@@ -448,8 +446,10 @@ lerch_easy(GEN z, GEN s, GEN a, long B)
 static GEN
 _lerchphi(GEN z, GEN s, GEN a, long prec)
 {
-  GEN res = NULL, L, LT, J, rs, mleft, left, right, top, w, Linf, tabg, E, Em;
+  GEN res = NULL, L, LT, J, rs, mleft, left, right, top, w, Linf, tabg;
+  GEN E, f, fm;
   long B = prec2nbits(prec), MB = 3 - B, NB, prec2;
+  entree *ep;
 
   if (!iscplx(z)) pari_err_TYPE("lerchphi", z);
   if (!iscplx(s)) pari_err_TYPE("lerchphi", s);
@@ -473,8 +473,11 @@ _lerchphi(GEN z, GEN s, GEN a, long prec)
   s = gprec_w(s, prec2);
   a = gprec_w(a, prec2);
   rs = ground(real_i(s)); L = glog(z, prec2);
-  E = mkvec5(gsubgs(s, 1), gsubsg(1, a), gneg(z), gen_1, stoi(prec2));
-  Em = mkvec5(gsubgs(s, 1), gsubsg(1, a), gneg(z), gen_m1, stoi(prec2));
+  ep = is_entry("_lerch_worker");
+  E = mkvec4(gsubgs(s, 1), gsubsg(1, a), gneg(z), stoi(prec2));
+  f = snm_closure(ep, mkvec(E));
+  E = shallowcopy(E); gel(E,4) = stoi(-prec2);
+  fm = snm_closure(ep, mkvec(E));
   Linf = mkvec2(mkoo(), real_i(a));
   if (gexpo(gsub(s, rs)) < MB && gcmpgs(rs, 1) >= 0)
   { /* real(s) ~ positive integer */
@@ -484,10 +487,10 @@ _lerchphi(GEN z, GEN s, GEN a, long prec)
       GEN LT1 = gaddgs(gabs(L, prec2), 1);
       LT = mkvec4(gen_0, mkcomplex(gen_0, t), mkcomplex(LT1, t), LT1);
       tabg = intnumgaussinit(2*(NB >> 2) + 60, prec2);
-      J = parintnumgaussadapt(E, LT, tabg, NB);
-      J = gadd(J, parintnumadapt(E, LT1, Linf, NULL, NB));
+      J = parintnumgaussadapt(f, LT, tabg, NB);
+      J = gadd(J, parintnumadapt(f, LT1, Linf, NULL, NB));
     }
-    else J = parintnumadapt(E, gen_0, Linf, NULL, NB);
+    else J = parintnumadapt(f, gen_0, Linf, NULL, NB);
     return gdiv(J, ggamma(s, prec2));
   }
   tabg = intnumgaussinit(2*(NB >> 2) + 60, prec2);
@@ -509,22 +512,22 @@ _lerchphi(GEN z, GEN s, GEN a, long prec)
   {
     /* z, s, a real, 0 < a, z < 1 */
     LT = mkvec3(right, mkcomplex(right, top), mkcomplex(mleft, top));
-    J = imag_i(gdiv(parintnumgaussadapt(E, LT, tabg, NB), w));
+    J = imag_i(gdiv(parintnumgaussadapt(f, LT, tabg, NB), w));
     LT = mkvec2(mkcomplex(mleft, top), mleft);
     J = gmul(mkcomplex(gen_0, gen_2),
-             gadd(J, imag_i(parintnumgaussadapt(Em, LT, tabg, NB))));
+             gadd(J, imag_i(parintnumgaussadapt(fm, LT, tabg, NB))));
   }
   else
   {
     GEN mtop = gneg(top);
     LT = mkvec3(right, mkcomplex(right, top), mkcomplex(mleft, top));
-    J = gdiv(parintnumgaussadapt(E, LT, tabg, NB), w);
+    J = gdiv(parintnumgaussadapt(f, LT, tabg, NB), w);
     LT = mkvec2(mkcomplex(mleft, top), mkcomplex(mleft, mtop));
-    J = gadd(J, parintnumgaussadapt(Em, LT, tabg, NB));
+    J = gadd(J, parintnumgaussadapt(fm, LT, tabg, NB));
     LT = mkvec3(mkcomplex(mleft, mtop), mkcomplex(right, mtop), right);
-    J = gadd(J, gmul(parintnumgaussadapt(E, LT, tabg, NB), w));
+    J = gadd(J, gmul(parintnumgaussadapt(f, LT, tabg, NB), w));
   }
-  J = gadd(J, gmul(gsub(w, ginv(w)), parintnumadapt(E, right, Linf, NULL, NB)));
+  J = gadd(J, gmul(gsub(w, ginv(w)), parintnumadapt(f, right, Linf, NULL, NB)));
   J = gdiv(J, PiI2(prec2)); if (res) J = gadd(J, res);
   return gneg(gmul(ggamma(gsubsg(1, s), prec2), J));
 }
