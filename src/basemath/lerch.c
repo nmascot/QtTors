@@ -435,6 +435,7 @@ lerch_easy(GEN z, GEN s, GEN a, long B)
 {
   long NB = B + 32, prec = nbits2prec(NB), n = 0;
   GEN ns = gneg(s), S = gpow(a, ns, prec), zn = gen_1;
+  z = gtofp(z, prec + EXTRAPRECWORD);
   while (gexpo(zn) > -B - 5)
   {
     zn = gmul(zn, z); n++;
@@ -505,7 +506,7 @@ _lerchphi(GEN z, GEN s, GEN a, long prec)
     top = gaddgs(gabs(imag_i(L), prec2), 1);
     right = gaddgs(gabs(L, prec2), 1);
   }
-  w = gexp(gmul(PiI2n(0, prec2), gsubgs(s, 1)), prec2);
+  w = expIPiC(gsubgs(s, 1), prec2);
   mleft = gneg(left);
   if (gexpo(imag_i(z)) < MB && gexpo(imag_i(a)) < MB && gexpo(imag_i(s)) < MB
       && gcmpgs(real_i(z), 1) < 0 && gsigne(real_i(a)) > 0)
@@ -514,8 +515,8 @@ _lerchphi(GEN z, GEN s, GEN a, long prec)
     LT = mkvec3(right, mkcomplex(right, top), mkcomplex(mleft, top));
     J = imag_i(gdiv(parintnumgaussadapt(f, LT, tabg, NB), w));
     LT = mkvec2(mkcomplex(mleft, top), mleft);
-    J = gmul(mkcomplex(gen_0, gen_2),
-             gadd(J, imag_i(parintnumgaussadapt(fm, LT, tabg, NB))));
+    J = gmul2n(gadd(J, imag_i(parintnumgaussadapt(fm, LT, tabg, NB))), 1);
+    J = mulcxI(J);
   }
   else
   {
