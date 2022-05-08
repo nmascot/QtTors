@@ -593,6 +593,29 @@ zetamult_Akhilesh(GEN e, long bit, long prec)
   if (DEBUGLEVEL) err_printf("polylogmult: k = %ld, %ld nodes\n", k, H->nb);
   return gprec_wtrunc(gel(r,1), prec);
 }
+
+/* lump together close entries + round to 1 entries that are ~ 1 */
+static GEN
+vec_round(GEN V, long b)
+{
+  GEN v = shallowcopy(V), w = shallowcopy(v);
+  long i, j, l = lg(v);
+  for (i = 1; i < l; i++)
+  {
+    long e;
+    if (!gel(v,i)) continue;
+    if (gexpo(gsubgs(gel(v,i), 1)) < b) gel(w,i) = gel(v,i) = gen_1;
+    e = gexpo(gel(v,i));
+    for (j = i+1; j < l; j++)
+      if (gel(v,j) && gexpo(gsub(gel(v,i), gel(v,j))) - e < b)
+      {
+        gel(v,j) = NULL;
+        gel(w,j) = gel(w,i);
+      }
+  }
+  return w;
+}
+
 /* evec t_VEC */
 static GEN
 zetamultevec(GEN evec, long prec)
@@ -604,6 +627,7 @@ zetamultevec(GEN evec, long prec)
   hashtable *H;
 
   if (k == 0) return gen_1;
+  evec = vec_round(evec, 3 - prec2nbits(prec));
   v = vec_equiv(evec); l = lg(v);
   Evec = cgetg(k+1, t_VECSMALL);
   X = cgetg(l + 2, t_VEC); /* our alphabet */

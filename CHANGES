@@ -125,6 +125,9 @@ AP 103- nfgrunwaldwang: fix infinite loop [#2343]
 BA 107- bnrclassfield: incorrect result when fundamental units are large, e.g.
         bnrclassfield(bnfinit(nfsplitting(a^3-a^2-202*a-3080),1),2)  [#2371]
    108- M8=mfinit([8,5/2]); mfatkininit(M8,8)[1] was 0 and shouldn't be
+   109- polylogmult instability
+        default(realprecision,366);a=(1+sqrt(5))/2;w=(1+sqrt(-3))/2;
+        polylogmult([1,1,1,1],[1/a,a,1,w]) -> error
 
   Added
 HC   1- new GP function eulerreal
