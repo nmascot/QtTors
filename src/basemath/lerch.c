@@ -433,15 +433,14 @@ iscplx(GEN z) { long t = typ(z); return is_real_t(t) || t == t_COMPLEX; }
 static GEN
 lerch_easy(GEN z, GEN s, GEN a, long B)
 {
-  long NB = B + 32, prec = nbits2prec(NB), n = 0;
-  GEN ns = gneg(s), S = gpow(a, ns, prec), zn = gen_1;
-  z = gtofp(z, prec + EXTRAPRECWORD);
-  while (gexpo(zn) > -B - 5)
+  long n, prec = nbits2prec(B + 32);
+  GEN zn, ms = gneg(s), S = gpow(a, ms, prec);
+  zn = z = gtofp(z, prec);
+  for (n = 1;; n++, zn = gmul(zn, z))
   {
-    zn = gmul(zn, z); n++;
-    S = gadd(S, gmul(zn, gpow(gaddgs(a, n), ns, prec)));
+    S = gadd(S, gmul(zn, gpow(gaddgs(a, n), ms, prec)));
+    if (gexpo(zn) <= - B - 5) return S;
   }
-  return S;
 }
 
 static GEN
