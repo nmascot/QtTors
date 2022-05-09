@@ -854,7 +854,7 @@ static GEN
 algo51(GEN W, GEN M)
 {
   GEN P = gel(W,1), Q = gel(W,2);
-  while(1)
+  for(;;)
   {
     long vP = ZX_lval(P,2);
     long vQ = signe(Q) ? ZX_lval(Q,2): vP+1;
@@ -886,11 +886,11 @@ algo51(GEN W, GEN M)
 }
 
 static GEN
-algo52(GEN W, GEN c, GEN M, long *pt_lambda)
+algo52(GEN W, GEN c, long *pt_lambda)
 {
   long lambda;
   GEN P = gel(W,1), Q = gel(W,2);
-  while(1)
+  for(;;)
   {
     GEN H, H1;
     /* 1 */
@@ -967,25 +967,29 @@ algo56(GEN W, long g)
   if (test55(Woo,ep,g))
   {
     long lambda;
-    GEN Moo = mkvec2(gel(M,1), ZM2_mul(gel(M,2),mkmat22(gen_0,gen_1,gen_1,gen_0)));
-    Woo = algo52(Woo, gen_0, Moo, &lambda);
+    Woo = algo52(Woo, gen_0, &lambda);
     if (!test53(lambda,ep,g))
+    {
+      GEN Moo = mkvec2(gel(M,1),
+                       ZM2_mul(gel(M,2), mkmat22(gen_0,gen_1,gen_1,gen_0)));
       W = reduce(Woo, Moo, gen_0, lambda, M);
+    }
   }
-  while(1)
+  for(;;)
   {
     long j, ep = get_ep(W);
-    for (j = 0; j<2; j++)
+    for (j = 0; j < 2; j++)
     {
       long lambda;
       GEN c = utoi(j);
-      GEN Pc = ZX_affine(gel(W,1), gen_2, c), Qc = ZX_affine(gel(W,2), gen_2, c);
+      GEN Pc = ZX_affine(gel(W,1), gen_2, c);
+      GEN Qc = ZX_affine(gel(W,2), gen_2, c);
       if (test55(mkvec2(Pc, Qc), ep, g))
       {
-        GEN Mc = gcopy(M);
-        GEN Wc = algo52(W, c, Mc, &lambda);
-        if(!test53(lambda,ep,g))
+        GEN Wc = algo52(W, c, &lambda);
+        if (!test53(lambda,ep,g))
         {
+          GEN Mc = shallowcopy(M);
           W = reduce(Wc, Mc, c, lambda, M);
           break;
         }
@@ -1007,11 +1011,11 @@ algo57(GEN F, long g, GEN pr)
   if (!pr)
   {
     GEN D = absi(ZX_disc(F));
-    D = shifti(D,-vali(D));
+    D = shifti(D, -vali(D));
     pr = gel(factor(D),1);
   }
   l = lg(pr);
-  for(i = 1; i < l; i++)
+  for (i = 1; i < l; i++)
   {
     long ep;
     GEN p = gel(pr, i), ps2 = shifti(p,-1), Fe;
@@ -1030,7 +1034,7 @@ algo57(GEN F, long g, GEN pr)
         gel(M,2) = ZM2_mul(gel(M,2), mkmat22(gen_0,gen_1,p,gen_0));
       }
     }
-    while(1)
+    for(;;)
     {
       long ep = ZX_pval(F,p);
       GEN R = algo541(F, p, ep, g);
