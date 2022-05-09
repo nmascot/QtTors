@@ -431,7 +431,7 @@ filllg1(GEN ibin1, GEN r1, GEN y, long N, long prec)
 }
 static GEN
 fillrec(hashtable *H, GEN evec, long _0, long _1, GEN X, GEN pab, GEN r1,
-        long N, long prec)
+        long N)
 {
   long n, a, b, s, x0;
   GEN xy1, x, y, r, wmid, wini, wfin, mid, ini, fin;
@@ -441,9 +441,9 @@ fillrec(hashtable *H, GEN evec, long _0, long _1, GEN X, GEN pab, GEN r1,
   findabvgen(evec, _0, _1, &wmid, &wini, &wfin, &a, &b);
   x = gel(X, evec[1]); s = lg(evec)-1; /* > 1 */
   y = gel(X, evec[s]);
-  mid = fillrec(H, wmid, _0, _1, X, pab, r1, N, prec);
-  ini = fillrec(H, wini, _0, _1, X, pab, r1, N, prec);
-  fin = fillrec(H, wfin, _0, _1, X, pab, r1, N, prec);
+  mid = fillrec(H, wmid, _0, _1, X, pab, r1, N);
+  ini = fillrec(H, wini, _0, _1, X, pab, r1, N);
+  fin = fillrec(H, wfin, _0, _1, X, pab, r1, N);
   if (evec[1] == _0) { x0 = 1; xy1 = gdiv(r1, y); }
   else { x0 = 0; xy1 = gdiv(r1, gmul(gsubsg(1, x), y)); }
   r = cgetg(N+2, t_VEC); gel(r, N+1) = gen_0;
@@ -658,7 +658,7 @@ zetamultevec(GEN evec, long prec)
   set_avma(av);
   if (z >= 2) pari_err_IMPL("polylogmult in this range");
   bitprec = prec2nbits(prec) + 64*(1 + (k >> 5));
-  N = 1 + bitprec/ (2 - z);
+  N = 1 + bitprec / (2 - z);
   bitprec += z * N;
   prec2 = nbits2prec(bitprec);
   X = gprec_wensure(X, prec2);
@@ -669,7 +669,7 @@ zetamultevec(GEN evec, long prec)
   for (i = 1; i < l; i++)
     if (i != _0 && i != _1)
       hash_insert(H, mkvecsmall(i), filllg1(ibin1, r1, gel(X,i), N, prec2));
-  r = fillrec(H, Evec, _0, _1, X, pab, r1, N, prec2);
+  r = fillrec(H, Evec, _0, _1, X, pab, r1, N);
   if (DEBUGLEVEL) err_printf("polylogmult: k = %ld, %ld nodes\n", k, H->nb);
   return gprec_wtrunc(gel(r,1), prec);
 }
