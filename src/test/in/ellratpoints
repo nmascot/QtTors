@@ -33,8 +33,7 @@ checkhyp(P,Q)=
   L=hyperellratpoints([P,Q],10000);
   if(#L!=#Set(L),error([P,Q,L]));
   for(i=1,#L,
-    my([x,y]=L[i]);
-    if(y^2+y*subst(Q,'x,x)!=subst(P,'x,x),error([P,Q,L[i]])));
+    if(!hyperellisoncurve([P,Q],L[i]),error([P,Q,L[i]])));
   #L;
 }
 P=82342800 *x^6 - 470135160 *x^5 + 52485681 *x^4 + 2396040466 *x^3 + 567207969 *x^2 - 985905640 *x + 247747600;
