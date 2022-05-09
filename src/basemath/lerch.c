@@ -308,10 +308,15 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
 GEN
 lerch_worker(GEN t, GEN E)
 {
-  GEN s = gel(E,1), a1 = gel(E,2), z = gel(E,3);
+  GEN n, d, T, s = gel(E,1), a = gmul(gel(E,2), t), z = gel(E,3);
   long p = itos(gel(E,4)), prec = labs(p);
-  return gdiv(gmul(gpow(p > 0? t: gneg(t), s, prec), gexp(gmul(a1,t), prec)),
-              gadd(gexp(t, prec), z));
+  d = gadd(gexp(t, prec), z);
+  T = p > 0? t: gneg(t);
+  if (typ(s) == t_INT)
+    n = gmul(gpow(T, s, prec), gexp(a, prec));
+  else /* save one exp */
+    n = gexp(gadd(gmul(s, glog(T, prec)), a), prec);
+  return gdiv(n, d);
 }
 
 /* tab already computed with N = #tab[1] even */
