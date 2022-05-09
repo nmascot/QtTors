@@ -940,16 +940,6 @@ test55(GEN W, long ep, long g)
 }
 
 static GEN
-reduce(GEN Wc, GEN Mc, GEN c, long lambda, GEN M)
-{
-  long r = lambda>>1;
-  gel(M,1) = shifti(gel(Mc,1), r);
-  gel(M,2) = ZM2_mul(gel(Mc,2), mkmat22(gen_2, c, gen_0, gen_1));
-  return mkvec2(ZX_shifti(ZX_affine(gel(Wc,1),gen_2,c),-2*r),
-                ZX_shifti(ZX_affine(gel(Wc,2),gen_2,c),-r));
-}
-
-static GEN
 hyperell_reverse(GEN W, long g)
 {
   return mkvec2(RgXn_recip_shallow(gel(W,1),2*g+3),
@@ -970,9 +960,11 @@ algo56(GEN W, long g)
     Woo = algo52(Woo, gen_0, &lambda);
     if (!test53(lambda,ep,g))
     {
-      GEN Moo = mkvec2(gel(M,1),
-                       ZM2_mul(gel(M,2), mkmat22(gen_0,gen_1,gen_1,gen_0)));
-      W = reduce(Woo, Moo, gen_0, lambda, M);
+      long r = lambda>>1;
+      gel(M,1) = shifti(gel(M,1), r);
+      gel(M,2) = ZM2_mul(gel(M,2), mkmat22(gen_0, gen_1, gen_2, gen_0));
+      W = mkvec2(ZX_shifti(ZX_unscale(gel(Woo,1), gen_2), -2*r),
+                 ZX_shifti(ZX_unscale(gel(Woo,2), gen_2), -r));
     }
   }
   for(;;)
@@ -989,8 +981,11 @@ algo56(GEN W, long g)
         GEN Wc = algo52(W, c, &lambda);
         if (!test53(lambda,ep,g))
         {
-          GEN Mc = shallowcopy(M);
-          W = reduce(Wc, Mc, c, lambda, M);
+          long r = lambda>>1;
+          gel(M,1) = shifti(gel(M,1), r);
+          gel(M,2) = ZM2_mul(gel(M,2), mkmat22(gen_2, c, gen_0, gen_1));
+          W = mkvec2(ZX_shifti(ZX_affine(gel(Wc,1), gen_2,c), -2*r),
+                     ZX_shifti(ZX_affine(gel(Wc,2), gen_2,c), -r));
           break;
         }
       }
