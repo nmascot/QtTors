@@ -467,7 +467,7 @@ _lerchphi(GEN z, GEN s, GEN a, long prec)
   if (gcmpgs(real_i(a), 2) < 0)
     return gadd(gpow(a, gneg(s), prec),
                 gmul(z, lerchphi(z, s, gaddgs(a, 1), prec)));
-  NB = (long)ceil(B + M_PI * labs(gtodouble(imag_i(s))));
+  NB = (long)ceil(B + M_PI * fabs(gtodouble(imag_i(s))));
   prec2 = nbits2prec(NB);
   z = gprec_w(z, prec2);
   s = gprec_w(s, prec2);
