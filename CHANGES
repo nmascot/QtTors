@@ -287,6 +287,8 @@ BA  22- [libpari] gen_factorback now take an extra parameter one.
     36- in idealtyp(ideal, fa), allow setting fa to NULL
 BA  37- system now return the shell return value.
     38- allow valuation(x) when x is a t_PADIC, a t_POL or a t_SER
+    39- libpari function precision() now always return a 'prec' (integer > 2).
+        It used to return 2 for real 0 of non-negative exponent.
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

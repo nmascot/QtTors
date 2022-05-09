@@ -689,11 +689,18 @@ the coefficients of a \typ{POL} in the following situation:
 @eprog
 
 \fun{long}{precision}{GEN x} If \kbd{x} is of type \typ{REAL}, returns the
-precision of~\kbd{x}, namely the length of \kbd{x} in \B-bit words if \kbd{x}
-is not zero, and a reasonable quantity obtained from the exponent of \kbd{x}
-if \kbd{x} is numerically equal to zero. If \kbd{x} is of type
-\typ{COMPLEX}, returns the minimum of the precisions of the real and
-imaginary part. Otherwise, returns~0 (which stands for infinite precision).
+precision of~\kbd{x}, namely
+
+\item if \kbd{x} is not zero: the length of \kbd{x} in \B-bit words;
+
+\item if \kbd{x} is numerically equal to $0$, of exponent $e$:
+the absolute accuracy \kbd{nbits2prec}$(e)$ if $e < 0$ and
+\kbd{LOWDEFAULTPREC} if $e \geq 0$.
+
+If \kbd{x} is of type \typ{COMPLEX}, returns the minimum of the precisions of
+the real and imaginary part. Otherwise, returns~0 (which stands for infinite
+precision). In all cases, the precision is either $0$ or can be used as a
+\kbd{prec} parameter in transcendental functions.
 
 \fun{long}{lgcols}{GEN x} is equal to \kbd{lg(gel(x,1))}. This is the length
 of the columns of a \typ{MAT} with at least one column.
