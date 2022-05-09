@@ -2050,15 +2050,17 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
   return condp;
 }
 
-static long
-chk_pol(GEN P) {
-  switch(typ(P))
-  {
-    case t_INT: break;
-    case t_POL: RgX_check_ZX(P,"genus2red"); return varn(P); break;
-    default: pari_err_TYPE("genus2red", P);
-  }
-  return -1;
+static GEN
+hyperellintegralmodel(GEN PQ)
+{
+  GEN D;
+  PQ = Q_remove_denom(PQ, &D);
+  if (!D) return PQ;
+  if (typ(PQ)==t_POL) return gmul(PQ,D);
+  if (typ(PQ) == t_VEC && lg(PQ) == 3)
+    return mkvec2(gmul(gel(PQ,1),D), gel(PQ,2));
+  pari_err_TYPE("hyperellintegralmodel",PQ);
+  return NULL; /* LCOV_EXCL_LINE */
 }
 
 /* P,Q are ZX, study Y^2 + Q(X) Y = P(X) */
@@ -2067,32 +2069,13 @@ genus2red(GEN PQ, GEN p)
 {
   pari_sp av = avma;
   struct igusa I;
-  GEN P, Q, D;
+  GEN P, Q;
   GEN j22, j42, j2j6, a0,a1,a2,a3,a4,a5,a6, V,polr,facto,factp, vecmini, cond;
-  long i, l, dd, vP,vQ;
-
-  PQ = Q_remove_denom(PQ, &D);
-  if (typ(PQ) == t_VEC && lg(PQ) == 3)
-  {
-    P = gel(PQ,1);
-    Q = gel(PQ,2);
-  }
-  else
-  {
-    P = PQ;
-    Q = gen_0;
-  }
-
-  vP = chk_pol(P);
-  vQ = chk_pol(Q);
-  if (vP < 0)
-  {
-    if (vQ < 0) pari_err_TYPE("genus2red",mkvec2(P,Q));
-    P = scalarpol(P,vQ);
-  }
-  else if (vQ < 0) Q = scalarpol(Q,vP);
+  long i, l, dd;
+  PQ = gel(hyperellminimalmodel(hyperellintegralmodel(PQ), p ? mkvec(p): p), 1);
+  P = gel(PQ,1);
+  Q = gel(PQ,2);
   if (p && typ(p) != t_INT) pari_err_TYPE("genus2red", p);
-  if (D) P = ZX_Z_mul(P,D);
 
   polr = ZX_add(ZX_sqr(Q), gmul2n(P,2)); /* ZX */
   switch(degpol(polr))
