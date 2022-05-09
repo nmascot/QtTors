@@ -622,7 +622,7 @@ zetamultevec(GEN evec, long prec)
 {
   pari_sp av = avma;
   double *x, *y, z = 0;
-  long i, j, l, lH, bitprec, prec2, N, _0 = 0, _1 = 0, k = lg(evec) - 1;
+  long b, i, j, l, lH, bitprec, prec2, N, _0 = 0, _1 = 0, k = lg(evec) - 1;
   GEN r1, r, pab, ibin, ibin1, X, Evec, v;
   hashtable *H;
 
@@ -655,12 +655,19 @@ zetamultevec(GEN evec, long prec)
   }
   for (i = 1; i < l; i++)
     for (j = i+1; j < l; j++) z = maxdd(z, x[i] + y[j]);
+  b = 0;
+  for (i = 1; i < l; i++)
+  {
+    GEN t = real_i(gel(X,i));
+    long e = -gexpo(gsubgs(gmul2n(t,1), 1));
+    b = maxss(b, e);
+  }
   set_avma(av);
   if (z >= 2) pari_err_IMPL("polylogmult in this range");
   bitprec = prec2nbits(prec) + 64*(1 + (k >> 5));
   N = 1 + bitprec / (2 - z);
   bitprec += z * N;
-  prec2 = nbits2prec(bitprec);
+  prec2 = nbits2prec(bitprec + b);
   X = gprec_wensure(X, prec2);
   get_ibin(&ibin, &ibin1, N, prec2);
   pab = get_pab(N, k);
