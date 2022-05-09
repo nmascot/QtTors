@@ -37,6 +37,8 @@ P=[241/771,-3207473/458314011];
 Q=pointchange(P,C)
 hyperellisoncurve(W,Q)
 
+hyperellminimalmodel(1593*x^6+6750*x^5+11817*x^4+10952*x^3+5672*x^2+1560*x+180)
+
 test(g,pp=3,u=2,B1=10,B2=B1) =
 {
   my(W = pp^u*[random(-B1*x^(2*g+2)),random(-B2*x^(g+1))]);

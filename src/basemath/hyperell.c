@@ -1092,10 +1092,9 @@ static GEN
 hyperell_redQ(GEN W)
 {
   GEN P = gel(W,1), Q = gel(W,2);
-  GEN H = ZX_shifti(Q,-1);
-  P = ZX_add(P, ZX_mul(H, ZX_sub(Q, H)));
-  Q = ZX_sub(Q, ZX_mulu(H, 2));
-  return mkvec2(P,Q);
+  GEN Pr, Qr = FpX_red(Q, gen_2);
+  Pr = ZX_add(P, ZX_shifti(ZX_mul(ZX_sub(Q, Qr),ZX_add(Q, Qr)),-2));
+  return mkvec2(Pr, Qr);
 }
 
 static GEN
