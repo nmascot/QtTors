@@ -260,33 +260,51 @@ sort_Dmq_by_cnum(void *data, GEN x, GEN y)
   return sort_Dmq_by_q(data, x, y);
 }
 
-/* return H s.t if -maxD <= D < 0 is fundamental then H[(-D)>>1] is the
- * ordinary class number of Q(sqrt(D)); junk at other entries. */
-static GEN
-allh(ulong maxD)
+static void
+allh_r(GEN H, ulong minD, ulong maxD)
 {
-  ulong a, A = usqrt(maxD/3), maxD2 = maxD >> 1;
-  GEN H = zero_zv(maxD2);
+  ulong a, A = usqrt(maxD/3), minD2 = (minD-1) >> 1, maxD2 = maxD >> 1;
   for (a = 1; a <= A; a++)
   {
     ulong a2 = a << 1, aa = a*a, aa4 = aa << 2, b, B;
     { /* b = 0 */
       ulong D = aa << 1;
-      while (D <= maxD2) { H[D]++; D += a2; }
+      if (D <= minD2)
+        D += a2 * ((minD2 - D + a2) / a2);
+      for (; D <= maxD2; D += a2) H[D]++;
     }
     B = aa4 - 1; /* 4a^2 - b^2 */
     for (b = 1; b < a; b++)
     {
       ulong D = B >> 1; /* (4a^2 - b^2) / 2 */
       B -= (b << 1) + 1; if (D > maxD2) continue;
-      H[D]++; D += a2; /* c = a */
-      while (D <= maxD2) { H[D] += 2; D += a2; }
+      if (D > minD2)
+      {
+        H[D]++; D += a2; /* c = a */
+      } else
+        D += a2 * ((minD2 - D + a2) / a2);
+      for (; D <= maxD2; D += a2) H[D] += 2;
     }
     { /* b = a */
       ulong D = (aa4 - aa) >> 1;
-      while (D <= maxD2) { H[D]++; D += a2; }
+      if (D <= minD2)
+        D += a2 * ((minD2 - D + a2) / a2);
+      for (; D <= maxD2; D += a2) H[D] ++;
     }
   }
+}
+
+/* return H s.t if -maxD <= D < 0 is fundamental then H[(-D)>>1] is the
+ * ordinary class number of Q(sqrt(D)); junk at other entries. */
+
+static GEN
+allh(ulong maxD)
+{
+  ulong maxD2 = maxD>>1, s = 1UL<<16;
+  GEN H = zero_zv(maxD2);
+  ulong a;
+  for (a = 0; a < maxD; a += s)
+    allh_r(H, a+1, minss(a+s,maxD));
   return H;
 }
 
