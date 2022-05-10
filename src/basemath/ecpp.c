@@ -269,10 +269,10 @@ allh(ulong maxD)
   GEN H = zero_zv(maxD2);
   for (a = 1; a <= A; a++)
   {
-    ulong a2 = a << 1, aa = a*a, aa4 = aa << 2, b, c, B;
+    ulong a2 = a << 1, aa = a*a, aa4 = aa << 2, b, B;
     { /* b = 0 */
       ulong D = aa << 1;
-      for (c = a; D <= maxD2; c++) { H[D]++; D += a2; }
+      while (D <= maxD2) { H[D]++; D += a2; }
     }
     B = aa4 - 1; /* 4a^2 - b^2 */
     for (b = 1; b < a; b++)
@@ -280,11 +280,11 @@ allh(ulong maxD)
       ulong D = B >> 1; /* (4a^2 - b^2) / 2 */
       B -= (b << 1) + 1; if (D > maxD2) continue;
       H[D]++; D += a2; /* c = a */
-      for (c = a+1; D <= maxD2; c++) { H[D] += 2; D += a2; }
+      while (D <= maxD2) { H[D] += 2; D += a2; }
     }
     { /* b = a */
       ulong D = (aa4 - aa) >> 1;
-      for (c = a; D <= maxD2; c++) { H[D]++; D += a2; }
+      while (D <= maxD2) { H[D]++; D += a2; }
     }
   }
   return H;
