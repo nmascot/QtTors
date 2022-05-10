@@ -940,7 +940,7 @@ quartic_minim_all(GEN P, GEN discF)
 {
   GEN IJ = quartic_IJ(P), I = gel(IJ,1), J = gel(IJ,2);
   GEN g = Z_ppo(gcdii(I,J), gel(discF,1));
-  GEN plist = ZV_sort(shallowconcat(gel(absZ_factor(g),1), gel(discF,2)));
+  GEN plist = ZV_sort_uniq(shallowconcat(gel(absZ_factor(g),1), gel(discF,2)));
   long i, l = lg(plist);
   GEN m = mkvec2(gen_1, matid(2));
   for (i = 1; i < l; i++)
