@@ -325,13 +325,15 @@ parintnumgauss(GEN f, GEN a, GEN b, GEN tab, long prec)
 {
   GEN R = gel(tab, 1), W = gel(tab, 2), bma, bpa, S = gen_0, VP, VM, V;
   long n = lg(R) - 1, i, prec2 = prec + EXTRAPREC64;
-  a = gprec_wensure(a, prec2); b = gprec_wensure(b, prec2);
-  bma = gmul2n(gsub(b, a), -1); bpa = gadd(bma, a);
-  VP = cgetg(n + 1, t_VEC); VM = cgetg(n + 1, t_VEC);
+  a = gprec_wensure(a, prec2);
+  b = gprec_wensure(b, prec2);
+  VP = cgetg(n + 1, t_VEC); bma = gmul2n(gsub(b, a), -1);
+  VM = cgetg(n + 1, t_VEC); bpa = gadd(bma, a);
   for (i = 1; i <= n; i++)
   {
     GEN h = gmul(bma, gel(R, i));
-    gel(VP, i) = gadd(bpa, h); gel(VM, i) = gsub(bpa, h);
+    gel(VP, i) = gadd(bpa, h);
+    gel(VM, i) = gsub(bpa, h);
   }
   V = gadd(parapply(f, VP), parapply(f, VM));
   for (i = 1; i <= n; i++)
@@ -357,7 +359,10 @@ parintnum(GEN f, GEN a, GEN tab)
     {
       x0 = gadd(a, x0);
       for (i = 1; i < L; i++)
-      { gel(VP, i) = gadd(a, gel(VP, i)); gel(VM, i) = gadd(a, gel(VM, i)); }
+      {
+        gel(VP, i) = gadd(a, gel(VP, i));
+        gel(VM, i) = gadd(a, gel(VM, i));
+      }
     }
     else
     {
