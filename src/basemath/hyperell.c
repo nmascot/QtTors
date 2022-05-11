@@ -1141,3 +1141,11 @@ hyperellminimalmodel(GEN W, GEN pr)
   Hf = minimalmodel_getH(gel(W,2), gel(Wf,2), ef, Mf, g, v);
   return gerepilecopy(av, mkvec2(Wf, mkvec3(ef, Mf, Hf)));
 }
+
+GEN
+hyperellminimaldisc(GEN W, GEN pr)
+{
+  pari_sp av = avma;
+  GEN C = hyperellminimalmodel(W, pr);
+  return gerepileuptoint(av, hyperelldisc(gel(C,1)));
+}
