@@ -999,22 +999,20 @@ static GEN
 algo57(GEN F, long g, GEN pr)
 {
   long i, l;
-  GEN C = content(F);
+  GEN D, C = content(F);
   GEN e = gel(core2(shifti(C,-vali(C))),2);
   GEN M = mkvec2(e, matid(2));
+  long minvd = (2*g+1)>>(odd(g) ? 4:2);
   F = ZX_Z_divexact(F,sqri(e));
+  D = absi(hyperelldisc(F));
   if (!pr)
-  {
-    GEN D = absi(ZX_disc(F));
-    D = shifti(D, -vali(D));
-    pr = gel(factor(D),1);
-  }
+    pr = gel(factor(shifti(D, -vali(D))),1);
   l = lg(pr);
   for (i = 1; i < l; i++)
   {
     long ep;
     GEN p = gel(pr, i), ps2 = shifti(p,-1), Fe;
-    if (equaliu(p,2)) continue;
+    if (equaliu(p,2) || Z_pval(D,p) < minvd) continue;
     ep = ZX_pval(F,p);
     Fe = FpX_red(ep ? ZX_Z_divexact(F,p): F, p);
     if (degpol(Fe) < g+1+ep)
