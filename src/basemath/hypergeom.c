@@ -710,6 +710,11 @@ F21_i(GEN a, GEN b, GEN c, GEN z, long prec)
   }
   /* Here a, b, c, c-a, c-b are not nonpositive integers */
   ind = F21ind(a, b, c, z, bitprec);
+  prec2 = prec + EXTRAPREC64;
+  a = gprec_wensure(a,prec2);
+  b = gprec_wensure(b,prec2);
+  c = gprec_wensure(c,prec2);
+  z = gprec_wensure(z,prec2);
   if (ind < 0) return gmul(ggamma(c, prec), F21taylorind(a,b,c, z, ind, prec));
   if (gsigne(real_i(b)) <= 0)
   {
@@ -727,11 +732,6 @@ F21_i(GEN a, GEN b, GEN c, GEN z, long prec)
   }
   if (gcmp(real_i(a), real_i(b)) < 0 && gsigne(real_i(a)) > 0) swap(a,b);
   /* Here real(b) > 0 and either real(a) <= 0 or real(a) > real(b) */
-  prec2 = prec + EXTRAPREC64;
-  a = gprec_wensure(a,prec2);
-  b = gprec_wensure(b,prec2);
-  c = gprec_wensure(c,prec2);
-  z = gprec_wensure(z,prec2);
   if (gcmp(real_i(c), real_i(b)) <= 0)
   {
     long N = 1 + itos(gfloor(gsub(real_i(b),real_i(c)))); /* >= 1 */
