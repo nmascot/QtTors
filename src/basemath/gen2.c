@@ -1299,7 +1299,11 @@ gvaluation(GEN x, GEN p)
         if (vp == vx)
         {
           long val;
-          if (RgX_is_monomial(p)) return RgX_val(x) / degpol(p);
+          if (RgX_is_monomial(p))
+          {
+            val = RgX_val(x); if (val == LONG_MAX) return LONG_MAX;
+            return val / degpol(p);
+          }
           if (!signe(x)) return LONG_MAX;
           av = avma;
           for (val=0; ; val++)
