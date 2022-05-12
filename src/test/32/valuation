@@ -35,6 +35,8 @@ O(x)
 2
 2
 2
+1
+1
   ***   at top-level: valuation(Pi)
   ***                 ^-------------
   *** valuation: incorrect type in gvaluation (t_REAL).

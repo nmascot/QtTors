@@ -1300,6 +1300,7 @@ gvaluation(GEN x, GEN p)
         {
           long val;
           if (RgX_is_monomial(p)) return RgX_val(x) / degpol(p);
+          if (!signe(x)) return LONG_MAX;
           av = avma;
           for (val=0; ; val++)
           {
