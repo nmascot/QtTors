@@ -762,7 +762,7 @@ nffactorback(GEN nf, GEN L, GEN e)
 { return gen_factorback(L, e, (void*)checknf(nf), &eltmul, &eltpow, NULL); }
 
 static GEN
-_nf_red(void *E, GEN x) { (void)E; return x; }
+_nf_red(void *E, GEN x) { (void)E; return gcopy(x); }
 
 static GEN
 _nf_add(void *E, GEN x, GEN y) { return nfadd((GEN)E,x,y); }
@@ -799,6 +799,15 @@ nfM_inv(GEN nf, GEN M)
   const struct bb_field *S = get_nf_field(&E, nf);
   return gen_Gauss(M, matid(lg(M)-1), E, S);
 }
+
+GEN
+nfM_ker(GEN nf, GEN M)
+{
+   void *E;
+   const struct bb_field *S = get_nf_field(&E, nf);
+   return gen_ker(M, 0, E, S);
+}
+
 GEN
 nfM_mul(GEN nf, GEN A, GEN B)
 {
