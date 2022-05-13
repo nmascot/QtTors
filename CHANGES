@@ -129,6 +129,7 @@ BA 107- bnrclassfield: incorrect result when fundamental units are large, e.g.
         default(realprecision,366);a=(1+sqrt(5))/2;w=(1+sqrt(-3))/2;
         polylogmult([1,1,1,1],[1/a,a,1,w]) -> error
    110- valuation(x*(y^2-1), y+1) -> oo loop [#2381]
+   111- round(t_FRAC, &e): e was always -oo
 
   Added
 HC   1- new GP function eulerreal

@@ -2411,7 +2411,8 @@ round_i(GEN x, long *pe)
   if (e <= 0)
   {
     if (e) m = shifti(m,-e);
-    *pe = -e; return m;
+    if (pe) *pe = -e;
+    return m;
   }
   B = int2n(e-1);
   m = addii(m, B);
@@ -2419,7 +2420,7 @@ round_i(GEN x, long *pe)
   r = remi2n(m, e);
   /* 2^e (x+1/2) = m = 2^e q + r, sgn(r)=sgn(m), |r|<2^e */
   if (!signe(r))
-    *pe = -1;
+  { if (pe) *pe = -1; }
   else
   {
     if (signe(m) < 0)
@@ -2430,7 +2431,7 @@ round_i(GEN x, long *pe)
     else
       r = subii(r, B);
     /* |x - q| = |r| / 2^e */
-    *pe = signe(r)? expi(r) - e: -e;
+    if (pe) *pe = signe(r)? expi(r) - e: -e;
     cgiv(r);
   }
   return q;
@@ -2457,7 +2458,7 @@ roundr_safe(GEN x)
   if (!s || (ex = expo(x)) < -1) return gen_0;
   if (ex == -1) return s>0? gen_1:
                             absrnz_equal2n(x)? gen_0: gen_m1;
-  av = avma; x = round_i(x, &ex);
+  av = avma; x = round_i(x, NULL);
   return gerepileuptoint(av, x);
 }
 
@@ -2534,7 +2535,10 @@ grndtoi(GEN x, long *e)
       av = avma; x = round_i(x, e);
       return gerepileuptoint(av, x);
     }
-    case t_FRAC: return diviiround(gel(x,1), gel(x,2));
+    case t_FRAC:
+      y = diviiround(gel(x,1), gel(x,2));
+      av = avma; *e = gexpo(gsub(x, y)); set_avma(av);
+      return y;
     case t_INTMOD: return gcopy(x);
     case t_QUAD:
       y = ground(x); av = avma;
@@ -2558,7 +2562,7 @@ grndtoi(GEN x, long *e)
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++)
       {
-        gel(y,i) = grndtoi(gel(x,i),&e1);
+        gel(y,i) = grndtoi(gel(x,i), &e1);
         if (e1 > *e) *e = e1;
       }
       return normalizepol_lg(y, lx);
@@ -2567,20 +2571,20 @@ grndtoi(GEN x, long *e)
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++)
       {
-        gel(y,i) = grndtoi(gel(x,i),&e1);
+        gel(y,i) = grndtoi(gel(x,i), &e1);
         if (e1 > *e) *e = e1;
       }
       return normalizeser(y);
     case t_RFRAC:
       y = cgetg(3,t_RFRAC);
-      gel(y,1) = grndtoi(gel(x,1),&e1); if (e1 > *e) *e = e1;
-      gel(y,2) = grndtoi(gel(x,2),&e1); if (e1 > *e) *e = e1;
+      gel(y,1) = grndtoi(gel(x,1), &e1); if (e1 > *e) *e = e1;
+      gel(y,2) = grndtoi(gel(x,2), &e1); if (e1 > *e) *e = e1;
       return y;
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++)
       {
-        gel(y,i) = grndtoi(gel(x,i),&e1);
+        gel(y,i) = grndtoi(gel(x,i), &e1);
         if (e1 > *e) *e = e1;
       }
       return y;
