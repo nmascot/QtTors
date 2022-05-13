@@ -64,17 +64,15 @@ if(1,my(bnf=bnfinit(x^2-x+2), gc=gcharinit(bnf,idealprimedec(bnf,11)[1]),chi=[1,
 ];
 }
 
-chk(s,i,a,b) =
-{
-  my(e,eps,cvt=0);
-  if(type(a)!="t_VEC",a=[a];b=[b];cvt=1);
-  e=vector(#a,i,my(e);round((a[i]-b[i])/b[i],&e);e);
-  eps=10^(-precision(1.));
-  if(type(a[1])=="t_COMPLEX" && normlp(imag(a))<eps, a = real(a));
-  if(cvt,a=a[1]);
-  if(vecmax(e)>-120,
-    error("bug in lfuntype:", s, ":", i, ":", e)
-   ,print(i," (",s,"): ",a));
+chk(s,i,a,b, laxist = 0) =
+{ my (v, cvt = 0, B = getlocalbitprec());
+  if (type(a)!="t_VEC", a=[a]; b=[b]; cvt=1);
+  v = vector(#a,i, my(e); round((a[i]-b[i]) / b[i], &e); e);
+  if (type(a[1])=="t_COMPLEX" && exponent(imag(a)) < -B, a = real(a));
+  if (cvt, a = a[1]);
+  if (vecmax(v) > if (laxist, laxist, 15 - B),
+    error("bug in lfuntype:", s, ":", i, ":", v)
+  , print(i," (",s,"): ",a));
 }
 
 {
@@ -100,10 +98,10 @@ for(i=1,#VALL,
   chk("lfunderivlambda",i,a,b);
   a=lfuncheckfeq(L);
   b=lfuncheckfeq(ldata);
-  chk("lfuncheckfeq",i,a,b);
+  chk("lfuncheckfeq",i,a,b, 1); \\ we may have a != b
   a=lfuncheckfeq(lfundual(L));
   b=lfuncheckfeq(lfundual(ldata));
-  chk("lfuncheckfeq(lfundual)",i,a,b);
+  chk("lfuncheckfeq(lfundual)",i,a,b, 1); \\ we may have a != b
   a=lfunhardy(L,2);
   b=lfunhardy(ldata,2);
   chk("lfunhardy",i,a,b);
