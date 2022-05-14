@@ -664,21 +664,20 @@ void unexportall(void);
 
 /* parinf.h */
 
-GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long PREC, FP_chk_fun *CHECK);
+GEN  coltoalg(GEN nf,GEN x);
+GEN  fincke_pohst(GEN a,GEN BOUND,long stockmax,long PREC, FP_chk_fun *CHECK);
 void init_zlog(zlog_S *S, GEN bid);
 GEN  log_gen_arch(zlog_S *S, long index);
 GEN  log_gen_pr(zlog_S *S, long index, GEN nf, long e);
+GEN  make_integral(GEN nf, GEN L0, GEN f, GEN listpr);
+GEN  poltobasis(GEN nf,GEN x);
+GEN  rnfdisc_get_T(GEN nf, GEN P, GEN *lim);
+GEN  rnfallbase(GEN nf, GEN pol, GEN lim, GEN eq, GEN *pD, GEN *pfi, GEN *pdKP);
 GEN  sprk_log_gen_pr(GEN nf, GEN sprk, long e);
 GEN  sprk_log_gen_pr2(GEN nf, GEN sprk, long e);
 GEN  sprk_log_prk1(GEN nf, GEN a, GEN sprk);
-GEN    poltobasis(GEN nf,GEN x);
-GEN    coltoalg(GEN nf,GEN x);
-
-GEN    rnfdisc_get_T(GEN nf, GEN P, GEN *lim);
-GEN    make_integral(GEN nf, GEN L0, GEN f, GEN listpr);
-GEN    rnfallbase(GEN nf, GEN pol, GEN lim, GEN rnfeq, GEN *pD, GEN *pfi,
-                  GEN *pdKP);
-GEN    subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
+GEN  sprk_to_bid(GEN nf, GEN L, long flag);
+GEN  subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
 
 /* Qfb.c */
 
