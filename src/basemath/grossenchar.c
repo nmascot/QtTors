@@ -801,10 +801,10 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
 static void
 same_arg(GEN v1, GEN v2, long s1, long s2)
 {
-  long i1, i2, e, l = lg(v1);
+  long i1, i2, l = lg(v1);
   for (i1 = s1, i2 = s2; i1 < l; i1++,i2++)
   {
-    GEN d = grndtoi(gsub(gel(v2,i2),gel(v1,i1)), &e);
+    GEN d = grndtoi(gsub(gel(v2,i2),gel(v1,i1)), NULL);
     if (signe(d)) gel(v1,i1) = gadd(gel(v1,i1), d);
   }
 }

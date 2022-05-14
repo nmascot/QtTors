@@ -384,13 +384,13 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
   long e;
 
   C = grndtoi(mulir(mulii(BS->Ind, kappa),
-                    gpow(B0, dbltor(2.2), DEFAULTPREC)), &e);
+                    gpow(B0, dbltor(2.2), DEFAULTPREC)), NULL);
 
   if (DEBUGLEVEL > 1) err_printf("C (bitsize) : %d\n", expi(C));
   lllmat = matid(3);
   if (cmpri(B0, BS->Ind) > 0)
   {
-    gcoeff(lllmat, 1, 1) = grndtoi(divri(B0, BS->Ind), &e);
+    gcoeff(lllmat, 1, 1) = grndtoi(divri(B0, BS->Ind), NULL);
     triv = shiftr(sqrr(B0), 1);
   }
   else

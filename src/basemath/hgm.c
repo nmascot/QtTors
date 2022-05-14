@@ -2076,7 +2076,7 @@ lfunhgmwild(GEN L, GEN H, GEN t, GEN BAD, long pole, GEN hint, long bitprec)
               gmael(PPOL, i, 2) = gmul(gmael(PPOL, i, 2), t);
             }
           for (i = 1; i < lB; i++) gmael(PPOL, i, 2) = ginv(gmael(PPOL, i, 2));
-          eno = grndtoi(eno, &i);
+          eno = grndtoi(eno, NULL);
           if (typ(eno) != t_INT) pari_err_BUG("lfunhgmwild");
           return mkvec3(N, mkvec2(t, PPOL), eno);
         }

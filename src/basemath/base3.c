@@ -1785,8 +1785,7 @@ nfsetsigns(GEN nf, GEN signs, GEN x, GEN sarch)
     GEN MI = sarch_get_MI(sarch), F = sarch_get_F(sarch);
     GEN lambda = sarch_get_lambda(sarch);
     GEN t = RgC_sub(get_C(lambda, l, signs), ex);
-    long e;
-    t = grndtoi(RgM_RgC_mul(MI,t), &e);
+    t = grndtoi(RgM_RgC_mul(MI,t), NULL);
     if (lg(F) != 1) t = ZM_ZC_mul(F, t);
     x = typ(x) == t_COL? RgC_add(t, x): RgC_Rg_add(t, x);
   }

@@ -2251,7 +2251,7 @@ RgM_rescale_to_int(GEN x)
   for (j = 1; j < lx; j++)
     for (i = 1; i < hx; i++) rescale_init(gcoeff(x,i,j), &exact, &emin, &D);
   if (exact) return D == gen_1 ? x: Q_muli_to_int(x, D);
-  return grndtoi(gmul2n(x, -emin), &i);
+  return grndtoi(gmul2n(x, -emin), NULL);
 }
 GEN
 RgX_rescale_to_int(GEN x)
@@ -2265,7 +2265,7 @@ RgX_rescale_to_int(GEN x)
   D = gen_1;
   for (i = 2; i < lx; i++) rescale_init(gel(x,i), &exact, &emin, &D);
   if (exact) return D == gen_1 ? x: Q_muli_to_int(x, D);
-  return grndtoi(gmul2n(x, -emin), &i);
+  return grndtoi(gmul2n(x, -emin), NULL);
 }
 
 /* return x * n/d. x: rational; d,n,result: integral; d,n coprime */

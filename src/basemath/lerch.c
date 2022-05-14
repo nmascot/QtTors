@@ -183,7 +183,7 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
       if (!(y = toser_i(x))) pari_err_TYPE("zetahurwitz", x);
       x = y; x0 = polcoef_i(x, 0, -1); break;
   }
-  rx = grndtoi(real_i(x0), &j);
+  rx = grndtoi(real_i(x0), NULL);
   if (typ(rx) != t_INT) pari_err_TYPE("zetahurwitz", x);
   if (x0 == x && signe(rx) <= 0 && gexpo(gsub(x, rx)) < 17 - bitprec)
     pari_err_DOMAIN("zetahurwitz", "x", "<=", gen_0, x);

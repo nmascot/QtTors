@@ -12010,8 +12010,10 @@ to the nearest integers.
 
 \fun{GEN}{grndtoi}{GEN x, long *e} same as \kbd{ground}, but in addition sets
 \kbd{*e} to the binary exponent of $x - \kbd{ground}(x)$. If this is
-positive, all significant bits are lost. This kind of situation raises an
-error message in \key{ground} but not in \key{grndtoi}.
+positive, then significant bits are lost in the rounded result. This kind of
+situation raises an error message in \key{ground} but not in \key{grndtoi}.
+The parameter $e$ can be set to \kbd{NULL} if an error estimate is not
+needed, for a minor speed up.
 
 \fun{GEN}{gtrunc}{GEN x} truncates~\kbd{x}. This is the false integer part
 if \kbd{x} is a real number (i.e.~the unique integer closest to \kbd{x} among
