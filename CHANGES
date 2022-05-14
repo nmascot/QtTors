@@ -238,6 +238,7 @@ BA  87- [libpari] RgX_affine
 HC  88- new GP function lerchphi, lerchzeta
 BA  89- new GP function hyperellisoncurve
 BA  90- [libpari] nfM_ker
+    91- [libpari] Qp_zeta
 
   Changed
 HC   1- faster implementation of eulervec + cache result
