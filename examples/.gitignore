@@ -1,3 +1,4 @@
 /Makefile*
-/extgcd-*
+/extgcd
 /extgcd.o
+/libextgcd.*
