@@ -179,14 +179,19 @@ and $[h]$ encodes $D = [1/2,0,h]$ (critical line up to height $h$).\hfil\break
 \li{$L(E,1,r)/(r! \cdot R\cdot \#Sha)$ assuming BSD}{ellbsd$(E)$}
 
 \section{Other curves of small genus}
-A hyperelliptic curve is given by a pair $[P,Q]$ ($y^2+Qy = P$ with $Q^2+4P$
+A hyperelliptic curve $C$ is given by a pair $[P,Q]$ ($y^2+Qy = P$ with $Q^2+4P$
 squarefree) or a single squarefree polynomial $P$ ($y^2 = P$).\hfil\break
-\li{reduction of $y^2+Qy = P$ (genus $2$)}{genus2red$([P,Q],\{p\})$}
-\li{affine rational points of height $\leq h$}{hyperellratpoints$([P,Q], h)$}
+\li{check if $[x,y]$ is on $C$}{hyperellisoncurve$(C, [x,y])$}
+\li{discriminant of $C$}{hyperelldisc$(C)$}
+\li{minimal discriminant of integral $C$}{hyperellminimaldisc$(C)$}
+\li{minimal model of integral $C$}{hyperellminimalmodel$(C)$}
+\li{reduction of $y^2+Qy = P$ (genus $2$)}{genus2red$(C,\{p\})$}
+\li{affine rational points of height $\leq h$}{hyperellratpoints$(C, h)$}
 \li{find a rational point on a conic, $^t x G x = 0$}{qfsolve$(G)$}
+\li{$[H,U]$ such that $H = cU^t GU$ has minimat det}{qfminimize$(G)$}
 \li{quadratic Hilbert symbol (at $p$)}{hilbert$(x,y,\{p\})$}
 \li{all solutions in $\QQ^3$ of ternary form}{qfparam$(G,x)$}
-\li{$P,Q\in\FF_q[X]$; char. poly. of Frobenius}{hyperellcharpoly$([P,Q])$}
+\li{$P,Q\in\FF_q[X]$; char. poly. of Frobenius}{hyperellcharpoly$(Q)$}
 \li{matrix of Frobenius on $\QQ_p\otimes H^1_{dR}$}{hyperellpadicfrobenius}
 \medskip
 

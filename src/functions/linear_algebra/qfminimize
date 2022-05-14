@@ -8,7 +8,7 @@ Help: qfminimize(G): given a square symmetric matrix G with rational
  determinant.
 Doc: Given a square symmetric matrix $G$ with rational coefficients, and
  non-zero determinant, of dimension $n \geq 1$, return \kbd{[H,U]} such that
- \kbd{H = c*U~*G*U} for some rational $c$, and $H$ integral with minimal
+ \kbd{H = c*U\til*G*U} for some rational $c$, and $H$ integral with minimal
  determinant. The coefficients of $U$ are usually nonintegral.
  \bprog
  ? G = matdiagonal([650, -104329, -104329]);
