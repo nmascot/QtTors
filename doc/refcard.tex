@@ -182,6 +182,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 %
 \li{intersection of sets $x$ and $y$}{setintersect$(x,y)$}
 \li{set of elements in $x$ not belonging to $y$}{setminus$(x,y)$}
+\li{symmetric difference $x \Delta y$}{setdelta$(x,y)$}
 \li{union of sets $x$ and $y$}{setunion$(x,y)$}
 \li{does $y$ belong to the set $x$}{setsearch$(x,y,\{\fl\})$}
 \li{set of all $f(x,y)$, $x\in X$, $y\in Y$}{setbinop$(f,X,Y)$}
@@ -558,8 +559,10 @@ A finite field is encoded by any element (\typ{FFELT}).\hfil\break
    {gamma{\rm, }lngamma{\rm, }psi}
 \li{half-integer gamma function $\Gamma(n+1/2)$}{gammah$(n)$}
 \li{Riemann's zeta $\zeta(s)=\sum n^{-s}$}{zeta$(s)$}
-\li{$\sum_{n \le N} n^s$}{dirpowerssum$(N,s)$}
+\li{$\sum_{1\le n \le N} n^s$}{dirpowerssum$(N,s)$}
 \li{Hurwitz's $\zeta(s,x)=\sum (n+x)^{-s}$}{zetahurwitz$(s,x)$}
+\li{Lerch $\Phi(z,s,x)=\sum z^n(n+x)^{-s}$}{lerchphi$(z,s,x)$}
+\li{Lerch $L(s,x,t)=\Phi(e^{2i\pi t}, s,x)$}{lerchzeta$(s,x,t)$}
 \li{multiple zeta value (MZV), $\zeta(s_1,\dots,s_k)$}{zetamult$(s,\{T\})$}
 \li{all MZVs for weight $\sum s_i = n$}{zetamultall$(n)$}
 \li{convert MZV id to $[s_1,\dots,s_k]$}{zetamultconvert$(f,\{\fl\})$}
