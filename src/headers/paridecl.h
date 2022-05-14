@@ -2353,6 +2353,7 @@ long    nfispower(GEN nf, GEN z, long n, GEN *px);
 GEN     nflogembed(GEN nf, GEN x, GEN *emb, long prec);
 GEN     nfM_det(GEN nf, GEN M);
 GEN     nfM_inv(GEN nf, GEN M);
+GEN     nfM_ker(GEN nf, GEN M);
 GEN     nfM_mul(GEN nf, GEN A, GEN B);
 GEN     nfM_nfC_mul(GEN nf, GEN A, GEN B);
 GEN     nfmod(GEN nf, GEN a, GEN b);
