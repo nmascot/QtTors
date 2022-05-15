@@ -466,9 +466,6 @@ _lerchphi(GEN z, GEN s, GEN a, long prec)
   long B = prec2nbits(prec), MB = 3 - B, NB, prec2;
   entree *ep;
 
-  if (!iscplx(z)) pari_err_TYPE("lerchphi", z);
-  if (!iscplx(s)) pari_err_TYPE("lerchphi", s);
-  if (!iscplx(a)) pari_err_TYPE("lerchphi", a);
   if (gexpo(z) < MB) return gpow(a, gneg(s), prec);
   if (gexpo(gsubgs(z, 1)) < MB) return zetahurwitz(s, a, 0, B); /* z ~ 1 */
   if (gexpo(gaddgs(z, 1)) < MB) /* z ~ -1 */
@@ -481,13 +478,13 @@ _lerchphi(GEN z, GEN s, GEN a, long prec)
     return lerch_easy(z, s, a, B);
   if (gcmpgs(real_i(a), 2) < 0)
     return gadd(gpow(a, gneg(s), prec),
-                gmul(z, lerchphi(z, s, gaddgs(a, 1), prec)));
+                gmul(z, _lerchphi(z, s, gaddgs(a, 1), prec)));
   NB = (long)ceil(B + M_PI * fabs(gtodouble(imag_i(s))));
   prec2 = nbits2prec(NB);
-  z = gprec_w(z, prec2);
+  z = gprec_w(z, prec2); /* |z| > 9/10 */
   s = gprec_w(s, prec2);
-  a = gprec_w(a, prec2);
-  rs = ground(real_i(s)); L = glog(z, prec2);
+  a = gprec_w(a, prec2); /* Re(a) >= 2 */
+  rs = ground(real_i(s)); L = glog(z, prec2); /* Re(L) > -0.11 */
   ep = is_entry("_lerch_worker");
   E = mkvec4(gsubgs(s, 1), gsubsg(1, a), gneg(z), stoi(prec2));
   f = snm_closure(ep, mkvec(E));
@@ -495,9 +492,9 @@ _lerchphi(GEN z, GEN s, GEN a, long prec)
   fm = snm_closure(ep, mkvec(E));
   Linf = mkvec2(mkoo(), real_i(a));
   if (gexpo(gsub(s, rs)) < MB && gcmpgs(rs, 1) >= 0)
-  { /* real(s) ~ positive integer */
+  { /* s ~ positive integer */
     if (gcmp(gabs(imag_i(L), prec2), sstoQ(1, 4)) < 0 && gsigne(real_i(L)) >= 0)
-    { /* real(L) >= 0, |imag(L)| < 1/4 */
+    { /* Re(L) >= 0, |Im(L)| < 1/4 */
       GEN t = gsigne(imag_i(z)) > 0 ? gen_m1: gen_1;
       GEN LT1 = gaddgs(gabs(L, prec2), 1);
       LT = mkvec4(gen_0, mkcomplex(gen_0, t), mkcomplex(LT1, t), LT1);
@@ -509,9 +506,7 @@ _lerchphi(GEN z, GEN s, GEN a, long prec)
     return gdiv(J, ggamma(s, prec2));
   }
   tabg = intnumgaussinit(2*(NB >> 2) + 60, prec2);
-  if (gcmp(real_i(L), gneg(ghalf)) < 0) /* real(L) < -1/2 */
-    left = right = top = gmin(gmul2n(gabs(real_i(L), prec2), -1), gen_1);
-  else if (gcmp(gabs(imag_i(L), prec2), ghalf) > 0) /* |imag(L)| > 1/2 */
+  if (gcmp(gabs(imag_i(L), prec2), ghalf) > 0) /* |Im(L)| > 1/2 */
     left = right = top = gmin(gmul2n(gabs(imag_i(L), prec2), -1), gen_1);
   else
   {
@@ -523,9 +518,8 @@ _lerchphi(GEN z, GEN s, GEN a, long prec)
   w = expIPiC(gsubgs(s, 1), prec2);
   mleft = gneg(left);
   if (gexpo(imag_i(z)) < MB && gexpo(imag_i(a)) < MB && gexpo(imag_i(s)) < MB
-      && gcmpgs(real_i(z), 1) < 0 && gsigne(real_i(a)) > 0)
-  {
-    /* z, s, a real, 0 < a, z < 1 */
+      && gcmpgs(real_i(z), 1) < 0)
+  { /* (z, s, a) real, z < 1 */
     LT = mkvec3(right, mkcomplex(right, top), mkcomplex(mleft, top));
     J = imag_i(gdiv(parintnumgaussadapt(f, LT, tabg, NB), w));
     LT = mkvec2(mkcomplex(mleft, top), mleft);
@@ -553,6 +547,9 @@ GEN
 lerchphi(GEN z, GEN s, GEN a, long prec)
 {
   pari_sp av = avma;
+  if (!iscplx(z)) pari_err_TYPE("lerchphi", z);
+  if (!iscplx(s)) pari_err_TYPE("lerchphi", s);
+  if (!iscplx(a)) pari_err_TYPE("lerchphi", a);
   return gerepileupto(av, _lerchphi(z, s, a, prec));
 }
 
@@ -561,5 +558,8 @@ lerchzeta(GEN s, GEN a, GEN lam, long prec)
 {
   pari_sp av = avma;
   GEN z = gexp(gmul(PiI2(prec), lam), prec);
+  if (!iscplx(z)) pari_err_TYPE("lerchzeta", z);
+  if (!iscplx(s)) pari_err_TYPE("lerchzeta", s);
+  if (!iscplx(a)) pari_err_TYPE("lerchzeta", a);
   return gerepileupto(av, _lerchphi(z, s, a, prec));
 }
