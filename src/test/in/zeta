@@ -31,6 +31,7 @@ zeta(0.+O(x))
 
 \\ Errors
 zeta(1)
+zeta(1+O(3))
 \\#2375
 \ps1
 zeta(1+t)

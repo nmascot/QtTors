@@ -20,100 +20,101 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /********************************************************/
 /*                   Hurwitz zeta function              */
 /********************************************************/
+struct hurwitzp_t { GEN B, _1, s1; };
+static void
+hurwitzp_init(struct hurwitzp_t *S, long prec, GEN s)
+{
+  GEN B, C = gen_1, s1 = gsubgs(s, 1), p = gel(s, 2);
+  long j, J = ((equaliu(p,2)? (prec >> 1): prec) + 2) >> 1;
+  if (gequal0(s1)) s1 = NULL;
+  B = bernvec(J);
+  for (j = 1; j <= J; j++)
+  {
+    GEN t = (j == 1 && !s1)? s: gmul(gaddgs(s, 2*j-3), gaddgs(s, 2*j-2));
+    C = gdivgunextu(gmul(C, t), 2*j-1);
+    gel(B, j+1) = gmul(gel(B, j+1), C); /* B_{2j} * binomial(1-s, 2j) */
+  }
+  S->_1 = cvtop(gen_1, p, prec);
+  S->s1 = s1;
+  S->B = B;
+}
+
 /* s1 = s-1 or NULL (if s=1) */
 static GEN
-hurwitzp_i(GEN cache, GEN s1, GEN x, GEN p, long prec)
+hurwitzp_i(struct hurwitzp_t *S, GEN x)
 {
-  long j, J = lg(cache) - 2;
-  GEN S, x2, x2j;
+  GEN z, x2, x2j, s1 = S->s1;
+  long j, J = lg(S->B) - 2;
 
-  x = ginv(gadd(x, zeropadic_shallow(p, prec)));
-  S = s1? gmul2n(gmul(s1, x), -1): gadd(Qp_log(x), gmul2n(x, -1));
-  x2j = x2 = gsqr(x); S = gaddgs(S,1);
+  x = cvtop2(ginv(x), S->_1); z = gmul2n(x, -1);
+  z = s1? gmul(s1, z): gadd(Qp_log(x), z);
+  x2j = x2 = gsqr(x); z = gaddgs(z, 1);
   for (j = 1;; j++)
   {
-    S = gadd(S, gmul(gel(cache, j+1), x2j));
+    z = gadd(z, gmul(gel(S->B, j + 1), x2j));
     if (j == J) break;
     x2j = gmul(x2, x2j);
   }
-  if (s1) S = gmul(gdiv(S, s1), Qp_exp(gmul(s1, Qp_log(x))));
-  return S;
+  if (s1) z = gmul(gdiv(z, s1), Qp_exp(gmul(s1, Qp_log(x))));
+  return z;
 }
+/* private (absolute) padicprec */
+static long
+pprec(GEN x) { return maxss(valp(x) + precp(x), 1); }
 
-static GEN
-init_cache(long prec, long p, GEN s)
-{
-  long j, fls = !gequal1(s), J = (((p==2)? (prec >> 1): prec) + 2) >> 1;
-  GEN C = gen_1, cache = bernvec(J);
-  for (j = 1; j <= J; j++)
-  { /* B_{2j} * binomial(1-s, 2j) */
-    GEN t = (j > 1 || fls) ? gmul(gaddgs(s, 2*j-3), gaddgs(s, 2*j-2)) : s;
-    C = gdiv(gmul(C, t), mulss(2*j, 2*j-1));
-    gel(cache, j+1) = gmul(gel(cache, j+1), C);
-  }
-  return cache;
-}
-
+/* L_p(s, (D, .)) */
 static GEN
 zetap_i(GEN s, long D)
 {
   pari_sp av = avma;
-  GEN cache, S, s1, gm, va, gp = gel(s,2);
+  GEN z, va, gp = gel(s,2);
   ulong a, p = itou(gp), m;
-  long prec = valp(s) + precp(s);
+  long prec = pprec(s);
+  struct hurwitzp_t S;
 
   if (D <= 0) pari_err_DOMAIN("p-adic L-function", "D", "<=", gen_0, stoi(D));
   if (!uposisfundamental(D))
     pari_err_TYPE("p-adic L-function [D not fundamental]", stoi(D));
   if (D == 1 && gequal1(s))
     pari_err_DOMAIN("p-adic zeta", "argument", "=", gen_1, s);
-  if (prec <= 0) prec = 1;
-  cache = init_cache(prec, p, s);
-  m = ulcm(D, p == 2? 4: p);
-  gm = stoi(m);
-  va = coprimes_zv(m);
-  S = gen_0; s1 = gsubgs(s,1); if (gequal0(s1)) s1 = NULL;
-  for (a = 1; a <= (m >> 1); a++)
+  hurwitzp_init(&S, prec, s);
+  m = ulcm(D, p == 2? 4: p); va = coprimes_zv(m);
+  for (a = 1, z = gen_0; a <= (m >> 1); a++)
     if (va[a])
     {
-      GEN z = hurwitzp_i(cache, s1, gdivsg(a,gm), gp, prec);
-      S = gadd(S, gmulsg(kross(D,a), z));
+      GEN h = hurwitzp_i(&S, uutoQ(a, m));
+      if (D != 1 && kross(D, a) < 0) h = gneg(h);
+      z = gadd(z, h);
     }
-  S = gdiv(gmul2n(S, 1), gm);
-  if (D > 1)
-  {
-    gm = gadd(gm, zeropadic_shallow(gp, prec));
-    S = gmul(S, Qp_exp(gmul(gsubsg(1, s), Qp_log(gm))));
-  }
-  return gerepileupto(av, S);
+  z = gdivgs(gmul2n(z, 1), m);
+  if (D != 1) z = gmul(z, Qp_exp(gmul(gsubsg(1, s), Qp_log(cvstop2(m, s)))));
+  return gerepileupto(av, z);
 }
 GEN
 Qp_zeta(GEN s) { return zetap_i(s, 1); }
 
+/* s a t_PADIC; gerepileupto-safe */
 static GEN
 hurwitzp(GEN s, GEN x)
 {
-  GEN s1, T = (typ(s) == t_PADIC)? s: x, gp = gel(T,2);
-  long p = itou(gp), vqp = (p==2)? 2: 1, prec = maxss(1, valp(T) + precp(T));
-
-  if (s == T) x = gadd(x, zeropadic_shallow(gp, prec));
-  else        s = gadd(s, zeropadic_shallow(gp, prec));
-  /* now both s and x are t_PADIC */
-  if (valp(x) > -vqp)
+  GEN gp = gel(s,2);
+  long p = itou(gp), prec = pprec(s);
+  struct hurwitzp_t S;
+  hurwitzp_init(&S, prec, s);
+  if (typ(x) != t_PADIC) x = gadd(x, zeropadic_shallow(gp, prec));
+  if (valp(x) >= ((p==2)? -1: 0))
   {
-    GEN S = gen_0;
+    GEN z = gen_0;
     long j, M = (p==2)? 4: p;
     for (j = 0; j < M; j++)
     {
       GEN y = gaddsg(j, x);
-      if (valp(y) <= 0) S = gadd(S, hurwitzp(s, gdivgu(y, M)));
+      if (valp(y) <= 0) z = gadd(z, hurwitzp_i(&S, gdivgu(y, M)));
     }
-    return gdivgu(S, M);
+    return gdivgu(z, M);
   }
-  if (valp(s) <= 1/(p-1) - vqp)
-    pari_err_DOMAIN("hurwitzp", "v(s)", "<=", stoi(1/(p-1)-vqp), s);
-  s1 = gsubgs(s,1); if (gequal0(s1)) s1 = NULL;
-  return hurwitzp_i(init_cache(prec,p,s), s1, x, gp, prec);
+  if (valp(s) < 0) pari_err_DOMAIN("hurwitzp", "v(s)", "<", gen_0, s);
+  return hurwitzp_i(&S, x);
 }
 
 static void
@@ -174,8 +175,12 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
     }
     return gerepileupto(av,z);
   }
-  if (typ(x) == t_PADIC || typ(s) == t_PADIC)
-    return gerepilecopy(av, hurwitzp(s, x));
+  if (typ(s) == t_PADIC) return gerepileupto(av, hurwitzp(s, x));
+  if (typ(x) == t_PADIC)
+  {
+    s = gadd(s, zeropadic_shallow(gel(x,2), pprec(x)));
+    return gerepileupto(av, hurwitzp(s, x));
+  }
   switch(typ(x))
   {
     case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX: break;
