@@ -2472,9 +2472,9 @@ cvstop2(long s, GEN y)
 {
   GEN z, p = gel(y,2);
   long v, d = signe(gel(y,4))? precp(y): 0;
-  if (!s) return zeropadic(p, d);
+  if (!s) return zeropadic_shallow(p, d);
   v = z_pvalrem(s, p, &s);
-  if (d <= 0) return zeropadic(p, v);
+  if (d <= 0) return zeropadic_shallow(p, v);
   z = cgetg(5, t_PADIC);
   z[1] = evalprecp(d) | evalvalp(v);
   gel(z,2) = p;
@@ -2482,23 +2482,27 @@ cvstop2(long s, GEN y)
   gel(z,4) = modsi(s, gel(y,3)); return z;
 }
 
+static GEN
+itop2_coprime(GEN x, GEN y, long v, long d)
+{
+  GEN z = cgetg(5, t_PADIC);
+  z[1] = evalprecp(d) | evalvalp(v);
+  gel(z,2) = gel(y,2);
+  gel(z,3) = gel(y,3);
+  gel(z,4) = modii(x, gel(y,3)); return z;
+}
 /* cvtop(x, gel(y,2), precp(y)), shallow */
 GEN
 cvtop2(GEN x, GEN y)
 {
-  GEN z, p = gel(y,2);
+  GEN p = gel(y,2);
   long v, d = signe(gel(y,4))? precp(y): 0;
   switch(typ(x))
   {
     case t_INT:
-      if (!signe(x)) return zeropadic(p, d);
-      if (d <= 0) return zeropadic(p, Z_pval(x,p));
-      v = Z_pvalrem(x, p, &x);
-      z = cgetg(5, t_PADIC);
-      z[1] = evalprecp(d) | evalvalp(v);
-      gel(z,2) = p;
-      gel(z,3) = gel(y,3);
-      gel(z,4) = modii(x, gel(y,3)); return z;
+      if (!signe(x)) return zeropadic_shallow(p, d);
+      if (d <= 0) return zeropadic_shallow(p, Z_pval(x,p));
+      v = Z_pvalrem(x, p, &x); return itop2_coprime(x, y, v, d);
 
     case t_INTMOD:
       v = Z_pval(gel(x,1),p); if (v > d) v = d;
@@ -2507,18 +2511,18 @@ cvtop2(GEN x, GEN y)
     case t_FRAC:
     {
       GEN num, den;
-      if (d <= 0) return zeropadic(p, Q_pval(x,p));
+      if (d <= 0) return zeropadic_shallow(p, Q_pval(x,p));
       num = gel(x,1); v = Z_pvalrem(num, p, &num);
       den = gel(x,2); if (!v) v = -Z_pvalrem(den, p, &den);
-      z = cgetg(5, t_PADIC);
-      z[1] = evalprecp(d) | evalvalp(v);
-      gel(z,2) = p;
-      gel(z,3) = gel(y,3);
       if (!is_pm1(den)) num = mulii(num, Fp_inv(den, gel(y,3)));
-      gel(z,4) = modii(num, gel(y,3)); return z;
+      return itop2_coprime(num, y, v, d);
     }
     case t_COMPLEX: return ctop(x, p, d);
     case t_QUAD:    return qtop(x, p, d);
+    case t_PADIC:
+      if (!signe(gel(x,4))) return zeropadic_shallow(p, d);
+      if (precp(x) <= d) return x;
+      return itop2_coprime(gel(x,4), y, valp(x), d); /* reduce accuracy */
   }
   pari_err_TYPE("cvtop2",x);
   return NULL; /* LCOV_EXCL_LINE */
