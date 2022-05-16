@@ -13663,6 +13663,8 @@ reduced modulo $\text{SL}_2(\Z)$. Not \kbd{gerepile}-clean but suitable for
 
 \subsec{Transcendental functions with \typ{PADIC} arguments}
 
+The argument $x$ is assumed to be a \typ{PADIC}.
+
 \fun{GEN}{Qp_exp}{GEN x} shortcut for \kbd{gexp(x, /*ignored*/prec)}
 
 \fun{long}{Qp_exp_prec}{GEN x} number of terms to sum in the $\exp(x)$
@@ -13672,7 +13674,8 @@ Return $-1$ if the series does not converge ($ne \leq 1$).
 
 \fun{GEN}{Qp_gamma}{GEN x} shortcut for \kbd{ggamma(x, /*ignored*/prec)}
 
-\fun{GEN}{Qp_zeta}{GEN x} shortcut for \kbd{gzeta(x, /*ignored*/prec)}
+\fun{GEN}{Qp_zeta}{GEN x} shortcut for \kbd{gzeta(x, /*ignored*/prec)};
+assume that $x\neq 1$.
 
 \fun{GEN}{Qp_log}{GEN x} shortcut for \kbd{glog(x, /*ignored*/prec)}
 

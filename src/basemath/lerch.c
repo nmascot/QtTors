@@ -62,7 +62,7 @@ hurwitzp_i(struct hurwitzp_t *S, GEN x)
 static long
 pprec(GEN x) { return maxss(valp(x) + precp(x), 1); }
 
-/* L_p(s, (D, .)) */
+/* L_p(s, (D, .)); assume s != 1 if D = 1 */
 static GEN
 zetap_i(GEN s, long D)
 {
@@ -75,8 +75,6 @@ zetap_i(GEN s, long D)
   if (D <= 0) pari_err_DOMAIN("p-adic L-function", "D", "<=", gen_0, stoi(D));
   if (!uposisfundamental(D))
     pari_err_TYPE("p-adic L-function [D not fundamental]", stoi(D));
-  if (D == 1 && gequal1(s))
-    pari_err_DOMAIN("p-adic zeta", "argument", "=", gen_1, s);
   hurwitzp_init(&S, prec, s);
   m = ulcm(D, p == 2? 4: p); va = coprimes_zv(m);
   for (a = 1, z = gen_0; a <= (m >> 1); a++)
