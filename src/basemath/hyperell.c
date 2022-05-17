@@ -1121,7 +1121,7 @@ minimalmodel_getH(GEN Qo, GEN Qn, GEN e, GEN M, long g, long v)
 {
   GEN A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
   GEN B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
-  GEN Bp = gpowers(B, 2*g+2);
+  GEN Bp = gpowers(B, g+1);
   return ZX_shifti(ZX_sub(ZX_Z_mul(Qn,e), RgX_RgM2_eval(Qo, A, Bp, g+1)), -1);
 }
 
