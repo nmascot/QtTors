@@ -1117,19 +1117,22 @@ hyperell_redQ(GEN W)
 }
 
 static GEN
-minimalmodel_getH(GEN Qo, GEN Qn, GEN e, GEN M, long g, long v)
+minimalmodel_getH(GEN W, GEN Qn, GEN e, GEN M, long g, long v)
 {
+  GEN P = gel(W,1), Q = gel(W,2);
+  long gr = maxss((degpol(P)-1)>>1,degpol(Q)-1);
   GEN A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
   GEN B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
-  GEN Bp = gpowers(B, g+1);
-  return ZX_shifti(ZX_sub(ZX_Z_mul(Qn,e), RgX_RgM2_eval(Qo, A, Bp, g+1)), -1);
+  GEN Bp = gpowers(B, gr+1);
+  return ZX_shifti(ZX_sub(ZX_mul(gel(Bp,gr-g+1), ZX_Z_mul(Qn,e)),
+                          RgX_RgM2_eval(Q, A, Bp, gr+1)), -1);
 }
 
 GEN
 hyperellminimalmodel(GEN W, GEN pr)
 {
   pari_sp av = avma;
-  GEN F, WM2, F2, W2, M2, Modd, Wf, ef, Mf, Hf;
+  GEN Wr, F, WM2, F2, W2, M2, Modd, Wf, ef, Mf, Hf;
   long d, g, v;
   F = check_hyperell(W);
   if (!F || signe(F)==0 || !RgX_is_ZX(F))
@@ -1147,20 +1150,21 @@ hyperellminimalmodel(GEN W, GEN pr)
       pari_err_TYPE("hyperellminimalmodel",F);
     W = mkvec2(P, Q);
   }
+  Wr = hyperell_redQ(W);
   if (!pr || RgV_isin(pr, gen_2))
   {
-    WM2 = algo56(W,g); W2 = gel(WM2, 1); M2 = gel(WM2, 2);
+    WM2 = algo56(Wr,g); W2 = gel(WM2, 1); M2 = gel(WM2, 2);
     F2 = check_hyperell(W2);
   }
   else
   {
-    W2 = W; F2 = F; M2 = mkvec2(gen_1, matid(2));
+    W2 = Wr; F2 = F; M2 = mkvec2(gen_1, matid(2));
   }
   Modd = gel(algo57(F2, g, pr), 2);
   Wf = hyperell_redQ(minimalmodel_merge(W2, Modd, g, v));
   ef = mulii(gel(M2,1), gel(Modd,1));
   Mf = ZM2_mul(gel(M2,2), gel(Modd,2));
-  Hf = minimalmodel_getH(gel(W,2), gel(Wf,2), ef, Mf, g, v);
+  Hf = minimalmodel_getH(W, gel(Wf,2), ef, Mf, g, v);
   return gerepilecopy(av, mkvec2(Wf, mkvec3(ef, Mf, Hf)));
 }
 
