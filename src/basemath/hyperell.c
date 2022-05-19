@@ -1138,6 +1138,8 @@ hyperellminimalmodel(GEN W, GEN pr)
   if (!F || signe(F)==0 || !RgX_is_ZX(F))
     pari_err_TYPE("hyperellminimalmodel",W);
   d = degpol(F); g = ((d+1)>>1)-1; v = varn(F);
+  if (pr && (!is_vec_t(typ(pr)) || !RgV_is_ZV(pr)))
+    pari_err_TYPE("hyperellminimalmodel",pr);
   if (signe(ZX_disc(F))==0)
     pari_err_DOMAIN("hyperellminimalmodel","disc(W)","==",gen_0,W);
   if (typ(W)==t_POL) W = mkvec2(W, pol_0(v));
