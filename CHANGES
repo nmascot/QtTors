@@ -295,6 +295,8 @@ BA  37- system now return the shell return value.
     39- libpari function precision() now always return a 'prec' (integer > 2).
         It used to return 2 for real 0 of non-negative exponent.
     40- grndtoi(GEN x, long *e): allow setting e = NULL
+BA  41- [libpari] pari_thread_start: do not allow threads started this way to
+        launch more threads.
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

@@ -21,6 +21,7 @@ void mt_err_recover(long er) { mtsingle_err_recover(er); }
 void pari_mt_close(void) { }
 void mt_queue_reset(void) { }
 void mt_broadcast(GEN code) {(void) code;}
+void mt_thread_init(void) { }
 
 void
 mt_sigint(void) {}

@@ -1224,6 +1224,7 @@ pari_thread_start(struct pari_thread *t)
   pari_mainstack_use(&t->st);
   pari_thread_init();
   pari_thread_set_global(&t->gs);
+  mt_thread_init();
   return t->data;
 }
 

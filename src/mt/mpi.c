@@ -328,6 +328,7 @@ mt_err_recover(long er)
 void mt_sigint_block(void) { }
 void mt_sigint_unblock(void) { }
 void mt_sigint(void) {}
+void mt_thread_init(void) { }
 
 int
 mt_is_parallel(void)

@@ -163,6 +163,7 @@ void mt_export_add(const char *str, GEN val);
 void mt_export_del(const char *str);
 void mt_init_stack(size_t s);
 int  mt_is_thread(void);
+void mt_thread_init(void);
 
 GEN  eisker_worker(GEN Ei, GEN M, GEN D, GEN co, GEN CD);
 GEN  pareval_worker(GEN code);

@@ -111,6 +111,9 @@ mt_nbthreads(void)
 }
 
 void
+mt_thread_init(void) { mt_thread_no = 0; }
+
+void
 mt_export_add(const char *str, GEN val)
 {
   if (pari_mt)
