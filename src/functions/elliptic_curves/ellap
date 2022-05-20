@@ -71,7 +71,7 @@ Doc:
  %6 = 6  \\ good reduction
  ? E2 = ellchangecurve(E, [17,0,0,0]);
  ? ellap(E2, P17)
- %8 = 6  \\ same, starting from a nonmiminal model
+ %8 = 6  \\ same, starting from a nonminimal model
 
  ? P3 = idealprimedec(K,3)[1];
  ? ellap(E, P3)  \\ OK: E is minimal at P3

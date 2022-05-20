@@ -4680,7 +4680,7 @@ ellnf_minimalnormu(GEN E0)
   if (Nu) P = gmul(Nu, P);
   return P;
 }
-/* E integral model; return change of variable to miminal model (t_VEC)
+/* E integral model; return change of variable to minimal model (t_VEC)
  * or (nontrivial) Weierstrass class (t_COL) */
 static GEN
 bnf_get_v(GEN E)
