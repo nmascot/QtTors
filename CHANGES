@@ -209,8 +209,7 @@ BA  60- new GP function serdiffdep
         hgmtwist     hgmcoef         hgmeulerfactor    hgmissymmetrical
         lfunhgm      hgmcoefs        hgmgamma        hgmparams
 BA  62- new GP function lfuneuler
-TF  63- new GP functions znsubgroupgenerators, subcyclohminus,
-        subcycloiwasawa, subcyclopclgp
+TF  63- new GP functions subcyclohminus, subcycloiwasawa, subcyclopclgp
     64- new GP function bnrcompositum
     65- [libpari] gdivgu, gdivgunextu, divrunextu, gmulgu, gmulug
     66- [libpari] Zp_log, Zp_exp
