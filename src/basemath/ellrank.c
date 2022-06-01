@@ -934,13 +934,14 @@ static GEN
 red_Cremona_Stoll(GEN P, GEN *pM)
 {
   GEN q1, q2, q3, M, R;
-  long i, prec = nbits2prec(2*gexpo(P)) + 1;
+  long i, prec = nbits2prec(2*gexpo(P)) + 1, d = degpol(P);
   GEN dP = ZX_deriv(P), r = QX_complex_roots(P, prec);
   q1 = gen_0; q2 = gen_0; q3 = gen_0;
-  for (i = 1; i <= 4; i++)
+  for (i = 1; i <= d; i++)
   {
     GEN ri = gel(r,i);
     GEN s = ginv(gabs(RgX_cxeval(dP,ri,NULL), prec));
+    if (d!=4) s = gpow(s, gdivgs(gen_2,d-2), prec);
     q1 = gadd(q1, s);
     q2 = gsub(q2, gmul(real_i(ri), s));
     q3 = gadd(q3, gmul(gnorm(ri), s));
