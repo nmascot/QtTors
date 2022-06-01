@@ -1118,13 +1118,11 @@ hyperell_redQ(GEN W)
 static GEN
 minimalmodel_getH(GEN W, GEN Qn, GEN e, GEN M, long g, long v)
 {
-  GEN P = gel(W,1), Q = gel(W,2);
-  long gr = maxss((degpol(P)-1)>>1,degpol(Q)-1);
+  GEN Q = gel(W,2);
   GEN A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
   GEN B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
-  GEN Bp = gpowers(B, gr+1);
-  return ZX_shifti(ZX_sub(ZX_mul(gel(Bp,gr-g+1), ZX_Z_mul(Qn,e)),
-                          RgX_RgM2_eval(Q, A, Bp, gr+1)), -1);
+  GEN Bp = gpowers(B, g+1);
+  return ZX_shifti(ZX_sub(ZX_Z_mul(Qn,e),RgX_RgM2_eval(Q, A, Bp, g+1)), -1);
 }
 
 static void
@@ -1140,10 +1138,15 @@ check_hyperell_Q(const char *fun, GEN *pW, GEN *pF)
   else
   {
     GEN P = gel(W, 1), Q = gel(W, 2);
+    long g = ((degpol(F)+1)>>1)-1;
     if( typ(P)!=t_POL) P = scalarpol(P, v);
     if( typ(Q)!=t_POL) Q = scalarpol(Q, v);
     if (!RgX_is_ZX(P) || !RgX_is_ZX(Q))
-      pari_err_TYPE(fun,F);
+      pari_err_TYPE(fun,W);
+    if (degpol(P) > 2*g+2)
+      pari_err_DOMAIN(fun, "poldegree(P)", ">", utoi(2*g+2), P);
+    if (degpol(Q) > g+1)
+      pari_err_DOMAIN(fun, "poldegree(Q)", ">", utoi(g+1), Q);
     W = mkvec2(P, Q);
   }
   *pW = W; *pF = F;
@@ -1277,4 +1280,58 @@ hyperellred(GEN W, GEN *pM)
   Hf = minimalmodel_getH(W, gel(Wf,2), gen_1, M, g, v);
   if (pM) *pM = mkvec3(gen_1, M, Hf);
   return gc_all(av, pM ? 2: 1, &Wf, pM);
+}
+
+static void
+check_hyperell_Rg(const char *fun, GEN *pW, GEN *pF)
+{
+  GEN W = *pW, F = check_hyperell(W);
+  long v = varn(F);
+  if (!F || signe(F)==0)
+    pari_err_TYPE(fun, W);
+  if (typ(W)==t_POL) W = mkvec2(W, pol_0(v));
+  else
+  {
+    GEN P = gel(W, 1), Q = gel(W, 2);
+    long g = ((degpol(F)+1)>>1)-1;
+    if( typ(P)!=t_POL) P = scalarpol(P, v);
+    if( typ(Q)!=t_POL) Q = scalarpol(Q, v);
+    if (degpol(P) > 2*g+2)
+      pari_err_DOMAIN(fun, "poldegree(P)", ">", utoi(2*g+2), P);
+    if (degpol(Q) > g+1)
+      pari_err_DOMAIN(fun, "poldegree(Q)", ">", utoi(g+1), Q);
+
+    W = mkvec2(P, Q);
+  }
+  if (pF) *pF = F;
+  *pW = W;
+}
+
+static void
+check_hyperell_vc(const char *fun, GEN C, long v, GEN *e, GEN *M, GEN *H)
+{
+  if (lg(C)!=4 || typ(gel(C,2))!=t_MAT)
+    pari_err_TYPE(fun,C);
+  *e = gel(C,1); *M = gel(C,2);
+  *H = typ(gel(C,3))!=t_POL || varn(gel(C,3))!=v ? scalarpol(gel(C,3), v): gel(C,3);
+}
+
+GEN
+hyperellchangecurve(GEN W, GEN C)
+{
+  pari_sp av = avma;
+  GEN F, P, Q, A, B, Bp, e, M, H;
+  long d, g, v;
+  check_hyperell_Rg("hyperellchangecurve",&W,&F);
+  P = gel(W,1); Q = gel(W,2);
+  d = degpol(F); g = ((d+1)>>1)-1; v = varn(F);
+  check_hyperell_vc("hyperellchangecurve", C, v, &e, &M, &H);
+  A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
+  B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
+  Bp = gpowers(B, 2*g+2);
+  P = RgX_RgM2_eval(P, A, Bp, 2*g+2);
+  Q = RgX_RgM2_eval(Q, A, Bp, g+1);
+  P = RgX_Rg_div(RgX_sub(P, RgX_mul(H,RgX_add(Q,H))), gsqr(e));
+  Q = RgX_Rg_div(RgX_add(Q, RgX_shift(H,1)), e);
+  return gerepilecopy(av, mkvec2(P,Q));
 }

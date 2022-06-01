@@ -3996,13 +3996,14 @@ ulong   hash_zv(GEN x);
 /* hyperell.c */
 
 GEN     ZX_hyperellred(GEN P, GEN *pM);
-GEN     hyperellpadicfrobenius0(GEN x, GEN p, long e);
-GEN     hyperellpadicfrobenius(GEN x, ulong p, long e);
 GEN     hyperellcharpoly(GEN x);
+GEN     hyperellchangecurve(GEN C, GEN m);
 GEN     hyperelldisc(GEN x);
 int     hyperellisoncurve(GEN W, GEN P);
 GEN     hyperellminimaldisc(GEN x, GEN pr);
 GEN     hyperellminimalmodel(GEN x, GEN *pM, GEN pr);
+GEN     hyperellpadicfrobenius0(GEN x, GEN p, long e);
+GEN     hyperellpadicfrobenius(GEN x, ulong p, long e);
 GEN     hyperellred(GEN P, GEN *pM);
 GEN     nfhyperellpadicfrobenius(GEN H, GEN T, ulong p, long n);
 
