@@ -229,7 +229,8 @@ BA  77- [libpari] RgXY_cxevalx
 BA  80- [libpari] FlxM_to_FlxXV, FlxXC_sub
 BA  81- [libpari] FlxqXC_FlxqXQ_eval, FlxqXC_FlxqXQV_eval
 BA  82- new GP function qfminimize
-BA  83- new GP functions hyperelldisc, hyperellminimalmodel, hyperellminimaldisc
+BA  83- new GP functions hyperelldisc, hyperellminimalmodel,
+        hyperellminimaldisc, hyperellred
     84- new GP function setdelta
 BA  85- [libpari] RgX_homogenous_evalpow, QXQX_homogenous_evalpow
 BA  86- [libpari] FpX_roots_mult

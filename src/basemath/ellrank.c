@@ -906,81 +906,6 @@ static GEN
 ell2pol(GEN ell)
 { return mkpoln(4, gen_1, ell_get_a2(ell), ell_get_a4(ell), ell_get_a6(ell)); }
 
-static GEN
-redqfbsplit(GEN a, GEN b, GEN c, GEN d)
-{
-  GEN p = subii(d,b), q = shifti(a,1);
-  GEN U, Q, u, v, w = bezout(p, q, &u, &v);
-
-  if (!equali1(w)) { p = diviiexact(p, w); q = diviiexact(q, w); }
-  U = mkmat22(p, negi(v), q, u);
-  Q = qfb_apply_ZM(mkvec3(a,b,c), U);
-  b = gel(Q, 2); c = gel(Q,3);
-  if (signe(b) < 0) gel(U,2) = mkcol2(v, negi(u));
-  gel(U,2) = ZC_lincomb(gen_1, truedivii(negi(c), d), gel(U,2), gel(U,1));
-  return U;
-}
-
-static GEN
-polreduce(GEN P, GEN M)
-{
-  long v = varn(P);
-  GEN A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
-  GEN B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
-  return RgX_homogenous_evalpow(P, A, gpowers(B, degpol(P)));
-}
-
-static GEN
-red_Cremona_Stoll(GEN P, GEN *pM)
-{
-  GEN q1, q2, q3, M, R;
-  long i, prec = nbits2prec(2*gexpo(P)) + 1, d = degpol(P);
-  GEN dP = ZX_deriv(P), r = QX_complex_roots(P, prec);
-  q1 = gen_0; q2 = gen_0; q3 = gen_0;
-  for (i = 1; i <= d; i++)
-  {
-    GEN ri = gel(r,i);
-    GEN s = ginv(gabs(RgX_cxeval(dP,ri,NULL), prec));
-    if (d!=4) s = gpow(s, gdivgs(gen_2,d-2), prec);
-    q1 = gadd(q1, s);
-    q2 = gsub(q2, gmul(real_i(ri), s));
-    q3 = gadd(q3, gmul(gnorm(ri), s));
-  }
-  M = lllgram(mkmat22(q1,q2,q2,q3));
-  if (lg(M) != 3) M = matid(2);
-  R = polreduce(P, M);
-  *pM = M; return R;
-}
-
-static GEN
-hyperellreduce(GEN P, GEN *pM)
-{
-  long d = degpol(P);
-  GEN q1, q2, q3, D, vD;
-  GEN a = gel(P,d+2), b = gel(P,d+1), c = gel(P, d);
-  GEN M, R, M2;
-
-  q1 = muliu(sqri(a), d);
-  q2 = shifti(mulii(a,b), 1);
-  q3 = subii(sqri(b), shifti(mulii(a,c), 1));
-  D = gcdii(gcdii(q1, q2), q3);
-  if (!equali1(D))
-  {
-    q1 = diviiexact(q1, D);
-    q2 = diviiexact(q2, D);
-    q3 = diviiexact(q3, D);
-  }
-  D = qfb_disc3(q1, q2, q3);
-  if (!signe(D))
-    M = mkmat22(gen_1, truedivii(negi(q2),shifti(q1,1)), gen_0, gen_1);
-  else if (issquareall(D,&vD))
-    M = redqfbsplit(q1, q2, q3, vD);
-  else
-    M = gel(qfbredsl2(mkqfb(q1,q2,q3,D), NULL), 2);
-  R = red_Cremona_Stoll(polreduce(P, M), &M2);
-  *pM = gmul(M, M2); return R;
-}
-
 /* find point (x:y:z) on y^2 = pol, return [x,z]~ and set *py = y */
 static GEN
 projratpointxz(GEN pol, long lim, GEN *py)
@@ -1028,7 +953,7 @@ projratpointxz2(GEN pol, long lim, GEN *py)
     {
       GEN xz, y, aux, U;
       if (c==1) continue;
-      pol = hyperellreduce(pol, &U);
+      pol = ZX_hyperellred(pol, &U);
       if (DEBUGLEVEL>1) err_printf("  reduced quartic(%ld): Y^2 = %Ps\n", i, pol);
       xz = projratpointxz(pol, lim, &y); if (!xz) continue;
       *py = gmul(y, mulii(C, k));
@@ -1693,7 +1618,7 @@ liftselmer_cover(GEN b, GEN expo, GEN LS2, GEN pol, GEN discF, GEN K)
   QM = quartic_minim_all(q1, discF);
   q1 = gel(QM,1);
   zden = gmael(QM,2,1);
-  Q = hyperellreduce(q1, &R);
+  Q = ZX_hyperellred(q1, &R);
   R = gmul(gmael(QM,2,2), R);
   if (DEBUGLEVEL>1) err_printf("  reduced quartic: Y^2 = %Ps\n", Q);
   xz = mkcol2(pol_x(0),gen_1);
@@ -1749,7 +1674,7 @@ liftselmer(GEN b, GEN expo, GEN sbase, GEN LS2, GEN pol, GEN discF, GEN K, long 
     QM = quartic_minim_all(q1, discF);
     q1 = gel(QM,1);
     zden = gmael(QM,2,1);
-    Q = hyperellreduce(q1, &R);
+    Q = ZX_hyperellred(q1, &R);
     R = gmul(gmael(QM,2,2), R);
     if (pt_Q) *pt_Q = Q;
     Qk = shallowcopy(Q);
