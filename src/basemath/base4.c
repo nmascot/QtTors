@@ -2979,46 +2979,40 @@ prV_primes(GEN v)
  * exponents, gives b such that v_p(b) = v_p(x) for all prime ideals pr | x
  * and v_pr(b) >= 0 for all other pr.
  * For optimal performance, all [anti-]uniformizers should be precomputed,
- * but no support for this yet.
- *
- * If nored, do not reduce result.
- * No garbage collecting */
+ * but no support for this yet. If nored, do not reduce result. */
 static GEN
 idealapprfact_i(GEN nf, GEN x, int nored)
 {
-  GEN z, d, L, e, e2, F;
+  GEN d = NULL, z, L, e, e2, F;
   long i, r;
-  int flagden;
+  int hasden = 0;
 
   nf = checknf(nf);
   L = gel(x,1);
   e = gel(x,2);
   F = prV_lcm_capZ(L);
-  flagden = 0;
   z = NULL; r = lg(e);
   for (i = 1; i < r; i++)
   {
     long s = signe(gel(e,i));
     GEN pi, q;
     if (!s) continue;
-    if (s < 0) flagden = 1;
+    if (s < 0) hasden = 1;
     pi = pr_uniformizer(gel(L,i), F);
     q = nfpow(nf, pi, gel(e,i));
     z = z? nfmul(nf, z, q): q;
   }
   if (!z) return gen_1;
-  if (nored || typ(z) != t_COL) return z;
-  e2 = cgetg(r, t_VEC);
-  for (i=1; i<r; i++) gel(e2,i) = addiu(gel(e,i), 1);
-  x = factorbackprime(nf, L,e2);
-  if (flagden) /* denominator */
+  if (hasden) /* denominator */
   {
     z = Q_remove_denom(z, &d);
     d = diviiexact(d, Z_ppo(d, F));
-    x = RgM_Rg_mul(x, d);
   }
-  else
-    d = NULL;
+  if (nored || typ(z) != t_COL) return d? gdiv(z, d): z;
+  e2 = cgetg(r, t_VEC);
+  for (i = 1; i < r; i++) gel(e2,i) = addiu(gel(e,i), 1);
+  x = factorbackprime(nf, L, e2);
+  if (d) x = RgM_Rg_mul(x, d);
   z = ZC_reducemodlll(z, x);
   return d? RgC_Rg_div(z,d): z;
 }

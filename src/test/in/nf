@@ -157,3 +157,8 @@ nfisincl(x^2-2^5,nfinit(x^4-2))
 \\ # 2214 (duplicate of 2213)
 nfisincl(x^9 - 3*x^6 - 6*x^3 - 1,nfinit(x^18 - 3*x^15 + 15*x^12 + 20*x^9 + 33*x^6 + 6*x^3 + 1))
 nfeltispower(nfinit(x^4-2),x,2^64-100)
+
+\\ #2385
+K=nfinit(x^2+1357*x+3299);
+idealcoprime(K,10,60)
+idealcoprime(K,10,10)
