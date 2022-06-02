@@ -16,7 +16,7 @@ Doc:
  the model is then only garanteed minimal at the elements of $pr$.
  The output is a two-component vector $[W,m]$ where $W$ is the new model and
  $m$ gives the mapping from the original model to the new one.
- $M$ is a three-component vector $[e,[a,b;c,d],H]$ such that
+ $m$ is a three-component vector $[e,[a,b;c,d],H]$ such that
  if $(x,y)$ is a point on $W$, the corresponding point on $C$ is given by
  $$
    x_C = (a*x+b)/(c*x+d)
