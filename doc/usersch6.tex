@@ -126,11 +126,15 @@ polynomial representative (shallow) if \kbd{x} and \kbd{nf} are compatible.
 Raise an exception otherwise. Set $s$ to the name of the caller for a
 meaningful error message.
 
-\fun{void}{check_ZKmodule}{GEN x, const char *s} check whether $x$ looks like
-$\Z_K$-module (a pair $[A,I]$, where $A$ is a matrix and $I$ is a list of
-ideals; $A$ has as many columns as $I$ has elements. Otherwise
-raises an exception. Set $s$ to the name of the caller for a
-meaningful error message.
+\fun{int}{check_ZKmodule_i}{GEN x} return $1$ if $x$ looks like
+a projective $\Z_K$-module, i.e., a pair $[A,I]$ where $A$ is a matrix and
+$I$ is a list of ideals and $A$ has as many columns as $I$ has elements. Or
+possibly a longer list $[A,I,\dots]$ such as the output of
+\kbd{rnfpseudobasis}. Otherwise return $0$.
+
+\fun{void}{check_ZKmodule}{GEN x, const char *s} raise an exception
+unless $x$ is recognized as a projective $\Z_K$-module. Set $s$ to the name
+of the caller for a meaningful error message.
 
 \fun{long}{idealtyp}{GEN *ideal, GEN *fa} The input is \kbd{ideal}, a pointer
 to an ideal or extended ideal; returns the type of the underlying ideal

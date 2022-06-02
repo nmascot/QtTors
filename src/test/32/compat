@@ -3492,8 +3492,10 @@ A function with that name existed in GP-1.39.15. Please update your script.
 
 New syntax: rnfhermitebasis(bnf,order) ===> rnfhnfbasis(bnf,order)
 
-rnfhnfbasis(bnf,x): given an order x as output by rnfpseudobasis, gives either 
-a true HNF basis of the order if it exists, zero otherwise.
+rnfhnfbasis(bnf,M): given a bnf attached to a number field K and a projective 
+Z_K module M given by a pseudo-matrix, returns either a true HNF basis of M if 
+one exists, or zero otherwise. If M is a polynomial with coefficients in K, 
+replace it by the pseudo-matrix returned by rnfpseudobasis.
 
 
   ***   at top-level: rootmod()
@@ -4505,4 +4507,4 @@ New syntax: texprint(x) ===> printtex(x)
 printtex({str}*): outputs its string arguments in TeX format.
 
 
-Total time spent: 9
+Total time spent: 4

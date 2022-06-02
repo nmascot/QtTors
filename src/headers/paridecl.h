@@ -2150,6 +2150,7 @@ GEN     FpX_FpC_nfpoleval(GEN nf, GEN pol, GEN a, GEN p);
 GEN     embed_T2(GEN x, long r1);
 GEN     embednorm_T2(GEN x, long r1);
 GEN     embed_norm(GEN x, long r1);
+int     check_ZKmodule_i(GEN M);
 void    check_ZKmodule(GEN x, const char *s);
 void    checkbid(GEN bid);
 GEN     checkbid_i(GEN bid);

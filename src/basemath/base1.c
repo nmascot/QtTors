@@ -157,14 +157,17 @@ checknfelt_mod(GEN nf, GEN x, const char *s)
   return a;
 }
 
-void
-check_ZKmodule(GEN x, const char *s)
+int
+check_ZKmodule_i(GEN M)
 {
-  if (typ(x) != t_VEC || lg(x) < 3) pari_err_TYPE(s,x);
-  if (typ(gel(x,1)) != t_MAT) pari_err_TYPE(s,gel(x,1));
-  if (typ(gel(x,2)) != t_VEC) pari_err_TYPE(s,gel(x,2));
-  if (lg(gel(x,2)) != lgcols(x)) pari_err_DIM(s);
+  return (typ(M) ==t_VEC && lg(M) >= 3
+          && typ(gel(M,1)) == t_MAT
+          && typ(gel(M,2)) == t_VEC
+          && lgcols(M) == lg(gel(M,2)));
 }
+void
+check_ZKmodule(GEN M, const char *s)
+{ if (!check_ZKmodule_i(M)) pari_err_TYPE(s, M); }
 
 static long
 typv6(GEN x)

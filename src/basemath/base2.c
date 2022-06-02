@@ -3692,40 +3692,30 @@ gen_if_principal(GEN bnf, GEN x)
   return isintzero(z)? gc_NULL(av): z;
 }
 
-static int
-is_pseudo_matrix(GEN O)
-{
-  return (typ(O) ==t_VEC && lg(O) >= 3
-          && typ(gel(O,1)) == t_MAT
-          && typ(gel(O,2)) == t_VEC
-          && lgcols(O) == lg(gel(O,2)));
-}
-
-/* given bnf and a pseudo-basis of an order in HNF [A,I], tries to simplify
- * the HNF as much as possible. The resulting matrix will be upper triangular
- * but the diagonal coefficients will not be equal to 1. The ideals are
- * guaranteed to be integral and primitive. */
+/* given bnf and a HNF pseudo-basis of a proj. module, simplify the HNF as
+ * much as possible. The resulting matrix will be upper triangular but the
+ * diagonal coefficients will not be equal to 1. The ideals are integral and
+ * primitive. */
 GEN
-rnfsimplifybasis(GEN bnf, GEN x)
+rnfsimplifybasis(GEN bnf, GEN M)
 {
   pari_sp av = avma;
   long i, l;
   GEN y, Az, Iz, nf, A, I;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  if (!is_pseudo_matrix(x)) pari_err_TYPE("rnfsimplifybasis",x);
-  A = gel(x,1);
-  I = gel(x,2); l = lg(I);
-  y = cgetg(3, t_VEC);
-  Az = cgetg(l, t_MAT); gel(y,1) = Az;
-  Iz = cgetg(l, t_VEC); gel(y,2) = Iz;
+  if (!check_ZKmodule_i(M)) pari_err_TYPE("rnfsimplifybasis",M);
+  A = gel(M,1);
+  I = gel(M,2); l = lg(I);
+  Az = cgetg(l, t_MAT);
+  Iz = cgetg(l, t_VEC); y = mkvec2(Az, Iz);
   for (i = 1; i < l; i++)
   {
     GEN c, d;
-    if (ideal_is1(gel(I,i))) {
+    if (ideal_is1(gel(I,i)))
+    {
       gel(Iz,i) = gen_1;
-      gel(Az,i) = gel(A,i);
-      continue;
+      gel(Az,i) = gel(A,i); continue;
     }
 
     gel(Iz,i) = Q_primitive_part(gel(I,i), &c);
@@ -3743,24 +3733,21 @@ rnfsimplifybasis(GEN bnf, GEN x)
 }
 
 static GEN
-get_order(GEN nf, GEN O, const char *s)
+get_module(GEN nf, GEN O, const char *s)
 {
-  if (typ(O) == t_POL)
-    return rnfpseudobasis(nf, O);
-  if (!is_pseudo_matrix(O)) pari_err_TYPE(s, O);
-  return O;
+  if (typ(O) == t_POL) return rnfpseudobasis(nf, O);
+  if (!check_ZKmodule_i(O)) pari_err_TYPE(s, O);
+  return shallowcopy(O);
 }
 
 GEN
-rnfdet(GEN nf, GEN order)
+rnfdet(GEN nf, GEN M)
 {
   pari_sp av = avma;
-  GEN A, I, D;
+  GEN D;
   nf = checknf(nf);
-  order = get_order(nf, order, "rnfdet");
-  A = gel(order,1);
-  I = gel(order,2);
-  D = idealmul(nf, nfM_det(nf,A), idealprod(nf,I));
+  M = get_module(nf, M, "rnfdet");
+  D = idealmul(nf, nfM_det(nf, gel(M,1)), idealprod(nf, gel(M,2)));
   return gerepileupto(av, D);
 }
 
@@ -3785,22 +3772,21 @@ nfidealdet1(GEN nf, GEN a, GEN b, GEN *px, GEN *py, GEN *pz, GEN *pt)
   *pt = nfdiv(nf, gel(uv,1), x);
 }
 
-/* given a pseudo-basis of an order in HNF [A,I] (or [A,I,D,d]), gives an
- * n x n matrix (not in HNF) of a pseudo-basis and an ideal vector
- * [1,1,...,1,I] such that order = Z_K^(n-1) x I.
- * Uses the approximation theorem ==> slow. */
+/* given a pseudo-basis of a proj. module in HNF [A,I] (or [A,I,D,d]), gives
+ * an n x n matrix (not HNF) of a pseudo-basis and an ideal vector
+ * [1,...,1,I] such that M ~ Z_K^(n-1) x I. Uses the approximation theorem.*/
 GEN
-rnfsteinitz(GEN nf, GEN order)
+rnfsteinitz(GEN nf, GEN M)
 {
   pari_sp av = avma;
-  long i, n, l;
-  GEN A, I, p1;
+  long i, n;
+  GEN A, I;
 
   nf = checknf(nf);
-  order = get_order(nf, order, "rnfsteinitz");
-  A = RgM_to_nfM(nf, gel(order,1));
-  I = leafcopy(gel(order,2)); n=lg(A)-1;
-  for (i=1; i<n; i++)
+  M = get_module(nf, M, "rnfsteinitz");
+  A = RgM_to_nfM(nf, gel(M,1));
+  I = leafcopy(gel(M,2)); n = lg(A)-1;
+  for (i = 1; i < n; i++)
   {
     GEN c1, c2, b, a = gel(I,i);
     gel(I,i) = gen_1;
@@ -3818,104 +3804,94 @@ rnfsteinitz(GEN nf, GEN order)
     else
     {
       pari_sp av2 = avma;
-      GEN x, y, z, t;
+      GEN x, y, z, t, c;
       nfidealdet1(nf,a,b, &x,&y,&z,&t);
       x = RgC_add(nfC_nf_mul(nf, c1, x), nfC_nf_mul(nf, c2, y));
       y = RgC_add(nfC_nf_mul(nf, c1, z), nfC_nf_mul(nf, c2, t));
       gerepileall(av2, 2, &x,&y);
       gel(A,i) = x;
       gel(A,i+1) = y;
-      gel(I,i+1) = Q_primitive_part(idealmul(nf,a,b), &p1);
-      if (p1) gel(A,i+1) = nfC_nf_mul(nf, gel(A,i+1), p1);
+      gel(I,i+1) = Q_primitive_part(idealmul(nf,a,b), &c);
+      if (c) gel(A,i+1) = nfC_nf_mul(nf, gel(A,i+1), c);
     }
   }
-  l = lg(order);
-  p1 = cgetg(l,t_VEC);
-  gel(p1,1) = A;
-  gel(p1,2) = I; for (i=3; i<l; i++) gel(p1,i) = gel(order,i);
-  return gerepilecopy(av, p1);
+  gel(M,1) = A;
+  gel(M,2) = I; return gerepilecopy(av, M);
 }
 
-/* Given bnf and either an order as output by rnfpseudobasis or a polynomial,
- * and outputs a basis if it is free, an n+1-generating set if it is not */
+/* Given bnf and a proj. module (or a t_POL -> rnfpseudobasis), and outputs a
+ * basis if it is free, an n+1-generating set if it is not */
 GEN
-rnfbasis(GEN bnf, GEN order)
+rnfbasis(GEN bnf, GEN M)
 {
   pari_sp av = avma;
   long j, n;
   GEN nf, A, I, cl, col, a;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  order = get_order(nf, order, "rnfbasis");
-  I = gel(order,2); n = lg(I)-1;
-  j=1; while (j<n && ideal_is1(gel(I,j))) j++;
-  if (j<n)
-  {
-    order = rnfsteinitz(nf,order);
-    I = gel(order,2);
-  }
-  A = gel(order,1);
+  M = get_module(nf, M, "rnfbasis");
+  I = gel(M,2); n = lg(I)-1;
+  j = 1; while (j < n && ideal_is1(gel(I,j))) j++;
+  if (j < n) { M = rnfsteinitz(nf,M); I = gel(M,2); }
+  A = gel(M,1);
   col= gel(A,n); A = vecslice(A, 1, n-1);
   cl = gel(I,n);
   a = gen_if_principal(bnf, cl);
   if (!a)
   {
     GEN v = idealtwoelt(nf, cl);
-    A = shallowconcat(A, gmul(gel(v,1), col));
+    A = vec_append(A, gmul(gel(v,1), col));
     a = gel(v,2);
   }
-  A = shallowconcat(A, nfC_nf_mul(nf, col, a));
+  A = vec_append(A, nfC_nf_mul(nf, col, a));
   return gerepilecopy(av, A);
 }
 
-/* Given bnf and either an order as output by rnfpseudobasis or a polynomial,
- * and outputs a basis (not pseudo) in Hermite Normal Form if it exists, zero
- * if not
- */
+/* Given a Z_K-module M (or a polynomial => rnfpseudobasis) outputs a
+ * Z_K-basis in HNF if it exists, zero if not */
 GEN
-rnfhnfbasis(GEN bnf, GEN order)
+rnfhnfbasis(GEN bnf, GEN M)
 {
   pari_sp av = avma;
-  long j, n;
+  long j, l;
   GEN nf, A, I, a;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  order = get_order(nf, order, "rnfbasis");
-  A = gel(order,1); A = RgM_shallowcopy(A);
-  I = gel(order,2); n = lg(A)-1;
-  for (j=1; j<=n; j++)
+  if (typ(M) == t_POL) M = rnfpseudobasis(nf, M);
+  else
+  {
+    if (typ(M) != t_VEC) pari_err_TYPE("rnfhnfbasis", M);
+    if (lg(M) == 5) M = mkvec2(gel(M,1), gel(M,2));
+    M = nfhnf(nf, M); /* in case M is not in HNF */
+  }
+  A = shallowcopy(gel(M,1));
+  I = gel(M,2); l = lg(A);
+  for (j = 1; j < l; j++)
   {
     if (ideal_is1(gel(I,j))) continue;
     a = gen_if_principal(bnf, gel(I,j));
-    if (!a) { set_avma(av); return gen_0; }
+    if (!a) return gc_const(av, gen_0);
     gel(A,j) = nfC_nf_mul(nf, gel(A,j), a);
   }
   return gerepilecopy(av,A);
 }
 
-static long
-rnfisfree_aux(GEN bnf, GEN order)
+long
+rnfisfree(GEN bnf, GEN M)
 {
-  long n, j;
+  pari_sp av = avma;
   GEN nf, P, I;
+  long l, j;
 
   bnf = checkbnf(bnf);
   if (is_pm1( bnf_get_no(bnf) )) return 1;
   nf = bnf_get_nf(bnf);
-  order = get_order(nf, order, "rnfisfree");
-  I = gel(order,2); n = lg(I)-1;
-  j=1; while (j<=n && ideal_is1(gel(I,j))) j++;
-  if (j>n) return 1;
-
-  P = gel(I,j);
-  for (j++; j<=n; j++)
-    if (!ideal_is1(gel(I,j))) P = idealmul(nf,P,gel(I,j));
-  return gequal0( isprincipal(bnf,P) );
+  M = get_module(nf, M, "rnfisfree");
+  I = gel(M,2); l = lg(I); P = NULL;
+  for (j = 1; j < l; j++)
+    if (!ideal_is1(gel(I,j))) P = P? idealmul(nf, P, gel(I,j)): gel(I,j);
+  return gc_long(av, P? gequal0( isprincipal(bnf,P) ): 1);
 }
-
-long
-rnfisfree(GEN bnf, GEN order)
-{ pari_sp av = avma; return gc_long(av, rnfisfree_aux(bnf,order)); }
 
 /**********************************************************************/
 /**                                                                  **/
