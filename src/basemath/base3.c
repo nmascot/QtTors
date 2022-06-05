@@ -1750,7 +1750,8 @@ get_C(GEN lambda, long l, GEN signs)
   for (i = 1; i < l; i++) gel(C,i) = signs[i]? mlambda: lambda;
   return C;
 }
-/* signs = NULL: totally positive at archp */
+/* signs = NULL: totally positive at archp.
+ * Assume that a t_COL x is not a scalar */
 static GEN
 nfsetsigns(GEN nf, GEN signs, GEN x, GEN sarch)
 {
@@ -1772,7 +1773,7 @@ nfsetsigns(GEN nf, GEN signs, GEN x, GEN sarch)
     ex = (i < l)? const_col(l-1, x): NULL;
   }
   else
-  {
+  { /* inefficient if x scalar, wrong if x = 0 */
     pari_sp av = avma;
     GEN cex, M = nf_get_M(nf), archp = sarch_get_archp(sarch);
     GEN xp = Q_primitive_part(x,&cex);
