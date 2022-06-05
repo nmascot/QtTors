@@ -2051,19 +2051,20 @@ example, used to retrieve the coefficient array of a multivariate polynomial
 (a nontrivial task due to PARI's unsophisticated representation for those
 objects): \sidx{multivariate polynomial}
 \bprog
-coeffs(P, nbvar) =
-{
-  if (type(P) != "t_POL",
-    for (i=1, nbvar, P = [P]);
-    return (P)
-  );
-  vector(poldegree(P)+1, i, coeffs(polcoef(P, i-1), nbvar-1))
+coeffs(P, nvar) =
+{ my (d = poldegree(P));
+  if (d <= 0,
+    P = simplify(P); for (i=1, nvar, P = [P]);
+    return (P));
+  vector(d + 1, i, coeffs(polcoef(P, i-1), nvar-1));
 }
 @eprog
 
 \noindent If $P$ is a polynomial in $k$ variables, show that after the
 assignment {\tt v = coeffs(P,k)}, the coefficient of $x_1^{n_1}\dots
-x_k^{n_k}$ in P is given by {\tt v[$n_1$+1][\dots][$n_k$+1]}.
+x_k^{n_k}$ in P is given by {\tt v[$n_1$+1][\dots][$n_k$+1]}, provided
+a monomial $x_1^{N_1}\dots x_k^{N_k}$ with $n \leq N$ (lexicographically)
+exists with a non-zero coefficient.
 
 When the operating system allows querying the maximum size of the process
 stack, we automatically limit the \idx{recursion depth}: \sidx{deep recursion}
@@ -3104,10 +3105,10 @@ line.
 
 \item lines starting with \kbd{\#if} \var{boolean} are treated as
 comments if \var{boolean} evaluates to \kbd{false}, and read normally
-otherwise. The condition can be negated using either \kbd{\#if not} (or
-\kbd{\#if !}). If the rest of the current line is empty, the test applies to
-the next line (same behavior as \kbd{=} under \kbd{gp}). The following
-tests can be performed:
+otherwise. The condition can be negated using either \kbd{\#if not},
+\kbd{\#ifnot} or \kbd{\#if !}. If the rest of the current line is empty, the
+test applies to the next line (same behavior as \kbd{=} under \kbd{gp}). The
+following tests can be performed:
 
 \kbd{EMACS}: \kbd{true} if \kbd{gp} is running in an Emacs or TeXmacs shell (see
 \secref{se:emacs}).
