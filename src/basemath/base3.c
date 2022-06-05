@@ -1666,7 +1666,8 @@ oksigns2(long l, GEN signs, long i, long s)
   return signs[i] == s && oksigns(l, signs, i+1, 1-s);
 }
 
-/* true nf, x a ZC (primitive for efficiency), embx its embeddings or NULL */
+/* true nf, x a ZC (primitive for efficiency) which is not a scalar; embx its
+ * embeddings or NULL */
 static int
 nfchecksigns_i(GEN nf, GEN x, GEN embx, GEN signs, GEN archp)
 {
@@ -1797,15 +1798,15 @@ nfsetsigns(GEN nf, GEN signs, GEN x, GEN sarch)
  *   (vector of signs as {0,1}-vector), NULL (totally positive at archp),
  *   or a nonzero number field element (replaced by its signature at archp);
  * - y is a nonzero number field element
- * Return z = y (mod F) with signs(y, archp) = signs(x) (a {0,1}-vector) */
+ * Return z = y (mod F) with signs(y, archp) = signs(x) (a {0,1}-vector).
+ * Not stack-clean */
 GEN
 set_sign_mod_divisor(GEN nf, GEN x, GEN y, GEN sarch)
 {
   GEN archp = sarch_get_archp(sarch);
   if (lg(archp) == 1) return y;
   if (x && typ(x) != t_VECSMALL) x = nfsign_arch(nf, x, archp);
-  y = nf_to_scalar_or_basis(nf,y);
-  return nfsetsigns(nf, x, y, sarch);
+  return nfsetsigns(nf, x, nf_to_scalar_or_basis(nf,y), sarch);
 }
 
 static GEN
@@ -2017,18 +2018,27 @@ idealchinese(GEN nf, GEN x, GEN w)
     long i, r = lg(w);
     F = gel(x1,1);
     for (i=1; i<r; i++)
-      if (!gequal0(gel(w,i)))
+      if (!ZV_equal0(gel(w,i)))
       {
         GEN t = nfmuli(nf, gel(U,i), gel(w,i));
         s = s? ZC_add(s,t): t;
       }
-    if (s) s = ZC_reducemodmatrix(s, F);
+    if (s)
+    {
+      s = ZC_reducemodmatrix(s, F);
+      if (ZV_isscalar(s)) s = icopy(gel(s,1));
+    }
   }
-  if (lg(x2) != 1) s = nfsetsigns(nf, gel(x2,1), s? s: gen_0, x2);
-  if (!s) { s = zerocol(nf_get_degree(nf)); dw = NULL; }
-
-  if (dw) s = RgC_Rg_div(s,dw);
-  return gerepileupto(av, s);
+  if (lg(x2) != 1)
+  {
+    s = nfsetsigns(nf, gel(x2,1), s? s: gen_0, x2);
+    if (typ(s) == t_COL && QV_isscalar(s))
+    {
+      s = gel(s,1); if (!dw) s = gcopy(s);
+    }
+  }
+  else if (!s) return gc_const(av, gen_0);
+  return gerepileupto(av, dw? gdiv(s, dw): s);
 }
 
 /*************************************************************************/

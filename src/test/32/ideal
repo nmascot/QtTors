@@ -203,7 +203,7 @@ matrix(0,2)
 [-85124952/2401, 33204681/2401]~
 [249/2401, 1644/2401]~
 [7, 14]~
-[14, 0]~
+14
 [1, 0]
 [2, [0, -4]~]
 [3, [8/125, 0]~]
@@ -214,9 +214,9 @@ matrix(0,2)
 [15, 4]~
 [-3, 4]~
 [-15, 4]~
-[-2]~
-[2]~
-[0]~
+-2
+2
+0
 1
 
 [75 22 41]
@@ -324,4 +324,4 @@ matrix(0,2)
   ***   at top-level: idealstar(K,[4,Vecsmall([1,1])])
   ***                 ^--------------------------------
   *** idealstar: incorrect type in Idealstar [incorrect archimedean component] (t_VECSMALL).
-Total time spent: 127
+Total time spent: 112

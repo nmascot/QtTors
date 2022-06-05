@@ -162,3 +162,7 @@ nfeltispower(nfinit(x^4-2),x,2^64-100)
 K=nfinit(x^2+1357*x+3299);
 idealcoprime(K,10,60)
 idealcoprime(K,10,10)
+
+K=nfinit(x^2+134*x+712);
+F=idealfactor(K, idealhnf(K, 2, 1/2*x+36));
+idealchinese(K, [F, [1,1]], [1/2*x+32])
