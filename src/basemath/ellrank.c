@@ -732,8 +732,8 @@ quartic_minim_all(GEN F, GEN discF)
   GEN IJ = quartic_IJ(F), I = gel(IJ,1), J = gel(IJ,2);
   GEN g = Z_ppo(gcdii(I,J), gel(discF,1));
   GEN plist = ZV_sort_uniq(shallowconcat(gel(absZ_factor(g),1), gel(discF,2)));
-  GEN W = hyperellminimalmodel(F, plist);
-  GEN PQ = gel(W,1), P = gel(PQ,1), Q = gel(PQ,2), C = gel(W,2);
+  GEN W, C, PQ = hyperellminimalmodel(F, &C, plist);
+  GEN P = gel(PQ,1), Q = gel(PQ,2);
   if (signe(Q)==0)
     W = mkvec2(P, C);
   else

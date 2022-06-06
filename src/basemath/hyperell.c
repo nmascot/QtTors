@@ -1128,20 +1128,15 @@ minimalmodel_getH(GEN W, GEN Qn, GEN e, GEN M, long g, long v)
                           RgX_RgM2_eval(Q, A, Bp, gr+1)), -1);
 }
 
-GEN
-hyperellminimalmodel(GEN W, GEN pr)
+static void
+check_hyperell_Q(const char *fun, GEN *pW, GEN *pF)
 {
-  pari_sp av = avma;
-  GEN Wr, F, WM2, F2, W2, M2, Modd, Wf, ef, Mf, Hf;
-  long d, g, v;
-  F = check_hyperell(W);
+  GEN W = *pW, F = check_hyperell(W);
+  long v = varn(F);
   if (!F || signe(F)==0 || !RgX_is_ZX(F))
-    pari_err_TYPE("hyperellminimalmodel",W);
-  d = degpol(F); g = ((d+1)>>1)-1; v = varn(F);
-  if (pr && (!is_vec_t(typ(pr)) || !RgV_is_ZV(pr)))
-    pari_err_TYPE("hyperellminimalmodel",pr);
+    pari_err_TYPE(fun, W);
   if (signe(ZX_disc(F))==0)
-    pari_err_DOMAIN("hyperellminimalmodel","disc(W)","==",gen_0,W);
+    pari_err_DOMAIN(fun,"disc(W)","==",gen_0,W);
   if (typ(W)==t_POL) W = mkvec2(W, pol_0(v));
   else
   {
@@ -1149,9 +1144,20 @@ hyperellminimalmodel(GEN W, GEN pr)
     if( typ(P)!=t_POL) P = scalarpol(P, v);
     if( typ(Q)!=t_POL) Q = scalarpol(Q, v);
     if (!RgX_is_ZX(P) || !RgX_is_ZX(Q))
-      pari_err_TYPE("hyperellminimalmodel",F);
+      pari_err_TYPE(fun,F);
     W = mkvec2(P, Q);
   }
+  *pW = W; *pF = F;
+}
+
+GEN
+hyperellminimalmodel(GEN W, GEN *pM, GEN pr)
+{
+  pari_sp av = avma;
+  GEN Wr, F, WM2, F2, W2, M2, Modd, Wf, ef, Mf, Hf;
+  long d, g, v;
+  check_hyperell_Q("hyperellminimalmodel",&W, &F);
+  d = degpol(F); g = ((d+1)>>1)-1; v = varn(F);
   Wr = hyperell_redQ(W);
   if (!pr || RgV_isin(pr, gen_2))
   {
@@ -1164,16 +1170,18 @@ hyperellminimalmodel(GEN W, GEN pr)
   }
   Modd = gel(algo57(F2, g, pr), 2);
   Wf = hyperell_redQ(minimalmodel_merge(W2, Modd, g, v));
+  if (!pM) return gerepilecopy(av, Wf);
   ef = mulii(gel(M2,1), gel(Modd,1));
   Mf = ZM2_mul(gel(M2,2), gel(Modd,2));
   Hf = minimalmodel_getH(W, gel(Wf,2), ef, Mf, g, v);
-  return gerepilecopy(av, mkvec2(Wf, mkvec3(ef, Mf, Hf)));
+  *pM =  mkvec3(ef, Mf, Hf);
+  return gc_all(av, pM ? 2: 1, &Wf, pM);
 }
 
 GEN
 hyperellminimaldisc(GEN W, GEN pr)
 {
   pari_sp av = avma;
-  GEN C = hyperellminimalmodel(W, pr);
-  return gerepileuptoint(av, hyperelldisc(gel(C,1)));
+  GEN C = hyperellminimalmodel(W, NULL, pr);
+  return gerepileuptoint(av, hyperelldisc(C));
 }

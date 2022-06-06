@@ -2311,7 +2311,7 @@ lfungenus2(GEN G)
   GEN Ldata;
   GEN gr = genus2red(G, NULL);
   GEN N  = gel(gr, 1), M = gel(gr, 2), Q = gel(gr, 3), L = gel(gr, 4);
-  GEN PQ = gel(hyperellminimalmodel(Q,mkvecs(2)),1);
+  GEN PQ = hyperellminimalmodel(Q,NULL,mkvecs(2));
   GEN e;
   long i, lL = lg(L), ram2;
   ram2 = absequaliu(gmael(M,1,1),2);

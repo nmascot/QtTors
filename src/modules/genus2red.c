@@ -2072,7 +2072,7 @@ genus2red(GEN PQ, GEN p)
   GEN P, Q;
   GEN j22, j42, j2j6, a0,a1,a2,a3,a4,a5,a6, V,polr,facto,factp, vecmini, cond;
   long i, l, dd;
-  PQ = gel(hyperellminimalmodel(hyperellintegralmodel(PQ), p ? mkvec(p): p), 1);
+  PQ = hyperellminimalmodel(hyperellintegralmodel(PQ), NULL, p ? mkvec(p): p);
   P = gel(PQ,1);
   Q = gel(PQ,2);
   if (p && typ(p) != t_INT) pari_err_TYPE("genus2red", p);

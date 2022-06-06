@@ -4001,7 +4001,7 @@ GEN     hyperellcharpoly(GEN x);
 GEN     hyperelldisc(GEN x);
 int     hyperellisoncurve(GEN W, GEN P);
 GEN     hyperellminimaldisc(GEN x, GEN pr);
-GEN     hyperellminimalmodel(GEN x, GEN pr);
+GEN     hyperellminimalmodel(GEN x, GEN *pM, GEN pr);
 GEN     nfhyperellpadicfrobenius(GEN H, GEN T, ulong p, long n);
 
 /* hypergeom.c */

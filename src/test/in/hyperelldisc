@@ -34,16 +34,16 @@ pointchange(Po,C)=
 }
 
 W=[subst(polrecip(2176782336*x^6+60466176*x^5+1296*x^2+1),x,81*x+3)-x^6,2*x^3];
-[W2,C]= hyperellminimalmodel(W);
+W2 = hyperellminimalmodel(W, &C);
 P=[241/771,-3207473/458314011];
 Q=pointchange(P,C)
 hyperellisoncurve(W,Q)
 hyperellminimaldisc(W)
 W=1593*x^6+6750*x^5+11817*x^4+10952*x^3+5672*x^2+1560*x+180;
-hyperellminimalmodel(W)
+[hyperellminimalmodel(W,&C),C]
 hyperellminimaldisc(W)
 W=[subst(x^6+2*x^5+x^4+2*x^3+6*x^2+4*x+1,x,(9*x+19)/(3*x+27))*(3*x+27)^6-9*x^10,6*x^5];
-C=hyperellminimalmodel(W); varchange(W,C[2])==C[1]
+WC=hyperellminimalmodel(W,&C); varchange(W,C)==WC
 
 test(g,pp=3,u=2,B1=10,B2=B1) =
 {
@@ -53,14 +53,14 @@ test(g,pp=3,u=2,B1=10,B2=B1) =
   if(de==0,return);
   my(F=factor(2*pp*abs(de))[,1]);
   my(Wt = varchange(W,[1,M,random(-B*x^(g+1))]));
-  my(R = hyperellminimalmodel(W,F));
-  if(denominator(content(apply(content,R[1])))>1,error([W,R]));
-  my(Rt = hyperellminimalmodel(Wt,F));
-  if(denominator(content(apply(content,Rt[1])))>1,error([Wt,Rt]));
-  if (varchange(W,R[2])!=R[1],error("basis change",[W]));
-  if (varchange(Wt,Rt[2])!=Rt[1],error("basis change",[Wt]));
-  my(D1 = hyperelldisc(R[1]));
-  my(Dt = hyperelldisc(Rt[1]));
+  my(C,R = hyperellminimalmodel(W,&C, F));
+  if(denominator(content(apply(content,R)))>1,error([W,R]));
+  my(Ct,Rt = hyperellminimalmodel(Wt,&Ct,F));
+  if(denominator(content(apply(content,Rt)))>1,error([Wt,Rt]));
+  if (varchange(W,C)!=R,error("basis change",[W]));
+  if (varchange(Wt,Ct)!=Rt,error("basis change",[Wt]));
+  my(D1 = hyperelldisc(R));
+  my(Dt = hyperelldisc(Rt));
   if(D1 != Dt,error("bad disc:",[W,Wt,R,Rt,D1,Dt]));
 }
 
