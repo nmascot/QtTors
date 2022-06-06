@@ -473,6 +473,20 @@ file_input(char **s0, int junk, input_method *IM, filtre_t *F)
   return file_getline(F->buf, s0, IM);
 }
 
+static void
+runaway_close(filtre_t *F)
+{
+  if (F->in_string)
+  {
+    pari_warn(warner,"run-away string. Closing it");
+    F->in_string = 0;
+  }
+  if (F->in_comment)
+  {
+    pari_warn(warner,"run-away comment. Closing it");
+    F->in_comment = 0;
+  }
+}
 /* Read a "complete line" and filter it. Return: 0 if EOF, 1 otherwise */
 int
 input_loop(filtre_t *F, input_method *IM)
@@ -481,20 +495,7 @@ input_loop(filtre_t *F, input_method *IM)
   char *to_read, *s = b->buf;
 
   /* read first line */
-  if (! (to_read = IM->getline(&s,1, IM, F)) )
-  {
-    if (F->in_string)
-    {
-      pari_warn(warner,"run-away string. Closing it");
-      F->in_string = 0;
-    }
-    if (F->in_comment)
-    {
-      pari_warn(warner,"run-away comment. Closing it");
-      F->in_comment = 0;
-    }
-    return 0;
-  }
+  if (! (to_read = IM->getline(&s,1, IM, F)) ) { runaway_close(F); return 0; }
 
   /* buffer is not empty, init filter */
   F->in_string = 0;
@@ -512,7 +513,11 @@ input_loop(filtre_t *F, input_method *IM)
     /* read continuation line */
     s = F->end;
     to_read = IM->getline(&s,0, IM, F);
-    if (!to_read) break;
+    if (!to_read)
+    {
+      if (!*(b->buf)) runaway_close(F);
+      break;
+    }
   }
   return 1;
 }
