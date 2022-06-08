@@ -816,15 +816,15 @@ hyperellisoncurve(GEN W, GEN P)
 {
   pari_sp av = avma;
   long res;
-  GEN Px, Py;
+  GEN x, y;
   if (typ(P)!=t_VEC || lg(P)!=3) pari_err_TYPE("hyperellisoncurve",P);
-  Px = gel(P,1); Py = gel(P,2);
+  x = gel(P,1); y = gel(P,2);
   if (typ(W)==t_POL)
-    res = gequal(gsqr(Py),poleval(W,Px));
+    res = gequal(gsqr(y), poleval(W,x));
   else
   {
     if (typ(W)!=t_VEC || lg(W)!=3) pari_err_TYPE("hyperellisoncurve",W);
-    res = gequal(gmul(Py, gadd(Py,poleval(gel(W,2), Px))), poleval(gel(W,1), Px));
+    res = gequal(gmul(y, gadd(y,poleval(gel(W,2), x))), poleval(gel(W,1), x));
   }
   return gc_int(av, res);
 }
