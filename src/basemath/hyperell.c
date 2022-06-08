@@ -1175,7 +1175,7 @@ hyperellminimalmodel(GEN W, GEN *pM, GEN pr)
   Mf = ZM2_mul(gel(M2,2), gel(Modd,2));
   Hf = minimalmodel_getH(W, gel(Wf,2), ef, Mf, g, v);
   *pM =  mkvec3(ef, Mf, Hf);
-  return gc_all(av, pM ? 2: 1, &Wf, pM);
+  return gc_all(av, 2, &Wf, pM);
 }
 
 GEN
