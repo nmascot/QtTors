@@ -997,19 +997,18 @@ algo56(GEN W, long g)
 
 /* return the (degree 2) apolar invariant (the nth transvectant of P and P) */
 static GEN
-RgX_apolar(GEN P, long n)
+ZX_apolar(GEN P, long n)
 {
   pari_sp av = avma;
   long d = degpol(P), i;
-  GEN s = gen_0;
-  GEN g = cgetg(n+2,t_VEC);
+  GEN s = gen_0, g = cgetg(n+2,t_VEC);
   gel(g,1) = gen_1;
-  for (i = 1; i <= n; i++)
-    gel(g,i+1) = muliu(gel(g,i),i);
+  for (i = 1; i <= n; i++) gel(g,i+1) = muliu(gel(g,i),i); /* g[i+1] = i! */
   for (i = n-d; i <= d; i++)
   {
-     GEN a = gmul(mulii(gel(g,i+1),gel(g,n-i+1)), gmul(gel(P,i+2),gel(P,n-i+2)));
-     s = odd(i) ? gsub(s, a) : gadd(s, a);
+     GEN a = mulii(mulii(gel(g,i+1),gel(g,n-i+1)),
+                   mulii(gel(P,i+2),gel(P,n-i+2)));
+     s = odd(i)? subii(s, a): addii(s, a);
   }
   return gerepileuptoint(av,s);
 }
@@ -1026,7 +1025,7 @@ algo57(GEN F, long g, GEN pr)
   D = absi(hyperelldisc(F));
   if (!pr)
   {
-    GEN A = gcdii(D, RgX_apolar(F, 2*g+2));
+    GEN A = gcdii(D, ZX_apolar(F, 2*g+2));
     pr = gel(factor(shifti(A, -vali(A))),1);
   }
   l = lg(pr);
