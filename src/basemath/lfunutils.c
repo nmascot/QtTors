@@ -2310,9 +2310,8 @@ lfungenus2(GEN G)
   pari_sp ltop = avma;
   GEN Ldata;
   GEN gr = genus2red(G, NULL);
-  GEN N  = gel(gr, 1), M = gel(gr, 2), Q = gel(gr, 3), L = gel(gr, 4);
-  GEN PQ = hyperellminimalmodel(Q,NULL,mkvecs(2));
-  GEN e;
+  GEN N  = gel(gr, 1), M = gel(gr, 2), PQ = gel(gr, 3), L = gel(gr, 4);
+  GEN e, F = gadd(gsqr(gel(PQ, 2)), gmul2n(gel(PQ, 1), 2));
   long i, lL = lg(L), ram2;
   ram2 = absequaliu(gmael(M,1,1),2);
   if (ram2 && equalis(gmael(M,2,1),-1))
@@ -2324,9 +2323,9 @@ lfungenus2(GEN G)
   {
     GEN Li = gel(L, i);
     GEN p = gel(Li, 1);
-    gel(e, ram2 ? i: i+1) = mkvec2(p, genus2_eulerfact(Q,p));
+    gel(e, ram2 ? i: i+1) = mkvec2(p, genus2_eulerfact(F,p));
   }
-  Ldata = mkvecn(6, tag(mkvec2(Q,e), t_LFUN_GENUS2),
+  Ldata = mkvecn(6, tag(mkvec2(F,e), t_LFUN_GENUS2),
       gen_0, mkvec4(gen_0, gen_0, gen_1, gen_1), gen_2, N, gen_0);
   return gerepilecopy(ltop, Ldata);
 }

@@ -5,6 +5,8 @@ This file lists the incompatible changes between Version 2.x and older versions
      as ellinit ([a1,a2,a3,a4,a6], [a4,a6], Cremona label)
    - default(debugfiles,) is now obsolete, use setdebug("io",)
    - system() now return the shell return value
+   - genus2red 3rd component is now a pair [P,Q] such that y^2+Q*y=P is
+     minimal everywhere.
 
 * Specific to the PARI library:
 ===============================

@@ -296,6 +296,8 @@ BA  37- system now return the shell return value.
     40- grndtoi(GEN x, long *e): allow setting e = NULL
 BA  41- [libpari] pari_thread_start: do not allow threads started this way to
         launch more threads.
+BA  42- genus2red: 3rd component is now a pair [P,Q] such that y^2+Q*y=P is
+        minimal everywhere.
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,
