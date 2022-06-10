@@ -272,11 +272,17 @@ eulerf_shift(GEN an, GEN p, long prec)
 static GEN
 eulerf_hgm(GEN an, GEN p)
 {
-  GEN H = gel(an,1), t = gmael(an,2,1), L = gmael(an,2,2);
-  long i, l = lg(L);
-  for (i = 1; i < l; i++) /* wild primes */
-    if (equalii(p, gmael(L, i, 1))) break;
-  return i == l? ginv(hgmeulerfactor(H, t, itos(p), NULL)): gmael(L,i,2);
+  GEN H = gel(an,1), t = gel(an,2);
+  if (typ(t)==t_VEC && lg(t)==3)
+  {
+    GEN L = gel(t,2);
+    long i, l = lg(L);
+    t = gel(t,1);
+    for (i = 1; i < l; i++) /* wild primes */
+      if (equalii(p, gmael(L, i, 1))) break;
+    if (i<l) return gmael(L,i,2);
+  }
+  return ginv(hgmeulerfactor(H, t, itos(p), NULL));
 }
 
 static GEN
