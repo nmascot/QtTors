@@ -1206,8 +1206,7 @@ redqfbsplit(GEN a, GEN b, GEN c, GEN d)
 static GEN
 polreduce(GEN P, GEN M)
 {
-  long v = varn(P), d = degpol(P);
-  if(odd(d)) d++;
+  long v = varn(P), dP = degpol(P), d = odd(dP) ? dP+1: dP;
   GEN A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
   GEN B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
   return RgX_RgM2_eval(P, A, gpowers(B, d), d);
