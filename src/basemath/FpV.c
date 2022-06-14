@@ -36,19 +36,6 @@ GEN
 FpC_center(GEN x, GEN p, GEN pov2)
 { pari_APPLY_type(t_COL, Fp_center(gel(x,i), p, pov2)) }
 
-/* assume 0 <= u < p and ps2 = p>>1 */
-INLINE void
-Fp_center_inplace(GEN u, GEN p, GEN ps2)
-{ if (abscmpii(u,ps2) > 0) subiiz(u,p,u); }
-
-void
-FpC_center_inplace(GEN z, GEN p, GEN ps2)
-{
-  long i,l = lg(z);
-  for (i=1; i<l; i++)
-    Fp_center_inplace(gel(z,i), p, ps2);
-}
-
 GEN
 Flv_center(GEN x, ulong p, ulong ps2)
 { pari_APPLY_ulong(Fl_center(uel(x,i),p,ps2)) }
@@ -62,11 +49,41 @@ GEN
 FpM_center(GEN x, GEN p, GEN pov2)
 { pari_APPLY_same(FpC_center(gel(x,i), p,pov2)) }
 
+/* p != 3; assume entries in [0,p[ and ps2 = p>>1. */
+static void
+_FpC_center_inplace(GEN z, GEN p, GEN ps2)
+{
+  long i, l = lg(z);
+  for (i = 1; i < l; i++)
+  { /* HACK: assume p != 3, which ensures u = gen_[0-2] is never written to */
+    GEN u = gel(z,i);
+    if (abscmpii(u, ps2) > 0) subiiz(u, p, u);
+  }
+}
+static void
+_F3C_center_inplace(GEN z)
+{
+  long i, l = lg(z);
+  for (i = 1; i < l; i++) /* z[i] = 0, 1 : no-op */
+    if (equaliu(gel(z,i), 2)) gel(z,i) = gen_m1;
+}
+void
+FpC_center_inplace(GEN z, GEN p, GEN ps2)
+{
+  if (equaliu(p, 3))
+    _F3C_center_inplace(z);
+  else
+    _FpC_center_inplace(z, p, ps2);
+}
+
 void
 FpM_center_inplace(GEN z, GEN p, GEN pov2)
 {
   long i, l = lg(z);
-  for (i=1; i<l; i++) FpC_center_inplace(gel(z,i), p, pov2);
+  if (equaliu(p, 3))
+    for (i = 1; i < l; i++) _F3C_center_inplace(gel(z,i));
+  else
+    for (i = 1; i < l; i++) _FpC_center_inplace(gel(z,i), p, pov2);
 }
 GEN
 Flm_center(GEN x, ulong p, ulong ps2)

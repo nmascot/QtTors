@@ -446,6 +446,17 @@ error("inconsistent dimensions in gtrace.")
 
 [0 1]
 
+
+[ 266 -43 -104 -46]
+
+[-183  30   72  31]
+
+[ -22   2    8   5]
+
+[ 314 -49 -123 -55]
+
+[ 100 -15  -39 -18]
+
 lindep:
 [1, 0, 1]~
 [1, -2, 1]~
@@ -668,4 +679,4 @@ matrix(0,2)
   ***   at top-level: matreduce([1,x;1,y])
   ***                 ^--------------------
   *** matreduce: incorrect type in matreduce (t_MAT).
-Total time spent: 464
+Total time spent: 514
