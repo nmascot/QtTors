@@ -2213,6 +2213,8 @@ RgXQX_mul(GEN x, GEN y, GEN T)
 GEN
 RgX_Rg_mul(GEN x, GEN y) { pari_APPLY_pol(gmul(y, gel(x,i))); }
 GEN
+RgX_mul2n(GEN x, long n) { pari_APPLY_pol(gmul2n(gel(x,i), n)); }
+GEN
 RgX_muls(GEN x, long y) { pari_APPLY_pol(gmulsg(y, gel(x,i))); }
 GEN
 RgXQX_RgXQ_mul(GEN x, GEN y, GEN T) { return RgXQX_red(RgX_Rg_mul(x,y), T); }
