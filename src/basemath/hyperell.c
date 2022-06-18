@@ -1331,6 +1331,6 @@ hyperellchangecurve(GEN W, GEN C)
   P = RgX_RgM2_eval(P, A, Bp, 2*g+2);
   Q = RgX_RgM2_eval(Q, A, Bp, g+1);
   P = RgX_Rg_div(RgX_sub(P, RgX_mul(H,RgX_add(Q,H))), gsqr(e));
-  Q = RgX_Rg_div(RgX_add(Q, RgX_shift(H,1)), e);
+  Q = RgX_Rg_div(RgX_add(Q, RgX_mul2n(H,1)), e);
   return gerepilecopy(av, mkvec2(P,Q));
 }

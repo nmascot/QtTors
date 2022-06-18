@@ -11,17 +11,6 @@ genus(W)=
   my(R = 4*P+Q^2); (poldegree(R)+1)\2-1;
 }
 
-varchange(W,C)=
-{
-  my([P,Q] = W, g=genus(W), [e,M,H] = C);
-  my(ga=max((poldegree(P)+1)\2,poldegree(Q))-1);
-  my([a,c]=M[,1],[b,d]=M[,2]);
-  my(U=(c*x+d)^(ga-g));
-  P=subst(P,x,(a*x+b)/(c*x+d))*(c*x+d)^(2*ga+2);
-  Q=subst(Q,x,(a*x+b)/(c*x+d))*(c*x+d)^(ga+1);
-  [(P  -Q*H-H^2)/e^2/U^2, (Q+2*H)/e/U];
-}
-
 pointchange(Po,C)=
 {
   my([x,y]=Po);
@@ -43,7 +32,7 @@ W=1593*x^6+6750*x^5+11817*x^4+10952*x^3+5672*x^2+1560*x+180;
 [hyperellminimalmodel(W,&C),C]
 hyperellminimaldisc(W)
 W=[subst(x^6+2*x^5+x^4+2*x^3+6*x^2+4*x+1,x,(9*x+19)/(3*x+27))*(3*x+27)^6,0];
-WC=hyperellminimalmodel(W,&C); varchange(W,C)==WC
+WC=hyperellminimalmodel(W,&C); hyperellchangecurve(W,C)==WC
 
 test(g,pp=3,u=2,B1=10,B2=B1) =
 {
@@ -52,13 +41,13 @@ test(g,pp=3,u=2,B1=10,B2=B1) =
   my(M = matrix(2,2,i,j,random(-B1)), de=matdet(M));
   if(de==0,return);
   my(F=factor(2*pp*abs(de))[,1]);
-  my(Wt = varchange(W,[1,M,random(-B*x^(g+1))]));
+  my(Wt = hyperellchangecurve(W,[1,M,random(-B*x^(g+1))]));
   my(C,R = hyperellminimalmodel(W,&C, F));
   if(denominator(content(apply(content,R)))>1,error([W,R]));
   my(Ct,Rt = hyperellminimalmodel(Wt,&Ct,F));
   if(denominator(content(apply(content,Rt)))>1,error([Wt,Rt]));
-  if (varchange(W,C)!=R,error("basis change",[W]));
-  if (varchange(Wt,Ct)!=Rt,error("basis change",[Wt]));
+  if (hyperellchangecurve(W,C)!=R,error("basis change",[W]));
+  if (hyperellchangecurve(Wt,Ct)!=Rt,error("basis change",[Wt]));
   my(D1 = hyperelldisc(R));
   my(Dt = hyperelldisc(Rt));
   if(D1 != Dt,error("bad disc:",[W,Wt,R,Rt,D1,Dt]));
