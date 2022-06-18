@@ -31,8 +31,10 @@ Doc:
  ? W = [x^6+216*x^3+324,0];
  ? D = hyperelldisc(W)
  %2 = 1828422898924853919744000
- ? Wn = hyperellminimalmodel(W)
- %3 = [2*x^6+18*x^3+1,-x^3];
+ ? Wn = hyperellminimalmodel(W,&M)
+ %3 = [2*x^6+18*x^3+1,x^3];
  ? hyperelldisc(Wn)
  %4 = 29530050606000
+ ? hyperellchangecurve(W, M)
+ %5 = [2*x^6+18*x^3+1,x^3]
  @eprog
