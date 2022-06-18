@@ -23,11 +23,13 @@ Doc:
  This function implements an algorithm of Plesken and Souvignier, following
  Souvignier's implementation.
  \bprog
- ? K=matkerint(Mat(concat([vector(23,i,2*i+1),51,145])));
- ? M=matdiagonal(vector(25,i,if(i==25,-1,1)));
- ? L24 = K~*M*K; \\ The Leech lattice
- ? Q = qfauto(L24); Q[1]
+ ? K = matkerint(Mat(concat([vector(23,i,2*i+1), 51, 145])));
+ ? M = matdiagonal(vector(25,i,if(i==25,-1,1)));
+ ? L24 = K~ * M * K; \\ the Leech lattice
+ ? [o,g] = qfauto(L24); o
  %4 = 8315553613086720000
+ ? #g
+ %5 = 2
  @eprog
 
 Variant: The function \fun{GEN}{qfauto}{GEN G, GEN fl} is also available
