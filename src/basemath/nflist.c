@@ -3091,7 +3091,11 @@ A5vec(GEN X, GEN Xinf, long s, long fl)
   GEN L1, L5;
   const char *suf = fl? "cond": "";
 
-  if (!fl && cmpii(X, powuu(10,12)) > 0) pari_err(e_MISC, "A5 table too short");
+  if (!fl)
+  {
+    GEN bnd = s==0 ? shifti(powuu(10,11),1): powuu(10,8);
+    if (cmpii(X, bnd) > 0) pari_err_DOMAIN("nflist(A5)", "N", ">", bnd, X);
+  }
   L1 = L5 = NULL;
   if (s <= 0) L5 = vecslicebyX(A5file(suf, 0), Xinf, X, fl);
   if (s) L1 = vecslicebyX(A5file(suf, 2), Xinf, X, fl);
