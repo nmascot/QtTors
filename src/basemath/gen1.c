@@ -2058,18 +2058,22 @@ gmul(GEN x, GEN y)
       switch (ty)
       {
         case t_SER:
-          if (lg(x) == 2) return zeropol(vx);
-          if (lg(y) == 2) return zeroser(vx, valp(y)+RgX_val(x));
-          av = avma;
-          i = RgX_valrem(x, &x);
-          if (degpol(x)) {
-            ly = lg(y); z = init_ser(ly, vx, i + valp(y));
+        {
+          long v;
+          av = avma; v = RgX_valrem(x, &x);
+          if (v == LONG_MAX) return gerepileupto(av, Rg_get_0(x));
+          v += valp(y); ly = lg(y);
+          if (ly == 2) { set_avma(av); return zeroser(vx, v); }
+          if (degpol(x))
+          {
+            z = init_ser(ly, vx, v);
             x = RgXn_mul(x, ser2pol_i(y, ly), ly-2);
             return gerepilecopy(av, fill_ser(z, x));
           }
-          /* take advantage of x = c*t^i */
+          /* take advantage of x = c*t^v */
           set_avma(av); y = mul_ser_scal(y, gel(x,2));
-          setvalp(y, i + valp(y)); return y;
+          setvalp(y, v); return y;
+        }
 
         case t_RFRAC: return mul_rfrac_scal(gel(y,1),gel(y,2), x);
       }

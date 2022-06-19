@@ -32,14 +32,12 @@ serchop(s)
 serchop(Mod(0,3)+O(x^2))
 serchop(Mod(0,3)*x+O(x^2))
 s = Mod(0,3)+O(x); s * s
-0 * (1 + O(x))
-Pol(0) * (1 + O(x))
-Mod(0,3) * (1 + O(x))
-0. * (1 + O(x))
-Pol(0) / (1 + O(x))
-0 / (1 + O(x))
-Mod(0,3) / (1 + O(x))
-0. / (1 + O(x))
+s = 1 + O(x);
+0 * s
+[Pol(0) * s, Pol(0) / s]
+[Mod(0,3) * s, Mod(0,3) / s]
+[Pol(Mod(0,3)) * s, Pol(Mod(0,3)) / s]
+[0. * s, 0. / s]
 
 Ser(Qfb(1,2,3))
 Ser(Qfb(1,2,3),, 5.5)
