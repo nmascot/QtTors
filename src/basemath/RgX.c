@@ -973,7 +973,11 @@ RgX_valrem(GEN x, GEN *Z)
   for (i = 2; i < lx; i++)
     if (!isexactzero(gel(x,i))) break;
   /* possible with nonrational zeros */
-  if (i == lx) { *Z = pol_0(varn(x)); return LONG_MAX; }
+  if (i == lx)
+  {
+    *Z = scalarpol_shallow(Rg_get_0(x), varn(x));
+    return LONG_MAX;
+  }
   v = i - 2;
   *Z = RgX_shift_shallow(x, -v);
   return v;

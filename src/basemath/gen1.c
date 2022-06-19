@@ -1335,7 +1335,7 @@ static GEN
 mul_ser_scal(GEN y, GEN x) {
   long l, i;
   GEN z;
-  if (isrationalzero(x)) return gmul(Rg_get_0(y), x);
+  if (isexactzero(x)) return gmul(Rg_get_0(y), x);
   if (ser_isexactzero(y))
   {
     z = scalarser(lg(y) == 2? Rg_get_0(x): gmul(gel(y,2), x), varn(y), 1);
@@ -2763,11 +2763,12 @@ gdiv(GEN x, GEN y)
       {
         case t_SER:
         {
-          long v = - valp(y);
           GEN y0 = y;
-          ly = lg(y);
-          if (ly == 2) return zeroser(vx, v + RgX_val(x));
-          av = avma; v += RgX_valrem(x, &x);
+          long v;
+          ly = lg(y); /* > 2 */
+          av = avma; v = RgX_valrem(x, &x);
+          if (v == LONG_MAX) return gerepileupto(av, Rg_get_0(x));
+          v -= valp(y);
           y = ser2pol_approx(y, ly, &i); if (i) { ly -= i; v -= i; }
           if (ly == 2) pari_err_INV("gdiv", y0);
           z = init_ser(ly, vx, v);
