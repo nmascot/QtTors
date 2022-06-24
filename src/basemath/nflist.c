@@ -3130,7 +3130,7 @@ veccond_to_A5(GEN D, long s)
   W = cgetg(lD, t_VEC);
   for (i = 1, j = 1; i < l; i++)
   {
-    ulong e = itou(gmael(V,i,2));
+    long e = itou(gmael(V,i,2));
     if (e < D[j]) continue;
     while (j < lD && e > D[j]) j++;
     if (j==lD) break;
