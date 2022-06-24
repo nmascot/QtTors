@@ -3122,6 +3122,8 @@ makeA5(GEN N, long s) { return makeA5_i(N, s, 0); }
 static GEN
 makeA5cond(GEN N, long s) { return makeA5_i(N, s, 1); }
 
+/* D a sorted t_VECSMALL of conductors; return all [T, d] with d = D[i]
+ * for some i and Gal(T) = A5 with s complex places */
 GEN
 veccond_to_A5(GEN D, long s)
 {

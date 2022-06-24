@@ -13082,7 +13082,7 @@ search_solvable(GEN LG, GEN mf, GEN F, long prec)
 }
 
 static GEN
-search_A5(GEN mf, GEN F, long prec)
+search_A5(GEN mf, GEN F)
 {
   GEN CHI = MF_get_CHI(mf), O, P, L;
   long N = MF_get_N(mf), i, j, lL, nd;
@@ -13101,18 +13101,16 @@ search_A5(GEN mf, GEN F, long prec)
     {
       ulong p = P[i], f = O[i];
       for (j = 1; j < lL; j++)
-        if(gel(L,j))
+        if (gel(L,j))
         {
-          GEN pr = ZpX_primedec(gmael(L,j,1), utoi(p));
-          if (!equaliu(vecmax(gel(pr,1)), f))
-          {
-             gel(L,j) = NULL; nd--;
-          }
+          GEN FE = ZpX_primedec(gmael(L,j,1), utoi(p)), F = gel(FE,1);
+          long nF = lg(F)-1;
+          if (!equaliu(gel(F, nF), f)) { gel(L,j) = NULL; nd--; }
         }
       if (nd <= 1) break;
     }
   }
-  for (j = 1; j<lL; j++)
+  for (j = 1; j < lL; j++)
     if (gel(L,j)) return gmael(L,j,1);
   return NULL;
 }
@@ -13122,15 +13120,15 @@ mfgaloisprojrep(GEN mf, GEN F, long prec)
 {
   pari_sp av = avma;
   GEN LG = NULL;
-  long mft;
   if (!checkMF_i(mf) && !checkmf_i(F)) pari_err_TYPE("mfgaloisrep", F);
-  mft = itos(mfgaloistype(mf,F));
-  if (mft == -12 || mft == 0)
-    LG = mkvec2(mkvecsmall2(3,1), mkvecsmall2(2,2));
-  else if (mft == -24)
-    LG = mkvec3(mkvecsmall2(2,1), mkvecsmall2(3,1), mkvecsmall2(2,2));
-  else if (mft == -60)
-    return gerepilecopy(av, search_A5(mf, F, prec));
-  else pari_err_IMPL("mfgaloisprojrep for types D_n");
+  switch( itos(mfgaloistype(mf,F)) )
+  {
+    case 0: case -12:
+      LG = mkvec2(mkvecsmall2(3,1), mkvecsmall2(2,2)); break;
+    case -24:
+      LG = mkvec3(mkvecsmall2(2,1), mkvecsmall2(3,1), mkvecsmall2(2,2)); break;
+    case -60: return gerepilecopy(av, search_A5(mf, F));
+    default: pari_err_IMPL("mfgaloisprojrep for types D_n");
+  }
   return gerepilecopy(av, search_solvable(LG, mf, F, prec));
 }
