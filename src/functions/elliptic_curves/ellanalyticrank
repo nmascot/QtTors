@@ -8,7 +8,7 @@ Help: ellanalyticrank(E, {eps}): returns the order of vanishing at s=1
  value less than eps is zero. If no value of eps is given, 2^(-bitprecision/2)
  is used.
 Doc: returns the order of vanishing at $s=1$ of the $L$-function of the
- elliptic curve $E$ and the value of the first nonzero derivative. To
+ elliptic curve $E/\Q$ and the value of the first nonzero derivative. To
  determine this order, it is assumed that any value less than \kbd{eps} is
  zero. If \kbd{eps} is omitted, $2^{-b/2}$ is used, where $b$
  is the current bit precision.
@@ -25,4 +25,6 @@ Doc: returns the order of vanishing at $s=1$ of the $L$-function of the
  ? E = ellinit("5077a1"); \\ rank 3
  ? ellanalyticrank(E)
  %8 = [3, 10.39109940071580413875185035]
- @eprog
+ @eprog\noindent Analogous and more general functionalities for $E$
+ defined over general number fields are available through \kbd{lfun}
+ and \kbd{lfunorderzero}.
