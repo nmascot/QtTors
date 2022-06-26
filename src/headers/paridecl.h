@@ -5795,6 +5795,7 @@ INLINE GEN    rtor(GEN x, long prec);
 INLINE long   sdivsi(long x, GEN y);
 INLINE long   sdivsi_rem(long x, GEN y, long *rem);
 INLINE long   sdivss_rem(long x, long y, long *rem);
+INLINE ulong  get_avma(void);
 INLINE void   set_avma(ulong av);
 INLINE ulong  uabsdiviu_rem(GEN n, ulong d, ulong *r);
 INLINE ulong  udivuu_rem(ulong x, ulong y, ulong *r);

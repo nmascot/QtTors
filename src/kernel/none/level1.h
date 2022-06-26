@@ -99,6 +99,8 @@ affrr_fixlg(GEN y, GEN z) { fixlg(z, lg(y)); affrr(y, z); }
 /*                       ALLOCATE ON STACK                         */
 /*                                                                 */
 /*******************************************************************/
+INLINE ulong
+get_avma(void) { return avma; }
 INLINE void
 set_avma(ulong av) { avma = av; }
 
