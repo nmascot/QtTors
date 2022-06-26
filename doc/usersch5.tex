@@ -11503,6 +11503,10 @@ to a \emph{shallow} \typ{SER} of length~$l\geq 2$.
 creates a \typ{SER} of length~$l\geq 2$ congruent to $F$. Not memory-clean
 but suitable for \kbd{gerepileupto}.
 
+\fun{GEN}{rfrac_to_ser_i}{GEN F, long l} internal variant of
+\kbd{rfrac\_to\_ser}, neither memory-clean nor suitable for
+\kbd{gerepileupto}.
+
 \fun{GEN}{rfracrecip_to_ser_absolute}{GEN F, long d} applied to a
 \typ{RFRAC}~$F$, creates the \typ{SER} $F(1/t) + O(t^d)$. Note that
 we use absolute and not relative precision here.
