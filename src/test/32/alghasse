@@ -176,4 +176,5 @@ degree bug
   *** alginit: sorry, nfgrunwaldwang for nonprime degree is not yet implemented.
 2 2 2 2 2 2 2 2 2 2 
 infinite loop in GW
-Total time spent: 2756
+inefficiency in backtrackfacto
+Total time spent: 2791

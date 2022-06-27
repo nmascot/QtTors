@@ -304,6 +304,16 @@ alglat_get_scalar(GEN lat) { return gel(lat,2); }
 
 /** ADDITIONAL **/
 
+/* is N=smooth*prime? */
+static int Z_easyfactor(GEN N, ulong lim)
+{
+  GEN fa;
+  if (lgefint(N) <= 3) return 1;
+  fa = absZ_factor_limit(N, lim);
+  fa = gel(fa,1);
+  return BPSW_psp(gel(fa,lg(fa)-1));
+}
+
 /* no garbage collection */
 static GEN
 backtrackfacto(GEN y0, long n, GEN red, GEN pl, GEN nf, GEN data, int (*test)(GEN,GEN), GEN* fa, GEN N, GEN I)
@@ -332,7 +342,7 @@ backtrackfacto(GEN y0, long n, GEN red, GEN pl, GEN nf, GEN data, int (*test)(GE
       ny = absi_shallow(nfnorm(nf, y1));
       if (!signe(ny)) continue;
       ny = diviiexact(ny, gcdii(ny, N));
-      if (!Z_issmooth(ny, lim)) continue;
+      if (!Z_easyfactor(ny, lim)) continue;
 
       y2 = idealdivexact(nf, y1, idealadd(nf,y1,I));
       *fa = idealfactor(nf, y2);

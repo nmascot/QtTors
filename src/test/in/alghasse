@@ -287,7 +287,10 @@ F=nfinit(y^4 - y^3 - 3*y^2 + y + 1);
 P=nfgrunwaldwang(F, [], Vecsmall([]), Vecsmall([-1, 0, -1, 0]));
 P=nfgrunwaldwang(F, [], Vecsmall([]), Vecsmall([0, 0, -1, 0]));
 
-
+print("inefficiency in backtrackfacto");
+F=nfinit(y^5-y^4-3*y^2+1);
+setrand(5)
+alginit(F, [2, [[], []], [1,1,0]],,0);
 
 
 
