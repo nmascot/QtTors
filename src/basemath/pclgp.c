@@ -80,14 +80,49 @@ FpX_factcyclo(ulong n, GEN p, ulong m, ulong flag)
 /* G=<s> is a cyclic group of order n and t=s^(-1).
  *  convert sum_i a_i*s^i to sum_i b_i*t^i */
 static GEN
-Flx_recip1(GEN x, long n)
+Flx_recip1_inplace(GEN x, long pn)
 {
-  long i, lx = lg(x), ly = n+2;
-  GEN y = const_vecsmall(ly, 0);
-  y[1] = x[1];
-  y[2] = x[2];
-  for (i=3; i<lx; i++) y[ly+2-i] = x[i];
-  return Flx_renormalize(y, ly);
+  long i, lx = lg(x);
+  if(lx-2 != pn) /* This case scarcely occurs */
+  {
+    long ly = pn+2;
+    GEN y = const_vecsmall(ly, 0);
+    y[1] = x[1];y[2] = x[2];
+    for(i=3;i<lx;i++) y[ly+2-i] = x[i];
+    return Flx_renormalize(y, ly);
+  }
+  else /* almost all cases */
+  {
+    long t, mid = (lx+1)>>1;
+    for(i=3;i<=mid;i++)
+    {
+      t = x[i];x[i] = x[lx+2-i];x[lx+2-i] = t;
+    }
+    return Flx_renormalize(x, lx);
+  }
+}
+
+/* Return h^degpol(P) P(x / h) */
+static GEN
+Flx_rescale_inplace(GEN P, ulong h, ulong p)
+{
+  long i, l = lg(P);
+  ulong hi = h;
+  for (i=l-2; i>=2; i--)
+  {
+    P[i] = Fl_mul(P[i], hi, p);
+    if (i == 2) break;
+    hi = Fl_mul(hi,h, p);
+  }
+  return P;
+}
+
+static GEN
+zx_to_Flx_inplace(GEN x, ulong p)
+{
+  long i, lx = lg(x);
+  for (i=2; i<lx; i++) uel(x,i) = umodsu(x[i], p);
+  return Flx_renormalize(x, lx);
 }
 
 /* zero pol of n components (i.e. deg=n-1). need to pass to ZX_renormalize */
@@ -862,14 +897,14 @@ realquadstkpol(long p, long m, long n)
   {
     chi = set_quad_chi_2(-m);
     stk = quadstk2(-m, n, chi);
-    stk = zx_to_Flx(stk, pn);
+    stk = zx_to_Flx_inplace(stk, pn);
   }
   else if (p==3 && m%3==0 && kross(-m/3,3)==1)
   {
     long m3 = m/3;
     chi = set_quad_chi_2(-m3);
     stk = quadstkp(3, -m3, n, chi);
-    stk = zx_to_Flx(stk, pn);
+    stk = zx_to_Flx_inplace(stk, pn);
   }
   else
   {
@@ -882,7 +917,7 @@ realquadstkpol(long p, long m, long n)
     stk = zxX_to_FlxX(stk, pn);  /* approx. */
     stk = FlxY_evalx(stk, x, pn);
   }
-  stk = Flx_rescale(Flx_recip1(stk, pn), (1+q0)%pn, pn);
+  stk = Flx_rescale_inplace(Flx_recip1_inplace(stk, pn), (1+q0)%pn, pn);
   ser = Flxn_translate1(stk, p, n);
   pol = Flxn_Weierstrass_prep(ser, p, n, 1);
   return degpol(pol)? mkvec(Flx_to_ZX(pol)): nullvec();
