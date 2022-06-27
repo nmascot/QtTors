@@ -625,19 +625,18 @@ hash_str_len(const char *str, long len)
 INLINE GEN
 vec_shorten(GEN v, long n)
 {
+  GEN V = cgetg(n+1, t_VEC);
   long i;
-  GEN V = cgetg(n+1,t_VEC);
-  for(i=1;i<=n;i++) gel(V,i) = gel(v,i);
+  for(i = 1; i <= n; i++) gel(V,i) = gel(v,i);
   return V;
 }
 /* shallow*/
 INLINE GEN
 vec_lengthen(GEN v, long n)
 {
-  long i;
-  long l=lg(v);
-  GEN V = cgetg(n+1,t_VEC);
-  for(i=1;i<l;i++) gel(V,i) = gel(v,i);
+  GEN V = cgetg(n+1, t_VEC);
+  long i, l = lg(v);
+  for(i = 1; i < l; i++) gel(V,i) = gel(v,i);
   return V;
 }
 /* shallow*/
@@ -646,7 +645,7 @@ vec_append(GEN V, GEN s)
 {
   long i, l2 = lg(V);
   GEN res = cgetg(l2+1, typ(V));
-  for (i = 1; i < l2; ++i) gel(res, i) = gel(V,i);
+  for (i = 1; i < l2; i++) gel(res, i) = gel(V,i);
   gel(res,l2) = s; return res;
 }
 /* shallow*/
@@ -656,7 +655,7 @@ vec_prepend(GEN v, GEN s)
   long i, l = lg(v);
   GEN w = cgetg(l+1, typ(v));
   gel(w,1) = s;
-  for (i = 2; i <= l; ++i) gel(w,i) = gel(v,i-1);
+  for (i = 2; i <= l; i++) gel(w,i) = gel(v,i-1);
   return w;
 }
 /* shallow*/
@@ -670,9 +669,9 @@ vec_setconst(GEN v, GEN x)
 INLINE GEN
 vecsmall_shorten(GEN v, long n)
 {
-  long i;
   GEN V = cgetg(n+1,t_VECSMALL);
-  for(i=1;i<=n;i++) V[i] = v[i];
+  long i;
+  for(i = 1; i <= n; i++) V[i] = v[i];
   return V;
 }
 INLINE GEN
@@ -680,7 +679,7 @@ vecsmall_lengthen(GEN v, long n)
 {
   long i, l = lg(v);
   GEN V = cgetg(n+1,t_VECSMALL);
-  for(i=1;i<l;i++) V[i] = v[i];
+  for(i = 1; i < l; i++) V[i] = v[i];
   return V;
 }
 
