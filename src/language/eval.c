@@ -2169,6 +2169,7 @@ parforeach(GEN x, GEN code, void *E, long call(void*, GEN, GEN))
   }
   set_avma(av2);
   mt_queue_end(&pt);
+  clone_unlock_deep(x);
   br_status = status;
   set_avma(av);
 }
