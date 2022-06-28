@@ -4360,7 +4360,6 @@ GEN     eta_ZXn(long v, long L);
 GEN     eta_product_ZXn(GEN eta, long L);
 long    etaquotype(GEN *eta, GEN *pN, GEN *pk, GEN *CHI, long *pv, long *sd, long *cusp);
 GEN     galois_get_conj(GEN G); /* TODO move somewhere else? */
-GEN     ldata_eulerf(GEN van, GEN p, long prec);
 GEN     ldata_vecan(GEN ldata, long L, long prec);
 GEN     ldata_newprec(GEN ldata, long prec);
 GEN     lfunabelianrelinit(GEN bnfabs, GEN bnf, GEN polrel, GEN dom, long der, long bitprec);

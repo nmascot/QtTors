@@ -124,6 +124,7 @@ lfunparams(GEN L, long prec)
 /********************************************************************/
 /**                     Simple constructors                        **/
 /********************************************************************/
+static GEN ldata_eulerf(GEN van, GEN p, long prec);
 
 static GEN
 vecan_conj(GEN an, long n, long prec)
