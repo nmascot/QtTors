@@ -136,13 +136,14 @@ pol_zero(long n)
   return p;
 }
 
+/* e[i+1] = L*i + K for i >= n; determine K,L and reduce n if possible */
 static GEN
 vecsmall2vec2(GEN e, long n)
 {
   long L = e[n+1] - e[n], K = e[n+1] - L*n;
-  n--; while (n && e[n+1] - L*n == K) n--;
-  if (!n) e = nullvec(); else { setlg(e, n+2); e = zv_to_ZV(e); }
-  return mkvec3(utoi(L), stoi(K), e);
+  n--; while (n >= 0 && e[n+1] - L*n == K) n--;
+  if (n < 0) e = nullvec(); else { setlg(e, n+2); e = zv_to_ZV(e); }
+  return mkvec3(utoi(L), stoi(K), e); /* L >= 0 */
 }
 
 /* z=zeta_{p^n}; return k s.t. (z-1)^k || f(z) assuming deg(f)<phi(p^n) */

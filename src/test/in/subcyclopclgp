@@ -56,6 +56,7 @@ subcycloiwasawa(T, 5, 4)
 subcycloiwasawa(x^2+239, 3, 10)
 subcycloiwasawa(x^2-17, 2, 10)
 subcycloiwasawa(x^2-101, 2, 10)
+subcycloiwasawa(x^2+239,3) \\ #2390
 
 \\ errors, keep at end of file
 subcyclopclgp([7, [1]], 3)

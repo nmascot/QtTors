@@ -65,6 +65,7 @@
 [x^6 + 18780*x^5 + 14526*x^4 + 18168*x^3 + 3951*x^2 + 1128*x]
 [x^3 + 132*x^2 + 248*x + 106]
 []
+[6, -2, [1]]
   ***   at top-level: subcyclopclgp([7,[1]],3)
   ***                 ^------------------------
   *** subcyclopclgp: domain error in subcyclopclgp: p divides [F:Q] = 6
@@ -88,4 +89,4 @@
   ***   at top-level: subcyclopclgp([7],5,64)
   ***                 ^-----------------------
   *** subcyclopclgp: invalid flag in subcyclopclgp.
-Total time spent: 8440
+Total time spent: 10039
