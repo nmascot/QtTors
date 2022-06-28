@@ -500,7 +500,7 @@ pop_lex(long n)
   long j;
   for(j=1; j<=n; j++)
     freelex();
-  s_trace.n--;
+  restore_trace(1);
 }
 
 static THREAD pari_stack s_relocs;

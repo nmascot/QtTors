@@ -131,8 +131,7 @@ BA 107- bnrclassfield: incorrect result when fundamental units are large, e.g.
    110- valuation(x*(y^2-1), y+1) -> oo loop [#2381]
    111- round(t_FRAC, &e): e was always -oo
    112- FpM_center_inplace would crash for p = 3 [#2387]
-        W=[266,828,54,-1080;-183,-255,303,-405;-22,-1242,-458,1620;314,
-        2304,-112,-1530;100,1190,94,-1126]; matrixqz(W) -> crash
+BA 113- [gp interpreter] fix memory leak in pop_lex
 
   Added
 HC   1- new GP function eulerreal
