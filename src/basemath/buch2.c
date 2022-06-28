@@ -2452,9 +2452,9 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M, GEN I,
       }
       for(;; step(fp->x,fp->y,inc,k))
       {
-        if (++try_elt > maxtry_ELEMENT) return 0;
         if (!fl)
         {
+          if (++try_elt > maxtry_ELEMENT) return 0;
           p = (double)fp->x[k] + fp->z[k];
           if (fp->y[k] + p*p*fp->v[k] <= BOUND) break;
 
