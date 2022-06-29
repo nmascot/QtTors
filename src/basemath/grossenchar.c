@@ -880,7 +880,8 @@ gcharnewprec_i(GEN gc, long newprec)
     if (DEBUGLEVEL) pari_warn(warnprec,"gcharnewprec",newprec);
     nfprec += newprec - prec;
     prec = newprec;
-    gel(gc2, 8) = gcopy(gel(gc,8));
+    gel(gc2, 8) = shallowcopy(gel(gc,8));
+    gmael(gc2, 8, 1) = shallowcopy(gmael(gc, 8, 1));
     gchar_set_prec(gc2, prec);
     gchar_set_nfprec(gc2, nfprec);
   }
