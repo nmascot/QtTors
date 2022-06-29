@@ -1652,7 +1652,7 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
   nnorm = 0;
   Norm = gen_0;
 
-  l = lg(Lchiv); Lchiv = shallowcopy(Lchiv);
+  l = lg(Lchiv); Lchiv = gcopy(Lchiv);
   if (lg(Lv) != l) pari_err_DIM("gcharidentify [#Lv != #Lchiv]");
   for (i = 1; i < l; i++)
   {
