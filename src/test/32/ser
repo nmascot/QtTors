@@ -128,6 +128,8 @@ Mod(0, 2)*x^-1 + O(x^0)
 O(11)*x^-2 + O(x^-1)
   *** _+_: Warning: normalizing a series with 0 leading term.
 O(23^0)*x^-2 + O(x^-1)
+O(23)*x^-1 + O(x^0)
+O(23)*x^-2 + O(x^-1)
 Mod(0, 2)
 1
 1

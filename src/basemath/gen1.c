@@ -1332,7 +1332,8 @@ gsub(GEN x, GEN y)
 /**                                                                **/
 /********************************************************************/
 static GEN
-mul_ser_scal(GEN y, GEN x) {
+mul_ser_scal(GEN y, GEN x)
+{
   long l, i;
   GEN z;
   if (isexactzero(x)) return gmul(Rg_get_0(y), x);
@@ -2264,12 +2265,15 @@ div_rfrac(GEN x, GEN y)
 
 /* x != 0 */
 static GEN
-div_ser_scal(GEN y, GEN x) {
+div_ser_scal(GEN y, GEN x)
+{
   long i, l;
   GEN z;
   if (ser_isexactzero(y))
-    return scalarser(lg(y) == 2? Rg_get_0(x)
-                               : gdiv(gel(y,2), x), varn(y), valp(y));
+  {
+    z = scalarser(lg(y) == 2? Rg_get_0(x): gdiv(gel(y,2), x), varn(y), 1);
+    setvalp(z, valp(y)); return z;
+  }
   z = cgetg_copy(y, &l); z[1] = y[1];
   for (i = 2; i < l; i++) gel(z,i) = gdiv(gel(y,i), x);
   return normalizeser(z);
