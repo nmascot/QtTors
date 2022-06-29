@@ -813,7 +813,10 @@ convol(GEN x, GEN y)
   ex = valp(x);
   ey = valp(y);
   if (ser_isexactzero(x))
-    return scalarser(gadd(Rg_get_0(x), Rg_get_0(y)), varn(x), maxss(ex,ey));
+  {
+    z = scalarser(gadd(Rg_get_0(x), Rg_get_0(y)), varn(x), 1);
+    setvalp(z, maxss(ex,ey)); return z;
+  }
   lx = lg(x) + ex; x -= ex;
   ly = lg(y) + ey; y -= ey;
   /* inputs shifted: x[i] and y[i] now correspond to monomials of same degree */
