@@ -129,6 +129,10 @@ default(parisize,"16m");
 gc = gcharinit(bnf,[[p5,1;p101,3],[0,1,0,1]]);
 
 print("gcharidentify");
+gc = gcharinit(x^2-5,1); om = Pi/log((1+sqrt(5))/2);
+lchiv = [[0,om-I],[0,-om-I]];
+gcharidentify(gc,[1,2],lchiv)
+gcharidentify(gc,[1,2],lchiv) \\ lchiv was altered, see 8c67726
 bnf = bnfinit(x^4 - x^3 + 3*x^2 + 2*x + 1, 1);
 gc = gcharinit(bnf, 1);
 round(gc.cyc)

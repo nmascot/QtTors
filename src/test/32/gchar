@@ -83,6 +83,8 @@ r2 = 5, clno = 5
 r2 = 4, clno = 3
 r2 = 8, clno = 16
 gcharidentify
+[1, 1]~
+[1, 1]~
 [2, 0, 0, 0, 0]
 [0, 0, 0, 0]~
 [0, 0, 0, 0]~
@@ -392,4 +394,4 @@ bad inputs
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)]~,1)
   ***                 ^------------------------------
   *** gcharlocal: incorrect type in check_gchar_i [s] (t_PADIC).
-Total time spent: 4198
+Total time spent: 2396
