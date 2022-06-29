@@ -924,8 +924,11 @@ get_2adic_info(ratpoints_args *args, ulong *den_bits,
       if (np2 > 0)       db |= 0x1010UL; /* v_2(den) = 2 */
       if (np3 > 0)       db |= 0x0100UL; /* v_2(den) = 3 */
       if (np4 > 0)       db |= 0x0001UL; /* v_2(den) >= 4 */
-      if (db == 0) { *den_bits = 0UL; return num_none; }
-
+      if (db == 0)
+      {
+        for (i = 0 ; i < 16; i++) num_bits[i] = RBA(0UL);
+        *den_bits = 0UL; return num_none;
+      }
       for (i = 16; i < BITS_IN_LONG; i <<= 1) db |= db << i;
       *den_bits = db;
     }
