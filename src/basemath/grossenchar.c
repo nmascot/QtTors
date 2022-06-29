@@ -1652,40 +1652,40 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
   nnorm = 0;
   Norm = gen_0;
 
-  l = lg(Lchiv); Lchiv = gcopy(Lchiv);
+  l = lg(Lchiv); Lchiv = shallowcopy(Lchiv);
   if (lg(Lv) != l) pari_err_DIM("gcharidentify [#Lv != #Lchiv]");
   for (i = 1; i < l; i++)
   {
-    x = gel(Lchiv,i);
+    GEN t = gel(Lchiv,i), u;
     if (typ(gel(Lv,i)) != t_INT)
     {
-      if (typ(x) == t_COMPLEX)
+      if (typ(t) == t_COMPLEX)
       {
         nnorm++; /* 2 Pi Im(theta) / log N(pr) */
-        Norm = gadd(Norm, gdiv(gmul(Pi2n(1,prec), gel(x,2)),
+        Norm = gadd(Norm, gdiv(gmul(Pi2n(1,prec), gel(t,2)),
                                glog(idealnorm(nf,gel(Lv,i)),prec)));
-        gel(Lchiv,i) = x = gel(x,1);
+        gel(Lchiv,i) = t = gel(t,1);
       }
-      if (!is_real_t(typ(x)))
-        pari_err_TYPE("gcharidentify [character value: should be real or complex]", x);
+      if (!is_real_t(typ(t)))
+        pari_err_TYPE("gcharidentify [character value: should be real or complex]", t);
     }
     else
     {
-      if (typ(x) != t_VEC)
-        pari_err_TYPE("gcharidentify [character at infinite place: should be a t_VEC]", x);
-      if (lg(x) != 3)
+      if (typ(t) != t_VEC)
+        pari_err_TYPE("gcharidentify [character at infinite place: should be a t_VEC]", t);
+      if (lg(t) != 3)
         pari_err_DIM("gcharidentify [character at infinite place: should have two components]");
-      if (typ(gel(x,1)) != t_INT)
-        pari_err_TYPE("gcharidentify [k parameter at infinite place: should be a t_INT]", gel(x,1));
-      x = gel(x,2);
-      if (typ(x) == t_COMPLEX)
+      if (typ(gel(t,1)) != t_INT)
+        pari_err_TYPE("gcharidentify [k parameter at infinite place: should be a t_INT]", gel(t,1));
+      u = gel(t,2);
+      if (typ(u) == t_COMPLEX)
       {
         nnorm++;
-        Norm = gsub(Norm, gel(x,2));
-        gmael(Lchiv,i,2) = x = gel(x,1);
+        Norm = gsub(Norm, gel(u,2)); u = gel(u,1);
+        gel(Lchiv, i) = mkvec2(gel(t,1), u);
       }
-      if (!is_real_t(typ(x)))
-        pari_err_TYPE("gcharidentify [phi parameter at infinite place: should be real or complex]", x);
+      if (!is_real_t(typ(u)))
+        pari_err_TYPE("gcharidentify [phi parameter at infinite place: should be real or complex]", u);
     }
   }
 
