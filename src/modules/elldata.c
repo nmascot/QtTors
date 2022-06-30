@@ -119,10 +119,9 @@ ellcondfile(long n)
   else
   {
     pari_sp av = avma;
-    char *s = stack_malloc(strlen(pari_datadir) + 12 + 20 + 1);
     pariFILE *F;
     GEN V;
-    sprintf(s, "%s/elldata/ell%ld", pari_datadir, n);
+    char *s = stack_sprintf("%s/elldata/ell%ld", pari_datadir, n);
     F = pari_fopengz(s);
     if (!F) pari_err_FILE("elldata file",s);
     set_avma(av);

@@ -291,10 +291,8 @@ static pariFILE *
 galopen(const char *pre, long n, long n1, long n2)
 {
   pari_sp av = avma;
-  char *s = stack_malloc(strlen(pari_datadir) + 3 + 4 * 20 + 1 + 3);
   pariFILE *f;
-
-  (void)sprintf(s, "%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
+  char *s = stack_sprintf("%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
   f = pari_fopengz(s);
   if (!f) pari_err_FILE("galois file",s);
   set_avma(av); return f;
@@ -2327,11 +2325,9 @@ static GEN
 polgaloisnamesbig(long n, long k)
 {
   pari_sp av = avma;
-  char *s = stack_malloc(strlen(pari_datadir) + 13 + 20 + 3);
   pariFILE *f;
   GEN V;
-
-  (void)sprintf(s, "%s/galdata/NAM%ld", pari_datadir, n);
+  char *s = stack_sprintf("%s/galdata/NAM%ld", pari_datadir, n);
   f = pari_fopengz(s);
   V = f? gp_read_stream(f->file): NULL;
   if (!V || typ(V)!=t_VEC || k>=lg(V)) pari_err_FILE("galois file %s",s);

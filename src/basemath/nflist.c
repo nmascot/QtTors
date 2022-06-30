@@ -3073,11 +3073,9 @@ vecslicebyX(GEN V, GEN Xinf, GEN X, long flag)
 static GEN
 nflistfile(const char *suf, long n, long t, long s)
 {
-  char *f = stack_malloc(strlen(pari_datadir) + strlen(suf)
-                         + 1+10+1+1+1+3 + 5/*n/t*/ + 1);
   pariFILE *F;
   GEN z;
-  sprintf(f, "%s/nflistdata/%ld/%ld/%ld%s.gp", pari_datadir, n, t,s, suf?suf:"");
+  char *f = stack_sprintf("%s/nflistdata/%ld/%ld/%ld%s.gp", pari_datadir, n, t,s, suf?suf:"");
   F = pari_fopengz(f);
   if (!F) pari_err_FILE("nflistdata file",f);
   z = gp_readvec_stream(F->file); pari_fclose(F); return z;
