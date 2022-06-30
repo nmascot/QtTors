@@ -362,7 +362,7 @@ factoredextchinesetest(GEN nf, GEN x, GEN y, GEN pl, GEN* fa, GEN data, int (*te
   n = nf_get_degree(nf);
   x = idealchineseinit(nf, mkvec2(x,pl));
   x1 = gel(x,1);
-  red = lg(x1) == 1? matid(n): gel(x1,1);
+  red = lg(x1) == 1? matid(n): gmael(x1,1,1);
   y0 = idealchinese(nf, x, y);
 
   E = shallowcopy(E);

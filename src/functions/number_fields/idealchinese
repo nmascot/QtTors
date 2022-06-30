@@ -45,7 +45,8 @@ Doc: $x$ being a prime ideal factorization (i.e.~a 2-columns matrix whose first
 
  If $y$ is omitted, return a data structure which can be used in
  place of $x$ in later calls and allows to solve many chinese remainder
- problems for a given $x$ more efficiently.
+ problems for a given $x$ more efficiently. In this case, the right hand side
+ $y$ is not allowed to have denominators, unless they are coprime to $x$.
  \bprog
  ? C = idealchinese(K, [x, [1,1]]);
  ? idealchinese(K, C, y) \\ as above

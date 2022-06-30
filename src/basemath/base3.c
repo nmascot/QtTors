@@ -1864,7 +1864,7 @@ isprfact(GEN x)
 static GEN
 pr_init(GEN nf, GEN fa, GEN w, GEN dw)
 {
-  GEN U, E, F, L = gel(fa,1), E0 = gel(fa,2);
+  GEN U, E, F, FZ, L = gel(fa,1), E0 = gel(fa,2);
   long i, r = lg(L);
 
   if (w && lg(w) != r) pari_err_TYPE("idealchinese", w);
@@ -1905,8 +1905,9 @@ pr_init(GEN nf, GEN fa, GEN w, GEN dw)
     }
     gel(U,i) = u;
   }
+  FZ = gcoeff(F, 1, 1);
   F = idealpseudored(F, nf_get_roundG(nf));
-  return mkvec2(F, U);
+  return mkvec2(mkvec2(F, FZ), U);
 }
 
 static GEN
@@ -1936,7 +1937,12 @@ is_chineseinit(GEN x)
   l = lg(fa);
   if (l != 1)
   {
-    if (l != 3 || typ(gel(fa,1)) != t_MAT || typ(gel(fa,2)) != t_VEC)
+    GEN z;
+    if (l != 3) return 0;
+    z = gel(fa, 1);
+    if (typ(z) != t_VEC || lg(z) != 3 || typ(gel(z,1)) != t_MAT
+                        || typ(gel(z,2)) != t_INT
+                        || typ(gel(fa,2)) != t_VEC)
       return 0;
   }
   l = lg(pl);
@@ -1983,7 +1989,7 @@ chineseinit_i(GEN nf, GEN fa, GEN w, GEN dw)
     if (r == 1) pl = cgetg(1, t_VEC);
     else
     {
-      GEN F = (lg(fa) == 1)? NULL: gel(fa,1), signs = cgetg(r, t_VECSMALL);
+      GEN F = (lg(fa) == 1)? NULL: gmael(fa,1,1), signs = cgetg(r, t_VECSMALL);
       long i;
       for (i = 1; i < r; i++) signs[i] = (pl[archp[i]] < 0)? 1: 0;
       pl = setsigns_init(nf, archp, F, signs);
@@ -1997,11 +2003,11 @@ chineseinit_i(GEN nf, GEN fa, GEN w, GEN dw)
  * v_p(b-w_p)>=v_p(x) for all prime ideals p in the ideal factorization
  * and v_p(b)>=0 for all other p, using the standard proof given in GTM 138. */
 GEN
-idealchinese(GEN nf, GEN x, GEN w)
+idealchinese(GEN nf, GEN x0, GEN w)
 {
   const char *fun = "idealchinese";
   pari_sp av = avma;
-  GEN x1, x2, s, dw, F;
+  GEN x = x0, x1, x2, s, dw, F;
 
   nf = checknf(nf);
   if (!w) return gerepilecopy(av, chineseinit_i(nf,x,NULL,NULL));
@@ -2012,12 +2018,12 @@ idealchinese(GEN nf, GEN x, GEN w)
   /* x is a 'chineseinit' */
   x1 = gel(x,1); s = NULL;
   x2 = gel(x,2);
-  if (lg(x1) == 1) F = NULL;
+  if (lg(x1) == 1) { F = NULL; dw = NULL; }
   else
   {
-    GEN  U = gel(x1,2);
+    GEN  U = gel(x1,2), FZ;
     long i, r = lg(w);
-    F = gel(x1,1);
+    F = gmael(x1,1,1); FZ = gmael(x1,1,2);
     for (i=1; i<r; i++)
       if (!ZV_equal0(gel(w,i)))
       {
@@ -2027,6 +2033,12 @@ idealchinese(GEN nf, GEN x, GEN w)
     if (s)
     {
       s = ZC_reducemodmatrix(s, F);
+      if (dw && x == x0) /* input was a chineseinit */
+      {
+        dw = modii(dw, FZ);
+        s = FpC_Fp_mul(s, Fp_inv(dw, FZ), FZ);
+        dw = NULL;
+      }
       if (ZV_isscalar(s)) s = icopy(gel(s,1));
     }
   }
