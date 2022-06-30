@@ -173,16 +173,13 @@ K = nfinit(x^4 + 1393*x^2 + 484416);
 J = idealpow(K,idealprimedec(K,3)[1],-2) / 5;
 idealdiv(K,J,[0,1/5,0,0]~)
 
-K0 = nfinit (x^2 + 134*x + 712);
-B = Mod(47560533730565214660095585*x + 6109497856657407515385728134, x^2 + 134*x + 712);
-A = Mod(-18920167941165507215790079135/2*x - 1215216865931238522952921344313, x^ 2 + 134*x + 712);
-nfac = idealfactor (K0, 60);
-nchin = idealchinese (K0, nfac);
-nsize = matsize (nfac)[1];
-cong = nfeltdiv (K0, B, 2 * A);
-cong = vector (nsize, i, cong);
-idealchinese (K0, nfac, cong)
-idealchinese (K0, nchin, cong)
+K = nfinit (x^2 + 134*x + 712);
+fa = idealfactor(K, 60);
+CH = idealchinese(K, fa);
+C = [2670768074695170611139434716011157107733, -7258527314365930510409656450413725891970]~ / 89111260116725317454044216131056431951297033;
+C = vector(matsize(fa)[1], i, C);
+idealchinese(K, fa, C)
+idealchinese(K, CH, C)
 
 \\ Errors, keep at end of file
 idealaddtoone(Q,2,[;])
