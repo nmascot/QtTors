@@ -3049,9 +3049,6 @@ vecslicebyX(GEN V, GEN Xinf, GEN X, long flag)
   long l = lg(V), i = 1, c;
   GEN W;
 
-  if (l == 1) return NULL;
-  if (typ(gmael(V,1,1)) == t_POL)
-    pari_err(e_MISC,"Versions mismatch. Please update the nflistdata package");
   if (!equali1(Xinf)) /* frequent special case */
   {
     i = gen_search(V, mkvec2(NULL,Xinf), NULL, &cmp2);
@@ -3061,49 +3058,74 @@ vecslicebyX(GEN V, GEN Xinf, GEN X, long flag)
     { i = -i; if (i >= lg(V)) return NULL; }
   }
   W = cgetg(l, t_VEC);
-  if (flag)
-    for (c = 1; i < l && cmpii(gmael(V, i, 2), X) <= 0; i++)
+  for (c = 1; i < l; i++)
+  {
+    GEN C = gmael(V, i, 2), x;
+    if (isintzero(C)) /* marker for incomplete slice */
     {
-      GEN x = gmael(V, i, 1);
-      gel(W, c++) = mkvec2(RgV_to_RgX(x,0), gmael(V, i, 2));
+      GEN B = gmael(V, i-1, 2);
+      if (equalii(B, X)) break;
+      pari_err_DOMAIN("nflist(A5)", "sqrt(N)", ">", B, X);
     }
-  else
-    for (c = 1; i < l && cmpii(gmael(V, i, 2), X) <= 0; i++)
-    {
-      GEN x = gmael(V, i, 1);
-      gel(W, c++) = RgV_to_RgX(x,0);
-    }
+    if (cmpii(C, X) > 0) break;
+    x = RgV_to_RgX(gmael(V, i, 1), 0);
+    gel(W, c++) = flag ? mkvec2(x, gmael(V, i, 2)): x;
+  }
   setlg(W, c); return W;
 }
 
 /* assume 1 <= t < 1000, 1 <= 2s <= n < 100 */
 static GEN
-nflistfile(const char *suf, long n, long t, long s)
+nflistfile(const char *suf, long n, long t, long s, long u)
 {
   pariFILE *F;
   GEN z;
-  char *f = stack_sprintf("%s/nflistdata/%ld/%ld/%ld%s.gp", pari_datadir, n, t,s, suf?suf:"");
+  char *f = stack_sprintf("%s/nflistdata/%ld/%ld/%ld%s/%ld",
+                          pari_datadir, n, t, s, suf, u);
   F = pari_fopengz(f);
   if (!F) pari_err_FILE("nflistdata file",f);
   z = gp_readvec_stream(F->file); pari_fclose(F); return z;
 }
 
 static GEN
-A5file(const char *suf, long s) { return nflistfile(suf, 5, 4, s); }
+A5file(const char *suf, long s, long u) { return nflistfile(suf, 5, 4, s, u); }
+
+/* If flag = 0 return only the T's. */
+static GEN
+vecsliceA5all(const char *suf, long s, ulong sl, GEN Xinf, GEN X, long flag)
+{
+  long i, l;
+  GEN V;
+  ulong  uinf = itou(divis(Xinf, sl));
+  ulong  usup = itou(divis(X, sl));
+  l = usup-uinf+2;
+  V = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
+    gel(V, i) = vecslicebyX(A5file(suf, s, uinf+i-1), Xinf, X, flag);
+  return shallowconcat1(V);
+}
+
+static GEN
+vecsliceA5(long s, GEN Xinf, GEN X, long flag)
+{
+  return vecsliceA5all("", s, 100000, Xinf, X, flag);
+}
+
+static GEN
+vecsliceA5cond(long s, GEN Xinf, GEN X, long flag)
+{
+  return vecsliceA5all("cond", s, 100000, Xinf, X, flag);
+}
+
 static GEN
 A5vec(GEN X, GEN Xinf, long s, long fl)
 {
   GEN L1, L5;
   const char *suf = fl? "cond": "";
 
-  if (!fl)
-  {
-    GEN bnd = s==0 ? shifti(powuu(10,11),1): powuu(10,8);
-    if (cmpii(X, bnd) > 0) pari_err_DOMAIN("nflist(A5)", "N", ">", bnd, X);
-  }
   L1 = L5 = NULL;
-  if (s <= 0) L5 = vecslicebyX(A5file(suf, 0), Xinf, X, fl);
-  if (s) L1 = vecslicebyX(A5file(suf, 2), Xinf, X, fl);
+  if (s <= 0) L5 = vecsliceA5all(suf, 0, 100000, Xinf, X, fl);
+  if (s)      L1 = vecsliceA5all(suf, 2, 100000, Xinf, X, fl);
   switch (s)
   {
     case 2: return L1;
@@ -3121,9 +3143,14 @@ A5vec(GEN X, GEN Xinf, long s, long fl)
 }
 static GEN
 makeA5_i(GEN N, long s, long fl)
-{ return (s == 1 || (!fl && !Z_issquare(N)))? NULL: A5vec(N, N, s, fl); }
+{ return s == 1 ? NULL: A5vec(N, N, s, fl); }
 static GEN
-makeA5(GEN N, long s) { return makeA5_i(N, s, 0); }
+makeA5(GEN N, long s)
+{
+  GEN rN;
+  if (!Z_issquareall(N, &rN)) return NULL;
+  return makeA5_i(rN, s, 0);
+}
 static GEN
 makeA5cond(GEN N, long s) { return makeA5_i(N, s, 1); }
 
@@ -3132,22 +3159,24 @@ makeA5cond(GEN N, long s) { return makeA5_i(N, s, 1); }
 GEN
 veccond_to_A5(GEN D, long s)
 {
-  GEN W, V = A5file("cond", s);
-  long l = lg(V), i, j, lD = lg(D), c = 1;
+  pari_sp av = avma;
+  long l, j, lD = lg(D), c = 1;
+  GEN W, V = vecsliceA5cond(s, utoi(D[1]), utoi(D[lD-1]), 1);
+  l = lg(V);
   W = cgetg(lD, t_VEC);
-  for (i = 1, j = 1; i < l; i++)
+  for (j = 1; j < lD; j++)
   {
-    long e = itou(gmael(V,i,2));
-    if (e < D[j]) continue;
-    while (j < lD && e > D[j]) j++;
-    if (j==lD) break;
-    if (e == D[j])
+    GEN Xinf = utoi(D[j]);
+    long i = gen_search(V, mkvec2(NULL, Xinf), NULL, &cmp2);
+    if (i > 0) /* found in list, rewind to first occurence */
     {
-      GEN x = gmael(V, i, 1);
-      gel(W, c++) = mkvec2(RgV_to_RgX(x,0), gmael(V, i, 2));
+      long ii;
+      while (i > 1 && equalii(gmael(V, i-1, 2), Xinf)) i--;
+      for (ii = i; ii < l && equaliu(gmael(V,ii,2),D[j]); ii++);
+      gel(W, c++) = vecslice(V, i, ii-1);
     }
   }
-  setlg(W, c); return W;
+  setlg(W, c); return gerepilecopy(av, shallowconcat1(W));
 }
 
 /* Sextic resolvent of A5 field */
@@ -3204,7 +3233,11 @@ makeA5vec_i(GEN X, GEN Xinf, GEN field, long s, long fl)
 
 static GEN
 makeA5vec(GEN X, GEN Xinf, GEN field, long s)
-{ return makeA5vec_i(X, Xinf, field, s, 0); }
+{
+  GEN rX = sqrti(X), sXinf, rXinf = sqrtremi(Xinf, &sXinf);
+  if (signe(sXinf)) rXinf = addiu(rXinf, 1);
+  return makeA5vec_i(rX, rXinf, field, s, 0);
+}
 
 static GEN
 makeA5condvec(GEN X, GEN Xinf, GEN field, long s)
@@ -3239,16 +3272,16 @@ makeA56(GEN N, long s) { return makeA56vec(N, N, s); }
 static GEN
 makeA56resolvent(GEN pol, long flag)
 {
-  GEN V, D6 = sqrti(nfdisc(pol)), LD = divisors(D6);
-  long i;
+  GEN D6 = sqrti(nfdisc(pol)), LD = divisors(D6);
+  long i, s;
   pol = polredabs(pol);
-  V = A5file("", pol2s(pol)? 2: 0);
+  s = pol2s(pol)? 2: 0;
   for (i = 1; i < lg(LD); i++)
   {
-    GEN D52 = sqri(gel(LD,i));
-    if (dvdii(D52, D6))
+    GEN D5 = gel(LD,i);
+    if (dvdii(sqri(D5), D6))
     {
-      GEN L = vecslicebyX(V, D52, D52, 0);
+      GEN L = vecsliceA5(s, D5, D5, 0);
       long j;
       for (j = 1; j < lg(L); j++)
       {

@@ -13085,10 +13085,10 @@ static GEN
 search_A5(GEN mf, GEN F)
 {
   GEN CHI = MF_get_CHI(mf), O, P, L;
-  long N = MF_get_N(mf), i, j, lL, nd;
+  long N = MF_get_N(mf), i, j, lL, nd, r;
   ulong bound = 1;
-  if (N > 1000000) pari_err_IMPL("mfgaloisprojrep for cond > 10^6");
-  L = veccond_to_A5(divisorsu(N), 2); lL = lg(L); nd = lL-1;
+  r = radicalu(N);
+  L = veccond_to_A5(zv_z_mul(divisorsu(N/r),r), 2); lL = lg(L); nd = lL-1;
   if (nd == 1) return gmael(L,1,1);
   O = cgetg(1, t_VECSMALL); /* projective order of rho(Frob_p) */
   P = cgetg(1, t_VECSMALL);
