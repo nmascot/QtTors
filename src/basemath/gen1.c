@@ -2339,7 +2339,8 @@ div_ser(GEN x, GEN y, long vx)
   if (ser_isexactzero(x))
   {
     if (lx == 2) return zeroser(vx, v);
-    return scalarser(gmul(gel(x,2),Rg_get_0(y)), varn(x), v);
+    z = scalarser(gmul(gel(x,2),Rg_get_0(y)), varn(x), 1);
+    setvalp(z, v); return z;
   }
   if (lx < ly) ly = lx;
   y = ser2pol_approx(y, ly, &e);
