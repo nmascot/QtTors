@@ -35,6 +35,10 @@ error("impossible inverse in gdiv: [Mod(0, 2), Mod(0, 2); Mod(0, 2), Mod(0,
 [1]
 
 
+[Mat(2)]
+
+Mat([Mat(2)])
+
 [1 2 3]
 
 [2 3 4]
@@ -679,4 +683,4 @@ matrix(0,2)
   ***   at top-level: matreduce([1,x;1,y])
   ***                 ^--------------------
   *** matreduce: incorrect type in matreduce (t_MAT).
-Total time spent: 514
+Total time spent: 450

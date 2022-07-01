@@ -2925,7 +2925,8 @@ bruti_intern(GEN g, pariout_t *T, pari_str *S, int addsign)
       if (l==2)
       {
         str_puts(S, "Mat(");
-        if (r == 2) { print(g, 1, 1,T, S); str_putc(S, ')'); return; }
+        if (r == 2 && (print != print_gcoef || typ(gcoeff(g,1,1)) != t_MAT))
+        { print(g, 1, 1,T, S); str_putc(S, ')'); return; }
       }
       str_putc(S, '[');
       for (i=1; i<l; i++)
