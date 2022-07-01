@@ -2662,7 +2662,7 @@ mscuspidal(GEN W, long flag)
   else if (use_Petersson(N, k, s)) M = eisker(W);
   else
   {
-    GEN T, TE, chE;
+    GEN dT, T, TE, chE;
     forprime_t F;
     long bit;
     pari_timer ti;
@@ -2679,8 +2679,10 @@ mscuspidal(GEN W, long flag)
     bit = TpE_char_bound(p, k, lg(TE)-1);
     chE = QM_charpoly_ZX_bound(TE, bit);
     chE = ZX_radical(chE);
+    T = Q_remove_denom(T, &dT);
+    if (dT) chE = ZX_rescale(chE, dT);
     M = RgX_RgM_eval(chE, T);
-    M = QM_image_shallow(M);
+    M = QM_image_shallow(M); /* = Im chE(T / dT) */
   }
   S = Qevproj_init(M);
   return gerepilecopy(av, flag? mkvec2(S,E): S);
