@@ -2791,8 +2791,6 @@ GEN     Buchquad(GEN D, double c1, double c2, long prec);
 GEN     quadclassno(GEN x);
 long    quadclassnos(long x);
 GEN     quadclassunit0(GEN x, long flag,GEN data, long prec);
-GEN     quadhilbert(GEN D, long prec);
-GEN     quadray(GEN bnf, GEN f, long prec);
 
 /* buch2.c */
 
@@ -5299,6 +5297,8 @@ GEN     bnrrootnumber(GEN bnr, GEN chi, long flag, long prec);
 GEN     bnrstark(GEN bnr, GEN subgroup, long prec);
 GEN     cyc2elts(GEN cyc);
 GEN     qfbforms(GEN D);
+GEN     quadhilbert(GEN D, long prec);
+GEN     quadray(GEN bnf, GEN f, long prec);
 
 /* str.c */
 
