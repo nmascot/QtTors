@@ -2936,7 +2936,7 @@ mskinit(ulong N, long k, long sign)
   return add_star(W, sign);
 }
 GEN
-msinit(GEN N, GEN K, long sign)
+msinit(GEN N, GEN K, long s)
 {
   pari_sp av = avma;
   GEN W;
@@ -2947,7 +2947,8 @@ msinit(GEN N, GEN K, long sign)
   if (k < 2) pari_err_DOMAIN("msinit","k", "<", gen_2,K);
   if (odd(k)) pari_err_IMPL("msinit [odd weight]");
   if (signe(N) <= 0) pari_err_DOMAIN("msinit","N", "<=", gen_0,N);
-  W = mskinit(itou(N), k, sign);
+  if (labs(s) > 1) pari_err_DOMAIN("msinit", "|sign|", ">", gen_1, stoi(s));
+  W = mskinit(itou(N), k, s);
   return gerepilecopy(av, W);
 }
 

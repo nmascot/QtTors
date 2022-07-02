@@ -544,4 +544,22 @@ O(11^7) + (10 + 3*11 + 6*11^2 + 9*11^3 + 8*11^4 + 5*11^5 + O(11^6))*x + (6 +
   ***   at top-level: W=msinit(6,4);msatkinlehner(W,4)
   ***                               ^------------------
   *** msatkinlehner: domain error in msatkinlehner: N % Q != 0
-Total time spent: 1903
+  ***   at top-level: msinit(-11,2,0)
+  ***                 ^---------------
+  *** msinit: domain error in msinit: N <= 0
+  ***   at top-level: msinit(11,1,0)
+  ***                 ^--------------
+  *** msinit: domain error in msinit: k < 2
+  ***   at top-level: msinit(1/2,2,0)
+  ***                 ^---------------
+  *** msinit: incorrect type in msinit (t_FRAC).
+  ***   at top-level: msinit(1,1/2,0)
+  ***                 ^---------------
+  *** msinit: incorrect type in msinit (t_FRAC).
+  ***   at top-level: msinit(11,2,2)
+  ***                 ^--------------
+  *** msinit: domain error in msinit: |sign| > 1
+  ***   at top-level: msinit(11,2,-2)
+  ***                 ^---------------
+  *** msinit: domain error in msinit: |sign| > 1
+Total time spent: 1954
