@@ -25,4 +25,10 @@
   ***   at top-level: hyperellred(x^2+1)
   ***                 ^------------------
   *** hyperellred: domain error in hyperellred: genus = 0
-Total time spent: 392
+  ***   at top-level: hyperellchangecurve(x^3+1,[[1,2],0])
+  ***                 ^------------------------------------
+  *** hyperellchangecurve: incorrect type in hyperellchangecurve (t_VEC).
+  ***   at top-level: hyperellchangecurve(x^3+1,[1,Mat(1),0])
+  ***                 ^---------------------------------------
+  *** hyperellchangecurve: incorrect type in hyperellchangecurve (t_VEC).
+Total time spent: 377

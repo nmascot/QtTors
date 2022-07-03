@@ -1307,10 +1307,10 @@ check_hyperell_Rg(const char *fun, GEN *pW, GEN *pF)
 static void
 check_hyperell_vc(const char *fun, GEN C, long v, GEN *e, GEN *M, GEN *H)
 {
-  if (lg(C)!=4 || typ(gel(C,2))!=t_MAT)
-    pari_err_TYPE(fun,C);
-  *e = gel(C,1); *M = gel(C,2);
-  *H = typ(gel(C,3))!=t_POL || varn(gel(C,3))!=v ? scalarpol(gel(C,3), v): gel(C,3);
+  if (typ(C) != t_VEC || lg(C) != 4) pari_err_TYPE(fun,C);
+  *e = gel(C,1); *M = gel(C,2); *H = gel(C,3);
+  if (typ(*M) != t_MAT || lg(*M) != 3 || lgcols(*M) != 3) pari_err_TYPE(fun,C);
+  if (typ(*H)!=t_POL || varn(*H)!=v) *H = scalarpol_shallow(*H,v);
 }
 
 GEN
