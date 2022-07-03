@@ -154,7 +154,9 @@ exp(.*x)
 1/(0.+x)+O(x^2)
 polcoef(0.+O(x),0)
 polcoef(Mod(0,2)+O(x),0)
-
+z=(Mod(2,17)*v1^-2+O(v1^-1))/(Mod(5,12)*v1^-4+O(v1));
+z==1
+z-1
 
 \\ Errors. Keep at end of file
 polcoef(0.+O(x),1)

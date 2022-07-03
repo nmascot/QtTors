@@ -2349,6 +2349,7 @@ div_ser(GEN x, GEN y, long vx)
   if (ly == 3)
   {
     gel(z,2) = gdiv(gel(x,2), gel(y,2));
+    if (gequal0(gel(z,2))) setsigne(z, 0); /* can happen: Mod(1,2)/Mod(1,3) */
     return gerepileupto(av, z);
   }
   x = ser2pol_i(x, ly);

@@ -164,6 +164,8 @@ q^32000 + O(q^32001)
 1.0000000000000000000000000000000000000*x^-1 + O(x^2)
 0.E-38
 0
+1
+Mod(0, 1)*v1 + O(v1^2)
   ***   at top-level: polcoef(0.+O(x),1)
   ***                 ^------------------
   *** polcoef: domain error in polcoef: degree > 0
@@ -216,4 +218,4 @@ q^32000 + O(q^32001)
   ***   at top-level: O(y)/O(x)
   ***                     ^-----
   *** _/_: impossible inverse in RgXn_inv: 0.
-Total time spent: 13
+Total time spent: 11
