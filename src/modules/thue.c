@@ -141,7 +141,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
   m1 = matslice(MatFU, 1,r, 1,r); /* minor order r */
   m1 = glog(gabs(m1, prec), prec); /* HIGH accuracy */
   A = RgM_inv(m1); if (!A) pari_err_PREC("thue");
-  IntM = RgM_Rg_add(RgM_mul(A,m1), gen_m1);
+  IntM = RgM_Rg_add_shallow(RgM_mul(A,m1), gen_m1);
   IntM = gabs(IntM, 0);
 
   eps2 = gadd(vecmax(IntM), real2n(-e, LOWDEFAULTPREC)); /* t_REAL */

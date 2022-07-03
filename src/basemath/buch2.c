@@ -2958,7 +2958,7 @@ compute_multiple_of_R(GEN Ar, long RU, long N, long *pneed, long *bit, GEN *ptL)
   if (gexpo(gsub(d,kR)) - gexpo(d) > -20) { *ptL = NULL; return gc_NULL(av); }
   L = RgM_inv(Im_mdet);
   /* estimate # of correct bits in result */
-  if (!L || (*bit = - gexpo(RgM_Rg_sub(RgM_mul(L,Im_mdet), gen_1))) < 16)
+  if (!L || (*bit = -gexpo(RgM_Rg_sub_shallow(RgM_mul(L,Im_mdet), gen_1))) < 16)
   { *ptL = NULL; return gc_NULL(av); }
 
   *ptL = RgM_mul(rowslice(L,2,RU), Ar); /* approximate rational entries */

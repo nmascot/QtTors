@@ -4874,7 +4874,7 @@ mslattice(GEN M, GEN F)
       long lB;
       B = RgXV_to_RgM(vb, k-1);
       /* add coboundaries */
-      B = shallowconcat(B, RgM_Rg_sub(RgX_act_Gl2Q(g, k), gen_1));
+      B = shallowconcat(B, RgM_Rg_sub_shallow(RgX_act_Gl2Q(g, k), gen_1));
       /* beware: the basis for RgX_act_Gl2Q is (X^(k-2),...,Y^(k-2)) */
       lB = lg(B);
       for (j = 1; j < lB; j++) gel(B,j) = vecreverse(gel(B,j));
