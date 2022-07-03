@@ -59,3 +59,9 @@ Q=325497034303801234152417285444683842502306560332291369157458504804311458529318
 hyperellred(Q,&M)
 M
 hyperellchangecurve(Q,M)
+
+\\ ERRORS, KEEP AT END OF FILE
+hyperellred(1)
+hyperellred(Pol(1))
+hyperellred(x)
+hyperellred(x^2+1)

@@ -724,6 +724,7 @@ hyperell_Weil_bound(GEN q, ulong g, GEN p)
   return gc_long(av, logint(w,p) + 1);
 }
 
+/* return 4P + Q^2 */
 static GEN
 check_hyperell(GEN PQ)
 {
@@ -732,9 +733,7 @@ check_hyperell(GEN PQ)
     H = gadd(gsqr(gel(PQ, 2)), gmul2n(gel(PQ, 1), 2));
   else
     H = gmul2n(PQ, 2);
-  if (typ(H)!=t_POL)
-    return NULL;
-  return H;
+  return typ(H) == t_POL? H: NULL;
 }
 
 GEN
@@ -1129,26 +1128,23 @@ static void
 check_hyperell_Q(const char *fun, GEN *pW, GEN *pF)
 {
   GEN W = *pW, F = check_hyperell(W);
-  long v = varn(F);
-  if (!F || signe(F)==0 || !RgX_is_ZX(F))
-    pari_err_TYPE(fun, W);
-  if (signe(ZX_disc(F))==0)
-    pari_err_DOMAIN(fun,"disc(W)","==",gen_0,W);
+  long v, d;
+  if (!F || !signe(F) || !RgX_is_ZX(F)) pari_err_TYPE(fun, W);
+  if (!signe(ZX_disc(F))) pari_err_DOMAIN(fun,"disc(W)","==",gen_0,W);
+  v = varn(F); d = degpol(F);
   if (typ(W)==t_POL) W = mkvec2(W, pol_0(v));
   else
   {
     GEN P = gel(W, 1), Q = gel(W, 2);
-    long g = ((degpol(F)+1)>>1)-1;
-    if( typ(P)!=t_POL) P = scalarpol(P, v);
-    if( typ(Q)!=t_POL) Q = scalarpol(Q, v);
-    if (!RgX_is_ZX(P) || !RgX_is_ZX(Q))
-      pari_err_TYPE(fun,W);
-    if (degpol(P) > 2*g+2)
-      pari_err_DOMAIN(fun, "poldegree(P)", ">", utoi(2*g+2), P);
-    if (degpol(Q) > g+1)
-      pari_err_DOMAIN(fun, "poldegree(Q)", ">", utoi(g+1), Q);
+    long g = ((d+1) >> 1) - 1;
+    if (typ(P)!=t_POL) P = scalarpol_shallow(P, v);
+    if (typ(Q)!=t_POL) Q = scalarpol_shallow(Q, v);
+    if (!RgX_is_ZX(P) || !RgX_is_ZX(Q)) pari_err_TYPE(fun,W);
+    if (degpol(P) > 2*g+2) pari_err_DOMAIN(fun, "deg(P)", ">", utoi(2*g+2), P);
+    if (degpol(Q) > g+1) pari_err_DOMAIN(fun, "deg(Q)", ">", utoi(g+1), Q);
     W = mkvec2(P, Q);
   }
+  if (d < 3) pari_err_DOMAIN(fun, "genus", "=", gen_0, gen_0);
   *pW = W; *pF = F;
 }
 
@@ -1212,6 +1208,7 @@ polreduce(GEN P, GEN M)
   return RgX_RgM2_eval(P, A, gpowers(B, d), d);
 }
 
+/* assume deg(P) > 2 */
 static GEN
 red_Cremona_Stoll(GEN P, GEN *pM)
 {
@@ -1235,6 +1232,7 @@ red_Cremona_Stoll(GEN P, GEN *pM)
   return R;
 }
 
+/* assume deg(P) > 2 */
 GEN
 ZX_hyperellred(GEN P, GEN *pM)
 {

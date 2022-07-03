@@ -13,4 +13,16 @@
 [2*x^10 + 9*x^9 + 8*x^8 + x^6 + 8*x^5 + 6*x^4 + 5*x^3 + 7*x + 3, 0]
 [1, [524494, -909; -505088299, 875368], 0]
 [2*x^10 + 9*x^9 + 8*x^8 + x^6 + 8*x^5 + 6*x^4 + 5*x^3 + 7*x + 3, 0]
-Total time spent: 517
+  ***   at top-level: hyperellred(1)
+  ***                 ^--------------
+  *** hyperellred: incorrect type in hyperellred (t_INT).
+  ***   at top-level: hyperellred(Pol(1))
+  ***                 ^-------------------
+  *** hyperellred: domain error in hyperellred: disc(W) == 0
+  ***   at top-level: hyperellred(x)
+  ***                 ^--------------
+  *** hyperellred: domain error in hyperellred: genus = 0
+  ***   at top-level: hyperellred(x^2+1)
+  ***                 ^------------------
+  *** hyperellred: domain error in hyperellred: genus = 0
+Total time spent: 392
