@@ -275,8 +275,7 @@ RgM_Rg_add(GEN x, GEN y)
   GEN z = cgetg(l,t_MAT);
 
   if (l==1) return z;
-  if (l != lgcols(x)) pari_err_OP( "+", x, y);
-  z = cgetg(l,t_MAT);
+  if (l != lgcols(x)) pari_err_OP("+", x, y);
   for (i=1; i<l; i++)
   {
     GEN zi = cgetg(l,t_COL), xi = gel(x,i);
@@ -293,8 +292,7 @@ RgM_Rg_sub(GEN x, GEN y)
   GEN z = cgetg(l,t_MAT);
 
   if (l==1) return z;
-  if (l != lgcols(x)) pari_err_OP( "-", x, y);
-  z = cgetg(l,t_MAT);
+  if (l != lgcols(x)) pari_err_OP("-", x, y);
   for (i=1; i<l; i++)
   {
     GEN zi = cgetg(l,t_COL), xi = gel(x,i);
