@@ -982,7 +982,8 @@ static int
 polequal(GEN x, GEN y)
 {
   long lx, ly;
-  if (signe(x) != signe(y)) return 0;
+  /* Can't do that: Mod(0,1)*x^0 == x^0
+  if (signe(x) != signe(y)) return 0; */
   lx = lg(x); ly = lg(y);
   while (lx > ly) if (!gequal0(gel(x,--lx))) return 0;
   while (ly > lx) if (!gequal0(gel(y,--ly))) return 0;
