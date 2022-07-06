@@ -296,7 +296,9 @@ gred_rfrac_simple(GEN n, GEN d)
   }
   z = cgetg(3,t_RFRAC);
   gel(z,1) = gmul(n, cn);
-  gel(z,2) = rfrac_denom_mul_scal(d, cd);
+  gel(z,2) = d = rfrac_denom_mul_scal(d, cd);
+  /* can happen: Pol(O(17^-1)) / Pol([Mod(9,23), O(23^-3)]) */
+  if (!signe(d)) pari_err_INV("gred_rfrac_simple", d);
   return z;
 }
 
