@@ -157,6 +157,35 @@ gtolong(GEN x)
 /*                         COMPARISONS                             */
 /*                                                                 */
 /*******************************************************************/
+static void
+chk_true_err()
+{
+  GEN E = pari_err_last();
+  switch(err_get_num(E))
+  {
+    case e_STACK: case e_MEM: case e_ALARM:
+      pari_err(0, E); /* rethrow */
+  }
+}
+/* x - y == 0 or undefined */
+static int
+gequal_try(GEN x, GEN y)
+{
+  int i;
+  pari_CATCH(CATCH_ALL) { chk_true_err(); return 0; }
+  pari_TRY { i = gequal0(gadd(x, gneg_i(y))); } pari_ENDCATCH;
+  return i;
+}
+/* x + y == 0 or undefined */
+static int
+gmequal_try(GEN x, GEN y)
+{
+  int i;
+  pari_CATCH(CATCH_ALL) { chk_true_err(); return 0; }
+  pari_TRY { i = gequal0(gadd(x, y)); } pari_ENDCATCH;
+  return i;
+}
+
 int
 isexactzero(GEN g)
 {
@@ -444,7 +473,7 @@ gequalm1(GEN x)
     case t_SER: return is_monomial_test(x, 2 - valp(x), &gequalm1);
 
     case t_RFRAC:
-      av = avma; return gc_bool(av, gequal(gel(x,1), gneg_i(gel(x,2))));
+      av = avma; return gc_bool(av, gmequal_try(gel(x,1), gel(x,2)));
     case t_COL: return col_test(x, &gequalm1);
     case t_MAT: return mat_test(x, &gequalm1);
   }
@@ -986,24 +1015,6 @@ vecequal(GEN x, GEN y)
   for (i = lg(x)-1; i; i--)
     if (! gequal(gel(x,i),gel(y,i)) ) return 0;
   return 1;
-}
-
-static int
-gequal_try(GEN x, GEN y)
-{
-  int i;
-  pari_CATCH(CATCH_ALL) {
-    GEN E = pari_err_last();
-    switch(err_get_num(E))
-    {
-      case e_STACK: case e_MEM: case e_ALARM:
-        pari_err(0, E); /* rethrow */
-    }
-    return 0;
-  } pari_TRY {
-    i = gequal0(gadd(x, gneg_i(y)));
-  } pari_ENDCATCH;
-  return i;
 }
 
 int
