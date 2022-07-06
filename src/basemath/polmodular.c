@@ -1340,55 +1340,40 @@ oneroot_of_classpoly(GEN hilb, GEN factu, norm_eqn_t ne, GEN jdb)
   return gc_ulong(av, j0);
 }
 
-/* TODO: Precompute the classgp_pcp_t structs and link them to dinfo */
-INLINE void
-make_pcp_surface(const disc_info *dinfo, classgp_pcp_t G)
+/* TODO: Precompute the GEN structs and link them to dinfo */
+INLINE GEN
+make_pcp_surface(const disc_info *dinfo)
 {
-  long k = 1, datalen = 3 * k;
-
-  memset(G, 0, sizeof *G);
-
-  G->_data = cgetg(datalen + 1, t_VECSMALL);
-  G->L = G->_data + 1;
-  G->n = G->L + k;
-  G->o = G->L + 2*k;
-
-  G->k = k;
-  G->h = G->enum_cnt = dinfo->n1;
-  G->L[0] = dinfo->L0;
-  G->n[0] = dinfo->n1;
-  G->o[0] = dinfo->n1;
+  GEN L = mkvecsmall(dinfo->L0);
+  GEN n = mkvecsmall(dinfo->n1);
+  GEN o = mkvecsmall(dinfo->n1);
+  return mkvec2(mkvec3(L, n, o), mkvecsmall3(0, 1, dinfo->n1));
 }
 
-INLINE void
-make_pcp_floor(const disc_info *dinfo, classgp_pcp_t G)
+INLINE GEN
+make_pcp_floor(const disc_info *dinfo)
 {
-  long k = dinfo->L1 ? 2 : 1, datalen = 3 * k;
-
-  memset(G, 0, sizeof *G);
-  G->_data = cgetg(datalen + 1, t_VECSMALL);
-  G->L = G->_data + 1;
-  G->n = G->L + k;
-  G->o = G->L + 2*k;
-
-  G->k = k;
-  G->h = G->enum_cnt = dinfo->n2 * k;
-  G->L[0] = dinfo->L0;
-  G->n[0] = dinfo->n2;
-  G->o[0] = dinfo->n2;
-  if (dinfo->L1) {
-    G->L[1] = dinfo->L1;
-    G->n[1] = 2;
-    G->o[1] = 2;
+  long k = dinfo->L1 ? 2 : 1;
+  GEN L, n, o;
+  if (k==1)
+  {
+    L = mkvecsmall(dinfo->L0);
+    n = mkvecsmall(dinfo->n2);
+    o = mkvecsmall(dinfo->n2);
+  } else
+  {
+    L = mkvecsmall2(dinfo->L0, dinfo->L1);
+    n = mkvecsmall2(dinfo->n2, 2);
+    o = mkvecsmall2(dinfo->n2, 2);
   }
+  return mkvec2(mkvec3(L, n, o), mkvecsmall3(0, k, dinfo->n2*k));
 }
 
 INLINE GEN
 enum_volcano_surface(const disc_info *dinfo, norm_eqn_t ne, ulong j0, GEN fdb)
 {
   pari_sp av = avma;
-  classgp_pcp_t G;
-  make_pcp_surface(dinfo, G);
+  GEN G = make_pcp_surface(dinfo);
   return gerepileupto(av, enum_roots(j0, ne, fdb, G));
 }
 
@@ -1401,13 +1386,13 @@ enum_volcano_floor(long L, norm_eqn_t ne, ulong j0_pr, GEN fdb, const disc_info 
   long R_cond = L * ne->u; /* conductor(DR); */
   long w = R_cond * ne->v;
   /* TODO: Calculate these once and for all in polmodular0_ZM(). */
-  classgp_pcp_t G;
+  GEN G;
   norm_eqn_t eqn;
   memcpy(eqn, ne, sizeof *ne);
   eqn->D = DR;
   eqn->u = R_cond;
   eqn->v = w;
-  make_pcp_floor(dinfo, G);
+  G = make_pcp_floor(dinfo);
   return gerepileupto(av, enum_roots(j0_pr, eqn, fdb, G));
 }
 

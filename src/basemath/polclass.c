@@ -19,6 +19,37 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #define dbg_printf(lvl) if (DEBUGLEVEL >= (lvl) + 3) err_printf
 
+static GEN
+pcp_get_L(GEN G) { return gmael(G,1,1)+1; }
+static GEN
+pcp_get_n(GEN G) { return gmael(G,1,2)+1; }
+static GEN
+pcp_get_m(GEN G) { return gmael(G,1,4)+1; }
+static GEN
+pcp_get_o(GEN G) { return gmael(G,1,3)+1; }
+static GEN
+pcp_get_r(GEN G) { return gmael(G,1,5)+1; }
+static GEN
+pcp_get_orient_p(GEN G) { return gmael(G,3,1)+1; }
+static GEN
+pcp_get_orient_q(GEN G) { return gmael(G,3,2)+1; }
+static GEN
+pcp_get_orient_reps(GEN G) { return gmael(G,3,3)+1; }
+static long
+pcp_get_L0(GEN G) { return mael(G,2,1); }
+static long
+pcp_get_k(GEN G) { return mael(G,2,2); }
+static long
+pcp_get_h(GEN G) { return mael(G,4,1); }
+static long
+pcp_get_u(GEN G) { return mael(G,4,2); }
+static long
+pcp_get_inv(GEN G) { return mael(G,4,3); }
+static long
+pcp_get_D(GEN G) { return mael(G,4,4); }
+static long
+pcp_get_D0(GEN G) { return mael(G,4,5); }
+
 /* SECTION: Functions dedicated to finding a j-invariant with a given
  * trace. */
 
@@ -1014,15 +1045,16 @@ next_prime_evec(long *qq, long f[], const long m[], long k,
 
 /* Return 1 on success, 0 on failure. */
 static int
-orient_pcp(classgp_pcp_t G, long *ni, long D, long u, hashtable *tbl)
+orient_pcp(GEN G, long *ni, long D, long u, hashtable *tbl)
 {
   pari_sp av = avma;
   /* 199 seems to suffice, but can be increased if necessary */
   enum { MAX_ORIENT_P = 199 };
-  const long *L = G->L, *n = G->n, *r = G->r, *m = G->m, *o = G->o;
-  long i, *ps = G->orient_p, *qs = G->orient_q, *reps = G->orient_reps;
-  long *ef, *e, *ei, *f, k = G->k, lvl = modinv_level(G->inv);
+  const long *L = pcp_get_L(G), *n = pcp_get_n(G), *r = pcp_get_r(G), *m = pcp_get_m(G), *o = pcp_get_o(G);
+  long i, *ps = pcp_get_orient_p(G), *qs = pcp_get_orient_q(G), *reps = pcp_get_orient_reps(G);
+  long *ef, *e, *ei, *f, k = pcp_get_k(G), lvl = modinv_level(pcp_get_inv(G));
   GEN DD = stoi(D);
+  long L0 = pcp_get_L0(G);
 
   memset(ps, 0, k * sizeof(long));
   memset(qs, 0, k * sizeof(long));
@@ -1044,7 +1076,7 @@ orient_pcp(classgp_pcp_t G, long *ni, long D, long u, hashtable *tbl)
       if (!next_prime_evec(&p, ef, m, k, tbl, D, DD, u, lvl, MAX_ORIENT_P))
         break;
       evec_inverse_o(ei, ef, n, o, r, k);
-      if (!distinct_inverses(NULL, ef, ei, n, o, r, k, G->L0, i)) continue;
+      if (!distinct_inverses(NULL, ef, ei, n, o, r, k, L0, i)) continue;
       ps[i] = p;
       qs[i] = 1;
     }
@@ -1062,7 +1094,7 @@ orient_pcp(classgp_pcp_t G, long *ni, long D, long u, hashtable *tbl)
       while (!qs[i]) {
         if (!next_prime_evec(&q, f, m, k, tbl, D, DD, u, lvl, p - 1)) break;
         evec_compose(ef, e, f, n, r, k);
-        if (!distinct_inverses(f, ef, ei, n, o, r, k, G->L0, i)) continue;
+        if (!distinct_inverses(f, ef, ei, n, o, r, k, L0, i)) continue;
         ps[i] = p;
         qs[i] = q;
       }
@@ -1123,66 +1155,41 @@ classgp_pcp_check_generators(const long *n, long *r, long k, long L0)
   return gc_long(av,-1);
 }
 
-static void
-pcp_alloc_and_set(
-  classgp_pcp_t G, const long *L, const long *n, const long *r, long k)
-{
-  /* classgp_pcp contains 6 arrays of length k (L, m, n, o, orient_p, orient_q),
-   * one of length binom(k, 2) (r) and one of length k^2 (orient_reps) */
-  long rlen = k * (k - 1) / 2, datalen = 6 * k + rlen + k * k;
-  G->_data = newblock(datalen);
-  G->L = G->_data;
-  G->m = G->L + k;
-  G->n = G->m + k;
-  G->o = G->n + k;
-  G->r = G->o + k;
-  G->orient_p = G->r + rlen;
-  G->orient_q = G->orient_p + k;
-  G->orient_reps = G->orient_q + k;
-  G->k = k;
-
-  evec_copy(G->L, L, k);
-  evec_copy(G->n, n, k);
-  evec_copy(G->r, r, rlen);
-  evec_orders(G->o, n, r, k);
-  evec_n_to_m(G->m, n, k);
-}
-
-static void
-classgp_pcp_clear(classgp_pcp_t G)
-{ if (G->_data) killblock(G->_data); }
-
 /* This is Sutherland 2009, Algorithm 2.2 (p16). */
-static void
+static GEN
 classgp_make_pcp(
-  classgp_pcp_t G, double *height, long *ni,
+  double *height, long *ni,
   long h, long D, long D0, ulong u, long inv, long Lfilter, long orient)
 {
   enum { MAX_GENS = 16, MAX_RLEN = MAX_GENS * (MAX_GENS - 1) / 2 };
-  pari_sp av = avma, bv;
+  pari_sp av, bv;
   long curr_p, nelts, lvl = modinv_level(inv);
-  GEN DD, ident, T, v;
+  GEN G, DD, ident, T, v;
   hashtable *tbl;
-  long i, L1, L2;
-  long k, L[MAX_GENS], n[MAX_GENS], r[MAX_RLEN];
+  long i, k, L1, L2;
+  GEN L, m, n, o, r, orient_p, orient_q, orient_reps;
+  long L0, enum_cnt, GLfilter;
 
-  memset(G, 0, sizeof *G);
-
-  G->D = D;
-  G->D0 = D0;
-  G->u = u;
-  G->h = h;
-  G->inv = inv;
-  if (!modinv_is_double_eta(inv) || !modinv_ramified(D, inv, &G->L0)) G->L0 = 0;
-  G->enum_cnt = h / (1 + !!G->L0);
-  G->Lfilter = ulcm(Lfilter, lvl);
+  L = cgetg(MAX_GENS+1, t_VECSMALL);
+  m = cgetg(MAX_GENS+1, t_VECSMALL);
+  n = cgetg(MAX_GENS+1, t_VECSMALL);
+  o = cgetg(MAX_GENS+1, t_VECSMALL);
+  r = cgetg(MAX_RLEN+1, t_VECSMALL);
+  orient_p = cgetg(MAX_GENS+1, t_VECSMALL);
+  orient_q = cgetg(MAX_GENS+1, t_VECSMALL);
+  orient_reps = cgetg(MAX_GENS*MAX_GENS+1, t_VECSMALL);
+  G = mkvec4(mkvec5(L, n, o, m, r), mkvecsmall3(0, 0, 0),
+             mkvec3(orient_p, orient_q, orient_reps), mkvecsmall5(h, u, inv, D, D0));
+  av = avma;
+  if (!modinv_is_double_eta(inv) || !modinv_ramified(D, inv, &L0)) L0 = 0;
+  enum_cnt = h / (1 + !!L0);
+  GLfilter = ulcm(Lfilter, lvl);
 
   if (h == 1) {
-    G->k = 0;
-    G->_data = NULL;
+    k = 0;
     *height = upper_bound_on_classpoly_coeffs(D, h, mkvecsmall(1));
     /* NB: No need to set *ni when h = 1 */
-    set_avma(av); return;
+    set_avma(av); return G;
   }
 
   DD = stoi(D);
@@ -1208,17 +1215,17 @@ classgp_make_pcp(
 
       if (k == MAX_GENS) pari_err_IMPL("classgp_pcp");
 
-      if (nelts == 1 && G->L0) {
-        curr_p = G->L0;
+      if (nelts == 1 && L0) {
+        curr_p = L0;
         gamma_i = qfb_nform(D, curr_p);
         beta = qfbred_i(gamma_i);
         if (equali1(gel(beta, 1)))
         {
           curr_p = 1;
-          gamma_i = next_generator(DD, D, u, G->Lfilter, &beta, &curr_p);
+          gamma_i = next_generator(DD, D, u, GLfilter, &beta, &curr_p);
         }
       } else
-        gamma_i = next_generator(DD, D, u, G->Lfilter, &beta, &curr_p);
+        gamma_i = next_generator(DD, D, u, GLfilter, &beta, &curr_p);
       while ((e = hash_search(tbl, beta)) == NULL) {
         long j;
         for (j = 1; j <= N; ++j) {
@@ -1231,17 +1238,17 @@ classgp_make_pcp(
       }
       if (ri > 1) {
         long j, si;
-        L[k] = curr_p;
-        n[k] = ri;
+        L[k+1] = curr_p;
+        n[k+1] = ri;
         nelts *= ri;
 
-        /* This is to reset the curr_p counter when we have G->L0 != 0
+        /* This is to reset the curr_p counter when we have L0 != 0
          * in the first position of L. */
-        if (curr_p == G->L0) curr_p = 1;
+        if (curr_p == L0) curr_p = 1;
 
         N = 1;
         si = (long)e->val;
-        for (j = 0; j < k; ++j) {
+        for (j = 1; j <= k; ++j) {
           evec_ri_mutate(r, k)[j] = (si / N) % n[j];
           N *= n[j];
         }
@@ -1249,34 +1256,36 @@ classgp_make_pcp(
       }
     }
 
-    if ((i = classgp_pcp_check_generators(n, r, k, G->L0)) < 0) {
-      pcp_alloc_and_set(G, L, n, r, k);
+    if ((i = classgp_pcp_check_generators(n+1, r+1, k, L0)) < 0) {
+      mael(G,2,1) = L0;
+      mael(G,2,2) = k;
+      mael(G,2,3) = enum_cnt;
+      evec_orders(o+1, n+1, r+1, k);
+      evec_n_to_m(m+1, n+1, k);
       if (!orient || orient_pcp(G, ni, D, u, tbl)) break;
-      G->Lfilter *= G->L[0];
-      classgp_pcp_clear(G);
-    } else if (log2(G->Lfilter) + log2(L[i]) >= BITS_IN_LONG)
+      GLfilter *= L[1];
+    } else if (log2(GLfilter) + log2(L[i+1]) >= BITS_IN_LONG)
       pari_err_IMPL("classgp_pcp");
     else
-      G->Lfilter *= L[i];
+      GLfilter *= L[i+1];
     set_avma(bv);
   }
-
   v = cgetg(h + 1, t_VECSMALL);
   v[1] = 1;
   for (i = 2; i <= h; ++i) uel(v,i) = itou(gmael(T,i,1));
-  *height = upper_bound_on_classpoly_coeffs(D, G->enum_cnt, v);
+  *height = upper_bound_on_classpoly_coeffs(D, enum_cnt, v);
 
   /* The norms of the last one or two generators. */
-  L1 = L[k - 1];
-  L2 = k > 1 ? L[k - 2] : 1;
+  L1 = L[k];
+  L2 = k > 1 ? L[k - 1] : 1;
   /* 4 * L1^2 * L2^2 must fit in a ulong */
   if (2 * (1 + log2(L1) + log2(L2)) >= BITS_IN_LONG)
     pari_err_IMPL("classgp_pcp");
 
-  if (G->L0 && (G->L[0] != G->L0 || G->o[0] != 2))
+  if (L0 && (L[1] != L0 || o[1] != 2))
     pari_err_BUG("classgp_pcp");
-
-  set_avma(av); return;
+  set_avma(av);
+  return G;
 }
 
 /* SECTION: Functions for calculating class polynomials. */
@@ -1313,16 +1322,16 @@ hclassno_wrapper(long D, ulong f, long h)
 
 /* This is Sutherland 2009, Algorithm 2.1 (p8); delta > 0 */
 static GEN
-select_classpoly_prime_pool(double min_bits, double delta, classgp_pcp_t G)
+select_classpoly_prime_pool(double min_bits, double delta, GEN G)
 { /* Sutherland defines V_MAX to be 1200 without saying why */
   const long V_MAX = 1200;
   pari_sp av = avma;
   double bits = 0.0, hurwitz, z;
-  ulong t_size_lim, d = (ulong)-G->D;
-  long ires, inv = G->inv;
+  ulong t_size_lim, d = (ulong)-pcp_get_D(G);
+  long ires, inv = pcp_get_inv(G);
   GEN res, t_min; /* t_min[v] = lower bound for the t we look at for that v */
 
-  hurwitz = hclassno_wrapper(G->D0, G->u, G->h);
+  hurwitz = hclassno_wrapper(pcp_get_D0(G), pcp_get_u(G), pcp_get_h(G));
 
   res = cgetg(128+1, t_VEC);
   ires = 1;
@@ -1347,7 +1356,7 @@ select_classpoly_prime_pool(double min_bits, double delta, classgp_pcp_t G)
 
       if (v >= v_bound_aux * hurwitz_ratio_bound / d) break;
       if (!is_smooth_enough(&vfactors, v)) continue;
-      H = hclassno_wrapper(G->D0, G->u * v, G->h);
+      H = hclassno_wrapper(pcp_get_D0(G), pcp_get_u(G) * v, pcp_get_h(G));
 
       /* t <= 2 sqrt(p) and p <= z H(v^2 d) and
        *   H(v^2 d) < vH(d) (11 log(log(v + 4))^2)
@@ -1376,7 +1385,7 @@ select_classpoly_prime_pool(double min_bits, double delta, classgp_pcp_t G)
     }
     if (uel(t_min,1) >= t_size_lim) {
       /* exhausted all solutions that fit in ulong */
-      char *err = stack_sprintf("class polynomial of discriminant %ld", G->D);
+      char *err = stack_sprintf("class polynomial of discriminant %ld", pcp_get_D(G));
       pari_err(e_ARCH, err);
     }
   }
@@ -1399,11 +1408,11 @@ height_margin(long inv, long D)
 
 static GEN
 select_classpoly_primes(ulong *vfactors, ulong *biggest_v, double delta,
-  classgp_pcp_t G, double height)
+  GEN G, double height)
 {
   const long k = 2;
   pari_sp av = avma;
-  long i, s, D = G->D, inv = G->inv;
+  long i, s, D = pcp_get_D(G), inv = pcp_get_inv(G);
   ulong biggest_p;
   double prime_bits, min_prime_bits, b;
   GEN prime_pool;
@@ -1610,11 +1619,11 @@ find_jinv(
 static GEN
 polclass_roots_modp(
   long *n_trace_curves,
-  norm_eqn_t ne, long rho_inv, classgp_pcp_t G, GEN db)
+  norm_eqn_t ne, long rho_inv, GEN G, GEN db)
 {
   pari_sp av = avma;
   ulong j = 0;
-  long inv = G->inv, endo_tries = 0;
+  long inv = pcp_get_inv(G), endo_tries = 0;
   int endo_cert;
   GEN res, jdb, fdb;
 
@@ -1678,13 +1687,13 @@ verify_2path(
 
 static long
 oriented_n_action(
-  const long *ni, classgp_pcp_t G, GEN v, ulong p, ulong pi, GEN fdb)
+  const long *ni, GEN G, GEN v, ulong p, ulong pi, GEN fdb)
 {
   pari_sp av = avma;
-  long i, j, k = G->k;
+  long i, j, k = pcp_get_k(G);
   long nr = k * (k - 1) / 2;
-  const long *n = G->n, *m = G->m, *o = G->o, *r = G->r,
-    *ps = G->orient_p, *qs = G->orient_q, *reps = G->orient_reps;
+  const long *n = pcp_get_n(G), *m = pcp_get_m(G), *o = pcp_get_o(G), *r = pcp_get_r(G),
+    *ps = pcp_get_orient_p(G), *qs = pcp_get_orient_q(G), *reps = pcp_get_orient_reps(G);
   long *signs = new_chunk(k);
   long *e = new_chunk(k);
   long *rels = new_chunk(nr);
@@ -1839,9 +1848,9 @@ polclass0(long D, long inv, long vx, GEN *db)
   pari_sp av = avma;
   GEN primes, H, plist, pilist, Pu, Eu;
   long n_curves_tested = 0, filter = 1;
-  long D0, nprimes, s, i, j, del, ni, orient, h, p1, p2;
+  long D0, nprimes, s, i, j, del, ni, orient, h, p1, p2, k;
   ulong u, vfactors, biggest_v;
-  classgp_pcp_t G;
+  GEN G;
   double height;
   static const double delta = 0.5;
 
@@ -1854,7 +1863,7 @@ polclass0(long D, long inv, long vx, GEN *db)
   ni = modinv_degree(&p1, &p2, inv);
   orient = modinv_is_double_eta(inv) && kross(D, p1) && kross(D, p2);
 
-  classgp_make_pcp(G, &height, &ni, h, D, D0, u, inv, filter, orient);
+  G = classgp_make_pcp(&height, &ni, h, D, D0, u, inv, filter, orient);
   primes = select_classpoly_primes(&vfactors, &biggest_v, delta, G, height);
 
   /* Prepopulate *db with all the modpolys we might need */
@@ -1875,13 +1884,16 @@ polclass0(long D, long inv, long vx, GEN *db)
   }
   if (p1 > 1) polmodular_db_add_level(db, p1, INV_J);
   if (p2 > 1) polmodular_db_add_level(db, p2, INV_J);
-  s = !!G->L0;
-  polmodular_db_add_levels(db, G->L + s, G->k - s, inv);
-  if (orient) {
-    for (i = 0; i < G->k; ++i)
+  s = !!pcp_get_L0(G); k = pcp_get_k(G);
+  polmodular_db_add_levels(db, pcp_get_L(G) + s, k - s, inv);
+  if (orient)
+  {
+    GEN orient_p = pcp_get_orient_p(G);
+    GEN orient_q = pcp_get_orient_q(G);
+    for (i = 0; i < k; ++i)
     {
-      if (G->orient_p[i] > 1) polmodular_db_add_level(db, G->orient_p[i], inv);
-      if (G->orient_q[i] > 1) polmodular_db_add_level(db, G->orient_q[i], inv);
+      if (orient_p[i] > 1) polmodular_db_add_level(db, orient_p[i], inv);
+      if (orient_q[i] > 1) polmodular_db_add_level(db, orient_q[i], inv);
     }
   }
   nprimes = lg(primes) - 1;
@@ -1905,10 +1917,10 @@ polclass0(long D, long inv, long vx, GEN *db)
   dbg_printf(0)("\n");
 
   if (orient) {
-    GEN nvec = new_chunk(G->k);
+    GEN nvec = new_chunk(k);
     GEN fdb = polmodular_db_for_inv(*db, inv);
     GEN F = double_eta_raw(inv);
-    index_to_evec((long *)nvec, ni, G->m, G->k);
+    index_to_evec((long *)nvec, ni, pcp_get_m(G), k);
     for (i = 1; i <= nprimes; ++i) {
       GEN v = gel(H, i);
       ulong p = uel(plist, i), pi = uel(pilist, i);
@@ -1943,7 +1955,6 @@ polclass0(long D, long inv, long vx, GEN *db)
   }
   setlg(H,nprimes+1-del);
   setlg(plist,nprimes+1-del);
-  classgp_pcp_clear(G);
 
   dbg_printf(1)("Total number of curves tested: %ld\n", n_curves_tested);
   H = ncV_chinese_center(H, plist, NULL);

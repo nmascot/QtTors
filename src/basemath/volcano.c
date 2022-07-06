@@ -15,6 +15,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+static GEN
+pcp_get_L(GEN G) { return gmael(G,1,1)+1; }
+static GEN
+pcp_get_n(GEN G) { return gmael(G,1,2)+1; }
+static GEN
+pcp_get_o(GEN G) { return gmael(G,1,3)+1; }
+static long
+pcp_get_L0(GEN G) { return mael(G,2,1); }
+static long
+pcp_get_k(GEN G) { return mael(G,2,2); }
+static long
+pcp_get_enum_cnt(GEN G) { return mael(G,2,3); }
+
 /* FIXME: Implement {ascend,descend}_volcano() in terms of the "new"
  * volcano traversal functions at the bottom of the file. */
 
@@ -607,13 +620,13 @@ surface_parallel_path(
 }
 
 GEN
-enum_roots(ulong J0, norm_eqn_t ne, GEN fdb, classgp_pcp_t G)
+enum_roots(ulong J0, norm_eqn_t ne, GEN fdb, GEN G)
 { /* MAX_HEIGHT >= max_{p,n} val_p(n) where p and n are ulongs */
   enum { MAX_HEIGHT = BITS_IN_LONG };
   pari_sp av, ltop = avma;
-  long s = !!G->L0;
-  long *n = G->n + s, *L = G->L + s, *o = G->o + s, k = G->k - s;
-  long i, t, vlen, *e, *h, *off, *poff, *M, N = G->enum_cnt;
+  long s = !!pcp_get_L0(G);
+  long *n = pcp_get_n(G)+s, *L = pcp_get_L(G)+s, *o = pcp_get_o(G)+s, k = pcp_get_k(G)-s;
+  long i, t, vlen, *e, *h, *off, *poff, *M, N = pcp_get_enum_cnt(G);
   ulong p = ne->p, pi = ne->pi, *roots;
   GEN Phi, vshape, vp, ve, roots_;
 

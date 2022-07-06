@@ -261,37 +261,6 @@ enum { FF_CARD = 1, FF_GROUP, FF_GROUPGEN, FF_O };
 /* for Buchall_param */
 enum { fupb_NONE = 0, fupb_RELAT, fupb_LARGE, fupb_PRECI };
 
-/* Polycyclic presentation for the classgroup of discriminant D */
-typedef struct {
-  long D; /* Negative discriminant */
-  long D0; /* Attached fundamental discriminant */
-  long u; /* Conductor of D = D0 u^2 */
-  long h; /* Size of classgroup */
-  long enum_cnt; /* Either h or h/2 (if L0 is set) */
-  /* If nonzero, L0=L[0] and n[0]=2 and classpoly is a perfect square
-   * (and we enumerate each double root just once), default is 0 */
-  long L0;
-  /* Product of primes L that are prohibited as norms of generators or
-   * auxilliary prime forms (by default, primes that make enumeration hard) */
-  long Lfilter;
-  /* Norms of implicit generators (primeforms a=(L*x^2+b*x*y+c*y^2)
-   * with norm L and b >=0) */
-  long *L;
-  long *m; /* products of relative orders: m[i] is the order of <g_1,...,g_i> */
-  long *n; /* Relative orders */
-  long *o; /* Absolute orders */
-  /* Power relations (a[i]^n[i] = a[0]^e[0]*...*a[i-1]^e[i-1], where e
-   * is an exponent vector of length i stored at offset binom(i,2) of r) */
-  long *r;
-  long *orient_p; /* Optional list of norms of orienting primes p ... */
-  long *orient_q; /* or product of primes p*q (q=1 when only p is needed) */
-  long *orient_reps; /* Representation of orienting norm p*q in terms of Ls */
-  long inv; /* Attached invariant */
-  long k; /* Number of generators */
-  GEN _data; /* Storage space for the above arrays */
-} classgp_pcp_struct;
-typedef classgp_pcp_struct classgp_pcp_t[1];
-
 /* Represents the data in the equation(s)
  *   4p = t^2 - v^2 D = t^2 - v^2 u^2 D_K = w^2 D_K.
  * t is the absolute trace, so always > 0.
@@ -1005,6 +974,6 @@ long j_level_in_volcano(GEN phi, ulong j, ulong p, ulong pi, long L, long depth)
 ulong ascend_volcano(GEN phi, ulong j, ulong p, ulong pi, long level, long L, long depth, long steps);
 ulong descend_volcano(GEN phi, ulong j, ulong p, ulong pi, long level, long L, long depth, long steps);
 long next_surface_nbr(ulong *nJ, GEN phi, long L, long h, ulong J, const ulong *pJ, ulong p, ulong pi);
-GEN enum_roots(ulong j, norm_eqn_t ne, GEN fdb, classgp_pcp_t G);
+GEN enum_roots(ulong j, norm_eqn_t ne, GEN fdb, GEN G);
 
 ENDEXTERN
