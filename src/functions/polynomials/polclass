@@ -105,3 +105,10 @@ Doc:
  ? polclass(-151,1)
  x^7 - x^6 + x^5 + 3*x^3 - x^2 + 3*x + 1
  @eprog
+
+Function: _polclass_worker
+Section: programming/internals
+C-Name: polclass_worker
+Prototype: GLLGG
+Help: used by polclass
+Doc: used by polclass

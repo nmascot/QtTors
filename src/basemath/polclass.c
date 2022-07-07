@@ -1646,7 +1646,7 @@ polclass_roots_modp(
   dbg_printf(2)("  j-invariant %ld has correct endomorphism ring "
              "(%ld tries)\n", j, endo_tries);
   dbg_printf(4)("  all such j-invariants: %Ps\n", res);
-  return res;
+  return gerepileupto(av, res);
 }
 
 INLINE int
@@ -1843,6 +1843,17 @@ quadnegclassnou(long D, long *pD0, GEN *pP, GEN *pE)
 }
 
 GEN
+polclass_worker(GEN p, long D, long u, GEN G, GEN db)
+{
+  long n_curves_tested = 0;
+  long rho_inv = p[4];
+  norm_eqn_t ne;
+  setup_norm_eqn(ne, D, u, p);
+  retmkvec2(polclass_roots_modp(&n_curves_tested, ne, rho_inv, G, db),
+            mkvecsmall3(ne->p, ne->pi, n_curves_tested));
+}
+
+GEN
 polclass0(long D, long inv, long vx, GEN *db)
 {
   pari_sp av = avma;
@@ -1850,7 +1861,7 @@ polclass0(long D, long inv, long vx, GEN *db)
   long n_curves_tested = 0, filter = 1;
   long D0, nprimes, s, i, j, del, ni, orient, h, p1, p2, k;
   ulong u, vfactors, biggest_v;
-  GEN G;
+  GEN G, Hp, worker;
   double height;
   static const double delta = 0.5;
 
@@ -1897,20 +1908,15 @@ polclass0(long D, long inv, long vx, GEN *db)
     }
   }
   nprimes = lg(primes) - 1;
+  worker = snm_closure(is_entry("_polclass_worker"),mkvec4(stoi(D), stoi(u), G, *db));
+  Hp = gen_parapply(worker, primes);
   H = cgetg(nprimes + 1, t_VEC);
   plist = cgetg(nprimes + 1, t_VECSMALL);
   pilist = cgetg(nprimes + 1, t_VECSMALL);
-  for (i = 1; i <= nprimes; ++i)
-  {
-    pari_sp av2 = avma;
-    long rho_inv = gel(primes, i)[4];
-    norm_eqn_t ne;
-    GEN z;
-    setup_norm_eqn(ne, D, u, gel(primes, i));
-    z = polclass_roots_modp(&n_curves_tested, ne, rho_inv, G, *db);
-    uel(plist, i) = ne->p;
-    uel(pilist, i) = ne->pi;
-    gel(H, i) = gerepileupto(av2, z);
+  for (i = 1; i <= nprimes; ++i) {
+    gel(H, i) = gmael(Hp,i,1);
+    uel(plist, i) = mael3(Hp,i,2,1);
+    uel(pilist, i) = mael3(Hp,i,2,2);
     if (DEBUGLEVEL>2 && (i & 3L)==0)
       err_printf(" %ld%%", i*100/nprimes);
   }
