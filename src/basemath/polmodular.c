@@ -1351,7 +1351,7 @@ make_pcp_surface(const disc_info *dinfo, classgp_pcp_t G)
   G->_data = cgetg(datalen + 1, t_VECSMALL);
   G->L = G->_data + 1;
   G->n = G->L + k;
-  G->o = G->L + k;
+  G->o = G->L + 2*k;
 
   G->k = k;
   G->h = G->enum_cnt = dinfo->n1;
@@ -1369,7 +1369,7 @@ make_pcp_floor(const disc_info *dinfo, classgp_pcp_t G)
   G->_data = cgetg(datalen + 1, t_VECSMALL);
   G->L = G->_data + 1;
   G->n = G->L + k;
-  G->o = G->L + k;
+  G->o = G->L + 2*k;
 
   G->k = k;
   G->h = G->enum_cnt = dinfo->n2 * k;
