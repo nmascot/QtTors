@@ -1624,11 +1624,10 @@ polclass_roots_modp(
   dbg_printf(2)("p = %ld, t = %ld, v = %ld\n", ne->p, ne->t, ne->v);
 
   do {
-    j = find_jinv(n_trace_curves, &endo_tries, &endo_cert, ne, inv, rho_inv, jdb);
-
+    j = find_jinv(n_trace_curves,&endo_tries,&endo_cert, ne, inv, rho_inv, jdb);
     res = enum_roots(j, ne, fdb, G);
-    if ( ! res && endo_cert) pari_err_BUG("polclass_roots_modp");
-    if (res && ! endo_cert && vecsmall_isin_skip(res, res[1], 2))
+    if (!res && endo_cert) pari_err_BUG("polclass_roots_modp");
+    if (res && !endo_cert && vecsmall_isin_skip(res, res[1], 2))
     {
       set_avma(av);
       res = NULL;
@@ -1638,7 +1637,7 @@ polclass_roots_modp(
   dbg_printf(2)("  j-invariant %ld has correct endomorphism ring "
              "(%ld tries)\n", j, endo_tries);
   dbg_printf(4)("  all such j-invariants: %Ps\n", res);
-  return gerepileupto(av, res);
+  return res;
 }
 
 INLINE int
@@ -1889,14 +1888,17 @@ polclass0(long D, long inv, long vx, GEN *db)
   H = cgetg(nprimes + 1, t_VEC);
   plist = cgetg(nprimes + 1, t_VECSMALL);
   pilist = cgetg(nprimes + 1, t_VECSMALL);
-  for (i = 1; i <= nprimes; ++i) {
+  for (i = 1; i <= nprimes; ++i)
+  {
+    pari_sp av2 = avma;
     long rho_inv = gel(primes, i)[4];
     norm_eqn_t ne;
+    GEN z;
     setup_norm_eqn(ne, D, u, gel(primes, i));
-
-    gel(H, i) = polclass_roots_modp(&n_curves_tested, ne, rho_inv, G, *db);
+    z = polclass_roots_modp(&n_curves_tested, ne, rho_inv, G, *db);
     uel(plist, i) = ne->p;
     uel(pilist, i) = ne->pi;
+    gel(H, i) = gerepileupto(av2, z);
     if (DEBUGLEVEL>2 && (i & 3L)==0)
       err_printf(" %ld%%", i*100/nprimes);
   }
@@ -1927,13 +1929,17 @@ polclass0(long D, long inv, long vx, GEN *db)
     }
   }
 
-  for (i = 1, j = 1, del = 0; i <= nprimes; ++i) {
-    GEN v = gel(H, i), pol;
+  for (i = 1, j = 1, del = 0; i <= nprimes; ++i)
+  {
+    pari_sp av2 = avma;
     ulong p = uel(plist, i);
+    long l;
+    GEN v;
     if (!p) { del++; continue; }
-    pol = Flv_roots_to_pol(v, p, vx);
+    v = Flv_roots_to_pol(gel(H,i), p, vx); l = lg(v);
+    *++v = evaltyp(t_VECSMALL) | evallg(l-1); /* Flx_to_Flv inplace */
     uel(plist, j) = p;
-    gel(H, j++) = Flx_to_Flv(pol, lg(pol) - 2);
+    gel(H, j++) = gerepileuptoleaf(av2, v);
   }
   setlg(H,nprimes+1-del);
   setlg(plist,nprimes+1-del);
@@ -1941,8 +1947,7 @@ polclass0(long D, long inv, long vx, GEN *db)
 
   dbg_printf(1)("Total number of curves tested: %ld\n", n_curves_tested);
   H = ncV_chinese_center(H, plist, NULL);
-  dbg_printf(1)("Result height: %.2f\n",
-             dbllog2r(itor(gsupnorm(H, DEFAULTPREC), DEFAULTPREC)));
+  dbg_printf(1)("Result height: %.2f\n", dbllog2(gsupnorm(H, DEFAULTPREC)));
   return gerepilecopy(av, RgV_to_RgX(H, vx));
 }
 
