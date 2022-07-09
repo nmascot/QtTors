@@ -1646,7 +1646,7 @@ polclass_roots_modp(
   dbg_printf(2)("  j-invariant %ld has correct endomorphism ring "
              "(%ld tries)\n", j, endo_tries);
   dbg_printf(4)("  all such j-invariants: %Ps\n", res);
-  return gerepileupto(av, res);
+  return res;
 }
 
 INLINE int
@@ -1845,12 +1845,14 @@ quadnegclassnou(long D, long *pD0, GEN *pP, GEN *pE)
 GEN
 polclass_worker(GEN p, long D, long u, GEN G, GEN db)
 {
-  long n_curves_tested = 0;
-  long rho_inv = p[4];
+  long n_curves_tested = 0, rho_inv = p[4];
+  GEN v = cgetg(3, t_VEC), z;
+  pari_sp av = avma;
   norm_eqn_t ne;
   setup_norm_eqn(ne, D, u, p);
-  retmkvec2(polclass_roots_modp(&n_curves_tested, ne, rho_inv, G, db),
-            mkvecsmall3(ne->p, ne->pi, n_curves_tested));
+  z = polclass_roots_modp(&n_curves_tested, ne, rho_inv, G, db);
+  gel(v,1) = gerepileuptoleaf(av, z);
+  gel(v,2) = mkvecsmall3(ne->p, ne->pi, n_curves_tested); return v;
 }
 
 GEN
