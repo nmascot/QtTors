@@ -52,14 +52,13 @@ node_degree(GEN phi, long L, ulong j, ulong p, ulong pi)
 INLINE GEN
 nhbr_polynomial(ulong path[], GEN phi, ulong p, ulong pi, long L)
 {
-  pari_sp ltop = avma;
   GEN modpol = Flm_Fl_polmodular_evalx(phi, L, path[0], p, pi);
   ulong rem;
   GEN nhbr_pol = Flx_div_by_X_x(modpol, path[-1], p, &rem);
   /* If disc End(path[0]) <= L^2, it's possible for path[0] to appear among the
    * roots of nhbr_pol. This should have been obviated by earlier choices */
   if (rem) pari_err_BUG("nhbr_polynomial: invalid preceding j");
-  return gerepileupto(ltop, nhbr_pol);
+  return nhbr_pol;
 }
 
 /* Path is an array with space for at least max_len+1 * elements, whose first
