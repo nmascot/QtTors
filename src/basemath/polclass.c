@@ -1860,12 +1860,13 @@ polclass0(long D, long inv, long vx, GEN *db)
 {
   pari_sp av = avma;
   GEN primes, H, plist, pilist, Pu, Eu;
-  long n_curves_tested = 0, filter = 1;
+  long n_curves_tested = 0, filter = 1, pending = 0, cnt = 0;
   long D0, nprimes, s, i, j, del, ni, orient, h, p1, p2, k;
   ulong u, vfactors, biggest_v;
-  GEN G, Hp, worker;
+  GEN G, worker, vec;
   double height;
   static const double delta = 0.5;
+  struct pari_mt pt;
 
   if (D >= -4) return polclass_small_disc(D, inv, vx);
 
@@ -1911,17 +1912,30 @@ polclass0(long D, long inv, long vx, GEN *db)
   }
   nprimes = lg(primes) - 1;
   worker = snm_closure(is_entry("_polclass_worker"),mkvec4(stoi(D), stoi(u), G, *db));
-  Hp = gen_parapply(worker, primes);
   H = cgetg(nprimes + 1, t_VEC);
   plist = cgetg(nprimes + 1, t_VECSMALL);
   pilist = cgetg(nprimes + 1, t_VECSMALL);
-  for (i = 1; i <= nprimes; ++i) {
-    gel(H, i) = gmael(Hp,i,1);
-    uel(plist, i) = mael3(Hp,i,2,1);
-    uel(pilist, i) = mael3(Hp,i,2,2);
-    if (DEBUGLEVEL>2 && (i & 3L)==0)
-      err_printf(" %ld%%", i*100/nprimes);
+  vec = cgetg(2, t_VEC);
+  mt_queue_start_lim(&pt, worker, nprimes);
+  for (i = 1; i <= nprimes || pending; i++)
+  {
+    long workid;
+    GEN done;
+    if (i <= nprimes) gel(vec,1) = gel(primes,i);
+    mt_queue_submit(&pt, i, i <= nprimes? vec: NULL);
+    done = mt_queue_get(&pt, &workid, &pending);
+    if (done)
+    {
+      gel(H, workid) = gel(done,1);
+      uel(plist, workid) = mael(done,2,1);
+      uel(pilist, workid) = mael(done,2,2);
+      n_curves_tested += mael(done,2,3);
+      cnt++;
+      if (DEBUGLEVEL>2 && (cnt & 3L)==0)
+        err_printf(" %ld%%", cnt*100/nprimes);
+    }
   }
+  mt_queue_end(&pt);
   dbg_printf(0)("\n");
 
   if (orient) {
