@@ -3667,6 +3667,12 @@ int     RgM_is_FFM(GEN x, GEN *ff);
 GEN     p_to_FF(GEN p, long v);
 GEN     Tp_to_FF(GEN T, GEN p);
 
+/* factcyclo.c */
+
+GEN     Flx_factcyclo(ulong n, ulong p, ulong m);
+GEN     FpX_factcyclo(ulong n, GEN p, ulong m);
+GEN     factormodcyclo(long n, GEN p, long m, long v);
+
 /* galconj.c */
 
 GEN     checkgal(GEN gal);

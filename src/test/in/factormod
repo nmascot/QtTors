@@ -49,6 +49,12 @@ polisirreducible(Mod(x^4+x^2+x,2)) \\#2037
 
 factormod((x+1)^2, 10^20+39)
 
+{
+  foreach(concat([primes(100),primes([2^32-100,2^32+100]),primes([2^64-200,2^64+200])]),p,
+    for(i=1,100,
+      if(i%p && factormodcyclo(i,p)!=factormod(polcyclo(i),p)[,1],error([p,i]))))
+}
+
 \\ errors, keep at end of file
 polrootsmod(x^3-1, 2^101-1)
 polrootsmod(x^10-1, 1023)

@@ -62,21 +62,6 @@ K_get_dchi(GEN K) { return gel(K,6)[1]; }
 static ulong
 K_get_nconj(GEN K) { return gel(K,6)[2]; }
 
-/* temporary dummy implementation of factcylo */
-static GEN
-Flx_factcyclo(ulong n, ulong p, ulong m, ulong flag)
-{
-  (void) m; (void) flag;
-  return gel(Flx_factor(ZX_to_Flx(polcyclo(n,0), p), p), 1);
-}
-
-static GEN
-FpX_factcyclo(ulong n, GEN p, ulong m, ulong flag)
-{
-  (void) m; (void) flag;
-  return gel(FpX_factor(polcyclo(n,0), p), 1);
-}
-
 /* G=<s> is a cyclic group of order n and t=s^(-1).
  *  convert sum_i a_i*s^i to sum_i b_i*t^i */
 static GEN
@@ -617,9 +602,9 @@ static GEN
 FpX_one_cyclo(long n, GEN p)
 {
   if (lgefint(p)==3)
-    return Flx_to_ZX(gel(Flx_factcyclo(n, p[2], 1, 0), 1));
+    return Flx_to_ZX(gel(Flx_factcyclo(n, p[2], 1), 1));
   else
-    return gel(FpX_factcyclo(n, p, 1, 0), 1);
+    return gel(FpX_factcyclo(n, p, 1), 1);
 }
 
 static void
@@ -2136,7 +2121,7 @@ chk_el_real_factor(GEN K, long p, long d_pow, long el, long j0)
     timer_start(&ti);
     err_printf("factoring polyclo(d) (mod %ld)\n",f, el);
   }
-  pols = Flx_factcyclo(f, el, 0, 0);
+  pols = Flx_factcyclo(f, el, 0);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Flx_factcyclo(%lu,%lu)",f,el);
   n_coset = lg(coset)-1;
   n_g = lg(pols)-1;

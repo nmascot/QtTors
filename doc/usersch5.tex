@@ -5156,6 +5156,10 @@ Assumes that \kbd{p} is prime.
 \fun{GEN}{FpX_split_part}{GEN f, GEN p} returns the largest totally split
 squarefree factor of $f$.
 
+\fun{GEN}{FpX_factcyclo}{ulong n, GEN p, ulong m} returns the factors
+of the $n$-th cyclotomic polynomial over \kbd{Fp}. if $m=1$ returns
+a single factor.
+
 \fun{GEN}{random_FpX}{long d, long v, GEN p} returns a random \kbd{FpX}
 in variable \kbd{v}, of degree less than~\kbd{d}.
 
@@ -6208,6 +6212,10 @@ is prime.
 
 \fun{GEN}{Flx_rootsff}{GEN P, GEN T, ulong p} as \tet{FpX_rootsff}.
 Assumes that $p$ is prime.
+
+\fun{GEN}{Flx_factcyclo}{ulong n, ulong p, ulong m} returns the factors
+of the $n$-th cyclotomic polynomial over \kbd{Fp}. if $m=1$ returns
+a single factor.
 
 \fun{GEN}{Flx_ffisom}{GEN P,GEN Q,ulong l} as \tet{FpX_ffisom}.
 Assumes that $p$ is prime.

@@ -271,6 +271,8 @@ BA  92- [libpari] RgX_mul2n
         Flxq_autpow_pre, FlxqX_gcd_pre, FlxY_evalx_pre, FlxqXQ_autsum_pre,
         FlxqXQ_minpoly_pre, FlxqXQ_autpow_pre, FlxqXQ_auttrace_pre,
         FlxqX_Frobenius_pre, FlxqX_factor_squarefree_pre, FlxqE_weilpairing_pre
+TF  95- new GP function factormodcyclo
+TF  96- new libpari functions FpX_factcyclo, Flx_factcyclo
 
   Changed
 HC   1- faster implementation of eulervec + cache result

@@ -21,7 +21,7 @@ BEGINEXTERN
   ID(bern), ID(bnf), ID(bnr), ID(bnrclassfield), ID(bb_group), \
   ID(compiler), \
   ID(ell), ID(ellanal), ID(ellcard), ID(ellisogeny), ID(ellrank), \
-  ID(ellsea), \
+  ID(ellsea), ID(factcyclo),\
   ID(factor), ID(factorff), ID(factorint), ID(factormod), ID(fflog), \
   ID(galois), ID(gammamellininv), ID(gchar), ID(genus2red), \
   ID(hensel), ID(hgm), ID(hyperell), \

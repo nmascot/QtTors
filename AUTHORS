@@ -47,7 +47,8 @@ Major contributors (large modules written or rewritten from scratch):
   Jeroen DEMEYER: SVG support
   Francisco DIAZ Y DIAZ: number fields (class groups, units)
   Yves EICHENLAUB: original polgalois implementation
-  Takashi FUKUDA: the subcyclopclgp module, znsubgroupgenerators
+  Takashi FUKUDA: the subcyclopclgp module, znsubgroupgenerators,
+    factormodcyclo
   Xavier GOURDON: polroots, initial Karatsuba/Toom Cook/fft implementations
   Louis GRANBOULAN: breakup of monolithic PARI into modules, first GMP
     kernel, first Configure
