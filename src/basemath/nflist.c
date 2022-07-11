@@ -121,7 +121,10 @@ gtoset_shallow(GEN x)
 }
 
 static GEN
-closure(const char *s, GEN v) { return snm_closure(is_entry(s), v); }
+nflist_parapply(const char *s, GEN v, GEN w)
+{
+  return gen_parapply(snm_closure(is_entry(s), v), w);
+}
 
 /**************************************************************************/
 /*                        Utility functions                               */
@@ -953,7 +956,7 @@ C3vec_F(long sX, long sXinf, GEN *pF)
 {
   GEN v, F, perm, T = mkvecsmall2(sX, sXinf);
   long i, l, lim = usqrt((sX << 2) / 27);
-  v = gen_parapply(closure("_nflist_C3_worker", mkvec(T)), identity_ZV(lim));
+  v = nflist_parapply("_nflist_C3_worker", mkvec(T), identity_ZV(lim));
   v = myshallowconcat1(v); l = lg(v); if (l == 1) return NULL;
   F = cgetg(l, t_VECSMALL);
   for (i = 1; i < l; i++) F[i] = uC3pol_f(gel(v,i));
@@ -1112,7 +1115,7 @@ cubicreal(long x, long xinf)
   binf = ceil(-sqx4);
   S = mkvecsmalln(10, x, xinf, (long)sqx, cplus, cminus, cmin, Dmin, Dsup,
                   bsup, binf);
-  V = gen_parapply(closure("_nflist_S3R_worker", mkvec(S)), identity_ZV(A));
+  V = nflist_parapply("_nflist_S3R_worker", mkvec(S), identity_ZV(A));
   V = myshallowconcat1(V); return lg(V) == 1? NULL: V;
 }
 
@@ -1172,7 +1175,7 @@ cubicimag(long x, long xinf)
   lima = 2 * sqx4;
   limb = sqrt(3.) * 2 * sqx4;
   S = mkvecsmall5(x, xinf, cplus, Dsup, limb);
-  V = gen_parapply(closure("_nflist_S3I_worker", mkvec(S)), identity_ZV(lima));
+  V = nflist_parapply("_nflist_S3I_worker", mkvec(S), identity_ZV(lima));
   V = myshallowconcat1(V); return lg(V) == 1? NULL: V;
 }
 
@@ -1484,7 +1487,7 @@ makeC4vec_i(GEN X, GEN Xinf, GEN field, long s)
   for (m = 5, c = 1; m <= limD; m += odd(m) ? 3 : 1)
     if (usum2sq(m)) gel(v, c++) = utoipos(m);
   setlg(v, c);
-  v = gen_parapply(closure("_nflist_C4vec_worker", mkvec3(X, Xinf, stoi(snew))), v);
+  v = nflist_parapply("_nflist_C4vec_worker", mkvec3(X, Xinf, stoi(snew)), v);
   return myshallowconcat1(v);
 }
 static GEN
@@ -1647,7 +1650,7 @@ makeV4vec(GEN X, GEN Xinf, GEN field, long s)
     if (p) gel(v, c++) = utoipos(d);
   }
   setlg(v, c);
-  v = gen_parapply(closure("_nflist_V4_worker", mkvec3(X, Xinf, stoi(s))), v);
+  v = nflist_parapply("_nflist_V4_worker", mkvec3(X, Xinf, stoi(s)), v);
   switch (s)
   {
     case 0: return Sextract(v,1);
@@ -1881,7 +1884,7 @@ makeD4vec(GEN X, GEN Xinf, GEN field, long s)
     if (m) gel(D, c++) = utoineg(da);
   }
   setlg(D, c);
-  v = gen_parapply(closure("_nflist_D4_worker", mkvec3(X, Xinf, getarchD4(s))), D);
+  v = nflist_parapply("_nflist_D4_worker", mkvec3(X, Xinf, getarchD4(s)), D);
   if (s >= 0) v = Sextract(v,s+1);
   else
   {
@@ -2392,8 +2395,8 @@ makeA4S4vec(long A4, GEN X, GEN Xinf, GEN field, long s)
     v = A4? makeC3vec(X, gen_1, NULL, 0)
           : makeS3vec(X, gen_1, NULL, odd(snew)? snew: 0);
     if (!v) return NULL;
-    v = gen_parapply(closure("_nflist_A4S4_worker",
-                             mkvec3(X,Xinf,mkvecsmall(snew))), v);
+    v = nflist_parapply("_nflist_A4S4_worker",
+                             mkvec3(X,Xinf,mkvecsmall(snew)), v);
     v = myshallowconcat1(v);
   }
   return sturmseparate(v, s, 4);
@@ -2541,7 +2544,7 @@ makeC5vec(GEN X, GEN Xinf, GEN field, long s)
   F = vecfactoroddu_i(xinf, x); l = lg(F);
   for (i = 1; i < l; i++)
     gel(F,i) = mkvec2(utoipos(xinf + ((i - 1) << 1)), zm_to_ZM(gel(F,i)));
-  v = gen_parapply(closure("_nflist_C5_worker", mkvec(bnfC5)), F);
+  v = nflist_parapply("_nflist_C5_worker", mkvec(bnfC5), F);
   v = myshallowconcat1(v); return s == -2? vecs(3, v): v;
 }
 
@@ -2614,7 +2617,7 @@ makeCLvec(long ell, GEN X, GEN Xinf, GEN field, long s)
   F = cgetg(x - xinf + 2, t_VEC);
   for (f = xinf; f <= x; f++)
     gel(F, f - xinf + 1) = utoipos(f);
-  v = gen_parapply(closure("_nflist_CL_worker", mkvec2(bnf, mkvecsmall(ell))), F);
+  v = nflist_parapply("_nflist_CL_worker", mkvec2(bnf, mkvecsmall(ell)), F);
   v = myshallowconcat1(v); return s == -2? vecs(em1>>1, v): v;
 }
 
@@ -2734,8 +2737,8 @@ makeDLvec(long ell, GEN X, GEN Xinf, GEN field, long s)
   X0pow = gceilsqrtn(Xinf, pow);
   V2 = field? mkvec(field): makeC2vec(X1pow, gen_1, NULL, s == -2? -1: s);
   if (!V2) return NULL;
-  v = gen_parapply(closure("_nflist_DL_worker", mkvec5(X1pow, X0pow, sqri(X),
-                           sqri(Xinf), mkvecsmall(ell))), V2);
+  v = nflist_parapply("_nflist_DL_worker", mkvec5(X1pow, X0pow, sqri(X),
+                           sqri(Xinf), mkvecsmall(ell)), V2);
   return sturmseparate(myshallowconcat1(v), s, ell);
 }
 /**********************************************************************/
@@ -2825,7 +2828,7 @@ makeD9vec(GEN X, GEN Xinf, GEN field, long s)
   X1pow = sqrtnint(X, 4);
   V2 = field? mkvec(field): makeC2vec(X1pow, gen_1, NULL, s == -2? -1: s);
   if (!V2) return NULL;
-  v = gen_parapply(closure("_nflist_D9_worker", mkvec2(X, Xinf)), V2);
+  v = nflist_parapply("_nflist_D9_worker", mkvec2(X, Xinf), V2);
   return sturmseparate(myshallowconcat1(v), s, 9);
 }
 /**********************************************************************/
@@ -3027,7 +3030,7 @@ makeMgenvec(long ell, long a, GEN X, GEN Xinf, GEN field, long s)
   else L = nfmakevecnum(a, 1, drel == 1? X: sqrti(X), gen_1, NULL, maxss(s,-1));
   if (!L) return NULL;
   T = mkvecsmall3(ell, drel, ell * a);
-  v = gen_parapply(closure("_nflist_Mgen_worker", mkvec3(X, Xinf, T)), L);
+  v = nflist_parapply("_nflist_Mgen_worker", mkvec3(X, Xinf, T), L);
   return sturmseparate(myshallowconcat1(v), s, ell);
 }
 
@@ -3425,7 +3428,7 @@ makeC6vec(GEN X, GEN Xinf, GEN field, long s)
   else if (!(v = makeC3vec(sqrti(divis(X, 3)), gen_1, NULL, 0))) return NULL;
   T = mkvecsmall2(s, floorsqrtn(X, 3));
   M = vecsquarefreeu(1, T[2]);
-  v = gen_parapply(closure("_nflist_C6_worker", mkvec4(X, Xinf, M, T)), v);
+  v = nflist_parapply("_nflist_C6_worker", mkvec4(X, Xinf, M, T), v);
   switch (s)
   {
     case -1: return shallowconcat(Sextract(v,1), Sextract(v,2));
@@ -3507,7 +3510,7 @@ nflist_S36_worker(GEN pol, GEN X, GEN Xinf)
 static GEN
 parselectS36(GEN v, GEN X, GEN Xinf)
 {
-  GEN w = gen_parapply(closure("_nflist_S36_worker", mkvec2(X, Xinf)), v);
+  GEN w = nflist_parapply("_nflist_S36_worker", mkvec2(X, Xinf), v);
   long l = lg(w), i, c;
 
   for (i = c = 1; i < l; i++)
@@ -3699,7 +3702,7 @@ makeD612vec(GEN X, GEN Xinf, GEN field, long s)
   }
   else if (!(v = makeS3vec(sqrti(X), gen_1, NULL, s3))) return NULL;
   T = mkvecsmall2(floorsqrtn(X, 3), s2);
-  v = gen_parapply(closure("_nflist_D612_worker", mkvec3(X, Xinf, T)), v);
+  v = nflist_parapply("_nflist_D612_worker", mkvec3(X, Xinf, T), v);
   return sturmseparate(myshallowconcat1(v), s, 6);
 }
 
@@ -3842,7 +3845,7 @@ makeA46S46Pvec(long card, GEN X, GEN Xinf, GEN field, long s)
                   : makeS3vec(sqX, gen_1, NULL, s? -1: 0);
   if (!v) return NULL;
   T = mkvec3(Xinf, sqX, mkvecsmall2(card, s == -2? -1: s));
-  v = gen_parapply(closure("_nflist_A46S46P_worker", T), v);
+  v = nflist_parapply("_nflist_A46S46P_worker", T, v);
   return sturmseparate(myshallowconcat1(v), s, 6);
 }
 
@@ -3967,8 +3970,8 @@ makeS46Mvec(GEN X, GEN Xinf, GEN field, long s)
     }
     setlg(v,c); v = myshallowconcat1(v);
   }
-  v = gen_parapply(closure("_nflist_S46M_worker",
-                           mkvec3(X, Xinf, mkvecsmall(s == -2? -1: s))), v);
+  v = nflist_parapply("_nflist_S46M_worker",
+                           mkvec3(X, Xinf, mkvecsmall(s == -2? -1: s)), v);
   return sturmseparate(myshallowconcat1(v), s, 6);
 }
 
@@ -4121,7 +4124,7 @@ makeA462vec(GEN X, GEN Xinf, GEN field, long s)
   }
   else if (!(v = makeC3vec(sqrti(X), gen_1, NULL, 0))) return NULL;
   GAL = mkvecsmall3(24, -1, 2);
-  v = gen_parapply(closure("_nflist_A462_worker", mkvec4(X, Xinf, archA462(s), GAL)), v);
+  v = nflist_parapply("_nflist_A462_worker", mkvec4(X, Xinf, archA462(s), GAL), v);
   return sturmseparate(myshallowconcat1(v), s, 6);
 }
 
@@ -4240,7 +4243,7 @@ makeS3C3vec(GEN X, GEN Xinf, GEN field, long s)
     if (c == 1) return NULL;
     setlg(v, c);
   }
-  v = gen_parapply(closure("_nflist_S3C3_worker", mkvec2(X, Xinf)), v);
+  v = nflist_parapply("_nflist_S3C3_worker", mkvec2(X, Xinf), v);
   return sturmseparate(myshallowconcat1(v), s, 6);
 }
 
@@ -4366,7 +4369,7 @@ makeS462vec(GEN X, GEN Xinf, GEN field, long s)
     return NULL;
   GAL = mkvecsmall3(48, -1, 1);
   T = mkvec4(X, Xinf, mkvec2(archS4621(s), archS4623(s)), GAL);
-  v = gen_parapply(closure("_nflist_S462_worker", T), v);
+  v = nflist_parapply("_nflist_S462_worker", T, v);
   return sturmseparate(myshallowconcat1(v), s, 6);
 }
 /************************************************************************/
@@ -4517,7 +4520,7 @@ makeC32C4vec(GEN X, GEN Xinf, GEN field, long s)
     L = mkvec(field);
   }
   else L = makeC4vec(divis(X, 5), gen_1, NULL, s == -2? -1: s);
-  v = gen_parapply(closure("_nflist_C32C4_worker", mkvec3(X, Xinf, GAL)), L);
+  v = nflist_parapply("_nflist_C32C4_worker", mkvec3(X, Xinf, GAL), L);
   return sturmseparate(myshallowconcat1(v), s, 6);
 }
 /************************************************************************/
@@ -4610,7 +4613,7 @@ makeC9vec(GEN X, GEN Xinf, GEN field, long s)
     v = mkvec(field);
   }
   else if (!(v = makeC3vec(sqrtnint(X, 4), gen_1, NULL, 0))) return NULL;
-  v = gen_parapply(closure("_nflist_C9_worker", mkvec2(X, Xinf)), v);
+  v = nflist_parapply("_nflist_C9_worker", mkvec2(X, Xinf), v);
   v = myshallowconcat1(v);
   return (s == -2)? vecs(5, v): v;
 }
@@ -4723,7 +4726,7 @@ makeC3C3vec(GEN X, GEN Xinf, GEN field, long s)
   else
   {
     GEN T = mkvec3(v3, F, mkvecsmall2(x,xinf));
-    v = gen_parapply(closure("_nflist_C3C3_worker", T), identity_ZV(l-1));
+    v = nflist_parapply("_nflist_C3C3_worker", T, identity_ZV(l-1));
     v = myshallowconcat1(v);
   }
   v = gtoset_shallow(v); return s == -2? vecs(5, v): v;
@@ -4847,7 +4850,7 @@ makeS32common(GEN v, GEN X, GEN Xinf, GEN field, long s)
   }
   else
     if (s != 3) v1 = v2 = v; else { v1 = gel(v, 1); v2 = gel(v, 2); }
-  v = parapply(closure("_nflist_S32_worker", mkvec4(X, Xinf, v2, mkvecsmall(s))), v1);
+  v = nflist_parapply("_nflist_S32_worker", mkvec4(X, Xinf, v2, mkvecsmall(s)), v1);
   return sturmseparate(gtoset_shallow(myshallowconcat1(v)), s, 6);
 }
 
@@ -4974,7 +4977,7 @@ makeC32D4vec(GEN X, GEN Xinf, GEN field, long s)
     v = mkvec(field);
   }
   else v = makeD4vec(X, gen_1, NULL, s4);
-  v = parapply(closure("_nflist_C32D4_worker", mkvec3(X, Xinf, stoi(s))), v);
+  v = nflist_parapply("_nflist_C32D4_worker", mkvec3(X, Xinf, stoi(s)), v);
   return sturmseparate(gtoset_shallow(myshallowconcat1(v)), s, 6);
 }
 
