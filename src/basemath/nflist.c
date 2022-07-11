@@ -123,7 +123,11 @@ gtoset_shallow(GEN x)
 static GEN
 nflist_parapply(const char *s, GEN v, GEN w)
 {
-  return gen_parapply(snm_closure(is_entry(s), v), w);
+  GEN L;
+  if (DEBUGLEVEL>=3) err_printf("%s: ",s);
+  L = gen_parapply_percent(snm_closure(is_entry(s), v), w, DEBUGLEVEL>=3);
+  if (DEBUGLEVEL>=3) err_printf("done\n");
+  return L;
 }
 
 /**************************************************************************/
