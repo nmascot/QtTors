@@ -809,9 +809,9 @@ gen_parapply_slice(GEN worker, GEN D, long mmin)
 }
 
 GEN
-gen_parapply(GEN worker, GEN D)
+gen_parapply_percent(GEN worker, GEN D, long percent)
 {
-  long l = lg(D), i, pending = 0;
+  long l = lg(D), i, pending = 0, cnt = 0, lper = -1, lcnt = 0;
   GEN W, V;
   struct pari_mt pt;
 
@@ -826,9 +826,24 @@ gen_parapply(GEN worker, GEN D)
     if (i < l) gel(W,1) = gel(D,i);
     mt_queue_submit(&pt, i, i<l? W: NULL);
     done = mt_queue_get(&pt, &workid, &pending);
-    if (done) gel(V,workid) = done;
+    if (done)
+    {
+      gel(V,workid) = done;
+      if (percent && (++cnt)-lcnt>=percent)
+      {
+        long per = (long)(cnt*100./(l-1));
+        lcnt = cnt;
+        if (per > lper) { err_printf("%ld%% ",per); lper = per; }
+      }
+    }
   }
   mt_queue_end(&pt); return V;
+}
+
+GEN
+gen_parapply(GEN worker, GEN D)
+{
+  return gen_parapply_percent(worker, D, 0);
 }
 
 GEN

@@ -210,6 +210,7 @@ GEN  primecertisvalid_ecpp_worker(GEN certi);
 GEN  lfuninit_worker(long r, GEN K, GEN L, GEN peh2d, GEN vroots, GEN dr, GEN di, GEN an, GEN bn);
 GEN  lfuninit_theta2_worker(long r, GEN L, GEN qk, GEN a, GEN di, GEN an, GEN bn);
 GEN  gen_parapply(GEN worker, GEN D);
+GEN  gen_parapply_percent(GEN worker, GEN D, long percent);
 GEN  parapply_slice_worker(GEN worker, GEN D);
 GEN  gen_parapply_slice(GEN worker, GEN D, long mmin);
 GEN  gen_crt(const char *str, GEN worker, forprime_t *S, GEN dB, ulong bound, long mmin, GEN *pt_mod,
