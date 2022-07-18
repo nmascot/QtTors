@@ -341,10 +341,9 @@ FpX_roots_i(GEN f, GEN p)
 
 /* Assume f is normalized */
 static ulong
-Flx_cubic_root(GEN ff, ulong p)
+Flx_cubic_root(GEN ff, ulong p, ulong pi)
 {
   GEN f = Flx_normalize(ff,p);
-  ulong pi = get_Fl_red(p);
   ulong a = f[4], b=f[3], c=f[2], p3 = p%3==1 ? (2*p+1)/3 :(p+1)/3;
   ulong t = Fl_mul_pre(a, p3, p, pi), t2 = Fl_sqr_pre(t, p, pi);
   ulong A = Fl_sub(b, Fl_triple(t2, p), p);
@@ -443,7 +442,7 @@ static ulong
 Flx_oneroot_i(GEN f, ulong p, long fl)
 {
   GEN pol, a;
-  ulong q;
+  ulong q, pi;
   long da;
 
   if (Flx_val(f)) return 0;
@@ -451,15 +450,15 @@ Flx_oneroot_i(GEN f, ulong p, long fl)
   {
     case 1: return Fl_neg(f[2], p);
     case 2: return Flx_quad_root(f, p, 1);
-    case 3: if (p>3) return Flx_cubic_root(f, p); /*FALL THROUGH*/
+    case 3: if (p>3) return Flx_cubic_root(f, p, get_Fl_red(p)); /*FALL THROUGH*/
   }
-
+  pi = get_Fl_red(p);
   if (!fl)
   {
-    a = Flxq_powu(polx_Flx(f[1]), p - 1, f,p);
+    a = Flxq_powu_pre(polx_Flx(f[1]), p - 1, f,p,pi);
     if (lg(a) < 3) pari_err_PRIME("rootmod",utoipos(p));
     a = Flx_Fl_add(a, p-1, p); /* a = x^(p-1) - 1 mod f */
-    a = Flx_gcd(f,a, p);
+    a = Flx_gcd_pre(f,a, p, pi);
   } else a = f;
   da = degpol(a);
   if (!da) return p;
@@ -474,19 +473,19 @@ Flx_oneroot_i(GEN f, ulong p, long fl)
     {
       case 1: return Fl_neg(a[2], p);
       case 2: return Flx_quad_root(a, p, 0);
-      case 3: if (p>3) return Flx_cubic_root(a, p); /*FALL THROUGH*/
+      case 3: if (p>3) return Flx_cubic_root(a, p, pi); /*FALL THROUGH*/
       default: {
-        GEN b = Flxq_powu(pol,q, a,p);
+        GEN b = Flxq_powu_pre(pol,q, a,p,pi);
         long db;
         if (degpol(b) <= 0) continue;
-        b = Flx_gcd(a,Flx_Fl_add(b,p-1,p), p);
+        b = Flx_gcd_pre(a,Flx_Fl_add(b,p-1,p), p, pi);
         db = degpol(b); if (!db) continue;
         b = Flx_normalize(b, p);
         if (db <= (da >> 1)) {
           a = b;
           da = db;
         } else {
-          a = Flx_div(a,b, p);
+          a = Flx_div_pre(a,b, p, pi);
           da -= db;
         }
       }
@@ -1361,7 +1360,7 @@ F2x_factor_deg2(GEN f, long d, long flag)
 
 /* xt = NULL or x^(p-1)/2 mod g */
 static void
-split_squares(struct split_t *S, GEN g, ulong p, GEN xt)
+split_squares(struct split_t *S, GEN g, ulong p, ulong pi, GEN xt)
 {
   ulong q = p >> 1;
   GEN a = Flx_mod_Xnm1(g, q, p); /* mod x^(p-1)/2 - 1 */
@@ -1370,19 +1369,22 @@ split_squares(struct split_t *S, GEN g, ulong p, GEN xt)
   {
     ulong i;
     split_add_done(S, (GEN)1);
-    for (i = 2; i <= q; i++) split_add_done(S, (GEN)Fl_sqr(i,p));
+    if (!pi)
+      for (i = 2; i <= q; i++) split_add_done(S, (GEN)Fl_sqr(i,p));
+    else
+      for (i = 2; i <= q; i++) split_add_done(S, (GEN)Fl_sqr_pre(i,p,pi));
   } else {
     if (a != g) { (void)Flx_valrem(a, &a); d = degpol(a); }
     if (d)
     {
       if (xt) xt = Flx_Fl_add(xt, p-1, p); else xt = Flx_Xnm1(g[1], q, p);
-      a = Flx_gcd(a, xt, p);
+      a = Flx_gcd_pre(a, xt, p, pi);
       if (degpol(a)) split_add(S, Flx_normalize(a, p));
     }
   }
 }
 static void
-split_nonsquares(struct split_t *S, GEN g, ulong p, GEN xt)
+split_nonsquares(struct split_t *S, GEN g, ulong p, ulong pi, GEN xt)
 {
   ulong q = p >> 1;
   GEN a = Flx_mod_Xn1(g, q, p); /* mod x^(p-1)/2 + 1 */
@@ -1391,13 +1393,18 @@ split_nonsquares(struct split_t *S, GEN g, ulong p, GEN xt)
   {
     ulong i, z = nonsquare_Fl(p);
     split_add_done(S, (GEN)z);
-    for (i = 2; i <= q; i++) split_add_done(S, (GEN)Fl_mul(z, Fl_sqr(i,p), p));
+    if (!pi)
+      for (i = 2; i <= q; i++)
+        split_add_done(S, (GEN)Fl_mul(z, Fl_sqr(i,p), p));
+    else
+      for (i = 2; i <= q; i++)
+        split_add_done(S, (GEN)Fl_mul_pre(z, Fl_sqr_pre(i,p,pi), p,pi));
   } else {
     if (a != g) { (void)Flx_valrem(a, &a); d = degpol(a); }
     if (d)
     {
       if (xt) xt = Flx_Fl_add(xt, 1, p); else xt = Flx_Xn1(g[1], q, p);
-      a = Flx_gcd(a, xt, p);
+      a = Flx_gcd_pre(a, xt, p, pi);
       if (degpol(a)) split_add(S, Flx_normalize(a, p));
     }
   }
@@ -1405,7 +1412,7 @@ split_nonsquares(struct split_t *S, GEN g, ulong p, GEN xt)
 /* p > 2. f monic Flx, f(0) != 0. Add to split_t structs coprime factors
  * of g = \prod_{f(a) = 0} (X - a). Return 0 when f(x) = 0 for all x in Fp* */
 static int
-split_Flx_cut_out_roots(struct split_t *S, GEN f, ulong p)
+split_Flx_cut_out_roots(struct split_t *S, GEN f, ulong p, ulong pi)
 {
   GEN a, g = Flx_mod_Xnm1(f, p-1, p); /* f mod x^(p-1) - 1 */
   long d = degpol(g);
@@ -1414,15 +1421,15 @@ split_Flx_cut_out_roots(struct split_t *S, GEN f, ulong p)
   if (!d) return 1;
   if ((p >> 4) <= (ulong)d)
   { /* small p; split directly using x^((p-1)/2) +/- 1 */
-    GEN xt = ((ulong)d < (p>>1))? Flx_rem(monomial_Flx(1, p>>1, g[1]), g, p)
+    GEN xt = ((ulong)d < (p>>1))? Flx_rem_pre(monomial_Flx(1, p>>1, g[1]), g, p, pi)
                                 : NULL;
-    split_squares(S, g, p, xt);
-    split_nonsquares(S, g, p, xt);
+    split_squares(S, g, p, pi, xt);
+    split_nonsquares(S, g, p, pi, xt);
   } else { /* large p; use x^(p-1) - 1 directly */
-    a = Flxq_powu(polx_Flx(f[1]), p-1, g,p);
+    a = Flxq_powu_pre(polx_Flx(f[1]), p-1, g, p, pi);
     if (lg(a) < 3) pari_err_PRIME("rootmod",utoipos(p));
     a = Flx_Fl_add(a, p-1, p); /* a = x^(p-1) - 1 mod g */
-    g = Flx_gcd(g,a, p);
+    g = Flx_gcd_pre(g,a, p,pi);
     if (degpol(g)) split_add(S, Flx_normalize(g,p));
   }
   return 1;
@@ -1434,7 +1441,7 @@ Flx_roots_i(GEN f, ulong p)
 {
   GEN pol, g;
   long v = Flx_valrem(f, &g);
-  ulong q;
+  ulong q, pi;
   struct split_t S;
 
   /* optimization: test for small degree first */
@@ -1458,9 +1465,10 @@ Flx_roots_i(GEN f, ulong p)
   }
   q = p >> 1;
   split_init(&S, lg(f)-1);
+  pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   settyp(S.done, t_VECSMALL);
   if (v) split_add_done(&S, (GEN)0);
-  if (! split_Flx_cut_out_roots(&S, g, p))
+  if (! split_Flx_cut_out_roots(&S, g, p, pi))
     return all_roots_mod_p(p, lg(S.done) == 1);
   pol = polx_Flx(f[1]);
   for (pol[2]=1; ; pol[2]++)
@@ -1484,12 +1492,12 @@ Flx_roots_i(GEN f, ulong p)
           split_done(&S, j, (GEN)r, (GEN)s);
           j--; l--; break;
         default:
-          b = Flxq_powu(pol,q, c,p); /* pol^(p-1)/2 */
+          b = Flxq_powu_pre(pol,q, c,p,pi); /* pol^(p-1)/2 */
           if (degpol(b) <= 0) continue;
-          b = Flx_gcd(c,Flx_Fl_add(b,p-1,p), p);
+          b = Flx_gcd_pre(c,Flx_Fl_add(b,p-1,p), p, pi);
           if (!degpol(b)) continue;
           b = Flx_normalize(b, p);
-          c = Flx_div(c,b, p);
+          c = Flx_div_pre(c,b, p,pi);
           split_todo(&S, j, b, c);
       }
     }
