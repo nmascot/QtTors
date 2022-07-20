@@ -743,7 +743,7 @@ find_j_inv_with_given_trace(
     GEN Pp1, Pt;
     random_curves_with_m_torsion((ulong *)(A4 + 1), (ulong *)(A6 + 1),
                                  (ulong *)(tx + 1), (ulong *)(ty + 1),
-                                 batch_size, m, p);
+                                 batch_size, m, p, pi);
     Pp1 = random_FleV(A4, A6, p, pi);
     Pt = gcopy(Pp1);
     FleV_mulu_pre_inplace(Pp1, N, A4, p, pi);

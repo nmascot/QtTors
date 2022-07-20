@@ -605,12 +605,9 @@ torsion_compatible_with_characteristic(long m, ulong p)
  * is an m-torsion point on [a4[i], a6[i]]. */
 void
 random_curves_with_m_torsion(
-  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, long m, ulong p)
+  ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, long m, ulong p, ulong pi)
 {
-  ulong pi = get_Fl_red(p);
-
   if (ncurves == 0) return;
-
   if (m < 1 || m > LAST_X1_LEVEL
       || ! torsion_compatible_with_characteristic(m, p))
     pari_err_BUG("E_m_torsion");

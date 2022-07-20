@@ -743,7 +743,7 @@ GEN     subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound);
 
 /* crvwtors.c */
 
-void random_curves_with_m_torsion(ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, long m, ulong p);
+void random_curves_with_m_torsion(ulong *a4, ulong *a6, ulong *tx, ulong *ty, long ncurves, long m, ulong p, ulong pi);
 
 /* dirichlet.c */
 
