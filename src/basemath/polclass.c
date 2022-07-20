@@ -1916,6 +1916,7 @@ polclass0(long D, long inv, long vx, GEN *db)
   plist = cgetg(nprimes + 1, t_VECSMALL);
   pilist = cgetg(nprimes + 1, t_VECSMALL);
   vec = cgetg(2, t_VEC);
+  dbg_printf(0)("Calculating class polynomial of disc %ld and inv %ld:", D, inv);
   mt_queue_start_lim(&pt, worker, nprimes);
   for (i = 1; i <= nprimes || pending; i++)
   {
