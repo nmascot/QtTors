@@ -1937,7 +1937,7 @@ polclass0(long D, long inv, long vx, GEN *db)
     }
   }
   mt_queue_end(&pt);
-  dbg_printf(0)("\n");
+  dbg_printf(0)(" done\n");
 
   if (orient) {
     GEN nvec = new_chunk(k);

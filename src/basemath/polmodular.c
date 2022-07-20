@@ -1865,7 +1865,7 @@ polmodular0_ZM(long L, long inv, GEN J, GEN Q, int compute_derivs, GEN *db)
         dbg_printf(0)(" %ld%%", k*100/nprimes);
       }
     }
-    dbg_printf(0)("\n");
+    dbg_printf(0)(" done\n");
     mt_queue_end(&pt);
     killblock((GEN)dinfo->primes);
   }
