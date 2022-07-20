@@ -1474,6 +1474,9 @@ select_classpoly_prime_pool(double min_bits, double delta, GEN G)
   long ires, inv = pcp_get_inv(G);
   GEN fau = pcp_get_fau(G);
   GEN res, t_min; /* t_min[v] = lower bound for the t we look at for that v */
+#ifdef LONG_IS_64BIT
+  long L = pcp_get_L(G)[!!pcp_get_L0(G)];
+#endif
 
   hurwitz = hclassno_wrapper(pcp_get_h(G), pcp_get_D0(G), fau);
 
@@ -1491,45 +1494,48 @@ select_classpoly_prime_pool(double min_bits, double delta, GEN G)
     ulong v;
     dbg_printf(1)("z = %.2f\n", z);
     for (v = 1; v < V_MAX; v++)
-    {
-      ulong p, t, t_max, vfactors, v2d, vd;
-      double hurwitz_ratio_bound, max_p, H;
-      long ires0;
-      GEN faw;
+#ifdef LONG_IS_64BIT
+      if (L<=2 || v%L)
+#endif
+      {
+        ulong p, t, t_max, vfactors, v2d, vd;
+        double hurwitz_ratio_bound, max_p, H;
+        long ires0;
+        GEN faw;
 
-      if ((long)(vfactors = SMOOTH_INTS[v]) < 0) continue;
-      hurwitz_ratio_bound = HURWITZ_RATIO[v] / 128.0;
-      vd = v * d;
-      if (vd >= v_bound_aux * hurwitz_ratio_bound) break;
-      v2d = v * vd;
-      faw = factor_uv(fau, v, vfactors);
-      H = hclassno_wrapper(pcp_get_h(G), pcp_get_D0(G), faw);
-      /* t <= 2 sqrt(p) and p <= z H(v^2 d) and
-       *   H(v^2 d) < v H(d) \prod_{p | v} (p+1)/(p-1)
-       * This last term is v * hurwitz * hurwitz_ratio_bound. */
-      max_p = z * v * hurwitz * hurwitz_ratio_bound;
-      t_max = 2.0 * sqrt(mindd((1UL<<(BITS_IN_LONG-2)) - (v2d>>2), max_p));
-      t = t_min[v]; if ((t & 1) != (v2d & 1)) t++;
-      p = (t * t + v2d) >> 2;
-      ires0 = ires;
-      for (; t <= t_max; p += t+1, t += 2) /* 4p = t^2 + v^2*d */
-        if (modinv_good_prime(inv,p) && uisprime(p))
-        {
-          if (ires == lg(res)) res = vec_lengthen(res, lg(res) << 1);
-          gel(res, ires++) = mkvec2(mkvecsmall5(p,t,v,(long)(p/H),vfactors),
-                                    faw);
-          bits += log2(p);
+        if ((long)(vfactors = SMOOTH_INTS[v]) < 0) continue;
+        hurwitz_ratio_bound = HURWITZ_RATIO[v] / 128.0;
+        vd = v * d;
+        if (vd >= v_bound_aux * hurwitz_ratio_bound) break;
+        v2d = v * vd;
+        faw = factor_uv(fau, v, vfactors);
+        H = hclassno_wrapper(pcp_get_h(G), pcp_get_D0(G), faw);
+        /* t <= 2 sqrt(p) and p <= z H(v^2 d) and
+         *   H(v^2 d) < v H(d) \prod_{p | v} (p+1)/(p-1)
+         * This last term is v * hurwitz * hurwitz_ratio_bound. */
+        max_p = z * v * hurwitz * hurwitz_ratio_bound;
+        t_max = 2.0 * sqrt(mindd((1UL<<(BITS_IN_LONG-2)) - (v2d>>2), max_p));
+        t = t_min[v]; if ((t & 1) != (v2d & 1)) t++;
+        p = (t * t + v2d) >> 2;
+        ires0 = ires;
+        for (; t <= t_max; p += t+1, t += 2) /* 4p = t^2 + v^2*d */
+          if (modinv_good_prime(inv,p) && uisprime(p))
+          {
+            if (ires == lg(res)) res = vec_lengthen(res, lg(res) << 1);
+            gel(res, ires++) = mkvec2(mkvecsmall5(p,t,v,(long)(p/H),vfactors),
+                faw);
+            bits += log2(p);
+          }
+        t_min[v] = t;
+
+        if (ires - ires0) {
+          dbg_printf(2)("  Found %lu primes for v = %lu.\n", ires - ires0, v);
         }
-      t_min[v] = t;
-
-      if (ires - ires0) {
-        dbg_printf(2)("  Found %lu primes for v = %lu.\n", ires - ires0, v);
+        if (bits > min_bits) {
+          dbg_printf(1)("Found %ld primes; total size %.2f bits.\n", ires-1,bits);
+          setlg(res, ires); return res;
+        }
       }
-      if (bits > min_bits) {
-        dbg_printf(1)("Found %ld primes; total size %.2f bits.\n", ires-1,bits);
-        setlg(res, ires); return res;
-      }
-    }
     if (uel(t_min,1) >= t_size_lim) {
       /* exhausted all solutions that fit in ulong */
       char *err = stack_sprintf("class polynomial of discriminant %ld", pcp_get_D(G));
