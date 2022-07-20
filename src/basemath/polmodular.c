@@ -3845,28 +3845,27 @@ scanD0(long *tablelen, long *minD, long maxD, long maxh, long L0)
 {
   pari_sp av;
   D_entry *tab;
-  long d, cnt;
+  long i, lF, d, cnt;
+  GEN F;
 
   /* NB: As seen in the loop below, the real class number of D can be */
   /* 2*maxh if cl(D) is cyclic. */
-  if (maxh < 0) pari_err_BUG("scanD0");
-
   tab = (D_entry *) stack_malloc((maxD/4)*sizeof(*tab)); /* Overestimate */
-  /* d = 7, 11, 15, 19, 23, ... */
-  for (av = avma, d = *minD, cnt = 0; d <= maxD; d += 4, set_avma(av))
+  F = vecfactorsquarefreeu_coprime(*minD, maxD, mkvecsmall(2));
+  lF = lg(F); d = *minD;
+  for (av = avma, cnt = 0, i = 1; i < lF; i++, set_avma(av))
   {
-    GEN DD, fa, ordL, f, q, e;
-    long i, j, k, n, h, L1, D = -d;
+    GEN DD, ordL, f, q = gel(F,i);
+    long j, k, n, h, L1, d, D;
     ulong m;
 
-    if (kross(D, L0) < 1) continue;
-    fa = factoru(d); q = gel(fa, 1); k = lg(q) - 1;
+    if (!q) continue; /* not square-free */
     /* restrict to possibly cyclic class groups */
-    if (k > 2) continue;
-    e = gel(fa, 2);
-    for (i = 1; i <= k; i++)
-      if (e[i] > 1) break;
-    if (i <= k) continue; /* restrict to square-free discriminant */
+    k = lg(q) - 1; if (k > 2) continue;
+    d = i + *minD - 1; /* q = prime divisors of d */
+    if ((d & 3) == 1) continue;
+    D = -d; /* d = 3 (mod 4), D = 1 mod 4 fundamental */
+    if (kross(D, L0) < 1) continue;
 
     /* L1 initially the first factor of d if small enough, otherwise ignored */
     L1 = (k > 1 && q[1] <= MAX_L1)? q[1]: 0;
@@ -3883,7 +3882,7 @@ scanD0(long *tablelen, long *minD, long maxD, long maxh, long L0)
     n = itos(ordL);
     if (n < h/2 || (!L1 && n < h)) continue;
 
-    /* If f is big enough, great!  Otherwise, for each potential L1,
+    /* If f is big enough, great! Otherwise, for each potential L1,
      * do a discrete log to see if it is NOT in the subgroup generated
      * by L0; stop as soon as such is found. */
     for (j = 1;; j++) {
@@ -3894,16 +3893,14 @@ scanD0(long *tablelen, long *minD, long maxD, long maxh, long L0)
       if (!L1) break;
       L1 = (j <= k && k > 1 && q[j] <= MAX_L1 ? q[j] : 0);
     }
-    /* The first bit of m indicates whether f generates a proper
-     * subgroup of cl(D) (hence implying that we need L1) or if f
-     * generates the whole class group. */
+    /* The first bit of m is set iff f generates a proper subgroup of cl(D)
+     * (hence implying that we need L1). */
     m = (n < h ? 1 : 0);
-    /* bits i and i+1 of m give the 2-bit number 1 + (D|p) where p is
-     * the ith prime. */
-    for (i = 1 ; i <= SMOOTH_PRIMES; i++)
+    /* bits j and j+1 give the 2-bit number 1 + (D|p) where p = prime(j) */
+    for (j = 1 ; j <= SMOOTH_PRIMES; j++)
     {
-      ulong x  = (ulong) (1 + kross(D, PRIMES[i]));
-      m |= x << (2*i);
+      ulong x = (ulong) (1 + kross(D, PRIMES[j]));
+      m |= x << (2*j);
     }
 
     /* Insert d, h and m into the table */
