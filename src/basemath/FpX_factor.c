@@ -101,28 +101,27 @@ Flx_Xn1(long sv, long n, ulong p)
   t[i] = 1; return t;
 }
 
+/* assume lg(f) > 3 */
 static GEN
 Flx_root_mod_2(GEN f)
 {
-  int z1, z0 = !(f[2] & 1);
-  long i,n;
-  GEN y;
-
-  for (i=2, n=1; i < lg(f); i++) n += f[i];
-  z1 = n & 1;
-  y = cgetg(z0+z1+1, t_VECSMALL); i = 1;
-  if (z0) y[i++] = 0;
-  if (z1) y[i  ] = 1;
-  return y;
+  long i, n = lg(f)-1, c = f[2];
+  int z0 = !c;
+  c ^= 1; /* c = f[2] + f[n] mod 2, we know f[n] is odd */
+  for (i=3; i < n; i++) c ^= f[i];
+  /* c = 0 iff f(1) = 0 (mod 2) */
+  if (z0) return c? mkvecsmall(0): mkvecsmall2(0, 1);
+  return c? cgetg(1, t_VECSMALL): mkvecsmall(1);
 }
+/* assume lg(f) > 3 */
 static ulong
 Flx_oneroot_mod_2(GEN f)
 {
-  long i,n;
-  if (!(f[2] & 1)) return 0;
-  for (i=2, n=1; i < lg(f); i++) n += f[i];
-  if (n & 1) return 1;
-  return 2;
+  long i, n, c = f[2];
+  if (!c) return 0;
+  n = lg(f)-1; c = 0; /* = f[2] + f[n] (mod 2); both are odd */
+  for (i=3; i < n; i++) c ^= f[i];
+  return c? 2: 1;
 }
 
 static GEN FpX_roots_i(GEN f, GEN p);
@@ -437,7 +436,7 @@ FpX_cubic_root(GEN ff, GEN p)
   }
 }
 
-/* assume p > 2 prime */
+/* assume p > 2 prime; if fl is set, assume that f splits mod p */
 static ulong
 Flx_oneroot_i(GEN f, ulong p, long fl)
 {
