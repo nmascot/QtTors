@@ -690,7 +690,7 @@ modinv_double_eta_from_2j(
   d = Flx_gcd(f, g, p);
   /* we should have deg(d) = 1, but because j1 or j2 may not have the correct
    * endomorphism ring, we use the less strict conditional underneath */
-  return (degpol(d) > 2 || (*r = Flx_oneroot(d, p)) == p
+  return (degpol(d) > 2 || (*r = Flx_oneroot_pre(d, p, pi)) == p
           || ! double_eta_root(inv, r, *r, p, pi, s2));
 }
 
@@ -1324,7 +1324,7 @@ oneroot_of_classpoly(GEN hilb, GEN factu, norm_eqn_t ne, GEN jdb)
   GEN hilbp = ZX_to_Flx(hilb, p);
 
   /* TODO: Work out how to use hilb with better invariant */
-  j0 = Flx_oneroot_split(hilbp, p);
+  j0 = Flx_oneroot_split_pre(hilbp, p, pi);
   if (j0 == p) {
     pari_err_BUG("oneroot_of_classpoly: "
                  "Didn't find a root of the class polynomial");
@@ -1470,7 +1470,7 @@ root_matrix(long L, const disc_info *dinfo, long njinvs, GEN surface_js,
     pari_sp av = avma;
     ulong r1 = double_eta_power(inv, uel(rts, 1), p, pi);
     GEN r, f = Flx_double_eta_jpoly(F, r1, p, pi);
-    if ((j = Flx_oneroot(f, p)) == p) pari_err_BUG("root_matrix");
+    if ((j = Flx_oneroot_pre(f, p, pi)) == p) pari_err_BUG("root_matrix");
     j = compute_L_isogenous_curve(L, n, ne, j, card, val, 0);
     set_avma(av);
     r1 = double_eta_power(inv, uel(surface_js, i), p, pi);

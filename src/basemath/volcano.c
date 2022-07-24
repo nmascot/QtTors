@@ -75,7 +75,7 @@ extend_path(ulong path[], GEN phi, ulong p, ulong pi, long L, long max_len)
   for ( ; d < max_len; d++)
   {
     GEN nhbr_pol = nhbr_polynomial(path + d, phi, p, pi, L);
-    ulong nhbr = Flx_oneroot(nhbr_pol, p);
+    ulong nhbr = Flx_oneroot_pre(nhbr_pol, p, pi);
     set_avma(av);
     if (nhbr == p) break; /* no root: we are on the floor. */
     path[d+1] = nhbr;
@@ -143,10 +143,10 @@ random_distinct_neighbours_of(ulong *nhbr1, ulong *nhbr2,
   pari_sp av = avma;
   GEN modpol = Flm_Fl_polmodular_evalx(phi, L, j, p, pi);
   ulong rem;
-  *nhbr1 = Flx_oneroot(modpol, p);
+  *nhbr1 = Flx_oneroot_pre(modpol, p, pi);
   if (*nhbr1 == p) pari_err_BUG("random_distinct_neighbours_of [no neighbour]");
   modpol = Flx_div_by_X_x(modpol, *nhbr1, p, &rem);
-  *nhbr2 = Flx_oneroot(modpol, p);
+  *nhbr2 = Flx_oneroot_pre(modpol, p, pi);
   if (must_have_two_neighbours && *nhbr2 == p)
     pari_err_BUG("random_distinct_neighbours_of [single neighbour]");
   set_avma(av);

@@ -101,7 +101,7 @@ map_X1_points(GEN r, GEN s, const X1_info *X1, long ncurves, ulong p, ulong pi)
     y = random_Fl(p);
     ypowers = Fl_powers_pre(y, ydeg, p, pi);
     pol = FlxY_evalx_powers_pre(X1_c, ypowers, p, pi);
-    x = Flx_oneroot(pol, p);
+    x = Flx_oneroot_pre(pol, p, pi);
     if (x != p) {
       xpowers = Fl_powers_pre(x, xdeg, p, pi);
       rd[i] = FlxY_eval_powers_pre(rd_pol, ypowers, xpowers, p, pi);

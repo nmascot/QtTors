@@ -4747,8 +4747,8 @@ ZabM_ker_check(GEN M, GEN H, ulong p, GEN P, long n)
   do p += n; while(!uisprime(p));
   pi = get_Fl_red(p);
   P = ZX_to_Flx(P, p);
-  r = Flx_oneroot(P, p);
-  pow = Fl_powers_pre(r, degpol(P),p,pi);
+  r = Flx_oneroot_pre(P, p, pi);
+  pow = Fl_powers_pre(r, degpol(P),p, (p & HIGHMASK)? pi: 0);
   M = ZXM_to_FlxM(M, p, P[1]); M = FlxM_eval_powers_pre(M, pow, p, pi);
   H = ZXM_to_FlxM(H, p, P[1]); H = FlxM_eval_powers_pre(H, pow, p, pi);
   for (j = 1; j < l; j++)

@@ -431,17 +431,21 @@ FpX_cubic_root(GEN ff, GEN p)
 
 /* assume p > 2 prime; if fl is set, assume that f splits mod p */
 static ulong
-Flx_oneroot_i(GEN f, ulong p, long fl)
+Flx_oneroot_pre_i(GEN f, ulong p, ulong pi, long fl)
 {
   GEN pol, a;
-  ulong q, pi, PI;
+  ulong q, PI;
   long da;
 
   if (Flx_val(f)) return 0;
   da = degpol(f); f = Flx_normalize(f, p);
   if (da == 1) return Fl_neg(f[2], p);
-  PI = (p & HIGHMASK)? get_Fl_red(p): 0;
-  pi = SMALL_ULONG(p)? 0: (PI? PI: get_Fl_red(p));
+  if (SMALL_ULONG(p)) pi = PI = 0;
+  else
+  {
+    if (!pi) pi = get_Fl_red(p);
+    PI = (p & HIGHMASK)? pi: 0;
+  }
   switch(da)
   {
     case 2: return Flx_quad_root(f, p, PI, 1);
@@ -486,6 +490,12 @@ Flx_oneroot_i(GEN f, ulong p, long fl)
     }
   }
 }
+ulong
+Flx_oneroot_pre(GEN f, ulong p, ulong pi)
+{ return Flx_oneroot_pre_i(f, p, pi, 0); }
+ulong
+Flx_oneroot_split_pre(GEN f, ulong p, ulong pi)
+{ return Flx_oneroot_pre_i(f, p, pi, 1); }
 
 /* assume p > 3 prime */
 static GEN
@@ -550,7 +560,7 @@ Flx_oneroot(GEN f, ulong p)
     case 3: return p;
   }
   if (p == 2) return Flx_oneroot_mod_2(f);
-  return gc_ulong(av, Flx_oneroot_i(f, p, 0));
+  return gc_ulong(av, Flx_oneroot_pre(f, p, 0));
 }
 
 ulong
@@ -563,7 +573,7 @@ Flx_oneroot_split(GEN f, ulong p)
     case 3: return p;
   }
   if (p == 2) return Flx_oneroot_mod_2(f);
-  return gc_ulong(av, Flx_oneroot_i(f, p, 1));
+  return gc_ulong(av, Flx_oneroot_split_pre(f, p, 0));
 }
 
 /* assume that p is prime */
@@ -583,7 +593,7 @@ FpX_oneroot(GEN f, GEN p)
     if (pp == 2)
       r = Flx_oneroot_mod_2(f);
     else
-      r = Flx_oneroot_i(f, pp, 0);
+      r = Flx_oneroot_pre(f, pp, 0);
     set_avma(av);
     return (r == pp)? NULL: utoi(r);
   }
