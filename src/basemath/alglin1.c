@@ -4548,14 +4548,14 @@ FlmV_recover_pre(GEN a, GEN M, ulong p, ulong pi, long sv)
 static GEN
 FlkM_inv(GEN M, GEN P, ulong p)
 {
-  ulong pi = get_Fl_red(p);
-  GEN R = Flx_roots(P, p);
+  ulong pi = get_Fl_red(p), PI = (p & HIGHMASK)? pi: 0;
+  GEN R = Flx_roots_pre(P, p, pi);
   long l = lg(R), i;
   GEN W = Flv_invVandermonde(R, 1UL, p);
   GEN V = cgetg(l, t_VEC);
   for(i=1; i<l; i++)
   {
-    GEN pows = Fl_powers_pre(uel(R,i), degpol(P), p, pi);
+    GEN pows = Fl_powers_pre(uel(R,i), degpol(P), p, PI);
     GEN H = Flm_inv_sp(FlxM_eval_powers_pre(M, pows, p, pi), NULL, p);
     if (!H) return NULL;
     gel(V, i) = H;
@@ -4566,14 +4566,14 @@ FlkM_inv(GEN M, GEN P, ulong p)
 static GEN
 FlkM_adjoint(GEN M, GEN P, ulong p)
 {
-  ulong pi = get_Fl_red(p);
-  GEN R = Flx_roots(P, p);
+  ulong pi = get_Fl_red(p), PI = (p & HIGHMASK)? pi: 0;
+  GEN R = Flx_roots_pre(P, p, pi);
   long l = lg(R), i;
   GEN W = Flv_invVandermonde(R, 1UL, p);
   GEN V = cgetg(l, t_VEC);
   for(i=1; i<l; i++)
   {
-    GEN pows = Fl_powers_pre(uel(R,i), degpol(P), p, pi);
+    GEN pows = Fl_powers_pre(uel(R,i), degpol(P), p, PI);
     gel(V, i) = Flm_adjoint(FlxM_eval_powers_pre(M, pows, p, pi), p);
   }
   return FlmV_recover_pre(V, W, p, pi, P[1]);
@@ -4718,19 +4718,19 @@ ZabM_inv_ratlift(GEN M, GEN P, long n, GEN *pden)
 static GEN
 FlkM_ker(GEN M, GEN P, ulong p)
 {
-  ulong pi = get_Fl_red(p);
-  GEN R = Flx_roots(P, p);
+  ulong pi = get_Fl_red(p), PI = (p & HIGHMASK)? pi: 0;
+  GEN R = Flx_roots_pre(P, p, PI);
   long l = lg(R), i, dP = degpol(P), r;
   GEN M1, K, D;
   GEN W = Flv_invVandermonde(R, 1UL, p);
   GEN V = cgetg(l, t_VEC);
-  M1 = FlxM_eval_powers_pre(M, Fl_powers_pre(uel(R,1), dP, p, pi), p, pi);
+  M1 = FlxM_eval_powers_pre(M, Fl_powers_pre(uel(R,1), dP, p, PI), p, pi);
   K = Flm_ker_sp(M1, p, 2);
   r = lg(gel(K,1)); D = gel(K,2);
   gel(V, 1) = gel(K,1);
   for(i=2; i<l; i++)
   {
-    GEN Mi = FlxM_eval_powers_pre(M, Fl_powers_pre(uel(R,i), dP, p, pi), p, pi);
+    GEN Mi = FlxM_eval_powers_pre(M, Fl_powers_pre(uel(R,i), dP, p, PI), p, pi);
     GEN K = Flm_ker_sp(Mi, p, 2);
     if (lg(gel(K,1)) != r || !zv_equal(D, gel(K,2))) return NULL;
     gel(V, i) = gel(K,1);
@@ -4813,9 +4813,9 @@ ZabM_indexrank(GEN M, GEN P, long n)
     ulong pi;
     long l;
     do p += n; while (!uisprime(p));
-    pi = get_Fl_red(p);
+    pi = (p & HIGHMASK)? get_Fl_red(p): 0;
     Pp = ZX_to_Flx(P, p);
-    R = Flx_roots(Pp, p);
+    R = Flx_roots_pre(Pp, p, pi);
     Mp = ZXM_to_FlxM(M, p, get_Flx_var(Pp));
     K = FlxM_eval_powers_pre(Mp, Fl_powers_pre(uel(R,1), D,p,pi), p,pi);
     v = Flm_indexrank(K, p);

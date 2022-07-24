@@ -101,7 +101,7 @@ ascend_volcano(GEN phi, ulong j, ulong p, ulong pi, long level, long L,
   {
     GEN nhbr_pol = first_iter? Flm_Fl_polmodular_evalx(phi, L, j, p, pi)
                              : nhbr_polynomial(path+1, phi, p, pi, L);
-    GEN nhbrs = Flx_roots(nhbr_pol, p);
+    GEN nhbrs = Flx_roots_pre(nhbr_pol, p, pi);
     long nhbrs_len = lg(nhbrs)-1, i;
     pari_sp btop = avma;
     path[0] = j;
@@ -174,7 +174,7 @@ descend_volcano(GEN phi, ulong j, ulong p, ulong pi,
   {
     /* Look for any path to the floor. One of j's first three neighbours leads
      * to the floor, since at most two neighbours are on the surface. */
-    GEN nhbrs = Flx_roots(Flm_Fl_polmodular_evalx(phi, L, j, p, pi), p);
+    GEN nhbrs = Flx_roots_pre(Flm_Fl_polmodular_evalx(phi, L, j, p, pi), p, pi);
     long i;
     for (i = 1; i <= 3; i++)
     {
@@ -251,7 +251,7 @@ get_nbrs(GEN phi, long L, ulong J, const ulong *xJ, ulong p, ulong pi)
   pari_sp av = avma;
   GEN f = Flm_Fl_polmodular_evalx(phi, L, J, p, pi);
   if (xJ) f = Flx_remove_root(f, *xJ, p);
-  return gerepileupto(av, Flx_roots(f, p));
+  return gerepileupto(av, Flx_roots_pre(f, p, pi));
 }
 
 /* Return a path of length n along the surface of an L-volcano of height h
@@ -425,7 +425,7 @@ common_nbr(ulong *nbr,
   d = Flx_gcd(f, g, p);
   if (degpol(d) == 1) { *nbr = Flx_deg1_root(d, p); return gc_long(av,1); }
   if (degpol(d) != 2) pari_err_BUG("common_neighbour");
-  r = Flx_roots(d, p);
+  r = Flx_roots_pre(d, p, pi);
   rlen = vecsmall_len(r);
   if (!rlen) pari_err_BUG("common_neighbour");
   /* rlen is 1 or 2 depending on whether the root is unique or not. */

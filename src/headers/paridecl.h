@@ -838,6 +838,7 @@ long    Flx_nbroots(GEN f, ulong p);
 ulong   Flx_oneroot(GEN f, ulong p);
 ulong   Flx_oneroot_split(GEN f, ulong p);
 GEN     Flx_roots(GEN f, ulong p);
+GEN     Flx_roots_pre(GEN f, ulong p, ulong pi);
 GEN     Flx_rootsff(GEN P, GEN T, ulong p);
 GEN     FpX_ddf(GEN f, GEN p);
 long    FpX_ddf_degree(GEN T, GEN XP, GEN p);

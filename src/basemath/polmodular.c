@@ -466,7 +466,7 @@ modinv_f_from_j(ulong j, ulong p, ulong pi, ulong s2, long only_residue)
   g2 = Fl_sqrtl_pre(j, 3, p, pi);
 
   pol = mkvecsmall5(0UL, Fl_neg(16 % p, p), Fl_neg(g2, p), 0UL, 1UL);
-  r = Flx_roots(pol, p);
+  r = Flx_roots_pre(pol, p, pi);
   for (i = 1; i < lg(r); ++i)
     if (only_residue)
     { if (krouu(r[i], p) != -1) return gc_ulong(av,r[i]); }
@@ -485,7 +485,7 @@ modinv_f3_from_j(ulong j, ulong p, ulong pi, ulong s2)
 
   pol = mkvecsmall5(0UL,
       Fl_neg(4096 % p, p), Fl_sub(768 % p, j, p), Fl_neg(48 % p, p), 1UL);
-  r = Flx_roots(pol, p);
+  r = Flx_roots_pre(pol, p, pi);
   for (i = 1; i < lg(r); ++i)
     if (eighth_root(&f, r[i], p, pi, s2)) return gc_ulong(av,f);
   pari_err_BUG("modinv_f3_from_j");
@@ -672,7 +672,7 @@ modinv_double_eta_from_j(GEN F, long inv, ulong j, ulong p, ulong pi, ulong s2)
   long i;
   ulong f = ULONG_MAX;
   GEN a = Flx_double_eta_xpoly(F, j, p, pi);
-  a = Flx_roots(a, p);
+  a = Flx_roots_pre(a, p, pi);
   for (i = 1; i < lg(a); ++i)
     if (double_eta_root(inv, &f, uel(a, i), p, pi, s2)) break;
   if (i == lg(a)) pari_err_BUG("modinv_double_eta_from_j");
@@ -1475,7 +1475,7 @@ root_matrix(long L, const disc_info *dinfo, long njinvs, GEN surface_js,
     set_avma(av);
     r1 = double_eta_power(inv, uel(surface_js, i), p, pi);
     f = Flx_double_eta_jpoly(F, r1, p, pi);
-    r = Flx_roots(f, p);
+    r = Flx_roots_pre(f, p, pi);
     if (lg(r) != 3) pari_err_BUG("root_matrix");
     rev = (j != uel(r, 1)) && (j != uel(r, 2));
     set_avma(av0);
@@ -2279,7 +2279,7 @@ polmodular0_powerup_ZM(long L, long inv, GEN *db)
     phi_modp = zero_Flm_copy(N, L + 2);
     av1 = avma;
     Hp = ZX_to_Flx(H, p);
-    Hrts = Flx_roots(Hp, p);
+    Hrts = Flx_roots_pre(Hp, p, pi);
     if (lg(Hrts)-1 < N) pari_err_BUG("polmodular0_powerup_ZM");
     js = cgetg(N + 1, t_VECSMALL);
     for (i = 1; i <= N; ++i)
@@ -2293,7 +2293,7 @@ polmodular0_powerup_ZM(long L, long inv, GEN *db)
       GEN phi_at_ji, mprts;
 
       phi_at_ji = Flm_Fl_polmodular_evalx(Phip, L, uel(Hrts, i), p, pi);
-      mprts = Flx_roots(phi_at_ji, p);
+      mprts = Flx_roots_pre(phi_at_ji, p, pi);
       if (lg(mprts) != L + 2) pari_err_BUG("polmodular0_powerup_ZM");
 
       Flv_powu_inplace_pre(mprts, e, p, pi);

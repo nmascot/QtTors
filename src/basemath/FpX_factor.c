@@ -113,7 +113,6 @@ Flx_oneroot_mod_2(GEN f)
 }
 
 static GEN FpX_roots_i(GEN f, GEN p);
-static GEN Flx_roots_i(GEN f, ulong p);
 
 static int
 cmpGuGu(GEN a, GEN b) { return (ulong)a < (ulong)b? -1: (a == b? 0: 1); }
@@ -137,7 +136,7 @@ FpX_roots(GEN f, GEN p)
     else
     {
       if (!odd(pp)) pari_err_PRIME("FpX_roots", p);
-      y = Flx_roots_i(f, pp);
+      y = Flx_roots_pre(f, pp, 0);
     }
     y = Flc_to_ZC(y);
   }
@@ -1429,12 +1428,12 @@ split_Flx_cut_out_roots(struct split_t *S, GEN f, ulong p, ulong pi)
 }
 
 /* by splitting, assume p > 2 prime, deg(f) > 0, and f monic */
-static GEN
-Flx_roots_i(GEN f, ulong p)
+GEN
+Flx_roots_pre(GEN f, ulong p, ulong pi)
 {
   GEN pol;
   long v = Flx_valrem(f, &f), n = degpol(f);
-  ulong q, pi, PI;
+  ulong q, PI;
   struct split_t S;
 
   f = Flx_normalize(f, p);
@@ -1444,8 +1443,12 @@ Flx_roots_i(GEN f, ulong p)
     q = p - f[2];
     return v? mkvecsmall2(0, q): mkvecsmall(q);
   }
-  PI = (p & HIGHMASK)? get_Fl_red(p): 0;
-  pi = SMALL_ULONG(p)? 0: (PI? PI: get_Fl_red(p));
+  if (SMALL_ULONG(p)) pi = PI = 0;
+  else
+  {
+    if (!pi) pi = get_Fl_red(p);
+    PI = (p & HIGHMASK)? pi: 0;
+  }
   if (n == 2)
   {
     ulong r = Flx_quad_root(f, p, PI, 1), s;
@@ -1508,7 +1511,7 @@ Flx_roots(GEN f, ulong p)
     case 3: set_avma(av); return cgetg(1, t_VECSMALL);
   }
   if (p == 2) return Flx_root_mod_2(f);
-  return gerepileuptoleaf(av, Flx_roots_i(f, p));
+  return gerepileuptoleaf(av, Flx_roots_pre(f, p, 0));
 }
 
 /* assume x reduced mod p, monic. */
