@@ -3845,14 +3845,14 @@ scanD0(long *tablelen, long *minD, long maxD, long maxh, long L0)
 {
   pari_sp av;
   D_entry *tab;
-  long i, lF, d, cnt;
+  long i, lF, cnt;
   GEN F;
 
   /* NB: As seen in the loop below, the real class number of D can be */
   /* 2*maxh if cl(D) is cyclic. */
   tab = (D_entry *) stack_malloc((maxD/4)*sizeof(*tab)); /* Overestimate */
   F = vecfactorsquarefreeu_coprime(*minD, maxD, mkvecsmall(2));
-  lF = lg(F); d = *minD;
+  lF = lg(F);
   for (av = avma, cnt = 0, i = 1; i < lF; i++, set_avma(av))
   {
     GEN DD, ordL, f, q = gel(F,i);
@@ -3911,7 +3911,9 @@ scanD0(long *tablelen, long *minD, long maxD, long maxh, long L0)
 
   /* Sort the table */
   qsort(tab, cnt, sizeof(*tab), _qsort_cmp);
-  *tablelen = cnt; *minD = d; return tab;
+  *tablelen = cnt;
+  *minD = maxD + 3 - (maxD & 3); /* smallest d >= maxD, d = 3 (mod 4) */
+  return tab;
 }
 
 /* Populate Ds with discriminants (and attached data) that can be
