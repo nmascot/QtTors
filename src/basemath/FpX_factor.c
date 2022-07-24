@@ -130,41 +130,31 @@ static GEN Flx_roots_i(GEN f, ulong p);
 static int
 cmpGuGu(GEN a, GEN b) { return (ulong)a < (ulong)b? -1: (a == b? 0: 1); }
 
-/* Generic driver to computes the roots of f modulo pp, using 'Roots' when
- * pp is a small prime.
- * if (gpwrap), check types thoroughly and return t_INTMODs, otherwise
- * assume that f is an FpX, pp a prime and return t_INTs */
-static GEN
-rootmod_aux(GEN f, GEN pp)
-{
-  GEN y;
-  switch(lg(f))
-  {
-    case 2: pari_err_ROOTS0("rootmod");
-    case 3: return cgetg(1,t_COL);
-  }
-  if (typ(f) == t_VECSMALL)
-  {
-    ulong p = pp[2];
-    if (p == 2)
-      y = Flx_root_mod_2(f);
-    else
-    {
-      if (!odd(p)) pari_err_PRIME("rootmod",utoi(p));
-      y = Flx_roots_i(f, p);
-    }
-    y = Flc_to_ZC(y);
-  }
-  else
-    y = FpX_roots_i(f, pp);
-  return y;
-}
 /* assume that f is a ZX and p a prime */
 GEN
 FpX_roots(GEN f, GEN p)
 {
   pari_sp av = avma;
-  GEN y; ZX_rootmod_init(&f, p); y = rootmod_aux(f, p);
+  GEN y; ZX_rootmod_init(&f, p);
+  switch(lg(f))
+  {
+    case 2: pari_err_ROOTS0("FpX_roots");
+    case 3: return cgetg(1,t_COL);
+  }
+  if (typ(f) == t_VECSMALL)
+  {
+    ulong pp = p[2];
+    if (pp == 2)
+      y = Flx_root_mod_2(f);
+    else
+    {
+      if (!odd(pp)) pari_err_PRIME("FpX_roots", p);
+      y = Flx_roots_i(f, pp);
+    }
+    y = Flc_to_ZC(y);
+  }
+  else
+    y = FpX_roots_i(f, p);
   return gerepileupto(av, y);
 }
 

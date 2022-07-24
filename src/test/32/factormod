@@ -283,10 +283,10 @@ matrix(0,2)
   *** polrootsmod: not a prime number in polrootsmod: 1023.
   ***   at top-level: polrootsmod(Pol(0),p)
   ***                 ^---------------------
-  *** polrootsmod: zero polynomial in rootmod.
+  *** polrootsmod: zero polynomial in FpX_roots.
   ***   at top-level: polrootsmod(Pol(0),2)
   ***                 ^---------------------
-  *** polrootsmod: zero polynomial in rootmod.
+  *** polrootsmod: zero polynomial in FpX_roots.
   ***   at top-level: factormod(x,0)
   ***                 ^--------------
   *** factormod: incorrect type in factormod (t_INT).
@@ -296,4 +296,4 @@ matrix(0,2)
   ***   at top-level: factormod(x^3+1,[y^2+1,5])
   ***                 ^--------------------------
   *** factormod: not an irreducible polynomial in FpX_ffintersect: y^2 + 1.
-Total time spent: 52
+Total time spent: 46
