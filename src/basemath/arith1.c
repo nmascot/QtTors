@@ -735,6 +735,7 @@ ulong
 nonsquare_Fl(ulong p)
 { return ((p & 3UL) == 3)? p-1: nonsquare1_Fl(p); }
 
+/* allow pi = 0 */
 ulong
 Fl_2gener_pre(ulong p, ulong pi)
 {
@@ -744,13 +745,57 @@ Fl_2gener_pre(ulong p, ulong pi)
   return Fl_powu_pre(nonsquare1_Fl(p), p1 >> e, p, pi);
 }
 
-/* Tonelli-Shanks. Assume p is prime and (a,p) != -1. */
+static ulong
+Fl_sqrt_i(ulong a, ulong y, ulong p)
+{
+  long i, e, k;
+  ulong p1, q, v, w;
+
+  if (!a) return 0;
+  p1 = p - 1; e = vals(p1);
+  if (e == 0) /* p = 2 */
+  {
+    if (p != 2) pari_err_PRIME("Fl_sqrt [modulus]",utoi(p));
+    return ((a & 1) == 0)? 0: 1;
+  }
+  if (e == 1)
+  {
+    v = Fl_powu(a, (p+1) >> 2, p);
+    if (Fl_sqr(v, p) != a) return ~0UL;
+    p1 = p - v; if (v > p1) v = p1;
+    return v;
+  }
+  q = p1 >> e; /* q = (p-1)/2^oo is odd */
+  p1 = Fl_powu(a, q >> 1, p); /* a ^ [(q-1)/2] */
+  if (!p1) return 0;
+  v = Fl_mul(a, p1, p);
+  w = Fl_mul(v, p1, p);
+  if (!y) y = Fl_powu(nonsquare1_Fl(p), q, p);
+  while (w != 1)
+  { /* a*w = v^2, y primitive 2^e-th root of 1
+       a square --> w even power of y, hence w^(2^(e-1)) = 1 */
+    p1 = Fl_sqr(w, p);
+    for (k=1; p1 != 1 && k < e; k++) p1 = Fl_sqr(p1, p);
+    if (k == e) return ~0UL;
+    /* w ^ (2^k) = 1 --> w = y ^ (u * 2^(e-k)), u odd */
+    p1 = y;
+    for (i=1; i < e-k; i++) p1 = Fl_sqr(p1, p);
+    y = Fl_sqr(p1, p); e = k;
+    w = Fl_mul(y, w, p);
+    v = Fl_mul(v, p1, p);
+  }
+  p1 = p - v; if (v > p1) v = p1;
+  return v;
+}
+
+/* Tonelli-Shanks. Assume p is prime and (a,p) != -1. Allow pi = 0 */
 ulong
 Fl_sqrt_pre_i(ulong a, ulong y, ulong p, ulong pi)
 {
   long i, e, k;
   ulong p1, q, v, w;
 
+  if (!pi) return Fl_sqrt_i(a, y, p);
   if (!a) return 0;
   p1 = p - 1; e = vals(p1);
   if (e == 0) /* p = 2 */
@@ -790,17 +835,17 @@ Fl_sqrt_pre_i(ulong a, ulong y, ulong p, ulong pi)
 
 ulong
 Fl_sqrt(ulong a, ulong p)
-{ ulong pi = get_Fl_red(p); return Fl_sqrt_pre_i(a, 0, p, pi); }
+{ ulong pi = (p & HIGHMASK)? get_Fl_red(p): 0; return Fl_sqrt_pre_i(a, 0, p, pi); }
 
 ulong
 Fl_sqrt_pre(ulong a, ulong p, ulong pi)
 { return Fl_sqrt_pre_i(a, 0, p, pi); }
 
+/* allow pi = 0 */
 static ulong
 Fl_lgener_pre_all(ulong l, long e, ulong r, ulong p, ulong pi, ulong *pt_m)
 {
-  ulong x, y, m;
-  ulong le1 = upowuu(l, e-1);
+  ulong x, y, m, le1 = upowuu(l, e-1);
   for (x = 2; ; x++)
   {
     y = Fl_powu_pre(x, r, p, pi);
@@ -819,13 +864,12 @@ Fl_lgener_pre_all(ulong l, long e, ulong r, ulong p, ulong pi, ulong *pt_m)
 static ulong
 Fl_sqrtl_raw(ulong a, ulong l, ulong e, ulong r, ulong p, ulong pi, ulong y, ulong m)
 {
-  ulong p1, v, w, z, dl;
-  ulong u2;
+  ulong u2, p1, v, w, z, dl;
   if (a==0) return a;
   u2 = Fl_inv(l%r, r);
   v = Fl_powu_pre(a, u2, p, pi);
   w = Fl_powu_pre(v, l, p, pi);
-  w = Fl_mul_pre(w, Fl_inv(a, p), p, pi);
+  w = pi? Fl_mul_pre(w, Fl_inv(a, p), p, pi): Fl_div(w, a, p);
   if (w==1) return v;
   if (y==0) y = Fl_lgener_pre_all(l, e, r, p, pi, &m);
   while (w!=1)
@@ -842,28 +886,31 @@ Fl_sqrtl_raw(ulong a, ulong l, ulong e, ulong r, ulong p, ulong pi, ulong y, ulo
     p1 = Fl_powu_pre(y,dl*upowuu(l,e-k-1),p,pi);
     m = Fl_powu_pre(m, dl, p, pi);
     e = k;
-    v = Fl_mul_pre(p1,v,p,pi);
+    v = pi? Fl_mul_pre(p1,v,p,pi): Fl_mul(p1,v,p);
     y = Fl_powu_pre(p1,l,p,pi);
-    w = Fl_mul_pre(y,w,p,pi);
+    w = pi? Fl_mul_pre(y,w,p,pi): Fl_mul(y,w,p);
   }
   return v;
 }
 
+/* allow pi = 0 */
 static ulong
 Fl_sqrtl_i(ulong a, ulong l, ulong p, ulong pi, ulong y, ulong m)
 {
   ulong r, e = u_lvalrem(p-1, l, &r);
   return Fl_sqrtl_raw(a, l, e, r, p, pi, y, m);
 }
-
+/* allow pi = 0 */
 ulong
 Fl_sqrtl_pre(ulong a, ulong l, ulong p, ulong pi)
 { return Fl_sqrtl_i(a, l, p, pi, 0, 0); }
 
 ulong
 Fl_sqrtl(ulong a, ulong l, ulong p)
-{ ulong pi = get_Fl_red(p); return Fl_sqrtl_i(a, l, p, pi, 0, 0); }
+{ ulong pi = (p & HIGHMASK)? get_Fl_red(p): 0;
+  return Fl_sqrtl_i(a, l, p, pi, 0, 0); }
 
+/* allow pi = 0 */
 ulong
 Fl_sqrtn_pre(ulong a, long n, ulong p, ulong pi, ulong *zetan)
 {
@@ -900,7 +947,10 @@ Fl_sqrtn_pre(ulong a, long n, ulong p, ulong pi, ulong *zetan)
       e = u_lvalrem(q,l, &r);
       y = Fl_lgener_pre_all(l, e, r, p, pi, &zeta);
       if (zetan)
-        z = Fl_mul_pre(z, Fl_powu_pre(y, upowuu(l,e-j), p, pi), p, pi);
+      {
+        ulong Y = Fl_powu_pre(y, upowuu(l,e-j), p, pi);
+        z = pi? Fl_mul_pre(z, Y, p, pi): Fl_mul(z, Y, p);
+      }
       if (a!=1)
         do
         {
@@ -911,8 +961,8 @@ Fl_sqrtn_pre(ulong a, long n, ulong p, ulong pi, ulong *zetan)
   }
   if (m != nn)
   {
-    ulong qm = q/m, nm = nn/m;
-    a = Fl_powu_pre(a, Fl_inv(nm%qm, qm), p, pi);
+    ulong qm = q/m, nm = (nn/m) % qm;
+    a = Fl_powu_pre(a, Fl_inv(nm, qm), p, pi);
   }
   if (n < 0) a = Fl_inv(a, p);
   if (zetan) *zetan = z;
@@ -922,7 +972,7 @@ Fl_sqrtn_pre(ulong a, long n, ulong p, ulong pi, ulong *zetan)
 ulong
 Fl_sqrtn(ulong a, long n, ulong p, ulong *zetan)
 {
-  ulong pi = get_Fl_red(p);
+  ulong pi = (p & HIGHMASK)? get_Fl_red(p): 0;
   return Fl_sqrtn_pre(a, n, p, pi, zetan);
 }
 
@@ -1969,10 +2019,12 @@ Fl_2powu(ulong n, ulong p)
   return y;
 }
 
+/* allow pi = 0 */
 ulong
 Fl_powu_pre(ulong x, ulong n0, ulong p, ulong pi)
 {
   ulong y, z, n;
+  if (!pi) return Fl_powu(x, n0, p);
   if (n0 <= 1)
   { /* frequent special cases */
     if (n0 == 1) return x;
@@ -2020,23 +2072,36 @@ GEN
 Fl_powers_pre(ulong x, long n, ulong p, ulong pi)
 {
   long i, k;
-  GEN powers = cgetg(n + 2, t_VECSMALL);
-  powers[1] = 1; if (n == 0) return powers;
-  powers[2] = x;
-  for (i = 3, k=2; i <= n; i+=2, k++)
+  GEN z = cgetg(n + 2, t_VECSMALL);
+  z[1] = 1; if (n == 0) return z;
+  z[2] = x;
+  if (pi)
   {
-    powers[i] = Fl_sqr_pre(powers[k], p, pi);
-    powers[i+1] = Fl_mul_pre(powers[k], powers[k+1], p, pi);
+    for (i = 3, k=2; i <= n; i+=2, k++)
+    {
+      z[i] = Fl_sqr_pre(z[k], p, pi);
+      z[i+1] = Fl_mul_pre(z[k], z[k+1], p, pi);
+    }
+    if (i==n+1) z[i] = Fl_sqr_pre(z[k], p, pi);
   }
-  if (i==n+1)
-    powers[i] = Fl_sqr_pre(powers[k], p, pi);
-  return powers;
+  else if (p & HIGHMASK)
+  {
+    for (i = 3, k=2; i <= n; i+=2, k++)
+    {
+      z[i] = Fl_sqr(z[k], p);
+      z[i+1] = Fl_mul(z[k], z[k+1], p);
+    }
+    if (i==n+1) z[i] = Fl_sqr(z[k], p);
+  }
+  else
+    for (i = 2; i <= n; i++) z[i+1] = (z[i] * x) % p;
+  return z;
 }
 
 GEN
 Fl_powers(ulong x, long n, ulong p)
 {
-  return Fl_powers_pre(x, n, p, get_Fl_red(p));
+  return Fl_powers_pre(x, n, p, (p & HIGHMASK)? get_Fl_red(p): 0);
 }
 
 /**********************************************************************
@@ -2848,12 +2913,13 @@ Fp_log(GEN a, GEN g, GEN ord, GEN p)
   return gen_PH_log(a,g,v,(void*)p,&Fp_star);
 }
 
+/* assume !(p & HIGHMASK) */
 static ulong
 Fl_log_naive(ulong a, ulong g, ulong ord, ulong p)
 {
   ulong i, h=1;
-  for(i=0; i<ord; i++, h = Fl_mul(h, g, p))
-    if(a==h) return i;
+  for (i = 0; i < ord; i++, h = (h * g) % p)
+    if (a==h) return i;
   return ~0UL;
 }
 
@@ -2861,8 +2927,8 @@ static ulong
 Fl_log_naive_pre(ulong a, ulong g, ulong ord, ulong p, ulong pi)
 {
   ulong i, h=1;
-  for(i=0; i<ord; i++, h = Fl_mul_pre(h, g, p, pi))
-    if(a==h) return i;
+  for (i = 0; i < ord; i++, h = Fl_mul_pre(h, g, p, pi))
+    if (a==h) return i;
   return ~0UL;
 }
 
@@ -2877,6 +2943,7 @@ Fl_log_Fp(ulong a, ulong g, ulong ord, ulong p)
 ulong
 Fl_log_pre(ulong a, ulong g, ulong ord, ulong p, ulong pi)
 {
+  if (!pi) return Fl_log(a, g, ord, p);
   if (ord <= 200) return Fl_log_naive_pre(a, g, ord, p, pi);
   return Fl_log_Fp(a, g, ord, p);
 }

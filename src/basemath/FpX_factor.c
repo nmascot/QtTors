@@ -203,14 +203,14 @@ FpX_otherroot(GEN x, GEN r, GEN p)
 static ulong
 Fl_disc_bc(ulong b, ulong c, ulong p)
 { return Fl_sub(Fl_sqr(b,p), Fl_double(Fl_double(c,p),p), p); }
-/* p > 2 */
+/* p > 2; allow pi = 0 */
 static ulong
-Flx_quad_root(GEN x, ulong p, int unknown)
+Flx_quad_root(GEN x, ulong p, ulong pi, int unknown)
 {
   ulong s, b = x[3], c = x[2];
   ulong D = Fl_disc_bc(b, c, p);
   if (unknown && krouu(D,p) == -1) return p;
-  s = Fl_sqrt(D,p);
+  s = Fl_sqrt_pre(D, p, pi);
   if (s==~0UL) return p;
   return Fl_halve(Fl_sub(s,b, p), p);
 }
@@ -338,32 +338,49 @@ FpX_roots_i(GEN f, GEN p)
   }
 }
 
-/* Assume f is normalized */
+/* Assume f is normalized; allow pi = 0 */
 static ulong
 Flx_cubic_root(GEN ff, ulong p, ulong pi)
 {
   GEN f = Flx_normalize(ff,p);
   ulong a = f[4], b=f[3], c=f[2], p3 = p%3==1 ? (2*p+1)/3 :(p+1)/3;
-  ulong t = Fl_mul_pre(a, p3, p, pi), t2 = Fl_sqr_pre(t, p, pi);
-  ulong A = Fl_sub(b, Fl_triple(t2, p), p);
-  ulong B = Fl_addmul_pre(c, t, Fl_sub(Fl_double(t2, p), b, p), p, pi);
-  ulong A3 =  Fl_mul_pre(A, p3, p, pi);
-  ulong A32 = Fl_sqr_pre(A3, p, pi), A33 = Fl_mul_pre(A3, A32, p, pi);
-  ulong S = Fl_neg(B,p), P = Fl_neg(A3,p);
-  ulong D = Fl_add(Fl_sqr_pre(S, p, pi), Fl_double(Fl_double(A33, p), p), p);
+  ulong t, t2, A, B2, B, A3, A33, S, P, D;
+  if (pi)
+  {
+    t = Fl_mul_pre(a, p3, p, pi);
+    t2 = Fl_sqr_pre(t, p, pi);
+    A = Fl_sub(b, Fl_triple(t2, p), p);
+    B = Fl_sub(c, Fl_mul_pre(t, Fl_add(A, t2, p), p, pi), p);
+    A3 =  Fl_mul_pre(A, p3, p, pi);
+    B2 = Fl_sqr_pre(B, p, pi);
+  }
+  else
+  {
+    t = Fl_mul(a, p3, p);
+    t2 = Fl_sqr(t, p);
+    A = Fl_sub(b, Fl_triple(t2, p), p);
+    B = Fl_sub(c, Fl_mul(t, Fl_add(A, t2, p), p), p);
+    A3 =  Fl_mul(A, p3, p);
+    B2 = Fl_sqr(B, p);
+  }
+  A33 = Fl_powu_pre(A3, 3, p, pi);
+  D = Fl_add(B2, Fl_double(Fl_double(A33, p), p), p);
+  S = Fl_neg(B,p);
+  P = Fl_neg(A3,p);
   if (krouu(D,p) >= 0)
   {
     ulong s = Fl_sqrt_pre(D, p, pi), vS1, vS2;
     ulong S1 = S==s ? S: Fl_halve(Fl_sub(S, s, p), p);
     if (p%3==2) /* 1 solutions */
-      vS1 = Fl_powu_pre(S1, (2*p-1)/3, p, pi);
+      vS1 = Fl_powu_pre(S1, p - p3, p, pi);
     else
     {
       vS1 = Fl_sqrtl_pre(S1, 3, p, pi);
       if (vS1==~0UL) return p; /*0 solutions*/
       /*3 solutions*/
     }
-    vS2 = P? Fl_mul_pre(P, Fl_inv(vS1, p), p, pi): 0;
+    if (!P) return Fl_sub(vS1, t, p);
+    vS2 = pi? Fl_mul_pre(P, Fl_inv(vS1, p), p, pi): Fl_div(P, vS1, p);
     return Fl_sub(Fl_add(vS1,vS2, p), t, p);
   }
   else
@@ -377,8 +394,7 @@ Flx_cubic_root(GEN ff, ulong p, ulong pi)
     if (p%3==1) /*1 solutions*/
     {
       ulong Fa = Fl2_norm_pre(vS1, D, p, pi);
-      if (Fa!=P)
-        Sa = Fl_mul(Sa, Fl_div(Fa, P, p),p);
+      if (Fa!=P) Sa = Fl_mul(Sa, Fl_div(Fa, P, p),p);
     }
     set_avma(av);
     return Fl_sub(Fl_double(Sa,p),t,p);
@@ -397,8 +413,7 @@ FpX_cubic_root(GEN ff, GEN p)
   GEN t = Fp_mul(a, p3, p), t2 = Fp_sqr(t, p);
   GEN A = Fp_sub(b, Fp_mulu(t2, 3, p), p);
   GEN B = Fp_addmul(c, t, Fp_sub(shifti(t2, 1), b, p), p);
-  GEN A3 =  Fp_mul(A, p3, p);
-  GEN A32 = Fp_sqr(A3, p), A33 = Fp_mul(A3, A32, p);
+  GEN A3 =  Fp_mul(A, p3, p), A33 = Fp_powu(A3, 3, p);
   GEN S = Fp_neg(B,p), P = Fp_neg(A3,p);
   GEN D = Fp_add(Fp_sqr(S, p), shifti(A33, 2), p);
   if (kronecker(D,p) >= 0)
@@ -441,17 +456,19 @@ static ulong
 Flx_oneroot_i(GEN f, ulong p, long fl)
 {
   GEN pol, a;
-  ulong q, pi;
+  ulong q, pi, PI;
   long da;
 
   if (Flx_val(f)) return 0;
-  switch(degpol(f))
+  da = degpol(f);
+  if (da == 1) return Fl_neg(f[2], p);
+  PI = (p & HIGHMASK)? get_Fl_red(p): 0;
+  pi = SMALL_ULONG(p)? 0: (PI? PI: get_Fl_red(p));
+  switch(da)
   {
-    case 1: return Fl_neg(f[2], p);
-    case 2: return Flx_quad_root(f, p, 1);
-    case 3: if (p>3) return Flx_cubic_root(f, p, get_Fl_red(p)); /*FALL THROUGH*/
+    case 2: return Flx_quad_root(f, p, PI, 1);
+    case 3: if (p>3) return Flx_cubic_root(f, p, PI); /*FALL THROUGH*/
   }
-  pi = get_Fl_red(p);
   if (!fl)
   {
     a = Flxq_powu_pre(polx_Flx(f[1]), p - 1, f,p,pi);
@@ -471,8 +488,8 @@ Flx_oneroot_i(GEN f, ulong p, long fl)
     switch(da)
     {
       case 1: return Fl_neg(a[2], p);
-      case 2: return Flx_quad_root(a, p, 0);
-      case 3: if (p>3) return Flx_cubic_root(a, p, pi); /*FALL THROUGH*/
+      case 2: return Flx_quad_root(a, p, PI, 0);
+      case 3: if (p>3) return Flx_cubic_root(a, p, PI); /*FALL THROUGH*/
       default: {
         GEN b = Flxq_powu_pre(pol,q, a,p,pi);
         long db;
@@ -1451,7 +1468,7 @@ Flx_roots_i(GEN f, ulong p)
       return v? mkvecsmall2(0, r): mkvecsmall(r);
     }
     case 2: {
-      ulong r = Flx_quad_root(g, p, 1), s;
+      ulong r = Flx_quad_root(g, p, get_Fl_red(p), 1), s;
       if (r == p) return v? mkvecsmall(0): cgetg(1,t_VECSMALL);
       s = Flx_otherroot(g,r, p);
       if (r < s)
@@ -1485,7 +1502,7 @@ Flx_roots_i(GEN f, ulong p)
           split_moveto_done(&S, j, (GEN)(p - c[2]));
           j--; l--; break;
         case 2:
-          r = Flx_quad_root(c, p, 0);
+          r = Flx_quad_root(c, p, get_Fl_red(p), 0);
           if (r == p) pari_err_PRIME("polrootsmod",utoipos(p));
           s = Flx_otherroot(c,r, p);
           split_done(&S, j, (GEN)r, (GEN)s);
@@ -1550,7 +1567,7 @@ Flx_factor_2(GEN f, ulong p, long d)
   long v = f[1];
   if (!d) return mkvec2(cgetg(1,t_COL), cgetg(1,t_VECSMALL));
   if (labs(d) == 1) return mkvec2(mkcol(f), mkvecsmall(1));
-  r = Flx_quad_root(f, p, 1);
+  r = Flx_quad_root(f, p, get_Fl_red(p), 1);
   if (r==p) return mkvec2(mkcol(f), mkvecsmall(1));
   s = Flx_otherroot(f, r, p);
   r = Fl_neg(r, p);

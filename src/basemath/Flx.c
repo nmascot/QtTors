@@ -1971,10 +1971,10 @@ Flx_halfgcd(GEN x, GEN y, ulong p)
 
 /*Do not garbage collect*/
 static GEN
-Flx_gcd_basecase(GEN a, GEN b, ulong p)
+Flx_gcd_basecase(GEN a, GEN b, ulong p, ulong pi)
 {
   pari_sp av = avma;
-  ulong iter = 0, pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  ulong iter = 0;
   if (lg(b) > lg(a)) swap(a, b);
   while (lgpol(b))
   {
@@ -2012,7 +2012,7 @@ Flx_gcd_pre(GEN x, GEN y, ulong p, ulong pi)
       gerepileall(av,2,&x,&y);
     }
   }
-  return gerepileuptoleaf(av, Flx_gcd_basecase(x,y,p));
+  return gerepileuptoleaf(av, Flx_gcd_basecase(x,y,p,pi));
 }
 GEN
 Flx_gcd(GEN x, GEN y, ulong p)
@@ -3875,53 +3875,125 @@ zlx_translate1(GEN P, ulong p, long e)
 INLINE GEN
 mkF2(ulong a, ulong b) { return mkvecsmall2(a,b); }
 
+/* allow pi = 0 */
 GEN
 Fl2_mul_pre(GEN x, GEN y, ulong D, ulong p, ulong pi)
 {
-  ulong xaya, xbyb, Db2, mid;
-  ulong z1, z2;
+  ulong xaya, xbyb, Db2, mid, z1, z2;
   ulong x1 = x[1], x2 = x[2], y1 = y[1], y2 = y[2];
-  xaya = Fl_mul_pre(x1,y1,p,pi);
-  if (x2==0 && y2==0) return mkF2(xaya,0);
-  if (x2==0) return mkF2(xaya,Fl_mul_pre(x1,y2,p,pi));
-  if (y2==0) return mkF2(xaya,Fl_mul_pre(x2,y1,p,pi));
-  xbyb = Fl_mul_pre(x2,y2,p,pi);
-  mid = Fl_mul_pre(Fl_add(x1,x2,p), Fl_add(y1,y2,p),p,pi);
-  Db2 = Fl_mul_pre(D, xbyb, p,pi);
+  if (pi)
+  {
+    xaya = Fl_mul_pre(x1,y1,p,pi);
+    if (x2==0 && y2==0) return mkF2(xaya,0);
+    if (x2==0) return mkF2(xaya,Fl_mul_pre(x1,y2,p,pi));
+    if (y2==0) return mkF2(xaya,Fl_mul_pre(x2,y1,p,pi));
+    xbyb = Fl_mul_pre(x2,y2,p,pi);
+    mid = Fl_mul_pre(Fl_add(x1,x2,p), Fl_add(y1,y2,p),p,pi);
+    Db2 = Fl_mul_pre(D, xbyb, p,pi);
+  }
+  else if (p & HIGHMASK)
+  {
+    xaya = Fl_mul(x1,y1,p);
+    if (x2==0 && y2==0) return mkF2(xaya,0);
+    if (x2==0) return mkF2(xaya,Fl_mul(x1,y2,p));
+    if (y2==0) return mkF2(xaya,Fl_mul(x2,y1,p));
+    xbyb = Fl_mul(x2,y2,p);
+    mid = Fl_mul(Fl_add(x1,x2,p), Fl_add(y1,y2,p),p);
+    Db2 = Fl_mul(D, xbyb, p);
+  }
+  else
+  {
+    xaya = (x1 * y1) % p;
+    if (x2==0 && y2==0) return mkF2(xaya,0);
+    if (x2==0) return mkF2(xaya, (x1 * y2) % p);
+    if (y2==0) return mkF2(xaya, (x2 * y1) % p);
+    xbyb = (x2 * y2) % p;
+    mid = (Fl_add(x1,x2,p) * Fl_add(y1,y2,p)) % p;
+    Db2 = (D * xbyb) % p;
+  }
   z1 = Fl_add(xaya,Db2,p);
   z2 = Fl_sub(mid,Fl_add(xaya,xbyb,p),p);
   return mkF2(z1,z2);
 }
 
+/* allow pi = 0 */
 GEN
 Fl2_sqr_pre(GEN x, ulong D, ulong p, ulong pi)
 {
   ulong a = x[1], b = x[2];
   ulong a2, Db2, ab;
-  a2 = Fl_sqr_pre(a,p,pi);
-  if (b==0) return mkF2(a2,0);
-  Db2= Fl_mul_pre(D, Fl_sqr_pre(b,p,pi), p,pi);
-  ab = Fl_mul_pre(a,b,p,pi);
+  if (pi)
+  {
+    a2 = Fl_sqr_pre(a,p,pi);
+    if (b==0) return mkF2(a2,0);
+    Db2= Fl_mul_pre(D, Fl_sqr_pre(b,p,pi), p,pi);
+    ab = Fl_mul_pre(a,b,p,pi);
+  }
+  else if (p & HIGHMASK)
+  {
+    a2 = Fl_sqr(a,p);
+    if (b==0) return mkF2(a2,0);
+    Db2= Fl_mul(D, Fl_sqr(b,p), p);
+    ab = Fl_mul(a,b,p);
+  }
+  else
+  {
+    a2 = (a * a) % p;
+    if (b==0) return mkF2(a2,0);
+    Db2= (D * ((b * b) % p)) % p;
+    ab = (a * b) % p;
+  }
   return mkF2(Fl_add(a2,Db2,p), Fl_double(ab,p));
 }
 
+/* allow pi = 0 */
 ulong
 Fl2_norm_pre(GEN x, ulong D, ulong p, ulong pi)
 {
-  ulong a2 = Fl_sqr_pre(x[1],p,pi);
-  return x[2]? Fl_sub(a2, Fl_mul_pre(D, Fl_sqr_pre(x[2], p,pi), p,pi), p): a2;
+  ulong a = x[1], b = x[2], a2;
+  if (pi)
+  {
+    a2 = Fl_sqr_pre(a,p,pi);
+    return b? Fl_sub(a2, Fl_mul_pre(D, Fl_sqr_pre(b, p,pi), p,pi), p): a2;
+  }
+  else if (p & HIGHMASK)
+  {
+    a2 = Fl_sqr(a,p);
+    return b? Fl_sub(a2, Fl_mul(D, Fl_sqr(b, p), p), p): a2;
+  }
+  else
+  {
+    a2 = (a * a) % p;
+    return b? Fl_sub(a2, (D * ((b * b) % p)) % p, p): a2;
+  }
 }
 
+/* allow pi = 0 */
 GEN
 Fl2_inv_pre(GEN x, ulong D, ulong p, ulong pi)
 {
-  ulong n, ni;
-  if (x[2] == 0) return mkF2(Fl_inv(x[1],p),0);
-  n = Fl_sub(Fl_sqr_pre(x[1], p,pi),
-             Fl_mul_pre(D, Fl_sqr_pre(x[2], p,pi), p,pi), p);
-  ni = Fl_inv(n,p);
-  return mkF2(Fl_mul_pre(x[1], ni, p,pi),
-               Fl_neg(Fl_mul_pre(x[2], ni, p,pi), p));
+  ulong a = x[1], b = x[2], n, ni;
+  if (b == 0) return mkF2(Fl_inv(a,p), 0);
+  b = Fl_neg(b, p);
+  if (pi)
+  {
+    n = Fl_sub(Fl_sqr_pre(a, p,pi),
+               Fl_mul_pre(D, Fl_sqr_pre(b, p,pi), p,pi), p);
+    ni = Fl_inv(n,p);
+    return mkF2(Fl_mul_pre(a, ni, p,pi), Fl_mul_pre(b, ni, p,pi));
+  }
+  else if (p & HIGHMASK)
+  {
+    n = Fl_sub(Fl_sqr(a, p), Fl_mul(D, Fl_sqr(b, p), p), p);
+    ni = Fl_inv(n,p);
+    return mkF2(Fl_mul(a, ni, p), Fl_mul(b, ni, p));
+  }
+  else
+  {
+    n = Fl_sub((a * a) % p, (D * ((b * b) % p)) % p, p);
+    ni = Fl_inv(n,p);
+    return mkF2((a * ni) % p, (b * ni) % p);
+  }
 }
 
 int
@@ -3944,7 +4016,7 @@ _Fl2_mul(void *data, GEN x, GEN y)
   return Fl2_mul_pre(x,y, D->D, D->p, D->pi);
 }
 
-/* n-Power of x in Z/pZ[X]/(T), as t_VECSMALL. */
+/* n-Power of x in Z/pZ[X]/(T), as t_VECSMALL; allow pi = 0 */
 GEN
 Fl2_pow_pre(GEN x, GEN n, ulong D, ulong p, ulong pi)
 {
@@ -3979,6 +4051,7 @@ _Fl2_rand(void *data)
 static const struct bb_group Fl2_star={_Fl2_mul, _Fl2_pow, _Fl2_rand,
        hash_GEN, zv_equal, Fl2_equal1, NULL};
 
+/* allow pi = 0 */
 GEN
 Fl2_sqrtn_pre(GEN a, GEN n, ulong D, ulong p, ulong pi, GEN *zeta)
 {
@@ -3995,6 +4068,7 @@ Fl2_sqrtn_pre(GEN a, GEN n, ulong D, ulong p, ulong pi, GEN *zeta)
   return gen_Shanks_sqrtn(a,n,o,zeta,(void*)&E,&Fl2_star);
 }
 
+/* allow pi = 0 */
 GEN
 Flx_Fl2_eval_pre(GEN x, GEN y, ulong D, ulong p, ulong pi)
 {
