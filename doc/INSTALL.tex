@@ -162,7 +162,10 @@ hosts have mismatched configurations; suggested values are
 The remaining options are specific to parallel programming. We provide an
 \emph{Introduction to parallel GP programming} in the file
 \kbd{doc/parallel.dvi}, and to multi-threaded \kbd{libpari} programs
-in Appendix~D. Beware that these options change the library ABI:
+in Appendix~D. Beware that these options change the library ABI, in
+particular you will need to \kbd{make clean} between successive builds
+using different values of this option (note that running
+\kbd{Configure --tune} implicitly compiles for \kbd{--mt=single}):
 
 \kbd{--mt=}\var{engine}: specify the engine used for parallel computations.
 Supported value are
