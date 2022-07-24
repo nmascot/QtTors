@@ -1456,32 +1456,32 @@ static GEN
 Flx_roots_i(GEN f, ulong p)
 {
   GEN pol, g;
-  long v = Flx_valrem(f, &g);
-  ulong q, pi;
+  long v = Flx_valrem(f, &g), n = degpol(g);
+  ulong q, pi, PI;
   struct split_t S;
 
   /* optimization: test for small degree first */
-  switch(degpol(g))
+  if (n == 1)
   {
-    case 1: {
-      ulong r = p - g[2];
-      return v? mkvecsmall2(0, r): mkvecsmall(r);
-    }
-    case 2: {
-      ulong r = Flx_quad_root(g, p, get_Fl_red(p), 1), s;
-      if (r == p) return v? mkvecsmall(0): cgetg(1,t_VECSMALL);
-      s = Flx_otherroot(g,r, p);
-      if (r < s)
-        return v? mkvecsmall3(0, r, s): mkvecsmall2(r, s);
-      else if (r > s)
-        return v? mkvecsmall3(0, s, r): mkvecsmall2(s, r);
-      else
-        return v? mkvecsmall2(0, s): mkvecsmall(s);
-    }
+    q = p - g[2];
+    return v? mkvecsmall2(0, q): mkvecsmall(q);
+  }
+  PI = (p & HIGHMASK)? get_Fl_red(p): 0;
+  pi = SMALL_ULONG(p)? 0: (PI? PI: get_Fl_red(p));
+  if (n == 2)
+  {
+    ulong r = Flx_quad_root(g, p, PI, 1), s;
+    if (r == p) return v? mkvecsmall(0): cgetg(1,t_VECSMALL);
+    s = Flx_otherroot(g,r, p);
+    if (r < s)
+      return v? mkvecsmall3(0, r, s): mkvecsmall2(r, s);
+    else if (r > s)
+      return v? mkvecsmall3(0, s, r): mkvecsmall2(s, r);
+    else
+      return v? mkvecsmall2(0, s): mkvecsmall(s);
   }
   q = p >> 1;
   split_init(&S, lg(f)-1);
-  pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   settyp(S.done, t_VECSMALL);
   if (v) split_add_done(&S, (GEN)0);
   if (! split_Flx_cut_out_roots(&S, g, p, pi))
@@ -1502,7 +1502,7 @@ Flx_roots_i(GEN f, ulong p)
           split_moveto_done(&S, j, (GEN)(p - c[2]));
           j--; l--; break;
         case 2:
-          r = Flx_quad_root(c, p, get_Fl_red(p), 0);
+          r = Flx_quad_root(c, p, PI, 0);
           if (r == p) pari_err_PRIME("polrootsmod",utoipos(p));
           s = Flx_otherroot(c,r, p);
           split_done(&S, j, (GEN)r, (GEN)s);
