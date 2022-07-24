@@ -45,21 +45,9 @@ ZX_factmod_init(GEN *F, GEN p)
   if (lg(*F) > 3) *F = FpX_normalize(*F, p);
   return 2;
 }
-static void
-ZX_rootmod_init(GEN *F, GEN p)
-{
-  if (lgefint(p) == 3)
-  {
-    ulong pp = p[2];
-    *F = ZX_to_Flx(*F, pp);
-    if (lg(*F) > 3) *F = Flx_normalize(*F, pp);
-  }
-  else
-  {
-    *F = FpX_red(*F, p);
-    if (lg(*F) > 3) *F = FpX_normalize(*F, p);
-  }
-}
+static GEN
+ZX_rootmod_init(GEN F, GEN p)
+{ return lgefint(p) == 3? ZX_to_Flx(F, p[2]): FpX_red(F, p); }
 
 /* return 1,...,p-1 [not_0 = 1] or 0,...,p [not_0 = 0] */
 static GEN
@@ -135,7 +123,7 @@ GEN
 FpX_roots(GEN f, GEN p)
 {
   pari_sp av = avma;
-  GEN y; ZX_rootmod_init(&f, p);
+  GEN y; f = ZX_rootmod_init(f, p);
   switch(lg(f))
   {
     case 2: pari_err_ROOTS0("FpX_roots");
@@ -260,13 +248,14 @@ split_done(struct split_t *S, long i, GEN a, GEN b)
   split_add_done(S, b);
 }
 
-/* by splitting, assume p > 2 prime, deg(f) > 0, and f monic */
+/* by splitting, assume p > 2 prime, deg(f) > 0 */
 static GEN
 FpX_roots_i(GEN f, GEN p)
 {
   GEN pol, pol0, a, q;
   struct split_t S;
 
+  f = FpX_normalize(f, p);
   split_init(&S, lg(f)-1);
   settyp(S.done, t_COL);
   if (ZX_valrem(f, &f)) split_add_done(&S, gen_0);
@@ -450,7 +439,7 @@ Flx_oneroot_i(GEN f, ulong p, long fl)
   long da;
 
   if (Flx_val(f)) return 0;
-  da = degpol(f);
+  da = degpol(f); f = Flx_normalize(f, p);
   if (da == 1) return Fl_neg(f[2], p);
   PI = (p & HIGHMASK)? get_Fl_red(p): 0;
   pi = SMALL_ULONG(p)? 0: (PI? PI: get_Fl_red(p));
@@ -507,6 +496,7 @@ FpX_oneroot_i(GEN f, GEN p)
   long da;
 
   if (ZX_val(f)) return gen_0;
+  f = FpX_normalize(f, p);
   switch(degpol(f))
   {
     case 1: return subii(p, gel(f,2));
@@ -555,37 +545,34 @@ ulong
 Flx_oneroot(GEN f, ulong p)
 {
   pari_sp av = avma;
-  ulong r;
   switch(lg(f))
   {
     case 2: return 0;
     case 3: return p;
   }
   if (p == 2) return Flx_oneroot_mod_2(f);
-  r = Flx_oneroot_i(Flx_normalize(f, p), p, 0);
-  return gc_ulong(av,r);
+  return gc_ulong(av, Flx_oneroot_i(f, p, 0));
 }
 
 ulong
 Flx_oneroot_split(GEN f, ulong p)
 {
   pari_sp av = avma;
-  ulong r;
   switch(lg(f))
   {
     case 2: return 0;
     case 3: return p;
   }
   if (p == 2) return Flx_oneroot_mod_2(f);
-  r = Flx_oneroot_i(Flx_normalize(f, p), p, 1);
-  return gc_ulong(av,r);
+  return gc_ulong(av, Flx_oneroot_i(f, p, 1));
 }
 
 /* assume that p is prime */
 GEN
-FpX_oneroot(GEN f, GEN pp) {
+FpX_oneroot(GEN f, GEN p)
+{
   pari_sp av = avma;
-  ZX_rootmod_init(&f, pp);
+  f = ZX_rootmod_init(f, p);
   switch(lg(f))
   {
     case 2: set_avma(av); return gen_0;
@@ -593,15 +580,15 @@ FpX_oneroot(GEN f, GEN pp) {
   }
   if (typ(f) == t_VECSMALL)
   {
-    ulong r, p = pp[2];
-    if (p == 2)
+    ulong r, pp = p[2];
+    if (pp == 2)
       r = Flx_oneroot_mod_2(f);
     else
-      r = Flx_oneroot_i(f, p, 0);
+      r = Flx_oneroot_i(f, pp, 0);
     set_avma(av);
-    return (r == p)? NULL: utoi(r);
+    return (r == pp)? NULL: utoi(r);
   }
-  f = FpX_oneroot_i(f, pp);
+  f = FpX_oneroot_i(f, p);
   if (!f) return gc_NULL(av);
   return gerepileuptoint(av, f);
 }
@@ -1445,24 +1432,25 @@ split_Flx_cut_out_roots(struct split_t *S, GEN f, ulong p, ulong pi)
 static GEN
 Flx_roots_i(GEN f, ulong p)
 {
-  GEN pol, g;
-  long v = Flx_valrem(f, &g), n = degpol(g);
+  GEN pol;
+  long v = Flx_valrem(f, &f), n = degpol(f);
   ulong q, pi, PI;
   struct split_t S;
 
+  f = Flx_normalize(f, p);
   /* optimization: test for small degree first */
   if (n == 1)
   {
-    q = p - g[2];
+    q = p - f[2];
     return v? mkvecsmall2(0, q): mkvecsmall(q);
   }
   PI = (p & HIGHMASK)? get_Fl_red(p): 0;
   pi = SMALL_ULONG(p)? 0: (PI? PI: get_Fl_red(p));
   if (n == 2)
   {
-    ulong r = Flx_quad_root(g, p, PI, 1), s;
+    ulong r = Flx_quad_root(f, p, PI, 1), s;
     if (r == p) return v? mkvecsmall(0): cgetg(1,t_VECSMALL);
-    s = Flx_otherroot(g,r, p);
+    s = Flx_otherroot(f,r, p);
     if (r < s)
       return v? mkvecsmall3(0, r, s): mkvecsmall2(r, s);
     else if (r > s)
@@ -1474,7 +1462,7 @@ Flx_roots_i(GEN f, ulong p)
   split_init(&S, lg(f)-1);
   settyp(S.done, t_VECSMALL);
   if (v) split_add_done(&S, (GEN)0);
-  if (! split_Flx_cut_out_roots(&S, g, p, pi))
+  if (! split_Flx_cut_out_roots(&S, f, p, pi))
     return all_roots_mod_p(p, lg(S.done) == 1);
   pol = polx_Flx(f[1]);
   for (pol[2]=1; ; pol[2]++)
@@ -1520,7 +1508,7 @@ Flx_roots(GEN f, ulong p)
     case 3: set_avma(av); return cgetg(1, t_VECSMALL);
   }
   if (p == 2) return Flx_root_mod_2(f);
-  return gerepileuptoleaf(av, Flx_roots_i(Flx_normalize(f, p), p));
+  return gerepileuptoleaf(av, Flx_roots_i(f, p));
 }
 
 /* assume x reduced mod p, monic. */
