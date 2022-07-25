@@ -2423,6 +2423,7 @@ Flv_producttree(GEN xa, GEN s, ulong p, long vs)
   long n = lg(xa)-1;
   long m = n==1 ? 1: expu(n-1)+1;
   long i, j, k, ls = lg(s);
+  ulong pi;
   GEN T = cgetg(m+1, t_VEC);
   GEN t = cgetg(ls, t_VEC);
   for (j=1, k=1; j<ls; k+=s[j++])
@@ -2430,14 +2431,14 @@ Flv_producttree(GEN xa, GEN s, ulong p, long vs)
              mkvecsmall3(vs, Fl_neg(xa[k], p), 1):
              mkvecsmall4(vs, Fl_mul(xa[k], xa[k+1], p),
                  Fl_neg(Fl_add(xa[k],xa[k+1],p),p), 1);
-  gel(T,1) = t;
+  gel(T,1) = t; pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   for (i=2; i<=m; i++)
   {
     GEN u = gel(T, i-1);
     long n = lg(u)-1;
     GEN t = cgetg(((n+1)>>1)+1, t_VEC);
     for (j=1, k=1; k<n; j++, k+=2)
-      gel(t, j) = Flx_mul(gel(u, k), gel(u, k+1), p);
+      gel(t, j) = Flx_mul_pre(gel(u, k), gel(u, k+1), p, pi);
     gel(T, i) = t;
   }
   return T;
@@ -2448,6 +2449,8 @@ Flx_Flv_multieval_tree(GEN P, GEN xa, GEN T, ulong p)
 {
   long i,j,k;
   long m = lg(T)-1;
+  ulong PI = get_Fl_red(p);
+  ulong pi = SMALL_ULONG(p)? 0: PI;
   GEN R = cgetg(lg(xa), t_VECSMALL);
   GEN Tp = cgetg(m+1, t_VEC), t;
   gel(Tp, m) = mkvec(P);
@@ -2458,8 +2461,8 @@ Flx_Flv_multieval_tree(GEN P, GEN xa, GEN T, ulong p)
     t = cgetg(n+1, t_VEC);
     for (j=1, k=1; k<n; j++, k+=2)
     {
-      gel(t, k)   = Flx_rem(gel(v, j), gel(u, k), p);
-      gel(t, k+1) = Flx_rem(gel(v, j), gel(u, k+1), p);
+      gel(t, k)   = Flx_rem_pre(gel(v, j), gel(u, k), p, pi);
+      gel(t, k+1) = Flx_rem_pre(gel(v, j), gel(u, k+1), p, pi);
     }
     gel(Tp, i) = t;
   }
@@ -2469,7 +2472,7 @@ Flx_Flv_multieval_tree(GEN P, GEN xa, GEN T, ulong p)
     for (j=1, k=1; j<=n; j++)
     {
       long c, d = degpol(gel(u,j));
-      for (c=1; c<=d; c++, k++) R[k] = Flx_eval(gel(v, j), xa[k], p);
+      for (c=1; c<=d; c++, k++) R[k] = Flx_eval_pre(gel(v, j), xa[k], p, PI);
     }
     return gc_const((pari_sp)R, R);
   }
@@ -2479,6 +2482,7 @@ static GEN
 FlvV_polint_tree(GEN T, GEN R, GEN s, GEN xa, GEN ya, ulong p, long vs)
 {
   pari_sp av = avma;
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   long m = lg(T)-1;
   long i, j, k, ls = lg(s);
   GEN Tp = cgetg(m+1, t_VEC);
@@ -2502,8 +2506,8 @@ FlvV_polint_tree(GEN T, GEN R, GEN s, GEN xa, GEN ya, ulong p, long vs)
     GEN v = gel(Tp, i-1);
     long n = lg(v)-1;
     for (j=1, k=1; k<n; j++, k+=2)
-      gel(t, j) = Flx_add(Flx_mul(gel(u, k), gel(v, k+1), p),
-                          Flx_mul(gel(u, k+1), gel(v, k), p), p);
+      gel(t, j) = Flx_add(Flx_mul_pre(gel(u, k), gel(v, k+1), p, pi),
+                          Flx_mul_pre(gel(u, k+1), gel(v, k), p, pi), p);
     gel(Tp, i) = t;
   }
   return gerepileuptoleaf(av, gmael(Tp,m,1));
@@ -4135,24 +4139,28 @@ GEN
 FlxqV_dotproduct(GEN x, GEN y, GEN T, ulong p)
 {
   long i, lx = lg(x);
+  ulong pi;
   pari_sp av;
   GEN c;
   if (lx == 1) return pol0_Flx(get_Flx_var(T));
-  av = avma; c = Flx_mul(gel(x,1),gel(y,1), p);
-  for (i=2; i<lx; i++) c = Flx_add(c, Flx_mul(gel(x,i),gel(y,i), p), p);
-  return gerepileuptoleaf(av, Flx_rem(c,T,p));
+  av = avma; pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  c = Flx_mul_pre(gel(x,1),gel(y,1), p, pi);
+  for (i=2; i<lx; i++) c = Flx_add(c, Flx_mul_pre(gel(x,i),gel(y,i), p, pi), p);
+  return gerepileuptoleaf(av, Flx_rem_pre(c,T,p,pi));
 }
 
 GEN
 FlxqX_dotproduct(GEN x, GEN y, GEN T, ulong p)
 {
   long i, l = minss(lg(x), lg(y));
+  ulong pi;
   pari_sp av;
   GEN c;
   if (l == 2) return pol0_Flx(get_Flx_var(T));
-  av = avma; c = Flx_mul(gel(x,2),gel(y,2), p);
-  for (i=3; i<l; i++) c = Flx_add(c, Flx_mul(gel(x,i),gel(y,i), p), p);
-  return gerepileuptoleaf(av, Flx_rem(c,T,p));
+  av = avma; pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  c = Flx_mul_pre(gel(x,2),gel(y,2), p, pi);
+  for (i=3; i<l; i++) c = Flx_add(c, Flx_mul_pre(gel(x,i),gel(y,i), p, pi), p);
+  return gerepileuptoleaf(av, Flx_rem_pre(c,T,p,pi));
 }
 
 GEN
