@@ -2602,7 +2602,7 @@ Flxq_sqr_pre(GEN x,GEN T,ulong p,ulong pi)
 /* Square of y in Z/pZ[X]/(T), as t_VECSMALL. */
 GEN
 Flxq_sqr(GEN x,GEN T,ulong p)
-{ return Flx_rem_pre(Flx_sqr(x,p),T,p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
+{ return Flxq_sqr_pre(x,T,p,SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 static GEN
 _Flxq_red(void *E, GEN x)
