@@ -1346,16 +1346,17 @@ polcyclofactors(GEN f)
   set_avma(av); return cgetg(1,t_VEC);
 }
 
-/* return t*x mod T(x), T a monic ZX. Assume deg(t) < deg(T) */
+/* return t*x mod (T(x), p), T a monic Flx. Assume deg(t) < deg(T) */
 static GEN
-ZXQ_mul_by_X(GEN t, GEN T)
+Flxq_mul_by_X(GEN t, GEN T, ulong p)
 {
-  GEN lt;
-  t = RgX_shift_shallow(t, 1);
+  ulong lt;
+  t = Flx_shift(t, 1);
   if (degpol(t) < degpol(T)) return t;
-  lt = leading_coeff(t);
-  if (is_pm1(lt)) return signe(lt) > 0 ? ZX_sub(t, T): ZX_add(t, T);
-  return ZX_sub(t, ZX_Z_mul(T, leading_coeff(t)));
+  lt = uel(t, lg(t)-1); /* leading coeff */
+  if (lt == 1) return Flx_sub(t, T, p);
+  if (lt == p-1) return Flx_add(t, T, p);
+  return Flx_sub(t, Flx_Fl_mul(T, lt, p), p);
 }
 /* f a product of Phi_n, all n odd; deg f > 1. Is it irreducible ? */
 static long
@@ -1363,9 +1364,9 @@ BD_odd_iscyclo(GEN f)
 {
   pari_sp av;
   long d, e, n, bound;
+  ulong p;
   GEN t;
   f = ZX_deflate_max(f, &e);
-  av = avma;
   /* The original f is cyclotomic (= Phi_{ne}) iff the present one is Phi_n,
    * where all prime dividing e also divide n. If current f is Phi_n,
    * then n is odd and squarefree */
@@ -1384,16 +1385,18 @@ BD_odd_iscyclo(GEN f)
   else
     bound = (long)(2.573 * pow(d,1.01));
   /* IF f = Phi_n, n squarefree odd, then n <= bound */
-  t = pol_xn(d-1, varn(f));
+  p = unextprime(bound);
+  f = ZX_to_Flx(f, p); av = avma;
+  t = polxn_Flx(d-1, f[1]);
   for (n = d; n <= bound; n++)
   {
-    t = ZXQ_mul_by_X(t, f);
+    t = Flxq_mul_by_X(t, f, p);
     /* t = (X mod f(X))^d */
     if (degpol(t) == 0) break;
     if (gc_needed(av,1))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"BD_odd_iscyclo");
-      t = gerepilecopy(av, t);
+      t = gerepileuptoleaf(av, t);
     }
   }
   if (n > bound || eulerphiu(n) != (ulong)d) return 0;
