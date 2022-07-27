@@ -1358,19 +1358,15 @@ Flxq_mul_by_X(GEN t, GEN T, ulong p)
   if (lt == p-1) return Flx_add(t, T, p);
   return Flx_sub(t, Flx_Fl_mul(T, lt, p), p);
 }
-/* f a product of Phi_n, all n odd; deg f > 1. Is it irreducible ? */
+/* f a product of Phi_n, all n odd, not of the form F(x^e) for e > 1; deg f > 1.
+ * Is f = Phi_n irreducible ? (in which case n is squarefree) */
 static long
 BD_odd_iscyclo(GEN f)
 {
   pari_sp av;
-  long d, e, n, bound;
+  long d = degpol(f), n, bound;
   ulong p;
   GEN t;
-  f = ZX_deflate_max(f, &e);
-  /* The original f is cyclotomic (= Phi_{ne}) iff the present one is Phi_n,
-   * where all prime dividing e also divide n. If current f is Phi_n,
-   * then n is odd and squarefree */
-  d = degpol(f); /* = phi(n) */
   /* Let e > 0, g multiplicative such that
        g(p) = p / (p-1)^(1+e) < 1 iff p < (p-1)^(1+e)
      For all squarefree odd n, we have g(n) < C, hence n < C phi(n)^(1+e), where
@@ -1380,7 +1376,7 @@ BD_odd_iscyclo(GEN f)
      In fact, for n <= 10^7 odd & squarefree, we have n < 2.92 * phi(n)
      By the above, n<10^7 covers all d <= (10^7/2.573)^(1/(1+1/100)) < 3344391.
   */
-  if (d <= 3344391)
+  if (d <= 3344391) /* d = phi(n) */
     bound = (long)(2.92 * d);
   else
     bound = (long)(2.573 * pow(d,1.01));
@@ -1390,28 +1386,26 @@ BD_odd_iscyclo(GEN f)
   t = polxn_Flx(d-1, f[1]);
   for (n = d; n <= bound; n++)
   {
-    t = Flxq_mul_by_X(t, f, p);
-    /* t = (X mod f(X))^d */
+    t = Flxq_mul_by_X(t, f, p); /* = (X mod f(X))^n */
     if (degpol(t) == 0) break;
     if (gc_needed(av,1))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"BD_odd_iscyclo");
+      if(DEBUGMEM>1) pari_warn(warnmem,"BD_odd_iscyclo, n = %ld", n);
       t = gerepileuptoleaf(av, t);
     }
   }
-  if (n > bound || eulerphiu(n) != (ulong)d) return 0;
-
-  if (e > 1) return (u_ppo(e, n) == 1)? e * n : 0;
-  return n;
+  return (n <= bound && eulerphiu(n) == (ulong)d)? n: 0;
 }
 
-/* Checks if f, monic squarefree ZX with |constant coeff| = 1, is a cyclotomic
- * polynomial. Returns n if f = Phi_n, and 0 otherwise */
+/* Checks if f, monic squarefree ZX with |constant coeff| = 1, not of the
+ * form F(x^e) for e > 1, is a cyclotomic polynomial. Returns n if f = Phi_n,
+ * and 0 otherwise */
 static long
 BD_iscyclo(GEN f)
 {
   pari_sp av = avma;
-  GEN f2, fn, f1;
+  GEN P, E, f1, fn;
+  long m;
 
   if (degpol(f) == 1) return isint1(gel(f,2))? 2: 1;
   f1 = ZX_graeffe(f);
@@ -1421,12 +1415,13 @@ BD_iscyclo(GEN f)
   fn = ZX_z_unscale(f, -1); /* f(-x) */
   /* f = product of Phi_n, n = 2 mod 4 */
   if (ZX_equal(f1, fn)) return gc_long(av, 2*BD_odd_iscyclo(fn));
-
-  if (issquareall(f1, &f2))
-  {
-    GEN lt = leading_coeff(f2);
+  f1 = ZX_deflate_max(f1, &m);
+  P = ZX_squff(f1, &E);
+  if (lg(E) == 2 && E[1] == 2)
+  { /* f1 = f2^2 */
+    GEN f2 = gel(P,1), lt = leading_coeff(f2);
     long c;
-    if (signe(lt) < 0) f2 = ZX_neg(f2);
+    if (signe(lt) < 0) f2 = ZX_neg(f2); /* now lt(f2) > 0 */
     c = BD_iscyclo(f2);
     return odd(c)? 0: 2*c;
   }
@@ -1435,13 +1430,19 @@ BD_iscyclo(GEN f)
 long
 poliscyclo(GEN f)
 {
-  long d;
+  long n, e;
   if (typ(f) != t_POL) pari_err_TYPE("poliscyclo", f);
-  d = degpol(f);
-  if (d <= 0 || !RgX_is_ZX(f)) return 0;
-  if (!equali1(gel(f,d+2)) || !is_pm1(gel(f,2))) return 0;
-  if (d == 1) return signe(gel(f,2)) > 0? 2: 1;
-  return ZX_is_squarefree(f)? BD_iscyclo(f): 0;
+  n = degpol(f);
+  if (n <= 0 || !RgX_is_ZX(f)) return 0;
+  if (!equali1(gel(f,n+2)) || !is_pm1(gel(f,2))) return 0;
+  if (n == 1) return signe(gel(f,2)) > 0? 2: 1;
+  f = ZX_deflate_max(f, &e);
+  if (!ZX_is_squarefree(f)) return 0;
+  n = BD_iscyclo(f); if (e == 1) return n;
+    /* f1 = f2^2 */
+  /* f(x^e) is cyclotomic (= Phi_{ne}) iff f = Phi_n, where all prime dividing
+   * E also divide n. */
+  return (u_ppo(e, n) == 1)? e * n : 0;
 }
 
 long
