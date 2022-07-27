@@ -303,6 +303,8 @@ BA  41- [libpari] pari_thread_start: do not allow threads started this way to
         launch more threads.
 BA  42- genus2red: 3rd component is now a pair [P,Q] such that y^2+Q*y=P is
         minimal everywhere.
+    43- poliscyclo: replace Bradford-Davenport's Graeffe method by their
+        invphi algorithm (much faster)
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,

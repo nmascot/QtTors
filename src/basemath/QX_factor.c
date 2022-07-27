@@ -1346,102 +1346,73 @@ polcyclofactors(GEN f)
   set_avma(av); return cgetg(1,t_VEC);
 }
 
-/* return t*x mod (T(x), p), T a monic Flx. Assume deg(t) < deg(T) */
+/* list of all squarefree odd x such that phi(x) = n, P^-(x) > m. Unsorted */
 static GEN
-Flxq_mul_by_X(pari_sp av, GEN t, GEN T, ulong p)
+invphi(ulong n, ulong m)
 {
-  ulong lt;
-  long n = degpol(T);
-  if (degpol(t) + 1 < n) return Flx_shift(t, 1);
-  (void)new_chunk(n + 3); /* enough room for result */
-  t = Flx_shift(t, 1); lt = uel(t, lg(t)-1); /* leading coeff */
-  if (lt == 1) { set_avma(av); return Flx_sub(t, T, p); }
-  if (lt == p-1) { set_avma(av); return Flx_add(t, T, p); }
-  T = Flx_Fl_mul(T, lt, p); set_avma(av); return Flx_sub(t, T, p);
-}
-/* f a product of Phi_n, all n odd, not of the form F(x^e) for e > 1; deg f > 1.
- * Is f = Phi_n irreducible ? (in which case n is squarefree) */
-static long
-BD_odd_iscyclo(GEN f)
-{
-  pari_sp av;
-  long d = degpol(f), n, bound;
-  ulong p;
-  GEN t;
-  /* Let e > 0, g multiplicative such that
-       g(p) = p / (p-1)^(1+e) < 1 iff p < (p-1)^(1+e)
-     For all squarefree odd n, we have g(n) < C, hence n < C phi(n)^(1+e), where
-       C = \prod_{p odd | p > (p-1)^(1+e)} g(p)
-     For e = 1/10,   we obtain p = 3, 5 and C < 1.523
-     For e = 1/100,  we obtain p = 3, 5, ..., 29 and C < 2.573
-     In fact, for n <= 10^7 odd & squarefree, we have n < 2.92 * phi(n)
-     By the above, n<10^7 covers all d <= (10^7/2.573)^(1/(1+1/100)) < 3344391.
-  */
-  if (d <= 3344391) /* d = phi(n) */
-    bound = (long)(2.92 * d);
-  else
-    bound = (long)(2.573 * pow(d,1.01));
-  /* IF f = Phi_n, n squarefree odd, then n <= bound */
-  p = unextprime(bound);
-  f = ZX_to_Flx(f, p); av = avma;
-  t = polxn_Flx(d-1, f[1]);
-  for (n = d; n <= bound; n++)
+  GEN C, D;
+  long l, i;
+  if (n == 1) return mkvecsmall(1);
+  D = divisorsu(n); l = lg(D);
+  C = cgetg(1, t_VECSMALL);
+  for (i = 2; i < l; i++) /* skip 1 */
   {
-    t = Flxq_mul_by_X(av, t, f, p); /* = (X mod f(X))^n */
-    if (degpol(t) == 0) break;
-    if (gc_needed(av,1))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"BD_odd_iscyclo, n = %ld", n);
-      t = gerepileuptoleaf(av, t);
-    }
+    long d = D[i], p;
+    if (d < m) continue;
+    p = d + 1; if (!uisprime(p)) continue;
+    C = vecsmall_concat(C, zv_z_mul(invphi(D[l-i], p), p));
   }
-  return (n <= bound && eulerphiu(n) == (ulong)d)? n: 0;
+  return C;
 }
 
-/* Checks if f, monic squarefree ZX with |constant coeff| = 1, not of the
- * form F(x^e) for e > 1, is a cyclotomic polynomial. Returns n if f = Phi_n,
- * and 0 otherwise */
-static long
-BD_iscyclo(GEN f)
-{
-  pari_sp av = avma;
-  GEN P, E, f1, fn;
-
-  if (degpol(f) == 1) return isint1(gel(f,2))? 2: 1;
-  f1 = ZX_graeffe(f);
-  /* f = product of Phi_n, n odd */
-  if (ZX_equal(f, f1)) return gc_long(av, BD_odd_iscyclo(f));
-
-  fn = ZX_z_unscale(f, -1); /* f(-x) */
-  /* f = product of Phi_n, n = 2 mod 4 */
-  if (ZX_equal(f1, fn)) return gc_long(av, 2*BD_odd_iscyclo(fn));
-  P = ZX_squff(f1, &E);
-  if (lg(E) == 2 && E[1] == 2)
-  { /* f1 = f2^2 */
-    GEN f2 = gel(P,1), lt = leading_coeff(f2);
-    long c;
-    if (signe(lt) < 0) f2 = ZX_neg(f2); /* now lt(f2) > 0 */
-    c = BD_iscyclo(f2);
-    return odd(c)? 0: 2*c;
-  }
-  return gc_long(av, 0);
-}
 long
 poliscyclo(GEN f)
 {
-  long n, e;
+  const ulong p = 2147483647; /* prime */
+  pari_sp av;
+  long i, n, e, l, f3, fm3;
+  GEN D, fp, _3;
   if (typ(f) != t_POL) pari_err_TYPE("poliscyclo", f);
   n = degpol(f);
   if (n <= 0 || !RgX_is_ZX(f)) return 0;
   if (!equali1(gel(f,n+2)) || !is_pm1(gel(f,2))) return 0;
   if (n == 1) return signe(gel(f,2)) > 0? 2: 1;
-  f = ZX_deflate_max(f, &e);
-  if (!ZX_is_squarefree(f)) return 0;
-  n = BD_iscyclo(f); if (e == 1) return n;
-    /* f1 = f2^2 */
-  /* f(x^e) is cyclotomic (= Phi_{ne}) iff f = Phi_n, where all prime dividing
-   * E also divide n. */
-  return (u_ppo(e, n) == 1)? e * n : 0;
+  av = avma;
+  f = ZX_deflate_max(f, &e); if (e != 1) n = degpol(f);
+  D = invphi(n, 1); /* squareefree odd d s.t. phi(d) = n */
+  l = lg(D); _3 = gmodulss(3, p);
+  fp = ZX_to_Flx(f, p);
+  f3 = Flx_eval(fp, 3, p);
+  fm3 = Flx_eval(fp, p-3, p);
+  /* f(x^e) is cyclotomic (= Phi_{de}) iff f = Phi_d, where all prime dividing
+   * e also divide d. */
+  for (i = 1; i < l; i++)
+  {
+    long d = D[i]; /* squarefree odd */
+    if (odd(e))
+    {
+      if (e == 1 || u_ppo(e, d) == 1)
+      { /* early abort: check whether f(3) = Phi_d(3) or Phi_2d(3) = Phi_d(-3)
+         * mod p before checking in Z. N.B. phi(d) and value at 3 mod p
+         * determine Phi_d for all d <= 10^7 */
+        ulong F3 = Rg_to_Fl(polcyclo_eval(d, _3), p);
+        if (F3 == f3 && ZX_equal(f, polcyclo(d, varn(f))))
+          return gc_long(av, d * e);
+        if (F3 == fm3 && ZX_equal(f, polcyclo(2*d, varn(f))))
+          return gc_long(av, 2* d * e);
+      }
+    }
+    else
+    {
+      if (u_ppo(e, 2*d) == 1)
+      { /* early abort: check whether f(3) = Phi_2d(3) mod p */
+        ulong F3 = Rg_to_Fl(polcyclo_eval(2*d, _3), p);
+        if (F3 == f3 && ZX_equal(f, polcyclo(2*d, varn(f))))
+          return gc_long(av, 2* d * e);
+      }
+    }
+  }
+  return gc_long(av, 0);
 }
 
 long
