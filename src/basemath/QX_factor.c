@@ -1348,15 +1348,16 @@ polcyclofactors(GEN f)
 
 /* return t*x mod (T(x), p), T a monic Flx. Assume deg(t) < deg(T) */
 static GEN
-Flxq_mul_by_X(GEN t, GEN T, ulong p)
+Flxq_mul_by_X(pari_sp av, GEN t, GEN T, ulong p)
 {
   ulong lt;
-  t = Flx_shift(t, 1);
-  if (degpol(t) < degpol(T)) return t;
-  lt = uel(t, lg(t)-1); /* leading coeff */
-  if (lt == 1) return Flx_sub(t, T, p);
-  if (lt == p-1) return Flx_add(t, T, p);
-  return Flx_sub(t, Flx_Fl_mul(T, lt, p), p);
+  long n = degpol(T);
+  if (degpol(t) + 1 < n) return Flx_shift(t, 1);
+  (void)new_chunk(n + 3); /* enough room for result */
+  t = Flx_shift(t, 1); lt = uel(t, lg(t)-1); /* leading coeff */
+  if (lt == 1) { set_avma(av); return Flx_sub(t, T, p); }
+  if (lt == p-1) { set_avma(av); return Flx_add(t, T, p); }
+  T = Flx_Fl_mul(T, lt, p); set_avma(av); return Flx_sub(t, T, p);
 }
 /* f a product of Phi_n, all n odd, not of the form F(x^e) for e > 1; deg f > 1.
  * Is f = Phi_n irreducible ? (in which case n is squarefree) */
@@ -1386,7 +1387,7 @@ BD_odd_iscyclo(GEN f)
   t = polxn_Flx(d-1, f[1]);
   for (n = d; n <= bound; n++)
   {
-    t = Flxq_mul_by_X(t, f, p); /* = (X mod f(X))^n */
+    t = Flxq_mul_by_X(av, t, f, p); /* = (X mod f(X))^n */
     if (degpol(t) == 0) break;
     if (gc_needed(av,1))
     {
