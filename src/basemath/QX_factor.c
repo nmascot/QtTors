@@ -1405,7 +1405,6 @@ BD_iscyclo(GEN f)
 {
   pari_sp av = avma;
   GEN P, E, f1, fn;
-  long m;
 
   if (degpol(f) == 1) return isint1(gel(f,2))? 2: 1;
   f1 = ZX_graeffe(f);
@@ -1415,7 +1414,6 @@ BD_iscyclo(GEN f)
   fn = ZX_z_unscale(f, -1); /* f(-x) */
   /* f = product of Phi_n, n = 2 mod 4 */
   if (ZX_equal(f1, fn)) return gc_long(av, 2*BD_odd_iscyclo(fn));
-  f1 = ZX_deflate_max(f1, &m);
   P = ZX_squff(f1, &E);
   if (lg(E) == 2 && E[1] == 2)
   { /* f1 = f2^2 */
