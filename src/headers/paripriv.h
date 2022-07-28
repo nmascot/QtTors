@@ -177,7 +177,7 @@ void parforvec0(GEN a, GEN code, GEN code2, long flag);
 GEN  parvector_worker(GEN i, GEN C);
 GEN  polmodular_worker(GEN pt, ulong L, GEN hilb, GEN factu,
        GEN vne, GEN vinfo, long compute_derivs, GEN j_powers, GEN fdb);
-GEN  polclass_worker(GEN p, long D, long u, GEN G, GEN db);
+GEN  polclass_worker(GEN p, GEN G, GEN db);
 GEN  nf_L2_bound(GEN nf, GEN den, GEN *pL);
 GEN  nmV_polint_center_tree_worker(GEN Va, GEN T, GEN R, GEN xa, GEN m2);
 GEN  nmV_chinese_center_tree_seq(GEN A, GEN P, GEN T, GEN R);

@@ -109,6 +109,6 @@ Doc:
 Function: _polclass_worker
 Section: programming/internals
 C-Name: polclass_worker
-Prototype: GLLGG
+Prototype: GGG
 Help: used by polclass
 Doc: used by polclass
