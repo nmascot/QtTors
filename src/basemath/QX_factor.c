@@ -1357,7 +1357,7 @@ invphi(ulong n, ulong m)
   C = cgetg(1, t_VECSMALL);
   for (i = 2; i < l; i++) /* skip 1 */
   {
-    long d = D[i], p;
+    ulong d = D[i], p;
     if (d < m) continue;
     p = d + 1; if (!uisprime(p)) continue;
     C = vecsmall_concat(C, zv_z_mul(invphi(D[l-i], p), p));
@@ -1370,7 +1370,8 @@ poliscyclo(GEN f)
 {
   const ulong p = 2147483647; /* prime */
   pari_sp av;
-  long i, n, e, l, f3, fm3;
+  long i, n, e, l;
+  ulong f3, fm3;
   GEN D, fp, _3;
   if (typ(f) != t_POL) pari_err_TYPE("poliscyclo", f);
   n = degpol(f);
