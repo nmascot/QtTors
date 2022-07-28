@@ -1720,9 +1720,8 @@ Flv_deriv_pre_inplace(GEN v, long deg, ulong p, ulong pi)
 }
 
 INLINE GEN
-eval_modpoly_modp(GEN Tp, GEN j_powers, norm_eqn_t ne, int compute_derivs)
+eval_modpoly_modp(GEN Tp, GEN j_powers, ulong p, ulong pi, int compute_derivs)
 {
-  ulong p = ne->p, pi = ne->pi;
   long L = lg(j_powers) - 3;
   GEN j_pows_p = ZV_to_Flv(j_powers, p);
   GEN tmp = cgetg(2 + 2 * compute_derivs, t_VEC);
@@ -1748,7 +1747,8 @@ polmodular_worker(GEN tp, ulong L, GEN hilb, GEN factu, GEN vne, GEN vinfo,
   GEN Tp;
   norm_eqn_update(ne, vne, tp, L);
   Tp = polmodular_split_p_Flm(L, hilb, factu, ne, fdb, (const disc_info*)vinfo);
-  if (!isintzero(j_powers)) Tp = eval_modpoly_modp(Tp, j_powers, ne, derivs);
+  if (!isintzero(j_powers))
+    Tp = eval_modpoly_modp(Tp, j_powers, ne->p, ne->pi, derivs);
   return gerepileupto(av, Tp);
 }
 
@@ -3426,7 +3426,7 @@ modpoly_pickD_primes(
           continue;
         }
       }
-      if (!uisprime(p) || !modinv_good_prime(inv, p)) continue;
+      if (!modinv_good_prime(inv, p) || !uisprime(p)) continue;
       if (primes) {
         if (n >= max) goto done;
         /* TODO: Implement test to filter primes that lead to
