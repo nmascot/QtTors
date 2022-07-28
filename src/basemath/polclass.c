@@ -42,13 +42,13 @@ pcp_get_k(GEN G) { return mael(G,2,2); }
 static long
 pcp_get_h(GEN G) { return mael(G,4,1); }
 static long
-pcp_get_u(GEN G) { return mael(G,4,2); }
+pcp_get_inv(GEN G) { return mael(G,4,2); }
 static long
-pcp_get_inv(GEN G) { return mael(G,4,3); }
+pcp_get_D(GEN G) { return mael(G,4,3); }
 static long
-pcp_get_D(GEN G) { return mael(G,4,4); }
-static long
-pcp_get_D0(GEN G) { return mael(G,4,5); }
+pcp_get_D0(GEN G) { return mael(G,4,4); }
+static GEN
+pcp_get_fau(GEN G) { return gel(G,5); }
 
 /* SECTION: Functions dedicated to finding a j-invariant with a given
  * trace. */
@@ -1157,9 +1157,8 @@ classgp_pcp_check_generators(const long *n, long *r, long k, long L0)
 
 /* This is Sutherland 2009, Algorithm 2.2 (p16). */
 static GEN
-classgp_make_pcp(
-  double *height, long *ni,
-  long h, long D, long D0, ulong u, long inv, long Lfilter, long orient)
+classgp_make_pcp(double *height, long *ni, long h, long D, long D0, ulong u,
+  GEN Pu, GEN Eu, long inv, long Lfilter, long orient)
 {
   enum { MAX_GENS = 16, MAX_RLEN = MAX_GENS * (MAX_GENS - 1) / 2 };
   pari_sp av, bv;
@@ -1178,8 +1177,9 @@ classgp_make_pcp(
   orient_p = cgetg(MAX_GENS+1, t_VECSMALL);
   orient_q = cgetg(MAX_GENS+1, t_VECSMALL);
   orient_reps = cgetg(MAX_GENS*MAX_GENS+1, t_VECSMALL);
-  G = mkvec4(mkvec5(L, n, o, m, r), mkvecsmall3(0, 0, 0),
-             mkvec3(orient_p, orient_q, orient_reps), mkvecsmall5(h, u, inv, D, D0));
+  G = mkvec5(mkvec5(L, n, o, m, r), mkvecsmall3(0, 0, 0),
+             mkvec3(orient_p, orient_q, orient_reps),
+             mkvecsmall4(h, inv, D, D0), mkmat2(Pu, Eu));
   av = avma;
   if (!modinv_is_double_eta(inv) || !modinv_ramified(D, inv, &L0)) L0 = 0;
   enum_cnt = h / (1 + !!L0);
@@ -1305,19 +1305,39 @@ is_smooth_enough(ulong *factors, long v)
   return v == 1;
 }
 
-/* Hurwitz class number of Df^2, D < 0; h = classno(D) */
+/* Hurwitz class number of Df^2, D < 0; h = classno(D), Faf = factoru(f) */
 static double
-hclassno_wrapper(long D, ulong f, long h)
+hclassno_wrapper(long h, long D, GEN Faf)
 {
   pari_sp av;
-  if (f == 1) switch(D)
+  if (lg(gel(Faf,1)) == 1) switch(D)
   {
     case -3: return 1. / 3;
     case -4: return 1. / 2;
     default: return (double)h;
   }
   av = avma;
-  return (double)gc_long(av,  h * uhclassnoF_fact(factoru(f), D));
+  return (double)gc_long(av,  h * uhclassnoF_fact(Faf, D));
+}
+
+/* return factor(u*v) */
+static GEN
+factor_uv(GEN fau, ulong v, ulong vfactors)
+{
+  GEN P, E;
+  long i;
+  if (!vfactors) return fau;
+  P = gel(fau,1);
+  E = gel(fau,2);
+  for (i = 0; vfactors; i++, vfactors >>= 1)
+    if (vfactors & 1UL)
+    {
+      long p = SMALL_PRIMES[i];
+      P = vecsmall_append(P, p);
+      E = vecsmall_append(E, u_lvalrem(v, p, &v));
+      if (v == 1) break;
+    }
+  return famatsmall_reduce(mkmat2(P, E));
 }
 
 /* This is Sutherland 2009, Algorithm 2.1 (p8); delta > 0 */
@@ -1329,9 +1349,10 @@ select_classpoly_prime_pool(double min_bits, double delta, GEN G)
   double bits = 0.0, hurwitz, z;
   ulong t_size_lim, d = (ulong)-pcp_get_D(G);
   long ires, inv = pcp_get_inv(G);
+  GEN fau = pcp_get_fau(G);
   GEN res, t_min; /* t_min[v] = lower bound for the t we look at for that v */
 
-  hurwitz = hclassno_wrapper(pcp_get_D0(G), pcp_get_u(G), pcp_get_h(G));
+  hurwitz = hclassno_wrapper(pcp_get_h(G), pcp_get_D0(G), fau);
 
   res = cgetg(128+1, t_VEC);
   ires = 1;
@@ -1349,17 +1370,16 @@ select_classpoly_prime_pool(double min_bits, double delta, GEN G)
     for (v = 1; v < V_MAX; v++)
     {
       ulong p, t, t_max, vfactors, v2d = v * v * d;
-      /* hurwitz_ratio_bound = 11 * log(log(v + 4))^2 */
       double hurwitz_ratio_bound = log(log(v + 4.0)), max_p, H;
       long ires0;
-      hurwitz_ratio_bound *= 11.0 * hurwitz_ratio_bound;
+      hurwitz_ratio_bound *= 11.0 * hurwitz_ratio_bound;/* 11 log(log(v+4))^2 */
 
       if (v >= v_bound_aux * hurwitz_ratio_bound / d) break;
       if (!is_smooth_enough(&vfactors, v)) continue;
-      H = hclassno_wrapper(pcp_get_D0(G), pcp_get_u(G) * v, pcp_get_h(G));
-
+      H = hclassno_wrapper(pcp_get_h(G), pcp_get_D0(G),
+                           factor_uv(fau, v, vfactors));
       /* t <= 2 sqrt(p) and p <= z H(v^2 d) and
-       *   H(v^2 d) < vH(d) (11 log(log(v + 4))^2)
+       *   H(v^2 d) < v H(d) (11 log(log(v + 4))^2)
        * This last term is v * hurwitz * hurwitz_ratio_bound. */
       max_p = z * v * hurwitz * hurwitz_ratio_bound;
       t_max = 2.0 * sqrt(mindd((1UL<<(BITS_IN_LONG-2)) - (v2d>>2), max_p));
@@ -1443,7 +1463,7 @@ select_classpoly_primes(ulong *vfactors, ulong *biggest_v, double delta,
   }
   dbg_printf(1)("Selected %ld primes; largest is %lu ~ 2^%.2f\n",
              i, biggest_p, log2(biggest_p));
-  return gerepilecopy(av, vecslice0(prime_pool, 1, i));
+  return gerepilecopy(av, vecslice(prime_pool, 1, i));
 }
 
 /* This is Sutherland 2009 Algorithm 1.2. */
@@ -1877,7 +1897,7 @@ polclass0(long D, long inv, long vx, GEN *db)
   ni = modinv_degree(&p1, &p2, inv);
   orient = modinv_is_double_eta(inv) && kross(D, p1) && kross(D, p2);
 
-  G = classgp_make_pcp(&height, &ni, h, D, D0, u, inv, filter, orient);
+  G = classgp_make_pcp(&height, &ni, h, D, D0, u, Pu, Eu, inv, filter, orient);
   primes = select_classpoly_primes(&vfactors, &biggest_v, delta, G, height);
 
   /* Prepopulate *db with all the modpolys we might need */
