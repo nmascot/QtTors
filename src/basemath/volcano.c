@@ -234,8 +234,6 @@ j_level_in_volcano(
   return gc_long(av, lvl);
 }
 
-#define vecsmall_len(v) (lg(v) - 1)
-
 INLINE GEN
 Flx_remove_root(GEN f, ulong a, ulong p)
 {
@@ -280,8 +278,7 @@ surface_path(
   v = get_nbrs(phi, L, J, nJ, p, pi);
   /* Insert known neighbour first */
   if (nJ) v = gerepileupto(bv, vecsmall_prepend(v, *nJ));
-  gel(T,1) = v;
-  k = vecsmall_len(v);
+  gel(T,1) = v; k = lg(v)-1;
 
   switch (k) {
   case 0: pari_err_BUG("surface_path"); /* We must always have neighbours */
@@ -302,7 +299,7 @@ surface_path(
        * neighbour other than J; the other neighbour of J has either 0 or 2
        * neighbours that are not J */
       GEN u = get_nbrs(phi, L, uel(v, 1), &J, p, pi);
-      long n = vecsmall_len(u) - !!vecsmall_isin(u, J);
+      long n = lg(u)-1 - !!vecsmall_isin(u, J);
       W[1] = n == 1 ? uel(v,1) : uel(v,2);
       return gc_long(av, 2);
     }
@@ -314,7 +311,7 @@ surface_path(
     {
       v = get_nbrs(phi, L, W[w-1], &W[w-2], p, pi);
       /* A flat volcano must have exactly one non-previous neighbour */
-      if (vecsmall_len(v) != 1) pari_err_BUG("surface_path");
+      if (lg(v) != 2) pari_err_BUG("surface_path");
       W[w] = uel(v, 1);
       /* Detect cycle in case J doesn't have the right endo ring. */
       set_avma(av); if (W[w] == W0) return w;
@@ -347,7 +344,7 @@ surface_path(
       long m;
       /* We must get 0 or L neighbours here. */
       v = get_nbrs(phi, L, W[j], &W[j-1], p, pi);
-      m = vecsmall_len(v);
+      m = lg(v)-1;
       if (!m) {
         /* We hit the floor: save the neighbours of W[w-1] and dump the rest */
         GEN nbrs = gel(T, ((w-1) % h) + 1);
@@ -381,8 +378,7 @@ next_surface_nbr(
   ulong *P;
   long i, k;
 
-  S = get_nbrs(phi, L, J, pJ, p, pi);
-  k = vecsmall_len(S);
+  S = get_nbrs(phi, L, J, pJ, p, pi); k = lg(S)-1;
   /* If there is a double root and pJ is set, then k will be zero. */
   if (!k) return gc_long(av,0);
   if (k == 1 || ( ! pJ && k == 2)) { *nJ = uel(S, 1); return gc_long(av,1); }
@@ -397,7 +393,7 @@ next_surface_nbr(
     for (j = 1; j <= h; j++)
     {
       GEN T = get_nbrs(phi, L, P[j], &P[j - 1], p, pi);
-      if (!vecsmall_len(T)) break;
+      if (lg(T) == 1) break;
       P[j + 1] = uel(T, 1);
     }
     if (j < h) pari_err_BUG("next_surface_nbr");
@@ -426,7 +422,7 @@ common_nbr(ulong *nbr,
   if (degpol(d) == 1) { *nbr = Flx_deg1_root(d, p); return gc_long(av,1); }
   if (degpol(d) != 2) pari_err_BUG("common_neighbour");
   r = Flx_roots_pre(d, p, pi);
-  rlen = vecsmall_len(r);
+  rlen = lg(r)-1;
   if (!rlen) pari_err_BUG("common_neighbour");
   /* rlen is 1 or 2 depending on whether the root is unique or not. */
   nbr[0] = uel(r, 1);
@@ -637,10 +633,9 @@ enum_roots(ulong J0, norm_eqn_t ne, GEN fdb, GEN G)
 
   /* TODO: Shouldn't be factoring this every time. Store in *ne? */
   vshape = factoru(ne->v);
-  vp = gel(vshape, 1);
+  vp = gel(vshape, 1); vlen = lg(vp)-1;
   ve = gel(vshape, 2);
 
-  vlen = vecsmall_len(vp);
   Phi = new_chunk(k);
   e = new_chunk(k);
   off = new_chunk(k);
