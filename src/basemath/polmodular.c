@@ -772,9 +772,8 @@ modinv_j_from_f(ulong x, ulong n, ulong p, ulong pi)
 }
 /* should never be called if modinv_double_eta(inv) is true */
 INLINE ulong
-modfn_preimage(ulong x, norm_eqn_t ne, long inv)
+modfn_preimage(ulong x, ulong p, ulong pi, long inv)
 {
-  ulong p = ne->p, pi = ne->pi;
   switch (inv) {
     case INV_J:  return x;
     case INV_G2: return Fl_powu_pre(x, 3, p, pi);
@@ -1447,6 +1446,7 @@ root_matrix(long L, const disc_info *dinfo, long njinvs, GEN surface_js,
   pari_sp av;
   long i, m = dinfo->dl1, njs = lg(surface_js) - 1, inv = dinfo->inv, rev;
   GEN rt_mat = zero_Flm_copy(L + 1, njinvs), rts, cyc;
+  ulong p = ne->p, pi = ne->pi, j;
   av = avma;
 
   i = 1;
@@ -1465,7 +1465,6 @@ root_matrix(long L, const disc_info *dinfo, long njinvs, GEN surface_js,
     /* TODO: There is potential for refactoring between this,
      * double_eta_initial_js and modfn_preimage. */
     pari_sp av0 = avma;
-    ulong p = ne->p, pi = ne->pi, j;
     GEN F = double_eta_Fl(inv, p);
     pari_sp av = avma;
     ulong r1 = double_eta_power(inv, uel(rts, 1), p, pi);
@@ -1481,9 +1480,9 @@ root_matrix(long L, const disc_info *dinfo, long njinvs, GEN surface_js,
     set_avma(av0);
   } else {
     ulong j1pr, j1;
-    j1pr = modfn_preimage(uel(rts, 1), ne, dinfo->inv);
+    j1pr = modfn_preimage(uel(rts, 1), p, pi, dinfo->inv);
     j1 = compute_L_isogenous_curve(L, n, ne, j1pr, card, val, 0);
-    rev = j1 != modfn_preimage(uel(surface_js, i), ne, dinfo->inv);
+    rev = j1 != modfn_preimage(uel(surface_js, i), p, pi, dinfo->inv);
   }
   if (rev)
     carray_reverse_inplace(surface_js + 2, njs - 1);
