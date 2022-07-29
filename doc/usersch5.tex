@@ -2180,84 +2180,84 @@ This is based on an algorithm by T. Grandlund and N. M\"{o}ller in
 In the following, we set $B=\B$.
 
 \fun{ulong}{get_Fl_red}{ulong p} returns a pseudoinverse \var{pi} for $p$.
-Namely an integer $0 < \kbd{pi} < B$ such that, given $0 \leq x < B^2$ (by
+Namely an integer $0 < \var{pi} < B$ such that, given $0 \leq x < B^2$ (by
 two long words), we can compute the Euclidean quotient and remainder of $x$
 modulo $p$ by performing $2$ multiplications and some additions. Precisely,
-once we set $q = 2^k p$ for the unique $k$ such that $B/2 \leq q < B$, it is
-equal to the Euclidean quotient of $B^2 - qB + B-1$ by $q$. In particular
-$(\kbd{pi} + B) / B^2$ is very close to $1/q$.
+once we set $q = 2^k p$ for the unique $k$ such that $B/2 \leq q < B$, the
+pseudoinverse \var{pi} is equal to the Euclidean quotient of $B^2 - qB + B-1$
+by $q$. In particular $(\var{pi} + B) / B^2$ is very close to $1/q$.
 
 Note that this algorithm is generally less efficient than ordinary quotient
 and remainders (\kbd{divll} or even \kbd{/} and \kbd{\%}) when $0\leq x < B$
 and $p \leq B^{1/2}$ are small. High level functions below allow setting
-$\kbd{pi} = 0$ to cater for this possibility and avoid calling
+$\var{pi} = 0$ to cater for this possibility and avoid calling
 \kbd{get\_Fl\_red} for arguments where the standard algorithm is preferable.
 
 \fun{ulong}{divll_pre}{ulong x, ulong p, ulong pi}
-as divll, where \kbd{pi} is the pseudoinverse of $p$.
+as divll, where \var{pi} is the pseudoinverse of $p$.
 
 \fun{ulong}{remll_pre}{ulong u1, ulong u0, ulong p, ulong pi} returns
-the Euclidean remainder of $u_1\*2^B+u_0$ modulo $p$, assuming \kbd{pi} is the
+the Euclidean remainder of $u_1\*2^B+u_0$ modulo $p$, assuming \var{pi} is the
 pseudoinverse of $p$.  This function is faster if $u_1 < p$.
 
 \fun{ulong}{remlll_pre}{ulong u2, ulong u1, ulong u0, ulong p, ulong pi}
 returns the Euclidean remainder of $u_2\*2^{2\*B}+u_1\*2^{B}+u_0$ modulo $p$,
-assuming \kbd{pi} is the pseudoinverse of $p$.
+assuming \var{pi} is the pseudoinverse of $p$.
 
 \fun{ulong}{Fl_sqr_pre}{ulong x, ulong p, ulong pi} returns $x^2$ modulo $p$,
-assuming \kbd{pi} is the pseudoinverse of $p$.
+assuming \var{pi} is the pseudoinverse of $p$.
 
 \fun{ulong}{Fl_mul_pre}{ulong x, ulong y, ulong p, ulong pi} returns $x\*y$
-modulo $p$, assuming \kbd{pi} is the pseudoinverse of $p$.
+modulo $p$, assuming \var{pi} is the pseudoinverse of $p$.
 
 \fun{ulong}{Fl_addmul_pre}{ulong a, ulong b, ulong c, ulong p,  ulong pi}
-returns $a+b\*c$ modulo $p$, assuming \kbd{pi} is the pseudoinverse of $p$.
+returns $a+b\*c$ modulo $p$, assuming \var{pi} is the pseudoinverse of $p$.
 
 \fun{ulong}{Fl_addmulmul_pre}{ulong a,ulong b, ulong c,ulong d, ulong p, ulong pi}
-returns $a\*b+c\*d$ modulo $p$, assuming \kbd{pi} is the pseudoinverse of $p$.
+returns $a\*b+c\*d$ modulo $p$, assuming \var{pi} is the pseudoinverse of $p$.
 
 \fun{ulong}{Fl_powu_pre}{ulong x, ulong n, ulong p, ulong pi} returns
-$x^n$ modulo $p$, assuming \kbd{pi} is the pseudoinverse of $p$, or $0$
+$x^n$ modulo $p$, assuming \var{pi} is the pseudoinverse of $p$, or $0$
 in which case we either use ordinary divisions if $p < B^{1/2}$ is small
 and call \kbd{get\_Fl\_red} ourselves otherwise.
 
 \fun{GEN}{Fl_powers_pre}{ulong x, long n, ulong p, ulong pi} returns
-the vector (\typ{VECSMALL}) $(x^0, \dots, x^n)$, assuming \kbd{pi} is
+the vector (\typ{VECSMALL}) $(x^0, \dots, x^n)$, assuming \var{pi} is
 the pseudoinverse of $p$, or $0$ in which case we either use ordinary
 divisions if $p < B^{1/2}$ is small and call \kbd{get\_Fl\_red} ourselves
 otherwise.
 
 \fun{ulong}{Fl_log_pre}{ulong a, ulong g, ulong ord, ulong p, ulong pi}
-as \kbd{Fl\_log}, assuming \kbd{pi} is the pseudoinverse of $p$, or $0$ in
+as \kbd{Fl\_log}, assuming \var{pi} is the pseudoinverse of $p$, or $0$ in
 which case we either use ordinary divisions if $p < B^{1/2}$ is small and
 call \kbd{get\_Fl\_red} ourselves otherwise.
 
 \fun{ulong}{Fl_sqrt_pre}{ulong x, ulong p, ulong pi} returns a square root
-of $x$ modulo $p$, see \kbd{Fl\_sqrt}. We assume \kbd{pi} is the
+of $x$ modulo $p$, see \kbd{Fl\_sqrt}. We assume \var{pi} is the
 pseudoinverse of $p$, or $0$ in which case we either use ordinary divisions
 if $p < B^{1/2}$ is small and call \kbd{get\_Fl\_red} ourselves otherwise.
 
 \fun{ulong}{Fl_sqrtl_pre}{ulong x, ulong l, ulong p, ulong pi}
 returns a $l$-the root of \kbd{x} modulo \kbd{p}, assuming
 $p$ prime, $p \equiv 1 \pmod{l}$, and \kbd{x} to be a $l$-th power modulo
-\kbd{p}. We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case
+\kbd{p}. We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case
 we either use ordinary divisions if $p < B^{1/2}$ is small and call
 \kbd{get\_Fl\_red} ourselves otherwise.
 
 \fun{ulong}{Fl_sqrtn_pre}{ulong x, ulong n, ulong p, ulong pi, ulong *zn}
-See \kbd{Fl\_sqrtn}, assuming \kbd{pi} is the pseudoinverse of $p$, or $0$ in
+See \kbd{Fl\_sqrtn}, assuming \var{pi} is the pseudoinverse of $p$, or $0$ in
 which case we either use ordinary divisions if $p < B^{1/2}$ is small and
 call \kbd{get\_Fl\_red} ourselves otherwise.
 
 \fun{ulong}{Fl_2gener_pre}{ulong p, ulong pi} return a generator of
 the $2$-Sylow subgroup of $\F_p^*$, to be used in \kbd{Fl\_sqrt\_pre\_i}.
-We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 either use ordinary divisions if $p < B^{1/2}$ is small and call
 \kbd{get\_Fl\_red} ourselves otherwise.
 
 \fun{ulong}{Fl_sqrt_pre_i}{ulong x, ulong s2, ulong p, ulong pi}
 as \kbd{Fl\_sqrt\_pre} where \kbd{s2} is the element returned by
-\kbd{Fl\_2gener\_pre}. We assume \kbd{pi} is the pseudoinverse of $p$, or $0$
+\kbd{Fl\_2gener\_pre}. We assume \var{pi} is the pseudoinverse of $p$, or $0$
 in which case we either use ordinary divisions if $p < B^{1/2}$ is small and
 call \kbd{get\_Fl\_red} ourselves otherwise.
 
@@ -4405,7 +4405,7 @@ the $n \times n$ identity matrix.
 (assumed to have compatible dimensions).
 
 \fun{GEN}{Flm_Flc_mul_pre}{GEN x, GEN y, ulong p, ulong pi} multiplies  \kbd{x}
-and \kbd{y} (assumed to have compatible dimensions), assuming \kbd{pi} is the
+and \kbd{y} (assumed to have compatible dimensions), assuming \var{pi} is the
 pseudoinverse of $p$, or $0$ in which case we assume
 \kbd{SMALL\_ULONG}$(p)$.
 
@@ -4419,7 +4419,7 @@ return \kbd{Flv\_to\_Flx(Flm\_Flc\_mul\_pre(x, y, p, pi), sv)}.
 \kbd{x} by \kbd{y}.
 
 \fun{GEN}{Flm_Fl_mul_pre}{GEN x, ulong y, ulong p, ulong pi} multiplies the
-\kbd{Flm} \kbd{x} by \kbd{y} assuming \kbd{pi} is the pseudoinverse of $p$,
+\kbd{Flm} \kbd{x} by \kbd{y} assuming \var{pi} is the pseudoinverse of $p$,
 or $0$ in which case we assume $p < B^{1/2}$ is small.
 
 \fun{GEN}{Flm_neg}{GEN x, ulong p} negates the \kbd{Flm} \kbd{x}.
@@ -4463,7 +4463,7 @@ $x$ by $x+y$.
 of \kbd{x} and \kbd{y}
 
 \fun{ulong}{Flv_dotproduct_pre}{GEN x, GEN y, ulong p, ulong pi} returns the
-scalar product of \kbd{x} and \kbd{y} assuming \kbd{pi} is the pseudoinverse of
+scalar product of \kbd{x} and \kbd{y} assuming \var{pi} is the pseudoinverse of
 $p$, or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flv_factorback}{GEN L, GEN e, ulong p} given an \kbd{Flv} $L$
@@ -4475,7 +4475,7 @@ and a \kbd{zv} $e$ of the same length, return $\prod_i L_i^{e_i}$ modulo $p$.
 $x$.
 
 \fun{ulong}{Flv_prod_pre}{GEN x, ulong p, ulong pi} as \kbd{Flv\_prod}
-assuming \kbd{pi} is the pseudoinverse of $p$.
+assuming \var{pi} is the pseudoinverse of $p$.
 
 \fun{GEN}{Flv_inv}{GEN x, ulong p} returns the vector of inverses of the
 elements of $x$ (as a \kbd{Flv}). Use Montgomery's trick.
@@ -4483,7 +4483,7 @@ elements of $x$ (as a \kbd{Flv}). Use Montgomery's trick.
 \fun{void}{Flv_inv_inplace}{GEN x, ulong p} in place variant of \kbd{Flv\_inv}.
 
 \fun{GEN}{Flv_inv_pre}{GEN x, ulong p, ulong pi} as \kbd{Flv\_inv}
-assuming \kbd{pi} is the pseudoinverse of $p$.
+assuming \var{pi} is the pseudoinverse of $p$.
 
 \fun{void}{Flv_inv_pre_inplace}{GEN x, ulong p, ulong pi} in place variant of
 \kbd{Flv\_inv}.
@@ -4516,7 +4516,7 @@ $0$.
 (assumed to have compatible dimensions).
 
 \fun{GEN}{Flm_mul_pre}{GEN x, GEN y, ulong p, ulong pi} multiplies  \kbd{x} and
-\kbd{y} (assumed to have compatible dimensions), assuming \kbd{pi} is the
+\kbd{y} (assumed to have compatible dimensions), assuming \var{pi} is the
 pseudoinverse of $p$, or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flm_powers}{GEN x, ulong n, ulong p} returns
@@ -6012,7 +6012,7 @@ modulus (\kbd{FlxT}) in all \kbd{Flxq}-classes functions, and in
 \fun{GEN}{Flx_get_red}{GEN T, ulong p} returns the extended modulus \kbd{eT}.
 
 \fun{GEN}{Flx_get_red_pre}{GEN T, ulong p, ulong pi} as \kbd{Flx\_get\_red}.
-We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 assume \kbd{SMALL\_ULONG}$(p)$.
 
 To write code that works both with plain and extended moduli, the following
@@ -6064,7 +6064,7 @@ $p$ assuming such $z$ exists.
 
 \fun{GEN}{Flx_mul}{GEN x, GEN y, ulong p}
 
-\fun{GEN}{Flx_mul_pre}{GEN x, GEN y, ulong p, ulong pi}. We assume \kbd{pi} is
+\fun{GEN}{Flx_mul_pre}{GEN x, GEN y, ulong p, ulong pi}. We assume \var{pi} is
 the pseudoinverse of $p$, or $0$ in which case we assume
 \kbd{SMALL\_ULONG}$(p)$.
 
@@ -6083,7 +6083,7 @@ assuming the result is monic of the same degree as $y$ (in particular $x\neq
 
 \fun{GEN}{Flx_sqr}{GEN x, ulong p}
 
-\fun{GEN}{Flx_sqr_pre}{GEN x, ulong p, ulong pi}. We assume \kbd{pi} is the
+\fun{GEN}{Flx_sqr_pre}{GEN x, ulong p, ulong pi}. We assume \var{pi} is the
 pseudoinverse of $p$, or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_powu}{GEN x, ulong n, ulong p} return $x^n$.
@@ -6092,21 +6092,21 @@ pseudoinverse of $p$, or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 here $p$ must be prime.
 
 \fun{GEN}{Flx_divrem_pre}{GEN x, GEN y, ulong p, ulong pi, GEN *pr},
-here $p$ must be prime. We assume \kbd{pi} is the pseudoinverse of $p$, or
+here $p$ must be prime. We assume \var{pi} is the pseudoinverse of $p$, or
 $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_div}{GEN x, GEN y, ulong p},
 here $p$ must be prime.
 
 \fun{GEN}{Flx_div_pre}{GEN x, GEN y, ulong p, ulong pi}.
-We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_rem}{GEN x, GEN y, ulong p},
 here $p$ must be prime.
 
 \fun{GEN}{Flx_rem_pre}{GEN x, GEN y, ulong p}, as \kbd{Flx\_rem}.
-We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_deriv}{GEN z, ulong p}
@@ -6137,7 +6137,7 @@ is a vector of \kbd{Flx}, returns $\sum_{i=0}^{n}{c_i\*B^i}$.
 here $p$ must be prime.
 
 \fun{GEN}{Flx_Frobenius_pre}{GEN T, ulong p, ulong pi}
-as \kbd{Flx\_Frobenius}. We assume \kbd{pi} is the pseudoinverse of $p$, or
+as \kbd{Flx\_Frobenius}. We assume \var{pi} is the pseudoinverse of $p$, or
 $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_matFrobenius}{GEN T, ulong p}
@@ -6147,7 +6147,7 @@ here $p$ must be prime.
 greatest common divisor of $x$  and $y$. Here $p$ must be prime.
 
 \fun{GEN}{Flx_gcd_pre}{GEN a, GEN b, ulong p} as \kbd{Flx\_gcd}. We assume
-\kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
+\var{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
 \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_halfgcd}{GEN x, GEN y, ulong p} returns a two-by-two \kbd{FlxM}
@@ -6156,14 +6156,14 @@ has the property that $\deg a \geq {\deg x \over 2} > \deg b$.
 Assumes that $p$ is prime.
 
 \fun{GEN}{Flx_halfgcd_pre}{GEN a, GEN b, ulong p} as \kbd{Flx\_halfgcd}. We
-assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
+assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
 \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_extgcd}{GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv},
 here $p$ must be prime.
 
 \fun{GEN}{Flx_extgcd_pre}{GEN a, GEN b, ulong p, ulong pi, GEN *ptu, GEN *ptv},
-as \kbd{Flx\_extgcd}. We assume \kbd{pi} is the pseudoinverse of $p$, or $0$
+as \kbd{Flx\_extgcd}. We assume \var{pi} is the pseudoinverse of $p$, or $0$
 in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_roots}{GEN f, ulong p} returns the vector of roots
@@ -6171,7 +6171,7 @@ of $f$ (without multiplicity, as a \typ{VECSMALL}). Assumes that $p$ is
 prime.
 
 \fun{GEN}{Flx_roots_pre}{GEN f, ulong p}, as \kbd{Flx\_roots}. We assume
-\kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
+\var{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
 \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{ulong}{Flx_oneroot}{GEN f, ulong p} returns one root $0 \leq r < p$ of
@@ -6179,14 +6179,14 @@ the \kbd{Flx}~\kbd{f} in \kbd{\Z/p\Z}. Return $p$ if no root exists.
 Assumes that $p$ is prime.
 
 \fun{GEN}{Flx_oneroot_pre}{GEN f, ulong p}, as \kbd{Flx\_oneroot}. We assume
-\kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
+\var{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
 \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{ulong}{Flx_oneroot_split}{GEN f, ulong p} as \kbd{Flx\_oneroot} but
 assume $f$ is totally split. Assumes that $p$ is prime.
 
 \fun{ulong}{Flx_oneroot_split_pre}{GEN f, ulong p, ulong pi} as
-\kbd{Flx\_oneroot\_split}. We assume \kbd{pi} is the pseudoinverse of $p$, or
+\kbd{Flx\_oneroot\_split}. We assume \var{pi} is the pseudoinverse of $p$, or
 $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{long}{Flx_ispower}{GEN f, ulong k, ulong p, GEN *pt}
@@ -6281,12 +6281,12 @@ Euclidean quotient of the \kbd{Flx}~\kbd{A} by $X - \kbd{a}$, and sets
 \fun{ulong}{Flx_eval}{GEN x, ulong y, ulong p}, as \kbd{FpX\_eval}.
 
 \fun{ulong}{Flx_eval_pre}{GEN x, ulong y, ulong p, ulong pi}, as
-\kbd{Flx\_eval}. We assume \kbd{pi} is the pseudoinverse of $p$,
+\kbd{Flx\_eval}. We assume \var{pi} is the pseudoinverse of $p$,
 or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{ulong}{Flx_eval_powers_pre}{GEN P, GEN y, ulong p, ulong pi}. Let $y$ be
 the \typ{VECSMALL} $(1,a,\dots,a^n)$, where $n$ is the degree of the
-\kbd{Flx} $P$, return $P(a)$. We assume \kbd{pi} is the pseudoinverse of $p$,
+\kbd{Flx} $P$, return $P(a)$. We assume \var{pi} is the pseudoinverse of $p$,
 or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_Flv_multieval}{GEN P, GEN v, ulong p} returns the vector
@@ -6441,31 +6441,31 @@ It is required that $p>n$.
 \fun{GEN}{Flxq_mul}{GEN x, GEN y, GEN T, ulong p}
 
 \fun{GEN}{Flxq_mul_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi}
-We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flxq_sqr}{GEN y, GEN T, ulong p}
 
 \fun{GEN}{Flxq_sqr_pre}{GEN y, GEN T, ulong p}
-We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flxq_inv}{GEN x, GEN T, ulong p}
 
 \fun{GEN}{Flxq_inv_pre}{GEN x, GEN T, ulong p, ulong pi}
-We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flxq_invsafe}{GEN x, GEN T, ulong p}
 
 \fun{GEN}{Flxq_invsafe_pre}{GEN x, GEN T, ulong p, ulong pi}
-We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flxq_div}{GEN x, GEN y, GEN T, ulong p}
 
 \fun{GEN}{Flxq_div_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi}
-We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flxq_pow}{GEN x, GEN n, GEN T, ulong p}
@@ -6473,7 +6473,7 @@ assume \kbd{SMALL\_ULONG}$(p)$.
 \fun{GEN}{Flxq_powu}{GEN x, ulong n, GEN T, ulong p}
 
 \fun{GEN}{Flxq_powu_pre}{GEN x, ulong n, GEN T, ulong p}
-We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{FlxqV_factorback}{GEN L, GEN e, GEN Tp, ulong p}
@@ -6485,7 +6485,7 @@ assume \kbd{SMALL\_ULONG}$(p)$.
 \fun{GEN}{Flxq_powers}{GEN x, long n, GEN T, ulong p}
 
 \fun{GEN}{Flxq_powers_pre}{GEN x, long n, GEN T, ulong p, ulong pi}
-We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flxq_matrix_pow}{GEN x, long m, long n, GEN T, ulong p},
@@ -6511,28 +6511,28 @@ see \kbd{FpXQ\_auttrace}.
 $\kbd{f}(\kbd{x})$.
 
 \fun{GEN}{Flx_Flxq_eval_pre}{GEN f, GEN x, GEN T, ulong p, ulong pi}
-as \kbd{Flx\_Flxq\_eval}, where \kbd{pi} is a pseudoinverse of $p$,
+as \kbd{Flx\_Flxq\_eval}, where \var{pi} is a pseudoinverse of $p$,
 or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_FlxqV_eval}{GEN f, GEN x, GEN T, ulong p},
 see \kbd{FpX\_FpXQV\_eval}.
 
 \fun{GEN}{Flx_FlxqV_eval_pre}{GEN f, GEN x, GEN T, ulong p, ulong pi},
-see \kbd{FlX\_FlxqV\_eval}. We assume \kbd{pi} is a pseudoinverse of $p$, or
+see \kbd{FlX\_FlxqV\_eval}. We assume \var{pi} is a pseudoinverse of $p$, or
 $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{FlxC_Flxq_eval}{GEN C, GEN x, GEN T, ulong p},
 see \kbd{FpXC\_FpXQ\_eval}.
 
 \fun{GEN}{FlxC_Flxq_eval_pre}{GEN C, GEN x, GEN T, ulong p, ulong pi},
-as \kbd{FlxC\_Flxq\_eval}. We assume \kbd{pi} is a pseudoinverse of $p$, or
+as \kbd{FlxC\_Flxq\_eval}. We assume \var{pi} is a pseudoinverse of $p$, or
 $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{FlxC_FlxqV_eval}{GEN C, GEN V, GEN T, ulong p}
 see \kbd{FpXC\_FpXQV\_eval}.
 
 \fun{GEN}{FlxC_FlxqV_eval_pre}{GEN C, GEN V, GEN T, ulong p, ulong pi}
-as \kbd{FlxC\_FlxqV\_eval} where \kbd{pi} is a pseudoinverse of $p$,
+as \kbd{FlxC\_FlxqV\_eval} where \var{pi} is a pseudoinverse of $p$,
 or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{FlxqV_roots_to_pol}{GEN V, GEN T, ulong p, long v} as
@@ -6641,13 +6641,13 @@ variable of $P$.
 \fun{ulong}{FlxY_evalx_powers_pre}{GEN P, GEN xp, ulong p, ulong pi}, \kbd{xp}
 being the vector $[1,x,\dots,x^n]$, where $n$ is larger or equal to the degree
 of $P$ in $X$, return $P(x,Y)$, where $Y$ is the main variable of $Q$, assuming
-\kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
+\var{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
 \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{ulong}{FlxY_eval_powers_pre}{GEN P, GEN xp, GEN yp, ulong p, ulong pi},
 \kbd{xp} being the vector $[1,x,\dots,x^n]$, where $n$ is larger or equal to the degree
 of $P$ in $X$ and \kbd{yp} being the vector $[1,y,\dots,y^m]$, where $m$ is larger or equal to the degree of $P$ in $Y$ return $P(x,y)$, assuming
-\kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
+\var{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
 \kbd{SMALL\_ULONG}$(p)$.
 
 
