@@ -2244,7 +2244,7 @@ $p$ prime, $p \equiv 1 \pmod{l}$, and \kbd{x} to be a $l$-th power modulo
 we either use ordinary divisions if $p < B^{1/2}$ is small and call
 \kbd{get\_Fl\_red} ourselves otherwise.
 
-\fun{ulong}{Fl_sqrtn_pre}{ulong x, ulong n, ulong p, ulong *zn}
+\fun{ulong}{Fl_sqrtn_pre}{ulong x, ulong n, ulong p, ulong pi, ulong *zn}
 See \kbd{Fl\_sqrtn}, assuming \kbd{pi} is the pseudoinverse of $p$, or $0$ in
 which case we either use ordinary divisions if $p < B^{1/2}$ is small and
 call \kbd{get\_Fl\_red} ourselves otherwise.
@@ -6011,6 +6011,10 @@ modulus (\kbd{FlxT}) in all \kbd{Flxq}-classes functions, and in
 
 \fun{GEN}{Flx_get_red}{GEN T, ulong p} returns the extended modulus \kbd{eT}.
 
+\fun{GEN}{Flx_get_red_pre}{GEN T, ulong p, ulong pi} as \kbd{Flx\_get\_red}.
+We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
+
 To write code that works both with plain and extended moduli, the following
 accessors are defined:
 
@@ -6060,6 +6064,10 @@ $p$ assuming such $z$ exists.
 
 \fun{GEN}{Flx_mul}{GEN x, GEN y, ulong p}
 
+\fun{GEN}{Flx_mul_pre}{GEN x, GEN y, ulong p, ulong pi}. We assume \kbd{pi} is
+the pseudoinverse of $p$, or $0$ in which case we assume
+\kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flx_Fl_mul}{GEN y, ulong x, ulong p}
 
 \fun{GEN}{Flx_double}{GEN y, ulong p} returns $2\*y$.
@@ -6075,16 +6083,31 @@ assuming the result is monic of the same degree as $y$ (in particular $x\neq
 
 \fun{GEN}{Flx_sqr}{GEN x, ulong p}
 
+\fun{GEN}{Flx_sqr_pre}{GEN x, ulong p, ulong pi}. We assume \kbd{pi} is the
+pseudoinverse of $p$, or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flx_powu}{GEN x, ulong n, ulong p} return $x^n$.
 
 \fun{GEN}{Flx_divrem}{GEN x, GEN y, ulong p, GEN *pr},
 here $p$ must be prime.
 
+\fun{GEN}{Flx_divrem_pre}{GEN x, GEN y, ulong p, ulong pi, GEN *pr},
+here $p$ must be prime. We assume \kbd{pi} is the pseudoinverse of $p$, or
+$0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flx_div}{GEN x, GEN y, ulong p},
 here $p$ must be prime.
 
+\fun{GEN}{Flx_div_pre}{GEN x, GEN y, ulong p, ulong pi}.
+We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flx_rem}{GEN x, GEN y, ulong p},
 here $p$ must be prime.
+
+\fun{GEN}{Flx_rem_pre}{GEN x, GEN y, ulong p}, as \kbd{Flx\_rem}.
+We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_deriv}{GEN z, ulong p}
 
@@ -6113,30 +6136,58 @@ is a vector of \kbd{Flx}, returns $\sum_{i=0}^{n}{c_i\*B^i}$.
 \fun{GEN}{Flx_Frobenius}{GEN T, ulong p}
 here $p$ must be prime.
 
+\fun{GEN}{Flx_Frobenius_pre}{GEN T, ulong p, ulong pi}
+as \kbd{Flx\_Frobenius}. We assume \kbd{pi} is the pseudoinverse of $p$, or
+$0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flx_matFrobenius}{GEN T, ulong p}
 here $p$ must be prime.
 
 \fun{GEN}{Flx_gcd}{GEN a, GEN b, ulong p} returns a (not necessarily monic)
 greatest common divisor of $x$  and $y$. Here $p$ must be prime.
 
+\fun{GEN}{Flx_gcd_pre}{GEN a, GEN b, ulong p} as \kbd{Flx\_gcd}. We assume
+\kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
+\kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flx_halfgcd}{GEN x, GEN y, ulong p} returns a two-by-two \kbd{FlxM}
 $M$ with determinant $\pm 1$ such that the image $(a,b)$ of $(x,y)$ by $M$
 has the property that $\deg a \geq {\deg x \over 2} > \deg b$.
 Assumes that $p$ is prime.
 
+\fun{GEN}{Flx_halfgcd_pre}{GEN a, GEN b, ulong p} as \kbd{Flx\_halfgcd}. We
+assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
+\kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flx_extgcd}{GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv},
 here $p$ must be prime.
+
+\fun{GEN}{Flx_extgcd_pre}{GEN a, GEN b, ulong p, ulong pi, GEN *ptu, GEN *ptv},
+as \kbd{Flx\_extgcd}. We assume \kbd{pi} is the pseudoinverse of $p$, or $0$
+in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_roots}{GEN f, ulong p} returns the vector of roots
 of $f$ (without multiplicity, as a \typ{VECSMALL}). Assumes that $p$ is
 prime.
 
+\fun{GEN}{Flx_roots_pre}{GEN f, ulong p}, as \kbd{Flx\_roots}. We assume
+\kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
+\kbd{SMALL\_ULONG}$(p)$.
+
 \fun{ulong}{Flx_oneroot}{GEN f, ulong p} returns one root $0 \leq r < p$ of
 the \kbd{Flx}~\kbd{f} in \kbd{\Z/p\Z}. Return $p$ if no root exists.
 Assumes that $p$ is prime.
 
+\fun{GEN}{Flx_oneroot_pre}{GEN f, ulong p}, as \kbd{Flx\_oneroot}. We assume
+\kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
+\kbd{SMALL\_ULONG}$(p)$.
+
 \fun{ulong}{Flx_oneroot_split}{GEN f, ulong p} as \kbd{Flx\_oneroot} but
 assume $f$ is totally split. Assumes that $p$ is prime.
+
+\fun{ulong}{Flx_oneroot_split_pre}{GEN f, ulong p, ulong pi} as
+\kbd{Flx\_oneroot\_split}. We assume \kbd{pi} is the pseudoinverse of $p$, or
+$0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{long}{Flx_ispower}{GEN f, ulong k, ulong p, GEN *pt}
 return $1$ if the \kbd{Flx} $f$ is a $k$-th power, $0$ otherwise.
@@ -6389,17 +6440,41 @@ It is required that $p>n$.
 
 \fun{GEN}{Flxq_mul}{GEN x, GEN y, GEN T, ulong p}
 
+\fun{GEN}{Flxq_mul_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi}
+We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flxq_sqr}{GEN y, GEN T, ulong p}
+
+\fun{GEN}{Flxq_sqr_pre}{GEN y, GEN T, ulong p}
+We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flxq_inv}{GEN x, GEN T, ulong p}
 
+\fun{GEN}{Flxq_inv_pre}{GEN x, GEN T, ulong p, ulong pi}
+We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flxq_invsafe}{GEN x, GEN T, ulong p}
 
+\fun{GEN}{Flxq_invsafe_pre}{GEN x, GEN T, ulong p, ulong pi}
+We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flxq_div}{GEN x, GEN y, GEN T, ulong p}
+
+\fun{GEN}{Flxq_div_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi}
+We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flxq_pow}{GEN x, GEN n, GEN T, ulong p}
 
 \fun{GEN}{Flxq_powu}{GEN x, ulong n, GEN T, ulong p}
+
+\fun{GEN}{Flxq_powu_pre}{GEN x, ulong n, GEN T, ulong p}
+We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{FlxqV_factorback}{GEN L, GEN e, GEN Tp, ulong p}
 
@@ -6408,6 +6483,10 @@ It is required that $p>n$.
 \fun{GEN}{Flxq_pow_table}{GEN R, GEN n, GEN T, ulong p}
 
 \fun{GEN}{Flxq_powers}{GEN x, long n, GEN T, ulong p}
+
+\fun{GEN}{Flxq_powers_pre}{GEN x, long n, GEN T, ulong p, ulong pi}
+We assume \kbd{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flxq_matrix_pow}{GEN x, long m, long n, GEN T, ulong p},
 see \kbd{FpXQ\_matrix\_pow}.

@@ -1182,9 +1182,7 @@ Flx_rescale(GEN P, ulong h, ulong p)
   Q[1] = P[1]; return Q;
 }
 
-/*
- * x/polrecip(P)+O(x^n)
- */
+/* x/polrecip(P)+O(x^n); allow pi = 0 */
 static GEN
 Flx_invBarrett_basecase(GEN T, ulong p, ulong pi)
 {
@@ -1222,6 +1220,7 @@ Flx_lgrenormalizespec(GEN x, long lx)
     if (x[i]) break;
   return i+1;
 }
+/* allow pi = 0 */
 static GEN
 Flx_invBarrett_Newton(GEN T, ulong p, ulong pi)
 {
@@ -1277,6 +1276,7 @@ Flx_invBarrett_Newton(GEN T, ulong p, ulong pi)
   return x;
 }
 
+/* allow pi = 0 */
 static GEN
 Flx_invBarrett_pre(GEN T, ulong p, ulong pi)
 {
@@ -1305,6 +1305,7 @@ GEN
 Flx_invBarrett(GEN T, ulong p)
 { return Flx_invBarrett_pre(T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
+/* allow pi = 0 */
 GEN
 Flx_get_red_pre(GEN T, ulong p, ulong pi)
 {
@@ -1565,6 +1566,7 @@ Flx_divrem_Barrett(GEN x, GEN mg, GEN T, ulong p, ulong pi, GEN *pr)
   return q;
 }
 
+/* allow pi = 0 (SMALL_ULONG) */
 GEN
 Flx_divrem_pre(GEN x, GEN T, ulong p, ulong pi, GEN *pr)
 {
@@ -1646,6 +1648,7 @@ struct _Flxq {
   GEN aut, T;
   ulong p, pi;
 };
+/* allow pi = 0 */
 static void
 set_Flxq_pre(struct _Flxq *D, GEN T, ulong p, ulong pi)
 {
@@ -2709,33 +2712,41 @@ Flxq_pow_table(GEN R, GEN n, GEN T, ulong p)
 }
 
 /* Inverse of x in Z/lZ[X]/(T) or NULL if inverse doesn't exist
- * not stack clean.
- */
+ * not stack clean. */
 GEN
-Flxq_invsafe(GEN x, GEN T, ulong p)
+Flxq_invsafe_pre(GEN x, GEN T, ulong p, ulong pi)
 {
-  GEN V, z = Flx_extgcd(get_Flx_mod(T), x, p, NULL, &V);
+  GEN V, z = Flx_extgcd_pre(get_Flx_mod(T), x, p, pi, NULL, &V);
   ulong iz;
   if (degpol(z)) return NULL;
   iz = Fl_inv(uel(z,2), p);
   return Flx_Fl_mul(V, iz, p);
 }
+GEN
+Flxq_invsafe(GEN x, GEN T, ulong p)
+{ return Flxq_invsafe_pre(x, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
-Flxq_inv(GEN x,GEN T,ulong p)
+Flxq_inv_pre(GEN x, GEN T, ulong p, ulong pi)
 {
   pari_sp av=avma;
-  GEN U = Flxq_invsafe(x, T, p);
+  GEN U = Flxq_invsafe_pre(x, T, p, pi);
   if (!U) pari_err_INV("Flxq_inv",Flx_to_ZX(x));
   return gerepileuptoleaf(av, U);
 }
+GEN
+Flxq_inv(GEN x, GEN T, ulong p)
+{ return Flxq_inv_pre(x, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
-Flxq_div(GEN x,GEN y,GEN T,ulong p)
+Flxq_div_pre(GEN x, GEN y, GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;
-  return gerepileuptoleaf(av, Flxq_mul(x,Flxq_inv(y,T,p),T,p));
+  return gerepileuptoleaf(av, Flxq_mul_pre(x,Flxq_inv_pre(y,T,p,pi),T,p,pi));
 }
+GEN
+Flxq_div(GEN x, GEN y, GEN T, ulong p)
+{ return Flxq_div_pre(x, y, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
 Flxq_powers_pre(GEN x, long l, GEN T, ulong p, ulong pi)
