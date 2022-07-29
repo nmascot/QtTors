@@ -2215,57 +2215,60 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
   *ptV = v; return res;
 }
 
+/* allow pi = 0 (SMALL_ULONG) */
 ulong
 Flx_eval_powers_pre(GEN x, GEN y, ulong p, ulong pi)
 {
   ulong l0, l1, h0, h1, v1,  i = 1, lx = lg(x)-1;
-  LOCAL_OVERFLOW;
-  LOCAL_HIREMAINDER;
+
+  if (lx == 1) return 0;
   x++;
-
-  if (lx == 1)
-    return 0;
-  l1 = mulll(uel(x,i), uel(y,i)); h1 = hiremainder; v1 = 0;
-  while (++i < lx) {
-    l0 = mulll(uel(x,i), uel(y,i)); h0 = hiremainder;
-    l1 = addll(l0, l1); h1 = addllx(h0, h1); v1 += overflow;
+  if (pi)
+  {
+    LOCAL_OVERFLOW;
+    LOCAL_HIREMAINDER;
+    l1 = mulll(uel(x,i), uel(y,i)); h1 = hiremainder; v1 = 0;
+    while (++i < lx)
+    {
+      l0 = mulll(uel(x,i), uel(y,i)); h0 = hiremainder;
+      l1 = addll(l0, l1); h1 = addllx(h0, h1); v1 += overflow;
+    }
+    return v1? remlll_pre(v1, h1, l1, p, pi)
+             : remll_pre(h1, l1, p, pi);
   }
-  if (v1 == 0) return remll_pre(h1, l1, p, pi);
-  else return remlll_pre(v1, h1, l1, p, pi);
+  else
+  {
+    l1 = x[i] * y[i];
+    while (++i < lx) { l1 += x[i] * y[i]; if (l1 & HIGHBIT) l1 %= p; }
+    return l1 % p;
+  }
 }
 
-INLINE ulong
-Flx_eval_pre_i(GEN x, ulong y, ulong p, ulong pi)
-{
-  ulong p1;
-  long i=lg(x)-1;
-  if (i<=2)
-    return (i==2)? x[2]: 0;
-  p1 = x[i];
-  for (i--; i>=2; i--)
-    p1 = Fl_addmul_pre(uel(x, i), p1, y, p, pi);
-  return p1;
-}
-
+/* allow pi = 0 (SMALL_ULONG) */
 ulong
 Flx_eval_pre(GEN x, ulong y, ulong p, ulong pi)
 {
-  if (degpol(x) > 15)
+  long i, n = degpol(x);
+  ulong t;
+  if (n <= 0) return n? 0: x[2];
+  if (n > 15)
   {
     pari_sp av = avma;
-    GEN v = Fl_powers_pre(y, degpol(x), p, pi);
-    ulong r =  Flx_eval_powers_pre(x, v, p, pi);
-    return gc_ulong(av,r);
+    GEN v = Fl_powers_pre(y, n, p, pi);
+    return gc_ulong(av, Flx_eval_powers_pre(x, v, p, pi));
   }
-  else
-    return Flx_eval_pre_i(x, y, p, pi);
+  i = n+2; t = x[i];
+  if (pi)
+  {
+    for (i--; i>=2; i--) t = Fl_addmul_pre(uel(x, i), t, y, p, pi);
+    return t;
+  }
+  for (i--; i>=2; i--) t = (t * y + x[i]) % p;
+  return t %= p;
 }
-
 ulong
 Flx_eval(GEN x, ulong y, ulong p)
-{
-  return Flx_eval_pre(x, y, p, get_Fl_red(p));
-}
+{ return Flx_eval_pre(x, y, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 ulong
 Flv_prod_pre(GEN x, ulong p, ulong pi)
@@ -2449,8 +2452,7 @@ Flx_Flv_multieval_tree(GEN P, GEN xa, GEN T, ulong p)
 {
   long i,j,k;
   long m = lg(T)-1;
-  ulong PI = get_Fl_red(p);
-  ulong pi = SMALL_ULONG(p)? 0: PI;
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   GEN R = cgetg(lg(xa), t_VECSMALL);
   GEN Tp = cgetg(m+1, t_VEC), t;
   gel(Tp, m) = mkvec(P);
@@ -2472,7 +2474,7 @@ Flx_Flv_multieval_tree(GEN P, GEN xa, GEN T, ulong p)
     for (j=1, k=1; j<=n; j++)
     {
       long c, d = degpol(gel(u,j));
-      for (c=1; c<=d; c++, k++) R[k] = Flx_eval_pre(gel(v, j), xa[k], p, PI);
+      for (c=1; c<=d; c++, k++) R[k] = Flx_eval_pre(gel(v, j), xa[k], p, pi);
     }
     return gc_const((pari_sp)R, R);
   }
