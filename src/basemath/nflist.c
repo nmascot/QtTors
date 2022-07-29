@@ -2198,7 +2198,7 @@ S4_get_disc(GEN S) { return nf_get_disc(bnf_get_nf(gel(S,1))); }
 
 static int
 cmp2(void *E,GEN x,GEN y)
-{ (void)E; return cmpii(gel(x,2), gel(y,2)); }
+{ (void)E; return  signe(gel(x,2))==0 ? 1: signe(gel(y,2))==0 ? -1: cmpii(gel(x,2), gel(y,2)); }
 
 /* Find quartic A4 or S4-extensions of Q with resolvent pol and square root of
  * norm of relative discriminant = L; disc(K/Q) = L^2 nfdisc(pol).
@@ -3048,14 +3048,13 @@ vecslicebyX(GEN V, GEN Xinf, GEN X, long flag)
 {
   long l = lg(V), i = 1, c;
   GEN W;
-
-  if (!equali1(Xinf)) /* frequent special case */
+  if (cmpii(Xinf,gmael(V,1,2)) > 0) /* frequent special case */
   {
     i = gen_search(V, mkvec2(NULL,Xinf), NULL, &cmp2);
     if (i > 0) /* found in list, rewind to first occurence */
     { while (i > 1 && equalii(gmael(V, i-1, 2), Xinf)) i--; }
     else /* not in list */
-    { i = -i; if (i >= lg(V)) return NULL; }
+      i = -i;
   }
   W = cgetg(l, t_VEC);
   for (c = 1; i < l; i++)
@@ -3131,13 +3130,8 @@ A5vec(GEN X, GEN Xinf, long s, long fl)
     case 2: return L1;
     case 0: return L5;
     case -1:
-      if (!L1) return L5;
-      if (!L5) return L1;
       return shallowconcat(L1, L5);
     default:
-      if (!L1 && !L5) return NULL;
-      if (!L1) L1 = cgetg(1, t_VEC);
-      if (!L5) L5 = cgetg(1, t_VEC);
       return mkvec3(L5, cgetg(1, t_VEC), L1);
   }
 }
