@@ -1922,7 +1922,7 @@ matid2_FlxM(long v)
 static GEN
 Flx_halfgcd_split(GEN x, GEN y, ulong p, ulong pi)
 {
-  pari_sp av=avma;
+  pari_sp av = avma;
   GEN R, S, V;
   GEN y1, r, q;
   long l = lgpol(x), n = l>>1, k;
@@ -1964,8 +1964,8 @@ Flx_halfgcd_pre(GEN x, GEN y, ulong p, ulong pi)
   av = avma;
   q = Flx_divrem(y,x,p,&r);
   M = Flx_halfgcd_i(x,r,p,pi);
-  gcoeff(M,1,1) = Flx_sub(gcoeff(M,1,1), Flx_mul(q, gcoeff(M,1,2), p), p);
-  gcoeff(M,2,1) = Flx_sub(gcoeff(M,2,1), Flx_mul(q, gcoeff(M,2,2), p), p);
+  gcoeff(M,1,1) = Flx_sub(gcoeff(M,1,1), Flx_mul_pre(q,gcoeff(M,1,2), p,pi), p);
+  gcoeff(M,2,1) = Flx_sub(gcoeff(M,2,1), Flx_mul_pre(q,gcoeff(M,2,2), p,pi), p);
   return gerepilecopy(av, M);
 }
 GEN

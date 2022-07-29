@@ -2799,13 +2799,13 @@ RgX_halfgcd_FpX(GEN x, GEN y, GEN p)
   GEN M, V, a, b;
   if (lgefint(p) == 3)
   {
-    ulong pp = uel(p, 2);
+    ulong pp = uel(p, 2), pi = SMALL_ULONG(pp)? 0: get_Fl_red(pp);
     GEN xp = RgX_to_Flx(x, pp), yp = RgX_to_Flx(y, pp);
-    M = Flx_halfgcd(xp, yp, pp);
-    a = Flx_add(Flx_mul(gcoeff(M,1,1), xp, pp),
-                Flx_mul(gcoeff(M,1,2), yp, pp), pp);
-    b = Flx_add(Flx_mul(gcoeff(M,2,1), xp, pp),
-                Flx_mul(gcoeff(M,2,2), yp, pp), pp);
+    M = Flx_halfgcd_pre(xp, yp, pp, pi);
+    a = Flx_add(Flx_mul_pre(gcoeff(M,1,1), xp, pp, pi),
+                Flx_mul_pre(gcoeff(M,1,2), yp, pp, pi), pp);
+    b = Flx_add(Flx_mul_pre(gcoeff(M,2,1), xp, pp, pi),
+                Flx_mul_pre(gcoeff(M,2,2), yp, pp, pi), pp);
     M = FlxM_to_ZXM(M); a = Flx_to_ZX(a); b = Flx_to_ZX(b);
   }
   else
