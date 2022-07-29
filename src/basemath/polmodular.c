@@ -1683,25 +1683,6 @@ polmodular_split_p_Flm(ulong L, GEN hilb, GEN factu, norm_eqn_t ne, GEN db,
 }
 
 INLINE void
-norm_eqn_update(norm_eqn_t ne, GEN vne, GEN tp)
-{
-  ulong vL, t = tp[1], p = tp[2];
-
-  ne->D = vne[1];
-  ne->u = vne[2];
-  ne->t = t;
-  ne->p = p;
-  ne->pi = get_Fl_red(p);
-  ne->s2 = Fl_2gener_pre(p, ne->pi);
-  if (! uissquareall((4 * p - t * t) / -ne->D, &vL))
-    pari_err_BUG("norm_eqn_update");
-  ne->v = vL; /* L | vL */
-
-  /* select twisting parameter */
-  do ne->T = random_Fl(p); while (krouu(ne->T, p) != -1);
-}
-
-INLINE void
 Flv_deriv_pre_inplace(GEN v, long deg, ulong p, ulong pi)
 {
   long i, ln = lg(v), d = deg % p;
@@ -1735,8 +1716,13 @@ polmodular_worker(GEN tp, ulong L, GEN hilb, GEN factu, GEN vne, GEN vinfo,
 {
   pari_sp av = avma;
   norm_eqn_t ne;
+  long D = vne[1], u = vne[2];
+  ulong vL, t = tp[1], p = tp[2];
   GEN Tp;
-  norm_eqn_update(ne, vne, tp);
+
+  if (! uissquareall((4 * p - t * t) / -D, &vL))
+    pari_err_BUG("polmodular_worker");
+  norm_eqn_set(ne, D, t, u, vL, NULL, p); /* L | vL */
   Tp = polmodular_split_p_Flm(L, hilb, factu, ne, fdb,
                               G_surface, G_floor, (const disc_info*)vinfo);
   if (!isintzero(j_powers))

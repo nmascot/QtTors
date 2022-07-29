@@ -1644,27 +1644,19 @@ vecsmall_isin_skip(GEN v, long x, long k)
   return 0;
 }
 
-INLINE ulong
-select_twisting_param(ulong p)
+void
+norm_eqn_set(norm_eqn_t ne, long D, long t, long u, long v, GEN faw, ulong p)
 {
-  ulong T;
-  do T = random_Fl(p); while (krouu(T, p) != -1);
-  return T;
-}
-
-INLINE void
-setup_norm_eqn(norm_eqn_t ne, GEN G, GEN q)
-{
-  GEN P = gel(q,1), faw = gel(q,2);
-  ne->D = pcp_get_D(G);
-  ne->u = pcp_get_u(G);
-  ne->t = P[2];
-  ne->v = P[3];
+  ne->D = D;
+  ne->u = u;
+  ne->t = t;
+  ne->v = v;
   ne->faw = faw;
-  ne->p = (ulong)P[1];
+  ne->p = p;
   ne->pi = get_Fl_red(ne->p);
   ne->s2 = Fl_2gener_pre(ne->p, ne->pi);
-  ne->T = select_twisting_param(ne->p);
+  /* select twisting parameter */
+  do ne->T = random_Fl(p); while (krouu(ne->T, p) != -1);
 }
 
 INLINE ulong
@@ -1985,14 +1977,14 @@ quadnegclassnou(long D, long *pD0, GEN *pP, GEN *pE)
 GEN
 polclass_worker(GEN q, GEN G, GEN db)
 {
-  GEN v = cgetg(3, t_VEC), z;
-  long n_curves_tested = 0, rho_inv = gel(q,1)[4];
+  GEN T = cgetg(3, t_VEC), z, P = gel(q,1), faw = gel(q,2);
+  long n_curves_tested = 0, t = P[2], v = P[3], rho_inv = P[4];
+  ulong p = (ulong)P[1];
   pari_sp av = avma;
-  norm_eqn_t ne;
-  setup_norm_eqn(ne, G, q);
+  norm_eqn_t ne; norm_eqn_set(ne, pcp_get_D(G), t, pcp_get_u(G), v, faw, p);
   z = polclass_roots_modp(&n_curves_tested, ne, rho_inv, G, db);
-  gel(v,1) = gerepileuptoleaf(av, z);
-  gel(v,2) = mkvecsmall3(ne->p, ne->pi, n_curves_tested); return v;
+  gel(T,1) = gerepileuptoleaf(av, z);
+  gel(T,2) = mkvecsmall3(ne->p, ne->pi, n_curves_tested); return T;
 }
 
 GEN

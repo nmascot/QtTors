@@ -274,6 +274,7 @@ typedef struct {
   ulong p, pi, s2, T;
 } norm_eqn_struct;
 typedef norm_eqn_struct norm_eqn_t[1];
+void norm_eqn_set(norm_eqn_t ne, long D,long t,long u,long v,GEN faw,ulong p);
 
 #define zv_to_longptr(v) (&((v)[1]))
 #define zv_to_ulongptr(v) ((ulong *)&((v)[1]))
