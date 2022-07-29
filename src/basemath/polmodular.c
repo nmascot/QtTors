@@ -1369,15 +1369,14 @@ make_pcp_floor(const disc_info *dinfo)
 }
 
 INLINE GEN
-enum_volcano_surface(const disc_info *dinfo, norm_eqn_t ne, ulong j0, GEN fdb)
+enum_volcano_surface(norm_eqn_t ne, ulong j0, GEN fdb, GEN G)
 {
   pari_sp av = avma;
-  GEN G = make_pcp_surface(dinfo);
   return gerepileupto(av, enum_roots(j0, ne, fdb, G, NULL));
 }
 
 INLINE GEN
-enum_volcano_floor(long L, norm_eqn_t ne, ulong j0_pr, GEN fdb, const disc_info *dinfo)
+enum_volcano_floor(long L, norm_eqn_t ne, ulong j0_pr, GEN fdb, GEN G)
 {
   pari_sp av = avma;
   /* L^2 D is the discriminant for the order R = Z + L OO. */
@@ -1385,13 +1384,11 @@ enum_volcano_floor(long L, norm_eqn_t ne, ulong j0_pr, GEN fdb, const disc_info 
   long R_cond = L * ne->u; /* conductor(DR); */
   long w = R_cond * ne->v;
   /* TODO: Calculate these once and for all in polmodular0_ZM(). */
-  GEN G;
   norm_eqn_t eqn;
   memcpy(eqn, ne, sizeof *ne);
   eqn->D = DR;
   eqn->u = R_cond;
   eqn->v = w;
-  G = make_pcp_floor(dinfo);
   return gerepileupto(av, enum_roots(j0_pr, eqn, fdb, G, NULL));
 }
 
@@ -1621,19 +1618,17 @@ double_eta_initial_js(
 /* This is Sutherland 2012, Algorithm 2.1, p16. */
 static GEN
 polmodular_split_p_Flm(ulong L, GEN hilb, GEN factu, norm_eqn_t ne, GEN db,
-  const disc_info *dinfo)
+  GEN G_surface, GEN G_floor, const disc_info *dinfo)
 {
   ulong j0, j0_rt, j0pr, j0pr_rt;
   ulong n, card, val, p = ne->p, pi = ne->pi;
-  long s = modinv_sparse_factor(dinfo->inv);
+  long inv = dinfo->inv, s = modinv_sparse_factor(inv);
   long nj_selected = ceil((L + 1)/(double)s) + 1;
-  GEN surface_js, floor_js, rts;
-  GEN phi_modp;
-  GEN jdb, fdb;
+  GEN surface_js, floor_js, rts, phi_modp, jdb, fdb;
   long switched_signs = 0;
 
   jdb = polmodular_db_for_inv(db, INV_J);
-  fdb = polmodular_db_for_inv(db, dinfo->inv);
+  fdb = polmodular_db_for_inv(db, inv);
 
   /* Precomputation */
   card = p + 1 - ne->t;
@@ -1641,15 +1636,14 @@ polmodular_split_p_Flm(ulong L, GEN hilb, GEN factu, norm_eqn_t ne, GEN db,
 
   j0 = oneroot_of_classpoly(hilb, factu, ne, jdb);
   j0pr = compute_L_isogenous_curve(L, n, ne, j0, card, val, 1);
-  if (modinv_is_double_eta(dinfo->inv)) {
-    double_eta_initial_js(&j0_rt, &j0pr_rt, j0, j0pr, ne, dinfo->inv,
-        L, n, card, val);
+  if (modinv_is_double_eta(inv)) {
+    double_eta_initial_js(&j0_rt, &j0pr_rt, j0, j0pr, ne, inv, L, n, card, val);
   } else {
-    j0_rt = modfn_root(j0, ne, dinfo->inv);
-    j0pr_rt = modfn_root(j0pr, ne, dinfo->inv);
+    j0_rt = modfn_root(j0, ne, inv);
+    j0pr_rt = modfn_root(j0pr, ne, inv);
   }
-  surface_js = enum_volcano_surface(dinfo, ne, j0_rt, fdb);
-  floor_js = enum_volcano_floor(L, ne, j0pr_rt, fdb, dinfo);
+  surface_js = enum_volcano_surface(ne, j0_rt, fdb, G_surface);
+  floor_js = enum_volcano_floor(L, ne, j0pr_rt, fdb, G_floor);
   rts = root_matrix(L, dinfo, nj_selected, surface_js, floor_js,
                     n, card, val, ne);
   do {
@@ -1736,13 +1730,15 @@ eval_modpoly_modp(GEN Tp, GEN j_powers, ulong p, ulong pi, int compute_derivs)
 /* Parallel interface */
 GEN
 polmodular_worker(GEN tp, ulong L, GEN hilb, GEN factu, GEN vne, GEN vinfo,
-                  long derivs, GEN j_powers, GEN fdb)
+                  long derivs, GEN j_powers, GEN G_surface, GEN G_floor,
+                  GEN fdb)
 {
   pari_sp av = avma;
   norm_eqn_t ne;
   GEN Tp;
   norm_eqn_update(ne, vne, tp);
-  Tp = polmodular_split_p_Flm(L, hilb, factu, ne, fdb, (const disc_info*)vinfo);
+  Tp = polmodular_split_p_Flm(L, hilb, factu, ne, fdb,
+                              G_surface, G_floor, (const disc_info*)vinfo);
   if (!isintzero(j_powers))
     Tp = eval_modpoly_modp(Tp, j_powers, ne->p, ne->pi, derivs);
   return gerepileupto(av, Tp);
@@ -1839,9 +1835,10 @@ polmodular0_ZM(long L, long inv, GEN J, GEN Q, int compute_derivs, GEN *db)
     dbg_printf(0)("Calculating modular polynomial of level %lu:", L);
 
     worker = snm_closure(is_entry("_polmodular_worker"),
-                         mkvecn(8, utoi(L), hilb, factu, mkvecsmall2(D, cond),
+                         mkvecn(10, utoi(L), hilb, factu, mkvecsmall2(D, cond),
                                    (GEN)dinfo, stoi(compute_derivs), j_powers,
-                                   *db));
+                                   make_pcp_surface(dinfo),
+                                   make_pcp_floor(dinfo), *db));
     mt_queue_start_lim(&pt, worker, dinfo->nprimes);
     for (i = 0; i < dinfo->nprimes || pending; i++)
     {
