@@ -1492,7 +1492,7 @@ select_classpoly_prime_pool(double min_bits, double delta, GEN G)
       long ires0;
       GEN faw;
 
-      if ((vfactors = SMOOTH_INTS[v]) < 0) continue;
+      if ((long)(vfactors = SMOOTH_INTS[v]) < 0) continue;
       hurwitz_ratio_bound = HURWITZ_RATIO[v] / 128.0;
       vd = v * d;
       if (vd >= v_bound_aux * hurwitz_ratio_bound) break;
