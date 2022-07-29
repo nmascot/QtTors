@@ -243,6 +243,13 @@ BA  90- [libpari] nfM_ker
     91- [libpari] Qp_zeta
 BA  92- [libpari] RgX_mul2n
     93- [libpari] rfrac_to_ser_i
+    94- [libpari] FlxC_FlxqV_eval_pre, FlxC_Flxq_eval_pre,
+        Flx_FlxqV_eval_pre, Flx_Flxq_eval_pre, Flx_Frobenius_pre,
+        Flx_div_pre, Flx_divrem_pre, Flx_extgcd_pre, Flx_gcd_pre,
+        Flx_get_red_pre, Flx_halfgcd_pre, Flx_mul_pre, Flx_oneroot_pre,
+        Flx_oneroot_split_pre, Flx_rem_pre, Flx_roots_pre, Flx_sqr_pre,
+        Flxq_div_pre, Flxq_inv_pre, Flxq_invsafe_pre, Flxq_mul_pre,
+        Flxq_powers_pre, Flxq_powu_pre, Flxq_sqr_pre
 
   Changed
 HC   1- faster implementation of eulervec + cache result
