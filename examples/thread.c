@@ -54,7 +54,8 @@ main(void)
   pthread_join(th2,(void*)&F2);
   pthread_join(th3,(void*)&D1);
   pthread_join(th4,(void*)&D2); /* Wait for termination, get the results */
-  pari_printf("F1=%Ps\nF2=%Ps\nlog(D1)=%Ps\nlog(D2)=%Ps\n", F1,F2, glog(D1,prec),glog(D2,prec));
+  pari_printf("F1=%Ps\nF2=%Ps\nlog(D1)=%Ps\nlog(D2)=%Ps\n",
+              F1,F2, glog(D1,prec),glog(D2,prec));
   pari_thread_free(&pth1);
   pari_thread_free(&pth2);
   pari_thread_free(&pth3);
