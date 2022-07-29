@@ -2067,7 +2067,7 @@ Fl_powu(ulong x, ulong n0, ulong p)
   }
 }
 
-/* Reduce data dependency to maximize internal parallelism */
+/* Reduce data dependency to maximize internal parallelism; allow pi = 0 */
 GEN
 Fl_powers_pre(ulong x, long n, ulong p, ulong pi)
 {
@@ -2940,6 +2940,7 @@ Fl_log_Fp(ulong a, ulong g, ulong ord, ulong p)
   return gc_ulong(av, typ(r)==t_INT ? itou(r): ~0UL);
 }
 
+/* allow pi = 0 */
 ulong
 Fl_log_pre(ulong a, ulong g, ulong ord, ulong p, ulong pi)
 {
@@ -2952,8 +2953,8 @@ ulong
 Fl_log(ulong a, ulong g, ulong ord, ulong p)
 {
   if (ord <= 200)
-  return (p&HIGHMASK) ? Fl_log_naive_pre(a, g, ord, p, get_Fl_red(p))
-                      : Fl_log_naive(a, g, ord, p);
+    return (p&HIGHMASK)? Fl_log_naive_pre(a, g, ord, p, get_Fl_red(p))
+                       : Fl_log_naive(a, g, ord, p);
   return Fl_log_Fp(a, g, ord, p);
 }
 

@@ -444,6 +444,7 @@ FlxY_Flx_translate(GEN P, GEN c, ulong p)
   return gerepilecopy(av, Q);
 }
 
+/* allow pi = 0 */
 GEN
 FlxY_evalx_powers_pre(GEN pol, GEN ypowers, ulong p, ulong pi)
 {
@@ -455,6 +456,7 @@ FlxY_evalx_powers_pre(GEN pol, GEN ypowers, ulong p, ulong pi)
   return Flx_renormalize(res, len);
 }
 
+/* allow pi = 0 */
 ulong
 FlxY_eval_powers_pre(GEN pol, GEN ypowers, GEN xpowers, ulong p, ulong pi)
 {

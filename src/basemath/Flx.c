@@ -2809,6 +2809,7 @@ FlxV_to_Flm_lg(GEN x, long m, long n)
   return y;
 }
 
+/* allow pi = 0 (SMALL_ULONG) */
 GEN
 Flx_FlxqV_eval_pre(GEN Q, GEN x, GEN T, ulong p, ulong pi)
 {
@@ -2831,7 +2832,7 @@ Flx_FlxqV_eval_pre(GEN Q, GEN x, GEN T, ulong p, ulong pi)
   B = Flx_blocks_Flm(Q, n, d);
   C = gerepileupto(av, Flm_mul(A, B, p));
   g = gel(x, l);
-  pi = SMALL_ULONG(p)? 0 : get_Fl_red(p);
+  if (pi && SMALL_ULONG(p)) pi = 0;
   T = Flx_get_red_pre(T, p, pi);
   btop = avma;
   S = Flv_to_Flx(gel(C, d), sv);
@@ -2847,6 +2848,7 @@ GEN
 Flx_FlxqV_eval(GEN Q, GEN x, GEN T, ulong p)
 { return Flx_FlxqV_eval_pre(Q, x, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
+/* allow pi = 0 (SMALL_ULONG) */
 GEN
 Flx_Flxq_eval_pre(GEN Q, GEN x, GEN T, ulong p, ulong pi)
 {
@@ -2864,22 +2866,25 @@ GEN
 Flx_Flxq_eval(GEN Q, GEN x, GEN T, ulong p)
 { return Flx_Flxq_eval_pre(Q, x, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
+/* allow pi = 0 (SMALL_ULONG) */
 GEN
 FlxC_FlxqV_eval_pre(GEN x, GEN v, GEN T, ulong p, ulong pi)
-{ pari_APPLY_type(t_COL, Flx_FlxqV_eval_pre(gel(x,i), v, T, p, pi))
-}
+{ pari_APPLY_type(t_COL, Flx_FlxqV_eval_pre(gel(x,i), v, T, p, pi)) }
 GEN
 FlxC_FlxqV_eval(GEN x, GEN v, GEN T, ulong p)
 { return FlxC_FlxqV_eval_pre(x, v, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
+/* allow pi = 0 (SMALL_ULONG) */
 GEN
-FlxC_Flxq_eval(GEN x, GEN F, GEN T, ulong p)
+FlxC_Flxq_eval_pre(GEN x, GEN F, GEN T, ulong p, ulong pi)
 {
   long d = brent_kung_optpow(get_Flx_degree(T)-1,lg(x)-1,1);
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   GEN Fp = Flxq_powers_pre(F, d, T, p, pi);
   return FlxC_FlxqV_eval_pre(x, Fp, T, p, pi);
 }
+GEN
+FlxC_Flxq_eval(GEN x, GEN F, GEN T, ulong p)
+{ return FlxC_Flxq_eval_pre(x, F, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 #if 0
 static struct bb_algebra Flxq_algebra = { _Flxq_red, _Flx_add, _Flx_sub,
@@ -4165,6 +4170,7 @@ FlxqX_dotproduct(GEN x, GEN y, GEN T, ulong p)
   return gerepileuptoleaf(av, Flx_rem_pre(c,T,p,pi));
 }
 
+/* allow pi = 0 */
 GEN
 FlxC_eval_powers_pre(GEN z, GEN x, ulong p, ulong pi)
 {
@@ -4178,7 +4184,7 @@ FlxC_eval_powers_pre(GEN z, GEN x, ulong p, ulong pi)
 /***********************************************************************/
 /**                               FlxM                                **/
 /***********************************************************************/
-
+/* allow pi = 0 */
 GEN
 FlxM_eval_powers_pre(GEN z, GEN x, ulong p, ulong pi)
 {

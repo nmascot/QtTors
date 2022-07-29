@@ -941,6 +941,7 @@ Flm_Flc_mul(GEN x, GEN y, ulong p)
     return Flm_Flc_mul_i(x, y, lx, l, p, get_Fl_red(p));
 }
 
+/* allow pi = 0 */
 GEN
 Flm_Flc_mul_pre(GEN x, GEN y, ulong p, ulong pi)
 {
@@ -956,6 +957,7 @@ Flm_Flc_mul_pre(GEN x, GEN y, ulong p, ulong pi)
   return z;
 }
 
+/* allow pi = 0 */
 GEN
 Flm_Flc_mul_pre_Flx(GEN x, GEN y, ulong p, ulong pi, long sv)
 {
