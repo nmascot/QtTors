@@ -1689,10 +1689,9 @@ polmodular_split_p_Flm(ulong L, GEN hilb, GEN factu, norm_eqn_t ne, GEN db,
 }
 
 INLINE void
-norm_eqn_update(norm_eqn_t ne, GEN vne, GEN tp, long L)
+norm_eqn_update(norm_eqn_t ne, GEN vne, GEN tp)
 {
-  ulong vL_sqr, vL, t = tp[1], p = tp[2];
-  long res;
+  ulong vL, t = tp[1], p = tp[2];
 
   ne->D = vne[1];
   ne->u = vne[2];
@@ -1700,11 +1699,9 @@ norm_eqn_update(norm_eqn_t ne, GEN vne, GEN tp, long L)
   ne->p = p;
   ne->pi = get_Fl_red(p);
   ne->s2 = Fl_2gener_pre(p, ne->pi);
-
-  vL_sqr = (4 * p - t * t) / -ne->D;
-  res = uissquareall(vL_sqr, &vL);
-  if (!res || vL % L) pari_err_BUG("norm_eqn_update");
-  ne->v = vL;
+  if (! uissquareall((4 * p - t * t) / -ne->D, &vL))
+    pari_err_BUG("norm_eqn_update");
+  ne->v = vL; /* L | vL */
 
   /* select twisting parameter */
   do ne->T = random_Fl(p); while (krouu(ne->T, p) != -1);
@@ -1744,7 +1741,7 @@ polmodular_worker(GEN tp, ulong L, GEN hilb, GEN factu, GEN vne, GEN vinfo,
   pari_sp av = avma;
   norm_eqn_t ne;
   GEN Tp;
-  norm_eqn_update(ne, vne, tp, L);
+  norm_eqn_update(ne, vne, tp);
   Tp = polmodular_split_p_Flm(L, hilb, factu, ne, fdb, (const disc_info*)vinfo);
   if (!isintzero(j_powers))
     Tp = eval_modpoly_modp(Tp, j_powers, ne->p, ne->pi, derivs);
