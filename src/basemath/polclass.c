@@ -1765,7 +1765,7 @@ polclass_roots_modp(
   ulong j = 0;
   long inv = pcp_get_inv(G), endo_tries = 0;
   int endo_cert;
-  GEN res, jdb, fdb;
+  GEN res, jdb, fdb, vshape = factoru(ne->v);
 
   jdb = polmodular_db_for_inv(db, INV_J);
   fdb = polmodular_db_for_inv(db, inv);
@@ -1774,7 +1774,7 @@ polclass_roots_modp(
 
   do {
     j = find_jinv(n_trace_curves,&endo_tries,&endo_cert, ne, inv, rho_inv, jdb);
-    res = enum_roots(j, ne, fdb, G);
+    res = enum_roots(j, ne, fdb, G, vshape);
     if (!res && endo_cert) pari_err_BUG("polclass_roots_modp");
     if (res && !endo_cert && vecsmall_isin_skip(res, res[1], 2))
     {

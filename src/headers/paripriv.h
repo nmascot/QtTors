@@ -976,6 +976,6 @@ long j_level_in_volcano(GEN phi, ulong j, ulong p, ulong pi, long L, long depth)
 ulong ascend_volcano(GEN phi, ulong j, ulong p, ulong pi, long level, long L, long depth, long steps);
 ulong descend_volcano(GEN phi, ulong j, ulong p, ulong pi, long level, long L, long depth, long steps);
 long next_surface_nbr(ulong *nJ, GEN phi, long L, long h, ulong J, const ulong *pJ, ulong p, ulong pi);
-GEN enum_roots(ulong j, norm_eqn_t ne, GEN fdb, GEN G);
+GEN enum_roots(ulong j, norm_eqn_t ne, GEN fdb, GEN G, GEN vshape);
 
 ENDEXTERN

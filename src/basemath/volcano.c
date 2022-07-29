@@ -615,7 +615,7 @@ surface_parallel_path(
 }
 
 GEN
-enum_roots(ulong J0, norm_eqn_t ne, GEN fdb, GEN G)
+enum_roots(ulong J0, norm_eqn_t ne, GEN fdb, GEN G, GEN vshape)
 { /* MAX_HEIGHT >= max_{p,n} val_p(n) where p and n are ulongs */
   enum { MAX_HEIGHT = BITS_IN_LONG };
   pari_sp av, ltop = avma;
@@ -623,7 +623,7 @@ enum_roots(ulong J0, norm_eqn_t ne, GEN fdb, GEN G)
   long *n = pcp_get_n(G)+s, *L = pcp_get_L(G)+s, *o = pcp_get_o(G)+s, k = pcp_get_k(G)-s;
   long i, t, vlen, *e, *h, *off, *poff, *M, N = pcp_get_enum_cnt(G);
   ulong p = ne->p, pi = ne->pi, *roots;
-  GEN Phi, vshape, vp, ve, roots_;
+  GEN Phi, vp, ve, roots_;
 
   if (!k) return mkvecsmall(J0);
 
@@ -631,8 +631,7 @@ enum_roots(ulong J0, norm_eqn_t ne, GEN fdb, GEN G)
   roots = zv_to_ulongptr(roots_);
   av = avma;
 
-  /* TODO: Shouldn't be factoring this every time. Store in *ne? */
-  vshape = factoru(ne->v);
+  if (!vshape) vshape = factoru(ne->v);
   vp = gel(vshape, 1); vlen = lg(vp)-1;
   ve = gel(vshape, 2);
 

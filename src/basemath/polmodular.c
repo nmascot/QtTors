@@ -1373,7 +1373,7 @@ enum_volcano_surface(const disc_info *dinfo, norm_eqn_t ne, ulong j0, GEN fdb)
 {
   pari_sp av = avma;
   GEN G = make_pcp_surface(dinfo);
-  return gerepileupto(av, enum_roots(j0, ne, fdb, G));
+  return gerepileupto(av, enum_roots(j0, ne, fdb, G, NULL));
 }
 
 INLINE GEN
@@ -1392,7 +1392,7 @@ enum_volcano_floor(long L, norm_eqn_t ne, ulong j0_pr, GEN fdb, const disc_info 
   eqn->u = R_cond;
   eqn->v = w;
   G = make_pcp_floor(dinfo);
-  return gerepileupto(av, enum_roots(j0_pr, eqn, fdb, G));
+  return gerepileupto(av, enum_roots(j0_pr, eqn, fdb, G, NULL));
 }
 
 INLINE void
