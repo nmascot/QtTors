@@ -225,8 +225,8 @@ j_level_in_volcano(
   random_distinct_neighbours_of(&path1[1], &path2[1], phi, j, p, pi, L, 0);
   if (path2[1] == p)
     lvl = depth; /* Only one neighbour => j is on the floor => level = depth */
-   else
-   {
+  else
+  {
     long path1_len = extend_path(path1, phi, p, pi, L, depth);
     long path2_len = extend_path(path2, phi, p, pi, L, path1_len);
     lvl = depth - path2_len;
