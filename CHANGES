@@ -263,7 +263,8 @@ BA  92- [libpari] RgX_mul2n
         FlxqXQ_powers_pre, FlxqXQ_powu_pre, FlxqX_normalize_pre, FlxqX_red_pre,
         Kronecker_to_FlxqX_pre, Flx_dotproduct_pre, FlxqX_div_pre,
         FlxY_Flxq_evalx_pre, FlxqXC_FlxqXQV_eval_pre, Flx_is_smooth_pre,
-        Flxq_pow_pre, Flxq_pow_init_pre, Flxq_pow_table_pre
+        Flxq_pow_pre, Flxq_pow_init_pre, Flxq_pow_table_pre,
+        Flx_matFrobenius_pre, FlxqV_dotproduct_pre
 
   Changed
 HC   1- faster implementation of eulervec + cache result
