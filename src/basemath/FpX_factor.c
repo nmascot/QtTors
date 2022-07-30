@@ -797,6 +797,7 @@ long
 Flx_nbroots(GEN f, ulong p)
 {
   long n = degpol(f);
+  ulong pi;
   pari_sp av = avma;
   GEN z;
   if (n <= 1) return n;
@@ -807,8 +808,9 @@ Flx_nbroots(GEN f, ulong p)
     D = Fl_sub(Fl_sqr(f[3], p), Fl_mul(Fl_mul(f[4], f[2], p), 4%p, p), p);
     return 1 + krouu(D,p);
   }
-  z = Flx_sub(Flx_Frobenius(f, p), polx_Flx(f[1]), p);
-  z = Flx_gcd(z, f, p);
+  pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  z = Flx_sub(Flx_Frobenius_pre(f, p, pi), polx_Flx(f[1]), p);
+  z = Flx_gcd_pre(z, f, p, pi);
   return gc_long(av, degpol(z));
 }
 
@@ -1959,26 +1961,26 @@ F2x_is_irred(GEN f) { return !!F2x_factor_i(f, 2); }
 
 /* Adapted from Shoup NTL */
 GEN
-Flx_factor_squarefree(GEN f, ulong p)
+Flx_factor_squarefree_pre(GEN f, ulong p, ulong pi)
 {
   long i, q, n = degpol(f);
   GEN u = const_vec(n+1, pol1_Flx(f[1]));
   for(q = 1;;q *= p)
   {
-    GEN t, v, tv, r = Flx_gcd(f, Flx_deriv(f, p), p);
+    GEN t, v, tv, r = Flx_gcd_pre(f, Flx_deriv(f, p), p, pi);
     if (degpol(r) == 0) { gel(u, q) = f; break; }
-    t = Flx_div(f, r, p);
+    t = Flx_div_pre(f, r, p, pi);
     if (degpol(t) > 0)
     {
       long j;
       for(j = 1;;j++)
       {
-        v = Flx_gcd(r, t, p);
-        tv = Flx_div(t, v, p);
+        v = Flx_gcd_pre(r, t, p, pi);
+        tv = Flx_div_pre(t, v, p, pi);
         if (degpol(tv) > 0)
           gel(u, j*q) = Flx_normalize(tv, p);
         if (degpol(v) <= 0) break;
-        r = Flx_div(r, v, p);
+        r = Flx_div_pre(r, v, p, pi);
         t = v;
       }
       if (degpol(r) == 0) break;
@@ -1989,18 +1991,22 @@ Flx_factor_squarefree(GEN f, ulong p)
     if (degpol(gel(u,i))) break;
   setlg(u,i+1); return u;
 }
+GEN
+Flx_factor_squarefree(GEN f, ulong p)
+{ return Flx_factor_squarefree_pre(f, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 long
 Flx_ispower(GEN f, ulong k, ulong p, GEN *pt_r)
 {
   pari_sp av = avma;
-  ulong lc;
+  ulong lc, pi;
   GEN F;
   long i, n = degpol(f), v = f[1], l;
   if (n % k) return 0;
   lc = Fl_sqrtn(Flx_lead(f), k, p, NULL);
   if (lc == ULONG_MAX) { av = avma; return 0; }
-  F = Flx_factor_squarefree(f, p); l = lg(F)-1;
+  pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  F = Flx_factor_squarefree_pre(f, p, pi); l = lg(F)-1;
   for (i = 1; i <= l; i++)
     if (i%k && degpol(gel(F,i))) return gc_long(av,0);
   if (pt_r)
@@ -2009,8 +2015,8 @@ Flx_ispower(GEN f, ulong k, ulong p, GEN *pt_r)
     for(i = l; i >= 1; i--)
     {
       if (i%k) continue;
-      s = Flx_mul(s, gel(F,i), p);
-      r = Flx_mul(r, s, p);
+      s = Flx_mul_pre(s, gel(F,i), p, pi);
+      r = Flx_mul_pre(r, s, p, pi);
     }
     *pt_r = gerepileuptoleaf(av, r);
   } else set_avma(av);
@@ -2019,7 +2025,7 @@ Flx_ispower(GEN f, ulong k, ulong p, GEN *pt_r)
 
 /* See <http://www.shoup.net/papers/factorimpl.pdf> */
 static GEN
-Flx_ddf_Shoup(GEN T, GEN XP, ulong p)
+Flx_ddf_Shoup(GEN T, GEN XP, ulong p, ulong pi)
 {
   pari_sp av = avma;
   GEN b, g, h, F, f, Tr, xq;
@@ -2041,21 +2047,21 @@ Flx_ddf_Shoup(GEN T, GEN XP, ulong p)
   if (DEBUGLEVEL>=7) timer_start(&ti);
   if (expu(p) <= ro)
     for (i = 3; i <= l+1; i++)
-      gel(b, i) = Flxq_powu(gel(b, i-1), p, T, p);
+      gel(b, i) = Flxq_powu_pre(gel(b, i-1), p, T, p, pi);
   else
   {
-    xq = Flxq_powers(gel(b, 2), bo,  T, p);
+    xq = Flxq_powers_pre(gel(b, 2), bo,  T, p, pi);
     if (DEBUGLEVEL>=7) timer_printf(&ti,"Flx_ddf_Shoup: xq baby");
     for (i = 3; i <= l+1; i++)
-      gel(b, i) = Flx_FlxqV_eval(gel(b, i-1), xq, T, p);
+      gel(b, i) = Flx_FlxqV_eval_pre(gel(b, i-1), xq, T, p, pi);
   }
   if (DEBUGLEVEL>=7) timer_printf(&ti,"Flx_ddf_Shoup: baby");
-  xq = Flxq_powers(gel(b, l+1), brent_kung_optpow(n, m-1, 1),  T, p);
+  xq = Flxq_powers_pre(gel(b, l+1), brent_kung_optpow(n, m-1, 1),  T, p, pi);
   if (DEBUGLEVEL>=7) timer_printf(&ti,"Flx_ddf_Shoup: xq giant");
   g = cgetg(m+1, t_VEC);
   gel(g, 1) = gel(xq, 2);
   for(i = 2; i <= m; i++)
-    gel(g, i) = Flx_FlxqV_eval(gel(g, i-1), xq, T, p);
+    gel(g, i) = Flx_FlxqV_eval_pre(gel(g, i-1), xq, T, p, pi);
   if (DEBUGLEVEL>=7) timer_printf(&ti,"Flx_ddf_Shoup: giant");
   h = cgetg(m+1, t_VEC);
   for (j = 1; j <= m; j++)
@@ -2064,7 +2070,7 @@ Flx_ddf_Shoup(GEN T, GEN XP, ulong p)
     GEN gj = gel(g, j);
     GEN e = Flx_sub(gj, gel(b, 1), p);
     for (i = 2; i <= l; i++)
-      e = Flxq_mul(e, Flx_sub(gj, gel(b, i), p), T, p);
+      e = Flxq_mul_pre(e, Flx_sub(gj, gel(b, i), p), T, p, pi);
     gel(h, j) = gerepileupto(av, e);
   }
   if (DEBUGLEVEL>=7) timer_printf(&ti,"Flx_ddf_Shoup: diff");
@@ -2072,11 +2078,11 @@ Flx_ddf_Shoup(GEN T, GEN XP, ulong p)
   F = cgetg(m+1, t_VEC);
   for (j = 1; j <= m; j++)
   {
-    GEN u = Flx_gcd(Tr, gel(h, j), p);
+    GEN u = Flx_gcd_pre(Tr, gel(h, j), p, pi);
     if (degpol(u))
     {
       u = Flx_normalize(u, p);
-      Tr = Flx_div(Tr, u, p);
+      Tr = Flx_div_pre(Tr, u, p, pi);
     }
     gel(F, j) = u;
   }
@@ -2087,11 +2093,11 @@ Flx_ddf_Shoup(GEN T, GEN XP, ulong p)
     GEN e = gel(F, j);
     for (i=l-1; i >= 0; i--)
     {
-      GEN u = Flx_gcd(e, Flx_sub(gel(g, j), gel(b, i+1), p), p);
+      GEN u = Flx_gcd_pre(e, Flx_sub(gel(g, j), gel(b, i+1), p), p, pi);
       if (degpol(u))
       {
         gel(f, l*j-i) = u;
-        e = Flx_div(e, u, p);
+        e = Flx_div_pre(e, u, p, pi);
       }
       if (!degpol(e)) break;
     }
@@ -2102,27 +2108,27 @@ Flx_ddf_Shoup(GEN T, GEN XP, ulong p)
 }
 
 static void
-Flx_edf_simple(GEN Tp, GEN XP, long d, ulong p, GEN V, long idx)
+Flx_edf_simple(GEN Tp, GEN XP, long d, ulong p, ulong pi, GEN V, long idx)
 {
   long n = degpol(Tp), r = n/d;
   GEN T, f, ff;
   ulong p2;
   if (r==1) { gel(V, idx) = Tp; return; }
   p2 = p>>1;
-  T = Flx_get_red(Tp, p);
-  XP = Flx_rem(XP, T, p);
+  T = Flx_get_red_pre(Tp, p, pi);
+  XP = Flx_rem_pre(XP, T, p, pi);
   while (1)
   {
     pari_sp btop = avma;
     long i;
     GEN g = random_Flx(n, Tp[1], p);
-    GEN t = gel(Flxq_auttrace(mkvec2(XP, g), d, T, p), 2);
+    GEN t = gel(Flxq_auttrace_pre(mkvec2(XP, g), d, T, p, pi), 2);
     if (lgpol(t) == 0) continue;
     for(i=1; i<=10; i++)
     {
       pari_sp btop2 = avma;
-      GEN R = Flxq_powu(Flx_Fl_add(t, random_Fl(p), p), p2, T, p);
-      f = Flx_gcd(Flx_Fl_add(R, p-1, p), Tp, p);
+      GEN R = Flxq_powu_pre(Flx_Fl_add(t, random_Fl(p), p), p2, T, p, pi);
+      f = Flx_gcd_pre(Flx_Fl_add(R, p-1, p), Tp, p, pi);
       if (degpol(f) > 0 && degpol(f) < n) break;
       set_avma(btop2);
     }
@@ -2130,15 +2136,16 @@ Flx_edf_simple(GEN Tp, GEN XP, long d, ulong p, GEN V, long idx)
     set_avma(btop);
   }
   f = Flx_normalize(f, p);
-  ff = Flx_div(Tp, f ,p);
-  Flx_edf_simple(f, XP, d, p, V, idx);
-  Flx_edf_simple(ff, XP, d, p, V, idx+degpol(f)/d);
+  ff = Flx_div_pre(Tp, f, p, pi);
+  Flx_edf_simple(f, XP, d, p, pi, V, idx);
+  Flx_edf_simple(ff, XP, d, p, pi, V, idx+degpol(f)/d);
 }
 static void
-Flx_edf(GEN Tp, GEN XP, long d, ulong p, GEN V, long idx);
+Flx_edf(GEN Tp, GEN XP, long d, ulong p, ulong pi, GEN V, long idx);
 
 static void
-Flx_edf_rec(GEN T, GEN XP, GEN hp, GEN t, long d, ulong p, GEN V, long idx)
+Flx_edf_rec(GEN T, GEN XP, GEN hp, GEN t, long d, ulong p, ulong pi,
+  GEN V, long idx)
 {
   pari_sp av;
   GEN Tp = get_Flx_mod(T);
@@ -2146,74 +2153,73 @@ Flx_edf_rec(GEN T, GEN XP, GEN hp, GEN t, long d, ulong p, GEN V, long idx)
   GEN u1, u2, f1, f2;
   ulong p2 = p>>1;
   GEN R, h;
-  h = Flx_get_red(hp, p);
-  t = Flx_rem(t, T, p);
+  h = Flx_get_red_pre(hp, p, pi);
+  t = Flx_rem_pre(t, T, p, pi);
   av = avma;
   do
   {
     set_avma(av);
-    R = Flxq_powu(mkvecsmall3(vT, random_Fl(p), 1), p2, h, p);
-    u1 = Flx_gcd(Flx_Fl_add(R, p-1, p), hp, p);
+    R = Flxq_powu_pre(mkvecsmall3(vT, random_Fl(p), 1), p2, h, p, pi);
+    u1 = Flx_gcd_pre(Flx_Fl_add(R, p-1, p), hp, p, pi);
   } while (degpol(u1)==0 || degpol(u1)==n);
-  f1 = Flx_gcd(Flx_Flxq_eval(u1, t, T, p), Tp, p);
+  f1 = Flx_gcd_pre(Flx_Flxq_eval_pre(u1, t, T, p, pi), Tp, p, pi);
   f1 = Flx_normalize(f1, p);
-  u2 = Flx_div(hp, u1, p);
-  f2 = Flx_div(Tp, f1, p);
+  u2 = Flx_div_pre(hp, u1, p, pi);
+  f2 = Flx_div_pre(Tp, f1, p, pi);
   if (degpol(u1)==1)
   {
     if (degpol(f1)==d)
       gel(V, idx) = f1;
     else
-      Flx_edf(f1, XP, d, p, V, idx);
+      Flx_edf(f1, XP, d, p, pi, V, idx);
   }
   else
-    Flx_edf_rec(Flx_get_red(f1, p), XP, u1, t, d, p, V, idx);
+    Flx_edf_rec(Flx_get_red(f1, p), XP, u1, t, d, p, pi, V, idx);
   idx += degpol(f1)/d;
   if (degpol(u2)==1)
   {
     if (degpol(f2)==d)
       gel(V, idx) = f2;
     else
-      Flx_edf(f2, XP, d, p, V, idx);
+      Flx_edf(f2, XP, d, p, pi, V, idx);
   }
   else
-    Flx_edf_rec(Flx_get_red(f2, p), XP, u2, t, d, p, V, idx);
+    Flx_edf_rec(Flx_get_red(f2, p), XP, u2, t, d, p, pi, V, idx);
 }
 
 static void
-Flx_edf(GEN Tp, GEN XP, long d, ulong p, GEN V, long idx)
+Flx_edf(GEN Tp, GEN XP, long d, ulong p, ulong pi, GEN V, long idx)
 {
   long n = degpol(Tp), r = n/d, vT = Tp[1];
   GEN T, h, t;
   pari_timer ti;
   if (r==1) { gel(V, idx) = Tp; return; }
-  T = Flx_get_red(Tp, p);
-  XP = Flx_rem(XP, T, p);
+  T = Flx_get_red_pre(Tp, p, pi);
+  XP = Flx_rem_pre(XP, T, p, pi);
   if (DEBUGLEVEL>=7) timer_start(&ti);
   do
   {
     GEN g = random_Flx(n, vT, p);
-    t = gel(Flxq_auttrace(mkvec2(XP, g), d, T, p), 2);
+    t = gel(Flxq_auttrace_pre(mkvec2(XP, g), d, T, p, pi), 2);
     if (DEBUGLEVEL>=7) timer_printf(&ti,"Flx_edf: Flxq_auttrace");
-    h = Flxq_minpoly(t, T, p);
+    h = Flxq_minpoly_pre(t, T, p, pi);
     if (DEBUGLEVEL>=7) timer_printf(&ti,"Flx_edf: Flxq_minpoly");
   } while (degpol(h) <= 1);
-  Flx_edf_rec(T, XP, h, t, d, p, V, idx);
+  Flx_edf_rec(T, XP, h, t, d, p, pi, V, idx);
 }
 
 static GEN
-Flx_factor_Shoup(GEN T, ulong p)
+Flx_factor_Shoup(GEN T, ulong p, ulong pi)
 {
-  long i, n, s = 0;
+  long i, n, s = 0, e = expu(p);
   GEN XP, D, V;
-  long e = expu(p);
   pari_timer ti;
   n = get_Flx_degree(T);
-  T = Flx_get_red(T, p);
+  T = Flx_get_red_pre(T, p, pi);
   if (DEBUGLEVEL>=6) timer_start(&ti);
-  XP = Flx_Frobenius(T, p);
+  XP = Flx_Frobenius_pre(T, p, pi);
   if (DEBUGLEVEL>=6) timer_printf(&ti,"Flx_Frobenius");
-  D = Flx_ddf_Shoup(T, XP, p);
+  D = Flx_ddf_Shoup(T, XP, p, pi);
   if (DEBUGLEVEL>=6) timer_printf(&ti,"Flx_ddf_Shoup");
   s = ddf_to_nbfact(D);
   V = cgetg(s+1, t_COL);
@@ -2225,9 +2231,9 @@ Flx_factor_Shoup(GEN T, ulong p)
     Di = Flx_normalize(Di, p);
     if (ni == i) { gel(V, s++) = Di; continue; }
     if (ri <= e*expu(e))
-      Flx_edf(Di, XP, i, p, V, s);
+      Flx_edf(Di, XP, i, p, pi, V, s);
     else
-      Flx_edf_simple(Di, XP, i, p, V, s);
+      Flx_edf_simple(Di, XP, i, p, pi, V, s);
     if (DEBUGLEVEL>=6) timer_printf(&ti,"Flx_edf(%ld)",i);
     s += ri;
   }
@@ -2237,14 +2243,15 @@ Flx_factor_Shoup(GEN T, ulong p)
 static GEN
 Flx_factor_Cantor(GEN T, ulong p)
 {
-  GEN E, F, V = Flx_factor_squarefree(get_Flx_mod(T), p);
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  GEN E, F, V = Flx_factor_squarefree_pre(get_Flx_mod(T), p, pi);
   long i, j, l = lg(V);
   F = cgetg(l, t_VEC);
   E = cgetg(l, t_VEC);
   for (i=1, j=1; i < l; i++)
     if (degpol(gel(V,i)))
     {
-      GEN Fj = Flx_factor_Shoup(gel(V,i), p);
+      GEN Fj = Flx_factor_Shoup(gel(V,i), p, pi);
       gel(F, j) = Fj;
       gel(E, j) = const_vecsmall(lg(Fj)-1, i);
       j++;
@@ -2253,23 +2260,27 @@ Flx_factor_Cantor(GEN T, ulong p)
 }
 
 GEN
-Flx_ddf(GEN T, ulong p)
+Flx_ddf_pre(GEN T, ulong p, ulong pi)
 {
   GEN XP;
-  T = Flx_get_red(T, p);
-  XP = Flx_Frobenius(T, p);
-  return ddf_to_ddf2(Flx_ddf_Shoup(T, XP, p));
+  T = Flx_get_red_pre(T, p, pi);
+  XP = Flx_Frobenius_pre(T, p, pi);
+  return ddf_to_ddf2(Flx_ddf_Shoup(T, XP, p, pi));
 }
+GEN
+Flx_ddf(GEN T, ulong p)
+{ return Flx_ddf_pre(T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 static GEN
 Flx_simplefact_Cantor(GEN T, ulong p)
 {
-  GEN V;
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   long i, l;
-  T = Flx_get_red(T, p);
-  V = Flx_factor_squarefree(get_Flx_mod(T), p); l = lg(V);
+  GEN V;
+  T = Flx_get_red_pre(T, p, pi);
+  V = Flx_factor_squarefree_pre(get_Flx_mod(T), p, pi); l = lg(V);
   for (i=1; i < l; i++)
-    gel(V,i) = Flx_ddf_Shoup(gel(V,i), Flx_Frobenius(gel(V,i), p), p);
+    gel(V,i) = Flx_ddf_Shoup(gel(V,i), Flx_Frobenius_pre(gel(V,i), p,pi), p,pi);
   return vddf_to_simplefact(V, get_Flx_degree(T));
 }
 
@@ -2278,15 +2289,16 @@ Flx_isirred_Cantor(GEN Tp, ulong p)
 {
   pari_sp av = avma;
   pari_timer ti;
-  long n;
   GEN T = get_Flx_mod(Tp), dT = Flx_deriv(T, p), XP, D;
-  if (degpol(Flx_gcd(T, dT, p)) != 0) return gc_bool(av,0);
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  long n;
+  if (degpol(Flx_gcd_pre(T, dT, p, pi)) != 0) return gc_bool(av,0);
   n = get_Flx_degree(T);
-  T = Flx_get_red(Tp, p);
+  T = Flx_get_red_pre(Tp, p, pi);
   if (DEBUGLEVEL>=6) timer_start(&ti);
-  XP = Flx_Frobenius(T, p);
+  XP = Flx_Frobenius_pre(T, p, pi);
   if (DEBUGLEVEL>=6) timer_printf(&ti,"Flx_Frobenius");
-  D = Flx_ddf_Shoup(T, XP, p);
+  D = Flx_ddf_Shoup(T, XP, p, pi);
   if (DEBUGLEVEL>=6) timer_printf(&ti,"Flx_ddf_Shoup");
   return gc_bool(av, degpol(gel(D,n)) == n);
 }
@@ -2325,41 +2337,43 @@ Flx_nbfact_by_degree(GEN T, long *nb, ulong p)
 {
   GEN XP, D;
   pari_timer ti;
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   long i, s, n = get_Flx_degree(T);
   GEN V = const_vecsmall(n, 0);
   pari_sp av = avma;
-  T = Flx_get_red(T, p);
+  T = Flx_get_red_pre(T, p, pi);
   if (DEBUGLEVEL>=6) timer_start(&ti);
-  XP = Flx_Frobenius(T, p);
+  XP = Flx_Frobenius_pre(T, p, pi);
   if (DEBUGLEVEL>=6) timer_printf(&ti,"Flx_Frobenius");
-  D = Flx_ddf_Shoup(T, XP, p);
+  D = Flx_ddf_Shoup(T, XP, p, pi);
   if (DEBUGLEVEL>=6) timer_printf(&ti,"Flx_ddf_Shoup");
-  for (i = 1, s = 0; i <= n; i++)
-  {
-    V[i] = degpol(gel(D,i))/i;
-    s += V[i];
-  }
-  *nb = s;
-  set_avma(av); return V;
+  for (i = 1, s = 0; i <= n; i++) { V[i] = degpol(gel(D,i))/i; s += V[i]; }
+  *nb = s; set_avma(av); return V;
 }
 
 long
-Flx_nbfact_Frobenius(GEN T, GEN XP, ulong p)
+Flx_nbfact_Frobenius_pre(GEN T, GEN XP, ulong p, ulong pi)
 {
   pari_sp av = avma;
-  long s = ddf_to_nbfact(Flx_ddf_Shoup(T, XP, p));
+  long s = ddf_to_nbfact(Flx_ddf_Shoup(T, XP, p, pi));
   return gc_long(av,s);
 }
+long
+Flx_nbfact_Frobenius(GEN T, GEN XP, ulong p)
+{ return Flx_nbfact_Frobenius_pre(T, XP, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 /* T must be squarefree mod p*/
 long
-Flx_nbfact(GEN T, ulong p)
+Flx_nbfact_pre(GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;
-  GEN XP = Flx_Frobenius(T, p);
-  long n = Flx_nbfact_Frobenius(T, XP, p);
+  GEN XP = Flx_Frobenius_pre(T, p, pi);
+  long n = Flx_nbfact_Frobenius_pre(T, XP, p, pi);
   return gc_long(av,n);
 }
+long
+Flx_nbfact(GEN T, ulong p)
+{ return Flx_nbfact_pre(T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 int
 Flx_is_irred(GEN f, ulong p)

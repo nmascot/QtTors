@@ -6185,10 +6185,14 @@ If \kbd{pt} is not \kbd{NULL}, set it to $g$ such that $g^k = f$.
 
 \fun{GEN}{Flx_ddf}{GEN f, ulong p} Assumes that $p$ is prime.
 
+\fun{GEN}{Flx_ddf_pre}{GEN f, ulong p, ulong pi}
+
 \fun{GEN}{Flx_factor_squarefree}{GEN f, ulong p} returns the squarefree
 factorization of $f$ modulo $p$. This is a vector $[u_1,\dots,u_k]$
 of pairwise coprime \kbd{Flx} such that $u_k \neq 1$ and $f = \prod u_i^i$.
 Shallow function. Assumes that $p$ is prime.
+
+\fun{GEN}{Flx_factor_squarefree_pre}{GEN f, ulong p, ulong pi}
 
 \fun{GEN}{Flx_mod_Xn1}{GEN T, ulong n, ulong p} return $T$ modulo
 $(X^n + 1, p)$. Shallow function.
@@ -6313,8 +6317,12 @@ Assumes that $p$ is prime.
 \fun{long}{Flx_nbfact}{GEN z, ulong p}, as \kbd{FpX\_nbfact}.
 Assumes that $p$ is prime.
 
+\fun{long}{Flx_nbfact_pre}{GEN z, ulong p, ulong pi}
+
 \fun{long}{Flx_nbfact_Frobenius}{GEN f, GEN XP, ulong p},
 as \kbd{FpX\_nbfact\_Frobenius}. Assumes that $p$ is prime.
+
+\fun{long}{Flx_nbfact_Frobenius_pre}{GEN f, GEN XP, ulong p, ulong pi}
 
 \fun{GEN}{Flx_degfact}{GEN f, ulong p}, as \kbd{FpX\_degfact}.
 Assumes that $p$ is prime.
@@ -6483,6 +6491,8 @@ the pseudoinverse of $p$, or $0$ in which case we assume
 \fun{GEN}{Flxq_matrix_pow}{GEN x, long m, long n, GEN T, ulong p},
 see \kbd{FpXQ\_matrix\_pow}.
 
+\fun{GEN}{Flxq_matrix_pow_pre}{GEN x, long m, long n, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{Flxq_autpow}{GEN a, long n, GEN T, ulong p}
 see \kbd{FpXQ\_autpow}.
 
@@ -6497,35 +6507,29 @@ see \kbd{FpXQ\_autsum}.
 \fun{GEN}{Flxq_auttrace}{GEN a, ulong n, GEN T, ulong p}
 see \kbd{FpXQ\_auttrace}.
 
+\fun{GEN}{Flxq_auttrace_pre}{GEN a, ulong n, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{Flxq_ffisom_inv}{GEN S, GEN T, ulong p}, as \kbd{FpXQ\_ffisom\_inv}.
 
 \fun{GEN}{Flx_Flxq_eval}{GEN f, GEN x, GEN T, ulong p} returns
 $\kbd{f}(\kbd{x})$.
 
 \fun{GEN}{Flx_Flxq_eval_pre}{GEN f, GEN x, GEN T, ulong p, ulong pi}
-as \kbd{Flx\_Flxq\_eval}, where \var{pi} is a pseudoinverse of $p$,
-or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_FlxqV_eval}{GEN f, GEN x, GEN T, ulong p},
 see \kbd{FpX\_FpXQV\_eval}.
 
-\fun{GEN}{Flx_FlxqV_eval_pre}{GEN f, GEN x, GEN T, ulong p, ulong pi},
-see \kbd{FlX\_FlxqV\_eval}. We assume \var{pi} is a pseudoinverse of $p$, or
-$0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
+\fun{GEN}{Flx_FlxqV_eval_pre}{GEN f, GEN x, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxC_Flxq_eval}{GEN C, GEN x, GEN T, ulong p},
 see \kbd{FpXC\_FpXQ\_eval}.
 
-\fun{GEN}{FlxC_Flxq_eval_pre}{GEN C, GEN x, GEN T, ulong p, ulong pi},
-as \kbd{FlxC\_Flxq\_eval}. We assume \var{pi} is a pseudoinverse of $p$, or
-$0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
+\fun{GEN}{FlxC_Flxq_eval_pre}{GEN C, GEN x, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxC_FlxqV_eval}{GEN C, GEN V, GEN T, ulong p}
 see \kbd{FpXC\_FpXQV\_eval}.
 
 \fun{GEN}{FlxC_FlxqV_eval_pre}{GEN C, GEN V, GEN T, ulong p, ulong pi}
-as \kbd{FlxC\_FlxqV\_eval} where \var{pi} is a pseudoinverse of $p$,
-or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{FlxqV_roots_to_pol}{GEN V, GEN T, ulong p, long v} as
 \kbd{FqV\_roots\_to\_pol} returning an \kbd{FlxqX} in variable $v$.
@@ -6556,11 +6560,15 @@ Return \kbd{NULL} if \kbd{x} is not a square.
 returns $b$ such that $b^p=a$. Only useful if $p$ is less than the degree of
 $T$.
 
+\fun{GEN}{Flxq_lroot_fast_pre}{GEN a, GEN V, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{Flxq_charpoly}{GEN x, GEN T, ulong p} returns the characteristic
 polynomial of \kbd{x}
 
 \fun{GEN}{Flxq_minpoly}{GEN x, GEN T, ulong p} returns the minimal polynomial
 of \kbd{x}
+
+\fun{GEN}{Flxq_minpoly_pre}{GEN x, GEN T, ulong p, ulong pi}
 
 \fun{ulong}{Flxq_norm}{GEN x, GEN T, ulong p} returns the norm of \kbd{x}
 
@@ -6852,6 +6860,8 @@ irreducible factors (the sum of the $D[i]$).
 
 \fun{GEN}{FlxqX_FlxqXQ_eval}{GEN Q, GEN x, GEN S, GEN T, ulong p} as
 \kbd{FpX\_FpXQ\_eval}.
+
+\fun{GEN}{FlxqX_FlxqXQ_eval_pre}{GEN Q, GEN x, GEN S, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqX_FlxqXQV_eval}{GEN P, GEN V, GEN S, GEN T, ulong p} as
 \kbd{FpX\_FpXQV\_eval}.

@@ -3027,14 +3027,17 @@ Flxq_auttrace_sqr(void *E, GEN x)
 { return Flxq_auttrace_mul(E, x, x); }
 
 GEN
-Flxq_auttrace(GEN x, ulong n, GEN T, ulong p)
+Flxq_auttrace_pre(GEN x, ulong n, GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;
   struct _Flxq D;
-  set_Flxq(&D, T, p);
+  set_Flxq_pre(&D, T, p, pi);
   x = gen_powu_i(x,n,(void*)&D,Flxq_auttrace_sqr,Flxq_auttrace_mul);
   return gerepilecopy(av, x);
 }
+GEN
+Flxq_auttrace(GEN x, ulong n, GEN T, ulong p)
+{ return Flxq_auttrace_pre(x, n, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 static long
 bounded_order(ulong p, GEN b, long k)
@@ -3354,10 +3357,9 @@ Flxq_transmul(GEN tau, GEN a, long n, ulong p, ulong pi)
 }
 
 GEN
-Flxq_minpoly(GEN x, GEN T, ulong p)
+Flxq_minpoly_pre(GEN x, GEN T, ulong p, ulong pi)
 {
   pari_sp ltop = avma;
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   long vT = get_Flx_var(T), n = get_Flx_degree(T);
   GEN v_x;
   GEN g = pol1_Flx(vT), tau = pol1_Flx(vT);
@@ -3394,6 +3396,9 @@ Flxq_minpoly(GEN x, GEN T, ulong p)
   g = Flx_normalize(g,p);
   return gerepileuptoleaf(ltop,g);
 }
+GEN
+Flxq_minpoly(GEN x, GEN T, ulong p)
+{ return Flxq_minpoly_pre(x, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
 Flxq_conjvec(GEN x, GEN T, ulong p)
