@@ -53,20 +53,20 @@ Flx_cnext(GEN t, ulong p)
 }
 
 static int
-has_deg1_auto(GEN T, ulong p)
+has_deg1_auto(GEN T, ulong p, ulong pi)
 {
   long i, n = degpol(T);
   GEN a = polx_Flx(get_Flx_var(T));
   for (i=1; i<n; i++)
   {
-    a = Flxq_powu(a, p, T, p);
+    a = Flxq_powu_pre(a, p, T, p, pi);
     if (degpol(a)==1) return 1;
   }
   return 0;
 }
 
 static void
-smallirred_Flx_next(GEN a, long p)
+smallirred_Flx_next(GEN a, long p, ulong pi)
 {
   do
   {
@@ -74,16 +74,16 @@ smallirred_Flx_next(GEN a, long p)
     for(i=2;;i++)
       if (++a[i]==p) a[i]=0;
       else break;
-  } while (!Flx_is_irred(a, p) || has_deg1_auto(a,p) );
+  } while (!Flx_is_irred(a, p) || has_deg1_auto(a,p,pi) );
 }
 
 /* Avoid automorphisms of degree 1 */
 static GEN
-smallirred_Flx(long p, ulong n, long sv)
+smallirred_Flx(long p, ulong n, long sv, ulong pi)
 {
   GEN a = zero_zv(n+2);
   a[1] = sv; a[3] = 1; a[n+2] = 1;
-  smallirred_Flx_next(a, p);
+  smallirred_Flx_next(a, p, pi);
   return a;
 }
 
@@ -166,7 +166,7 @@ Flx_renormalize_inplace(GEN x, long lx)
    = R + (a*b-c^2)*C+a*b*c
  */
 static void
-Flxq_log_cubic(struct Flxq_log_rel *r, GEN C, GEN R, ulong p)
+Flxq_log_cubic(struct Flxq_log_rel *r, GEN C, GEN R, ulong p, ulong pi)
 {
   long l = lg(C);
   GEN a = zero_zv(l); /*We allocate one extra word to catch overflow*/
@@ -187,10 +187,10 @@ Flxq_log_cubic(struct Flxq_log_rel *r, GEN C, GEN R, ulong p)
       c = Flx_neg(Flx_add(a,b,p),p);
       k = Flx_cindex(c, p);
       if (k > j) continue;
-      pab  = Flx_mul(a, b, p);
-      pabc = Flx_mul(pab,c,p);
-      pabc2= Flx_sub(pab,Flx_sqr(c,p),p);
-      h = Flx_add(R,Flx_add(Flx_mul(C,pabc2,p),pabc,p), p);
+      pab  = Flx_mul_pre(a, b, p, pi);
+      pabc = Flx_mul_pre(pab,c,p,pi);
+      pabc2= Flx_sub(pab,Flx_sqr_pre(c,p,pi),p);
+      h = Flx_add(R,Flx_add(Flx_mul_pre(C,pabc2,p,pi),pabc,p), p);
       h = Flx_normalize(h, p);
       if (Flx_addifsmooth3(&av, r, h, i, j, k, p)) return;
     }
@@ -198,18 +198,19 @@ Flxq_log_cubic(struct Flxq_log_rel *r, GEN C, GEN R, ulong p)
 }
 
 static GEN
-Flxq_log_find_rel(GEN b, long r, GEN T, ulong p, GEN *g, long *e)
+Flxq_log_find_rel(GEN b, long r, GEN T, ulong p, ulong pi, GEN *g, long *e)
 {
   pari_sp av = avma;
   while (1)
   {
     GEN M;
-    *g = Flxq_mul(*g, b, T, p); (*e)++;
-    M = Flx_halfgcd(*g,T,p);
-    if (Flx_is_smooth(gcoeff(M,1,1), r, p))
+    *g = Flxq_mul_pre(*g, b, T, p, pi); (*e)++;
+    M = Flx_halfgcd_pre(*g,T,p,pi);
+    if (Flx_is_smooth_pre(gcoeff(M,1,1), r, p, pi))
     {
-      GEN z = Flx_add(Flx_mul(gcoeff(M,1,1),*g,p), Flx_mul(gcoeff(M,1,2),T,p),p);
-      if (Flx_is_smooth(z, r, p))
+      GEN z = Flx_add(Flx_mul_pre(gcoeff(M,1,1),*g,p,pi),
+                      Flx_mul_pre(gcoeff(M,1,2),T,p,pi),p);
+      if (Flx_is_smooth_pre(z, r, p, pi))
       {
         GEN F = factorel(z, p);
         GEN G = factorel(gcoeff(M,1,1), p);
@@ -330,7 +331,7 @@ smooth_best(long p, long n, long *pt_r, long *pt_nb)
 }
 
 static GEN
-check_kernel(long r, GEN M, long nbi, long nbrow, GEN T, ulong p, GEN m)
+check_kernel(long r, GEN M, long nbi, long nbrow, GEN T, ulong p, ulong pi, GEN m)
 {
   pari_sp av = avma;
   long N = 3*upowuu(p, r);
@@ -345,16 +346,16 @@ check_kernel(long r, GEN M, long nbi, long nbrow, GEN T, ulong p, GEN m)
   while (signe(gel(K,u))==0)
     u++;
   K = FpC_Fp_mul(K, Fp_inv(gel(K, u), m), m);
-  g = Flxq_pow(cindex_Flx(u, r, p, T[1]), idx, T, p);
+  g = Flxq_pow_pre(cindex_Flx(u, r, p, T[1]), idx, T, p, pi);
   tbs = maxss(1, expu(nbi/expi(m)));
-  tab = Flxq_pow_init(g, q, tbs, T, p);
+  tab = Flxq_pow_init_pre(g, q, tbs, T, p, pi);
   setlg(K, N);
   for (i=1; i<N; i++)
   {
     GEN k = gel(K,i);
     pari_sp av = avma;
-    long t = signe(k) && Flx_equal(Flxq_pow_table(tab, k, T, p),
-                                   Flxq_pow(cindex_Flx(i,r,p,T[1]), idx, T, p));
+    long t = signe(k) && Flx_equal(Flxq_pow_table_pre(tab, k, T, p, pi),
+                                   Flxq_pow_pre(cindex_Flx(i,r,p,T[1]), idx, T, p, pi));
     set_avma(av);
     if (!t)
       gel(K,i) = cgetineg(lm);
@@ -367,7 +368,7 @@ check_kernel(long r, GEN M, long nbi, long nbrow, GEN T, ulong p, GEN m)
 }
 
 static GEN
-Flxq_log_rec(GEN W, GEN a, long r, GEN T, ulong p, GEN m)
+Flxq_log_rec(GEN W, GEN a, long r, GEN T, ulong p, ulong pi, GEN m)
 {
   long AV = 0, u = 1;
   GEN g = a, b;
@@ -380,7 +381,7 @@ Flxq_log_rec(GEN W, GEN a, long r, GEN T, ulong p, GEN m)
     long i, l;
     GEN V, F, E, Ao;
     timer_start(&ti);
-    V = Flxq_log_find_rel(b, r, T, p, &g, &AV);
+    V = Flxq_log_find_rel(b, r, T, p, pi, &g, &AV);
     if (DEBUGLEVEL>1) timer_printf(&ti,"%ld-smooth element",r);
     F = gel(V,1); E = gel(V,2);
     l = lg(F);
@@ -411,6 +412,7 @@ Flxq_log_use_index_cubic(GEN m, GEN T0, ulong p)
 static GEN
 Flxq_log_index_cubic(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
 {
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   long n = get_Flx_degree(T0), r, nb;
   pari_sp av = avma;
   struct Flxq_log_rel rel;
@@ -426,14 +428,14 @@ Flxq_log_index_cubic(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
     err_printf("Size FB=%ld, looking for %ld relations, %Ps tests needed\n", nbi, nb,cost);
     timer_start(&ti);
   }
-  T = smallirred_Flx(p,n,get_Flx_var(T0));
+  T = smallirred_Flx(p,n,get_Flx_var(T0), pi);
   for(;;)
   {
     S = Flx_ffisom(T0,T,p);
-    a = Flx_Flxq_eval(a0, S, T, p);
-    b = Flx_Flxq_eval(b0, S, T, p);
+    a = Flx_Flxq_eval_pre(a0, S, T, p, pi);
+    b = Flx_Flxq_eval_pre(b0, S, T, p, pi);
     C = Flx_shift(pol1_Flx(get_Flx_var(T)), (n+2)/3);
-    R = Flxq_powu(C,3,T,p);
+    R = Flxq_powu_pre(C,3,T,p,pi);
     if (DEBUGLEVEL)
       timer_printf(&ti," model change: %Ps",Flx_to_ZX(T));
     rel.nbmax=2*nb;
@@ -441,39 +443,40 @@ Flxq_log_index_cubic(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
     rel.rel = M;
     rel.nbrel = 0; rel.r = r; rel.off = 3*upowuu(p,r);
     rel.nb = nbi; rel.nbexp = nb; rel.nbtest=0;
-    Flxq_log_cubic(&rel, C, R, p);
+    Flxq_log_cubic(&rel, C, R, p, pi);
     setlg(M,1+rel.nbrel);
     if (DEBUGLEVEL)
     {
       err_printf("\n");
       timer_printf(&ti," %ld relations, %ld generators (%ld tests)",rel.nbrel,rel.nb,rel.nbtest);
     }
-    W = check_kernel(r, M, nbi, rel.off + rel.nb - nbi, T, p, m);
+    W = check_kernel(r, M, nbi, rel.off + rel.nb - nbi, T, p, pi, m);
     if (W) break;
     if (DEBUGLEVEL) timer_start(&ti);
-    smallirred_Flx_next(T,p);
+    smallirred_Flx_next(T,p, pi);
   }
   if (DEBUGLEVEL) timer_start(&ti);
-  Ao = Flxq_log_rec(W, a, r, T, p, m);
+  Ao = Flxq_log_rec(W, a, r, T, p, pi, m);
   if (DEBUGLEVEL) timer_printf(&ti,"smooth element");
-  Bo = Flxq_log_rec(W, b, r, T, p, m);
+  Bo = Flxq_log_rec(W, b, r, T, p, pi, m);
   if (DEBUGLEVEL) timer_printf(&ti,"smooth generator");
   e = Fp_div(Ao, Bo, m);
-  if (!Flx_equal(Flxq_pow(b0, e, T0, p), a0)) pari_err_BUG("Flxq_log");
+  if (!Flx_equal(Flxq_pow_pre(b0, e, T0, p, pi), a0)) pari_err_BUG("Flxq_log");
   return gerepileupto(av, e);
 }
 
 INLINE GEN Flx_frob(GEN u, ulong p) { return Flx_inflate(u, p); }
 
 static GEN
-rel_Coppersmith(long r, GEN u, GEN v, long h, GEN R, long d, ulong p)
+rel_Coppersmith(long r, GEN u, GEN v, long h, GEN R, long d, ulong p, ulong pi)
 {
   GEN a, b, F, G, M;
-  if (degpol(Flx_gcd(u,v,p))) return NULL;
+  if (degpol(Flx_gcd_pre(u,v,p,pi))) return NULL;
   a = Flx_add(Flx_shift(u, h), v, p);
-  if (lgpol(a)==0 || !Flx_is_smooth(a, r, p)) return NULL;
-  b = Flx_add(Flx_mul(R, Flx_frob(u, p), p), Flx_shift(Flx_frob(v, p),d), p);
-  if (!Flx_is_smooth(b, r, p)) return NULL;
+  if (lgpol(a)==0 || !Flx_is_smooth_pre(a, r, p, pi)) return NULL;
+  b = Flx_add(Flx_mul_pre(R, Flx_frob(u, p), p, pi),
+              Flx_shift(Flx_frob(v, p),d), p);
+  if (!Flx_is_smooth_pre(b, r, p, pi)) return NULL;
   F = factorel(a, p); G = factorel(b, p);
   M = mkmat2(vecsmall_concat(gel(F, 1), vecsmall_append(gel(G, 1), 2*p)),
              vecsmall_concat(zv_z_mul(gel(F, 2),p), vecsmall_append(zv_neg(gel(G, 2)),d)));
@@ -483,7 +486,7 @@ rel_Coppersmith(long r, GEN u, GEN v, long h, GEN R, long d, ulong p)
 GEN
 Flxq_log_Coppersmith_worker(GEN u, long i, GEN V, GEN R)
 {
-  long r = V[1], h = V[2], d = V[3], p = V[4], dT = V[5];
+  long r = V[1], h = V[2], d = V[3], p = V[4], pi = V[5], dT = V[6];
   pari_sp ltop = avma;
   GEN v = zero_zv(dT+2);
   GEN L = cgetg(2*i+1, t_VEC);
@@ -499,17 +502,17 @@ Flxq_log_Coppersmith_worker(GEN u, long i, GEN V, GEN R)
     lv = Flx_lead(v);
     set_avma(av);
     if (lu != 1 && lv != 1) continue;
-    if (degpol(Flx_gcd(u, v, p))!=0) continue;
+    if (degpol(Flx_gcd_pre(u, v, p, pi))!=0) continue;
     if (lu==1)
     {
-      z = rel_Coppersmith(r, u, v, h, R, d, p);
+      z = rel_Coppersmith(r, u, v, h, R, d, p, pi);
       nbtest++;
       if (z) { gel(L, rel++) = z; av = avma; }
     }
     if (i==j) continue;
     if (lv==1)
     {
-      z = rel_Coppersmith(r, v, u, h, R, d, p);
+      z = rel_Coppersmith(r, v, u, h, R, d, p, pi);
       nbtest++;
       if (z) { gel(L, rel++) = z; av = avma; }
     }
@@ -519,7 +522,7 @@ Flxq_log_Coppersmith_worker(GEN u, long i, GEN V, GEN R)
 }
 
 static GEN
-Flxq_log_Coppersmith(long nbrel, long r, GEN T, ulong p)
+Flxq_log_Coppersmith(long nbrel, long r, GEN T, ulong p, ulong pi)
 {
   pari_sp av;
   long dT = degpol(T);
@@ -531,7 +534,7 @@ Flxq_log_Coppersmith(long nbrel, long r, GEN T, ulong p)
   GEN M = cgetg(nbrel+1, t_VEC);
   long i = 1;
   GEN worker = snm_closure(is_entry("_Flxq_log_Coppersmith_worker"),
-               mkvec2(mkvecsmall5(r,h,d,p,dT), R));
+               mkvec2(mkvecsmalln(6, r,h,d,p,pi,dT), R));
   struct pari_mt pt;
   long running, pending = 0, stop=0;
   if (DEBUGLEVEL) err_printf("Coppersmith (R = %ld): ",degpol(R));
@@ -568,10 +571,10 @@ Flxq_log_Coppersmith(long nbrel, long r, GEN T, ulong p)
   return M;
 }
 
-static GEN Flxq_log_Coppersmith_d(GEN W, GEN g, long r, GEN T, ulong p, GEN mo);
+static GEN Flxq_log_Coppersmith_d(GEN W, GEN g, long r, GEN T, ulong p, ulong pi, GEN mo);
 
 static GEN
-Flxq_log_from_rel(GEN W, GEN rel, long r, GEN T, ulong p, GEN m)
+Flxq_log_from_rel(GEN W, GEN rel, long r, GEN T, ulong p, ulong pi, GEN m)
 {
   pari_sp av = avma;
   GEN F = gel(rel,1), E = gel(rel,2), o = gen_0;
@@ -584,7 +587,7 @@ Flxq_log_from_rel(GEN W, GEN rel, long r, GEN T, ulong p, GEN m)
     else if (signe(R)<0) /* Not yet tested */
     {
       setsigne(gel(W,F[i]),0);
-      R = Flxq_log_Coppersmith_d(W, cindex_Flx(F[i],r,p,T[1]), r, T, p, m);
+      R = Flxq_log_Coppersmith_d(W, cindex_Flx(F[i],r,p,T[1]), r, T, p, pi, m);
       if (!R) return NULL;
     }
     o = Fp_add(o, mulis(R, E[i]), m);
@@ -593,7 +596,7 @@ Flxq_log_from_rel(GEN W, GEN rel, long r, GEN T, ulong p, GEN m)
 }
 
 static GEN
-Flxq_log_Coppersmith_d(GEN W, GEN g, long r, GEN T, ulong p, GEN mo)
+Flxq_log_Coppersmith_d(GEN W, GEN g, long r, GEN T, ulong p, ulong pi, GEN mo)
 {
   pari_sp av = avma, av2;
   long dg = degpol(g), k = r-1, m = maxss((dg-k)/2,0);
@@ -601,12 +604,12 @@ Flxq_log_Coppersmith_d(GEN W, GEN g, long r, GEN T, ulong p, GEN mo)
   GEN v = cgetg(k+m+1,t_MAT);
   long dT = degpol(T);
   long h = dT/p, d = dT-h*p;
-  GEN R = Flx_rem(Flx_shift(pol1_Flx(T[1]), dT), T, p);
-  GEN z = Flx_rem(Flx_shift(pol1_Flx(T[1]), h), g, p);
+  GEN R = Flx_rem_pre(Flx_shift(pol1_Flx(T[1]), dT), T, p, pi);
+  GEN z = Flx_rem_pre(Flx_shift(pol1_Flx(T[1]), h), g, p, pi);
   for(i=1; i<=k+m; i++)
   {
     gel(v,i) = Flx_to_Flv(Flx_shift(z,-l),m);
-    z = Flx_rem(Flx_shift(z,1),g,p);
+    z = Flx_rem_pre(Flx_shift(z,1),g,p,pi);
   }
   v = Flm_ker(v,p);
   for(i=1; i<=k; i++)
@@ -626,13 +629,14 @@ Flxq_log_Coppersmith_d(GEN W, GEN g, long r, GEN T, ulong p, GEN mo)
       if (r) q = Flx_add(q, Flx_Fl_mul(gel(v,j), r, p), p);
     }
     qh = Flx_shift(q, h);
-    p0 = Flx_rem(qh, g, p);
-    b = Flx_sub(Flx_mul(R, Flx_frob(q, p), p), Flx_shift(Flx_frob(p0, p), d), p);
-    if (lgpol(b)==0 || !Flx_is_smooth(b, r, p)) continue;
-    a = Flx_div(Flx_sub(qh, p0, p), g, p);
-    if (degpol(Flx_gcd(a, q, p)) &&  degpol(Flx_gcd(a, p0 ,p)))
+    p0 = Flx_rem_pre(qh, g, p, pi);
+    b = Flx_sub(Flx_mul_pre(R, Flx_frob(q, p), p, pi),
+                Flx_shift(Flx_frob(p0, p), d), p);
+    if (lgpol(b)==0 || !Flx_is_smooth_pre(b, r, p, pi)) continue;
+    a = Flx_div_pre(Flx_sub(qh, p0, p), g, p, pi);
+    if (degpol(Flx_gcd_pre(a, q, p, pi)) && degpol(Flx_gcd_pre(a, p0, p, pi)))
       continue;
-    if (!(lgpol(a)==0 || !Flx_is_smooth(a, r, p)))
+    if (!(lgpol(a)==0 || !Flx_is_smooth_pre(a, r, p, pi)))
     {
       GEN F = factorel(b, p);
       GEN G = factorel(a, p);
@@ -640,7 +644,7 @@ Flxq_log_Coppersmith_d(GEN W, GEN g, long r, GEN T, ulong p, GEN mo)
       GEN E  = vecsmall_concat(vecsmall_append(gel(F, 2), -d),
           zv_z_mul(gel(G, 2),-p));
       GEN R  = famatsmall_reduce(mkmat2(FG, E));
-      GEN l  = Flxq_log_from_rel(W, R, r, T, p, mo);
+      GEN l  = Flxq_log_from_rel(W, R, r, T, p, pi, mo);
       if (!l) continue;
       l = Fp_divu(l,p,mo);
       if (dg <= r)
@@ -657,7 +661,7 @@ Flxq_log_Coppersmith_d(GEN W, GEN g, long r, GEN T, ulong p, GEN mo)
 }
 
 static GEN
-Flxq_log_Coppersmith_rec(GEN W, long r2, GEN a, long r, GEN T, ulong p, GEN m)
+Flxq_log_Coppersmith_rec(GEN W, long r2, GEN a, long r, GEN T, ulong p, ulong pi, GEN m)
 {
   GEN b = polx_Flx(T[1]);
   long AV = 0;
@@ -668,7 +672,7 @@ Flxq_log_Coppersmith_rec(GEN W, long r2, GEN a, long r, GEN T, ulong p, GEN m)
     long i, l;
     GEN V, F, E, Ao;
     timer_start(&ti);
-    V = Flxq_log_find_rel(b, r2, T, p, &g, &AV);
+    V = Flxq_log_find_rel(b, r2, T, p, pi, &g, &AV);
     if (DEBUGLEVEL>1) timer_printf(&ti,"%ld-smooth element",r2);
     F = gel(V,1); E = gel(V,2);
     l = lg(F);
@@ -684,14 +688,14 @@ Flxq_log_Coppersmith_rec(GEN W, long r2, GEN a, long r, GEN T, ulong p, GEN m)
         else if (signe(gel(W,F[i]))<0)
         {
           setsigne(gel(W,F[i]),0);
-          R = Flxq_log_Coppersmith_d(W,Fi,r,T,p,m);
+          R = Flxq_log_Coppersmith_d(W,Fi,r,T,p,pi,m);
         } else
           R = gel(W,F[i]);
       }
       else
       {
         if (Flx_equal(Fi,bad)) break;
-        R = Flxq_log_Coppersmith_d(W,Fi,r,T,p,m);
+        R = Flxq_log_Coppersmith_d(W,Fi,r,T,p,pi,m);
         if (!R) bad = Fi;
       }
       if (!R) break;
@@ -704,6 +708,7 @@ Flxq_log_Coppersmith_rec(GEN W, long r2, GEN a, long r, GEN T, ulong p, GEN m)
 static GEN
 Flxq_log_index_Coppersmith(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
 {
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   pari_sp av = avma;
   GEN  M, S, a, b, Ao=NULL, Bo=NULL, W, e;
   pari_timer ti;
@@ -718,21 +723,21 @@ Flxq_log_index_Coppersmith(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
     err_printf("Coppersmith: Size FB=%ld rel. needed=%ld\n", nbi, nbrel);
     timer_start(&ti);
   }
-  T = smallirred_Flx(p,n,get_Flx_var(T0));
+  T = smallirred_Flx(p,n,get_Flx_var(T0), pi);
   S = Flx_ffisom(T0,T,p);
-  a = Flx_Flxq_eval(a0, S, T, p);
-  b = Flx_Flxq_eval(b0, S, T, p);
+  a = Flx_Flxq_eval_pre(a0, S, T, p, pi);
+  b = Flx_Flxq_eval_pre(b0, S, T, p, pi);
   if (DEBUGLEVEL) timer_printf(&ti,"model change");
-  M = Flxq_log_Coppersmith(nbrel, r, T, p);
+  M = Flxq_log_Coppersmith(nbrel, r, T, p, pi);
   if (DEBUGLEVEL) timer_printf(&ti,"relations");
-  W = check_kernel(r, M, nbi, 3*upowuu(p,r), T, p, m);
+  W = check_kernel(r, M, nbi, 3*upowuu(p,r), T, p, pi, m);
   timer_start(&ti);
-  Ao = Flxq_log_Coppersmith_rec(W, r2, a, r, T, p, m);
+  Ao = Flxq_log_Coppersmith_rec(W, r2, a, r, T, p, pi, m);
   if (DEBUGLEVEL) timer_printf(&ti,"smooth element");
-  Bo = Flxq_log_Coppersmith_rec(W, r2, b, r, T, p, m);
+  Bo = Flxq_log_Coppersmith_rec(W, r2, b, r, T, p, pi, m);
   if (DEBUGLEVEL) timer_printf(&ti,"smooth generator");
   e = Fp_div(Ao, Bo, m);
-  if (!Flx_equal(Flxq_pow(b0,e,T0,p),a0)) pari_err_BUG("Flxq_log");
+  if (!Flx_equal(Flxq_pow_pre(b0,e,T0,p,pi), a0)) pari_err_BUG("Flxq_log");
   return gerepileupto(av, e);
 }
 

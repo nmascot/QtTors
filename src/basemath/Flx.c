@@ -2061,9 +2061,8 @@ Flx_is_l_pow(GEN x, ulong p)
 }
 
 int
-Flx_is_smooth(GEN g, long r, ulong p)
+Flx_is_smooth_pre(GEN g, long r, ulong p, ulong pi)
 {
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   while (1)
   {
     GEN f = Flx_gcd_pre(g, Flx_deriv(g, p), p, pi);
@@ -2073,6 +2072,9 @@ Flx_is_smooth(GEN g, long r, ulong p)
     g = Flx_is_l_pow(f,p) ? Flx_deflate(f, p): f;
   }
 }
+int
+Flx_is_smooth(GEN g, long r, ulong p)
+{ return Flx_is_smooth_pre(g, r, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 static GEN
 Flx_extgcd_basecase(GEN a, GEN b, ulong p, ulong pi, GEN *ptu, GEN *ptv)
@@ -2689,33 +2691,42 @@ Flxq_powu(GEN x, ulong n, GEN T, ulong p)
 
 /* n-Power of x in Z/pZ[X]/(T), as t_VECSMALL. */
 GEN
-Flxq_pow(GEN x, GEN n, GEN T, ulong p)
+Flxq_pow_pre(GEN x, GEN n, GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;
   struct _Flxq D;
   GEN y;
   long s = signe(n);
   if (!s) return pol1_Flx(get_Flx_var(T));
-  if (s < 0) x = Flxq_inv(x,T,p);
+  if (s < 0) x = Flxq_inv_pre(x,T,p,pi);
   if (is_pm1(n)) return s < 0 ? x : Flx_copy(x);
-  set_Flxq(&D, T, p);
+  set_Flxq_pre(&D, T, p, pi);
   y = gen_pow_i(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
   return gerepileuptoleaf(av, y);
 }
+GEN
+Flxq_pow(GEN x, GEN n, GEN T, ulong p)
+{ return Flxq_pow_pre(x, n, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
-Flxq_pow_init(GEN x, GEN n, long k,  GEN T, ulong p)
+Flxq_pow_init_pre(GEN x, GEN n, long k, GEN T, ulong p, ulong pi)
 {
-  struct _Flxq D; set_Flxq(&D, T, p);
+  struct _Flxq D; set_Flxq_pre(&D, T, p, pi);
   return gen_pow_init(x, n, k, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
 }
+GEN
+Flxq_pow_init(GEN x, GEN n, long k, GEN T, ulong p)
+{ return Flxq_pow_init_pre(x, n, k, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
-Flxq_pow_table(GEN R, GEN n, GEN T, ulong p)
+Flxq_pow_table_pre(GEN R, GEN n, GEN T, ulong p, ulong pi)
 {
   struct _Flxq D; set_Flxq(&D, T, p);
   return gen_pow_table(R, n, (void*)&D, &_Flxq_one, &_Flxq_mul);
 }
+GEN
+Flxq_pow_table(GEN R, GEN n, GEN T, ulong p)
+{ return Flxq_pow_table_pre(R, n, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 /* Inverse of x in Z/lZ[X]/(T) or NULL if inverse doesn't exist
  * not stack clean. */
