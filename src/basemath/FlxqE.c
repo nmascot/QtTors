@@ -43,32 +43,43 @@ GEN
 FlxqE_changepoint(GEN x, GEN ch, GEN T, ulong p)
 {
   pari_sp av = avma;
-  GEN p1,z,u,r,s,t,v,v2,v3;
+  GEN p1, p2, z, u, r, s, t, v, v2, v3;
+  ulong pi;
   if (ell_is_inf(x)) return x;
+  pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   u = gel(ch,1); r = gel(ch,2);
   s = gel(ch,3); t = gel(ch,4);
-  v = Flxq_inv(u, T, p); v2 = Flxq_sqr(v, T, p); v3 = Flxq_mul(v,v2, T, p);
-  p1 = Flx_sub(gel(x,1),r, p);
+  v = Flxq_inv_pre(u, T, p, pi);
+  v2 = Flxq_sqr_pre(v, T, p, pi);
+  v3 = Flxq_mul_pre(v,v2, T, p, pi);
+  p1 = Flx_sub(gel(x,1), r, p);
+  p2 = Flx_sub(gel(x,2), Flx_add(Flxq_mul_pre(s, p1, T, p, pi),t, p), p);
   z = cgetg(3,t_VEC);
-  gel(z,1) = Flxq_mul(v2, p1, T, p);
-  gel(z,2) = Flxq_mul(v3, Flx_sub(gel(x,2), Flx_add(Flxq_mul(s, p1, T, p),t, p), p), T, p);
+  gel(z,1) = Flxq_mul_pre(v2, p1, T, p, pi);
+  gel(z,2) = Flxq_mul_pre(v3, p2, T, p, pi);
   return gerepileupto(av, z);
 }
 
 GEN
 FlxqE_changepointinv(GEN x, GEN ch, GEN T, ulong p)
 {
-  GEN u, r, s, t, X, Y, u2, u3, u2X, z;
+  pari_sp av = avma;
+  GEN p1, p2, u, r, s, t, X, Y, u2, u3, u2X, z;
+  ulong pi;
   if (ell_is_inf(x)) return x;
+  pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   X = gel(x,1); Y = gel(x,2);
   u = gel(ch,1); r = gel(ch,2);
   s = gel(ch,3); t = gel(ch,4);
-  u2 = Flxq_sqr(u, T, p); u3 = Flxq_mul(u,u2, T, p);
-  u2X = Flxq_mul(u2,X, T, p);
+  u2 = Flxq_sqr_pre(u, T, p, pi);
+  u3 = Flxq_mul_pre(u,u2, T, p, pi);
+  u2X = Flxq_mul_pre(u2,X, T, p, pi);
+  p1 = Flxq_mul_pre(u3,Y, T, p, pi);
+  p2 = Flx_add(Flxq_mul_pre(s,u2X, T, p, pi), t, p);
   z = cgetg(3, t_VEC);
-  gel(z,1) = Flx_add(u2X,r, p);
-  gel(z,2) = Flx_add(Flxq_mul(u3,Y, T, p), Flx_add(Flxq_mul(s,u2X, T, p), t, p), p);
-  return z;
+  gel(z,1) = Flx_add(u2X, r, p);
+  gel(z,2) = Flx_add(p1, p2, p);
+  return gerepileupto(av, z);
 }
 
 static GEN
