@@ -412,15 +412,17 @@ FlxX_Flx_mul(GEN P, GEN U, ulong p)
 }
 
 GEN
-FlxY_evalx(GEN Q, ulong x, ulong p)
+FlxY_evalx_pre(GEN Q, ulong x, ulong p, ulong pi)
 {
   long i, lb = lg(Q);
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   GEN z;
   z = cgetg(lb,t_VECSMALL); z[1] = evalvarn(varn(Q));
   for (i=2; i<lb; i++) z[i] = Flx_eval_pre(gel(Q,i), x, p, pi);
   return Flx_renormalize(z, lb);
 }
+GEN
+FlxY_evalx(GEN Q, ulong x, ulong p)
+{ return FlxY_evalx_pre(Q, x, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
 FlxY_Flx_translate(GEN P, GEN c, ulong p)
@@ -1285,10 +1287,9 @@ FlxqX_gcd_basecase(GEN a, GEN b, GEN T, ulong p, ulong pi)
 }
 
 GEN
-FlxqX_gcd(GEN x, GEN y, GEN T, ulong p)
+FlxqX_gcd_pre(GEN x, GEN y, GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   x = FlxqX_red_pre(x, T, p, pi);
   y = FlxqX_red_pre(y, T, p, pi);
   if (!signe(x)) return gerepileupto(av, y);
@@ -1306,6 +1307,9 @@ FlxqX_gcd(GEN x, GEN y, GEN T, ulong p)
   }
   return gerepileupto(av, FlxqX_gcd_basecase(x, y, T, p, pi));
 }
+GEN
+FlxqX_gcd(GEN x, GEN y, GEN T, ulong p)
+{ return FlxqX_gcd_pre(x, y, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 static GEN
 FlxqX_extgcd_basecase(GEN a, GEN b, GEN T, ulong p,ulong pi, GEN *ptu, GEN *ptv)
@@ -1839,10 +1843,9 @@ polxn_FlxX(long n, long v, long vT)
 }
 
 GEN
-FlxqXQ_minpoly(GEN x, GEN S, GEN T, ulong p)
+FlxqXQ_minpoly_pre(GEN x, GEN S, GEN T, ulong p, ulong pi)
 {
   pari_sp ltop = avma;
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   long vS, vT, n;
   GEN v_x, g, tau;
   vS = get_FlxqX_var(S);
@@ -1882,9 +1885,12 @@ FlxqXQ_minpoly(GEN x, GEN S, GEN T, ulong p)
     tau = FlxqXQ_mul_pre(tau, FlxqX_FlxqXQV_eval_pre(g_prime, v_x, S, T,p,pi),
                          S, T, p,pi);
   }
-  g = FlxqX_normalize(g,T, p);
+  g = FlxqX_normalize_pre(g,T,p,pi);
   return gerepilecopy(ltop,g);
 }
+GEN
+FlxqXQ_minpoly(GEN x, GEN S, GEN T, ulong p)
+{ return FlxqXQ_minpoly_pre(x, S, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
 FlxqXQ_matrix_pow(GEN y, long n, long m, GEN S, GEN T, ulong p)
@@ -2010,9 +2016,8 @@ FlxqXQ_autpow_mul(void * E, GEN x, GEN y)
 }
 
 GEN
-FlxqXQ_autpow(GEN aut, long n, GEN S, GEN T, ulong p)
+FlxqXQ_autpow_pre(GEN aut, long n, GEN S, GEN T, ulong p, ulong pi)
 {
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   pari_sp av = avma;
   struct _FlxqXQ D;
   T = Flx_get_red_pre(T, p, pi);
@@ -2021,6 +2026,9 @@ FlxqXQ_autpow(GEN aut, long n, GEN S, GEN T, ulong p)
   aut = gen_powu_i(aut,n,&D,FlxqXQ_autpow_sqr,FlxqXQ_autpow_mul);
   return gerepilecopy(av, aut);
 }
+GEN
+FlxqXQ_autpow(GEN aut, long n, GEN S, GEN T, ulong p)
+{ return FlxqXQ_autpow_pre(aut, n, S, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 static GEN
 FlxqXQ_autsum_mul(void *E, GEN x, GEN y)
@@ -2048,10 +2056,9 @@ FlxqXQ_autsum_sqr(void * T, GEN x)
 { return FlxqXQ_autsum_mul(T, x, x); }
 
 GEN
-FlxqXQ_autsum(GEN aut, long n, GEN S, GEN T, ulong p)
+FlxqXQ_autsum_pre(GEN aut, long n, GEN S, GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   struct _FlxqXQ D;
   T = Flx_get_red_pre(T, p, pi);
   S = FlxqX_get_red_pre(S, T, p, pi);
@@ -2059,6 +2066,9 @@ FlxqXQ_autsum(GEN aut, long n, GEN S, GEN T, ulong p)
   aut = gen_powu_i(aut,n,&D,FlxqXQ_autsum_sqr,FlxqXQ_autsum_mul);
   return gerepilecopy(av, aut);
 }
+GEN
+FlxqXQ_autsum(GEN aut, long n, GEN S, GEN T, ulong p)
+{ return FlxqXQ_autsum_pre(aut, n, S, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 static GEN
 FlxqXQ_auttrace_mul(void *E, GEN x, GEN y)
@@ -2081,10 +2091,9 @@ FlxqXQ_auttrace_sqr(void *E, GEN x)
 { return FlxqXQ_auttrace_mul(E, x, x); }
 
 GEN
-FlxqXQ_auttrace(GEN x, ulong n, GEN S, GEN T, ulong p)
+FlxqXQ_auttrace_pre(GEN x, ulong n, GEN S, GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   struct _FlxqXQ D;
   T = Flx_get_red_pre(T, p, pi);
   S = FlxqX_get_red_pre(S, T, p, pi);
@@ -2092,6 +2101,9 @@ FlxqXQ_auttrace(GEN x, ulong n, GEN S, GEN T, ulong p)
   x = gen_powu_i(x,n,(void*)&D,FlxqXQ_auttrace_sqr,FlxqXQ_auttrace_mul);
   return gerepilecopy(av, x);
 }
+GEN
+FlxqXQ_auttrace(GEN x, ulong n, GEN S, GEN T, ulong p)
+{ return FlxqXQ_auttrace_pre(x, n, S, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 /*******************************************************************/
 /*                                                                 */

@@ -2148,10 +2148,10 @@ Flx_extgcd(GEN x, GEN y, ulong p, GEN *ptu, GEN *ptv)
 { return Flx_extgcd_pre(x, y, p, SMALL_ULONG(p)? 0: get_Fl_red(p), ptu, ptv); }
 
 ulong
-Flx_resultant(GEN a, GEN b, ulong p)
+Flx_resultant_pre(GEN a, GEN b, ulong p, ulong pi)
 {
   long da,db,dc,cnt;
-  ulong pi, lb, res = 1UL;
+  ulong lb, res = 1UL;
   pari_sp av;
   GEN c;
 
@@ -2180,6 +2180,9 @@ Flx_resultant(GEN a, GEN b, ulong p)
   }
   return gc_ulong(av, Fl_mul(res, Fl_powu_pre(b[2], da, p, pi), p));
 }
+ulong
+Flx_resultant(GEN a, GEN b, ulong p)
+{ return Flx_resultant_pre(a, b, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 /* If resultant is 0, *ptU and *ptV are not set */
 ulong
@@ -2939,7 +2942,7 @@ Flxq_autpow_msqr(void *E, GEN x)
   return Flx_FlxqV_eval_pre(Flxq_autpow_sqr(E, x), D->aut, D->T, D->p, D->pi);
 }
 
-static GEN
+GEN
 Flxq_autpow_pre(GEN x, ulong n, GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;

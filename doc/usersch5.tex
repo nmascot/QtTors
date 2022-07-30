@@ -6244,6 +6244,8 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 \fun{ulong}{Flx_resultant}{GEN a, GEN b, ulong p}, returns the resultant
 of \kbd{a} and \kbd{b}. Assumes that $p$ is prime.
 
+\fun{ulong}{Flx_resultant_pre}{GEN a, GEN b, ulong p, ulong pi}
+
 \fun{ulong}{Flx_extresultant}{GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV}
 given two \kbd{Flx} \kbd{a} and \kbd{b},
 returns their resultant and sets Bezout coefficients (if the resultant is 0,
@@ -6496,6 +6498,8 @@ see \kbd{FpXQ\_matrix\_pow}.
 \fun{GEN}{Flxq_autpow}{GEN a, long n, GEN T, ulong p}
 see \kbd{FpXQ\_autpow}.
 
+\fun{GEN}{Flxq_autpow_pre}{GEN a, long n, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{Flxq_autpowers}{GEN a, long n, GEN T, ulong p}
 return $[X,\sigma(X),\ldots,\sigma^n(X)]$,
 assuming $a=\sigma(X)$ where $\sigma$ is an automorphism of the algebra
@@ -6626,6 +6630,8 @@ respect to the main variable.
 
 \fun{GEN}{FlxY_evalx}{GEN P, ulong z, ulong p} $P$ being an \kbd{FlxY}, returns
 the \kbd{Flx} $P(z,Y)$, where $Y$ is the main variable of $P$.
+
+\fun{GEN}{FlxY_evalx_pre}{GEN P, ulong z, ulong p, ulong pi}
 
 \fun{GEN}{FlxX_translate1}{GEN P, ulong p, long n} $P$ being an \kbd{FlxX} with
 all coefficients of degree at most $n$, return $(P(x,Y+1)$, where $Y$ is the
@@ -6780,6 +6786,8 @@ particular $U\neq 0$).
 \fun{GEN}{FlxqX_gcd}{GEN x, GEN y, ulong p} returns a (not necessarily monic)
 greatest common divisor of $x$  and $y$.
 
+\fun{GEN}{FlxqX_gcd_pre}{GEN x, GEN y, ulong p, ulong pi}
+
 \fun{GEN}{FlxqX_extgcd}{GEN x, GEN y, GEN T, ulong p, GEN *ptu, GEN *ptv}
 
 \fun{GEN}{FlxqX_extgcd_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi, GEN *ptu, GEN *ptv}
@@ -6828,6 +6836,8 @@ If \kbd{pt} is not \kbd{NULL}, set it to $g$ such that $g^k = f$.
 
 \fun{GEN}{FlxqX_Frobenius}{GEN S, GEN T, ulong p}, as \kbd{FpXQX\_Frobenius}
 
+\fun{GEN}{FlxqX_Frobenius_pre}{GEN S, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqX_roots}{GEN f, GEN T, ulong p} return the roots of \kbd{f} in
 $\F_p[X]/(T)$. Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
 
@@ -6837,6 +6847,8 @@ in $\F_p[X]$.
 
 \fun{GEN}{FlxqX_factor_squarefree}{GEN f, GEN T, ulong p} returns the squarefree
 factorization of $f$, see \kbd{FpX\_factor\_squarefree}.
+
+\fun{GEN}{FlxqX_factor_squarefree_pre}{GEN f, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqX_ddf}{GEN f, GEN T, ulong p} as \kbd{FpX\_ddf}.
 
@@ -6922,17 +6934,25 @@ assume \kbd{SMALL\_ULONG}$(p)$.
 \fun{GEN}{FlxqXQ_autpow}{GEN a, long n, GEN S, GEN T, ulong p}
 as \kbd{FpXQXQ\_autpow}
 
+\fun{GEN}{FlxqXQ_autpow_pre}{GEN a, long n, GEN S, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqXQ_autsum}{GEN a, long n, GEN S, GEN T, ulong p}
 as \kbd{FpXQXQ\_autsum}
 
+\fun{GEN}{FlxqXQ_autsum_pre}{GEN a, long n, GEN S, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqXQ_auttrace}{GEN a, long n, GEN S, GEN T, ulong p}
 as \kbd{FpXQXQ\_auttrace}
+
+\fun{GEN}{FlxqXQ_auttrace_pre}{GEN a, long n, GEN S, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqXQ_halfFrobenius}{GEN A, GEN S, GEN T, ulong p}, as
 \kbd{FpXQXQ\_halfFrobenius}
 
 \fun{GEN}{FlxqXQ_minpoly}{GEN x, GEN S, GEN T, ulong p}, as
 \kbd{FpXQ\_minpoly}
+
+\fun{GEN}{FlxqXQ_minpoly_pre}{GEN x, GEN S, GEN T, ulong p, ulong pi}
 
 \subsec{\kbd{FlxqXn}} See \kbd{FpXn} operations.
 In this section, we assume \var{pi} is the pseudoinverse of $p$, or $0$ in
