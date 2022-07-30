@@ -249,7 +249,20 @@ BA  92- [libpari] RgX_mul2n
         Flx_get_red_pre, Flx_halfgcd_pre, Flx_mul_pre, Flx_oneroot_pre,
         Flx_oneroot_split_pre, Flx_rem_pre, Flx_roots_pre, Flx_sqr_pre,
         Flxq_div_pre, Flxq_inv_pre, Flxq_invsafe_pre, Flxq_mul_pre,
-        Flxq_powers_pre, Flxq_powu_pre, Flxq_sqr_pre
+        Flxq_powers_pre, Flxq_powu_pre, Flxq_sqr_pre,
+        Flx_powu_pre, Flxn_div_pre, Flxn_mul_pre, Flxn_sqr_pre,
+        FlxqX_fromNewton_pre, FlxqX_Flxq_mul_pre, FlxqX_Flxq_mul_to_monic_pre,
+        FlxqX_FlxqXQV_eval_pre, FlxY_FlxqV_evalx_pre, FlxY_Flxq_evalx_pre,
+        FlxqX_Newton_pre, FlxqX_get_red_pre, FlxqX_invBarrett_pre,
+        FlxqX_powu_pre, FlxqXn_mul_pre, FlxqXn_sqr_pre, FlxqXn_inv_pre,
+        FlxqXn_expint_pre, FlxY_eval_powers_pre, FlxY_evalx_powers_pre,
+        FlxY_evalx_powers_pre, FlxqX_divrem_pre, FlxqXQ_inv_pre,
+        FlxqXQ_invsafe_pre, FlxqXQ_sqr_pre, FlxqX_rem_pre, FlxqX_sqr_pre,
+        FlxqXQ_pow_pre, FlxqXC_FlxqXQV_eval_pre, FlxqXQ_div_pre,
+        FlxqXQ_mul_pre, FlxqX_halfgcd_pre, FlxqX_mul_pre, FlxqX_extgcd_pre,
+        FlxqXQ_powers_pre, FlxqXQ_powu_pre, FlxqX_normalize_pre, FlxqX_red_pre,
+        Kronecker_to_FlxqX_pre, Flx_dotproduct_pre, FlxqX_div_pre,
+        FlxY_Flxq_evalx_pre, FlxqXC_FlxqXQV_eval_pre
 
   Changed
 HC   1- faster implementation of eulervec + cache result

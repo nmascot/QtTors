@@ -911,15 +911,18 @@ Flv_dotproduct_pre(GEN x, GEN y, ulong p, ulong pi)
 }
 
 ulong
-Flx_dotproduct(GEN x, GEN y, ulong p)
+Flx_dotproduct_pre(GEN x, GEN y, ulong p, ulong pi)
 {
   long lx = minss(lgpol(x), lgpol(y));
   if (lx == 0) return 0;
-  if (SMALL_ULONG(p))
-    return Flv_dotproductspec_SMALL(x+2, y+2, p, lx);
-  else
+  if (pi)
     return Flv_dotproductspec_i(x+2, y+2, p, get_Fl_red(p), lx);
+  else
+    return Flv_dotproductspec_SMALL(x+2, y+2, p, lx);
 }
+ulong
+Flx_dotproduct(GEN x, GEN y, ulong p)
+{ return Flx_dotproduct_pre(x, y, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
 FpM_FpC_mul(GEN x, GEN y, GEN p)

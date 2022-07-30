@@ -1563,7 +1563,7 @@ Flx_FlxY_resultant_polint(GEN a, GEN b, ulong p, long dres, long sx)
 }
 
 static GEN
-FlxX_pseudorem(GEN x, GEN y, ulong p)
+FlxX_pseudorem(GEN x, GEN y, ulong p, ulong pi)
 {
   long vx = varn(x), dx, dy, dz, i, lx, dp;
   pari_sp av = avma, av2;
@@ -1577,10 +1577,10 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
   {
     gel(x,0) = Flx_neg(gel(x,0), p); dp--;
     for (i=1; i<=dy; i++)
-      gel(x,i) = Flx_add( Flx_mul(gel(y,0), gel(x,i), p),
-                              Flx_mul(gel(x,0), gel(y,i), p), p );
+      gel(x,i) = Flx_add( Flx_mul_pre(gel(y,0), gel(x,i), p, pi),
+                          Flx_mul_pre(gel(x,0), gel(y,i), p, pi), p );
     for (   ; i<=dx; i++)
-      gel(x,i) = Flx_mul(gel(y,0), gel(x,i), p);
+      gel(x,i) = Flx_mul_pre(gel(y,0), gel(x,i), p, pi);
     do { x++; dx--; } while (dx >= 0 && lg(gel(x,0))==2);
     if (dx < dy) break;
     if (gc_needed(av2,1))
@@ -1596,9 +1596,8 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
   x = RgX_recip_i(x);
   if (dp)
   { /* multiply by y[0]^dp   [beware dummy vars from FpX_FpXY_resultant] */
-    GEN t = Flx_powu(gel(y,0), dp, p);
-    for (i=2; i<lx; i++)
-      gel(x,i) = Flx_mul(gel(x,i), t, p);
+    GEN t = Flx_powu_pre(gel(y,0), dp, p, pi);
+    for (i=2; i<lx; i++) gel(x,i) = Flx_mul_pre(gel(x,i), t, p, pi);
   }
   return gerepilecopy(av, x);
 }
@@ -1608,22 +1607,24 @@ GEN
 FlxX_resultant(GEN u, GEN v, ulong p, long sx)
 {
   pari_sp av = avma, av2;
-  long degq,dx,dy,du,dv,dr,signh;
-  GEN z,g,h,r,p1;
+  long degq, dx, dy, du, dv, dr, signh;
+  ulong pi;
+  GEN z, g, h, r, p1;
 
-  dx=degpol(u); dy=degpol(v); signh=1;
+  dx = degpol(u); dy = degpol(v); signh = 1;
   if (dx < dy)
   {
     swap(u,v); lswap(dx,dy);
     if (both_odd(dx, dy)) signh = -signh;
   }
   if (dy < 0) return zero_Flx(sx);
-  if (dy==0) return gerepileupto(av, Flx_powu(gel(v,2),dx,p));
+  pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  if (dy==0) return gerepileupto(av, Flx_powu_pre(gel(v,2),dx,p,pi));
 
   g = h = pol1_Flx(sx); av2 = avma;
   for(;;)
   {
-    r = FlxX_pseudorem(u,v,p); dr = lg(r);
+    r = FlxX_pseudorem(u,v,p,pi); dr = lg(r);
     if (dr == 2) { set_avma(av); return zero_Flx(sx); }
     du = degpol(u); dv = degpol(v); degq = du-dv;
     u = v; p1 = g; g = leading_coeff(u);
@@ -1631,10 +1632,11 @@ FlxX_resultant(GEN u, GEN v, ulong p, long sx)
     {
       case 0: break;
       case 1:
-        p1 = Flx_mul(h,p1, p); h = g; break;
+        p1 = Flx_mul_pre(h,p1, p, pi); h = g; break;
       default:
-        p1 = Flx_mul(Flx_powu(h,degq,p), p1, p);
-        h = Flx_div(Flx_powu(g,degq,p), Flx_powu(h,degq-1,p), p);
+        p1 = Flx_mul_pre(Flx_powu_pre(h,degq,p,pi), p1, p, pi);
+        h = Flx_div_pre(Flx_powu_pre(g,degq,p,pi),
+                        Flx_powu_pre(h,degq-1,p,pi), p, pi);
     }
     if (both_odd(du,dv)) signh = -signh;
     v = FlxY_Flx_div(r, p1, p);
@@ -1646,7 +1648,8 @@ FlxX_resultant(GEN u, GEN v, ulong p, long sx)
     }
   }
   z = gel(v,2);
-  if (dv > 1) z = Flx_div(Flx_powu(z,dv,p), Flx_powu(h,dv-1,p), p);
+  if (dv > 1) z = Flx_div_pre(Flx_powu_pre(z,dv,p,pi),
+                              Flx_powu_pre(h,dv-1,p,pi), p, pi);
   if (signh < 0) z = Flx_neg(z,p);
   return gerepileupto(av, z);
 }

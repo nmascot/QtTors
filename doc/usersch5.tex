@@ -6088,6 +6088,10 @@ pseudoinverse of $p$, or $0$ in which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flx_powu}{GEN x, ulong n, ulong p} return $x^n$.
 
+\fun{GEN}{Flx_powu_pre}{GEN x, ulong n, ulong p, ulong pi} as
+\kbd{Flx\_powu}. We assume \var{pi} is the pseudoinverse of $p$, or $0$ in
+which case we assume \kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flx_divrem}{GEN x, GEN y, ulong p, GEN *pr},
 here $p$ must be prime.
 
@@ -6295,6 +6299,11 @@ $[P(v[1]),\ldots,P(v[n])]$ as a \kbd{Flv}.
 \fun{ulong}{Flx_dotproduct}{GEN x, GEN y, ulong p} returns the scalar product
 of the coefficients of $x$ and $y$.
 
+\fun{ulong}{Flx_dotproduct_pre}{GEN x, GEN y, ulong p, ulong pi}.
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
+
+
 \fun{GEN}{Flx_deflate}{GEN P, long d} assuming $P$ is a polynomial of the
 form $Q(X^d)$, return $Q$.
 
@@ -6412,14 +6421,26 @@ this function applies \kbd{FlxC\_eval\_powers\_pre} to all entries of \kbd{M}.
 \fun{GEN}{Flxn_mul}{GEN a, GEN b, long n, ulong p}
 returns $a\*b$ modulo $X^n$.
 
+\fun{GEN}{Flxn_mul_pre}{GEN a, GEN b, long n, ulong p, ulong pi}
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
+
 \fun{GEN}{Flxn_sqr}{GEN a, long n, ulong p}
 returns $a^2$ modulo $X^n$.
+
+\fun{GEN}{Flxn_sqr_pre}{GEN a, long n, ulong p, ulong pi}
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flxn_inv}{GEN a, long n, ulong p}
 returns $1/a$ modulo $X^n$.
 
 \fun{GEN}{Flxn_div}{GEN a, GEN b, long n, ulong p}
 returns $a/b$ modulo $X^n$.
+
+\fun{GEN}{Flxn_div_pre}{GEN a, GEN b, long n, ulong p, ulong pi}
+We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{Flxn_red}{GEN a, long n}
 returns $a$ modulo $X^n$.
@@ -6584,6 +6605,8 @@ order of the multiplicative group of the finite field, and \var{fa} is
 its factorization.
 
 \subsec{\kbd{FlxX}} See \kbd{FpXX} operations.
+In this section, we assume \var{pi} is the pseudoinverse of $p$, or $0$ in
+which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{pol1_FlxX}{long vX, long sx} returns the unit \kbd{FlxX} as a
 \typ{POL} in variable \kbd{vX} which only coefficient is \kbd{pol1\_Flx(sx)}.
@@ -6640,20 +6663,22 @@ variable of $P$.
 
 \fun{ulong}{FlxY_evalx_powers_pre}{GEN P, GEN xp, ulong p, ulong pi}, \kbd{xp}
 being the vector $[1,x,\dots,x^n]$, where $n$ is larger or equal to the degree
-of $P$ in $X$, return $P(x,Y)$, where $Y$ is the main variable of $Q$, assuming
-\var{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
-\kbd{SMALL\_ULONG}$(p)$.
+of $P$ in $X$, return $P(x,Y)$, where $Y$ is the main variable of $Q$.
 
 \fun{ulong}{FlxY_eval_powers_pre}{GEN P, GEN xp, GEN yp, ulong p, ulong pi},
-\kbd{xp} being the vector $[1,x,\dots,x^n]$, where $n$ is larger or equal to the degree
-of $P$ in $X$ and \kbd{yp} being the vector $[1,y,\dots,y^m]$, where $m$ is larger or equal to the degree of $P$ in $Y$ return $P(x,y)$, assuming
-\var{pi} is the pseudoinverse of $p$, or $0$ in which case we assume
-\kbd{SMALL\_ULONG}$(p)$.
+\kbd{xp} being the vector $[1,x,\dots,x^n]$, where $n$ is larger or equal to
+the degree of $P$ in $X$ and \kbd{yp} being the vector $[1,y,\dots,y^m]$,
+where $m$ is larger or equal to the degree of $P$ in $Y$ return $P(x,y)$.
 
+\fun{GEN}{FlxY_Flxq_evalx}{GEN x, GEN y, GEN T, ulong p} as
+\kbd{FpXY\_FpXQ\_evalx}.
 
-\fun{GEN}{FlxY_Flxq_evalx}{GEN x, GEN y, GEN T, ulong p} as \kbd{FpXY\_FpXQ\_evalx}.
+\fun{GEN}{FlxY_Flxq_evalx_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi}
 
-\fun{GEN}{FlxY_FlxqV_evalx}{GEN x, GEN V, GEN T, ulong p} as \kbd{FpXY\_FpXQV\_evalx}.
+\fun{GEN}{FlxY_FlxqV_evalx}{GEN x, GEN V, GEN T, ulong p} as
+\kbd{FpXY\_FpXQV\_evalx}.
+
+\fun{GEN}{FlxY_FlxqV_evalx_pre}{GEN x, GEN V, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
@@ -6692,6 +6717,10 @@ functions, and in \kbd{FlxqX\_rem} and \kbd{FlxqX\_divrem}.
 \fun{GEN}{FlxqX_get_red}{GEN S, GEN T, ulong p} returns the extended modulus
 \kbd{eS}.
 
+\fun{GEN}{FlxqX_get_red_pre}{GEN S, GEN T, ulong p, ulong pi}, where \var{pi}
+is a pseudoinverse of $p$, or $0$ in which case we assume
+\kbd{SMALL\_ULONG}$(p)$.
+
 To write code that works both with plain and extended moduli, the following
 accessors are defined:
 
@@ -6702,6 +6731,9 @@ accessors are defined:
 \fun{GEN}{get_FlxqX_degree}{GEN eS} returns the degree of the modulus.
 
 \subsubsec{basic functions}
+
+In this section, \var{pi} is a pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{random_FlxqX}{long d, long v, GEN T, ulong p} returns a random
 \kbd{FlxqX} in variable \kbd{v}, of degree less than~\kbd{d}.
@@ -6718,36 +6750,64 @@ form of $P$, this function returns $Q\in \Z[X,t]$ such that $Q$ is congruent to
 $P(X,t)$ mod $(p, T(X))$, $\deg_X Q < n$, and all coefficients are in $[0,p[$.
 Not stack-clean. Note that $t$ need not be the same variable as $Y$!
 
+\fun{GEN}{Kronecker_to_FlxqX_pre}{GEN z, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqX_red}{GEN z, GEN T, ulong p}
+
+\fun{GEN}{FlxqX_red_pre}{GEN z, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqX_normalize}{GEN z, GEN T, ulong p}
 
+\fun{GEN}{FlxqX_normalize_pre}{GEN z, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqX_mul}{GEN x, GEN y, GEN T, ulong p}
 
+\fun{GEN}{FlxqX_mul_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqX_Flxq_mul}{GEN P, GEN U, GEN T, ulong p}
+
+\fun{GEN}{FlxqX_Flxq_mul_pre}{GEN P, GEN U, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqX_Flxq_mul_to_monic}{GEN P, GEN U, GEN T, ulong p}
 returns $P*U$ assuming the result is monic of the same degree as $P$ (in
 particular $U\neq 0$).
 
+\fun{GEN}{FlxqX_Flxq_mul_to_monic_pre}{GEN P, GEN U, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqX_sqr}{GEN x, GEN T, ulong p}
+
+\fun{GEN}{FlxqX_sqr_pre}{GEN x, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqX_powu}{GEN x, ulong n, GEN T, ulong p}
 
+\fun{GEN}{FlxqX_powu_pre}{GEN x, ulong n, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqX_divrem}{GEN x, GEN y, GEN T, ulong p, GEN *pr}
+
+\fun{GEN}{FlxqX_divrem_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi, GEN *pr}
 
 \fun{GEN}{FlxqX_div}{GEN x, GEN y, GEN T, ulong p}
 
+\fun{GEN}{FlxqX_div_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqX_rem}{GEN x, GEN y, GEN T, ulong p}
 
+\fun{GEN}{FlxqX_rem_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqX_invBarrett}{GEN T, GEN Q, ulong p}
+
+\fun{GEN}{FlxqX_invBarrett_pre}{GEN T, GEN Q, ulong p, ulong pi}
 
 \fun{GEN}{FlxqX_gcd}{GEN x, GEN y, ulong p} returns a (not necessarily monic)
 greatest common divisor of $x$  and $y$.
 
 \fun{GEN}{FlxqX_extgcd}{GEN x, GEN y, GEN T, ulong p, GEN *ptu, GEN *ptv}
 
+\fun{GEN}{FlxqX_extgcd_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi, GEN *ptu, GEN *ptv}
+
 \fun{GEN}{FlxqX_halfgcd}{GEN x, GEN y, GEN T, ulong p}, see \kbd{FpX\_halfgcd}.
+
+\fun{GEN}{FlxqX_halfgcd_pre}{GEN x, GEN y, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqX_resultant}{GEN x, GEN y, GEN T, ulong p}
 
@@ -6772,7 +6832,13 @@ product of the coefficients of $x$ and $y$.
 
 \fun{GEN}{FlxqX_Newton}{GEN x, long n, GEN T, ulong p}
 
+\fun{GEN}{FlxqX_Newton_pre}{GEN x, long n, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqX_fromNewton}{GEN x, GEN T, ulong p}
+
+\fun{GEN}{FlxqX_fromNewton_pre}{GEN x, GEN T, ulong p, ulong pi}
+We assume \var{pi} is a pseudoinverse of $p$, or $0$ in which case we assume
+\kbd{SMALL\_ULONG}$(p)$.
 
 \fun{long}{FlxqX_is_squarefree}{GEN S, GEN T, ulong p}, as
 \kbd{FpX\_is\_squarefree}.
@@ -6819,29 +6885,56 @@ irreducible factors (the sum of the $D[i]$).
 \fun{GEN}{FlxqX_FlxqXQV_eval}{GEN P, GEN V, GEN S, GEN T, ulong p} as
 \kbd{FpX\_FpXQV\_eval}.
 
+\fun{GEN}{FlxqX_FlxqXQV_eval_pre}{GEN P, GEN V, GEN S, GEN T, ulong p,
+ulong pi}
+
 \fun{GEN}{FlxqXC_FlxqXQ_eval}{GEN Q, GEN x, GEN S, GEN T, ulong p} as
 \kbd{FpXC\_FpXQ\_eval}.
+
+\fun{GEN}{FlxqXC_FlxqXQ_eval_pre}{GEN Q, GEN x, GEN S, GEN T, ulong p,
+ulong pi}
 
 \fun{GEN}{FlxqXC_FlxqXQV_eval}{GEN P, GEN V, GEN S, GEN T, ulong p} as
 \kbd{FpXC\_FpXQV\_eval}.
 
+\fun{GEN}{FlxqXC_FlxqXQV_eval_pre}{GEN P, GEN V, GEN S, GEN T, ulong p, ulong
+pi}
+
 \subsec{\kbd{FlxqXQ}} See \kbd{FpXQXQ} operations.
+In this section, \var{pi} is a pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{FlxqXQ_mul}{GEN x, GEN y, GEN S, GEN T, ulong p}
 
+\fun{GEN}{FlxqXQ_mul_pre}{GEN x, GEN y, GEN S, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqXQ_sqr}{GEN x, GEN S, GEN T, ulong p}
+
+\fun{GEN}{FlxqXQ_sqr_pre}{GEN x, GEN S, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqXQ_inv}{GEN x, GEN S, GEN T, ulong p}
 
+\fun{GEN}{FlxqXQ_inv_pre}{GEN x, GEN S, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqXQ_invsafe}{GEN x, GEN S, GEN T, ulong p}
+
+\fun{GEN}{FlxqXQ_invsafe_pre}{GEN x, GEN S, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqXQ_div}{GEN x, GEN y, GEN S, GEN T, ulong p}
 
+\fun{GEN}{FlxqXQ_div_pre}{GEN x, GEN y, GEN S, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqXQ_pow}{GEN x, GEN n, GEN S, GEN T, ulong p}
+
+\fun{GEN}{FlxqXQ_pow_pre}{GEN x, GEN n, GEN S, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqXQ_powu}{GEN x, ulong n, GEN S, GEN T, ulong p}
 
+\fun{GEN}{FlxqXQ_powu_pre}{GEN x, ulong n, GEN S, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqXQ_powers}{GEN x, long n, GEN S, GEN T, ulong p}
+
+\fun{GEN}{FlxqXQ_powers_pre}{GEN x, long n, GEN S, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqXQ_matrix_pow}{GEN x, long n, long m, GEN S, GEN T, ulong p}
 
@@ -6861,16 +6954,26 @@ as \kbd{FpXQXQ\_auttrace}
 \kbd{FpXQ\_minpoly}
 
 \subsec{\kbd{FlxqXn}} See \kbd{FpXn} operations.
+In this section, we assume \var{pi} is the pseudoinverse of $p$, or $0$ in
+which case we assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{FlxXn_red}{GEN a, long n} returns $a$ modulo $X^n$.
 
 \fun{GEN}{FlxqXn_mul}{GEN a, GEN b, long n, GEN T, ulong p}
 
+\fun{GEN}{FlxqXn_mul_pre}{GEN a, GEN b, long n, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqXn_sqr}{GEN a, long n, GEN T, ulong p}
+
+\fun{GEN}{FlxqXn_sqr_pre}{GEN a, long n, GEN T, ulong p, ulong pi}
 
 \fun{GEN}{FlxqXn_inv}{GEN a, long n, GEN T, ulong p}
 
+\fun{GEN}{FlxqXn_inv_pre}{GEN a, long n, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{FlxqXn_expint}{GEN a, long n, GEN T, ulong p}
+
+\fun{GEN}{FlxqXn_expint_pre}{GEN a, long n, GEN T, ulong p, ulong pi}
 
 \subsec{\kbd{F2x}} An \kbd{F2x}~\kbd{z} is a \typ{VECSMALL}
 representing a polynomial over $\F_2[X]$. Specifically

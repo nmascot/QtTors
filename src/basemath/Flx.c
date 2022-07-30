@@ -1121,18 +1121,24 @@ Flx_sqr(GEN x, ulong p)
 { return Flx_sqr_pre(x, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
-Flx_powu(GEN x, ulong n, ulong p)
+Flx_powu_pre(GEN x, ulong n, ulong p, ulong pi)
 {
   GEN y = pol1_Flx(x[1]), z;
-  ulong m, pi;
+  ulong m;
   if (n == 0) return y;
-  m = n; z = x; pi = SMALL_ULONG(p)?0 : get_Fl_red(p);
+  m = n; z = x;
   for (;;)
   {
     if (m&1UL) y = Flx_mul_pre(y,z, p, pi);
     m >>= 1; if (!m) return y;
     z = Flx_sqr_pre(z, p, pi);
   }
+}
+GEN
+Flx_powu(GEN x, ulong n, ulong p)
+{
+  if (n == 0) return pol1_Flx(x[1]);
+  return Flx_powu_pre(x, n, p, SMALL_ULONG(p)? 0: get_Fl_red(p));
 }
 
 GEN
@@ -3286,7 +3292,7 @@ Flxq_charpoly(GEN x, GEN TB, ulong p)
    that is, v*(M_tau) */
 
 static GEN
-Flxq_transmul_init(GEN tau, GEN T, ulong p)
+Flxq_transmul_init(GEN tau, GEN T, ulong p, ulong pi)
 {
   GEN bht;
   GEN h, Tp = get_Flx_red(T, &h);
@@ -3295,10 +3301,10 @@ Flxq_transmul_init(GEN tau, GEN T, ulong p)
   GEN bt = Flx_recipspec(tau+2, lgpol(tau), n);
   ft[1] = vT; bt[1] = vT;
   if (h)
-    bht = Flxn_mul(bt, h, n-1, p);
+    bht = Flxn_mul_pre(bt, h, n-1, p, pi);
   else
   {
-    GEN bh = Flx_div(Flx_shift(tau, n-1), T, p);
+    GEN bh = Flx_div_pre(Flx_shift(tau, n-1), T, p, pi);
     bht = Flx_recipspec(bh+2, lgpol(bh), n-1);
     bht[1] = vT;
   }
@@ -3306,16 +3312,16 @@ Flxq_transmul_init(GEN tau, GEN T, ulong p)
 }
 
 static GEN
-Flxq_transmul(GEN tau, GEN a, long n, ulong p)
+Flxq_transmul(GEN tau, GEN a, long n, ulong p, ulong pi)
 {
   pari_sp ltop = avma;
   GEN t1, t2, t3, vec;
   GEN bt = gel(tau, 1), bht = gel(tau, 2), ft = gel(tau, 3);
   if (lgpol(a)==0) return pol0_Flx(a[1]);
-  t2  = Flx_shift(Flx_mul(bt, a, p),1-n);
+  t2  = Flx_shift(Flx_mul_pre(bt, a, p, pi),1-n);
   if (lgpol(bht)==0) return gerepileuptoleaf(ltop, t2);
-  t1  = Flx_shift(Flx_mul(ft, a, p),-n);
-  t3  = Flxn_mul(t1, bht, n-1, p);
+  t1  = Flx_shift(Flx_mul_pre(ft, a, p, pi),-n);
+  t3  = Flxn_mul_pre(t1, bht, n-1, p, pi);
   vec = Flx_sub(t2, Flx_shift(t3, 1), p);
   return gerepileuptoleaf(ltop, vec);
 }
@@ -3324,39 +3330,39 @@ GEN
 Flxq_minpoly(GEN x, GEN T, ulong p)
 {
   pari_sp ltop = avma;
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   long vT = get_Flx_var(T), n = get_Flx_degree(T);
   GEN v_x;
   GEN g = pol1_Flx(vT), tau = pol1_Flx(vT);
-  T = Flx_get_red(T, p);
-  v_x = Flxq_powers(x, usqrt(2*n), T, p);
+  T = Flx_get_red_pre(T, p, pi);
+  v_x = Flxq_powers_pre(x, usqrt(2*n), T, p, pi);
   while (lgpol(tau) != 0)
   {
     long i, j, m, k1;
-    GEN M, v, tr;
-    GEN g_prime, c;
+    GEN M, v, tr, g_prime, c;
     if (degpol(g) == n) { tau = pol1_Flx(vT); g = pol1_Flx(vT); }
     v = random_Flx(n, vT, p);
-    tr = Flxq_transmul_init(tau, T, p);
-    v = Flxq_transmul(tr, v, n, p);
+    tr = Flxq_transmul_init(tau, T, p, pi);
+    v = Flxq_transmul(tr, v, n, p, pi);
     m = 2*(n-degpol(g));
     k1 = usqrt(m);
-    tr = Flxq_transmul_init(gel(v_x,k1+1), T, p);
+    tr = Flxq_transmul_init(gel(v_x,k1+1), T, p, pi);
     c = cgetg(m+2,t_VECSMALL);
     c[1] = vT;
     for (i=0; i<m; i+=k1)
     {
       long mj = minss(m-i, k1);
       for (j=0; j<mj; j++)
-        uel(c,m+1-(i+j)) = Flx_dotproduct(v, gel(v_x,j+1), p);
-      v = Flxq_transmul(tr, v, n, p);
+        uel(c,m+1-(i+j)) = Flx_dotproduct_pre(v, gel(v_x,j+1), p, pi);
+      v = Flxq_transmul(tr, v, n, p, pi);
     }
     c = Flx_renormalize(c, m+2);
     /* now c contains <v,x^i> , i = 0..m-1  */
-    M = Flx_halfgcd(monomial_Flx(1, m, vT), c, p);
+    M = Flx_halfgcd_pre(monomial_Flx(1, m, vT), c, p, pi);
     g_prime = gmael(M, 2, 2);
     if (degpol(g_prime) < 1) continue;
-    g = Flx_mul(g, g_prime, p);
-    tau = Flxq_mul(tau, Flx_FlxqV_eval(g_prime, v_x, T, p), T, p);
+    g = Flx_mul_pre(g, g_prime, p, pi);
+    tau = Flxq_mul_pre(tau, Flx_FlxqV_eval_pre(g_prime, v_x, T,p,pi), T,p,pi);
   }
   g = Flx_normalize(g,p);
   return gerepileuptoleaf(ltop,g);
@@ -3533,30 +3539,35 @@ Flxn_red(GEN a, long n)
 }
 
 GEN
+Flxn_mul_pre(GEN a, GEN b, long n, ulong p, ulong pi)
+{ return Flxn_red(Flx_mul_pre(a, b, p, pi), n); }
+GEN
 Flxn_mul(GEN a, GEN b, long n, ulong p)
-{ return Flxn_red(Flx_mul(a, b, p), n); }
+{ return Flxn_mul_pre(a, b, n, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
+Flxn_sqr_pre(GEN a, long n, ulong p, ulong pi)
+{ return Flxn_red(Flx_sqr_pre(a, p, pi), n); }
+GEN
 Flxn_sqr(GEN a, long n, ulong p)
-{ return Flxn_red(Flx_sqr(a, p), n); }
+{ return Flxn_sqr_pre(a, n, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 /* (f*g) \/ x^n */
 static GEN
-Flx_mulhigh_i(GEN f, GEN g, long n, ulong p)
-{
-  return Flx_shift(Flx_mul(f,g, p),-n);
-}
+Flx_mulhigh_i(GEN f, GEN g, long n, ulong p, ulong pi)
+{ return Flx_shift(Flx_mul_pre(f, g, p, pi),-n); }
 
 static GEN
-Flxn_mulhigh(GEN f, GEN g, long n2, long n, ulong p)
+Flxn_mulhigh(GEN f, GEN g, long n2, long n, ulong p, ulong pi)
 {
   GEN F = Flx_blocks(f, n2, 2), fl = gel(F,1), fh = gel(F,2);
-  return Flx_add(Flx_mulhigh_i(fl, g, n2, p), Flxn_mul(fh, g, n - n2, p), p);
+  return Flx_add(Flx_mulhigh_i(fl, g, n2, p, pi),
+                 Flxn_mul_pre(fh, g, n - n2, p, pi), p);
 }
 
 /* g==NULL -> assume g==1 */
 GEN
-Flxn_div(GEN g, GEN f, long e, ulong p)
+Flxn_div_pre(GEN g, GEN f, long e, ulong p, ulong pi)
 {
   pari_sp av = avma, av2;
   ulong mask;
@@ -3575,12 +3586,12 @@ Flxn_div(GEN g, GEN f, long e, ulong p)
     fr = Flxn_red(f, n);
     if (mask>1 || !g)
     {
-      u = Flxn_mul(W, Flxn_mulhigh(fr, W, n2, n, p), n-n2, p);
+      u = Flxn_mul_pre(W, Flxn_mulhigh(fr, W, n2, n, p, pi), n-n2, p, pi);
       W = Flx_sub(W, Flx_shift(u, n2), p);
     } else
     {
-      GEN y = Flxn_mul(g, W, n, p), yt =  Flxn_red(y, n-n2);
-      u = Flxn_mul(yt, Flxn_mulhigh(fr,  W, n2, n, p), n-n2, p);
+      GEN y = Flxn_mul_pre(g, W, n, p, pi), yt =  Flxn_red(y, n-n2);
+      u = Flxn_mul_pre(yt, Flxn_mulhigh(fr,  W, n2, n, p, pi), n-n2, p, pi);
       W = Flx_sub(y, Flx_shift(u, n2), p);
     }
     if (gc_needed(av2,2))
@@ -3591,6 +3602,9 @@ Flxn_div(GEN g, GEN f, long e, ulong p)
   }
   return gerepileupto(av, W);
 }
+GEN
+Flxn_div(GEN g, GEN f, long e, ulong p)
+{ return Flxn_div_pre(g, f, e, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
 Flxn_inv(GEN f, long e, ulong p)
@@ -3602,7 +3616,7 @@ Flxn_expint(GEN h, long e, ulong p)
   pari_sp av = avma, av2;
   long v = h[1], n=1;
   GEN f = pol1_Flx(v), g = pol1_Flx(v);
-  ulong mask = quadratic_prec_mask(e);
+  ulong mask = quadratic_prec_mask(e), pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   av2 = avma;
   for (;mask>1;)
   {
@@ -3610,12 +3624,12 @@ Flxn_expint(GEN h, long e, ulong p)
     long n2 = n;
     n<<=1; if (mask & 1) n--;
     mask >>= 1;
-    u = Flxn_mul(g, Flx_mulhigh_i(f, Flxn_red(h, n2-1), n2-1, p), n-n2, p);
+    u = Flxn_mul_pre(g, Flx_mulhigh_i(f, Flxn_red(h, n2-1), n2-1, p,pi), n-n2, p,pi);
     u = Flx_add(u, Flx_shift(Flxn_red(h, n-1), 1-n2), p);
-    w = Flxn_mul(f, Flx_integXn(u, n2-1, p), n-n2, p);
+    w = Flxn_mul_pre(f, Flx_integXn(u, n2-1, p), n-n2, p, pi);
     f = Flx_add(f, Flx_shift(w, n2), p);
     if (mask<=1) break;
-    u = Flxn_mul(g, Flxn_mulhigh(f, g, n2, n, p), n-n2, p);
+    u = Flxn_mul_pre(g, Flxn_mulhigh(f, g, n2, n, p, pi), n-n2, p, pi);
     g = Flx_sub(g, Flx_shift(u, n2), p);
     if (gc_needed(av2,2))
     {
@@ -3751,9 +3765,7 @@ Flx_composedsum(GEN P, GEN Q, ulong p)
 
 GEN
 Flx_direct_compositum(GEN a, GEN b, ulong p)
-{
-  return Flx_composedsum(a, b, p);
-}
+{ return Flx_composedsum(a, b, p); }
 
 static GEN
 _Flx_direct_compositum(void *E, GEN a, GEN b)
@@ -3761,9 +3773,7 @@ _Flx_direct_compositum(void *E, GEN a, GEN b)
 
 GEN
 FlxV_direct_compositum(GEN V, ulong p)
-{
-  return gen_product(V, (void *)p, &_Flx_direct_compositum);
-}
+{ return gen_product(V, (void *)p, &_Flx_direct_compositum); }
 
 /* (x+1)^n mod p; assume 2 <= n < 2p prime */
 static GEN
