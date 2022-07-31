@@ -580,14 +580,14 @@ trace of Frobenius for many distinct $p$, see \tet{ellQ_get_CM}.
 returns the discriminant of the curve $E$.
 
 \fun{ulong}{Fl_elldisc_pre}{ulong a4, ulong a6, ulong p, ulong pi}
-returns the discriminant of the curve $E$, assuming $pi$ is the pseudo inverse
+returns the discriminant of the curve $E$, assuming $pi$ is the pseudoinverse
 of $p$.
 
 \fun{ulong}{Fl_ellj}{ulong a4, ulong a6, ulong p}
 returns the $j$-invariant of the curve $E$.
 
 \fun{ulong}{Fl_ellj_pre}{ulong a4, ulong a6, ulong p, ulong pi}
-returns the $j$-invariant of the curve $E$, assuming $pi$ is the pseudo inverse
+returns the $j$-invariant of the curve $E$, assuming $pi$ is the pseudoinverse
 of $p$.
 
 \fun{void}{Fl_ellj_to_a4a6}{ulong j, ulong p, ulong *pa4, ulong *pa6}
@@ -817,6 +817,10 @@ returns the Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 
 \fun{GEN}{FlxqE_weilpairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p}
 returns the Weil pairing of the points of $m$-torsion $P$ and $Q$.
+
+\fun{GEN}{FlxqE_weilpairing_pre}{GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p,
+ulong pi}, where \var{pi} is a pseudoinverse of $p$, or $0$ in which case we
+assume \kbd{SMALL\_ULONG}$(p)$.
 
 \fun{GEN}{RgE_to_FlxqE}{GEN P, GEN T, ulong p} returns the \kbd{FlxqE}
 obtained by applying \kbd{Rg\_to\_Flxq} coefficientwise.

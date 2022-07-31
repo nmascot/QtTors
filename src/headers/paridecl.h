@@ -697,6 +697,7 @@ GEN     FlxqE_order(GEN z, GEN o, GEN a4, GEN T, ulong p);
 GEN     FlxqE_sub(GEN P, GEN Q, GEN a4, GEN T, ulong p);
 GEN     FlxqE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN T, ulong p);
 GEN     FlxqE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN T, ulong p);
+GEN     FlxqE_weilpairing_pre(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p, ulong pi);
 GEN     ZXX_to_FlxX(GEN B, ulong p, long v);
 GEN     ZXXT_to_FlxXT(GEN z, ulong p, long v);
 GEN     ZXXV_to_FlxXV(GEN V, ulong p, long v);
