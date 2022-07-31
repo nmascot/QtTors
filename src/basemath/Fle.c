@@ -225,32 +225,22 @@ FljV_factorback_pre(GEN P, GEN L, ulong a4, ulong p, ulong pi)
 }
 
 ulong
-Flj_order_ufact(GEN P, ulong n, GEN F, ulong a4, ulong p, ulong pi)
+Flj_order_ufact(GEN P, ulong n, GEN fa, ulong a4, ulong p, ulong pi)
 {
   pari_sp av = avma;
+  GEN T = gel(fa,1), E = gel(fa,2);
+  long i, l = lg(T);
   ulong res = 1;
-  long i, nfactors;
-  GEN primes, exps;
 
-  primes = gel(F, 1);
-  nfactors = lg(primes);
-  exps = gel(F, 2);
-
-  for (i = 1; i < nfactors; ++i) {
-    ulong q, pp = primes[i];
-    long j, k, ei = exps[i];
-    naf_t x;
-    GEN b;
-
-    for (q = pp, j = 1; j < ei; ++j) q *= pp;
-    b = Flj_mulu_pre(P, n / q, a4, p, pi);
-
-    naf_repr(&x, pp);
-    for (j = 0; j < ei && b[3]; ++j)
-      b = Flj_mulu_pre_naf(b, pp, a4, p, pi, &x);
+  for (i = 1; i < l; i++, set_avma(av))
+  {
+    ulong j, t = T[i], e = E[i];
+    GEN b = P;
+    naf_t x; naf_repr(&x, t);
+    if (l != 2) b = Flj_mulu_pre(b, n / upowuu(t,e), a4, p, pi);
+    for (j = 0; j < e && b[3]; j++) b = Flj_mulu_pre_naf(b, t, a4, p, pi, &x);
     if (b[3]) return 0;
-    for (k = 0; k < j; ++k) res *= pp;
-    set_avma(av);
+    res *= upowuu(t, j);
   }
   return res;
 }
