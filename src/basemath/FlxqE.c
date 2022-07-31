@@ -484,7 +484,6 @@ FlxqE_weilpairing_pre(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p, ulong pi)
   if (ell_is_inf(P) || ell_is_inf(Q)
     || (Flx_equal(gel(P,1),gel(Q,1)) && Flx_equal(gel(P,2),gel(Q,2))))
     return pol1_Flx(get_Flx_var(T));
-  pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   N = FlxqE_Miller(P, Q, m, a4, T, p, pi);
   D = FlxqE_Miller(Q, P, m, a4, T, p, pi);
   w = Flxq_div_pre(N, D, T, p, pi); if (mpodd(m)) w = Flx_neg(w, p);
