@@ -2651,46 +2651,28 @@ _Flxq_one(void *data)
   struct _Flxq *D = (struct _Flxq*)data;
   return pol1_Flx(get_Flx_var(D->T));
 }
-#if 0
-static GEN
-_Flxq_zero(void *data)
-{
-  struct _Flxq *D = (struct _Flxq*)data;
-  return pol0_Flx(get_Flx_var(D->T));
-}
-static GEN
-_Flxq_cmul(void *data, GEN P, long a, GEN x)
-{
-  struct _Flxq *D = (struct _Flxq*)data;
-  return Flx_Fl_mul(x, P[a+2], D->p);
-}
-#endif
 
+static GEN
+_Flxq_powu_i(struct _Flxq *D, GEN x, ulong n)
+{ return gen_powu_i(x, n, (void*)D, &_Flxq_sqr, &_Flxq_mul); }
+static GEN
+_Flxq_powu(struct _Flxq *D, GEN x, ulong n)
+{ pari_sp av = avma; return gerepileuptoleaf(av, _Flxq_powu_i(D, x, n)); }
 /* n-Power of x in Z/pZ[X]/(T), as t_VECSMALL. */
 GEN
 Flxq_powu_pre(GEN x, ulong n, GEN T, ulong p, ulong pi)
 {
-  pari_sp av = avma;
+  pari_sp av;
   struct _Flxq D;
-  GEN y;
   switch(n)
   {
     case 0: return pol1_Flx(get_Flx_var(T));
     case 1: return Flx_copy(x);
     case 2: return Flxq_sqr_pre(x, T, p, pi);
   }
-  set_Flxq_pre(&D, T, p, pi);
-  y = gen_powu_i(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
-  return gerepileuptoleaf(av, y);
+  av = avma; set_Flxq_pre(&D, T, p, pi);
+  return gerepileuptoleaf(av, _Flxq_powu_i(&D, x, n));
 }
-static GEN
-_Flxq_powu(struct _Flxq *D, GEN x, ulong n)
-{
-  pari_sp av = avma;
-  GEN y = gen_powu_i(x, n, (void*)D, &_Flxq_sqr, &_Flxq_mul);
-  return gerepileuptoleaf(av, y);
-}
-
 GEN
 Flxq_powu(GEN x, ulong n, GEN T, ulong p)
 { return Flxq_powu_pre(x, n, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
@@ -2727,7 +2709,7 @@ Flxq_pow_init(GEN x, GEN n, long k, GEN T, ulong p)
 GEN
 Flxq_pow_table_pre(GEN R, GEN n, GEN T, ulong p, ulong pi)
 {
-  struct _Flxq D; set_Flxq(&D, T, p);
+  struct _Flxq D; set_Flxq_pre(&D, T, p, pi);
   return gen_pow_table(R, n, (void*)&D, &_Flxq_one, &_Flxq_mul);
 }
 GEN
