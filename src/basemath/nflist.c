@@ -189,7 +189,7 @@ ceilsqrtndiv(GEN X, GEN Y, long n)
   if (cmpii(mulii(powuu(x, n), Y), X) < 0) x++;
   return gc_long(av, x);
 }
-static long
+long
 ceilsqrtdiv(GEN X, GEN Y)
 {
   pari_sp av = avma;

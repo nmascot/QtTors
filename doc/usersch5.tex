@@ -6559,6 +6559,8 @@ Return \kbd{NULL} if \kbd{x} is not a square.
 
 \fun{GEN}{Flxq_lroot}{GEN a, GEN T, ulong p} returns $x$ such that $x^p = a$.
 
+\fun{GEN}{Flxq_lroot_pre}{GEN a, GEN T, ulong p, ulong pi}
+
 \fun{GEN}{Flxq_lroot_fast}{GEN a, GEN V, GEN T, ulong p} assuming that
 \kbd{V=Flxq\_powers(s,p-1,T,p)} where $s(x)^p \equiv x\pmod{T(x),p}$,
 returns $b$ such that $b^p=a$. Only useful if $p$ is less than the degree of

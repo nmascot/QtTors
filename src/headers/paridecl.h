@@ -497,6 +497,7 @@ int     Flxq_issquare(GEN x, GEN T, ulong p);
 int     Flxq_is2npower(GEN x, long n, GEN T, ulong p);
 GEN     Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p);
 GEN     Flxq_lroot(GEN a, GEN T, long p);
+GEN     Flxq_lroot_pre(GEN a, GEN T, long p, ulong pi);
 GEN     Flxq_lroot_fast(GEN a, GEN sqx, GEN T, long p);
 GEN     Flxq_lroot_fast_pre(GEN a, GEN sqx, GEN T, long p, ulong pi);
 GEN     Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l);

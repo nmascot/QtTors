@@ -3263,14 +3263,12 @@ Flxq_lroot_fast(GEN a, GEN sqx, GEN T, long p)
 { return Flxq_lroot_fast_pre(a, sqx, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 GEN
-Flxq_lroot(GEN a, GEN T, long p)
+Flxq_lroot_pre(GEN a, GEN T, long p, ulong pi)
 {
   pari_sp av=avma;
   long n = get_Flx_degree(T), d = degpol(a);
-  ulong pi;
   GEN sqx, V;
   if (n==1) return leafcopy(a);
-  pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   if (n==2) return Flxq_powu_pre(a, p, T, p, pi);
   sqx = Flxq_autpow_pre(Flx_Frobenius_pre(T, p, pi), n-1, T, p, pi);
   if (d==1 && a[2]==0 && a[3]==1) return gerepileuptoleaf(av, sqx);
@@ -3281,14 +3279,16 @@ Flxq_lroot(GEN a, GEN T, long p)
   } else
     return gerepileuptoleaf(av, Flx_Flxq_eval_pre(a,sqx,T,p,pi));
 }
+GEN
+Flxq_lroot(GEN a, GEN T, long p)
+{ return Flxq_lroot_pre(a, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 ulong
 Flxq_norm(GEN x, GEN TB, ulong p)
 {
   GEN T = get_Flx_mod(TB);
-  ulong y = Flx_resultant(T, x, p);
-  ulong L = Flx_lead(T);
-  if ( L==1 || lgpol(x)==0) return y;
+  ulong y = Flx_resultant(T, x, p), L = Flx_lead(T);
+  if (L==1 || lgpol(x)==0) return y;
   return Fl_div(y, Fl_powu(L, (ulong)degpol(x), p), p);
 }
 

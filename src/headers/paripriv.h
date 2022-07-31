@@ -923,6 +923,7 @@ GEN     ffinit_rand(GEN p, long n);
 /* nflist.c */
 
 GEN veccond_to_A5(GEN L, long s);
+long ceilsqrtdiv(GEN x, GEN y);
 
 /* nflistQT.c */
 

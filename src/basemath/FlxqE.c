@@ -25,18 +25,15 @@ small characteristic. */
 /**                              FlxqE                                **/
 /**                                                                   **/
 /***********************************************************************/
-
-/* Theses functions deal with point over elliptic curves over Fq defined
- * by an equation of the form y^2=x^3+a4*x+a6.
- * Most of the time a6 is omitted since it can be recovered from any point
- * on the curve.
- */
+/* These functions deal with point over elliptic curves over Fq defined
+ * by an equation of the form y^2=x^3+a4*x+a6. Most of the time a6 is omitted
+ * since it can be recovered from any point on the curve. */
 
 GEN
 RgE_to_FlxqE(GEN x, GEN T, ulong p)
 {
   if (ell_is_inf(x)) return x;
-  retmkvec2(Rg_to_Flxq(gel(x,1),T,p),Rg_to_Flxq(gel(x,2),T,p));
+  retmkvec2(Rg_to_Flxq(gel(x,1),T,p), Rg_to_Flxq(gel(x,2),T,p));
 }
 
 GEN
@@ -101,37 +98,40 @@ nonsquare_Flxq(GEN T, ulong p)
 void
 Flxq_elltwist(GEN a, GEN a6, GEN T, ulong p, GEN *pt_a, GEN *pt_a6)
 {
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   GEN d = nonsquare_Flxq(T, p);
-  GEN d2 = Flxq_sqr(d, T, p), d3 = Flxq_mul(d2, d, T, p);
+  GEN d2 = Flxq_sqr_pre(d, T, p, pi), d3 = Flxq_mul_pre(d2, d, T, p, pi);
   if (typ(a)==t_VECSMALL)
   {
-    *pt_a  = Flxq_mul(a,  d2, T, p);
-    *pt_a6 = Flxq_mul(a6, d3, T, p);
+    *pt_a  = Flxq_mul_pre(a,  d2, T, p, pi);
+    *pt_a6 = Flxq_mul_pre(a6, d3, T, p, pi);
   } else
   {
-    *pt_a  = mkvec(Flxq_mul(gel(a,1), d, T, p));
-    *pt_a6 = Flxq_mul(a6, d3, T, p);
+    *pt_a  = mkvec(Flxq_mul_pre(gel(a,1), d, T, p, pi));
+    *pt_a6 = Flxq_mul_pre(a6, d3, T, p, pi);
   }
 }
 
 static GEN
-FlxqE_dbl_slope(GEN P, GEN a4, GEN T, ulong p, GEN *slope)
+FlxqE_dbl_slope(GEN P, GEN a4, GEN T, ulong p, ulong pi, GEN *ps)
 {
-  GEN x, y, Q;
+  GEN x, y, Q, s;
   if (ell_is_inf(P) || !lgpol(gel(P,2))) return ellinf();
   x = gel(P,1); y = gel(P,2);
   if (p==3UL)
-    *slope = typ(a4)==t_VEC ? Flxq_div(Flxq_mul(x, gel(a4, 1), T, p), y, T, p)
-                            : Flxq_div(a4, Flx_neg(y, p), T, p);
+    s = typ(a4)==t_VEC? Flxq_div_pre(Flxq_mul_pre(x, gel(a4,1), T,p,pi), y, T,p,pi)
+                      : Flxq_div_pre(a4, Flx_neg(y, p), T,p,pi);
   else
   {
-    GEN sx = Flx_add(Flx_triple(Flxq_sqr(x, T, p), p), a4, p);
-    *slope = Flxq_div(sx, Flx_double(y, p), T, p);
+    GEN sx = Flx_add(Flx_triple(Flxq_sqr_pre(x, T, p, pi), p), a4, p);
+    s = Flxq_div_pre(sx, Flx_double(y, p), T, p, pi);
   }
   Q = cgetg(3,t_VEC);
-  gel(Q, 1) = Flx_sub(Flxq_sqr(*slope, T, p), Flx_double(x, p), p);
-  if (typ(a4)==t_VEC) gel(Q, 1) = Flx_sub(gel(Q, 1), gel(a4, 1), p);
-  gel(Q, 2) = Flx_sub(Flxq_mul(*slope, Flx_sub(x, gel(Q, 1), p), T, p), y, p);
+  gel(Q,1) = Flx_sub(Flxq_sqr_pre(s, T, p, pi), Flx_double(x, p), p);
+  if (typ(a4)==t_VEC) gel(Q, 1) = Flx_sub(gel(Q,1), gel(a4,1), p);
+  gel(Q,2) = Flx_sub(Flxq_mul_pre(s, Flx_sub(x, gel(Q,1), p), T, p, pi),
+                     y, p);
+  if (ps) *ps = s;
   return Q;
 }
 
@@ -139,14 +139,14 @@ GEN
 FlxqE_dbl(GEN P, GEN a4, GEN T, ulong p)
 {
   pari_sp av = avma;
-  GEN slope;
-  return gerepileupto(av, FlxqE_dbl_slope(P,a4, T, p,&slope));
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  return gerepileupto(av, FlxqE_dbl_slope(P,a4, T, p, pi, NULL));
 }
 
 static GEN
-FlxqE_add_slope(GEN P, GEN Q, GEN a4, GEN T, ulong p, GEN *slope)
+FlxqE_add_slope(GEN P, GEN Q, GEN a4, GEN T, ulong p, ulong pi, GEN *ps)
 {
-  GEN Px, Py, Qx, Qy, R;
+  GEN Px, Py, Qx, Qy, R, s;
   if (ell_is_inf(P)) return Q;
   if (ell_is_inf(Q)) return P;
   Px = gel(P,1); Py = gel(P,2);
@@ -154,15 +154,17 @@ FlxqE_add_slope(GEN P, GEN Q, GEN a4, GEN T, ulong p, GEN *slope)
   if (Flx_equal(Px, Qx))
   {
     if (Flx_equal(Py, Qy))
-      return FlxqE_dbl_slope(P, a4, T, p, slope);
+      return FlxqE_dbl_slope(P, a4, T, p, pi, ps);
     else
       return ellinf();
   }
-  *slope = Flxq_div(Flx_sub(Py, Qy, p), Flx_sub(Px, Qx, p), T, p);
+  s = Flxq_div_pre(Flx_sub(Py, Qy, p), Flx_sub(Px, Qx, p), T, p, pi);
   R = cgetg(3,t_VEC);
-  gel(R, 1) = Flx_sub(Flx_sub(Flxq_sqr(*slope, T, p), Px, p), Qx, p);
-  if (typ(a4)==t_VEC) gel(R, 1) = Flx_sub(gel(R, 1),gel(a4, 1), p);
-  gel(R, 2) = Flx_sub(Flxq_mul(*slope, Flx_sub(Px, gel(R, 1), p), T, p), Py, p);
+  gel(R,1) = Flx_sub(Flx_sub(Flxq_sqr_pre(s, T, p, pi), Px, p), Qx, p);
+  if (typ(a4)==t_VEC) gel(R,1) = Flx_sub(gel(R,1), gel(a4,1), p);
+  gel(R,2) = Flx_sub(Flxq_mul_pre(s, Flx_sub(Px, gel(R,1), p), T, p, pi),
+                     Py, p);
+  if (ps) *ps = s;
   return R;
 }
 
@@ -170,8 +172,8 @@ GEN
 FlxqE_add(GEN P, GEN Q, GEN a4, GEN T, ulong p)
 {
   pari_sp av = avma;
-  GEN slope;
-  return gerepileupto(av, FlxqE_add_slope(P,Q,a4, T, p,&slope));
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  return gerepileupto(av, FlxqE_add_slope(P,Q,a4, T,p,pi, NULL));
 }
 
 static GEN
@@ -193,29 +195,35 @@ GEN
 FlxqE_sub(GEN P, GEN Q, GEN a4, GEN T, ulong p)
 {
   pari_sp av = avma;
-  GEN slope;
-  return gerepileupto(av, FlxqE_add_slope(P, FlxqE_neg_i(Q, p), a4, T, p, &slope));
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  return gerepileupto(av, FlxqE_add_slope(P, FlxqE_neg_i(Q, p), a4, T,p,pi, NULL));
 }
 
 struct _FlxqE
 {
-  GEN a4, a6;
-  GEN T;
-  ulong p;
+  GEN a4, a6, T;
+  ulong p, pi;
 };
 
 static GEN
 _FlxqE_dbl(void *E, GEN P)
 {
-  struct _FlxqE *ell = (struct _FlxqE *) E;
-  return FlxqE_dbl(P, ell->a4, ell->T, ell->p);
+  struct _FlxqE *e = (struct _FlxqE *) E;
+  return FlxqE_dbl_slope(P, e->a4, e->T, e->p, e->pi, NULL);
 }
 
 static GEN
 _FlxqE_add(void *E, GEN P, GEN Q)
 {
-  struct _FlxqE *ell=(struct _FlxqE *) E;
-  return FlxqE_add(P, Q, ell->a4, ell->T, ell->p);
+  struct _FlxqE *e = (struct _FlxqE *) E;
+  return FlxqE_add_slope(P, Q, e->a4, e->T, e->p, e->pi, NULL);
+}
+
+static GEN
+_FlxqE_sub(void *E, GEN P, GEN Q)
+{
+  struct _FlxqE *e = (struct _FlxqE *) E;
+  return FlxqE_add_slope(P, FlxqE_neg_i(Q,e->p), e->a4, e->T,e->p,e->pi, NULL);
 }
 
 static GEN
@@ -225,7 +233,7 @@ _FlxqE_mul(void *E, GEN P, GEN n)
   struct _FlxqE *e=(struct _FlxqE *) E;
   long s = signe(n);
   if (!s || ell_is_inf(P)) return ellinf();
-  if (s<0) P = FlxqE_neg(P, e->T, e->p);
+  if (s < 0) P = FlxqE_neg(P, e->T, e->p);
   if (is_pm1(n)) return s>0? gcopy(P): P;
   return gerepilecopy(av, gen_pow_i(P, n, e, &_FlxqE_dbl, &_FlxqE_add));
 }
@@ -234,7 +242,7 @@ GEN
 FlxqE_mul(GEN P, GEN n, GEN a4, GEN T, ulong p)
 {
   struct _FlxqE E;
-  E.a4= a4; E.T = T; E.p = p;
+  E.a4= a4; E.T = T; E.p = p; E.pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   return _FlxqE_mul(&E, P, n);
 }
 
@@ -259,31 +267,33 @@ random_F3xqE(GEN a2, GEN a6, GEN T)
 }
 
 /* Finds a random nonsingular point on E */
-GEN
-random_FlxqE(GEN a4, GEN a6, GEN T, ulong p)
+static GEN
+random_FlxqE_pre(GEN a4, GEN a6, GEN T, ulong p, ulong pi)
 {
   pari_sp ltop = avma;
   GEN x, x2, y, rhs;
-  if (typ(a4)==t_VEC)
-    return random_F3xqE(gel(a4,1), a6, T);
+  if (typ(a4)==t_VEC) return random_F3xqE(gel(a4,1), a6, T);
   do
   {
     set_avma(ltop);
     x   = random_Flx(get_Flx_degree(T),get_Flx_var(T),p);
-    x2  = Flxq_sqr(x, T, p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
-    rhs = Flx_add(Flxq_mul(x, Flx_add(x2, a4, p), T, p), a6, p);
+    x2  = Flxq_sqr_pre(x, T, p, pi); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
+    rhs = Flx_add(Flxq_mul_pre(x, Flx_add(x2, a4, p), T, p, pi), a6, p);
   } while ((!lgpol(rhs) && !lgpol(Flx_add(Flx_triple(x2, p), a4, p)))
           || !Flxq_issquare(rhs, T, p));
   y = Flxq_sqrt(rhs, T, p);
   if (!y) pari_err_PRIME("random_FlxqE", T);
   return gerepilecopy(ltop, mkvec2(x, y));
 }
+GEN
+random_FlxqE(GEN a4, GEN a6, GEN T, ulong p)
+{ return random_FlxqE_pre(a4, a6, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 static GEN
 _FlxqE_rand(void *E)
 {
-  struct _FlxqE *ell=(struct _FlxqE *) E;
-  return random_FlxqE(ell->a4, ell->a6, ell->T, ell->p);
+  struct _FlxqE *e=(struct _FlxqE *) E;
+  return random_FlxqE_pre(e->a4, e->a6, e->T, e->p, e->pi);
 }
 
 static const struct bb_group FlxqE_group={_FlxqE_add,_FlxqE_mul,_FlxqE_rand,hash_GEN,zvV_equal,ell_is_inf, NULL};
@@ -292,9 +302,11 @@ const struct bb_group *
 get_FlxqE_group(void ** pt_E, GEN a4, GEN a6, GEN T, ulong p)
 {
   struct _FlxqE *e = (struct _FlxqE *) stack_malloc(sizeof(struct _FlxqE));
-  e->a4 = a4; e->a6 = a6; e->T = Flx_get_red(T, p); e->p = p;
-  *pt_E = (void *) e;
-  return &FlxqE_group;
+  e->a4 = a4; e->a6 = a6;
+  e->pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  e->p = p;
+  e->T = Flx_get_red_pre(T, p, e->pi);
+  *pt_E = (void *)e; return &FlxqE_group;
 }
 
 GEN
@@ -302,7 +314,7 @@ FlxqE_order(GEN z, GEN o, GEN a4, GEN T, ulong p)
 {
   pari_sp av = avma;
   struct _FlxqE e;
-  e.a4=a4; e.T=T; e.p=p;
+  e.a4 = a4; e.T = T; e.p = p; e.pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   return gerepileuptoint(av, gen_order(z, o, (void*)&e, &FlxqE_group));
 }
 
@@ -311,57 +323,48 @@ FlxqE_log(GEN a, GEN b, GEN o, GEN a4, GEN T, ulong p)
 {
   pari_sp av = avma;
   struct _FlxqE e;
-  e.a4=a4; e.T=T; e.p=p;
+  e.a4 = a4; e.T = T; e.p = p; e.pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   return gerepileuptoint(av, gen_PH_log(a, b, o, (void*)&e, &FlxqE_group));
 }
 
 /***********************************************************************/
-/**                                                                   **/
 /**                            Pairings                               **/
-/**                                                                   **/
 /***********************************************************************/
-
-/* Derived from APIP from and by Jerome Milan, 2012 */
-
+/* Derived from APIP by Jerome Milan, 2012 */
 static GEN
-FlxqE_vert(GEN P, GEN Q, GEN a4, GEN T, ulong p)
+FlxqE_vert(GEN P, GEN Q, GEN a4, GEN T, ulong p, ulong pi)
 {
   long vT = get_Flx_var(T);
   GEN df;
-  if (ell_is_inf(P))
-    return pol1_Flx(vT);
-  if (!Flx_equal(gel(Q, 1), gel(P, 1)))
-    return Flx_sub(gel(Q, 1), gel(P, 1), p);
+  if (ell_is_inf(P)) return pol1_Flx(vT);
+  if (!Flx_equal(gel(Q,1), gel(P,1))) return Flx_sub(gel(Q,1), gel(P,1), p);
   if (lgpol(gel(P,2))!=0) return pol1_Flx(vT);
-  df = typ(a4)==t_VEC ? Flxq_mul(gel(P,1), Flx_mulu(gel(a4, 1), 2, p), T, p)
+  df = typ(a4)==t_VEC ? Flxq_mul_pre(gel(P,1), Flx_double(gel(a4,1), p), T,p,pi)
                       : a4;
-  return Flxq_inv(Flx_add(Flx_mulu(Flxq_sqr(gel(P,1), T, p), 3, p),
-                          df, p), T, p);
+  return Flxq_inv_pre(Flx_add(Flx_triple(Flxq_sqr_pre(gel(P,1), T,p, pi), p),
+                              df, p), T, p, pi);
 }
 
 static GEN
-FlxqE_Miller_line(GEN R, GEN Q, GEN slope, GEN a4, GEN T, ulong p)
+FlxqE_Miller_line(GEN R, GEN Q, GEN slope, GEN a4, GEN T, ulong p, ulong pi)
 {
   long vT = get_Flx_var(T);
-  GEN x = gel(Q, 1), y = gel(Q, 2);
-  GEN tmp1 = Flx_sub(x, gel(R, 1), p);
-  GEN tmp2 = Flx_add(Flxq_mul(tmp1, slope, T, p), gel(R, 2), p);
-  if (!Flx_equal(y, tmp2))
-    return Flx_sub(y, tmp2, p);
-  if (lgpol(y) == 0)
-    return pol1_Flx(vT);
+  GEN x = gel(Q,1), y = gel(Q,2);
+  GEN tmp1 = Flx_sub(x, gel(R,1), p);
+  GEN tmp2 = Flx_add(Flxq_mul_pre(tmp1, slope, T, p, pi), gel(R,2), p);
+  if (!Flx_equal(y, tmp2)) return Flx_sub(y, tmp2, p);
+  if (lgpol(y) == 0) return pol1_Flx(vT);
   else
   {
     GEN s1, s2, a2 = typ(a4)==t_VEC ? gel(a4,1): NULL;
-    GEN y2i = Flxq_inv(Flx_mulu(y, 2, p), T, p);
-    GEN df = a2 ? Flxq_mul(x, Flx_mulu(a2, 2, p), T, p): a4;
+    GEN y2i = Flxq_inv_pre(Flx_mulu(y, 2, p), T, p, pi);
+    GEN df = a2 ? Flxq_mul_pre(x, Flx_mulu(a2, 2, p), T, p, pi): a4;
     GEN x3, ddf;
-    s1 = Flxq_mul(Flx_add(Flx_mulu(Flxq_sqr(x, T, p), 3, p), df, p), y2i, T, p);
-    if (!Flx_equal(s1, slope))
-      return Flx_sub(s1, slope, p);
-    x3 = Flx_mulu(x, 3, p);
+    s1 = Flxq_mul_pre(Flx_add(Flx_triple(Flxq_sqr_pre(x, T, p, pi), p), df, p), y2i, T, p, pi);
+    if (!Flx_equal(s1, slope)) return Flx_sub(s1, slope, p);
+    x3 = Flx_triple(x, p);
     ddf = a2 ? Flx_add(x3, a2, p): x3;
-    s2 = Flxq_mul(Flx_sub(ddf, Flxq_sqr(s1, T, p), p), y2i, T, p);
+    s2 = Flxq_mul_pre(Flx_sub(ddf, Flxq_sqr_pre(s1, T,p,pi), p), y2i, T,p,pi);
     return lgpol(s2)!=0 ? s2: y2i;
   }
 }
@@ -369,7 +372,7 @@ FlxqE_Miller_line(GEN R, GEN Q, GEN slope, GEN a4, GEN T, ulong p)
 /* Computes the equation of the line tangent to R and returns its
  * evaluation at the point Q. Also doubles the point R. */
 static GEN
-FlxqE_tangent_update(GEN R, GEN Q, GEN a4, GEN T, ulong p, GEN *pt_R)
+FlxqE_tangent_update(GEN R, GEN Q, GEN a4, GEN T, ulong p, ulong pi, GEN *pt_R)
 {
   if (ell_is_inf(R))
   {
@@ -379,48 +382,48 @@ FlxqE_tangent_update(GEN R, GEN Q, GEN a4, GEN T, ulong p, GEN *pt_R)
   else if (!lgpol(gel(R,2)))
   {
     *pt_R = ellinf();
-    return FlxqE_vert(R, Q, a4, T, p);
+    return FlxqE_vert(R, Q, a4, T, p, pi);
   } else {
     GEN slope;
-    *pt_R = FlxqE_dbl_slope(R, a4, T, p, &slope);
-    return FlxqE_Miller_line(R, Q, slope, a4, T, p);
+    *pt_R = FlxqE_dbl_slope(R, a4, T, p, pi, &slope);
+    return FlxqE_Miller_line(R, Q, slope, a4, T, p, pi);
   }
 }
 
 /* Computes the equation of the line through R and P, and returns its
  * evaluation at the point Q. Also adds P to the point R. */
 static GEN
-FlxqE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN T, ulong p, GEN *pt_R)
+FlxqE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN T, ulong p, ulong pi, GEN *pt_R)
 {
   if (ell_is_inf(R))
   {
     *pt_R = gcopy(P);
-    return FlxqE_vert(P, Q, a4, T, p);
+    return FlxqE_vert(P, Q, a4, T, p, pi);
   }
   else if (ell_is_inf(P))
   {
     *pt_R = gcopy(R);
-    return FlxqE_vert(R, Q, a4, T, p);
+    return FlxqE_vert(R, Q, a4, T, p, pi);
   }
   else if (Flx_equal(gel(P, 1), gel(R, 1)))
   {
     if (Flx_equal(gel(P, 2), gel(R, 2)))
-      return FlxqE_tangent_update(R, Q, a4, T, p, pt_R);
+      return FlxqE_tangent_update(R, Q, a4, T, p, pi, pt_R);
     else
     {
       *pt_R = ellinf();
-      return FlxqE_vert(R, Q, a4, T, p);
+      return FlxqE_vert(R, Q, a4, T, p, pi);
     }
   } else {
     GEN slope;
-    *pt_R = FlxqE_add_slope(P, R, a4, T, p, &slope);
-    return FlxqE_Miller_line(R, Q, slope, a4, T, p);
+    *pt_R = FlxqE_add_slope(P, R, a4, T, p, pi, &slope);
+    return FlxqE_Miller_line(R, Q, slope, a4, T, p, pi);
   }
 }
 
 struct _FlxqE_miller
 {
-  ulong p;
+  ulong p, pi;
   GEN T, a4, P;
 };
 
@@ -428,78 +431,81 @@ static GEN
 FlxqE_Miller_dbl(void* E, GEN d)
 {
   struct _FlxqE_miller *m = (struct _FlxqE_miller *)E;
-  ulong p  = m->p;
+  ulong p = m->p, pi = m->pi;
   GEN T = m->T, a4 = m->a4, P = m->P;
   GEN v, line, point = gel(d,3);
-  GEN N = Flxq_sqr(gel(d,1), T, p);
-  GEN D = Flxq_sqr(gel(d,2), T, p);
-  line = FlxqE_tangent_update(point, P, a4, T, p, &point);
-  N  = Flxq_mul(N, line, T, p);
-  v = FlxqE_vert(point, P, a4, T, p);
-  D = Flxq_mul(D, v, T, p); return mkvec3(N, D, point);
+  GEN N = Flxq_sqr_pre(gel(d,1), T, p, pi);
+  GEN D = Flxq_sqr_pre(gel(d,2), T, p, pi);
+  line = FlxqE_tangent_update(point, P, a4, T, p, pi, &point);
+  N  = Flxq_mul_pre(N, line, T, p, pi);
+  v = FlxqE_vert(point, P, a4, T, p, pi);
+  D = Flxq_mul_pre(D, v, T, p, pi); return mkvec3(N, D, point);
 }
 
 static GEN
 FlxqE_Miller_add(void* E, GEN va, GEN vb)
 {
   struct _FlxqE_miller *m = (struct _FlxqE_miller *)E;
-  ulong p = m->p;
+  ulong p = m->p, pi = m->pi;
   GEN T = m->T, a4 = m->a4, P = m->P;
   GEN v, line, point;
   GEN na = gel(va,1), da = gel(va,2), pa = gel(va,3);
   GEN nb = gel(vb,1), db = gel(vb,2), pb = gel(vb,3);
-  GEN N = Flxq_mul(na, nb, T, p);
-  GEN D = Flxq_mul(da, db, T, p);
-  line = FlxqE_chord_update(pa, pb, P, a4, T, p, &point);
-  N  = Flxq_mul(N, line, T, p);
-  v = FlxqE_vert(point, P, a4, T, p);
-  D = Flxq_mul(D, v, T, p); return mkvec3(N, D, point);
+  GEN N = Flxq_mul_pre(na, nb, T, p, pi);
+  GEN D = Flxq_mul_pre(da, db, T, p, pi);
+  line = FlxqE_chord_update(pa, pb, P, a4, T, p, pi, &point);
+  N  = Flxq_mul_pre(N, line, T, p, pi);
+  v = FlxqE_vert(point, P, a4, T, p, pi);
+  D = Flxq_mul_pre(D, v, T, p, pi); return mkvec3(N, D, point);
 }
 
 /* Returns the Miller function f_{m, Q} evaluated at the point P using
  * the standard Miller algorithm. */
 static GEN
-FlxqE_Miller(GEN Q, GEN P, GEN m, GEN a4, GEN T, ulong p)
+FlxqE_Miller(GEN Q, GEN P, GEN m, GEN a4, GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;
   struct _FlxqE_miller d;
   GEN v, N, D, g1;
 
-  d.a4 = a4; d.T = T; d.p = p; d.P = P;
+  d.a4 = a4; d.T = T; d.p = p; d.P = P; d.pi = pi;
   g1 = pol1_Flx(get_Flx_var(T));
   v = gen_pow_i(mkvec3(g1,g1,Q), m, (void*)&d,
                 FlxqE_Miller_dbl, FlxqE_Miller_add);
   N = gel(v,1); D = gel(v,2);
-  return gerepileupto(av, Flxq_div(N, D, T, p));
+  return gerepileupto(av, Flxq_div_pre(N, D, T, p, pi));
 }
 
 GEN
-FlxqE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p)
+FlxqE_weilpairing_pre(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;
-  GEN N, D, result;
+  GEN N, D, w;
   if (ell_is_inf(P) || ell_is_inf(Q)
     || (Flx_equal(gel(P,1),gel(Q,1)) && Flx_equal(gel(P,2),gel(Q,2))))
     return pol1_Flx(get_Flx_var(T));
-  N = FlxqE_Miller(P, Q, m, a4, T, p);
-  D = FlxqE_Miller(Q, P, m, a4, T, p);
-  result = Flxq_div(N, D, T, p);
-  if (mpodd(m)) result = Flx_neg(result, p);
-  return gerepileupto(av, result);
+  pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  N = FlxqE_Miller(P, Q, m, a4, T, p, pi);
+  D = FlxqE_Miller(Q, P, m, a4, T, p, pi);
+  w = Flxq_div_pre(N, D, T, p, pi); if (mpodd(m)) w = Flx_neg(w, p);
+  return gerepileupto(av, w);
 }
+GEN
+FlxqE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p)
+{ return FlxqE_weilpairing_pre(P,Q,m,a4,T,p, SMALL_ULONG(p)?0:get_Fl_red(p)); }
 
 GEN
 FlxqE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p)
 {
   if (ell_is_inf(P) || ell_is_inf(Q)) return pol1_Flx(get_Flx_var(T));
-  return FlxqE_Miller(P, Q, m, a4, T, p);
+  return FlxqE_Miller(P, Q, m, a4, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p));
 }
 
 static GEN
 _FlxqE_pairorder(void *E, GEN P, GEN Q, GEN m, GEN F)
 {
   struct _FlxqE *e = (struct _FlxqE *) E;
-  return  Flxq_order(FlxqE_weilpairing(P,Q,m,e->a4,e->T,e->p), F, e->T, e->p);
+  return  Flxq_order(FlxqE_weilpairing_pre(P,Q,m,e->a4,e->T,e->p,e->pi), F, e->T, e->p);
 }
 
 GEN
@@ -507,7 +513,7 @@ Flxq_ellgroup(GEN a4, GEN a6, GEN N, GEN T, ulong p, GEN *pt_m)
 {
   struct _FlxqE e;
   GEN q = powuu(p, get_Flx_degree(T));
-  e.a4=a4; e.a6=a6; e.T=T; e.p=p;
+  e.a4=a4; e.a6=a6; e.T=T; e.p=p; e.pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   return gen_ellgroup(N, subiu(q,1), pt_m, (void*)&e, &FlxqE_group, _FlxqE_pairorder);
 }
 
@@ -517,7 +523,7 @@ Flxq_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, ulong p)
   GEN P;
   pari_sp av = avma;
   struct _FlxqE e;
-  e.a4=a4; e.a6=a6; e.T=T; e.p=p;
+  e.a4=a4; e.a6=a6; e.T=T; e.p=p; e.pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   switch(lg(D)-1)
   {
   case 0:
@@ -535,12 +541,10 @@ Flxq_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, ulong p)
   return gerepilecopy(av, P);
 }
 /***********************************************************************/
-/**                                                                   **/
 /**                          Point counting                           **/
-/**                                                                   **/
 /***********************************************************************/
 
-/* assume a and n  are coprime */
+/* assume a and n are coprime */
 static GEN
 RgX_circular_shallow(GEN P, long a, long n)
 {
@@ -577,21 +581,21 @@ ZpXQ_frob(GEN x, GEN Xm, GEN T, GEN q, ulong p)
 
 struct _lift_lin
 {
-  ulong p;
-  GEN sqx, Tp;
-  GEN ai, Xm;
+  ulong p, pi;
+  GEN sqx, Tp, ai, Xm;
 };
 
-static GEN _lift_invl(void *E, GEN x)
+static GEN
+_lift_invl(void *E, GEN x)
 {
   struct _lift_lin *d = (struct _lift_lin *) E;
   GEN T = d->Tp;
-  ulong p = d->p;
-  GEN xai = Flxq_mul(ZX_to_Flx(x, p), d->ai, T, p);
-  return Flx_to_ZX(Flxq_lroot_fast(xai, d->sqx, T, p));
+  ulong p = d->p, pi = d->pi;
+  GEN xai = Flxq_mul_pre(ZX_to_Flx(x, p), d->ai, T, p, pi);
+  return Flx_to_ZX(Flxq_lroot_fast_pre(xai, d->sqx, T, p, pi));
 }
-
-static GEN _lift_lin(void *E, GEN F, GEN x2, GEN q)
+static GEN
+_lift_lin(void *E, GEN F, GEN x2, GEN q)
 {
   struct _lift_lin *d = (struct _lift_lin *) E;
   pari_sp av = avma;
@@ -614,9 +618,7 @@ FpM_FpXV_bilinear(GEN P, GEN X, GEN Y, GEN p)
 
 static GEN
 FpM_FpXQV_bilinear(GEN P, GEN X, GEN Y, GEN T, GEN p)
-{
-  return FpX_rem(FpM_FpXV_bilinear(P,X,Y,p),T,p);
-}
+{ return FpX_rem(FpM_FpXV_bilinear(P,X,Y,p),T,p); }
 
 static GEN
 FpXC_powderiv(GEN M, GEN p)
@@ -633,10 +635,8 @@ FpXC_powderiv(GEN M, GEN p)
 
 struct _lift_iso
 {
-  GEN phi;
-  GEN Xm,T;
-  GEN sqx, Tp;
-  ulong p;
+  GEN phi, Xm, T, sqx, Tp;
+  ulong p, pi;
 };
 
 static GEN
@@ -658,25 +658,25 @@ _lift_invd(void *E, GEN V, GEN v, GEN qM, long M)
 {
   struct _lift_iso *d = (struct _lift_iso *) E;
   struct _lift_lin e;
-  ulong p = d->p;
+  ulong p = d->p, pi = d->pi;
   GEN TM = FpXT_red(d->T, qM), XM = FpXV_red(d->Xm, qM);
   GEN xp = FpXV_red(gel(v,2), qM);
   GEN yp = FpXV_red(gel(v,3), qM);
   GEN Dx = FpM_FpXQV_bilinear(d->phi, FpXC_powderiv(xp, qM), yp, TM, qM);
   GEN Dy = FpM_FpXQV_bilinear(d->phi, xp, FpXC_powderiv(yp, qM), TM, qM);
   GEN F = mkvec4(Dy, Dx, TM, XM);
-  e.ai = Flxq_inv(ZX_to_Flx(Dy,p),d->Tp,p);
-  e.sqx = d->sqx; e.Tp = d->Tp; e.p=p; e.Xm = XM;
+  e.ai = Flxq_inv_pre(ZX_to_Flx(Dy,p),d->Tp, p, pi);
+  e.sqx = d->sqx; e.Tp = d->Tp; e.p=p; e.pi=pi; e.Xm = XM;
   return gen_ZpX_Dixon(F,V,qM,utoipos(p),M,(void*) &e, _lift_lin, _lift_invl);
 }
 
 static GEN
-lift_isogeny(GEN phi, GEN x0, long n, GEN Xm, GEN T, GEN sqx, GEN Tp, ulong p)
+lift_isogeny(GEN phi, GEN x0, long n, GEN Xm, GEN T, GEN sqx, GEN Tp,
+  ulong p, ulong pi)
 {
   struct _lift_iso d;
-  d.phi=phi;
-  d.Xm=Xm; d.T=T;
-  d.sqx=sqx; d.Tp=Tp; d.p=p;
+  d.phi = phi; d.Xm = Xm; d.T = T;
+  d.sqx = sqx; d.Tp = Tp; d.p = p; d.pi = pi;
   return gen_ZpX_Newton(x0, utoipos(p), n,(void*)&d, _lift_iter, _lift_invd);
 }
 
@@ -706,12 +706,8 @@ ZpXQ_norm_mul(void *E, GEN x, GEN y)
   retmkvec2(FpXQ_mul(P,ZpXQ_frob_cyc(Q, D->T, D->p, a), D->T, D->p),
             mkvecsmall((a*b)%D->n));
 }
-
 static GEN
-ZpXQ_norm_sqr(void *E, GEN x)
-{
-  return ZpXQ_norm_mul(E, x, x);
-}
+ZpXQ_norm_sqr(void *E, GEN x) { return ZpXQ_norm_mul(E, x, x); }
 
 /* Assume T = Phi_(n) and n prime */
 GEN
@@ -745,7 +741,7 @@ ZpXQ_sqrtnorm(GEN a, GEN T, GEN q, GEN p, long e)
 
 struct _teich_lin
 {
-  ulong p;
+  ulong p, pi;
   GEN sqx, Tp;
   long m;
 };
@@ -754,9 +750,8 @@ static GEN
 _teich_invl(void *E, GEN x)
 {
   struct _teich_lin *d = (struct _teich_lin *) E;
-  ulong p = d->p;
-  GEN T = d->Tp;
-  return Flx_to_ZX(Flxq_lroot_fast(ZX_to_Flx(x, p), d->sqx, T, p));
+  ulong p = d->p, pi = d->pi;
+  return Flx_to_ZX(Flxq_lroot_fast_pre(ZX_to_Flx(x,p), d->sqx, d->Tp, p, pi));
 }
 
 static GEN
@@ -772,9 +767,8 @@ _teich_lin(void *E, GEN F, GEN x2, GEN q)
 
 struct _teich_iso
 {
-  GEN Xm, T;
-  GEN sqx, Tp;
-  ulong p;
+  GEN Xm, T, sqx, Tp;
+  ulong p, pi;
 };
 
 static GEN
@@ -799,20 +793,21 @@ _teich_invd(void *E, GEN V, GEN v, GEN qM, long M)
   GEN TM = FpXT_red(d->T, qM), XM = FpXV_red(d->Xm, qM);
   GEN x1 = FpX_red(gel(v,2), qM);
   GEN F = mkvec3(x1, TM, XM);
-  e.sqx = d->sqx; e.Tp = d->Tp; e.p=p;
+  e.sqx = d->sqx; e.Tp = d->Tp; e.p = p; e.pi = d->pi;
   return gen_ZpX_Dixon(F,V,qM,utoipos(p),M,(void*) &e, _teich_lin, _teich_invl);
 }
 
 static GEN
-Teichmuller_lift(GEN x, GEN Xm, GEN T, GEN sqx, GEN Tp, ulong p, long N)
+Teichmuller_lift(GEN x, GEN Xm, GEN T, GEN sqx, GEN Tp, ulong p, ulong pi,
+  long N)
 {
   struct _teich_iso d;
-  d.Xm = Xm; d.T = T; d.sqx = sqx; d.Tp = Tp; d.p = p;
+  d.Xm = Xm; d.T = T; d.sqx = sqx; d.Tp = Tp; d.p = p; d.pi = pi;
   return gen_ZpX_Newton(x,utoipos(p), N,(void*)&d, _teich_iter, _teich_invd);
 }
 
 static GEN
-get_norm(GEN a4, GEN a6, GEN T, ulong p, long N)
+get_norm(GEN a4, GEN a6, GEN T, ulong p, ulong pi, long N)
 {
   long sv=T[1];
   GEN a;
@@ -820,7 +815,7 @@ get_norm(GEN a4, GEN a6, GEN T, ulong p, long N)
   else
   {
     GEN P = mkpoln(4, pol1_Flx(sv), pol0_Flx(sv), a4, a6);
-    a = gel(FlxqX_powu(P,p>>1,T,p),2+p-1);
+    a = gel(FlxqX_powu_pre(P, p>>1, T,p,pi), 2+p-1);
   }
   return Zp_sqrtnlift(gen_1,subss(p,1),utoi(Flxq_norm(a,T,p)),utoipos(p), N);
 }
@@ -833,18 +828,16 @@ fill_pols(long n, const long *v, long m, const long *vn,
   long d = upowuu(n,12/(n-1));
   GEN N, D, M = zeromatcopy(n+1,n+1);
   gmael(M,1,n+1) = gen_1;
-  for(i=2;i<=n+1;i++)
-    for(j=i-1;j<=n;j++)
-      gmael(M,i,j) = mulis(powuu(d,i-2),v[j-i+1]);
+  for (i = 2; i <= n+1; i++)
+    for (j = i-1; j <= n; j++) gmael(M,i,j) = mulis(powuu(d,i-2), v[j-i+1]);
   N = cgetg(m+1,t_COL);
   D = cgetg(m+1,t_COL);
-  for(i=1;i<=m;i++)
+  for(i = 1; i <= m; i++)
   {
     gel(N,i) = stoi(*vn++);
     gel(D,i) = stoi(*vd++);
   }
-  *act = mkmat2(N,D);
-  return M;
+  *act = mkmat2(N,D); return M;
 }
 
 /*
@@ -894,11 +887,9 @@ long
 zx_is_pcyc(GEN T)
 {
   long i, n = degpol(T);
-  if (!uisprime(n+1))
-    return 0;
-  for (i=0; i<=n; i++)
-    if (T[i+2]!=1UL)
-      return 0;
+  if (!uisprime(n+1)) return 0;
+  for (i = 0; i <= n; i++)
+    if (T[i+2] != 1UL) return 0;
   return 1;
 }
 
@@ -909,11 +900,10 @@ Flxq_ellcard_Kohel(GEN a4, GEN a6, GEN T, ulong p)
   pari_timer ti;
   long n = get_Flx_degree(T), N = (n+4)/2, dj;
   GEN q = powuu(p, N);
-  GEN T2, Xm, s1, c2, t, lr;
-  GEN S1, sqx;
-  GEN Nc2, Np;
+  GEN T2, Xm, s1, c2, t, lr, S1, sqx, Nc2, Np;
   GEN act, phi = get_Kohel_polynomials(p, &act, &dj);
   long ispcyc = zx_is_pcyc(get_Flx_mod(T));
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   timer_start(&ti);
   if (!ispcyc)
   {
@@ -921,6 +911,7 @@ Flxq_ellcard_Kohel(GEN a4, GEN a6, GEN T, ulong p)
     if (DEBUGLEVEL) timer_printf(&ti,"Teich");
   } else
     T2 = Flx_to_ZX(get_Flx_mod(T));
+
   T2 = FpX_get_red(T2, q); T = ZXT_to_FlxT(T2, p);
   av2 = avma;
   if (DEBUGLEVEL) timer_printf(&ti,"Barrett");
@@ -930,17 +921,17 @@ Flxq_ellcard_Kohel(GEN a4, GEN a6, GEN T, ulong p)
     if (DEBUGLEVEL) timer_printf(&ti,"Xm");
   } else
     Xm = cgetg(1,t_VEC);
-  s1 = Flxq_inv(Flx_Fl_add(Flxq_ellj(a4,a6,T,p),dj, p),T,p);
-  lr = Flxq_lroot(polx_Flx(get_Flx_var(T)), T, p);
-  sqx = Flxq_powers(lr, p-1, T, p);
-  S1 = lift_isogeny(phi, Flx_to_ZX(s1), N, Xm, T2, sqx, T ,p);
+  s1 = Flxq_inv_pre(Flx_Fl_add(Flxq_ellj(a4,a6,T,p),dj, p),T,p,pi);
+  lr = Flxq_lroot_pre(polx_Flx(get_Flx_var(T)), T,p,pi);
+  sqx = Flxq_powers_pre(lr, p-1, T, p, pi);
+  S1 = lift_isogeny(phi, Flx_to_ZX(s1), N, Xm, T2, sqx, T,p,pi);
   if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");
   c2 = getc2(act, S1, T2, q, p, N);
   if (DEBUGLEVEL) timer_printf(&ti,"c^2");
   if (p>3 && !ispcyc)
   {
-    GEN c2p = Flx_to_ZX(Flxq_inv(ZX_to_Flx(c2,p),T,p));
-    GEN tc2 = Teichmuller_lift(c2p,Xm, T2,sqx,T,p,N);
+    GEN c2p = Flx_to_ZX(Flxq_inv_pre(ZX_to_Flx(c2,p),T,p,pi));
+    GEN tc2 = Teichmuller_lift(c2p,Xm, T2,sqx,T,p,pi,N);
     if (DEBUGLEVEL) timer_printf(&ti,"Teichmuller/Fq");
     c2 = FpX_rem(FpX_mul(tc2,c2,q),T2,q);
   }
@@ -948,7 +939,7 @@ Flxq_ellcard_Kohel(GEN a4, GEN a6, GEN T, ulong p)
   if (DEBUGLEVEL) timer_printf(&ti,"tc2");
   Nc2 = (ispcyc? ZpXQ_sqrtnorm_pcyc: ZpXQ_sqrtnorm)(c2, T2, q, utoipos(p), N);
   if (DEBUGLEVEL) timer_printf(&ti,"Norm");
-  Np = get_norm(a4,a6,T,p,N);
+  Np = get_norm(a4,a6,T,p,pi,N);
   if (p>3 && ispcyc)
   {
     GEN Ncpi =  utoi(Fl_inv(umodiu(Nc2,p), p));
@@ -960,8 +951,7 @@ Flxq_ellcard_Kohel(GEN a4, GEN a6, GEN T, ulong p)
   return gerepileupto(av, subii(addiu(powuu(p,n),1),t));
 }
 
-/* Use Damien Robert method */
-
+/* Use Damien Robert's method */
 static GEN
 get_trace_Robert(GEN J, GEN phi, GEN Xm, GEN T, GEN q, ulong p, long e)
 {
@@ -984,10 +974,9 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
   pari_timer ti;
   long n = get_Flx_degree(T), N = (n+5)/2;
   GEN pp = utoipos(p), q = powuu(p, N);
-  GEN T2, j, t, phi;
-  GEN J1,sqx,Xm;
-  GEN c2, tc2, c2p, Nc2, Np;
+  GEN T2, j, t, phi, J1, sqx, Xm, c2, tc2, c2p, Nc2, Np;
   long ispcyc = zx_is_pcyc(get_Flx_mod(T));
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   timer_start(&ti);
   if (!ispcyc)
   {
@@ -1005,18 +994,18 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
   } else
     Xm = cgetg(1,t_VEC);
   j = Flxq_ellj(a4,a6,T,p);
-  sqx = Flxq_powers(Flxq_lroot(polx_Flx(T[1]), T, p), p-1, T, p);
+  sqx = Flxq_powers_pre(Flxq_lroot_pre(polx_Flx(T[1]), T,p,pi), p-1, T,p,pi);
   phi = polmodular_ZM(p, 0);
   if (DEBUGLEVEL) timer_printf(&ti,"phi");
-  J1 = lift_isogeny(phi, Flx_to_ZX(j), N, Xm, T2,sqx,T,p);
+  J1 = lift_isogeny(phi, Flx_to_ZX(j), N, Xm, T2,sqx,T,p,pi);
   if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");
   c2 = get_trace_Robert(J1, phi, Xm, T2, q, p, N);
   q = diviuexact(q,p); N--;
   if (DEBUGLEVEL) timer_printf(&ti,"c^2");
   if (!ispcyc)
   {
-    c2p = Flx_to_ZX(Flxq_inv(ZX_to_Flx(c2,p),T,p));
-    tc2 = Teichmuller_lift(c2p,Xm, T2,sqx,T,p,N);
+    c2p = Flx_to_ZX(Flxq_inv_pre(ZX_to_Flx(c2,p),T,p,pi));
+    tc2 = Teichmuller_lift(c2p,Xm, T2,sqx,T,p,pi,N);
     if (DEBUGLEVEL) timer_printf(&ti,"teichmuller");
     c2 = FpX_rem(FpX_mul(tc2,c2,q),T2,q);
   }
@@ -1024,7 +1013,7 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
   q = powuu(p, N);
   Nc2 = (ispcyc? ZpXQ_sqrtnorm_pcyc: ZpXQ_sqrtnorm)(c2, T2, q, pp, N);
   if (DEBUGLEVEL) timer_printf(&ti,"Norm");
-  Np = get_norm(a4,a6,T,p,N);
+  Np = get_norm(a4,a6,T,p,pi,N);
   if (ispcyc)
   {
     GEN Ncpi = utoi(Fl_inv(umodiu(Nc2,p), p));
@@ -1037,49 +1026,44 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
 }
 
 /***************************************************************************/
-/*                                                                         */
-/*                          Shanks Mestre                                  */
-/*                                                                         */
+/*                          Shanks-Mestre                                  */
 /***************************************************************************/
 
 /* Return the lift of a (mod b), which is closest to h */
 static GEN
 closest_lift(GEN a, GEN b, GEN h)
-{
-  return addii(a, mulii(b, diviiround(subii(h,a), b)));
-}
+{ return addii(a, mulii(b, diviiround(subii(h,a), b))); }
 
+/* find multiple of order of f using Baby Step/Giant Step, f^h close to 1,
+ * order lies in an interval of size <= 'bound' and known mod B */
 static GEN
-FlxqE_find_order(GEN f, GEN h, GEN bound, GEN B, GEN a4, GEN T, ulong p)
+_FlxqE_order_multiple(void *E, GEN f, GEN h, GEN bound, GEN B)
 {
   pari_sp av = avma, av1;
   pari_timer Ti;
-  long s = itos( gceil(gsqrt(gdiv(bound,B),DEFAULTPREC)) ) >> 1;
-  GEN tx, ti;
-  GEN fh = FlxqE_mul(f, h, a4, T, p);
-  GEN F, P = fh, fg;
-  long i;
+  long i, s = ceilsqrtdiv(bound, B) >> 1;
+  GEN P, F, tx, ti, fg, fh;
+
+  P = fh = _FlxqE_mul(E, f, h);
   if (DEBUGLEVEL >= 6) timer_start(&Ti);
   if (ell_is_inf(fh)) return h;
-  F = FlxqE_mul(f, B, a4, T, p);
+  F = _FlxqE_mul(E, f, B);
   if (s < 3)
   { /* we're nearly done: naive search */
     GEN Q = P;
     for (i=1;; i++)
     {
-      P = FlxqE_add(P, F, a4, T, p); /* h.f + i.F */
+      P = _FlxqE_add(E, P, F); /* h.f + i.F */
       if (ell_is_inf(P)) return gerepileupto(av, addii(h, mului(i,B)));
-      Q = FlxqE_sub(Q, F, a4, T, p); /* h.f - i.F */
+      Q = _FlxqE_sub(E, Q, F); /* h.f - i.F */
       if (ell_is_inf(Q)) return gerepileupto(av, subii(h, mului(i,B)));
     }
   }
-  tx = cgetg(s+1,t_VECSMALL);
-  /* Baby Step/Giant Step */
-  av1 = avma;
+  tx = cgetg(s+1,t_VECSMALL); av1 = avma;
   for (i=1; i<=s; i++)
   { /* baby steps */
     tx[i] = hash_GEN(gel(P, 1));
-    P = FlxqE_add(P, F, a4, T, p); /* h.f + i.F */
+    P = _FlxqE_add(E, P, F); /* h.f + i.F */
     if (ell_is_inf(P)) return gerepileupto(av, addii(h, mului(i,B)));
     if (gc_needed(av1,3))
     {
@@ -1087,25 +1071,24 @@ FlxqE_find_order(GEN f, GEN h, GEN bound, GEN B, GEN a4, GEN T, ulong p)
       P = gerepileupto(av1,P);
     }
   }
-  if (DEBUGLEVEL >= 6) timer_printf(&Ti, "[Flxq_ellcard] baby steps, s = %ld",s);
+  if (DEBUGLEVEL >= 6) timer_printf(&Ti,"[Flxq_ellcard] baby steps, s = %ld",s);
   /* giant steps: fg = s.F */
-  fg = gerepileupto(av1, FlxqE_sub(P, fh, a4, T, p));
-  if (ell_is_inf(fg)) return gerepileupto(av,mului(s,B));
+  fg = gerepileupto(av1, _FlxqE_sub(E, P, fh));
+  if (ell_is_inf(fg)) return gerepileupto(av, mului(s,B));
   ti = vecsmall_indexsort(tx); /* = permutation sorting tx */
   tx = perm_mul(tx,ti);
   if (DEBUGLEVEL >= 6) timer_printf(&Ti, "[Flxq_ellcard] sorting");
   av1 = avma;
   for (P=fg, i=1; ; i++)
   {
-    long k = hash_GEN(gel(P,1));
-    long r = zv_search(tx, k);
+    long k = hash_GEN(gel(P,1)), r = zv_search(tx, k);
     if (r)
     {
       while (r && tx[r] == k) r--;
       for (r++; r <= s && tx[r] == k; r++)
       {
         long j = ti[r]-1;
-        GEN Q = FlxqE_add(FlxqE_mul(F, stoi(j), a4, T, p), fh, a4, T, p);
+        GEN Q = _FlxqE_add(E, _FlxqE_mul(E, F, stoi(j)), fh);
         if (DEBUGLEVEL >= 6)
           timer_printf(&Ti, "[Flxq_ellcard] giant steps, i = %ld",i);
         if (Flx_equal(gel(P,1), gel(Q,1)))
@@ -1115,7 +1098,7 @@ FlxqE_find_order(GEN f, GEN h, GEN bound, GEN B, GEN a4, GEN T, ulong p)
         }
       }
     }
-    P = FlxqE_add(P,fg,a4,T,p);
+    P = _FlxqE_add(E, P, fg);
     if (gc_needed(av1,3))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"[Flxq_ellcard] giants steps, i=%ld",i);
@@ -1123,19 +1106,19 @@ FlxqE_find_order(GEN f, GEN h, GEN bound, GEN B, GEN a4, GEN T, ulong p)
     }
   }
 }
+static GEN
+_FlxqE_order(void *E, GEN f, GEN h, GEN bound, GEN B)
+{
+  GEN o = _FlxqE_order_multiple(E, f, h, bound, B);
+  return gen_order(f, o, E, &FlxqE_group);
+}
 
 static void
 Flx_next(GEN t, ulong p)
 {
   long i;
   for(i=2;;i++)
-    if (uel(t,i)==p-1)
-      t[i]=0;
-    else
-    {
-      t[i]++;
-      break;
-    }
+    if (uel(t,i)==p-1) t[i]=0; else { t[i]++; break; }
 }
 
 static void
@@ -1162,10 +1145,10 @@ F3xq_ellcard_naive(GEN a2, GEN a6, GEN T)
     if (!lgpol(rhs)) a++; else if (Flxq_issquare(rhs, T, 3)) a+=2;
     Flx_next(x, 3);
   }
-  set_avma(av);
-  return a;
+  set_avma(av); return a;
 }
 
+/* p^deg(T) is tiny */
 static ulong
 Flxq_ellcard_naive(GEN a4, GEN a6, GEN T, ulong p)
 {
@@ -1173,41 +1156,38 @@ Flxq_ellcard_naive(GEN a4, GEN a6, GEN T, ulong p)
   long i, d = get_Flx_degree(T), lx = d+2;
   long q = upowuu(p, d), a;
   GEN x = zero_zv(lx); x[1] = get_Flx_var(T);
-  for(a=1, i=0; i<q; i++)
+  for(a = 1, i = 0; i < q; i++)
   {
     GEN x2, rhs;
     Flx_renormalize_ip(x, lx);
-    x2  = Flxq_sqr(x, T, p);
-    rhs = Flx_add(Flxq_mul(x, Flx_add(x2, a4, p), T, p), a6, p);
-    if (!lgpol(rhs)) a++; else if (Flxq_issquare(rhs,T,p)) a+=2;
+    x2  = Flxq_sqr_pre(x, T, p, 0);
+    rhs = Flx_add(Flxq_mul_pre(x, Flx_add(x2, a4, p), T, p, 0), a6, p);
+    if (!lgpol(rhs)) a++; else if (Flxq_issquare(rhs,T,p)) a += 2;
     Flx_next(x,p);
   }
-  set_avma(av);
-  return a;
+  set_avma(av); return a;
 }
 
-/* assume T irreducible mod p, m = (q-1)/(p-1) */
 static long
-Flxq_kronecker(GEN x, GEN m, GEN T, ulong p)
+Flxq_kronecker(GEN x, GEN T, ulong p)
 {
   pari_sp av;
-  ulong z;
   if (lgpol(x) == 0) return 0;
-  av = avma; z = Flxq_pow(x, m, T, p)[2];
-  return gc_long(av, krouu(z, p));
+  av = avma; return gc_long(av, krouu(Flxq_norm(x, T, p), p));
 }
 
 /* Find x such that kronecker(u = x^3+a4x+a6, p) is KRO.
  * Return point [x*u,u^2] on E (KRO=1) / E^twist (KRO=-1) */
 static GEN
-Flxq_ellpoint(long KRO, GEN a4, GEN a6, GEN m, long n, long vn, GEN T, ulong p)
+Flxq_ellpoint(long KRO, GEN a4, GEN a6, GEN T, ulong p, ulong pi)
 {
+  long v = varn(a4), n = get_Flx_degree(T);
   for(;;)
   {
-    GEN x = random_Flx(n,vn,p);
-    GEN u = Flx_add(a6, Flxq_mul(Flx_add(a4, Flxq_sqr(x,T,p), p), x, T,p), p);
-    if (Flxq_kronecker(u, m,T,p) == KRO)
-      return mkvec2(Flxq_mul(u,x, T,p), Flxq_sqr(u, T,p));
+    GEN x = random_Flx(n, v, p), x2 = Flxq_sqr_pre(x,T,p,pi);
+    GEN u = Flx_add(a6, Flxq_mul_pre(Flx_add(a4, x2, p), x, T,p, pi), p);
+    if (Flxq_kronecker(u,T,p) == KRO)
+      return mkvec2(Flxq_mul_pre(u,x, T,p,pi), Flxq_sqr_pre(u, T,p,pi));
   }
 }
 
@@ -1215,19 +1195,21 @@ static GEN
 Flxq_ellcard_Shanks(GEN a4, GEN a6, GEN q, GEN T, ulong p)
 {
   pari_sp av = avma;
-  long vn = get_Flx_var(T), n = get_Flx_degree(T), KRO = -1;
-  GEN h,f, ta4, A, B, m;
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  long v = get_Flx_var(T), KRO = -1;
+  GEN h,f, A, B;
   GEN q1p = addiu(q,1), q2p = shifti(q1p, 1);
   GEN bound = addiu(sqrti(gmul2n(q,4)), 1); /* ceil( 4sqrt(q) ) */
+  struct _FlxqE e;
+  e.p = p; e.pi = pi; e.T = Flx_get_red_pre(T, p, pi);
   /* once #E(Flxq) is know mod B >= bound, it is completely determined */
   /* how many 2-torsion points ? */
-  switch(FlxqX_nbroots(mkpoln(4, pol1_Flx(vn), pol0_Flx(vn), a4, a6), T, p))
+  switch(FlxqX_nbroots(mkpoln(4, pol1_Flx(v), pol0_Flx(v), a4, a6), T, p))
   {
   case 3:  A = gen_0; B = utoipos(4); break;
   case 1:  A = gen_0; B = gen_2; break;
   default: A = gen_1; B = gen_2; break; /* 0 */
   }
-  m = diviuexact(subiu(powuu(p,n), 1), p-1);
   for(;;)
   {
     h = closest_lift(A, B, q1p);
@@ -1237,11 +1219,9 @@ Flxq_ellcard_Shanks(GEN a4, GEN a6, GEN q, GEN T, ulong p)
      *
      * #E_u(Flxq) = A (mod B),  h is close to #E_u(Flxq) */
     KRO = -KRO;
-    f = Flxq_ellpoint(KRO, a4,a6, m,n,vn, T,p);
-
-    ta4 = Flxq_mul(a4, gel(f,2), T, p); /* a4 for E_u */
-    h = FlxqE_find_order(f, h, bound, B, ta4,T,p);
-    h = FlxqE_order(f, h, ta4, T, p);
+    f = Flxq_ellpoint(KRO, a4,a6, T,p,pi);
+    e.a4 = Flxq_mul_pre(a4, gel(f,2), T,p,pi); /* a4 for E_u */
+    h = _FlxqE_order((void*)&e, f, h, bound, B);
     /* h | #E_u(Flxq) = A (mod B) */
     A = Z_chinese_all(A, gen_0, B, h, &B);
     if (cmpii(B, bound) >= 0) break;
@@ -1307,7 +1287,7 @@ Flxq_ellcard_Satoh(GEN a4, GEN a6, GEN j, GEN T, ulong p)
         return Flxq_is2npower(u, 2, T, p) ? subii(q1,t): addii(q1,t);
       }
     }
-    if (p<=7 || p==13 ) return Flxq_ellcard_Kohel(a4, a6, T, p);
+    if (p<=7 || p==13) return Flxq_ellcard_Kohel(a4, a6, T, p);
     else return Flxq_ellcard_Harley(a4, a6, T, p);
   }
 }
