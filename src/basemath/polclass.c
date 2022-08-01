@@ -99,20 +99,21 @@ test_curve_order(norm_eqn_t ne, ulong a4, ulong a6,
   m0 = m1 = 1;
   for (av = avma;;)
   {
-    GEN Q, fa0;
     long a1, x, n_s;
-
-    Q = random_Flj_pre(a4, a6, p, pi);
-    if (m0 != 1) Q = Flj_mulu_pre(Q, m0, a4, p, pi);
-    fa0 = m0 == 1? n0: famatsmall_divexact(n0, factoru(m0));
-    n_s = Flj_order_ufact(Q, N0 / m0, fa0, a4, p, pi);
-    if (n_s == 0) {
-      /* If m0 divides N1 and m1 divides N0 and N0 < N1, then swap */
-      if (!swapped && N1 % m0 == 0 && N0 % m1 == 0) {
-        swapspec(n0, n1, N0, N1);
-        swapped = 1; continue;
-      }
-      return gc_long(ltop,0);
+    GEN Q = random_Flj_pre(a4, a6, p, pi);
+    if (m0 == 1)
+      n_s = Flj_order_ufact(Q, N0, n0, a4, p, pi);
+    else if (N0 % m0) n_s = 0;
+    else
+    { /* m0 | N0 */
+      GEN fa0 = famatsmall_divexact(n0, factoru(m0));
+      Q = Flj_mulu_pre(Q, m0, a4, p, pi);
+      n_s = Flj_order_ufact(Q, N0 / m0, fa0, a4, p, pi);
+    }
+    if (n_s == 0)
+    { /* If m0 divides N1 and m1 divides N0 and N0 < N1, then swap */
+      if (swapped || N1 % m0 || N0 % m1) return gc_long(ltop,0);
+      swapspec(n0, n1, N0, N1); swapped = 1; continue;
     }
 
     m0 *= n_s; a1 = (2 * p + 2) % m1;
@@ -724,9 +725,13 @@ find_j_inv_with_given_trace(
 
   N0 = (long)p1 - t; n0 = factoru(N0);
   N1 = (long)p1 + t; n1 = factoru(N1);
-
   best_torsion_constraint(p, t, &twist, &m);
-  N = p1 - (twist<3 ? (twist==1 ? t: -t): 0);
+  switch(twist)
+  {
+    case 1: N = N0; break;
+    case 2: N = N1; break;
+    default: N = p1;
+  }
 
   /* Select batch size so that we have roughly a 50% chance of finding
    * a good curve in a batch. */

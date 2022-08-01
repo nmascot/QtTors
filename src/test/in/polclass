@@ -145,3 +145,5 @@ if ( ! got_err, error("No error when given bad invariant"));
 
 if (variable(polclass(-7, , 'z)) != 'z, error("Didn't use user-provided variable"));
 }
+
+setrand(51);polclass(-8,5)
