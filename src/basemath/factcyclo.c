@@ -1604,10 +1604,9 @@ FpX_factcyclo_just_conductor(ulong n, GEN p, ulong m)
     return FpX_factcyclo_fact(n, p, m, action);
 }
 
-GEN
-FpX_factcyclo(ulong n, GEN p, ulong m)
+static GEN
+FpX_factcyclo_i(ulong n, GEN p, ulong m)
 {
-  pari_sp av = avma;
   GEN fn = factoru(n), z;
   long phin = eulerphiu_fact(fn), pmodn = umodiu(p, n);
   ulong d = Fl_order(pmodn, phin, n), f = phin/d, fK;
@@ -1627,9 +1626,11 @@ FpX_factcyclo(ulong n, GEN p, ulong m)
     for (i = 1; i <= m; i++)
       gel(z, i) = FpX_conductor_lift(gel(z, i), p, n, fK, vP);
   }
-  z = gen_sort(z,(void*)cmpii, &gen_cmp_RgX);
-  return gerepilecopy(av, z);
+  return gen_sort(z,(void*)cmpii, &gen_cmp_RgX);
 }
+GEN
+FpX_factcyclo(ulong n, GEN p, ulong m)
+{ pari_sp av = avma; return gerepileupto(av, FpX_factcyclo_i(n, p, m)); }
 
 /*  Data = [H, GH, i_t, d0, kT, [n, d, f, n_T, mitk]]
 *   Data2 = [vT, polcyclo_n, [p, pr, pu, pru]] */
@@ -2125,10 +2126,9 @@ Flx_factcyclo_just_conductor(ulong n, ulong p, ulong m)
     return Flx_factcyclo_fact(n, p, m, action);
 }
 
-GEN
-Flx_factcyclo(ulong n, ulong p, ulong m)
+static GEN
+Flx_factcyclo_i(ulong n, ulong p, ulong m)
 {
-  pari_sp av = avma;
   GEN fn = factoru(n), z;
   ulong phin = eulerphiu_fact(fn), pmodn = p%n;
   ulong d = Fl_order(pmodn, phin, n), f = phin/d, fK;
@@ -2148,38 +2148,28 @@ Flx_factcyclo(ulong n, ulong p, ulong m)
     for (i = 1; i <= m; i++)
       gel(z, i) = Flx_conductor_lift(gel(z, i), p, n, fK, vP);
   }
-  z = gen_sort(z,(void*)cmpGuGu, &gen_cmp_RgX);
-  return gerepilecopy(av, z);
+  return gen_sort(z,(void*)cmpGuGu, &gen_cmp_RgX);
 }
-
-static void
-checkp(long n, GEN p, const char *fun)
-{
-  if (!BPSW_psp(p)) pari_err_PRIME(fun, p);
-  if (dvdui(n, p)) pari_err_COPRIME("factcyclo", stoi(n), p);
-}
+GEN
+Flx_factcyclo(ulong n, ulong p, ulong m)
+{ pari_sp av = avma; return gerepileupto(av, Flx_factcyclo_i(n, p, m)); }
 
 GEN
 factormodcyclo(long n, GEN p, long m, long v)
 {
-  pari_sp av = avma;
   const char *fun = "factormodcyclo";
+  pari_sp av = avma;
+  long i, l;
+  GEN z;
   if (v < 0) v = 0;
   if (n <= 0) pari_err_DOMAIN(fun, "n", "<=", gen_0, stoi(n));
   if (typ(p) != t_INT) pari_err_TYPE(fun, p);
-  checkp(n, p, fun);
-  if (lgefint(p)==3)
-  {
-    GEN z = Flx_factcyclo(n, p[2], m);
-    long i, l = lg(z);
-    for (i = 1; i < l; i++) gel(z,i)[1] = evalvarn(v);
-    return gerepileupto(av, FpXC_to_mod(FlxC_to_ZXC(z), p));
-  }
+  if (!BPSW_psp(p)) pari_err_PRIME(fun, p);
+  if (dvdui(n, p)) pari_err_COPRIME(fun, stoi(n), p);
+  if (lgefint(p) == 3)
+    z = FlxC_to_ZXC(Flx_factcyclo_i(n, p[2], m));
   else
-  {
-    GEN z = FpX_factcyclo(n, p, m);
-    long i, l = lg(z);
-    for (i = 1; i < l; i++) setvarn(gel(z, i), v);
-    return FpXC_to_mod(z, p);
-  }
+    z = FpX_factcyclo_i(n, p, m);
+  l = lg(z); for (i = 1; i < l; i++) setvarn(gel(z, i), v);
+  return gerepileupto(av, FpXC_to_mod(z, p));
 }
