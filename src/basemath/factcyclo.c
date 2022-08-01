@@ -176,7 +176,7 @@ FpX_degsub(GEN P, GEN Q, GEN p)
 *  T(x) is separable over F_el and so Vandermonde mod el is regular.
 */
 static GEN
-gausspol_el(GEN H, ulong n, GEN p, ulong d, ulong f, ulong g, ulong el)
+gausspol_el(GEN H, ulong n, ulong d, ulong f, ulong g, ulong el)
 {
   ulong j, k, z_n = rootsof1_Fl(n, el);
   GEN vz_n, L = cgetg(1+f, t_VECSMALL), x = cgetg(1+f, t_VECSMALL), X;
@@ -194,12 +194,9 @@ gausspol_el(GEN H, ulong n, GEN p, ulong d, ulong f, ulong g, ulong el)
   return Flv_to_Flx(Flm_Flc_mul(X, x, el), 0);
 }
 
-/* Data = [H, p, d0, d1, [n, d, f, g]] */
 static GEN
-get_G(GEN Data, ulong el, long  k)
+get_G(GEN H, GEN d0, GEN d1, GEN N, ulong el, long  k)
 {
-  GEN H = gel(Data, 1), p = gel(Data, 2), d0 = gel(Data, 3), d1 = gel(Data, 4);
-  GEN N = gel(Data, 5);
   long n = N[1], d = N[2], f = N[3], g = N[4], i;
   GEN POL = cgetg(1+k, t_VEC), EL = cgetg(1+k, t_VECSMALL), G, M, x;
   pari_timer ti;
@@ -208,7 +205,7 @@ get_G(GEN Data, ulong el, long  k)
   for (i = 1; i <= k; i++)
   {
     el = next_el_n(el, n, d1);
-    x = gausspol_el(H, n, p, d, f, g, el);
+    x = gausspol_el(H, n, d, f, g, el);
     gel(POL, i) = Flx_Fl_mul(x, umodiu(d0, el), el);
     EL[i] = el;
   }
@@ -265,18 +262,18 @@ gausspol(GEN T, GEN H, GEN N, GEN p, ulong d, ulong f, ulong g)
   else d0 = d1 = dT;
   d0 = sqrti(d0);  /* d0*F is in Z[X] */
   d1 = sqrti(d1);  /* d1 has same prime factors as dT */
-  Data = mkvec5(H, p, d0, d1, mkvecsmall4(n, d, f, g));
+  Data = mkvecsmall4(n, d, f, g);
   z = get_n_el(d0);
   start = z[1]; second = z[2];
   el = start_el_n(n);
 
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   if (DEBUGLEVEL == 2) err_printf("gausspol:start=(%ld,%ld)\n",start,second);
-  G = get_G(Data, el, start);
+  G = get_G(H, d0, d1, Data, el, start);
   G1 = gel(G, 1); M1 = gel(G, 2); el = itou(gel(G, 3));
   for(n_el=second; n_el; n_el++)
   {
-    G = get_G(Data, el, n_el);
+    G = get_G(H, d0, d1, Data, el, n_el);
     G2 = gel(G, 1); M2 = gel(G, 2); el = itou(gel(G, 3));
     if (FpX_degsub(G1, G2, M2) < 0) break;  /* G1 = G2 (mod M2) */
     if (DEBUGLEVEL == 2)
@@ -1464,7 +1461,7 @@ FpX_factcyclo_newton_power(GEN N, GEN p, ulong m)
 }
 
 static GEN
-FpX_split(ulong n, GEN p, long f, long m)
+FpX_split(ulong n, GEN p, long m)
 {
   pari_sp av = avma;
   long i;
@@ -1492,7 +1489,7 @@ FpX_factcyclo_prime_power(long el, long e, GEN p, long m)
   long d = z[6], f = z[7]; /* d and f for n=el^e0 */
 
   if (f == 1) v = mkvec(FpX_polcyclo(n, p));
-  else if (d == 1) v = FpX_split(n, p, f, (m==1)?1:f);
+  else if (d == 1) v = FpX_split(n, p, (m==1)?1:f);
   else if (el == 2) v = FpX_factcyclo_gen(NULL, n, p, m); /* d==2 in this case */
   else
   {
@@ -1594,7 +1591,7 @@ FpX_factcyclo_just_conductor(ulong n, GEN p, ulong m)
 
   if (DEBUGLEVEL >= 1) header(fn, n, d, f, p, action, GHgen, 1);
   if (d == 1) /* may occur. f==1 is already handled in FpX_factcyclo */
-    return FpX_split(n, p, f, m);
+    return FpX_split(n, p, m);
   else if (action[GENERAL])
     return FpX_factcyclo_gen(GH, n, p, m);
   else if (action[NEWTON_POWER])
@@ -1620,7 +1617,7 @@ FpX_factcyclo(ulong n, GEN p, ulong m)
   if (f == 1)
     retmkvec(FpX_polcyclo(n, p));
   else if (d == 1)  /* p=1 (mod n), zeta_n in Z_p */
-    return FpX_split(n, p, f, m);
+    return FpX_split(n, p, m);
   fK = znstar_conductor(znstar_generate(n, mkvecsmall(pmodn)));
   z = FpX_factcyclo_just_conductor(fK, p, m);
   if (n > fK)
@@ -1778,10 +1775,10 @@ Flx_factcyclo_newton_general_new3(GEN Data)
   else
   {
     Data2 = vec_append(Data2, Flx_polcyclo(n, up));
-  if (DEBUGLEVEL >= 6) timer_start(&ti);
+    if (DEBUGLEVEL >= 6) timer_start(&ti);
     for (i = 1; i <= m; i++)
       gel(pols, i) = Flx_pol_newton_general_new3(Data2, i);
-  if (DEBUGLEVEL >= 6) timer_printf(&ti, "Flx_pol_newton_general_new3");
+    if (DEBUGLEVEL >= 6) timer_printf(&ti, "Flx_pol_newton_general_new3");
     return gerepilecopy(av, pols);
   }
 }
@@ -1986,11 +1983,9 @@ Flx_factcyclo_gen(GEN GH, ulong n, ulong p, ulong m)
   return gerepilecopy(av, pols);
 }
 
-/*
-*  factor polcyclo(n) mod p using Gaussian period
-*  n = el^e, p^d=1 (mod el) with d | (el-1) and p^d=1 (mod n)
-*  d>1 and nf>1
-*/
+/* factor polcyclo(n) mod p using Gaussian period
+ *  n = el^e, p^d=1 (mod el) with d | (el-1) and p^d=1 (mod n)
+ *  d>1 and nf>1 */
 static GEN
 Flx_factcyclo_newton_power(GEN N, ulong p, ulong m)
 {
@@ -2002,10 +1997,8 @@ Flx_factcyclo_newton_power(GEN N, ulong p, ulong m)
   long r, s = 0, u = 1;
   pari_timer ti;
 
-  /*
-  *  n=el^e, e0<=e, phin=phi(el^e0),
-  *  order of p in (Z/el)^* = order of p in (Z/el^e0)^*
-  */
+  /* n=el^e, e0<=e, phin=phi(el^e0),
+   * order of p in (Z/el)^* = order of p in (Z/el^e0)^* */
   if (m != 1) m = nf;
   for (pu = p0; cmpiu(pu,d) <= 0; u++) pu = muliu(pu,p);  /* d<p^u, pu=p^u */
   H = Fl_powers(pmodn, d, n);
@@ -2039,7 +2032,7 @@ cmpGuGu(GEN a, GEN b) { return (ulong)a < (ulong)b? -1: (a == b? 0: 1); }
 
 /* p=1 (mod n). If m!=1, then m=phi(n) */
 static GEN
-Flx_split(ulong n, ulong phin, ulong p, ulong f, ulong m)
+Flx_split(ulong n, ulong phin, ulong p, ulong m)
 {
   pari_sp av = avma;
   ulong i;
@@ -2066,8 +2059,8 @@ Flx_factcyclo_prime_power(long el, long e, long p, long m)
   long d = z[6], f = z[7]; /* d and f for n=el^e0 */
 
   if (f == 1) v = mkvec(Flx_polcyclo(n, p));
-  else if (d == 1) v = Flx_split(n, phin, p, f, (m==1)?1:f);
-  else if (el == 2) v = Flx_factcyclo_gen(NULL, n, p, m); /* d==2 in this case */
+  else if (d == 1) v = Flx_split(n, phin, p, (m==1)?1:f);
+  else if (el == 2) v = Flx_factcyclo_gen(NULL, n, p, m);/* d==2 in this case */
   else
   {
     GEN N = mkvecsmall5(n, el, e0, phin, g);
@@ -2119,7 +2112,7 @@ Flx_factcyclo_just_conductor(ulong n, ulong p, ulong m)
 
   if (DEBUGLEVEL >= 1) header(fn, n, d, f, utoi(p), action, GHgen, 1);
   if (d == 1) /* may occur. f==1 is already handled in Flx_factcyclo */
-    return Flx_split(n, phin, p, f, m);
+    return Flx_split(n, phin, p, m);
   else if (action[GENERAL])
     return Flx_factcyclo_gen(GH, n, p, m);
   else if (action[NEWTON_POWER])
@@ -2145,7 +2138,7 @@ Flx_factcyclo(ulong n, ulong p, ulong m)
   if (f == 1)
     retmkvec(Flx_polcyclo(n, p));
   else if (d == 1)  /* p=1 (mod n), zeta_n in Z_p */
-    return Flx_split(n, phin, p, f, m);
+    return Flx_split(n, phin, p, m);
   fK = znstar_conductor(znstar_generate(n, mkvecsmall(pmodn)));
   z = Flx_factcyclo_just_conductor(fK, p, m);
   if (n > fK)
@@ -2170,9 +2163,9 @@ GEN
 factormodcyclo(long n, GEN p, long m, long v)
 {
   pari_sp av = avma;
-  const char *fun = "factcyclo";
+  const char *fun = "factormodcyclo";
   if (v < 0) v = 0;
-  if (n <= 0) pari_err_DOMAIN("factcyclo","n","<=", gen_0, stoi(n));
+  if (n <= 0) pari_err_DOMAIN(fun, "n", "<=", gen_0, stoi(n));
   if (typ(p) != t_INT) pari_err_TYPE(fun, p);
   checkp(n, p, fun);
   if (lgefint(p)==3)
@@ -2180,7 +2173,7 @@ factormodcyclo(long n, GEN p, long m, long v)
     GEN z = Flx_factcyclo(n, p[2], m);
     long i, l = lg(z);
     for (i = 1; i < l; i++) gel(z,i)[1] = evalvarn(v);
-    return gerepileupto(av,  FpXC_to_mod(FlxC_to_ZXC(z), p));
+    return gerepileupto(av, FpXC_to_mod(FlxC_to_ZXC(z), p));
   }
   else
   {
