@@ -12,19 +12,18 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* written by Takashi Fukuda
-*  2019.10.27 : Flx_factcyclo_gen, FpX_factcyclo_gen
-*  2019.10.28 : Flx_factcyclo_lift, FpX_factcyclo_lift
-*  2019.11.3  : Flx_factcyclo_newton, FpX_factcyclo_newton
-*  2019.11.12 : gausspol for prime
-*  2019.11.13 : gausspol for prime power
-*  2019.11.14 : ZpX_roots_nonsep with ZX_Zp_root
-*  2019.11.15 : test ZpX_roots_nonsep with polrootspadic
-*  2019.11.16 : accept variable number
-*  2019.11.17 : gen_ascent
-*  2019.11.20 : ZpX_roots_nonsep with FpX_roots
-*  2021.7.19  : Flx_factcyclo_newton_general
-*  2021.7.22  : Flx_conductor_lift
-*/
+ *  2019.10.27 : Flx_factcyclo_gen, FpX_factcyclo_gen
+ *  2019.10.28 : Flx_factcyclo_lift, FpX_factcyclo_lift
+ *  2019.11.3  : Flx_factcyclo_newton, FpX_factcyclo_newton
+ *  2019.11.12 : gausspol for prime
+ *  2019.11.13 : gausspol for prime power
+ *  2019.11.14 : ZpX_roots_nonsep with ZX_Zp_root
+ *  2019.11.15 : test ZpX_roots_nonsep with polrootspadic
+ *  2019.11.16 : accept variable number
+ *  2019.11.17 : gen_ascent
+ *  2019.11.20 : ZpX_roots_nonsep with FpX_roots
+ *  2021.7.19  : Flx_factcyclo_newton_general
+ *  2021.7.22  : Flx_conductor_lift */
 
 #include "pari.h"
 #include "paripriv.h"
@@ -85,10 +84,9 @@ znstar_0(ulong n)
 }
 
 /* n=el^e, p^d=1 (mod n), d is in [1,el-1], phi(n)=d*f.
-*  E[i] : 1 <= i <= n-1
-*  E[g^i*p^j mod n] = i+1  (0 <= i <= f-1, 0 <= j <= d-1)
-*  We use E[i] (1 <= i <= d). Namely i < el.
-*/
+ *  E[i] : 1 <= i <= n-1
+ *  E[g^i*p^j mod n] = i+1  (0 <= i <= f-1, 0 <= j <= d-1)
+ *  We use E[i] (1 <= i <= d). Namely i < el. */
 static GEN
 set_E(long pmodn, long n, long d, long f, long g)
 {
@@ -167,14 +165,12 @@ FpX_degsub(GEN P, GEN Q, GEN p)
   return gc_long(av, d);
 }
 
-/*
-*  n=odd prime power, F=Q(zeta_n), G=G(F/Q)=(Z/nZ)^*, H=<p>, K <--> H,
-*  t_k=Tr_{F/K}(zeta_n^k), T=minimal pol. of t_1 over Q.
-*  g is a given generator of G(K/Q).
-*  There exists a unique G(x) in Q[x] s.t. t_g=G(t_1).
-*  return G(x) mod el assuming that el does not divide d(T), in which case
-*  T(x) is separable over F_el and so Vandermonde mod el is regular.
-*/
+/* n=odd prime power, F=Q(zeta_n), G=G(F/Q)=(Z/nZ)^*, H=<p>, K <--> H,
+ * t_k=Tr_{F/K}(zeta_n^k), T=minimal pol. of t_1 over Q.
+ * g is a given generator of G(K/Q).
+ * There exists a unique G(x) in Q[x] s.t. t_g=G(t_1).
+ * return G(x) mod el assuming that el does not divide d(T), in which case
+ * T(x) is separable over F_el and so Vandermonde mod el is regular. */
 static GEN
 gausspol_el(GEN H, ulong n, ulong d, ulong f, ulong g, ulong el)
 {
@@ -237,7 +233,7 @@ size_pol(GEN x)
 }
 
 /* theoretical upper bound of d0. large for practical calculation.
-*  but it seems to have the same order. */
+ * but it seems to have the same order. */
 static long
 bound_d0(long d, long f)
 {
@@ -291,8 +287,7 @@ gausspol(GEN T, GEN H, GEN N, GEN p, ulong d, ulong f, ulong g)
 }
 
 /* Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]]
-*  v_t_el[k]=t_k mod el, 1<= k <= n-1
-*/
+ * v_t_el[k]=t_k mod el, 1<= k <= n-1 */
 static GEN
 mk_v_t_el(GEN vT, GEN Data, ulong el)
 {
@@ -318,8 +313,7 @@ mk_v_t_el(GEN vT, GEN Data, ulong el)
 }
 
 /* G=[[G_1,...,G_d],M,el]
-* Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]]
-*/
+ * Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]] */
 static GEN
 get_vG(GEN vT, GEN Data, ulong el, long n_el)
 {
@@ -362,8 +356,7 @@ get_vG(GEN vT, GEN Data, ulong el, long n_el)
 }
 
 /* G=[[G_1,...,G_d],M,el]
-* Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]]
-*/
+ * Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]] */
 static GEN
 get_vG_new(GEN vT, GEN Data, long el, long n_el)
 {
@@ -406,9 +399,8 @@ get_vG_new(GEN vT, GEN Data, long el, long n_el)
 }
 
 /* F=Q(zeta_n), H=<p> in (Z/nZ)^*, K<-->H, t_k=Tr_{F/K}(zeta_n^k).
-*  i_t[i]==k ==> iH=kH, i.e. t_i==t_k. We use t_k instead of t_i.
-*  the number of k << the number of i.
-*/
+ * i_t[i]==k ==> iH=kH, i.e. t_i==t_k. We use t_k instead of t_i.
+ * the number of k << the number of i. */
 static GEN
 get_i_t(long n, long p)
 {
@@ -428,9 +420,8 @@ get_i_t(long n, long p)
 }
 
 /* get T_k(x) 1<= k <= d. d0*T_k(x) is in Z[x].
-*  T_0(x)=T_n(x)=f.
-*  Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]]
-*/
+ * T_0(x)=T_n(x)=f.
+ * Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]] */
 static GEN
 get_vT(GEN Data)
 {
@@ -538,7 +529,7 @@ get_vT_new(GEN Data)
 }
 
 /* d0=sqrti(x) is a multiple of (O_K:Z[t_1]). i.e. d0*T_k(x) is in Z[x].
-*  d1=sqrti(y) has the same prime factors as d(T) */
+ * d1=sqrti(y) has the same prime factors as d(T) */
 static GEN
 get_d0_d1(GEN dT, GEN fn)
 {
@@ -554,8 +545,7 @@ get_d0_d1(GEN dT, GEN fn)
 }
 
 /* return sorted kT={i_t[k] | 1<=k<=d}
-*  {T_k(x) | k in kT} are all the different T_k(x) (1<=k<=d)
-*/
+ * {T_k(x) | k in kT} are all the different T_k(x) (1<=k<=d) */
 static GEN
 get_kT(GEN i_t, long d)
 {
@@ -596,7 +586,7 @@ get_kTdiv(GEN kT, long n)
 }
 
 /* T is separable over Zp but not separable over Fp.
-*  receive all roots mod p^s and return all roots mod p^(s+1) */
+ * receive all roots mod p^s and return all roots mod p^(s+1) */
 static GEN
 ZpX_roots_nonsep(GEN T, GEN R0, GEN p, long s)
 {
@@ -622,9 +612,9 @@ ZpX_roots_nonsep(GEN T, GEN R0, GEN p, long s)
 }
 
 /* x : roots of T in Zp. r < n.
-*  receive vec of x mod p^r and return vec of x mod p^n.
-*  under the assumtion lg(v)-1==degpol(T), x is uniquely determined by
-*  x mod p^r. Namely, x mod p^n is unique. */
+ * receive vec of x mod p^r and return vec of x mod p^n.
+ * under the assumtion lg(v)-1==degpol(T), x is uniquely determined by
+ * x mod p^r. Namely, x mod p^n is unique. */
 static GEN
 ZX_Zp_liftroots(GEN T, GEN v, GEN p, long r, long n)
 {
@@ -685,33 +675,31 @@ Flx_polcyclo_el_e(ulong el, ulong e)
   return e > 1 ? Flx_inflate(x, upowuu(el, e-1)): x;
 }
 
-/*
-*  preparation for factoring polcyclo(el^e) mod p
-*  f_0(x) : irred factor of polcyclo(el^e0) mod p
-*  f_1(x)=f_0(x^(el^e1)) : irred factor of polcyclo(el^e) mod p
-*
-*  p^d0 = 1 (mod el^e0), p^d = 1 (mod el^e)
-*
-*  case el=2, 2^s || (p-1), s>=2
-*  d=1 (1 <= e <= s), d=2^(e-s) (s < e)
-*  e0=e, e1=0 if e <= s
-*  e0=s, e1=e-s if s < e
-*  d0=1
-*
-*  case el=2, 2^s || (p+1), s>=2
-*  d=1 (e == 1), d=2 (2 <= e <= s), d=2^(e-s) ( s < e )
-*  e0=e, e1=0 if e <= s+1
-*  e0=s+1, e1=e-s-1 if s+1 < e
-*  d0=1 if e==1,  d0=2 if e>1
-*
-*  case el>2, el^s || (p^d0-1)
-*  d=d0 (1 <= e <= s), d=d0*el^(e-s) (s < e)
-*  e0=e, e1=0 if e <= s
-*  e0=s, e1=e-s if s < e
-*  d0 is min d s.t. p^d=1 (mod el)
-*
-*  We do not need d. So d is not returned.
-*/
+/* Preparation for factoring polcyclo(el^e) mod p
+ * f_0(x) : irred factor of polcyclo(el^e0) mod p
+ * f_1(x)=f_0(x^(el^e1)) : irred factor of polcyclo(el^e) mod p
+ *
+ * p^d0 = 1 (mod el^e0), p^d = 1 (mod el^e)
+ *
+ * case el=2, 2^s || (p-1), s>=2
+ * d=1 (1 <= e <= s), d=2^(e-s) (s < e)
+ * e0=e, e1=0 if e <= s
+ * e0=s, e1=e-s if s < e
+ * d0=1
+ *
+ * case el=2, 2^s || (p+1), s>=2
+ * d=1 (e == 1), d=2 (2 <= e <= s), d=2^(e-s) (s < e)
+ * e0=e, e1=0 if e <= s+1
+ * e0=s+1, e1=e-s-1 if s+1 < e
+ * d0=1 if e==1,  d0=2 if e>1
+ *
+ * case el>2, el^s || (p^d0-1)
+ * d=d0 (1 <= e <= s), d=d0*el^(e-s) (s < e)
+ * e0=e, e1=0 if e <= s
+ * e0=s, e1=e-s if s < e
+ * d0 is min d s.t. p^d=1 (mod el)
+ *
+ * We do not need d. So d is not returned. */
 static GEN
 set_e0_e1(ulong el, ulong e, GEN p)
 {
@@ -922,9 +910,9 @@ FpX_pol_newton_general(GEN Data, GEN Data2, GEN x)
 }
 
 /* n is any integer prime to p, but must be equal to the conductor
-*  of the splitting field of p in Q(zeta_n).
-*  GH=G/H={g_1, ... ,g_f}
-*  Data = [GHgen, GH, fn, p, [n, d, f, m]] */
+ * of the splitting field of p in Q(zeta_n).
+ * GH=G/H={g_1, ... ,g_f}
+ * Data = [GHgen, GH, fn, p, [n, d, f, m]] */
 static GEN
 FpX_factcyclo_newton_general(GEN Data)
 {
@@ -1181,8 +1169,8 @@ newton_general_new_pre3(GEN Data)
   return Data3;
 }
 
-/*  Data=[vT, gGH, Rs, Rrs, i_t, kt, p, pu, pr, prs,
-*        [n, r, s, n_t, mitk, d], div, polcyclo_n] */
+/* Data=[vT, gGH, Rs, Rrs, i_t, kt, p, pu, pr, prs,
+ *      [n, r, s, n_t, mitk, d], div, polcyclo_n] */
 static GEN
 FpX_pol_newton_general_new3(GEN Data, long k)
 {
@@ -1310,17 +1298,14 @@ FpX_factcyclo_newton_pre(GEN Data, GEN N, GEN p, ulong m)
   R = set_R(T, F, Rs, p, nf, r, s, u);
   Data3 = mkvec3(R, E, mkvecsmall3(r, s, u));
   if (DEBUGLEVEL >= 6) timer_start(&ti);
-  for (i = 1; i <= m; i++)
-    gel(pols, i) = FpX_pol_newton(i, Data3, N, d, nf, p);
+  for (i = 1; i <= m; i++) gel(pols, i) = FpX_pol_newton(i, Data3, N, d, nf, p);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_pol_newton");
   return gerepilecopy(av, pols);
 }
 
-/*
-*  gcd(n1,n2)=1, e = gcd(d1,d2).
-*  phi(n1) = d1*nf1, phi(n2) = d2*nf2.
-*  d = lcm(d1,d2) = d1*d2/e, nf = phi(n1)*phi(n2)/d = nf1*nf2*e.
-*/
+/* gcd(n1,n2)=1, e = gcd(d1,d2).
+ * phi(n1) = d1*nf1, phi(n2) = d2*nf2.
+ * d = lcm(d1,d2) = d1*d2/e, nf = phi(n1)*phi(n2)/d = nf1*nf2*e. */
 static GEN
 FpX_factcyclo_lift(long n1, GEN v1, long n2, GEN v2, GEN p, long m)
 {
@@ -1365,8 +1350,7 @@ FpX_factcyclo_lift(long n1, GEN v1, long n2, GEN v2, GEN p, long m)
   return gerepilecopy(av, v);
 }
 
-/* n is any integer prime to p.
-*  d>1 and f>1 */
+/* n is any integer prime to p; d>1 and f>1 */
 static GEN
 FpX_factcyclo_gen(GEN GH, ulong n, GEN p, long m)
 {
@@ -1426,7 +1410,7 @@ FpX_factcyclo_gen(GEN GH, ulong n, GEN p, long m)
 }
 
 /* n is an odd prime power prime to p and equal to the conductor
-*  of the splitting field of p in Q(zeta_n). d>1 and nf>1 */
+ * of the splitting field of p in Q(zeta_n). d>1 and nf>1 */
 static GEN
 FpX_factcyclo_newton_power(GEN N, GEN p, ulong m)
 {
@@ -1469,7 +1453,7 @@ FpX_split(ulong n, GEN p, long m)
 }
 
 /* n is a prime power prime to p. n is not necessarily equal to the
-*  conductor of the splitting field of p in Q(zeta_n). */
+ * conductor of the splitting field of p in Q(zeta_n). */
 static GEN
 FpX_factcyclo_prime_power_i(long el, long e, GEN p, long m)
 {
@@ -1526,8 +1510,7 @@ static GEN
 Flv_FlvV_factorback(GEN g, GEN x, ulong q)
 { pari_APPLY_ulong(Flv_factorback(g, gel(x,i), q)) }
 
-/* return the structure and the generators of G/H.
-*  G=(Z/nZ)^, H=<p> */
+/* return the structure and the generators of G/H. G=(Z/nZ)^, H=<p> */
 static GEN
 get_GH_gen(long n, long pmodn)
 {
@@ -1627,7 +1610,7 @@ FpX_factcyclo(ulong n, GEN p, ulong m)
 { pari_sp av = avma; return gerepileupto(av, FpX_factcyclo_i(n, p, m)); }
 
 /*  Data = [H, GH, i_t, d0, kT, [n, d, f, n_T, mitk]]
-*   Data2 = [vT, polcyclo_n, [p, pr, pu, pru]] */
+ *  Data2 = [vT, polcyclo_n, [p, pr, pu, pru]] */
 static GEN
 Flx_pol_newton_general(GEN Data, GEN Data2, ulong x)
 {
@@ -1648,9 +1631,9 @@ Flx_pol_newton_general(GEN Data, GEN Data2, ulong x)
 }
 
 /* n is any integer prime to p, but must be equal to the conductor
-*  of the splitting field of p in Q(zeta_n).
-*  GH=G/H={g_1, ... ,g_f}
-*  Data = [GHgen, GH, fn, p, [n, d, f, m]] */
+ * of the splitting field of p in Q(zeta_n).
+ * GH=G/H={g_1, ... ,g_f}
+ * Data = [GHgen, GH, fn, p, [n, d, f, m]] */
 static GEN
 Flx_factcyclo_newton_general(GEN Data)
 {
@@ -1723,7 +1706,7 @@ Flx_factcyclo_newton_general(GEN Data)
 }
 
 /*  Data=[vT, gGH, Rs, Rrs, i_t, kt, p, pu, pr, prs,
-*        [n, r, s, n_t, mitk, d], div, polcyclo_n] */
+ *       [n, r, s, n_t, mitk, d], div, polcyclo_n] */
 static GEN
 Flx_pol_newton_general_new3(GEN Data, long k)
 {
@@ -1787,7 +1770,7 @@ Flx_1st_lift_2(GEN z, ulong p)
 }
 
 /* el does not divides e.
-*  construct Phi_{e*el}(x) from Phi_e(x). */
+ * construct Phi_{e*el}(x) from Phi_e(x). */
 static GEN
 Flx_1st_lift(GEN z, ulong p, ulong e, ulong el, GEN vP)
 {
@@ -1868,11 +1851,9 @@ Flx_factcyclo_newton_pre(GEN Data, GEN N, ulong p, ulong m)
   return pols;
 }
 
-/*
-*  gcd(n1,n2)=1, e = gcd(d1,d2).
-*  phi(n1) = d1*nf1, phi(n2) = d2*nf2.
-*  d = lcm(d1,d2) = d1*d2/e, nf = phi(n1)*phi(n2)/d = nf1*nf2*e.
-*/
+/* gcd(n1,n2)=1, e = gcd(d1,d2).
+ * phi(n1) = d1*nf1, phi(n2) = d2*nf2.
+ * d = lcm(d1,d2) = d1*d2/e, nf = phi(n1)*phi(n2)/d = nf1*nf2*e. */
 static GEN
 Flx_factcyclo_lift(long n1, GEN v1, long n2, GEN v2, long p, long m)
 {
@@ -1915,8 +1896,7 @@ Flx_factcyclo_lift(long n1, GEN v1, long n2, GEN v2, long p, long m)
   return gerepilecopy(av, v);
 }
 
-/* factor polcyclo(n) mod p based on an idea of Bill Allombert.
-*  d>1 and nf>1 */
+/* factor polcyclo(n) mod p based on an idea of Bill Allombert; d>1 and nf>1 */
 static GEN
 Flx_factcyclo_gen(GEN GH, ulong n, ulong p, ulong m)
 {
