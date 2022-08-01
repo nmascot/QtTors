@@ -248,7 +248,6 @@ bound_d0(long d, long f)
 static GEN
 gausspol(GEN T, GEN H, GEN N, GEN p, ulong d, ulong f, ulong g)
 {
-  pari_sp av = avma;
   long n = N[1], el0 = N[2];
   GEN F, G1, G2, M1, M2, G, d0, d1, dT = absi(RgX_disc(T)), Data, z;
   ulong el, n_el, start, second;
@@ -288,7 +287,7 @@ gausspol(GEN T, GEN H, GEN N, GEN p, ulong d, ulong f, ulong g)
     err_printf("G1:%ld, d0:%ld, M1:%ld, F:%ld\n",
                size_pol(G1), size_rat(d0), size_rat(M1), size_pol(F));
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "gausspol");
-  return gerepilecopy(av, F);
+  return F;
 }
 
 /* Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]]
@@ -299,12 +298,11 @@ mk_v_t_el(GEN vT, GEN Data, ulong el)
 {
   pari_sp av = avma;
   GEN H = gel(Data, 1), GH = gel(Data,2), i_t = gel(Data, 3), N=gel(Data, 6);
-  GEN vz_n;
   ulong n = N[1],  d = N[2], mitk = N[5], f = N[3], i, k;
   ulong z_n = rootsof1_Fl(n, el);
+  GEN vz_n = Fl_powers(z_n, n-1, el)+1;
   GEN v_t_el = const_vecsmall(n-1, 0);
 
-  vz_n = Fl_powers(z_n, n-1, el)+1;
   for (k = 1; k <= mitk; k++)
   {
     if (k > 1 && !isintzero(gel(vT, k))) continue; /* k=1 is always handled */
@@ -316,7 +314,7 @@ mk_v_t_el(GEN vT, GEN Data, ulong el)
       v_t_el[y] = t;
     }
   }
-  return gerepilecopy(av, v_t_el);
+  return gerepileuptoleaf(av, v_t_el);
 }
 
 /* G=[[G_1,...,G_d],M,el]
