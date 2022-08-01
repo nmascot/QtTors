@@ -249,7 +249,7 @@ static GEN
 gausspol(GEN T, GEN H, GEN N, GEN p, ulong d, ulong f, ulong g)
 {
   long n = N[1], el0 = N[2];
-  GEN F, G1, G2, M1, M2, G, d0, d1, dT = absi(RgX_disc(T)), Data, z;
+  GEN F, G1, G2, M1, M2, G, d0, d1, dT = absi(ZX_disc(T)), Data, z;
   ulong el, n_el, start, second;
   pari_timer ti;
 
@@ -947,7 +947,7 @@ FpX_factcyclo_newton_general(GEN Data)
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
-  d0d1 = get_d0_d1(absi(RgX_disc(T)), fn); /* d0*T_k(x) is in Z[x] */
+  d0d1 = get_d0_d1(absi(ZX_disc(T)), fn); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
   vT = get_vT(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
@@ -1130,7 +1130,7 @@ newton_general_new_pre3(GEN Data)
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
-  d0d1 = get_d0_d1(absi(RgX_disc(T)), fn); /* d0*T_k(x) is in Z[x] */
+  d0d1 = get_d0_d1(absi(ZX_disc(T)), fn); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, miTk));
   vT = get_vT_new(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
@@ -1672,7 +1672,7 @@ Flx_factcyclo_newton_general(GEN Data)
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
-  d0d1 = get_d0_d1(absi(RgX_disc(T)), fn); /* d0*T_k(x) is in Z[x] */
+  d0d1 = get_d0_d1(absi(ZX_disc(T)), fn); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
   vT = get_vT(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
