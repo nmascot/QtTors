@@ -18,16 +18,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /* Not so fast arithmetic with points over elliptic curves over Fl */
 
 /***********************************************************************/
-/**                                                                   **/
 /**                              Flj                                  **/
-/**                                                                   **/
 /***********************************************************************/
-
-/* Arithmetic is implemented using Jacobian coordinates, representing
- * a projective point (x : y : z) on E by [z*x , z^2*y , z].  This is
- * probably not the fastest representation available for the given
- * problem, but they're easy to implement and up to 60% faster than
- * the school-book method. */
+/* Jacobian coordinates: we represent a projective point (x:y:z) on E by
+ * [z*x, z^2*y, z]. Not the fastest representation available for the problem,
+ * but easy to implement and up to 60% faster than the school-book method. */
 
 /* Cost: 1M + 8S + 1*a + 10add + 1*8 + 2*2 + 1*3.
  * http://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian.html#doubling-dbl-2007-bl */
@@ -248,8 +243,7 @@ Flj_order_ufact(GEN P, ulong n, GEN fa, ulong a4, ulong p, ulong pi)
 GEN
 Fle_to_Flj(GEN P)
 { return ell_is_inf(P) ? mkvecsmall3(1UL, 1UL, 0UL):
-                         mkvecsmall3(P[1], P[2], 1UL);
-}
+                         mkvecsmall3(P[1], P[2], 1UL); }
 
 GEN
 Flj_to_Fle(GEN P, ulong p)
@@ -324,9 +318,7 @@ Flj_changepointinv_pre(GEN P, GEN ch, ulong p, ulong pi)
 }
 
 /***********************************************************************/
-/**                                                                   **/
 /**                              Fle                                  **/
-/**                                                                   **/
 /***********************************************************************/
 GEN
 Fle_changepoint(GEN P, GEN ch, ulong p)
@@ -699,13 +691,9 @@ FleV_mulu_pre_inplace(GEN P, ulong n, GEN a4, ulong p, ulong pi)
 }
 
 /***********************************************************************/
-/**                                                                   **/
 /**                            Pairings                               **/
-/**                                                                   **/
+/**               Derived from APIP by Jerome Milan, 2012             **/
 /***********************************************************************/
-
-/* Derived from APIP from and by Jerome Milan, 2012 */
-
 static ulong
 Fle_vert(GEN P, GEN Q, ulong a4, ulong p)
 {
@@ -740,22 +728,14 @@ Fle_Miller_line(GEN R, GEN Q, ulong slope, ulong a4, ulong p)
 }
 
 /* Computes the equation of the line tangent to R and returns its
-   evaluation at the point Q. Also doubles the point R.
- */
-
+ * evaluation at the point Q. Also doubles the point R. */
 static ulong
 Fle_tangent_update(GEN R, GEN Q, ulong a4, ulong p, GEN *pt_R)
 {
-  if (ell_is_inf(R))
+  if (ell_is_inf(R)) { *pt_R = ellinf(); return 1; }
+  else if (uel(R,2) == 0) { *pt_R = ellinf(); return Fle_vert(R, Q, a4, p); }
+  else
   {
-    *pt_R = ellinf();
-    return 1;
-  }
-  else if (uel(R,2) == 0)
-  {
-    *pt_R = ellinf();
-    return Fle_vert(R, Q, a4, p);
-  } else {
     ulong slope;
     *pt_R = Fle_dbl_slope(R, a4, p, &slope);
     return Fle_Miller_line(R, Q, slope, a4, p);
@@ -763,31 +743,19 @@ Fle_tangent_update(GEN R, GEN Q, ulong a4, ulong p, GEN *pt_R)
 }
 
 /* Computes the equation of the line through R and P, and returns its
-   evaluation at the point Q. Also adds P to the point R.
- */
-
+ * evaluation at the point Q. Also adds P to the point R. */
 static ulong
 Fle_chord_update(GEN R, GEN P, GEN Q, ulong a4, ulong p, GEN *pt_R)
 {
-  if (ell_is_inf(R))
-  {
-    *pt_R = gcopy(P);
-    return Fle_vert(P, Q, a4, p);
-  }
-  else if (ell_is_inf(P))
-  {
-    *pt_R = gcopy(R);
-    return Fle_vert(R, Q, a4, p);
-  }
+  if (ell_is_inf(R)) { *pt_R = P; return Fle_vert(P, Q, a4, p); }
+  else if (ell_is_inf(P)) { *pt_R = R; return Fle_vert(R, Q, a4, p); }
   else if (uel(P, 1) == uel(R, 1))
   {
-    if (uel(P, 2) == uel(R, 2))
-      return Fle_tangent_update(R, Q, a4, p, pt_R);
-    else {
-      *pt_R = ellinf();
-      return Fle_vert(R, Q, a4, p);
-    }
-  } else {
+    if (uel(P, 2) == uel(R, 2)) return Fle_tangent_update(R, Q, a4, p, pt_R);
+    else { *pt_R = ellinf(); return Fle_vert(R, Q, a4, p); }
+  }
+  else
+  {
     ulong slope;
     *pt_R = Fle_add_slope(P, R, a4, p, &slope);
     return Fle_Miller_line(R, Q, slope, a4, p);
