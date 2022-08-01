@@ -635,7 +635,7 @@ to give the change of coordinates $[u,r,s,t]$ as a \typ{VECSMALL}.
 
 \subsec{\kbd{FpJ}}
 
-Let $p$ be a prime \typ{INT}, and $E$ the elliptic curve given by the
+Let $p > 3$ be a prime \typ{INT}, and $E$ the elliptic curve given by the
 equation $E:y^2=x^3+a_4\*x+a_6$, where $a_4$ and $a_6$ are \typ{INT}.
 A \kbd{FpJ} is a \kbd{FpV} with three components $[x,y,z]$, representing
 the affine point $[x/z^2,y/z^3]$ in Jacobian coordinates, the point at
@@ -657,7 +657,8 @@ $[u^2\*x,u^3\*y,u\*z]$ and $[x,y,z]$ are representing the same affine point.
 
 \subsec{\kbd{Flj}}
 
-Below, \kbd{pi} is assumed to be the precomputed inverse of $p$.
+Let $p > 3$ be a prime. Below, \var{pi} is assumed to be the pseudoinverse
+of $p$ (see \kbd{get\_Fl\_red}).
 
 \fun{GEN}{Fle_to_Flj}{GEN P} convert a \kbd{Fle} to an equivalent \kbd{Flj}.
 
