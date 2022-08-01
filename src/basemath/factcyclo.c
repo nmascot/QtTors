@@ -51,28 +51,28 @@ ZX_to_nx(GEN z)
 }
 
 static long
-RgX_den_pval(GEN x, GEN p)
+QX_den_pval(GEN x, GEN p)
 {
-  long i, v_max = 0, l = lg(x);
+  long i, vmax = 0, l = lg(x);
   for (i = 2; i < l; i++)
   {
-    long v;
     GEN z = gel(x, i);
-    if (typ(z)==t_FRAC && (v = Z_pval(gel(z, 2), p))>v_max) v_max = v;
+    long v;
+    if (typ(z)==t_FRAC && (v = Z_pval(gel(z, 2), p)) > vmax) vmax = v;
   }
-  return v_max;
+  return vmax;
 }
 
 static long
-RgXV_den_pval(GEN vT, GEN kT, GEN p)
+QXV_den_pval(GEN vT, GEN kT, GEN p)
 {
-  long k, r_max = 0, l = lg(kT);
+  long k, vmax = 0, l = lg(kT);
   for (k = 1; k < l; k++)
   {
-    long r = RgX_den_pval(gel(vT, kT[k]), p);
-    if (r > r_max) r_max = r;
+    long v = QX_den_pval(gel(vT, kT[k]), p);
+    if (v > vmax) vmax = v;
   }
-  return r_max;
+  return vmax;
 }
 
 /* return (Z/nZ)^* as vecsmall */
@@ -97,13 +97,9 @@ set_E(long pmodn, long n, long d, long f, long g)
   for (i = 1; i <= f; i++)
   {
     ulong x = C[i];
-    for (j = 1; j <= d; j++)
-    {
-      x = Fl_mul(x, pmodn, n);
-      E[x] = i;
-    }
+    for (j = 1; j <= d; j++) { x = Fl_mul(x, pmodn, n); E[x] = i; }
   }
-  set_avma(av); return E;
+  return gc_const(av, E);
 }
 
 static GEN
@@ -130,9 +126,7 @@ next_el_n(ulong el, ulong n, GEN d1)
 {
   forprime_t T;
   u_forprime_arith_init(&T, el+n, ULONG_MAX, 1, n);
-  do
-    el = u_forprime_next(&T);
-  while (dvdiu(d1, el));
+  do el = u_forprime_next(&T); while (dvdiu(d1, el));
   return el;
 }
 
@@ -140,21 +134,21 @@ next_el_n(ulong el, ulong n, GEN d1)
 static ulong
 start_el_n(ulong n)
 {
-  ulong MAXHLONG = 1L<<(BITS_IN_LONG-1), el = (MAXHLONG/n)*n+1;
-  if ((el&1)==0) el+=n;  /* if el is even, then n is odd */
-  return el+n+n;
+  ulong MAXHLONG = 1L<<(BITS_IN_LONG-1), el = (MAXHLONG/n)*n + 1;
+  if ((el&1)==0) el += n; /* if el is even, then n is odd */
+  return el + n + n;
 }
 
 /* start probably catches d0*T_k(x). So small second is enough. */
-static GEN
-get_n_el(GEN d0)
+static ulong
+get_n_el(GEN d0, ulong *psec)
 {
-  long start = ((lgefint(d0)-2)*BITS_IN_LONG)/(BITS_IN_LONG-1)+1, second = 1;
+  ulong start = ((lgefint(d0)-2)*BITS_IN_LONG)/(BITS_IN_LONG-1)+1, second = 1;
   if (start>10) second++;
   if (start>100)  { start++; second++; }
   if (start>500)  { start++; second++; }
   if (start>1000) { start++; second++; }
-  return mkvecsmall2(start, second);
+  *psec = second; return start;
 }
 
 static long
@@ -245,7 +239,7 @@ static GEN
 gausspol(GEN T, GEN H, GEN N, GEN p, ulong d, ulong f, ulong g)
 {
   long n = N[1], el0 = N[2];
-  GEN F, G1, G2, M1, M2, G, d0, d1, dT = absi(ZX_disc(T)), Data, z;
+  GEN F, G1, G2, M1, M2, G, d0, d1, dT = absi(ZX_disc(T)), Data;
   ulong el, n_el, start, second;
   pari_timer ti;
 
@@ -258,8 +252,7 @@ gausspol(GEN T, GEN H, GEN N, GEN p, ulong d, ulong f, ulong g)
   d0 = sqrti(d0);  /* d0*F is in Z[X] */
   d1 = sqrti(d1);  /* d1 has same prime factors as dT */
   Data = mkvecsmall4(n, d, f, g);
-  z = get_n_el(d0);
-  start = z[1]; second = z[2];
+  start = get_n_el(d0, &second);
   el = start_el_n(n);
 
   if (DEBUGLEVEL >= 6) timer_start(&ti);
@@ -430,13 +423,12 @@ get_vT(GEN Data)
   ulong k, n = N[1], n_T = N[4], mitk = N[5];
   GEN vT = const_vec(mitk, gen_0); /* vT[k]!=NULL ==> vT[k]=T_k */
   ulong n_k = 0, el, n_el, start, second;
-  GEN G1 = cgetg(1+mitk, t_VEC), G2 = cgetg(1+mitk, t_VEC), G, M1, M2, z;
+  GEN G1 = cgetg(1+mitk, t_VEC), G2 = cgetg(1+mitk, t_VEC), G, M1, M2;
   pari_timer ti;
 
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   gel(vT, 1) = pol_x(0); n_k++;
-  z = get_n_el(d0);
-  start = z[1]; second = z[2];
+  start = get_n_el(d0, &second);
   el = start_el_n(n);
 
   if (DEBUGLEVEL == 2) err_printf("get_vT: start=(%ld,%ld)\n",start,second);
@@ -484,12 +476,11 @@ get_vT_new(GEN Data)
   ulong n = N[1], d = N[2], f = N[3], n_T = N[4], mitk = N[5];
   GEN vT = const_vec(mitk, gen_0); /* vT[k]!=NULL ==> vT[k]=T_k */
   ulong k, n_k = 0, el, n_el, start, second;
-  GEN G1, G2, G, M1, M2, z;
+  GEN G1, G2, G, M1, M2;
   pari_timer ti;
 
   if (DEBUGLEVEL >= 6) timer_start(&ti);
-  z = get_n_el(d0);
-  start = z[1]; second = z[2];
+  start = get_n_el(d0, &second);
   el = start_el_n(n);
 
   if (DEBUGLEVEL == 2) err_printf("get_vT_new: start=(%ld,%ld)\n",start,second);
@@ -939,7 +930,7 @@ FpX_factcyclo_newton_general(GEN Data)
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
   vT = get_vT(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
-  r = RgXV_den_pval(vT, kT, p);
+  r = QXV_den_pval(vT, kT, p);
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   Rs = FpX_roots(T, p); /* FpX_roots returns sorted roots */
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_roots, deg=%ld", degpol(T));
@@ -1122,7 +1113,7 @@ newton_general_new_pre3(GEN Data)
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, miTk));
   vT = get_vT_new(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
-  r = RgXV_den_pval(vT, kT, p);
+  r = QXV_den_pval(vT, kT, p);
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   Rs = FpX_roots(T, p); /* FpX_roots returns sorted roots */
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_roots, deg=%ld", degpol(T));
@@ -1427,7 +1418,7 @@ FpX_factcyclo_newton_power(GEN N, GEN p, ulong m)
   H = Fl_powers(pmodn, d, n);
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
   F = gausspol(T, H, N, p, d, nf, g);
-  r = RgX_den_pval(F, p);
+  r = QX_den_pval(F, p);
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   Rs = FpX_roots(T, p); /* FpX_roots returns sorted roots */
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_roots, deg=%ld", degpol(T));
@@ -1659,7 +1650,7 @@ Flx_factcyclo_newton_general(GEN Data)
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
   vT = get_vT(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
-  r = RgXV_den_pval(vT, kT, p);
+  r = QXV_den_pval(vT, kT, p);
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   Rs = FpX_roots(T, p); /* FpX_roots returns sorted roots */
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_roots, deg=%ld", degpol(T));
@@ -1973,7 +1964,7 @@ Flx_factcyclo_newton_power(GEN N, ulong p, ulong m)
   H = Fl_powers(pmodn, d, n);
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
   F = gausspol(T, H, N, p0, d, nf, g);
-  r = RgX_den_pval(F, p0);
+  r = QX_den_pval(F, p0);
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   Rs = FpX_roots(T, p0); /* FpX_roots returns sorted roots */
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_roots, deg=%ld", degpol(T));
