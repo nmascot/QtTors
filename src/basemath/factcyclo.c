@@ -585,7 +585,7 @@ ZpX_roots_nonsep(GEN T, GEN R0, GEN p, long s)
   GEN ps = powiu(p, s), ps1 = mulii(ps, p), v = cgetg(lr, t_VEC), R;
   for (i=1; i<lr; i++)
   {
-    GEN z, f = ZX_unscale_div(RgX_translate(T, gel(R0, i)), ps);
+    GEN z, f = ZX_unscale_div(ZX_translate(T, gel(R0, i)), ps);
     (void)ZX_pvalrem(f, p, &f);
     z = FpX_roots(f, p);
     gel(v, i) = z;
@@ -618,7 +618,7 @@ ZX_Zp_liftroots(GEN T, GEN v, GEN p, long r, long n)
   for (i=1; i<l; i++)
   {
     GEN x = gel(v, i), y, z;
-    GEN f = ZX_unscale_div(RgX_translate(T, x), pr);
+    GEN f = ZX_unscale_div(ZX_translate(T, x), pr);
     (void)ZX_pvalrem(f, p, &f);
     y = FpX_roots(f, p);
     z = (n==r+1) ? y : ZX_Zp_root(f, gel(y, 1), p, n-r);
