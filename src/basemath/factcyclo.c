@@ -306,7 +306,7 @@ mk_v_t_el(GEN vT, GEN Data, ulong el)
 /* G=[[G_1,...,G_d],M,el]
  * Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]] */
 static GEN
-get_vG(GEN vT, GEN Data, ulong el0, long n_el)
+get_vG(GEN vT, GEN Data, ulong *pel, long n_el)
 {
   GEN GH = gel(Data, 2), i_t = gel(Data, 3);
   GEN d0 = gmael(Data, 4, 1), d1 = gmael(Data, 4, 2);
@@ -318,7 +318,7 @@ get_vG(GEN vT, GEN Data, ulong el0, long n_el)
   long i, j, k;
 
   for (k=1; k<=mitk; k++) gel(vPOL, k) = cgetg(1+n_el, t_VEC);
-  EL = list_el_n(el0, n, d1, n_el);
+  EL = list_el_n(*pel, n, d1, n_el);
   for (i=1; i<=n_el; i++)
   {
     ulong el = uel(EL,i), d0model = umodiu(d0, el);
@@ -341,7 +341,7 @@ get_vG(GEN vT, GEN Data, ulong el0, long n_el)
     if (!isintzero(gel(vT, itk))) continue;
     gel(G, itk) = nxV_chinese_center(gel(vPOL, itk), EL, &M);
   }
-  return mkvec3(G, M, utoi(EL[n_el]));
+  *pel = EL[n_el]; return mkvec2(G, M);
 }
 
 /* F=Q(zeta_n), H=<p> in (Z/nZ)^*, K<-->H, t_k=Tr_{F/K}(zeta_n^k).
@@ -386,14 +386,14 @@ get_vT(GEN Data, int new)
 
   if (DEBUGLEVEL == 2) err_printf("get_vT: start=(%ld,%ld)\n",start,second);
 
-  G = get_vG(vT, Data,  el, start);
-  G1 = vecslice(gel(G,1), 1, mitk);
-  M1 = gel(G, 2); el = itou(gel(G, 3));
-  for (n_el=second; n_el; n_el++)
+  G = get_vG(vT, Data,  &el, start);
+  G1 = gel(G,1); if (new) G1 = vecslice(G1, 1, mitk);
+  M1 = gel(G,2);
+  for (n_el = second;; n_el++)
   {
-    G = get_vG(vT, Data, el, n_el);
-    G2 = vecslice(gel(G,1), 1, mitk);
-    M2 = gel(G, 2); el = itou(gel(G, 3));
+    G = get_vG(vT, Data, &el, n_el);
+    G2 = gel(G,1); if (new) G2 = vecslice(G2, 1, mitk);
+    M2 = gel(G,2);
     for (k=1; k<=n_T; k++)
     {
       long itk = kT[k];
