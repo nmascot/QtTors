@@ -32,10 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #define GENERAL            1
 #define NEWTON_POWER       2
-#define NEWTON_GENERAL     3
-#define NEWTON_GENERAL_NEW 4
-#define ASCENT             5
-#define MAX_DEG            6
+#define NEWTON_GENERAL     4
+#define NEWTON_GENERAL_NEW 8
+#define ASCENT            16
 
 #define Flx_polcyclo(n, p) ZX_to_Flx(polcyclo(n, 0), p)
 #define FpX_polcyclo(n, p) FpX_red(polcyclo(n, 0), p)
@@ -802,32 +801,31 @@ use_newton_general(long d, long f, long max_deg)
   else return 1;
 }
 
-static GEN
+static ulong
 set_action(GEN fa, GEN p, long d, long f)
 {
   GEN EL = gel(fa, 1), E = gel(fa, 2);
   long i, l = lg(EL), d0 = 1, f0 = 1, d1, f1, m0 = 0, m1 = 0;
   long maxdeg = 1, max = 1;
   GEN D = cgetg(l, t_VECSMALL), F = cgetg(l, t_VECSMALL);
-  GEN action = const_vecsmall(ASCENT, 0);
+  ulong action = 0;
 
   d += 10*(lgefint(p)-3);
   if (l == 2)
   { /* n is a prime power */
-    action[(EL[1]==2 || !use_newton(d, f))? GENERAL: NEWTON_POWER] = 1;
+    action |= (EL[1]==2 || !use_newton(d, f))? GENERAL: NEWTON_POWER;
     return action;
   }
-  if (f <= 2) action[NEWTON_GENERAL] = 1;
-  else if (d <= 10) action[GENERAL] = 1;
-  else if (f <= 10) action[NEWTON_GENERAL] = 1;
-  else if (d <= 20) action[GENERAL] = 1;
-  else if (f <= 20) action[NEWTON_GENERAL_NEW] = 1;
-  else if (d <= 30) action[GENERAL] = 1;
-  else if (f <= 30) action[NEWTON_GENERAL_NEW] = 1;
-  else if(d <= 40) action[GENERAL] = 1;
-  else if(f <= 40) action[NEWTON_GENERAL_NEW] = 1;
-  if (action[GENERAL] || action[NEWTON_GENERAL] || action[NEWTON_GENERAL_NEW])
-    return action;
+  if (f <= 2) action |= NEWTON_GENERAL;
+  else if (d <= 10) action |= GENERAL;
+  else if (f <= 10) action |= NEWTON_GENERAL;
+  else if (d <= 20) action |= GENERAL;
+  else if (f <= 20) action |= NEWTON_GENERAL_NEW;
+  else if (d <= 30) action |= GENERAL;
+  else if (f <= 30) action |= NEWTON_GENERAL_NEW;
+  else if (d <= 40) action |= GENERAL;
+  else if (f <= 40) action |= NEWTON_GENERAL_NEW;
+  if (action) return action;
 
   for (i = 1; i < l; i++)
   {
@@ -845,21 +843,20 @@ set_action(GEN fa, GEN p, long d, long f)
   if((p[2] != 2 && use_newton_general(d, f, maxdeg)) ||
      (p[2] == 2 && f <= 40))  /* does not decompose n */
   {
-    if (20 < d) action[NEWTON_GENERAL_NEW] = 1;
-    else action[NEWTON_GENERAL] = 1;
+    action |= (20 < d)? NEWTON_GENERAL_NEW: NEWTON_GENERAL;
     return action;
   }
 
-  if(d <= 20) action[GENERAL] = 1;
-  else if(p[2] == 2) action[GENERAL] = 0;
-  else if(d <= 50) action[GENERAL] = 1;
-  else if (maxdeg <= 3*d) action[GENERAL] = 0;
-  else if (d <= 200) action[GENERAL] = 1;
-  else if (maxdeg <= 10*d) action[GENERAL] = 0;
-  else if (d <= 500) action[GENERAL] = 1;
-  else if (maxdeg <= 20*d) action[GENERAL] = 0;
-  else if (d <= 1000) action[GENERAL] = 1;
-  else action[GENERAL] = 0;
+  if(d <= 20) action |= GENERAL;
+  else if (p[2] == 2) action &= ~GENERAL;
+  else if (d <= 50) action |= GENERAL;
+  else if (maxdeg <= 3*d) action &= ~GENERAL;
+  else if (d <= 200) action |= GENERAL;
+  else if (maxdeg <= 10*d) action &= ~GENERAL;
+  else if (d <= 500) action |= GENERAL;
+  else if (maxdeg <= 20*d) action &= ~GENERAL;
+  else if (d <= 1000) action |= GENERAL;
+  else action &= ~GENERAL;
   if (l <= 3) return action;  /* n has two factors */
 
   d0 = f0 = 1;  /* decompose n */
@@ -885,7 +882,8 @@ set_action(GEN fa, GEN p, long d, long f)
   }
   if (DEBUGLEVEL == 4) err_printf("(d0,f0)=(%ld,%ld)\n",d0,f0);
   if (DEBUGLEVEL == 4) err_printf("(m0,m1)=(%lu,%lu) %ld\n",m0,m1,m0<=m1);
-  action[ASCENT] = (m0 <= m1); return action;
+  if (m0 <= m1) action |= ASCENT;
+  return action;
 }
 
 /*  Data = [H, GH, i_t, d0, kT, [n, d, f, n_T, mitk]]
@@ -1529,22 +1527,22 @@ header(GEN fn, long n, long d, long f, GEN p)
   err_printf("(n,d,f) : (%ld,%ld,%ld) --> ",n,d,f);
 }
 
-static GEN
+static ulong
 FpX_factcyclo_just_conductor_init(GEN *pData, ulong n, GEN p, ulong m)
 {
   GEN fn = factoru(n), GH = NULL, GHgen = NULL;
   long phin = eulerphiu_fact(fn), pmodn = umodiu(p, n);
   long d = Fl_order(pmodn, phin, n), f = phin/d; /* d > 1 */
-  GEN action = set_action(fn, p, d, f);
-  if (action[GENERAL])
+  ulong action = set_action(fn, p, d, f);
+  if (action & GENERAL)
   {
     GEN H = znstar_generate(n, mkvecsmall(pmodn));
     GH = znstar_cosets(n, phin, H); /* representatives of G/H */
-    if (action[NEWTON_GENERAL_NEW] || action[NEWTON_GENERAL])
+    if (action & (NEWTON_GENERAL_NEW | NEWTON_GENERAL))
       GHgen = get_GH_gen(n, pmodn);  /* gen and order of G/H */
   }
-  else if (action[NEWTON_POWER]);
-  else if (action[NEWTON_GENERAL_NEW] || action[NEWTON_GENERAL])
+  else if (action & NEWTON_POWER);
+  else if (action & (NEWTON_GENERAL_NEW | NEWTON_GENERAL))
   {
     GEN H = znstar_generate(n, mkvecsmall(pmodn));
     GH = znstar_cosets(n, phin, H); /* representatives of G/H */
@@ -1553,7 +1551,7 @@ FpX_factcyclo_just_conductor_init(GEN *pData, ulong n, GEN p, ulong m)
   *pData = mkvec5(GHgen, GH, fn, p, mkvecsmall4(n, d, f, m));
   if (DEBUGLEVEL >= 1)
   {
-    err_printf("(%ld,%ld,%ld)  action=%Ps\n", n, d, f, zv_to_ZV(action));
+    err_printf("(%ld,%ld,%ld)  action=%ld\n", n, d, f, action);
     if (GHgen)
     {
       GEN cycGH = gel(GHgen,2), gGH = gel(GHgen,1);
@@ -1566,20 +1564,21 @@ FpX_factcyclo_just_conductor_init(GEN *pData, ulong n, GEN p, ulong m)
 static GEN
 FpX_factcyclo_just_conductor(ulong n, GEN p, ulong m)
 {
-  GEN Data, action = FpX_factcyclo_just_conductor_init(&Data, n, p, m);
-  if (action[GENERAL])
+  GEN Data;
+  ulong action = FpX_factcyclo_just_conductor_init(&Data, n, p, m);
+  if (action & GENERAL)
     return FpX_factcyclo_gen(gel(Data,2), n, p, m);
-  else if (action[NEWTON_POWER])
+  else if (action & NEWTON_POWER)
   {
     GEN fn = gel(Data,3);
     return FpX_factcyclo_prime_power_i(ucoeff(fn,1,1), ucoeff(fn,1,2), p, m);
   }
-  else if (action[NEWTON_GENERAL])
+  else if (action & NEWTON_GENERAL)
     return FpX_factcyclo_newton_general(Data);
-  else if (action[NEWTON_GENERAL_NEW])
+  else if (action & NEWTON_GENERAL_NEW)
     return FpX_factcyclo_newton_general_new3(Data);
   else
-    return FpX_factcyclo_fact(n, p, m, action[ASCENT]);
+    return FpX_factcyclo_fact(n, p, m, action & ASCENT);
 }
 
 static GEN
@@ -2065,20 +2064,21 @@ Flx_factcyclo_fact(ulong n, ulong p, ulong m, long ascent)
 static GEN
 Flx_factcyclo_just_conductor(ulong n, ulong p, ulong m)
 {
-  GEN Data, action = FpX_factcyclo_just_conductor_init(&Data, n, utoipos(p), m);
-  if (action[GENERAL])
+  GEN Data;
+  ulong action = FpX_factcyclo_just_conductor_init(&Data, n, utoipos(p), m);
+  if (action & GENERAL)
     return Flx_factcyclo_gen(gel(Data,2), n, p, m);
-  else if (action[NEWTON_POWER])
+  else if (action & NEWTON_POWER)
   {
     GEN fn = gel(Data,3);
     return Flx_factcyclo_prime_power_i(ucoeff(fn,1,1), ucoeff(fn,1,2), p, m);
   }
-  else if (action[NEWTON_GENERAL])
+  else if (action & NEWTON_GENERAL)
     return Flx_factcyclo_newton_general(Data);
-  else if (action[NEWTON_GENERAL_NEW])
+  else if (action & NEWTON_GENERAL_NEW)
     return Flx_factcyclo_newton_general_new3(Data);
   else
-    return Flx_factcyclo_fact(n, p, m, action[ASCENT]);
+    return Flx_factcyclo_fact(n, p, m, action & ASCENT);
 }
 
 static GEN
