@@ -74,14 +74,6 @@ QXV_den_pval(GEN vT, GEN kT, GEN p)
   return vmax;
 }
 
-/* return (Z/nZ)^* as vecsmall */
-static GEN
-znstar_0(ulong n)
-{
-  GEN zn = znstar_small(znstar(utoi(n)));
-  return znstar_elts(n, mkvec2(gel(zn, 3), gel(zn, 2)));
-}
-
 /* n=el^e, p^d=1 (mod n), d is in [1,el-1], phi(n)=d*f.
  *  E[i] : 1 <= i <= n-1
  *  E[g^i*p^j mod n] = i+1  (0 <= i <= f-1, 0 <= j <= d-1)
@@ -1422,15 +1414,14 @@ FpX_factcyclo_newton_power(GEN N, GEN p, ulong m)
 }
 
 static GEN
-FpX_split(ulong n, GEN p, long m)
+FpX_split(ulong n, GEN p, ulong m)
 {
-  long i;
-  GEN v = cgetg(1+m, t_VEC);
-  GEN C = (m==1) ? const_vecsmall(1, 1) : znstar_0(n); /* (Z/nZ)^* */
-  GEN z_n = rootsof1u_Fp(n, p);
-  GEN vx = Fp_powers(z_n, (m==1)? 1: n, p) + 1;
-  for (i = 1; i <= m; i++)
-    gel(v, i) = deg1pol_shallow(gen_1, Fp_neg(gel(vx, C[i]), p), 0);
+  ulong i, j;
+  GEN v, C, vx, z = rootsof1u_Fp(n, p);
+  if (m == 1) return mkvec(deg1pol_shallow(gen_1, Fp_neg(z,p), 0));
+  v = cgetg(m+1, t_VEC); C = coprimes_zv(n); vx = Fp_powers(z, n-1, p);
+  for (i = j = 1; i <= n; i++)
+    if (C[i]) gel(v, j++) = deg1pol_shallow(gen_1, Fp_neg(gel(vx,i+1), p), 0);
   return gen_sort(v, (void*)cmpii, &gen_cmp_RgX);
 }
 
@@ -1444,7 +1435,7 @@ FpX_factcyclo_prime_power_i(long el, long e, GEN p, long m)
   long d = z[6], f = z[7]; /* d and f for n=el^e0 */
 
   if (f == 1) v = mkvec(FpX_polcyclo(n, p));
-  else if (d == 1) v = FpX_split(n, p, (m==1)?1:f);
+  else if (d == 1) v = FpX_split(n, p, (m==1)? 1: f);
   else if (el == 2) v = FpX_factcyclo_gen(NULL, n, p, m); /* d==2 in this case */
   else
   {
@@ -1998,17 +1989,13 @@ cmpGuGu(GEN a, GEN b) { return (ulong)a < (ulong)b? -1: (a == b? 0: 1); }
 static GEN
 Flx_split(ulong n, ulong p, ulong m)
 {
-  ulong i;
-  GEN v = cgetg(1+m, t_VEC);
-  GEN C = (m==1) ? const_vecsmall(1, 1) : znstar_0(n); /* (Z/nZ)^* */
-  ulong z_n = rootsof1_Fl(n, p);
-  GEN vx = Fl_powers(z_n, (m==1)?1:n, p)+1;
-  for (i = 1; i <= m; i++)
-  {
-    gel(v, i) = polx_Flx(0);
-    mael(v, i, 2) = Fl_neg(vx[C[i]], p);
-  }
-  return gen_sort(v,(void*)cmpGuGu, &gen_cmp_RgX);
+  ulong i, j, z = rootsof1_Fl(n, p);
+  GEN v, C, vx;
+  if (m == 1) return mkvec(mkvecsmall3(0, Fl_neg(z,p), 1));
+  v = cgetg(m+1, t_VEC); C = coprimes_zv(n); vx = Fl_powers(z, n-1, p);
+  for (i = j = 1; i <= n; i++)
+    if (C[i]) gel(v, j++) = mkvecsmall3(0, Fl_neg(vx[i+1], p), 1);
+  return gen_sort(v, (void*)cmpGuGu, &gen_cmp_RgX);
 }
 
 /* d==1 or f==1 occurs */
