@@ -510,19 +510,19 @@ get_vT_new(GEN Data)
   return vT;
 }
 
-/* d0=sqrti(x) is a multiple of (O_K:Z[t_1]). i.e. d0*T_k(x) is in Z[x].
- * d1=sqrti(y) has the same prime factors as d(T) */
+/* d0 is a multiple of (O_K:Z[t_1]). i.e. d0*T_k(x) is in Z[x].
+ * d1 has the same prime factors as d(T); d0 d1 = d(T)^2 */
 static GEN
 get_d0_d1(GEN dT, GEN fn)
 {
   GEN EL = gel(fn, 1), x = dT, y = dT;
   long i, l = lg(EL);
-  for (i=1; i<l; i++)
-  {
-    long parity = Z_lval(dT, EL[i]) & 1;
-    x = parity ? diviuexact(x, EL[i]) : x;
-    y = parity ? muliu(y, EL[i]) : y;
-  }
+  for (i = 1; i < l; i++)
+    if (odd(Z_lval(dT, EL[i])))
+    {
+      x = diviuexact(x, EL[i]);
+      y = muliu(y, EL[i]);
+    }
   return mkvec2(sqrti(x), sqrti(y));  /* x and y are square */
 }
 
