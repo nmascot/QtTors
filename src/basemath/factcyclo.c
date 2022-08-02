@@ -1386,10 +1386,14 @@ FpX_factcyclo_gen(GEN GH, ulong n, GEN p, long m)
   }
   return pols;
 }
+
+static GEN Flx_factcyclo_newton_pre(GEN Data, GEN N, ulong p, ulong m);
+/* n is an odd prime power prime to p and equal to the conductor
+ * of the splitting field of p in Q(zeta_n). d>1 and nf>1 */
 static GEN
-FpX_factcyclo_newton_power_init(GEN N, GEN p, ulong m, GEN *ppu)
+FpX_factcyclo_newton_power(GEN N, GEN p, ulong m, int small)
 {
-  GEN Rs, H, T, F, pr, prs, pu;
+  GEN Rs, H, T, F, pr, prs, pu, Data;
   long n = N[1], el = N[2], phin = N[4], g = N[5];
   long pmodn = umodiu(p, n), pmodel = umodiu(p, el);
   long d = Fl_order(pmodel, el-1, el), nf = phin/d;
@@ -1405,16 +1409,11 @@ FpX_factcyclo_newton_power_init(GEN N, GEN p, ulong m, GEN *ppu)
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
   pr = powiu(p, r); prs = powiu(p, r+s); /* Usually, r=0, s=1, pr=1, prs=p */
   F = r ? RgX_to_FpX(RgX_Rg_mul(F, pr), prs) : RgX_to_FpX(F, prs);
-  *ppu = pu; return mkvec4(T, F, Rs, mkvecsmalln(6, d, nf, g, r, s, u));
-}
-/* n is an odd prime power prime to p and equal to the conductor
- * of the splitting field of p in Q(zeta_n). d>1 and nf>1 */
-static GEN
-FpX_factcyclo_newton_power(GEN N, GEN p, ulong m)
-{
-  pari_sp av = avma;
-  GEN pu, Data = FpX_factcyclo_newton_power_init(N, p, m, &pu);
-  return gerepilecopy(av, FpX_factcyclo_newton_pre(Data, N, p, m));
+  Data = mkvec4(T, F, Rs, mkvecsmalln(6, d, nf, g, r, s, u));
+  if (small && lgefint(pu) == 3)
+    return Flx_factcyclo_newton_pre(Data, N, uel(p,2), m);
+  else
+    return FpX_factcyclo_newton_pre(Data, N, p, m);
 }
 
 static GEN
@@ -1441,12 +1440,11 @@ FpX_factcyclo_prime_power_i(long el, long e, GEN p, long m)
   if (f == 1) v = mkvec(FpX_polcyclo(n, p));
   else if (d == 1) v = FpX_split(n, p, (m==1)? 1: f);
   else if (el == 2) v = FpX_factcyclo_gen(NULL, n, p, m); /* d==2 in this case */
+  else if (!use_newton(d,f)) v = FpX_factcyclo_gen(NULL, n, p, m);
   else
   {
     GEN N = mkvecsmall5(n, el, e0, phin, g);
-    long x = use_newton(d,f);
-    v = x ? FpX_factcyclo_newton_power(N, p, m) :
-            FpX_factcyclo_gen(NULL, n, p, m);
+    v = FpX_factcyclo_newton_power(N, p, m, 0);
   }
   if (e1)
   {
@@ -1947,25 +1945,6 @@ Flx_factcyclo_gen(GEN GH, ulong n, ulong p, ulong m)
   return pols;
 }
 
-/* factor polcyclo(n) mod p using Gaussian period
- *  n = el^e, p^d=1 (mod el) with d | (el-1) and p^d=1 (mod n)
- *  d>1 and nf>1 */
-static GEN
-Flx_factcyclo_newton_power(GEN N, ulong p, ulong m)
-{
-  GEN p0 = utoipos(p);
-  GEN pu, Data = FpX_factcyclo_newton_power_init(N, p0, m, &pu);
-  if (lgefint(pu) > 3)
-  { /* ULONG_MAX < p^u */
-    GEN z = FpX_factcyclo_newton_pre(Data, N, p0, m);
-    long i, l = lg(z);
-    GEN pols = cgetg(l, t_VEC);
-    for (i = 1; i < l; i++) gel(pols, i) = ZX_to_nx(gel(z, i));
-    return pols;
-  }
-  return Flx_factcyclo_newton_pre(Data, N, p, m);
-}
-
 static int
 cmpGuGu(GEN a, GEN b) { return (ulong)a < (ulong)b? -1: (a == b? 0: 1); }
 
@@ -1986,18 +1965,23 @@ Flx_split(ulong n, ulong p, ulong m)
 static GEN
 Flx_factcyclo_prime_power_i(long el, long e, long p, long m)
 {
-  GEN z = set_e0_e1(el, e, utoi(p)), v;
+  GEN p0 = utoipos(p), z = set_e0_e1(el, e, p0), v;
   long n = z[1], e0 = z[2], e1 = z[3], phin = z[4], g = z[5];
   long d = z[6], f = z[7]; /* d and f for n=el^e0 */
 
   if (f == 1) v = mkvec(Flx_polcyclo(n, p));
   else if (d == 1) v = Flx_split(n, p, (m==1)?1:f);
   else if (el == 2) v = Flx_factcyclo_gen(NULL, n, p, m);/* d==2 in this case */
+  else if (!use_newton(d, f)) v = Flx_factcyclo_gen(NULL, n, p, m);
   else
   {
     GEN N = mkvecsmall5(n, el, e0, phin, g);
-    v = use_newton(d, f)? Flx_factcyclo_newton_power(N, p, m) :
-                          Flx_factcyclo_gen(NULL, n, p, m);
+    v = FpX_factcyclo_newton_power(N, p0, m, 1);
+    if (typ(gel(v,1)) == t_POL)
+    { /* ZX: convert to Flx */
+      long i, l = lg(v);
+      for (i = 1; i < l; i++) gel(v,i) = ZX_to_nx(gel(v,i));
+    }
   }
   if (e1)
   {
