@@ -768,15 +768,14 @@ set_action(GEN fa, GEN p, long d, long f)
 }
 
 /*  Data = [H, GH, i_t, d0, kT, [n, d, f, n_T, mitk]]
-    Data2 = [vT, polcyclo_n, p, pr, pu, pru] */
+    N2 = [p, pr, pu, pru] */
 static GEN
-FpX_pol_newton_general(GEN Data, GEN Data2, GEN x)
+FpX_pol_newton_general(GEN Data, GEN N2, GEN vT, GEN polcyclo_n, GEN x)
 {
   pari_sp av = avma;
   GEN i_t = gel(Data, 3), kT = gel(Data, 5), N = gel(Data, 6);
   long k, d = N[2], n_T = N[4], mitk = N[5];
-  GEN vT = gel(Data2, 1), polcyclo_n = gel(Data2, 2), p = gel(Data2, 3);
-  GEN pr = gel(Data2, 4), pu = gel(Data2, 5), pru = gel(Data2, 6);
+  GEN p = gel(N2,1), pr = gel(N2,2), pu = gel(N2,3), pru = gel(N2,4);
   GEN S = cgetg(2+d, t_VEC), R = cgetg(1+mitk, t_VEC), P;
 
   for(k = 1; k<=n_T; k++)
@@ -800,12 +799,11 @@ FpX_factcyclo_newton_general(GEN Data)
   long n = mael(Data, 5, 1), d = mael(Data, 5, 2), f = mael(Data, 5, 3);
   long m = mael(Data, 5, 4), pmodn = umodiu(p, n);
   long i, k, n_T, mitk, r, s = 0, u = 1;
-  GEN vT, kT, H, i_t, T, d0d1, Data2, Data3, R, Rs, pr, pu, pru, pols;
+  GEN vT, kT, H, i_t, T, d0d1, Data2, Data3, R, Rs, pr, pu, pru;
   GEN polcyclo_n;
   pari_timer ti;
 
   if (m != 1) m = f;
-  pols = cgetg(1+m, t_VEC);
   for (pu = p; cmpiu(pu,d)<=0; u++) pu = mulii(pu, p);  /* d<pu, pu=p^n */
 
   H = Fl_powers(pmodn, d-1, n); /* H=<p> */
@@ -822,23 +820,23 @@ FpX_factcyclo_newton_general(GEN Data)
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
-  if (r+u<s) pari_err_BUG("FpX_factcyclo_newton_general (T(x) is not separable mod p^(r+u))");
+  if (r+u<s) pari_err_BUG("FpX_factcyclo_newton_general (T is not separable mod p^(r+u))");
   /* R and vT are mod p^(r+u) */
   R = (r+u==s) ? Rs : ZX_Zp_liftroots(T, Rs, p, s, r+u);
   pr = powiu(p, r); pru = powiu(p, r+u); /* Usually, r=0, s=1, pr=1, pru=p */
   for (k = 1; k<=n_T; k++)
   {
     long itk = kT[k];
-    gel(vT, itk) = r ? RgX_to_FpX(RgX_Rg_mul(gel(vT, itk), pr), pru):
-                       RgX_to_FpX(gel(vT, itk), pru);
+    GEN z = r? RgX_Rg_mul(gel(vT, itk), pr): gel(vT, itk);
+    gel(vT, itk) = RgX_to_FpX(z, pru);
   }
   polcyclo_n = FpX_polcyclo(n, p);
-  Data3 = mkvecn(6, vT, polcyclo_n, p, pr, pu, pru);
+  Data3 = mkvec4(p, pr, pu, pru);
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   for (i=1; i<=m; i++)
-    gel(pols, i) = FpX_pol_newton_general(Data2, Data3, gel(R, i));
+    gel(R,i) = FpX_pol_newton_general(Data2, Data3, vT, polcyclo_n, gel(R,i));
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_pol_newton_general");
-  return pols;
+  return R;
 }
 
 /* Data = [vT, gGH, Rs, Rrs, i_t, kt, p, pu, pr, prs,
@@ -1494,14 +1492,12 @@ FpX_factcyclo(ulong n, GEN p, ulong m)
 { pari_sp av = avma; return gerepilecopy(av, FpX_factcyclo_i(n, p, m)); }
 
 /*  Data = [H, GH, i_t, d0, kT, [n, d, f, n_T, mitk]]
- *  Data2 = [vT, polcyclo_n, [p, pr, pu, pru]] */
+ *  N2 = [p, pr, pu, pru] */
 static GEN
-Flx_pol_newton_general(GEN Data, GEN Data2, ulong x)
+Flx_pol_newton_general(GEN Data, GEN N2, GEN vT, GEN polcyclo_n, ulong x)
 {
-  GEN i_t = gel(Data, 3), kT = gel(Data, 5);
-  GEN N = gel(Data, 6), N2 = gel(Data2, 3);
+  GEN i_t = gel(Data, 3), kT = gel(Data, 5), N = gel(Data, 6);
   long k, d = N[2], n_T = N[4], mitk = N[5];
-  GEN vT = gel(Data2, 1), polcyclo_n = gel(Data2, 2);
   long p = N2[1], pr = N2[2], pu = N2[3], pru = N2[4];
   GEN S = cgetg(2+d, t_VECSMALL), R = cgetg(1+mitk, t_VECSMALL), P;
 
@@ -1525,11 +1521,10 @@ Flx_factcyclo_newton_general(GEN Data)
   ulong up = p[2], n = mael(Data, 5, 1), pmodn = up%n;
   long d = mael(Data, 5, 2), f = mael(Data, 5, 3), m = mael(Data, 5, 4);
   long i, k, n_T, mitk, r, s = 0, u = 1;
-  GEN vT, kT, H, i_t, T, d0d1, Data2, Data3, R, Rs, pr, pu, pru, pols;
+  GEN vT, kT, H, i_t, T, d0d1, Data2, Data3, R, Rs, pr, pu, pru;
   pari_timer ti;
 
   if (m != 1) m = f;
-  pols = cgetg(1+m, t_VEC);
   for (pu = p; cmpiu(pu,d) <= 0; u++) pu = muliu(pu, up);  /* d<pu, pu=p^u */
 
   H = Fl_powers(pmodn, d-1, n); /* H=<p> */
@@ -1546,7 +1541,7 @@ Flx_factcyclo_newton_general(GEN Data)
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
-  if (r+u < s) pari_err_BUG("Flx_factcyclo_newton_general, T(x) is not separable mod p^(r+u)");
+  if (r+u < s) pari_err_BUG("Flx_factcyclo_newton_general, T is not separable mod p^(r+u)");
   /* R and vT are mod p^(r+u) */
   R = (r+u==s) ? Rs : ZV_sort_shallow(ZX_Zp_liftroots(T, Rs, p, s, r+u));
   pr = powiu(p, r); pru = powiu(p, r+u); /* Usually, r=0, s=1, pr=1, pru=p */
@@ -1556,14 +1551,13 @@ Flx_factcyclo_newton_general(GEN Data)
     for (k = 1; k <= n_T; k++)
     {
       long itk = kT[k];
-      gel(vT, itk) = r ? RgX_to_FpX(RgX_Rg_mul(gel(vT, itk), pr), pru):
-                         RgX_to_FpX(gel(vT, itk), pru);
+      GEN z = r? RgX_Rg_mul(gel(vT, itk), pr): gel(vT, itk);
+      gel(vT, itk) = RgX_to_FpX(z, pru);
     }
     polcyclo_n = FpX_polcyclo(n, p);
-    Data3 = mkvecn(6, vT, polcyclo_n, p, pr, pu, pru);
+    Data3 = mkvec4(p, pr, pu, pru);
     for (i = 1; i <= m; i++)
-      gel(pols, i) = ZX_to_nx(FpX_pol_newton_general(Data2, Data3, gel(R, i)));
-    return pols;
+      gel(R,i) = ZX_to_nx(FpX_pol_newton_general(Data2, Data3, vT, polcyclo_n, gel(R,i)));
   }
   else
   {
@@ -1572,18 +1566,17 @@ Flx_factcyclo_newton_general(GEN Data)
     for (k = 1; k <= n_T; k++)
     {
       long itk = kT[k];
-      gel(vT, itk) = r ? RgX_to_Flx(RgX_muls(gel(vT, itk), upr), upru):
-                         RgX_to_Flx(gel(vT, itk), upru);
+      GEN z = r? RgX_muls(gel(vT, itk), upr): gel(vT, itk);
+      gel(vT, itk) = RgX_to_Flx(z, upru);
     }
     polcyclo_n = Flx_polcyclo(n, up);
-    Data3 = mkvec3(vT, polcyclo_n, mkvecsmall4(up, upr, upu, upru));
-    R = ZV_to_nv(R);
+    Data3 = mkvecsmall4(up, upr, upu, upru);
     if (DEBUGLEVEL >= 6) timer_start(&ti);
     for (i = 1; i <= m; i++)
-      gel(pols, i) = Flx_pol_newton_general(Data2, Data3, R[i]);
+      gel(R,i) = Flx_pol_newton_general(Data2, Data3, vT, polcyclo_n, itou(gel(R,i)));
     if (DEBUGLEVEL >= 6) timer_printf(&ti, "Flx_pol_newton_general");
-    return pols;
   }
+  return R;
 }
 
 /*  Data=[vT, gGH, Rs, Rrs, i_t, kt, p, pu, pr, prs,
