@@ -1169,7 +1169,7 @@ bnrclassfield_tower(GEN bnr, GEN subgroup, GEN TB, GEN p, long finaldeg, long ab
       if (lgefint(q) == 3) gel(Lbad,j++) = q;
     }
     setlg(Lbad,j);
-    Lbad = ZV_to_zv(ZV_sort_uniq(Lbad));
+    Lbad = ZV_to_zv(ZV_sort_uniq_shallow(Lbad));
     gel(fa,1) = shallowconcat1(gel(fa,1));
     settyp(gel(fa,1), t_COL);
     gel(fa,2) = cgetg(lg(gel(fa,1)), t_COL);

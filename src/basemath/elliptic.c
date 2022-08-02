@@ -4234,7 +4234,7 @@ ellintegralmodel_i(GEN e, GEN *pv)
   }
   /* a = [a1, a2, a3, a4, a6] */
   l = lg(L); if (l == 1) return e;
-  L = ZV_sort_uniq(L);
+  L = ZV_sort_uniq_shallow(L);
   l = lg(L);
 
   t = gen_1;

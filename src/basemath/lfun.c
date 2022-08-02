@@ -2519,7 +2519,7 @@ parse_maxcond(GEN maxN)
   else if (typ(maxN) == t_VEC)
   {
     if (!RgV_is_ZV(maxN)) pari_err_TYPE("lfunconductor",maxN);
-    return ZV_sort(maxN);
+    return ZV_sort_shallow(maxN);
   }
   else
     M = maxN;

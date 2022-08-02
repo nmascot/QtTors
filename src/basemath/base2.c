@@ -192,7 +192,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
         }
         P = gel(absZ_factor_limit_strict(dT, MIN, &U), 1);
         if (lg(P) != 0) { settyp(P, typ(P0)); P0 = shallowconcat(P0,P); }
-        P0 = ZV_sort_uniq(P0);
+        P0 = ZV_sort_uniq_shallow(P0);
         fa = fact_from_factors(dT, P0, 0);
         break;
       case t_INT:
@@ -3473,7 +3473,7 @@ rnfallbase(GEN nf, GEN pol, GEN lim, GEN rnf, GEN *pD, GEN *pf, GEN *pDKP)
         if (typ(p) != t_INT) p = pr_get_p(p);
         gel(P,i) = p;
       }
-      P = ZV_sort_uniq(P);
+      P = ZV_sort_uniq_shallow(P);
     }
     if (rnf)
     {

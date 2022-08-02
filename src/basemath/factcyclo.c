@@ -597,7 +597,7 @@ ZpX_roots_nonsep(GEN T, GEN R0, GEN p, GEN ps, GEN ps1)
     for (j=1; j<lz; j++)
       gel(R, ++n) = Fp_add(gel(R0, i), mulii(gel(z, j), ps), ps1);
   }
-  return ZV_sort_uniq_i(R);
+  return ZV_sort_uniq_shallow(R);
 }
 static GEN
 ZpX_roots_all(GEN T, GEN p, long f, long *ptrs)
@@ -1122,7 +1122,7 @@ newton_general_new_pre3(GEN Data)
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
   if (s < u)
   {
-    Rs = ZV_sort(ZX_Zp_liftroots(T, Rs, p, s, u));
+    Rs = ZV_sort_shallow(ZX_Zp_liftroots(T, Rs, p, s, u));
     s = u;
   }
   /* Rs : mod p^s, Rrs : mod p^(r+s), vT : mod p^(r+s) */
@@ -1666,7 +1666,7 @@ Flx_factcyclo_newton_general(GEN Data)
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
   if (r+u < s) pari_err_BUG("Flx_factcyclo_newton_general, T(x) is not separable mod p^(r+u)");
   /* R and vT are mod p^(r+u) */
-  R = (r+u==s) ? Rs : ZV_sort(ZX_Zp_liftroots(T, Rs, p, s, r+u));
+  R = (r+u==s) ? Rs : ZV_sort_shallow(ZX_Zp_liftroots(T, Rs, p, s, r+u));
   pr = powiu(p, r); pru = powiu(p, r+u); /* Usually, r=0, s=1, pr=1, pru=p */
   if (lgefint(pru) > 3)  /* ULONG_MAX < p^(r+u), probably not occur */
   {

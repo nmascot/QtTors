@@ -9011,10 +9011,14 @@ Error if one of the $y[i]$ is $0$.
 \fun{GEN}{ZV_sort}{GEN L} sort the \kbd{ZV} $L$.
 Returns a vector with the same type as $L$.
 
+\fun{GEN}{ZV_sort_shallow}{GEN L} shallow version of \kbd{ZV\_sort}.
+
 \fun{void}{ZV_sort_inplace}{GEN L} sort the \kbd{ZV} $L$, in place.
 
 \fun{GEN}{ZV_sort_uniq}{GEN L} sort the \kbd{ZV} $L$, removing duplicate
 entries. Returns a vector with the same type as $L$.
+
+\fun{GEN}{ZV_sort_uniq_shallow}{GEN L} shallow version of \kbd{ZV\_sort\_uniq}.
 
 \fun{long}{ZV_search}{GEN L, GEN y} look for the \typ{INT} $y$ in the sorted
 \kbd{ZV} $L$. Return an index $i$ such that $L[i] = y$, and  $0$ otherwise.

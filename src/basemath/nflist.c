@@ -1290,7 +1290,7 @@ static GEN
 Pell2prfa(GEN nf, GEN P, long ell, GEN f)
 {
   long v = Z_lval(f, ell);
-  if (v) P = ZV_sort(vec_append(P, utoipos(ell)));
+  if (v) P = ZV_sort_shallow(vec_append(P, utoipos(ell)));
   P = nf_pV_to_prV(nf, P); settyp(P, t_COL); P = P2fa(P);
   if (v)
   { /* add pr^{2e} for all pr | ell */
@@ -4941,7 +4941,7 @@ prMconj(GEN nf, GEN v, GEN w, GEN aut)
   GEN P = gel(v,1), E = gel(v,2), Q = gel(w,1), F = gel(w,2);
   long i, j, l = lg(P);
   if (lg(Q) != l) return 0;
-  if (!ZV_equal(ZV_sort(E), ZV_sort(F))) return 0;
+  if (!ZV_equal(ZV_sort_shallow(E), ZV_sort_shallow(F))) return 0;
   Q = shallowcopy(Q);
   for (i = 1; i < l; i++)
   {

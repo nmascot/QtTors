@@ -731,7 +731,7 @@ quartic_minim_all(GEN F, GEN discF)
 {
   GEN IJ = quartic_IJ(F), I = gel(IJ,1), J = gel(IJ,2);
   GEN g = Z_ppo(gcdii(I,J), gel(discF,1));
-  GEN plist = ZV_sort_uniq(shallowconcat(gel(absZ_factor(g),1), gel(discF,2)));
+  GEN plist = ZV_sort_uniq_shallow(shallowconcat(gel(absZ_factor(g),1),gel(discF,2)));
   GEN W, C, PQ = hyperellminimalmodel(F, &C, plist);
   GEN P = gel(PQ,1), Q = gel(PQ,2);
   if (signe(Q)==0)
@@ -855,7 +855,7 @@ casselspairing(GEN FD, GEN q1, GEN q2, GEN q3)
   GEN Hm = RgXQ_mul(QXQ_div(m, z1, T), H, T); /* deg(Hm) >= 2 */
   GEN gam = to_ZX(Q_primpart(gel(Hm,4)),1);
   GEN a = leading_coeff(q2), Fa = gel(absZ_factor(a),1);
-  GEN F = ZV_sort_uniq(shallowconcat1(mkvec2(Fa, FD)));
+  GEN F = ZV_sort_uniq_shallow(shallowconcat1(mkvec2(Fa, FD)));
   long i, e = 0, lF = lg(F);
   if (signe(a) <= 0)
   {
@@ -1275,7 +1275,7 @@ nf2selmer_quad(GEN nf, GEN S)
   long lS = lg(S), l, lHlist, i, j, k;
 
   QS2gen = vec_prepend(SlistQ, gen_m1);
-  bad = ZV_sort_uniq(shallowconcat(factD, SlistQ));
+  bad = ZV_sort_uniq_shallow(shallowconcat(factD, SlistQ));
   Hlist = ZV_search(bad, gen_2)? bad: vec_prepend(bad, gen_2);
   l = lg(QS2gen);
   lHlist = lg(Hlist);
@@ -1789,7 +1789,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
   KP = gel(absZ_factor(K), 1);
   disc = ZX_disc(pol);
   factdisc = mkvec3(KP, mkcol(gen_2), gel(absZ_factor(disc), 1));
-  factdisc = ZV_sort_uniq(shallowconcat1(factdisc));
+  factdisc = ZV_sort_uniq_shallow(shallowconcat1(factdisc));
   discF = mkvec2(gmul(K,disc), factdisc);
   badprimes = cgetg(n+1, t_VEC);
   vnf = cgetg(n+1, t_VEC);
@@ -1899,7 +1899,7 @@ ell2selmer(GEN ell, GEN ell_K, GEN help, GEN K, GEN vbnf,
     long i, j;
     GEN M = cgetg(dim+1, t_MAT), selker;
     GEN D = mulii(muliu(absi(disc), 27*4096), powiu(K,6));
-    GEN FD = ZV_sort_uniq(shallowconcat1(mkvec2(mkcol3s(3,5,7), factdisc)));
+    GEN FD = ZV_sort_uniq_shallow(shallowconcat1(mkvec2(mkcol3s(3,5,7), factdisc)));
 
     for (i = 1; i <= dim; i++) gel(M,i) = cgetg(dim+1, t_COL);
     for (i = 1; i <= dim; i++)

@@ -217,7 +217,7 @@ rnf_zkabs(GEN rnf)
     if (!isint1(D)) pari_err_TYPE("rnf_zkabs (old style rnf)", rnf);
   }
   v = shallowconcat(nf_get_ramified_primes(rnf_get_nf(rnf)), v);
-  return mkvec3(T, RgM_to_RgXV(M, varn(T)), ZV_sort_uniq(v));
+  return mkvec3(T, RgM_to_RgXV(M, varn(T)), ZV_sort_uniq_shallow(v));
 }
 
 static GEN

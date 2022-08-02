@@ -1649,11 +1649,10 @@ champion(GEN atkin, long k, GEN bound_champ)
 static GEN
 compute_diff(GEN v)
 {
-  pari_sp av = avma;
   long i, l = lg(v) - 1;
   GEN diff = cgetg(l, t_VEC);
   for (i = 1; i < l; i++) gel(diff, i) = subii(gel(v, i+1), gel(v, i));
-  return gerepileupto(av, ZV_sort_uniq(diff));
+  return ZV_sort_uniq_shallow(diff);
 }
 
 static int
