@@ -364,7 +364,7 @@ Flx_cubic_root(GEN ff, ulong p, ulong pi)
   else
   {
     pari_sp av = avma;
-    GEN S1 = mkvecsmall2(Fl_halve(S, p), Fl_halve(1UL, p));
+    GEN S1 = mkvecsmall2(Fl_halve(S, p), (p + 1UL) >> 1);
     GEN vS1 = Fl2_sqrtn_pre(S1, utoi(3), D, p, pi, NULL);
     ulong Sa;
     if (!vS1) return p; /*0 solutions, p%3==2*/
@@ -440,17 +440,13 @@ Flx_oneroot_pre_i(GEN f, ulong p, ulong pi, long fl)
   if (Flx_val(f)) return 0;
   da = degpol(f); f = Flx_normalize(f, p);
   if (da == 1) return Fl_neg(f[2], p);
-  if (SMALL_ULONG(p)) pi = PI = 0;
-  else
-  {
-    if (!pi) pi = get_Fl_red(p);
-    PI = (p & HIGHMASK)? pi: 0;
-  }
+  PI = pi? pi: get_Fl_red(p); /* PI for Fp, pi for Fp[x] */
   switch(da)
   {
     case 2: return Flx_quad_root(f, p, PI, 1);
     case 3: if (p>3) return Flx_cubic_root(f, p, PI); /*FALL THROUGH*/
   }
+  if (SMALL_ULONG(p)) pi = 0; /* bilinear ops faster without Fl_*_pre */
   if (!fl)
   {
     a = Flxq_powu_pre(polx_Flx(f[1]), p - 1, f,p,pi);
@@ -1455,12 +1451,7 @@ Flx_roots_pre(GEN f, ulong p, ulong pi)
     q = p - f[2];
     return v? mkvecsmall2(0, q): mkvecsmall(q);
   }
-  if (SMALL_ULONG(p)) pi = PI = 0;
-  else
-  {
-    if (!pi) pi = get_Fl_red(p);
-    PI = (p & HIGHMASK)? pi: 0;
-  }
+  PI = pi? pi: get_Fl_red(p); /* PI for Fp, pi for Fp[x] */
   if (n == 2)
   {
     ulong r = Flx_quad_root(f, p, PI, 1), s;
@@ -1473,6 +1464,7 @@ Flx_roots_pre(GEN f, ulong p, ulong pi)
     else
       return v? mkvecsmall2(0, s): mkvecsmall(s);
   }
+  if (SMALL_ULONG(p)) pi = 0; /* bilinear ops faster without Fl_*_pre */
   q = p >> 1;
   split_init(&S, lg(f)-1);
   settyp(S.done, t_VECSMALL);

@@ -501,7 +501,7 @@ Flx_factorff_irred(GEN P, GEN Q, ulong p)
   ulong pi, PI;
   if (d==1) retmkcol(Flx_to_FlxX(P, vq));
   PI = get_Fl_red(p);
-  pi = SMALL_ULONG(p)? 0: PI;
+  pi = SMALL_ULONG(p)? 0: PI; /* PI for Fp, pi for Fp[x] */
   FQ = Flx_matFrobenius_pre(Q,p,pi);
   av = avma;
   FP = Flx_matFrobenius_pre(P,p,pi);

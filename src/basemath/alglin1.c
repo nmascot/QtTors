@@ -4548,7 +4548,7 @@ FlmV_recover_pre(GEN a, GEN M, ulong p, ulong pi, long sv)
 static GEN
 FlkM_inv(GEN M, GEN P, ulong p)
 {
-  ulong pi = get_Fl_red(p), PI = (p & HIGHMASK)? pi: 0;
+  ulong PI = get_Fl_red(p), pi = SMALL_ULONG(p)? 0: PI;
   GEN R = Flx_roots_pre(P, p, pi);
   long l = lg(R), i;
   GEN W = Flv_invVandermonde(R, 1UL, p);
@@ -4566,7 +4566,7 @@ FlkM_inv(GEN M, GEN P, ulong p)
 static GEN
 FlkM_adjoint(GEN M, GEN P, ulong p)
 {
-  ulong pi = get_Fl_red(p), PI = (p & HIGHMASK)? pi: 0;
+  ulong PI = get_Fl_red(p), pi = SMALL_ULONG(p)? 0: PI;
   GEN R = Flx_roots_pre(P, p, pi);
   long l = lg(R), i;
   GEN W = Flv_invVandermonde(R, 1UL, p);
@@ -4718,8 +4718,8 @@ ZabM_inv_ratlift(GEN M, GEN P, long n, GEN *pden)
 static GEN
 FlkM_ker(GEN M, GEN P, ulong p)
 {
-  ulong pi = get_Fl_red(p), PI = (p & HIGHMASK)? pi: 0;
-  GEN R = Flx_roots_pre(P, p, PI);
+  ulong PI = get_Fl_red(p), pi = SMALL_ULONG(p)? 0: PI;
+  GEN R = Flx_roots_pre(P, p, pi);
   long l = lg(R), i, dP = degpol(P), r;
   GEN M1, K, D;
   GEN W = Flv_invVandermonde(R, 1UL, p);
