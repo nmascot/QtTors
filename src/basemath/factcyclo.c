@@ -224,22 +224,33 @@ bound_d0(long d, long f)
   return (long) F * (F-1) * log2((double)2*d) / (2*BITS_IN_LONG);
 }
 
+/* d0 is a multiple of (O_K:Z[t_1]). i.e. d0*T_k(x) is in Z[x].
+ * d1 has the same prime factors as d(T); d0 d1 = d(T)^2 */
+static GEN
+get_d0_d1(GEN T, GEN P)
+{
+  long i, l = lg(P);
+  GEN x, y, dT = ZX_disc(T);
+  x = y = dT; setsigne(dT, 1);
+  for (i = 1; i < l; i++)
+    if (odd(Z_lvalrem(dT, P[i], &dT)))
+    {
+      x = diviuexact(x, P[i]);
+      y = muliu(y, P[i]);
+    }
+  return mkvec2(sqrti(x), sqrti(y));  /* x and y are square */
+}
+
 static GEN
 gausspol(GEN T, GEN H, GEN N, ulong d, ulong f, ulong g)
 {
   long n = N[1], el0 = N[2];
-  GEN F, G1, G2, M1, M2, G, d0, d1, dT = absi(ZX_disc(T)), Data;
+  GEN F, G1, G2, M1, M2, G, d0, d1, Data, d0d1 = get_d0_d1(T, mkvecsmall(el0));
   ulong el, n_el, start, second;
   pari_timer ti;
 
-  if (odd(Z_lval(dT, el0)))
-  {
-    d0 = diviuexact(dT, el0);
-    d1 = muliu(dT, el0);
-  }
-  else d0 = d1 = dT;
-  d0 = sqrti(d0);  /* d0*F is in Z[X] */
-  d1 = sqrti(d1);  /* d1 has same prime factors as dT */
+  d0 = gel(d0d1,1); /* d0*F is in Z[X] */
+  d1 = gel(d0d1,2); /* d1 has same prime factors as disc(T) */
   Data = mkvecsmall4(n, d, f, g);
   start = get_n_el(d0, &second);
   el = start_el_n(n);
@@ -316,19 +327,19 @@ get_vG(GEN vT, GEN Data, ulong el, long n_el)
     d0model = umodiu(d0, el);
     EL[i] = el;
     v_t_el = mk_v_t_el(vT, Data, el);
-    for (j=1; j<=f; j++) L[j] = v_t_el[i_t[GH[j]]];
+    for (j = 1; j <= f; j++) L[j] = v_t_el[i_t[GH[j]]];
     X = Flv_invVandermonde(L, 1, el);
-    for (k=1; k<=n_T; k++)
+    for (k = 1; k <= n_T; k++)
     {
       GEN y;
       long itk = kT[k];
       if (!isintzero(gel(vT, itk))) continue;
-      for (j=1; j<=f; j++) x[j] = v_t_el[i_t[Fl_mul(itk, GH[j], n)]];
+      for (j = 1; j <= f; j++) x[j] = v_t_el[i_t[Fl_mul(itk, GH[j], n)]];
       y = Flv_to_Flx(Flm_Flc_mul(X, x, el), 0);
       gmael(vPOL, itk, i) = Flx_Fl_mul(y, d0model, el);
     }
   }
-  for (k=1; k<=n_T; k++)
+  for (k = 1; k <= n_T; k++)
   {
     long itk = kT[k];
     if (!isintzero(gel(vT, itk))) continue;
@@ -351,8 +362,8 @@ get_vG_new(GEN vT, GEN Data, long el, long n_el)
   GEN L = cgetg(1+f, t_VECSMALL), x = cgetg(1+f, t_VECSMALL);
   long i, j, k;
 
-  for(k=1; k<=mitk; k++) gel(vPOL, k) = cgetg(1+n_el, t_VEC);
-  for(i=1; i<=n_el; i++)
+  for (k=1; k<=mitk; k++) gel(vPOL, k) = cgetg(1+n_el, t_VEC);
+  for (i=1; i<=n_el; i++)
   {
     long d0model;
     el = next_el_n(el, n, d1);
@@ -361,17 +372,17 @@ get_vG_new(GEN vT, GEN Data, long el, long n_el)
     v_t_el = mk_v_t_el(vT, Data, el);
     for (j = 1; j <= f; j++) L[j] = v_t_el[i_t[GH[j]]];
     X = Flv_invVandermonde(L, 1, el);
-    for(k = 1; k <= n_T; k++)
+    for (k = 1; k <= n_T; k++)
     {
       GEN y;
       long itk = kT[k];
       if (!isintzero(gel(vT, itk))) continue;
-      for(j = 1; j <= f; j++) x[j] = v_t_el[i_t[Fl_mul(itk, GH[j], n)]];
+      for (j = 1; j <= f; j++) x[j] = v_t_el[i_t[Fl_mul(itk, GH[j], n)]];
       y = Flv_to_Flx(Flm_Flc_mul(X, x, el), 0);
       gmael(vPOL, itk, i) = Flx_Fl_mul(y, d0model, el);
     }
   }
-  for(k=1; k<=n_T; k++)
+  for (k = 1; k <= n_T; k++)
   {
     long itk = kT[k];
     if (!isintzero(gel(vT, itk))) continue;
@@ -506,22 +517,6 @@ get_vT_new(GEN Data)
   }
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "get_vT_new");
   return vT;
-}
-
-/* d0 is a multiple of (O_K:Z[t_1]). i.e. d0*T_k(x) is in Z[x].
- * d1 has the same prime factors as d(T); d0 d1 = d(T)^2 */
-static GEN
-get_d0_d1(GEN dT, GEN fn)
-{
-  GEN EL = gel(fn, 1), x = dT, y = dT;
-  long i, l = lg(EL);
-  for (i = 1; i < l; i++)
-    if (odd(Z_lval(dT, EL[i])))
-    {
-      x = diviuexact(x, EL[i]);
-      y = muliu(y, EL[i]);
-    }
-  return mkvec2(sqrti(x), sqrti(y));  /* x and y are square */
 }
 
 /* return sorted kT={i_t[k] | 1<=k<=d}
@@ -924,7 +919,7 @@ FpX_factcyclo_newton_general(GEN Data)
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
-  d0d1 = get_d0_d1(absi(ZX_disc(T)), fn); /* d0*T_k(x) is in Z[x] */
+  d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
   vT = get_vT(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
@@ -1103,7 +1098,7 @@ newton_general_new_pre3(GEN Data)
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
-  d0d1 = get_d0_d1(absi(ZX_disc(T)), fn); /* d0*T_k(x) is in Z[x] */
+  d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, miTk));
   vT = get_vT_new(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
@@ -1648,7 +1643,7 @@ Flx_factcyclo_newton_general(GEN Data)
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
-  d0d1 = get_d0_d1(absi(ZX_disc(T)), fn); /* d0*T_k(x) is in Z[x] */
+  d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
   vT = get_vT(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
