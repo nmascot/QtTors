@@ -215,15 +215,6 @@ ZX_size(GEN x)
   return max;
 }
 
-/* theoretical upper bound of d0. large for practical calculation.
- * but it seems to have the same order. */
-static long
-bound_d0(long d, long f)
-{
-  double F = (double)f;
-  return (long) F * (F-1) * log2((double)2*d) / (2*BITS_IN_LONG);
-}
-
 /* d0 is a multiple of (O_K:Z[t_1]). i.e. d0*T_k(x) is in Z[x].
  * d1 has the same prime factors as d(T); d0 d1 = d(T)^2 */
 static GEN
@@ -373,14 +364,14 @@ get_i_t(long n, long p)
  * T_0(x)=T_n(x)=f.
  * Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]] */
 static GEN
-get_vT(GEN Data)
+get_vT(GEN Data, int new)
 {
   pari_sp av = avma;
   GEN d0 = gmael(Data, 4, 1), kT = gel(Data, 5), N=gel(Data, 6);
   ulong k, n = N[1], n_T = N[4], mitk = N[5];
   GEN vT = const_vec(mitk, gen_0); /* vT[k]!=NULL ==> vT[k]=T_k */
   ulong n_k = 0, el, n_el, start, second;
-  GEN G1 = cgetg(1+mitk, t_VEC), G2 = cgetg(1+mitk, t_VEC), G, M1, M2;
+  GEN G, G1, G2, M1, M2;
   pari_timer ti;
 
   if (DEBUGLEVEL >= 6) timer_start(&ti);
@@ -391,12 +382,12 @@ get_vT(GEN Data)
   if (DEBUGLEVEL == 2) err_printf("get_vT: start=(%ld,%ld)\n",start,second);
 
   G = get_vG(vT, Data,  el, start);
-  for (k = 1; k <= mitk; k++) gel(G1, k) = gmael(G, 1, k);
+  G1 = vecslice(gel(G,1), 1, mitk);
   M1 = gel(G, 2); el = itou(gel(G, 3));
   for (n_el=second; n_el; n_el++)
   {
     G = get_vG(vT, Data, el, n_el);
-    for (k = 1; k <= mitk; k++) gel(G2, k) = gmael(G, 1, k);
+    G2 = vecslice(gel(G,1), 1, mitk);
     M2 = gel(G, 2); el = itou(gel(G, 3));
     for (k=1; k<=n_T; k++)
     {
@@ -423,57 +414,6 @@ get_vT(GEN Data)
   }
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "get_vT");
   return gerepilecopy(av, vT);
-}
-
-/*  Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, miTk]] */
-static GEN
-get_vT_new(GEN Data)
-{
-  GEN d0 = gmael(Data, 4, 1), kT = gel(Data, 5), N=gel(Data, 6);
-  ulong n = N[1], d = N[2], f = N[3], n_T = N[4], mitk = N[5];
-  GEN vT = const_vec(mitk, gen_0); /* vT[k]!=NULL ==> vT[k]=T_k */
-  ulong k, n_k = 0, el, n_el, start, second;
-  GEN G1, G2, G, M1, M2;
-  pari_timer ti;
-
-  if (DEBUGLEVEL >= 6) timer_start(&ti);
-  start = get_n_el(d0, &second);
-  el = start_el_n(n);
-
-  if (DEBUGLEVEL == 2) err_printf("get_vT_new: start=(%ld,%ld)\n",start,second);
-
-  G = get_vG(vT, Data,  el, start);
-  G1 = gel(G, 1); M1 = gel(G, 2); el = itou(gel(G, 3));
-  for (n_el = second; n_el; n_el++)
-  {
-    G = get_vG(vT, Data, el, n_el);
-    G2 = gel(G, 1); M2 = gel(G, 2); el = itou(gel(G, 3));
-    for (k = 1; k <= n_T; k++)
-    {
-      long itk = kT[k];
-      if (!isintzero(gel(vT, itk))) continue;
-      if (FpX_degsub(gel(G1, itk), gel(G2, itk), M2) < 0) /* G1=G2 (mod M2) */
-      {
-        gel(vT, itk) = RgX_Rg_div(gel(G1, itk), d0);
-        n_k++;
-        if (DEBUGLEVEL == 2)
-          err_printf("G1:%ld, d0:%ld, M1:%ld, vT[%ld]:%ld, bound(d0):%ld\n",
-            ZX_size(gel(G1, itk)), Q_size(d0), Q_size(M1), itk,
-            ZX_size(gel(vT, itk)), bound_d0(d, f));
-      }
-      else
-      {
-        if (DEBUGLEVEL == 2)
-          err_printf("G1:%ld, G2:%ld\n",
-            ZX_size(gel(G1, itk)),ZX_size(gel(G2, itk)));
-        gel(G1, itk) = ZX_chinese_center(gel(G1, itk), M1, gel(G2, itk), M2);
-      }
-    }
-    if (n_k==n_T) break;
-    M1 = mulii(M1, M2);
-  }
-  if (DEBUGLEVEL >= 6) timer_printf(&ti, "get_vT_new");
-  return vT;
 }
 
 /* return sorted kT={i_t[k] | 1<=k<=d}
@@ -878,7 +818,7 @@ FpX_factcyclo_newton_general(GEN Data)
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
   d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
-  vT = get_vT(Data2);
+  vT = get_vT(Data2, 0);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
@@ -1057,7 +997,7 @@ newton_general_new_pre3(GEN Data)
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
   d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, miTk));
-  vT = get_vT_new(Data2);
+  vT = get_vT(Data2, 1);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
@@ -1602,7 +1542,7 @@ Flx_factcyclo_newton_general(GEN Data)
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
   d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
-  vT = get_vT(Data2);
+  vT = get_vT(Data2, 0);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
