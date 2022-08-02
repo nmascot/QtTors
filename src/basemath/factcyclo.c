@@ -306,7 +306,7 @@ mk_v_t_el(GEN vT, GEN Data, ulong el)
 /* G=[[G_1,...,G_d],M,el]
  * Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]] */
 static GEN
-get_vG(GEN vT, GEN Data, ulong *pel, long n_el)
+get_vG(GEN vT, GEN Data, long n_el, ulong *pel, GEN *pM)
 {
   GEN GH = gel(Data, 2), i_t = gel(Data, 3);
   GEN d0 = gmael(Data, 4, 1), d1 = gmael(Data, 4, 2);
@@ -341,7 +341,7 @@ get_vG(GEN vT, GEN Data, ulong *pel, long n_el)
     if (!isintzero(gel(vT, itk))) continue;
     gel(G, itk) = nxV_chinese_center(gel(vPOL, itk), EL, &M);
   }
-  *pel = EL[n_el]; return mkvec2(G, M);
+  *pel = EL[n_el]; *pM = M; return G;
 }
 
 /* F=Q(zeta_n), H=<p> in (Z/nZ)^*, K<-->H, t_k=Tr_{F/K}(zeta_n^k).
@@ -369,31 +369,25 @@ get_i_t(long n, long p)
  * T_0(x)=T_n(x)=f.
  * Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]] */
 static GEN
-get_vT(GEN Data, int new)
+get_vT(GEN Data)
 {
   pari_sp av = avma;
-  GEN d0 = gmael(Data, 4, 1), kT = gel(Data, 5), N=gel(Data, 6);
+  GEN d0 = gmael(Data, 4, 1), kT = gel(Data, 5), N = gel(Data, 6);
   ulong k, n = N[1], n_T = N[4], mitk = N[5];
-  GEN vT = const_vec(mitk, gen_0); /* vT[k]!=NULL ==> vT[k]=T_k */
+  GEN G1, M1, vT = const_vec(mitk, gen_0); /* vT[k]!=NULL ==> vT[k]=T_k */
   ulong n_k = 0, el, n_el, start, second;
-  GEN G, G1, G2, M1, M2;
   pari_timer ti;
 
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   gel(vT, 1) = pol_x(0); n_k++;
   start = get_n_el(d0, &second);
   el = start_el_n(n);
-
   if (DEBUGLEVEL == 2) err_printf("get_vT: start=(%ld,%ld)\n",start,second);
-
-  G = get_vG(vT, Data,  &el, start);
-  G1 = gel(G,1); if (new) G1 = vecslice(G1, 1, mitk);
-  M1 = gel(G,2);
+  G1 = get_vG(vT, Data, start, &el, &M1);
   for (n_el = second;; n_el++)
   {
-    G = get_vG(vT, Data, &el, n_el);
-    G2 = gel(G,1); if (new) G2 = vecslice(G2, 1, mitk);
-    M2 = gel(G,2);
+    GEN G2, M2;
+    G2 = get_vG(vT, Data, n_el, &el, &M2);
     for (k=1; k<=n_T; k++)
     {
       long itk = kT[k];
@@ -823,7 +817,7 @@ FpX_factcyclo_newton_general(GEN Data)
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
   d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
-  vT = get_vT(Data2, 0);
+  vT = get_vT(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
@@ -1002,7 +996,7 @@ newton_general_new_pre3(GEN Data)
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
   d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, miTk));
-  vT = get_vT(Data2, 1);
+  vT = get_vT(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
@@ -1547,7 +1541,7 @@ Flx_factcyclo_newton_general(GEN Data)
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
   d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
-  vT = get_vT(Data2, 0);
+  vT = get_vT(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
