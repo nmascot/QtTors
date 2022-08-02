@@ -1541,11 +1541,9 @@ FpX_factcyclo_just_conductor_init(GEN *pData, ulong n, GEN p, ulong m)
 {
   GEN fn = factoru(n), GH = NULL, GHgen = NULL;
   long phin = eulerphiu_fact(fn), pmodn = umodiu(p, n);
-  long d = Fl_order(pmodn, phin, n), f = phin/d;
+  long d = Fl_order(pmodn, phin, n), f = phin/d; /* d > 1 */
   GEN action = set_action(fn, p, d, f);
-
-  if (d == 1);
-  else if (action[GENERAL])
+  if (action[GENERAL])
   {
     GEN H = znstar_generate(n, mkvecsmall(pmodn));
     GH = znstar_cosets(n, phin, H); /* representatives of G/H */
@@ -1576,10 +1574,7 @@ static GEN
 FpX_factcyclo_just_conductor(ulong n, GEN p, ulong m)
 {
   GEN Data, action = FpX_factcyclo_just_conductor_init(&Data, n, p, m);
-  long d = umael(Data, 5, 2);
-  if (d == 1) /* may occur. f==1 is already handled in FpX_factcyclo */
-    return FpX_split(n, p, m);
-  else if (action[GENERAL])
+  if (action[GENERAL])
     return FpX_factcyclo_gen(gel(Data,2), n, p, m);
   else if (action[NEWTON_POWER])
   {
@@ -1603,12 +1598,13 @@ FpX_factcyclo_i(ulong n, GEN p, ulong m)
 
   if (DEBUGLEVEL >= 1) header(fn, n, d, f, p);
   if (m != 1) m = f;
-  if (f == 1)
-    retmkvec(FpX_polcyclo(n, p));
-  else if (d == 1)  /* p=1 (mod n), zeta_n in Z_p */
-    return FpX_split(n, p, m);
+  if (f == 1) retmkvec(FpX_polcyclo(n, p));
+  else if (d == 1) return FpX_split(n, p, m); /* p=1 (mod n), zeta_n in Z_p */
   fK = znstar_conductor(znstar_generate(n, mkvecsmall(pmodn)));
-  z = FpX_factcyclo_just_conductor(fK, p, m);
+  if (fK != n && umodiu(p, fK) == 1)
+    z = FpX_split(fK, p, m);
+  else
+    z = FpX_factcyclo_just_conductor(fK, p, m);
   if (n > fK)
   {
     ulong i;
@@ -2078,10 +2074,7 @@ static GEN
 Flx_factcyclo_just_conductor(ulong n, ulong p, ulong m)
 {
   GEN Data, action = FpX_factcyclo_just_conductor_init(&Data, n, utoipos(p), m);
-  long d = umael(Data, 5, 2);
-  if (d == 1) /* may occur. f==1 is already handled in Flx_factcyclo */
-    return Flx_split(n, p, m);
-  else if (action[GENERAL])
+  if (action[GENERAL])
     return Flx_factcyclo_gen(gel(Data,2), n, p, m);
   else if (action[NEWTON_POWER])
   {
@@ -2105,12 +2098,13 @@ Flx_factcyclo_i(ulong n, ulong p, ulong m)
 
   if (DEBUGLEVEL >= 1) header(fn, n, d, f, utoi(p));
   if (m != 1) m = f;
-  if (f == 1)
-    retmkvec(Flx_polcyclo(n, p));
-  else if (d == 1)  /* p=1 (mod n), zeta_n in Z_p */
-    return Flx_split(n, p, m);
+  if (f == 1) retmkvec(Flx_polcyclo(n, p));
+  if (d == 1) return Flx_split(n, p, m); /* p=1 (mod n), zeta_n in Z_p */
   fK = znstar_conductor(znstar_generate(n, mkvecsmall(pmodn)));
-  z = Flx_factcyclo_just_conductor(fK, p, m);
+  if (fK != n && p % fK == 1)
+    z = Flx_split(fK, p, m);
+  else
+    z = Flx_factcyclo_just_conductor(fK, p, m);
   if (n > fK)
   {
     ulong i;
