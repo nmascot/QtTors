@@ -197,21 +197,19 @@ get_G(GEN H, GEN d0, GEN d1, GEN N, ulong el, long  k)
 }
 
 static long
-size_rat(GEN z)
+Q_size(GEN z)
 {
-  if (typ(z)==t_FRAC)
-    return maxss(lgefint(gel(z, 1))-2, lgefint(gel(z, 2))-2);
-  else return lgefint(z)-2;
+  if (typ(z)==t_INT) return lgefint(z) - 2;
+  return maxss(lgefint(gel(z,1)), lgefint(gel(z,2))) - 2;
 }
-
 /* return max log_a(|x[i]|), a=2^(BITS_IN_LONG-1) */
 static long
-size_pol(GEN x)
+ZX_size(GEN x)
 {
   long i, l = lg(x), max = 0;
   for (i = 2; i < l; i++)
   {
-    long y = size_rat(absi(gel(x, i)));
+    long y = lgefint(gel(x,i)) - 2;
     if (y > max) max = y;
   }
   return max;
@@ -256,7 +254,7 @@ gausspol(GEN T, GEN H, GEN N, ulong d, ulong f, ulong g)
     G2 = gel(G, 1); M2 = gel(G, 2); el = itou(gel(G, 3));
     if (FpX_degsub(G1, G2, M2) < 0) break;  /* G1 = G2 (mod M2) */
     if (DEBUGLEVEL == 2)
-      err_printf("G1:%ld, G2:%ld\n",size_pol(G1), size_pol(G2));
+      err_printf("G1:%ld, G2:%ld\n",ZX_size(G1), ZX_size(G2));
     if (DEBUGLEVEL >= 6) timer_start(&ti);
     G2 = ZX_chinese_center(G1, M1, G2, M2); M2 = mulii(M1, M2);
     if (DEBUGLEVEL >= 6) timer_printf(&ti, "ZX_chinese_center");
@@ -265,7 +263,7 @@ gausspol(GEN T, GEN H, GEN N, ulong d, ulong f, ulong g)
   F = RgX_Rg_div(G1, d0);
   if (DEBUGLEVEL == 2)
     err_printf("G1:%ld, d0:%ld, M1:%ld, F:%ld\n",
-               size_pol(G1), size_rat(d0), size_rat(M1), size_pol(F));
+               ZX_size(G1), Q_size(d0), Q_size(M1), ZX_size(F));
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "gausspol");
   return F;
 }
@@ -442,13 +440,13 @@ get_vT(GEN Data)
         n_k++;
         if (DEBUGLEVEL == 2)
           err_printf("G1:%ld, d0:%ld, M1:%ld, vT[%ld]:%ld words\n",
-            size_pol(gel(G1, itk)), size_rat(d0), size_rat(M1), itk, size_pol(gel(vT, itk)));
+            ZX_size(gel(G1, itk)), Q_size(d0), Q_size(M1), itk, ZX_size(gel(vT, itk)));
       }
       else
       {
         if (DEBUGLEVEL == 2)
           err_printf("G1:%ld, G2:%ld\n",
-                  size_pol(gel(G1, itk)), size_pol(gel(G2, itk)));
+                  ZX_size(gel(G1, itk)), ZX_size(gel(G2, itk)));
         gel(G1, itk) = ZX_chinese_center(gel(G1, itk), M1, gel(G2, itk), M2);
       }
     }
@@ -492,14 +490,14 @@ get_vT_new(GEN Data)
         n_k++;
         if (DEBUGLEVEL == 2)
           err_printf("G1:%ld, d0:%ld, M1:%ld, vT[%ld]:%ld, bound(d0):%ld\n",
-            size_pol(gel(G1, itk)), size_rat(d0), size_rat(M1), itk,
-            size_pol(gel(vT, itk)), bound_d0(d, f));
+            ZX_size(gel(G1, itk)), Q_size(d0), Q_size(M1), itk,
+            ZX_size(gel(vT, itk)), bound_d0(d, f));
       }
       else
       {
         if (DEBUGLEVEL == 2)
           err_printf("G1:%ld, G2:%ld\n",
-            size_pol(gel(G1, itk)),size_pol(gel(G2, itk)));
+            ZX_size(gel(G1, itk)),ZX_size(gel(G2, itk)));
         gel(G1, itk) = ZX_chinese_center(gel(G1, itk), M1, gel(G2, itk), M2);
       }
     }
