@@ -111,14 +111,21 @@ ZX_chinese_center(GEN x1, GEN p1, GEN x2, GEN p2)
   return x;
 }
 
-/* find prime el s.t. el=1 (mod n) and el does not divide d(T) */
-static ulong
-next_el_n(ulong el, ulong n, GEN d1)
+/* find n_el primes el such that el=1 (mod n) and el does not divide d(T) */
+static GEN
+list_el_n(ulong el0, ulong n, GEN d1, long n_el)
 {
+  GEN v = cgetg(n_el + 1, t_VECSMALL);
   forprime_t T;
-  u_forprime_arith_init(&T, el+n, ULONG_MAX, 1, n);
-  do el = u_forprime_next(&T); while (dvdiu(d1, el));
-  return el;
+  long i;
+  u_forprime_arith_init(&T, el0+n, ULONG_MAX, 1, n);
+  for (i = 1; i <= n_el; i++)
+  {
+    ulong el;
+    do el = u_forprime_next(&T); while (dvdiu(d1, el));
+    v[i] = el;
+  }
+  return v;
 }
 
 /* return min el s.t. 2^63<el and el=1 (mod n). */
@@ -127,7 +134,7 @@ start_el_n(ulong n)
 {
   ulong MAXHLONG = 1L<<(BITS_IN_LONG-1), el = (MAXHLONG/n)*n + 1;
   if ((el&1)==0) el += n; /* if el is even, then n is odd */
-  return el + n + n;
+  return el + (n << 1);
 }
 
 /* start probably catches d0*T_k(x). So small second is enough. */
@@ -176,24 +183,24 @@ gausspol_el(GEN H, ulong n, ulong d, ulong f, ulong g, ulong el)
 }
 
 static GEN
-get_G(GEN H, GEN d0, GEN d1, GEN N, ulong el, long  k)
+get_G(GEN H, GEN d0, GEN d1, GEN N, ulong el0, long  k)
 {
   long n = N[1], d = N[2], f = N[3], g = N[4], i;
-  GEN POL = cgetg(1+k, t_VEC), EL = cgetg(1+k, t_VECSMALL), G, M, x;
+  GEN POL = cgetg(1+k, t_VEC), EL, G, M, x;
   pari_timer ti;
 
   if (DEBUGLEVEL >= 6) timer_start(&ti);
+  EL = list_el_n(el0, n, d1, k);
   for (i = 1; i <= k; i++)
   {
-    el = next_el_n(el, n, d1);
+    ulong el = uel(EL,i);
     x = gausspol_el(H, n, d, f, g, el);
     gel(POL, i) = Flx_Fl_mul(x, umodiu(d0, el), el);
-    EL[i] = el;
   }
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "get_G : make data k=%ld",k);
   G = nxV_chinese_center(POL, EL, &M);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "get_G : nxV_chinese_center k=%ld",k);
-  retmkvec3(G, M, utoi(el));
+  retmkvec3(G, M, utoi(EL[k]));
 }
 
 static long
@@ -299,24 +306,22 @@ mk_v_t_el(GEN vT, GEN Data, ulong el)
 /* G=[[G_1,...,G_d],M,el]
  * Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]] */
 static GEN
-get_vG(GEN vT, GEN Data, ulong el, long n_el)
+get_vG(GEN vT, GEN Data, ulong el0, long n_el)
 {
   GEN GH = gel(Data, 2), i_t = gel(Data, 3);
   GEN d0 = gmael(Data, 4, 1), d1 = gmael(Data, 4, 2);
   GEN kT = gel(Data, 5), N = gel(Data, 6);
   long n = N[1], f = N[3], n_T = N[4], mitk = N[5];
   GEN G = const_vec(mitk, gen_0), vPOL = cgetg(1+mitk, t_VEC);
-  GEN EL = cgetg(1+n_el, t_VECSMALL), M, X, v_t_el;
+  GEN EL, M, X, v_t_el;
   GEN L = cgetg(1+f, t_VECSMALL), x = cgetg(1+f, t_VECSMALL);
   long i, j, k;
 
   for (k=1; k<=mitk; k++) gel(vPOL, k) = cgetg(1+n_el, t_VEC);
+  EL = list_el_n(el0, n, d1, n_el);
   for (i=1; i<=n_el; i++)
   {
-    long d0model;
-    el = next_el_n(el, n, d1);
-    d0model = umodiu(d0, el);
-    EL[i] = el;
+    ulong el = uel(EL,i), d0model = umodiu(d0, el);
     v_t_el = mk_v_t_el(vT, Data, el);
     for (j = 1; j <= f; j++) L[j] = v_t_el[i_t[GH[j]]];
     X = Flv_invVandermonde(L, 1, el);
@@ -336,7 +341,7 @@ get_vG(GEN vT, GEN Data, ulong el, long n_el)
     if (!isintzero(gel(vT, itk))) continue;
     gel(G, itk) = nxV_chinese_center(gel(vPOL, itk), EL, &M);
   }
-  return mkvec3(G, M, utoi(el));
+  return mkvec3(G, M, utoi(EL[n_el]));
 }
 
 /* F=Q(zeta_n), H=<p> in (Z/nZ)^*, K<-->H, t_k=Tr_{F/K}(zeta_n^k).
