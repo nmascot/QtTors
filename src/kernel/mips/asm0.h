@@ -20,6 +20,27 @@ NOASM addll bfffo divll
 #define LOCAL_HIREMAINDER  ulong hiremainder
 #define LOCAL_OVERFLOW     ulong overflow
 
+#if defined(__mips_isa_rev) && __mips_isa_rev >= 6
+#define mulll(a, b)                                         \
+__extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b); \
+ __asm__ ("muhu %0,%2,%3\n\tmulu %1,%2,%3"                  \
+   : "=&r" (__value), "=&r" (hiremainder)                   \
+   : "r" (__arg1), "r" (__arg2)                             \
+   : );                                                     \
+ __value;                                                   \
+})
+
+#define addmul(a, b)                                                    \
+__extension__ ({                                                        \
+  ulong __arg1 = (a), __arg2 = (b), __value, __tmp;                     \
+  __asm__ ("muhu %0,%3,%4\n\tmulu %2,%3,%4\n\t"                      \
+           "addu %1,%2,%5\n\tsltu %2,%1,%5\n\taddu %0,%0,%2"            \
+           : "=&r" (hiremainder), "=&r" (__value), "=&r" (__tmp)        \
+           : "r" (__arg1), "r" (__arg2), "r" (hiremainder)              \
+           : "hi", "lo");                                               \
+  __value;                                                              \
+})
+#else
 #define mulll(a, b)                                         \
 __extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b); \
  __asm__ ("multu %2,%3\n\tmfhi %1"                          \
@@ -39,5 +60,6 @@ __extension__ ({                                                        \
            : "hi", "lo");                                               \
   __value;                                                              \
 })
+#endif
 
 #endif
