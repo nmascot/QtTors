@@ -1589,16 +1589,9 @@ FpX_factcyclo_i(ulong n, GEN p, long fl)
   ulong d = Fl_order(pmodn, phin, n), f = phin/d, fK;
 
   if (DEBUGLEVEL >= 1) header(fn, n, d, f, p);
-  if (f == 1)
-  {
-    z = FpX_polcyclo(n, p);
-    return fl? z: mkvec(z);
-  }
-  else if (d == 1)
-  {
-    z = FpX_split(n, p, fl? 1: f);
-    return fl? gel(z,1): z; /* p=1 (mod n), zeta_n in Z_p */
-  }
+  if (f == 1) { z = FpX_polcyclo(n, p); return fl? z: mkvec(z); }
+  else if (d == 1) /* p=1 (mod n), zeta_n in Z_p */
+  { z = FpX_split(n, p, fl? 1: f); return fl? gel(z,1): z; }
   fK = znstar_conductor(znstar_generate(n, mkvecsmall(pmodn)));
   if (fK != n && umodiu(p, fK) == 1)
     z = FpX_split(fK, p, fl? 1: f);
@@ -1611,7 +1604,7 @@ FpX_factcyclo_i(ulong n, GEN p, long fl)
     for (i = 1; i < l; i++)
       gel(z, i) = FpX_conductor_lift(gel(z, i), p, n, fK, vP);
   }
-  return fl ? gel(z,1): gen_sort(z,(void*)cmpii, &gen_cmp_RgX);
+  return fl? gel(z,1): gen_sort(z,(void*)cmpii, &gen_cmp_RgX);
 }
 
 GEN
@@ -2097,16 +2090,9 @@ Flx_factcyclo_i(ulong n, ulong p, ulong fl)
   ulong d = Fl_order(pmodn, phin, n), f = phin/d, fK;
 
   if (DEBUGLEVEL >= 1) header(fn, n, d, f, utoi(p));
-  if (f == 1)
-  {
-    z = Flx_polcyclo(n, p);
-    return fl? z: mkvec(z);
-  }
-  if (d == 1)
-  { /* p=1 (mod n), zeta_n in Z_p */
-    z = Flx_split(n, p, fl? 1: f);
-    return fl? gel(z,1): z;
-  }
+  if (f == 1) { z = Flx_polcyclo(n, p); return fl? z: mkvec(z); }
+  if (d == 1) /* p=1 (mod n), zeta_n in Z_p */
+  { z = Flx_split(n, p, fl? 1: f); return fl? gel(z,1): z; }
   fK = znstar_conductor(znstar_generate(n, mkvecsmall(pmodn)));
   if (fK != n && p % fK == 1)
     z = Flx_split(fK, p, fl? 1: f);
@@ -2119,7 +2105,7 @@ Flx_factcyclo_i(ulong n, ulong p, ulong fl)
     for (i = 1; i < l; i++)
       gel(z, i) = Flx_conductor_lift(gel(z, i), p, n, fK, vP);
   }
-  return fl ? gel(z,1): gen_sort(z,(void*)cmpGuGu, &gen_cmp_RgX);
+  return fl? gel(z,1): gen_sort(z,(void*)cmpGuGu, &gen_cmp_RgX);
 }
 
 GEN
