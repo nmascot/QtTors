@@ -836,9 +836,8 @@ set_action(GEN fa, GEN p, long d, long f)
 
   for (i = 1; i < l; i++)
   {
-    long x;
-    long el = EL[i], e = E[i];
-    long ni = upowuu(el, e), phini = (el==2)?(1<<(e-1)):(el-1)*upowuu(el, e-1);
+    long x, el = EL[i], e = E[i], ni = upowuu(el, e);
+    long phini = (el==2)?(1<<(e-1)):(el-1)*upowuu(el, e-1);
     long di = Fl_order(umodiu(p, ni), phini, ni), fi = phini/di;
     D[i] = di; F[i] = fi;
     d0 *= di; f0 *= fi;
@@ -892,8 +891,7 @@ set_action(GEN fa, GEN p, long d, long f)
   }
   if (DEBUGLEVEL == 4) err_printf("(d0,f0)=(%ld,%ld)\n",d0,f0);
   if (DEBUGLEVEL == 4) err_printf("(m0,m1)=(%lu,%lu) %ld\n",m0,m1,m0<=m1);
-  action[ASCENT] = (m0 <= m1);
-  return action;
+  action[ASCENT] = (m0 <= m1); return action;
 }
 
 /*  Data = [H, GH, i_t, d0, kT, [n, d, f, n_T, mitk]]
@@ -1520,51 +1518,74 @@ get_GH_gen(long n, long pmodn)
   return mkvec2(gGH, cycGH);
 }
 
+/* 1st output */
 static void
-header(GEN fn, long n, long d, long f, GEN p, GEN action, GEN GHgen, long flag)
+header(GEN fn, long n, long d, long f, GEN p)
 {
   GEN EL = gel(fn, 1), E = gel(fn, 2);
   long i, l = lg(EL)-1;
-  if (flag==0) /* 1st output */
+  err_printf("n=%lu=", n);
+  for(i = 1; i <= l; i++)
   {
-    err_printf("n=%lu=",n);
-    for(i = 1; i <= l; i++)
-    {
-      long el = EL[i], e = E[i];
-      err_printf("%ld",el);
-      if (e > 1) err_printf("^%ld",e);
-      if (i < l) err_printf("*");
-    }
-    err_printf(", p=%Ps, phi(%lu)=%lu*%lu\n", p, n, d, f);
-    err_printf("(n,d,f) : (%ld,%ld,%ld) --> ",n,d,f);
+    long el = EL[i], e = E[i];
+    err_printf("%ld", el);
+    if (e > 1) err_printf("^%ld", e);
+    if (i < l) err_printf("*");
   }
-  else /* 2nd output */
+  err_printf(", p=%Ps, phi(%lu)=%lu*%lu\n", p, n, d, f);
+  err_printf("(n,d,f) : (%ld,%ld,%ld) --> ",n,d,f);
+}
+
+static GEN
+FpX_factcyclo_just_conductor_init(GEN *pData, ulong n, GEN p, ulong m)
+{
+  GEN fn = factoru(n), GH = NULL, GHgen = NULL;
+  long phin = eulerphiu_fact(fn), pmodn = umodiu(p, n);
+  long d = Fl_order(pmodn, phin, n), f = phin/d;
+  GEN action = set_action(fn, p, d, f);
+
+  if (d == 1);
+  else if (action[GENERAL])
   {
-    GEN cycGH = zv_to_ZV(gel(GHgen, 2)), gGH = zv_to_ZV(gel(GHgen, 1));
+    GEN H = znstar_generate(n, mkvecsmall(pmodn));
+    GH = znstar_cosets(n, phin, H); /* representatives of G/H */
+    if (action[NEWTON_GENERAL_NEW] || action[NEWTON_GENERAL])
+      GHgen = get_GH_gen(n, pmodn);  /* gen and order of G/H */
+  }
+  else if (action[NEWTON_POWER]);
+  else if (action[NEWTON_GENERAL_NEW] || action[NEWTON_GENERAL])
+  {
+    GEN H = znstar_generate(n, mkvecsmall(pmodn));
+    GH = znstar_cosets(n, phin, H); /* representatives of G/H */
+    GHgen = get_GH_gen(n, pmodn);  /* gen and order of G/H */
+  }
+  *pData = mkvec5(GHgen, GH, fn, p, mkvecsmall4(n, d, f, m));
+  if (DEBUGLEVEL >= 1)
+  {
     err_printf("(%ld,%ld,%ld)  action=%Ps\n", n, d, f, zv_to_ZV(action));
-    err_printf("G(K/Q)=%Ps gen=%Ps\n", cycGH, gGH);
+    if (GHgen)
+    {
+      GEN cycGH = gel(GHgen,2), gGH = gel(GHgen,1);
+      err_printf("G(K/Q)=%Ps gen=%Ps\n", zv_to_ZV(cycGH), zv_to_ZV(gGH));
+    }
   }
+  return action;
 }
 
 static GEN
 FpX_factcyclo_just_conductor(ulong n, GEN p, ulong m)
 {
-  GEN fn = factoru(n), EL = gel(fn, 1), E = gel(fn, 2);
-  long phin = eulerphiu_fact(fn), pmodn = umodiu(p, n);
-  long d = Fl_order(pmodn, phin, n), f = phin/d;
-  GEN H = znstar_generate(n, mkvecsmall(pmodn));
-  GEN GH = znstar_cosets(n, phin, H); /* representatives of G/H */
-  GEN GHgen = get_GH_gen(n, pmodn);  /* gen and order of G/H */
-  GEN action = set_action(fn, p, d, f);
-  GEN Data = mkvec5(GHgen, GH, fn, p, mkvecsmall4(n, d, f, m));
-
-  if (DEBUGLEVEL >= 1) header(fn, n, d, f, p, action, GHgen, 1);
+  GEN Data, action = FpX_factcyclo_just_conductor_init(&Data, n, p, m);
+  long d = umael(Data, 5, 2);
   if (d == 1) /* may occur. f==1 is already handled in FpX_factcyclo */
     return FpX_split(n, p, m);
   else if (action[GENERAL])
-    return FpX_factcyclo_gen(GH, n, p, m);
+    return FpX_factcyclo_gen(gel(Data,2), n, p, m);
   else if (action[NEWTON_POWER])
-    return FpX_factcyclo_prime_power_i(EL[1], E[1], p, m);
+  {
+    GEN fn = gel(Data,3);
+    return FpX_factcyclo_prime_power_i(ucoeff(fn,1,1), ucoeff(fn,1,2), p, m);
+  }
   else if (action[NEWTON_GENERAL])
     return FpX_factcyclo_newton_general(Data);
   else if (action[NEWTON_GENERAL_NEW])
@@ -1580,7 +1601,7 @@ FpX_factcyclo_i(ulong n, GEN p, ulong m)
   long phin = eulerphiu_fact(fn), pmodn = umodiu(p, n);
   ulong d = Fl_order(pmodn, phin, n), f = phin/d, fK;
 
-  if (DEBUGLEVEL >= 1) header(fn, n, d, f, p, NULL, NULL, 0);
+  if (DEBUGLEVEL >= 1) header(fn, n, d, f, p);
   if (m != 1) m = f;
   if (f == 1)
     retmkvec(FpX_polcyclo(n, p));
@@ -1986,7 +2007,7 @@ cmpGuGu(GEN a, GEN b) { return (ulong)a < (ulong)b? -1: (a == b? 0: 1); }
 
 /* p=1 (mod n). If m!=1, then m=phi(n) */
 static GEN
-Flx_split(ulong n, ulong phin, ulong p, ulong m)
+Flx_split(ulong n, ulong p, ulong m)
 {
   ulong i;
   GEN v = cgetg(1+m, t_VEC);
@@ -2010,7 +2031,7 @@ Flx_factcyclo_prime_power_i(long el, long e, long p, long m)
   long d = z[6], f = z[7]; /* d and f for n=el^e0 */
 
   if (f == 1) v = mkvec(Flx_polcyclo(n, p));
-  else if (d == 1) v = Flx_split(n, phin, p, (m==1)?1:f);
+  else if (d == 1) v = Flx_split(n, p, (m==1)?1:f);
   else if (el == 2) v = Flx_factcyclo_gen(NULL, n, p, m);/* d==2 in this case */
   else
   {
@@ -2056,22 +2077,17 @@ Flx_factcyclo_fact(ulong n, ulong p, ulong m, GEN gen)
 static GEN
 Flx_factcyclo_just_conductor(ulong n, ulong p, ulong m)
 {
-  GEN fn = factoru(n), EL = gel(fn, 1), E = gel(fn, 2);
-  ulong phin = eulerphiu_fact(fn), pmodn = p%n;
-  ulong d = Fl_order(pmodn, phin, n), f = phin/d;
-  GEN H = znstar_generate(n, mkvecsmall(pmodn));
-  GEN GH = znstar_cosets(n, phin, H); /* representatives of G/H */
-  GEN GHgen = get_GH_gen(n, pmodn); /* gen and order of G/H */
-  GEN action = set_action(fn, utoi(p), d, f);
-  GEN Data = mkvec5(GHgen, GH, fn, utoi(p), mkvecsmall4(n, d, f, m));
-
-  if (DEBUGLEVEL >= 1) header(fn, n, d, f, utoi(p), action, GHgen, 1);
+  GEN Data, action = FpX_factcyclo_just_conductor_init(&Data, n, utoipos(p), m);
+  long d = umael(Data, 5, 2);
   if (d == 1) /* may occur. f==1 is already handled in Flx_factcyclo */
-    return Flx_split(n, phin, p, m);
+    return Flx_split(n, p, m);
   else if (action[GENERAL])
-    return Flx_factcyclo_gen(GH, n, p, m);
+    return Flx_factcyclo_gen(gel(Data,2), n, p, m);
   else if (action[NEWTON_POWER])
-    return Flx_factcyclo_prime_power_i(EL[1], E[1], p, m);
+  {
+    GEN fn = gel(Data,3);
+    return Flx_factcyclo_prime_power_i(ucoeff(fn,1,1), ucoeff(fn,1,2), p, m);
+  }
   else if (action[NEWTON_GENERAL])
     return Flx_factcyclo_newton_general(Data);
   else if (action[NEWTON_GENERAL_NEW])
@@ -2087,12 +2103,12 @@ Flx_factcyclo_i(ulong n, ulong p, ulong m)
   ulong phin = eulerphiu_fact(fn), pmodn = p%n;
   ulong d = Fl_order(pmodn, phin, n), f = phin/d, fK;
 
-  if (DEBUGLEVEL >= 1) header(fn, n, d, f, utoi(p), NULL, NULL, 0);
+  if (DEBUGLEVEL >= 1) header(fn, n, d, f, utoi(p));
   if (m != 1) m = f;
   if (f == 1)
     retmkvec(Flx_polcyclo(n, p));
   else if (d == 1)  /* p=1 (mod n), zeta_n in Z_p */
-    return Flx_split(n, phin, p, m);
+    return Flx_split(n, p, m);
   fK = znstar_conductor(znstar_generate(n, mkvecsmall(pmodn)));
   z = Flx_factcyclo_just_conductor(fK, p, m);
   if (n > fK)
