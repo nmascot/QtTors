@@ -235,7 +235,7 @@ bound_d0(long d, long f)
 }
 
 static GEN
-gausspol(GEN T, GEN H, GEN N, GEN p, ulong d, ulong f, ulong g)
+gausspol(GEN T, GEN H, GEN N, ulong d, ulong f, ulong g)
 {
   long n = N[1], el0 = N[2];
   GEN F, G1, G2, M1, M2, G, d0, d1, dT = absi(ZX_disc(T)), Data;
@@ -1411,7 +1411,7 @@ FpX_factcyclo_newton_power(GEN N, GEN p, ulong m)
   for (pu = p; cmpiu(pu,d) <= 0; u++) pu = mulii(pu,p);  /* d<p^u, pu=p^u */
   H = Fl_powers(pmodn, d, n);
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
-  F = gausspol(T, H, N, p, d, nf, g);
+  F = gausspol(T, H, N, d, nf, g);
   r = QX_den_pval(F, p);
   Rs = ZpX_roots_all(T, p, nf, &s);
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
@@ -1970,7 +1970,7 @@ Flx_factcyclo_newton_power(GEN N, ulong p, ulong m)
   for (pu = p0; cmpiu(pu,d) <= 0; u++) pu = muliu(pu,p);  /* d<p^u, pu=p^u */
   H = Fl_powers(pmodn, d, n);
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
-  F = gausspol(T, H, N, p0, d, nf, g);
+  F = gausspol(T, H, N, d, nf, g);
   r = QX_den_pval(F, p0);
   Rs = ZpX_roots_all(T, p0, nf, &s);
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
