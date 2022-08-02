@@ -136,7 +136,7 @@ FpX_roots(GEN f, GEN p)
     else
     {
       if (!odd(pp)) pari_err_PRIME("FpX_roots", p);
-      y = Flx_roots_pre(f, pp, 0);
+      y = Flx_roots_pre(f, pp, SMALL_ULONG(pp)? 0: get_Fl_red(pp));
     }
     y = Flc_to_ZC(y);
   }
@@ -1509,13 +1509,15 @@ GEN
 Flx_roots(GEN f, ulong p)
 {
   pari_sp av = avma;
+  ulong pi;
   switch(lg(f))
   {
     case 2: pari_err_ROOTS0("Flx_roots");
     case 3: set_avma(av); return cgetg(1, t_VECSMALL);
   }
   if (p == 2) return Flx_root_mod_2(f);
-  return gerepileuptoleaf(av, Flx_roots_pre(f, p, 0));
+  pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  return gerepileuptoleaf(av, Flx_roots_pre(f, p, pi));
 }
 
 /* assume x reduced mod p, monic. */
