@@ -6,8 +6,8 @@ Help: factormodcyclo(n, p, {m=0}, {v='x}): factor n-th cyclotomic polynomial mod
 Doc: Factors $n$-th cyclotomic polynomial $\Phi_n(x)$ mod $p$,
  where $p$ is a prime number not dividing $n$.
  Faster than \kbd{factormod(polcyclo(n), p)}.
- If $m=1$, then gives just one irreducible factor.
- If $m\ne 1$, then gives all irreducible factors.
+ If $m=1$, return just one irreducible factor.
+ If $m=0$, return all the irreducible factors.
  Note that repeated calls of this function may return different results
  because it uses a function returning random values.
  Algorithms used are as follows.

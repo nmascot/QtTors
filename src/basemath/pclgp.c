@@ -602,9 +602,9 @@ static GEN
 FpX_one_cyclo(long n, GEN p)
 {
   if (lgefint(p)==3)
-    return Flx_to_ZX(gel(Flx_factcyclo(n, p[2], 1), 1));
+    return Flx_to_ZX(Flx_factcyclo(n, p[2], 1));
   else
-    return gel(FpX_factcyclo(n, p, 1), 1);
+    return FpX_factcyclo(n, p, 1);
 }
 
 static void

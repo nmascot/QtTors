@@ -1582,33 +1582,41 @@ FpX_factcyclo_just_conductor(ulong n, GEN p, ulong m)
 }
 
 static GEN
-FpX_factcyclo_i(ulong n, GEN p, ulong m)
+FpX_factcyclo_i(ulong n, GEN p, long fl)
 {
   GEN fn = factoru(n), z;
   long phin = eulerphiu_fact(fn), pmodn = umodiu(p, n);
   ulong d = Fl_order(pmodn, phin, n), f = phin/d, fK;
 
   if (DEBUGLEVEL >= 1) header(fn, n, d, f, p);
-  if (m != 1) m = f;
-  if (f == 1) retmkvec(FpX_polcyclo(n, p));
-  else if (d == 1) return FpX_split(n, p, m); /* p=1 (mod n), zeta_n in Z_p */
+  if (f == 1)
+  {
+    z = FpX_polcyclo(n, p);
+    return fl? z: mkvec(z);
+  }
+  else if (d == 1)
+  {
+    z = FpX_split(n, p, fl? 1: f);
+    return fl? gel(z,1): z; /* p=1 (mod n), zeta_n in Z_p */
+  }
   fK = znstar_conductor(znstar_generate(n, mkvecsmall(pmodn)));
   if (fK != n && umodiu(p, fK) == 1)
-    z = FpX_split(fK, p, m);
+    z = FpX_split(fK, p, fl? 1: f);
   else
-    z = FpX_factcyclo_just_conductor(fK, p, m);
+    z = FpX_factcyclo_just_conductor(fK, p, fl? 1: f);
   if (n > fK)
   {
-    ulong i;
+    ulong i, l = lg(z);
     GEN vP = const_vec(n, gen_0);
-    for (i = 1; i <= m; i++)
+    for (i = 1; i < l; i++)
       gel(z, i) = FpX_conductor_lift(gel(z, i), p, n, fK, vP);
   }
-  return gen_sort(z,(void*)cmpii, &gen_cmp_RgX);
+  return fl ? gel(z,1): gen_sort(z,(void*)cmpii, &gen_cmp_RgX);
 }
+
 GEN
 FpX_factcyclo(ulong n, GEN p, ulong m)
-{ pari_sp av = avma; return gerepileupto(av, FpX_factcyclo_i(n, p, m)); }
+{ pari_sp av = avma; return gerepilecopy(av, FpX_factcyclo_i(n, p, m)); }
 
 /*  Data = [H, GH, i_t, d0, kT, [n, d, f, n_T, mitk]]
  *  Data2 = [vT, polcyclo_n, [p, pr, pu, pru]] */
@@ -2082,50 +2090,70 @@ Flx_factcyclo_just_conductor(ulong n, ulong p, ulong m)
 }
 
 static GEN
-Flx_factcyclo_i(ulong n, ulong p, ulong m)
+Flx_factcyclo_i(ulong n, ulong p, ulong fl)
 {
   GEN fn = factoru(n), z;
   ulong phin = eulerphiu_fact(fn), pmodn = p%n;
   ulong d = Fl_order(pmodn, phin, n), f = phin/d, fK;
 
   if (DEBUGLEVEL >= 1) header(fn, n, d, f, utoi(p));
-  if (m != 1) m = f;
-  if (f == 1) retmkvec(Flx_polcyclo(n, p));
-  if (d == 1) return Flx_split(n, p, m); /* p=1 (mod n), zeta_n in Z_p */
+  if (f == 1)
+  {
+    z = Flx_polcyclo(n, p);
+    return fl? z: mkvec(z);
+  }
+  if (d == 1)
+  { /* p=1 (mod n), zeta_n in Z_p */
+    z = Flx_split(n, p, fl? 1: f);
+    return fl? gel(z,1): z;
+  }
   fK = znstar_conductor(znstar_generate(n, mkvecsmall(pmodn)));
   if (fK != n && p % fK == 1)
-    z = Flx_split(fK, p, m);
+    z = Flx_split(fK, p, fl? 1: f);
   else
-    z = Flx_factcyclo_just_conductor(fK, p, m);
+    z = Flx_factcyclo_just_conductor(fK, p, fl? 1: f);
   if (n > fK)
   {
-    ulong i;
+    long i, l = lg(z);
     GEN vP = const_vec(n, gen_0);
-    for (i = 1; i <= m; i++)
+    for (i = 1; i < l; i++)
       gel(z, i) = Flx_conductor_lift(gel(z, i), p, n, fK, vP);
   }
-  return gen_sort(z,(void*)cmpGuGu, &gen_cmp_RgX);
+  return fl ? gel(z,1): gen_sort(z,(void*)cmpGuGu, &gen_cmp_RgX);
 }
-GEN
-Flx_factcyclo(ulong n, ulong p, ulong m)
-{ pari_sp av = avma; return gerepileupto(av, Flx_factcyclo_i(n, p, m)); }
 
 GEN
-factormodcyclo(long n, GEN p, long m, long v)
+Flx_factcyclo(ulong n, ulong p, ulong m)
+{ pari_sp av = avma; return gerepilecopy(av, Flx_factcyclo_i(n, p, m)); }
+
+GEN
+factormodcyclo(long n, GEN p, long fl, long v)
 {
   const char *fun = "factormodcyclo";
   pari_sp av = avma;
   long i, l;
   GEN z;
   if (v < 0) v = 0;
+  if (fl < 0 || fl > 1) pari_err_FLAG(fun);
   if (n <= 0) pari_err_DOMAIN(fun, "n", "<=", gen_0, stoi(n));
   if (typ(p) != t_INT) pari_err_TYPE(fun, p);
-  if (!BPSW_psp(p)) pari_err_PRIME(fun, p);
   if (dvdui(n, p)) pari_err_COPRIME(fun, stoi(n), p);
-  if (lgefint(p) == 3)
-    z = FlxC_to_ZXC(Flx_factcyclo_i(n, p[2], m));
+  if (fl)
+  {
+    if (lgefint(p) == 3)
+      z = Flx_to_ZX(Flx_factcyclo_i(n, p[2], 1));
+    else
+      z = FpX_factcyclo_i(n, p, 1);
+    setvarn(z, v);
+    return gerepileupto(av, FpX_to_mod(z, p));
+  }
   else
-    z = FpX_factcyclo_i(n, p, m);
-  l = lg(z); for (i = 1; i < l; i++) setvarn(gel(z, i), v);
-  return gerepileupto(av, FpXC_to_mod(z, p));
+  {
+    if (lgefint(p) == 3)
+      z = FlxC_to_ZXC(Flx_factcyclo_i(n, p[2], 0));
+    else
+      z = FpX_factcyclo_i(n, p, 0);
+    l = lg(z); for (i = 1; i < l; i++) setvarn(gel(z, i), v);
+    return gerepileupto(av, FpXC_to_mod(z, p));
+  }
 }
