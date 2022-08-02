@@ -348,49 +348,6 @@ get_vG(GEN vT, GEN Data, ulong el, long n_el)
   return mkvec3(G, M, utoi(el));
 }
 
-/* G=[[G_1,...,G_d],M,el]
- * Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]] */
-static GEN
-get_vG_new(GEN vT, GEN Data, long el, long n_el)
-{
-  GEN GH = gel(Data, 2), i_t = gel(Data, 3);
-  GEN d0 = gmael(Data, 4, 1), d1 = gmael(Data, 4, 2);
-  GEN kT = gel(Data, 5), N = gel(Data, 6);
-  long n = N[1], f = N[3], n_T = N[4], mitk = N[5];
-  GEN G = const_vec(mitk, gen_0), vPOL = cgetg(1+mitk, t_VEC);
-  GEN EL = cgetg(1+n_el, t_VECSMALL), M, X, v_t_el;
-  GEN L = cgetg(1+f, t_VECSMALL), x = cgetg(1+f, t_VECSMALL);
-  long i, j, k;
-
-  for (k=1; k<=mitk; k++) gel(vPOL, k) = cgetg(1+n_el, t_VEC);
-  for (i=1; i<=n_el; i++)
-  {
-    long d0model;
-    el = next_el_n(el, n, d1);
-    d0model = umodiu(d0, el);
-    EL[i] = el;
-    v_t_el = mk_v_t_el(vT, Data, el);
-    for (j = 1; j <= f; j++) L[j] = v_t_el[i_t[GH[j]]];
-    X = Flv_invVandermonde(L, 1, el);
-    for (k = 1; k <= n_T; k++)
-    {
-      GEN y;
-      long itk = kT[k];
-      if (!isintzero(gel(vT, itk))) continue;
-      for (j = 1; j <= f; j++) x[j] = v_t_el[i_t[Fl_mul(itk, GH[j], n)]];
-      y = Flv_to_Flx(Flm_Flc_mul(X, x, el), 0);
-      gmael(vPOL, itk, i) = Flx_Fl_mul(y, d0model, el);
-    }
-  }
-  for (k = 1; k <= n_T; k++)
-  {
-    long itk = kT[k];
-    if (!isintzero(gel(vT, itk))) continue;
-    gel(G, itk) = nxV_chinese_center(gel(vPOL, itk), EL, &M);
-  }
-  return mkvec3(G, M, utoi(el));
-}
-
 /* F=Q(zeta_n), H=<p> in (Z/nZ)^*, K<-->H, t_k=Tr_{F/K}(zeta_n^k).
  * i_t[i]==k ==> iH=kH, i.e. t_i==t_k. We use t_k instead of t_i.
  * the number of k << the number of i. */
@@ -485,11 +442,11 @@ get_vT_new(GEN Data)
 
   if (DEBUGLEVEL == 2) err_printf("get_vT_new: start=(%ld,%ld)\n",start,second);
 
-  G = get_vG_new(vT, Data,  el, start);
+  G = get_vG(vT, Data,  el, start);
   G1 = gel(G, 1); M1 = gel(G, 2); el = itou(gel(G, 3));
   for (n_el = second; n_el; n_el++)
   {
-    G = get_vG_new(vT, Data, el, n_el);
+    G = get_vG(vT, Data, el, n_el);
     G2 = gel(G, 1); M2 = gel(G, 2); el = itou(gel(G, 3));
     for (k = 1; k <= n_T; k++)
     {
