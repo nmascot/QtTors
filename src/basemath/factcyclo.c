@@ -232,7 +232,7 @@ gausspol(GEN T, GEN H, GEN N, ulong d, ulong f, ulong g)
   ulong el, n_el, start, second;
   pari_timer ti;
 
-  if (odd(Z_lval(dT, el0)&1))
+  if (odd(Z_lval(dT, el0)))
   {
     d0 = diviuexact(dT, el0);
     d1 = muliu(dT, el0);
