@@ -1802,6 +1802,12 @@ GEN
 ZV_sort_uniq(GEN L) { return gen_sort_uniq(L, (void*)&cmpii, &cmp_nodata); }
 void
 ZV_sort_inplace(GEN L) { gen_sort_inplace(L, (void*)&cmpii, &cmp_nodata,NULL); }
+GEN
+ZV_sort_uniq_i(GEN L)
+{
+  GEN v = gen_indexsort_uniq(L, (void*)&cmpii, &cmp_nodata);
+  return vecpermute(L, v);
+}
 
 GEN
 vec_equiv(GEN F)

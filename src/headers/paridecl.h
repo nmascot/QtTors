@@ -2751,6 +2751,7 @@ long    ZV_search(GEN x, GEN y);
 GEN     ZV_sort(GEN L);
 void    ZV_sort_inplace(GEN L);
 GEN     ZV_sort_uniq(GEN L);
+GEN     ZV_sort_uniq_i(GEN L);
 GEN     ZV_union_shallow(GEN x, GEN y);
 GEN     binomial(GEN x, long k);
 GEN     binomial0(GEN x, GEN k);

@@ -579,29 +579,47 @@ get_kTdiv(GEN kT, long n)
 /* T is separable over Zp but not separable over Fp.
  * receive all roots mod p^s and return all roots mod p^(s+1) */
 static GEN
-ZpX_roots_nonsep(GEN T, GEN R0, GEN p, long s)
+ZpX_roots_nonsep(GEN T, GEN R0, GEN p, GEN ps, GEN ps1)
 {
   long i, j, n = 0, lr = lg(R0);
-  GEN ps = powiu(p, s), ps1 = mulii(ps, p), v = cgetg(lr, t_VEC), R;
-  for (i=1; i<lr; i++)
+  GEN v = cgetg(lr, t_VEC), R;
+  for (i = 1; i < lr; i++)
   {
     GEN z, f = ZX_unscale_div(ZX_translate(T, gel(R0, i)), ps);
     (void)ZX_pvalrem(f, p, &f);
-    z = FpX_roots(f, p);
-    gel(v, i) = z;
+    gel(v, i) = z = FpX_roots(f, p);
     n += lg(z)-1;
   }
   R = cgetg(n+1, t_VEC); n = 0;
-  for (i=1; i<lr; i++)
+  for (i = 1; i < lr; i++)
   {
     GEN z = gel(v, i);
     long lz = lg(z);
     for (j=1; j<lz; j++)
       gel(R, ++n) = Fp_add(gel(R0, i), mulii(gel(z, j), ps), ps1);
   }
-  return ZV_sort_uniq(R);
+  return ZV_sort_uniq_i(R);
 }
+static GEN
+ZpX_roots_all(GEN T, GEN p, long f, long *ptrs)
+{
+  pari_sp av = avma;
+  pari_timer ti;
+  GEN v, ps, ps1;
+  long s;
 
+  if (DEBUGLEVEL >= 6) timer_start(&ti);
+  v = FpX_roots(T, p); /* FpX_roots returns sorted roots */
+  if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_roots, deg=%ld", degpol(T));
+  ps = NULL; ps1 = p;
+  for (s = 1; lg(v) != f+1; s++)
+  {
+    ps = ps1; ps1 = mulii(ps1, p); /* p^s, p^(s+1) */
+    v = ZpX_roots_nonsep(T, v, p, ps, ps1);
+    if (gc_needed(av, 1)) gerepileall(av, 3, &v, &ps, &ps1);
+  }
+  *ptrs = s; return v;
+}
 /* x : roots of T in Zp. r < n.
  * receive vec of x mod p^r and return vec of x mod p^n.
  * under the assumtion lg(v)-1==degpol(T), x is uniquely determined by
@@ -931,10 +949,7 @@ FpX_factcyclo_newton_general(GEN Data)
   vT = get_vT(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
-  if (DEBUGLEVEL >= 6) timer_start(&ti);
-  Rs = FpX_roots(T, p); /* FpX_roots returns sorted roots */
-  if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_roots, deg=%ld", degpol(T));
-  for (s = 1; lg(Rs)!=f+1; s++) Rs = ZpX_roots_nonsep(T, Rs, p, s);
+  Rs = ZpX_roots_all(T, p, f, &s);
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
   if (r+u<s) pari_err_BUG("FpX_factcyclo_newton_general (T(x) is not separable mod p^(r+u))");
   /* R and vT are mod p^(r+u) */
@@ -1084,7 +1099,6 @@ static GEN
 /* Data = [GHgen, GH, fn, p, [n, d, f, m]] */
 newton_general_new_pre3(GEN Data)
 {
-  pari_sp av = avma;
   GEN gGH = gel(Data, 1), GH = gel(Data, 2), fn = gel(Data, 3);
   GEN p = gel(Data, 4);
   long n = mael(Data, 5, 1), d = mael(Data, 5, 2), f = mael(Data, 5, 3);
@@ -1114,16 +1128,7 @@ newton_general_new_pre3(GEN Data)
   vT = get_vT_new(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
-  if (DEBUGLEVEL >= 6) timer_start(&ti);
-  Rs = FpX_roots(T, p); /* FpX_roots returns sorted roots */
-  if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_roots, deg=%ld", degpol(T));
-  av = avma;
-  for (s = 1; lg(Rs) != f+1; s++)
-  {
-    Rs = ZpX_roots_nonsep(T, Rs, p, s);
-    if (gc_needed(av, 1))
-      Rs = gerepileupto(av, Rs);
-  }
+  Rs = ZpX_roots_all(T, p, f, &s);
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
   if (s < u)
   {
@@ -1411,7 +1416,6 @@ FpX_factcyclo_newton_power(GEN N, GEN p, ulong m)
   long pmodn = umodiu(p, n), pmodel = umodiu(p, el);
   long d = Fl_order(pmodel, el-1, el), nf = phin/d;
   long r, s = 0, u = 1;
-  pari_timer ti;
 
   if (m != 1) m = nf;
   for (pu = p; cmpiu(pu,d) <= 0; u++) pu = mulii(pu,p);  /* d<p^u, pu=p^u */
@@ -1419,10 +1423,7 @@ FpX_factcyclo_newton_power(GEN N, GEN p, ulong m)
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
   F = gausspol(T, H, N, p, d, nf, g);
   r = QX_den_pval(F, p);
-  if (DEBUGLEVEL >= 6) timer_start(&ti);
-  Rs = FpX_roots(T, p); /* FpX_roots returns sorted roots */
-  if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_roots, deg=%ld", degpol(T));
-  for (s = 1; lg(Rs)!=nf+1; s++) Rs = ZpX_roots_nonsep(T, Rs, p, s);
+  Rs = ZpX_roots_all(T, p, nf, &s);
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
   pr = powiu(p, r); prs = powiu(p, r+s); /* Usually, r=0, s=1, pr=1, prs=p */
   F = r ? RgX_to_FpX(RgX_Rg_mul(F, pr), prs) : RgX_to_FpX(F, prs);
@@ -1651,10 +1652,7 @@ Flx_factcyclo_newton_general(GEN Data)
   vT = get_vT(Data2);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
-  if (DEBUGLEVEL >= 6) timer_start(&ti);
-  Rs = FpX_roots(T, p); /* FpX_roots returns sorted roots */
-  if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_roots, deg=%ld", degpol(T));
-  for (s = 1; lg(Rs)!=f+1; s++) Rs = ZpX_roots_nonsep(T, Rs, p, s);
+  Rs = ZpX_roots_all(T, p, f, &s);
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
   if (r+u < s) pari_err_BUG("Flx_factcyclo_newton_general, T(x) is not separable mod p^(r+u)");
   /* R and vT are mod p^(r+u) */
@@ -1955,7 +1953,6 @@ Flx_factcyclo_newton_power(GEN N, ulong p, ulong m)
   long pmodn = p%n, pmodel = p%el;
   long d = Fl_order(pmodel, el-1, el), nf = phin/d;
   long r, s = 0, u = 1;
-  pari_timer ti;
 
   /* n=el^e, e0<=e, phin=phi(el^e0),
    * order of p in (Z/el)^* = order of p in (Z/el^e0)^* */
@@ -1965,10 +1962,7 @@ Flx_factcyclo_newton_power(GEN N, ulong p, ulong m)
   T = galoissubcyclo(utoi(n), utoi(pmodn), 0, 0);
   F = gausspol(T, H, N, p0, d, nf, g);
   r = QX_den_pval(F, p0);
-  if (DEBUGLEVEL >= 6) timer_start(&ti);
-  Rs = FpX_roots(T, p0); /* FpX_roots returns sorted roots */
-  if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_roots, deg=%ld", degpol(T));
-  for (s = 1; lg(Rs) != nf+1; s++) Rs = ZpX_roots_nonsep(T, Rs, p0, s);
+  Rs = ZpX_roots_all(T, p0, nf, &s);
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
   pr = powuu(p, r);
   prs = powuu(p, r+s); /* Usually, r=0, s=1, pr=1, prs=p */
