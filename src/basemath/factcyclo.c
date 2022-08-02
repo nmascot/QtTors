@@ -220,8 +220,8 @@ ZX_size(GEN x)
 static long
 bound_d0(long d, long f)
 {
-  long x = f*(f-1)*log2((double)2*d)/(2*BITS_IN_LONG);
-  return x;
+  double F = (double)f;
+  return (long) F * (F-1) * log2((double)2*d) / (2*BITS_IN_LONG);
 }
 
 static GEN
