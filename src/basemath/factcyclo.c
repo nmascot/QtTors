@@ -1720,8 +1720,8 @@ static GEN
 Flx_factcyclo_newton_general_new3(GEN Data)
 {
   GEN p = gel(Data, 4), Data2, pu, pols;
-  long n = mael(Data, 5, 1), f = mael(Data, 5, 3), m = mael(Data, 5, 4);
-  ulong i, up = p[2];
+  long i, n = mael(Data, 5, 1), f = mael(Data, 5, 3), m = mael(Data, 5, 4);
+  ulong up = p[2];
   pari_timer ti;
 
   if (m != 1) m = f;
