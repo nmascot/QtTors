@@ -937,7 +937,7 @@ newton_general_new_pre3(GEN Data)
   long n = mael(Data, 5, 1), d = mael(Data, 5, 2), f = mael(Data, 5, 3);
   long pmodn = umodiu(p, n);
   long k, n_t, n_T, mitk, miTk, r, s = 0, u = 1;
-  GEN vT, kt, kT, H, i_t, T, d0d1, Data2, Data3, Rs, Rrs, kTdiv;
+  GEN vT, kt, kT, H, i_t, T, d0d1, Data2, Rs, Rrs, kTdiv;
   GEN pr, pu, prs;
   pari_timer ti;
 
@@ -976,11 +976,9 @@ newton_general_new_pre3(GEN Data)
     for(k = 1; k <= n_T; k++)
     {
       long itk = kT[k];
-      gel(vT, itk) = r ? RgX_to_FpX(RgX_Rg_mul(gel(vT, itk), pr), prs):
-                         RgX_to_FpX(gel(vT, itk), prs);
+      GEN z = r? RgX_Rg_mul(gel(vT, itk), pr): gel(vT, itk);
+      gel(vT, itk) = RgX_to_FpX(z, prs);
     }
-    Data3 = mkvecn(12, vT, gGH, Rs, Rrs, i_t, kt, p, pu, pr, prs,
-                   mkvecsmalln(6, n, r, s, n_t, mitk, d), kTdiv);
   }
   else  /* p^(r+s) < ULONG_MAX, frequently occur */
   {
@@ -988,14 +986,13 @@ newton_general_new_pre3(GEN Data)
     for (k = 1; k <= n_T; k++)
     {
       long itk = kT[k];
-      gel(vT, itk) = r ? RgX_to_Flx(RgX_muls(gel(vT, itk), upr), uprs):
-                         RgX_to_Flx(gel(vT, itk), uprs);
+      GEN z = r? RgX_muls(gel(vT, itk), upr): gel(vT, itk);
+      gel(vT, itk) = RgX_to_Flx(z, uprs);
     }
     Rs = ZV_to_nv(Rs); Rrs = ZV_to_nv(Rrs);
-    Data3 = mkvecn(12, vT, gGH, Rs, Rrs, i_t, kt, p, pu, pr, prs,
-                   mkvecsmalln(6, n, r, s, n_t, mitk, d), kTdiv);
   }
-  return Data3;
+  return mkvecn(12, vT, gGH, Rs, Rrs, i_t, kt, p, pu, pr, prs,
+                mkvecsmalln(6, n, r, s, n_t, mitk, d), kTdiv);
 }
 
 /* Data=[vT, gGH, Rs, Rrs, i_t, kt, p, pu, pr, prs,
@@ -1085,9 +1082,8 @@ FpX_conductor_lift(GEN z, GEN p, ulong n, ulong e, GEN vP)
 
 /* R0 is mod p^u, d < p^u */
 static GEN
-FpX_pol_newton(long j, GEN Data, GEN N, long d, long f, GEN p)
+FpX_pol_newton(long j, GEN R0, GEN E, GEN D3, long d, long f, GEN p)
 {
-  GEN R0 = gel(Data, 1), E = gel(Data, 2), D3 = gel(Data, 3);
   long i, u = D3[3];
   GEN S = cgetg(2+d, t_VEC), R = cgetg(1+f, t_VEC), pu = powiu(p, u);
 
@@ -1100,7 +1096,6 @@ FpX_pol_newton(long j, GEN Data, GEN N, long d, long f, GEN p)
 static GEN
 FpX_factcyclo_newton_pre(GEN Data, GEN N, GEN p, ulong m)
 {
-  pari_sp av = avma;
   GEN T = gel(Data, 1), F = gel(Data, 2), Rs = gel(Data, 3), D4 = gel(Data, 4);
   long d = D4[1], nf = D4[2], g = D4[3], r = D4[4], s = D4[5], u = D4[6];
   GEN pols, E, R, Data3;
@@ -1111,11 +1106,11 @@ FpX_factcyclo_newton_pre(GEN Data, GEN N, GEN p, ulong m)
   pols = cgetg(1+m, t_VEC);
   E = set_E(pmodn, n, d, nf, g);
   R = set_R(T, F, Rs, p, nf, r, s, u);
-  Data3 = mkvec3(R, E, mkvecsmall3(r, s, u));
+  Data3 = mkvecsmall3(r, s, u);
   if (DEBUGLEVEL >= 6) timer_start(&ti);
-  for (i = 1; i <= m; i++) gel(pols, i) = FpX_pol_newton(i, Data3, N, d, nf, p);
+  for (i = 1; i <= m; i++) gel(pols, i) = FpX_pol_newton(i, R,E,Data3, d,nf,p);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_pol_newton");
-  return gerepilecopy(av, pols);
+  return pols;
 }
 
 /* gcd(n1,n2)=1, e = gcd(d1,d2).
@@ -1620,10 +1615,9 @@ Flx_conductor_lift(GEN z, ulong p, ulong n, ulong e, GEN vP)
 
 /* R0 is mod p^u, d < p^u */
 static GEN
-Flx_pol_newton(long j, GEN Data, GEN N, long d, long f, ulong p)
+Flx_pol_newton(long j, GEN R0, GEN E, GEN D3, long d, long f, ulong p)
 {
   long i;
-  GEN R0 = gel(Data, 1), E = gel(Data, 2), D3 = gel(Data, 3);
   ulong u = D3[3], pu = upowuu(p, u);
   GEN S = cgetg(2+d, t_VECSMALL), R = cgetg(1+f, t_VECSMALL);
 
@@ -1647,9 +1641,9 @@ Flx_factcyclo_newton_pre(GEN Data, GEN N, ulong p, ulong m)
   E = set_E(pmodn, n, d, nf, g);
   R = set_R(T, F, Rs, p0, nf, r, s, u);
   R = ZV_to_nv(R);
-  Data3 = mkvec3(R, E, mkvecsmall3(r, s, u));
+  Data3 = mkvecsmall3(r, s, u);
   if (DEBUGLEVEL >= 6) timer_start(&ti);
-  for (i = 1; i <= m; i++) gel(pols, i) = Flx_pol_newton(i, Data3, N, d, nf, p);
+  for (i = 1; i <= m; i++) gel(pols, i) = Flx_pol_newton(i, R,E,Data3, d,nf,p);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "Flx_pol_newton");
   return pols;
 }
