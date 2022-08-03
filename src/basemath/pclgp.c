@@ -3176,11 +3176,12 @@ gauss_ZX_mul(ulong f, GEN elg, GEN ellg)
   el = elg[1]; g_el = elg[2]; el_1 = el-1;
   f2 = f<<1; lv=el_1; lu=f; m=el_1/f;
   z_2f = Fp_pow(g_ell, diviuexact(ell_1, f2), ell);
+  av2 = avma;
+  vz_2f = Fp_powers(z_2f, f2-1, ell);
   z_el = Fp_pow(g_ell, diviuexact(ell_1, el), ell);
   W = cgetg(f+1, t_VEC);
   u = cgetg(lu+2, t_POL); u[1] = evalsigne(1) | evalvarn(0);
   v = cgetg(lv+2, t_POL); v[1] = evalsigne(1) | evalvarn(0);
-  vz_2f = Fp_powers(z_2f, f2-1, ell);
   vz_el = Fp_powers(z_el, el_1, ell);
   for (gi=1,i=i2=0; i<lu; i++)
   {
@@ -3195,7 +3196,7 @@ gauss_ZX_mul(ulong f, GEN elg, GEN ellg)
     gi = Fl_mul(gi, g_el, el);
     if ((i2+=i+i+1)>=f2) i2%=f2;
   }
-  w0 = FpX_mul(u, v, ell) + 1; av2 = avma;
+  w0 = gerepileupto(av, FpX_mul(u, v, ell)) + 1; av2 = avma;
   if (m==1)
   {
     for (i=1; i < f; i++) gel(W,i) = Fp_add(gel(w0, i), gel(w0, i+lv), ell);

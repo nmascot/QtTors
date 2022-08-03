@@ -116,7 +116,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
 
  \bprog
  ? subcyclopclgp(22220, 11)
- time = 86 ms.
+ time = 83 ms.
  %2 = [11, [2, [1, 1]], [16, []], [100, 20, 2, 2], 479, 1799]
  @eprog\noindent
  This computes the 11-part $A_F$ for the same $F$. The result says that
@@ -126,7 +126,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
 
  \bprog
  ? subcyclopclgp(22220, 11, 1)
- time = 186 ms.
+ time = 185 ms.
  %3 = [11, [2, [1, 1]], [16, [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
  [100, 20, 2, 2], 479, 1799]
  @eprog\noindent now guarantees that $A^+_F$ is isomorphic to $(\Z/11\Z)^2$
@@ -139,13 +139,13 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  \bprog
  ? T = polcompositum(x^2-36322, polcyclo(5), 2);
  ? subcyclopclgp(T, 5) \\ fast when non rigorous for A^+
- time = 85 ms.
+ time = 82 ms.
  %4 = [5, [1, [1]], [4, []], [4, 2], 5, 7]
- \\ try to certify; requires about 2.5GB of memory
+ \\ try to certify; requires about 2GB of memory
  ? subcyclopclgp(T, 5, 1)
  *** subcyclopclgp: the PARI stack overflows !
-  current stack size: 2000003072 (1907.352 Mbytes)
- ? default(parisizemax,"3G");
+  current stack size: 1000003072 (1907.352 Mbytes)
+ ? default(parisizemax,"2G");
  ? subcyclopclgp(T, 5, 1) \\ with more memory, we get an answer
  time = 36,201 ms.
  %6 = [5, [1, [1]], [4, [3, 1]], [4, 2], 5, 7]
@@ -165,8 +165,8 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  ? subcyclopclgp(T, 3)
  time = 123 ms.
  %2 = [3, [1, [1]], [4, []], [4, 2], 5, 5]
- ? subcyclopclgp(T, 3, 1) \\ requires a stack of 15GB
- time = 4min, 46,833 ms.
+ ? subcyclopclgp(T, 3, 1) \\ requires a stack of 8GB
+ time = 5min, 4,232 ms.
  %3 = [3, [1, [1]], [4, [1, 1, 1, 1]], [4, 2], 5, 5]
  ? subcyclopclgp(T, 3, 1+16);
  time = 7min, 15,164 ms. \\ works with 8GB, but slower
