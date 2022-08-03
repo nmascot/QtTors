@@ -346,7 +346,7 @@ get_vG(GEN vT, GEN Data, long n_el, ulong *pel, GEN *pM)
 }
 
 /* F=Q(zeta_n), H=<p> in (Z/nZ)^*, K<-->H, t_k=Tr_{F/K}(zeta_n^k).
- * i_t[i]==k ==> iH=kH, i.e. t_i==t_k. We use t_k instead of t_i.
+ * i_t[i]=k ==> iH=kH, i.e. t_i=t_k. We use t_k instead of t_i:
  * the number of k << the number of i. */
 static GEN
 get_i_t(long n, long p)
@@ -360,8 +360,7 @@ get_i_t(long n, long p)
     while (a < n && v_t[a]) a++;
     if (a==n) break;
     b = a;
-    do { v_t[b] = 1; i_t[b] = a; b = Fl_mul(b, p, n); }
-    while (b != a);
+    do { v_t[b] = 1; i_t[b] = a; b = Fl_mul(b, p, n); } while (b != a);
   }
   return i_t;
 }
@@ -420,18 +419,15 @@ get_vT(GEN Data, int new)
  * {T_k(x) | k in kT} are all the different T_k(x) (1<=k<=d) */
 static GEN
 get_kT(GEN i_t, long d)
-{
-  return vecsmall_uniq(vecsmall_shorten(i_t, d));
-}
+{ return vecsmall_uniq(vecsmall_shorten(i_t, d)); }
 
 static GEN
 get_kT_all(GEN GH, GEN i_t, long n, long d, long m)
 {
   long i, j, k = 0;
   GEN x = const_vecsmall(d*m, 0);
-  for(i=1; i<=m; i++)
-    for(j=1; j<=d; j++)
-      x[++k] = i_t[Fl_mul(GH[i], j, n)];
+  for (i = 1; i <= m; i++)
+    for (j = 1; j <= d; j++) x[++k] = i_t[Fl_mul(GH[i], j, n)];
   return vecsmall_uniq(x);
 }
 
@@ -444,7 +440,7 @@ kT_from_kt_new(GEN gGH, GEN kt, GEN i_t, long n)
 
   for (i = 1; i < lEL; i++) x[++k] = i_t[EL[i]];
   for (i = 2; i < lkt; i++) if (n%kt[i]==0) x[++k] = kt[i];
-  return vecsmall_uniq(vecsmall_shorten(x, k));
+  setlg(x, k+1); return vecsmall_uniq(x);
 }
 
 static GEN
@@ -665,14 +661,20 @@ use_newton_general(long d, long f, long max_deg)
   else return 1;
 }
 
-static ulong
-set_action(GEN fa, GEN p, long d, long f)
+static void
+update_dfm(long *pd, long *pf, long *pm, long di, long fi)
 {
-  GEN EL = gel(fa, 1), E = gel(fa, 2);
-  long i, l = lg(EL), d0 = 1, f0 = 1, d1, f1, m0 = 0, m1 = 0;
-  long maxdeg = 1, max = 1;
-  GEN D = cgetg(l, t_VECSMALL), F = cgetg(l, t_VECSMALL);
+  long c = ugcd(*pd,di), d1 = *pd * di, f1 = *pf * fi;
+  *pd = d1 / c; *pf = c * f1; *pm += d1 * d1 * f1;
+  if (DEBUGLEVEL == 4) err_printf("(%ld,%ld), ",d1,f1);
+}
+static ulong
+set_action(GEN fn, GEN p, long d, long f)
+{
+  GEN EL = gel(fn, 1), E = gel(fn, 2);
+  long i, d0, f0, m0, m1, maxdeg, max, l = lg(EL);
   ulong action = 0;
+  GEN D = cgetg(l, t_VECSMALL), F = cgetg(l, t_VECSMALL);
 
   d += 10*(lgefint(p)-3);
   if (l == 2)
@@ -691,18 +693,17 @@ set_action(GEN fa, GEN p, long d, long f)
   else if (f <= 40) action |= NEWTON_GENERAL_NEW;
   if (action) return action;
 
+  maxdeg = max = 1;
   for (i = 1; i < l; i++)
   {
-    long x, el = EL[i], e = E[i], ni = upowuu(el, e);
-    long phini = (el-1) * upowuu(el, e-1);
-    long di = Fl_order(umodiu(p, ni), phini, ni), fi = phini/di;
-    D[i] = di; F[i] = fi;
-    d0 *= di; f0 *= fi;
-    x = ugcd(max, di); max = max*di/x;
+    long x, el = EL[i], e = E[i];
+    long q = upowuu(el, e-1), ni = q * el, phini = ni - q;
+    long di = Fl_order(umodiu(p, ni), phini, ni);
+    D[i] = di; F[i] = phini / di;
+    x = ugcd(max, di); max = max * (di / x); /* = lcm(d1,..di) */
     if (x > 1) maxdeg = max*x;
-    if (DEBUGLEVEL == 4) err_printf("(%ld,%ld), ",di,fi);
+    if (DEBUGLEVEL == 4) err_printf("(%ld,%ld), ", D[i], F[i]);
   }
-  if (DEBUGLEVEL == 4) err_printf("(d0,f0)=(%ld,%ld)\n",d0,f0);
   if (maxdeg == 1) return action;
   if((p[2] != 2 && use_newton_general(d, f, maxdeg)) ||
      (p[2] == 2 && f <= 40))  /* does not decompose n */
@@ -721,29 +722,13 @@ set_action(GEN fa, GEN p, long d, long f)
   else if (maxdeg <= 20*d) action &= ~GENERAL;
   else if (d <= 1000) action |= GENERAL;
   else action &= ~GENERAL;
-  if (l <= 3) return action;  /* n has two factors */
+  if (l < 4) return action; /* n has two factors */
 
-  d0 = f0 = 1;  /* decompose n */
-  for (i = 1; i < l; i++)
-  {
-    long di = D[i], fi = F[i];
-    long d = ulcm(d0, di), f = (d0*di*f0*fi)/d;
-    d1 = d0*di; f1 = f0*fi;
-    d0 = d; f0 = f;
-    m0 += d1*d1*f1;
-    if (DEBUGLEVEL == 4) err_printf("(%ld,%ld), ",d1,f1);
-  }
+  d0 = f0 = 1; m0 = 0;
+  for (i = 1; i < l; i++) update_dfm(&d0, &f0, &m0, D[i], F[i]);
   if (DEBUGLEVEL == 4) err_printf("(d0,f0)=(%ld,%ld)\n",d0,f0);
-  d0 = f0 = 1;
-  for (i=l-1; i>=1; i--)
-  {
-    long di = D[i], fi = F[i];
-    long d = ulcm(d0, di), f = (d0*di*f0*fi)/d;
-    d1 = d0*di; f1 = f0*fi;
-    d0 = d; f0 = f;
-    m1 += d1*d1*f1;
-    if (DEBUGLEVEL == 4) err_printf("(%ld,%ld), ",d1,f1);
-  }
+  d0 = f0 = 1; m1 = 0;
+  for (i = l-1; i >= 1; i--) update_dfm(&d0, &f0, &m1, D[i], D[i]);
   if (DEBUGLEVEL == 4) err_printf("(d0,f0)=(%ld,%ld)\n",d0,f0);
   if (DEBUGLEVEL == 4) err_printf("(m0,m1)=(%lu,%lu) %ld\n",m0,m1,m0<=m1);
   if (m0 <= m1) action |= ASCENT;
@@ -797,7 +782,7 @@ FpX_factcyclo_newton_general(GEN Data)
   pari_timer ti;
 
   if (m != 1) m = f;
-  for (pu = p; cmpiu(pu,d)<=0; u++) pu = mulii(pu, p);  /* d<pu, pu=p^n */
+  for (pu = p; cmpiu(pu,d) <= 0; u++) pu = mulii(pu, p);  /* d<pu, pu=p^n */
 
   H = Fl_powers(pmodn, d-1, n); /* H=<p> */
   i_t = get_i_t(n, pmodn); /* i_t[1+i]=k ==> t_i=t_k */
@@ -813,7 +798,7 @@ FpX_factcyclo_newton_general(GEN Data)
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
   if (DEBUGLEVEL >= 2) err_printf("(u,s,r)=(%ld,%ld,%ld)\n",u,s,r);
-  if (r+u<s) pari_err_BUG("FpX_factcyclo_newton_general (T is not separable mod p^(r+u))");
+  if (r+u < s) pari_err_BUG("FpX_factcyclo_newton_general (T is not separable mod p^(r+u))");
   /* R and vT are mod p^(r+u) */
   R = (r+u==s) ? Rs : ZX_Zp_liftroots(T, Rs, p, s, r+u);
   pr = powiu(p, r); pru = powiu(p, r+u); /* Usually, r=0, s=1, pr=1, pru=p */
