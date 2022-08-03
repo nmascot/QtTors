@@ -369,7 +369,7 @@ get_i_t(long n, long p)
  * T_0(x)=T_n(x)=f.
  * Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]] */
 static GEN
-get_vT(GEN Data, int new)
+get_vT(GEN Data, int NEW)
 {
   pari_sp av = avma;
   GEN d0 = gmael(Data, 4, 1), kT = gel(Data, 5), N = gel(Data, 6);
@@ -379,7 +379,7 @@ get_vT(GEN Data, int new)
   pari_timer ti;
 
   if (DEBUGLEVEL >= 6) timer_start(&ti);
-  if (!new) { gel(vT, 1) = pol_x(0); n_k++; }
+  if (!NEW) { gel(vT, 1) = pol_x(0); n_k++; }
   start = get_n_el(d0, &second);
   el = start_el_n(n);
   if (DEBUGLEVEL == 2) err_printf("get_vT: start=(%ld,%ld)\n",start,second);
