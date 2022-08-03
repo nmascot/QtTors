@@ -93,22 +93,23 @@ set_E(long pmodn, long n, long d, long f, long g)
   return gc_const(av, E);
 }
 
+/* x1, x2 of the same degree; gcd(p1,p2) = 1, m = p1*p2, m2 = m >> 1*/
 static GEN
-ZX_chinese_center(GEN x1, GEN p1, GEN x2, GEN p2)
+ZX_chinese_center(GEN x1, GEN p1, GEN x2, GEN p2, GEN m, GEN m2)
 {
   long i, l = lg(x1);
   GEN x = cgetg(l, t_POL);
-  GEN y1, y2, q1, q2, m = mulii(p1, p2), m2 = shifti(m, -1);
-  x[1] = x1[1];
-  bezout(p1, p2, &q1, &q2);
-  y1 = Fp_mul(p2, q2, m); y2 = Fp_mul(p1, q1, m);
+  GEN y1, y2, q1, q2;
+  (void)bezout(p1, p2, &q1, &q2);
+  y1 = Fp_mul(p2, q2, m);
+  y2 = Fp_mul(p1, q1, m);
   for (i = 2; i < l; i++)
   {
     GEN y = Fp_add(mulii(gel(x1, i), y1), mulii(gel(x2, i), y2), m);
     if (cmpii(y, m2) > 0) y = subii(y, m);
     gel(x, i) = y;
   }
-  return x;
+  x[1] = x1[1]; return x;
 }
 
 /* find n_el primes el such that el=1 (mod n) and el does not divide d(T) */
@@ -183,14 +184,14 @@ gausspol_el(GEN H, ulong n, ulong d, ulong f, ulong g, ulong el)
 }
 
 static GEN
-get_G(GEN H, GEN d0, GEN d1, GEN N, ulong el0, long  k)
+get_G(GEN H, GEN d0, GEN d1, GEN N, long k, ulong *pel, GEN *pM)
 {
   long n = N[1], d = N[2], f = N[3], g = N[4], i;
   GEN POL = cgetg(1+k, t_VEC), EL, G, M, x;
   pari_timer ti;
 
   if (DEBUGLEVEL >= 6) timer_start(&ti);
-  EL = list_el_n(el0, n, d1, k);
+  EL = list_el_n(*pel, n, d1, k);
   for (i = 1; i <= k; i++)
   {
     ulong el = uel(EL,i);
@@ -200,7 +201,7 @@ get_G(GEN H, GEN d0, GEN d1, GEN N, ulong el0, long  k)
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "get_G : make data k=%ld",k);
   G = nxV_chinese_center(POL, EL, &M);
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "get_G : nxV_chinese_center k=%ld",k);
-  retmkvec3(G, M, utoi(EL[k]));
+  *pel = EL[k]; *pM = M; return G;
 }
 
 static long
@@ -243,7 +244,7 @@ static GEN
 gausspol(GEN T, GEN H, GEN N, ulong d, ulong f, ulong g)
 {
   long n = N[1], el0 = N[2];
-  GEN F, G1, G2, M1, M2, G, d0, d1, Data, d0d1 = get_d0_d1(T, mkvecsmall(el0));
+  GEN F, G1, M1, d0, d1, Data, d0d1 = get_d0_d1(T, mkvecsmall(el0));
   ulong el, n_el, start, second;
   pari_timer ti;
 
@@ -255,19 +256,19 @@ gausspol(GEN T, GEN H, GEN N, ulong d, ulong f, ulong g)
 
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   if (DEBUGLEVEL == 2) err_printf("gausspol:start=(%ld,%ld)\n",start,second);
-  G = get_G(H, d0, d1, Data, el, start);
-  G1 = gel(G, 1); M1 = gel(G, 2); el = itou(gel(G, 3));
+  G1 = get_G(H, d0, d1, Data, start, &el, &M1);
   for(n_el=second; n_el; n_el++)
   {
-    G = get_G(H, d0, d1, Data, el, n_el);
-    G2 = gel(G, 1); M2 = gel(G, 2); el = itou(gel(G, 3));
+    GEN m, G2, M2;
+    G2 = get_G(H, d0, d1, Data, n_el, &el, &M2);
     if (FpX_degsub(G1, G2, M2) < 0) break;  /* G1 = G2 (mod M2) */
     if (DEBUGLEVEL == 2)
       err_printf("G1:%ld, G2:%ld\n",ZX_size(G1), ZX_size(G2));
     if (DEBUGLEVEL >= 6) timer_start(&ti);
-    G2 = ZX_chinese_center(G1, M1, G2, M2); M2 = mulii(M1, M2);
+    m = mulii(M1, M2);
+    G2 = ZX_chinese_center(G1, M1, G2, M2, m, shifti(m,-1));
     if (DEBUGLEVEL >= 6) timer_printf(&ti, "ZX_chinese_center");
-    G1 = G2; M1 = M2;
+    G1 = G2; M1 = m;
   }
   F = RgX_Rg_div(G1, d0);
   if (DEBUGLEVEL == 2)
@@ -386,30 +387,30 @@ get_vT(GEN Data, int new)
   G1 = get_vG(vT, Data, start, &el, &M1);
   for (n_el = second;; n_el++)
   {
-    GEN G2, M2;
+    GEN G2, M2, m, m2;
     G2 = get_vG(vT, Data, n_el, &el, &M2);
-    for (k=1; k<=n_T; k++)
+    m = mulii(M1, M2); m2 = shifti(m,-1);
+    for (k = 1; k <= n_T; k++)
     {
-      long itk = kT[k];
-      if (!isintzero(gel(vT, itk))) continue;
-      if (FpX_degsub(gel(G1, itk), gel(G2, itk), M2) < 0) /* G1=G2 (mod M2) */
+      long j = kT[k];
+      if (!isintzero(gel(vT,j))) continue;
+      if (FpX_degsub(gel(G1,j), gel(G2,j), M2) < 0) /* G1=G2 (mod M2) */
       {
-        gel(vT, itk) = RgX_Rg_div(gel(G1, itk), d0);
+        gel(vT,j) = RgX_Rg_div(gel(G1,j), d0);
         n_k++;
         if (DEBUGLEVEL == 2)
           err_printf("G1:%ld, d0:%ld, M1:%ld, vT[%ld]:%ld words\n",
-            ZX_size(gel(G1, itk)), Q_size(d0), Q_size(M1), itk, ZX_size(gel(vT, itk)));
+            ZX_size(gel(G1,j)), Q_size(d0), Q_size(M1), j, ZX_size(gel(vT,j)));
       }
       else
       {
         if (DEBUGLEVEL == 2)
-          err_printf("G1:%ld, G2:%ld\n",
-                  ZX_size(gel(G1, itk)), ZX_size(gel(G2, itk)));
-        gel(G1, itk) = ZX_chinese_center(gel(G1, itk), M1, gel(G2, itk), M2);
+          err_printf("G1:%ld, G2:%ld\n", ZX_size(gel(G1,j)),ZX_size(gel(G2,j)));
+        gel(G1, j) = ZX_chinese_center(gel(G1,j),M1, gel(G2,j),M2, m,m2);
       }
     }
-    if (n_k==n_T) break;
-    M1 = mulii(M1, M2);
+    if (n_k == n_T) break;
+    M1 = m;
   }
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "get_vT");
   return gerepilecopy(av, vT);
