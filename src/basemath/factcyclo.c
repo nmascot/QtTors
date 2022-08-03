@@ -823,12 +823,10 @@ Fp_next_gen3(long x, long i, GEN v_t_p, GEN t, GEN Data)
   GEN Rrs = gel(Data, 4), i_t = gel(Data, 5);
   GEN pu = gel(Data, 8), pr = gel(Data, 9), prs = gel(Data, 10);
   GEN EL = gel(gGH, 1), E = gel(gGH, 2), div = gel(Data, 12);
-  long n = mael(Data, 11, 1), mitk = mael(Data, 11, 5);
-  long r = mael(Data, 11, 2);
+  long n = mael(Data, 11, 1), r = mael(Data, 11, 2), mitk = mael(Data, 11, 5);
   long j, k, l = lg(EL), ld = lg(div);
-
   if (i >= l) return;
-  for (j = 0; j<E[i]; j++)
+  for (j = 0; j < E[i]; j++)
   {
     if (j > 0)
     {
@@ -855,23 +853,19 @@ Fp_next_gen3(long x, long i, GEN v_t_p, GEN t, GEN Data)
           [n, r, s, n_t, mitk], div] */
 static GEN
 Fp_mk_v_t_p3(GEN Data, long i)
-{
-  /* v_t_p[k]!=gen_0 ==> v_t_p[k]=t_k mod p^u */
+{ /* v_t_p[k] != gen_0 => v_t_p[k] = t_k mod p^u */
   GEN Rs = gel(Data, 3), Rrs = gel(Data, 4);
   GEN pu = gel(Data, 8), pr = gel(Data, 9), prs = gel(Data, 10);
-  GEN vT = gel(Data, 1), i_t = gel(Data, 5);
-  GEN div = gel(Data, 12);
-  long r = mael(Data, 11, 2), mitk = mael(Data, 11, 5);
-  long k, ld = lg(div);
+  GEN vT = gel(Data, 1), i_t = gel(Data, 5), div = gel(Data, 12);
+  long k, r = mael(Data, 11, 2), mitk = mael(Data, 11, 5), ld = lg(div);
   GEN v_t_p = const_vec(mitk, gen_0);
 
   gel(v_t_p, 1) = Fp_red(gel(Rs, i), pu); /* mod p^u, guaranteed u<=s */
   Fp_next_gen3(1, 1, v_t_p, gel(Rrs, i), Data);
   for (k = 1; k<ld; k++)
   {
-    GEN x;
     ulong itk = i_t[div[k]];
-    x = FpX_eval(gel(vT, itk), gel(Rrs, i), prs);
+    GEN x = FpX_eval(gel(vT, itk), gel(Rrs, i), prs);
     if (r) x = diviiexact(x, pr); /* mod p^s */
     gel(v_t_p, itk) = Fp_red(x, pu);
   }
@@ -887,11 +881,10 @@ Fl_next_gen3(long x, long i, GEN v_t_p, ulong t, GEN Data)
   GEN Rrs = gel(Data, 4), i_t = gel(Data, 5);
   long pu = mael(Data, 8, 2), pr = mael(Data, 9, 2), prs = mael(Data, 10, 2);
   GEN EL = gel(gGH, 1), E = gel(gGH, 2), div = gel(Data, 12);
-  long n = mael(Data, 11, 1), mitk = mael(Data, 11, 5);
-  long r = mael(Data, 11, 2);
+  long n = mael(Data, 11, 1), r = mael(Data, 11, 2), mitk = mael(Data, 11, 5);
   long j, k, l = lg(EL), ld = lg(div);
   if (i >= l) return;
-  for (j = 0; j<E[i]; j++)
+  for (j = 0; j < E[i]; j++)
   {
     if (j > 0)
     {
@@ -917,24 +910,20 @@ Fl_next_gen3(long x, long i, GEN v_t_p, ulong t, GEN Data)
           [n, r, s, n_t, mitk], div] */
 static GEN
 Fl_mk_v_t_p3(GEN Data, long i)
-{
-  /* v_t_p[k]!=NULL ==> v_t_p[k]=t_k mod p^u */
+{ /* v_t_p[k] != 0 => v_t_p[k] = t_k mod p^u */
   GEN Rs = gel(Data, 3), Rrs = gel(Data, 4);
   ulong pu = mael(Data, 8, 2), pr = mael(Data, 9, 2), prs = mael(Data, 10, 2);
-  GEN vT = gel(Data, 1), i_t = gel(Data, 5);
-  GEN div = gel(Data, 12);
-  long r = mael(Data, 11, 2), mitk = mael(Data, 11, 5);
-  long k, ld = lg(div);
+  GEN vT = gel(Data, 1), i_t = gel(Data, 5), div = gel(Data, 12);
+  long k, r = mael(Data, 11, 2), mitk = mael(Data, 11, 5), ld = lg(div);
   GEN v_t_p = const_vecsmall(mitk, 0);
 
-  v_t_p[1] = Rs[i]%pu; /* mod p^u, guaranteed u<=s */
+  v_t_p[1] = Rs[i] % pu; /* mod p^u, guaranteed u<=s */
   Fl_next_gen3(1, 1, v_t_p, Rrs[i], Data);
   for (k = 1; k < ld; k++)
   {
-    ulong x, itk = i_t[div[k]];
-    x = Flx_eval(gel(vT, itk), Rrs[i], prs);
+    ulong itk = i_t[div[k]], x = Flx_eval(gel(vT, itk), Rrs[i], prs);
     if (r) x /= pr; /* mod p^s */
-    v_t_p[itk] = x%pu;
+    v_t_p[itk] = x % pu;
   }
   return v_t_p;
 }
