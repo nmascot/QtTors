@@ -750,6 +750,23 @@ set_action(GEN fa, GEN p, long d, long f)
   return action;
 }
 
+static GEN
+FpX_Newton_perm(long d, GEN R, GEN v, GEN pu, GEN p)
+{
+  GEN S = cgetg(d+2, t_VEC);
+  long k;
+  gel(S,1) = utoi(d); for(k = 1; k <= d; k++) gel(S, k+1) = gel(R, v[k]);
+  return FpX_red(FpX_fromNewton(RgV_to_RgX(S, 0), pu), p);
+}
+static GEN
+Flx_Newton_perm(long d, GEN R, GEN v, ulong pu, ulong p)
+{
+  GEN S = cgetg(d+2, t_VEC);
+  long k;
+  S[1] = d; for(k = 1; k <= d; k++) gel(S, k+1) = gel(R, v[k]);
+  return Flx_red(Flx_fromNewton(Flv_to_Flx(S, 0), pu), p);
+}
+
 /*  Data = [H, GH, i_t, d0, kT, [n, d, f, n_T, mitk]]
     N2 = [p, pr, pu, pru] */
 static GEN
@@ -758,12 +775,11 @@ FpX_pol_newton_general(GEN Data, GEN N2, GEN vT, GEN x)
   GEN i_t = gel(Data, 3), kT = gel(Data, 5), N = gel(Data, 6);
   long k, d = N[2], n_T = N[4], mitk = N[5];
   GEN p = gel(N2,1), pr = gel(N2,2), pu = gel(N2,3), pru = gel(N2,4);
-  GEN S = cgetg(2+d, t_VEC), R = cgetg(1+mitk, t_VEC);
+  GEN R = cgetg(1+mitk, t_VEC);
 
   for (k = 1; k <= n_T; k++)
     gel(R, kT[k]) = diviiexact(FpX_eval(gel(vT, kT[k]), x, pru), pr);
-  gel(S,1) = utoi(d); for(k = 1; k <= d; k++) gel(S, 1+k) = gel(R, i_t[k]);
-  return FpX_red(FpX_fromNewton(RgV_to_RgX(S, 0), pu), p);
+  return FpX_Newton_perm(d, R, i_t, pu, p);
 }
 
 /* n is any integer prime to p, but must be equal to the conductor
@@ -1002,13 +1018,10 @@ static GEN
 FpX_pol_newton_general_new3(GEN Data, long k)
 {
   GEN i_t = gel(Data, 5), p = gel(Data, 7), pu = gel(Data, 8);
-  long i, d = mael(Data, 11, 6);
-  GEN S = cgetg(2+d, t_VECSMALL), v_t_p;
-
-  v_t_p = Fp_mk_v_t_p3(Data, k);
+  long d = mael(Data, 11, 6);
+  GEN v_t_p = Fp_mk_v_t_p3(Data, k);
   if (DEBUGLEVEL == 3) err_printf("v_t_p=%Ps\n",v_t_p);
-  gel(S,1) = utoi(d); for (i = 1; i <= d; i++) gel(S,i+1) = gel(v_t_p, i_t[i]);
-  return FpX_red(FpX_fromNewton(RgV_to_RgX(S, 0), pu), p);
+  return FpX_Newton_perm(d, v_t_p, i_t, pu, p);
 }
 
 /* Data = [GHgen, GH, fn, p, [n, d, f, m]] */
@@ -1086,11 +1099,9 @@ static GEN
 FpX_pol_newton(long j, GEN R0, GEN E, GEN D3, long d, long f, GEN p)
 {
   long i, u = D3[3];
-  GEN S = cgetg(2+d, t_VEC), R = cgetg(1+f, t_VEC), pu = powiu(p, u);
-
+  GEN R = cgetg(1+f, t_VEC);
   for (i = 1; i <= f; i++) gel(R, i) = gel(R0, 1+(i+j)%f);
-  gel(S,1) = utoi(d); for (i = 1; i <= d; i++) gel(S,i+1) = gel(R, E[i]);
-  return FpX_red(FpX_fromNewton(RgV_to_RgX(S, 0), pu), p);
+  return FpX_Newton_perm(d, R, E, powiu(p, u), p);
 }
 
 /* Data = [T, F, Rs, [d, nf, g, r, s, u]], nf>1 */
@@ -1445,11 +1456,10 @@ Flx_pol_newton_general(GEN Data, GEN N2, GEN vT, ulong x)
   GEN i_t = gel(Data, 3), kT = gel(Data, 5), N = gel(Data, 6);
   long k, d = N[2], n_T = N[4], mitk = N[5];
   long p = N2[1], pr = N2[2], pu = N2[3], pru = N2[4];
-  GEN S = cgetg(2+d, t_VECSMALL), R = cgetg(1+mitk, t_VECSMALL);
+  GEN R = cgetg(1+mitk, t_VECSMALL);
 
-  for (k = 1; k <= n_T; k++) R[kT[k]] = Flx_eval(gel(vT, kT[k]), x, pru)/pr;
-  S[1] = d; for (k = 1; k <= d; k++) S[1+k] = R[i_t[k]];
-  return Flx_red(Flx_fromNewton(Flv_to_Flx(S, 0), pu), p);
+  for (k = 1; k <= n_T; k++) R[kT[k]] = Flx_eval(gel(vT, kT[k]), x, pru) / pr;
+  return Flx_Newton_perm(d, R, i_t, pu, p);
 }
 
 /* n is any integer prime to p, but must be equal to the conductor
@@ -1522,16 +1532,12 @@ Flx_factcyclo_newton_general(GEN Data)
 static GEN
 Flx_pol_newton_general_new3(GEN Data, long k)
 {
-  GEN i_t = gel(Data, 5), p = gel(Data, 7), pu = gel(Data, 8);
-  GEN prs = gel(Data, 10);
-  long i, d = mael(Data, 11, 6);
-  GEN S = cgetg(2+d, t_VECSMALL), v_t_p;
-
-  v_t_p = (lgefint(prs)>3) ? ZV_to_nv(Fp_mk_v_t_p3(Data, k))
-                           : Fl_mk_v_t_p3(Data, k);
+  GEN i_t = gel(Data,5), p = gel(Data,7), pu = gel(Data,8), prs = gel(Data,10);
+  long d = mael(Data, 11, 6);
+  GEN v_t_p = (lgefint(prs)>3)? ZV_to_nv(Fp_mk_v_t_p3(Data, k))
+                              : Fl_mk_v_t_p3(Data, k);
   if (DEBUGLEVEL == 3) err_printf("v_t_p=%Ps\n",v_t_p);
-  S[1] = d; for (i = 1; i <= d; i++) S[1+i] = v_t_p[i_t[i]];
-  return Flx_red(Flx_fromNewton(Flv_to_Flx(S, 0), pu[2]), p[2]);
+  return Flx_Newton_perm(d, v_t_p, i_t, pu[2], p[2]);
 }
 
 /* Data = [GHgen, GH, fn, p, [n, d, f, m]] */
@@ -1618,13 +1624,11 @@ Flx_conductor_lift(GEN z, ulong p, ulong n, ulong e, GEN vP)
 static GEN
 Flx_pol_newton(long j, GEN R0, GEN E, GEN D3, long d, long f, ulong p)
 {
+  ulong u = D3[3];
+  GEN R = cgetg(f+1, t_VECSMALL);
   long i;
-  ulong u = D3[3], pu = upowuu(p, u);
-  GEN S = cgetg(2+d, t_VECSMALL), R = cgetg(1+f, t_VECSMALL);
-
   for (i = 1; i <= f; i++) R[i] = R0[1+(i+j)%f];
-  S[1] = d; for (i = 1; i <= d; i++) S[1+i] = R[E[i]];
-  return Flx_red(Flx_fromNewton(Flv_to_Flx(S, 0), pu), p);
+  return Flx_Newton_perm(d, R, E, upowuu(p,u), p);
 }
 
 /* Data = [T, F, Rs, [d, nf, g, r, s, u]], nf>1 */
