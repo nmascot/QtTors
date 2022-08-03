@@ -369,7 +369,7 @@ get_i_t(long n, long p)
  * T_0(x)=T_n(x)=f.
  * Data = [H, GH, i_t, d0d1, kT, [n, d, f, n_T, mitk]] */
 static GEN
-get_vT(GEN Data)
+get_vT(GEN Data, int new)
 {
   pari_sp av = avma;
   GEN d0 = gmael(Data, 4, 1), kT = gel(Data, 5), N = gel(Data, 6);
@@ -379,7 +379,7 @@ get_vT(GEN Data)
   pari_timer ti;
 
   if (DEBUGLEVEL >= 6) timer_start(&ti);
-  gel(vT, 1) = pol_x(0); n_k++;
+  if (!new) { gel(vT, 1) = pol_x(0); n_k++; }
   start = get_n_el(d0, &second);
   el = start_el_n(n);
   if (DEBUGLEVEL == 2) err_printf("get_vT: start=(%ld,%ld)\n",start,second);
@@ -791,7 +791,7 @@ FpX_factcyclo_newton_general(GEN Data)
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
   d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
-  vT = get_vT(Data2);
+  vT = get_vT(Data2, 0);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
@@ -928,8 +928,8 @@ Fl_mk_v_t_p3(GEN Data, long i)
   return v_t_p;
 }
 
-static GEN
 /* Data = [GHgen, GH, fn, p, [n, d, f, m]] */
+static GEN
 newton_general_new_pre3(GEN Data)
 {
   GEN gGH = gel(Data, 1), GH = gel(Data, 2), fn = gel(Data, 3);
@@ -958,7 +958,7 @@ newton_general_new_pre3(GEN Data)
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
   d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, miTk));
-  vT = get_vT(Data2);
+  vT = get_vT(Data2, 1);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
@@ -1477,7 +1477,7 @@ Flx_factcyclo_newton_general(GEN Data)
   if (DEBUGLEVEL >= 6) timer_printf(&ti, "galoissubcyclo");
   d0d1 = get_d0_d1(T, gel(fn,1)); /* d0*T_k(x) is in Z[x] */
   Data2 = mkvecn(6, H, GH, i_t, d0d1, kT, mkvecsmalln(5, n, d, f, n_T, mitk));
-  vT = get_vT(Data2);
+  vT = get_vT(Data2, 0);
   if (DEBUGLEVEL == 4) err_printf("vT=%Ps\n",vT);
   r = QXV_den_pval(vT, kT, p);
   Rs = ZpX_roots_all(T, p, f, &s);
