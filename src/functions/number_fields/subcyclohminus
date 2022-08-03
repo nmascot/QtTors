@@ -85,9 +85,9 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  \bprog
  ? p=7860079; a=znprimroot(p)^(2*3^8);
  ? valuation(subcyclohminus([p,a])[1], 3)
- time = 1min, 22,536 ms.
+ time = 1min, 47,896 ms.
  %2 = 65
  ? subcyclohminus([p,a], 3)
- time = 1,295 ms.
+ time = 1,290 ms.
  %3 = 65
  @eprog\noindent

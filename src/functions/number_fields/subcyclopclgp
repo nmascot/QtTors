@@ -98,7 +98,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
 
  \bprog
  ? subcyclopclgp(22220, 101)
- time = 93 ms.
+ time = 113 ms.
  %1 = [101, [0, []], [41, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
  [100, 20, 2, 2], 479, 7999]
@@ -116,7 +116,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
 
  \bprog
  ? subcyclopclgp(22220, 11)
- time = 70 ms.
+ time = 86 ms.
  %2 = [11, [2, [1, 1]], [16, []], [100, 20, 2, 2], 479, 1799]
  @eprog\noindent
  This computes the 11-part $A_F$ for the same $F$. The result says that
@@ -126,7 +126,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
 
  \bprog
  ? subcyclopclgp(22220, 11, 1)
- time = 165 ms.
+ time = 186 ms.
  %3 = [11, [2, [1, 1]], [16, [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
  [100, 20, 2, 2], 479, 1799]
  @eprog\noindent now guarantees that $A^+_F$ is isomorphic to $(\Z/11\Z)^2$
@@ -139,7 +139,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  \bprog
  ? T = polcompositum(x^2-36322, polcyclo(5), 2);
  ? subcyclopclgp(T, 5) \\ fast when non rigorous for A^+
- time = 79 ms.
+ time = 85 ms.
  %4 = [5, [1, [1]], [4, []], [4, 2], 5, 7]
  \\ try to certify; requires about 2.5GB of memory
  ? subcyclopclgp(T, 5, 1)
@@ -147,14 +147,14 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
   current stack size: 2000003072 (1907.352 Mbytes)
  ? default(parisizemax,"3G");
  ? subcyclopclgp(T, 5, 1) \\ with more memory, we get an answer
- time = 39,028 ms.
+ time = 36,201 ms.
  %6 = [5, [1, [1]], [4, [3, 1]], [4, 2], 5, 7]
  \\ trying to reduce memory use does not work (still need 2.5GB); slower
  ? subcyclopclgp(T, 5, 1+16)
- time = 46,794 ms.
+ time = 39,450 ms.
  @eprog\noindent This shows that $A_F^+$ is isomorphic to $\Z/5\Z$ and
- $A_F^-$ is isomorphic to $\Z/5^3\Z\oplus\Z/5\Z$ for $p=5$. For this example, trying to
- reduce memory use with $\fl = 1+16$ fails: the computation becomes
+ $A_F^-$ is isomorphic to $\Z/5^3\Z\oplus\Z/5\Z$ for $p=5$. For this example,
+ trying to reduce memory use with $\fl = 1+16$ fails: the computation becomes
  slower (46,796 ms.) and still needs 2.5GB; $\fl = 1+16+32$ is a
  disaster: it bombs even with 10GB after 3 minutes of computation.
 
@@ -163,17 +163,17 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  \bprog
  ? T = polcompositum(x^2-15338, polcyclo(5), 2);
  ? subcyclopclgp(T, 3)
- time = 110 ms.
+ time = 123 ms.
  %2 = [3, [1, [1]], [4, []], [4, 2], 5, 5]
- ? subcyclopclgp(T, 3, 1) \\ requires a stack of 10GB
- time = 5min, 9,717 ms.
+ ? subcyclopclgp(T, 3, 1) \\ requires a stack of 15GB
+ time = 4min, 46,833 ms.
  %3 = [3, [1, [1]], [4, [1, 1, 1, 1]], [4, 2], 5, 5]
  ? subcyclopclgp(T, 3, 1+16);
- time = 10min, 25,967 ms. \\ works with 5GB, but twice slower
+ time = 7min, 15,164 ms. \\ works with 8GB, but slower
  ? subcyclopclgp(T, 3, 1+32);
- time = 1min, 16,810 ms. \\ also works with 5GB, 4 times faster
+ time = 1min, 11,810 ms. \\ also works with 8GB, 4 times faster
  ? subcyclopclgp(T, 3, 1+16+32);
- time = 2min, 14,969 ms. \\ now works with 2.5GB
+ time = 1min, 46,150 ms. \\ now works with 4GB
  @eprog
 
  Let $F = \Q(106)$ defined as above; namely, $F$ is the composite field
@@ -188,7 +188,7 @@ Doc: Let $F$ be the abelian number field contained in $\Q(\zeta_f)$
  time = 10 ms.
  %5 = [107, [1, [1]], [0, []], [106], 3, 105]
  ? subcyclopclgp([bnr,H], 107, 1) \\ requires 2.5GB
- time = 20min, 45,602 ms.
+ time = 15min, 13,537 ms.
  %6 = [107, [1, [1]], [0, []], [106], 3, 105]
  @eprog\noindent Both results are identical (and they were expected to be),
  but only the second is rigorous. Flag bit 32 has a minor impact in this case
