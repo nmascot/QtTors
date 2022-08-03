@@ -3250,7 +3250,9 @@ gauss_el_vell(ulong f, GEN elg, GEN vellg, GEN vz_2f)
     gi = Fl_mul(gi, g_el, el);
     if ((i2+=i+i+1)>=f2) i2%=f2;
   }
+  M = gclone(M);
   w0 = gerepileupto(av2, FpX_mul(u, v, M)) + 1;
+  u = M; M = icopy(M); gunclone(u);
   av2 = avma;
   if (m==1)
   { /* el_1=f */
