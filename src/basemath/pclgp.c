@@ -655,8 +655,9 @@ FpV_shift_add(GEN x, GEN y, GEN m, long start, long end)
   long i, j;
   for (i=start, j=1; i<=end; i++, j++)
   {
+    pari_sp av = avma;
     GEN z = addii(gel(x, i), gel(y, j));
-    gel(x, i) = (cmpii(z, m)>=0)?subii(z, m):z;
+    gel(x, i) = (cmpii(z, m) >= 0)? gerepileuptoint(av, subii(z, m)): z;
   }
   return x;
 }
@@ -668,8 +669,9 @@ FpV_shift_sub(GEN x, GEN y, GEN m, long start, long end)
   long i, j;
   for (i=start, j=1; i<=end; i++, j++)
   {
+    pari_sp av = avma;
     GEN z = subii(gel(x, i), gel(y, j));
-    gel(x, i) = (signe(z)<0)?addii(z, m):z;
+    gel(x, i) = (signe(z) < 0)? gerepileuptoint(av, addii(z, m)): z;
   }
   return x;
 }
@@ -3231,6 +3233,7 @@ gauss_el_vell(ulong f, GEN elg, GEN vellg, GEN vz_2f)
   GEN W = cgetg(f+1, t_VEC), vz_el, u, v, w0, M;
   ulong i, i2, gi;
 
+  av2 = avma;
   vz_el = vz_vell(el, vellg, &M);
   u = cgetg(lu+2, t_POL); u[1] = evalsigne(1) | evalvarn(0);
   v = cgetg(lv+2, t_POL); v[1] = evalsigne(1) | evalvarn(0);
@@ -3247,7 +3250,8 @@ gauss_el_vell(ulong f, GEN elg, GEN vellg, GEN vz_2f)
     gi = Fl_mul(gi, g_el, el);
     if ((i2+=i+i+1)>=f2) i2%=f2;
   }
-  w0 = FpX_mul(u, v, M) + 1; av2 = avma;
+  w0 = gerepileupto(av2, FpX_mul(u, v, M)) + 1;
+  av2 = avma;
   if (m==1)
   { /* el_1=f */
     for (i=1; i < f; i++) gel(W,i) = Fp_add(gel(w0, i), gel(w0, i+lv), M);
