@@ -17,7 +17,7 @@ Doc: find a real root of expression
  routine will test all $b=a\pm 2^r$, with $r\geq \log_2(|a|)$ until it finds
  a bracket for the root which satisfies the abovementioned condition.
 
- if both $a$ and $b$ are infinite, the routne will test $0$ and all $\pm 2^r$,
+ If both $a$ and $b$ are infinite, the routine will test $0$ and all $\pm 2^r$,
  $r\geq 0$, until it finds a bracket for the root which satisfies the
  condition.
 
