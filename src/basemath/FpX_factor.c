@@ -556,7 +556,7 @@ Flx_oneroot(GEN f, ulong p)
     case 3: return p;
   }
   if (p == 2) return Flx_oneroot_mod_2(f);
-  return gc_ulong(av, Flx_oneroot_pre(f, p, 0));
+  return gc_ulong(av, Flx_oneroot_pre(f, p, SMALL_ULONG(p)? 0: get_Fl_red(p)));
 }
 
 ulong
@@ -589,7 +589,7 @@ FpX_oneroot(GEN f, GEN p)
     if (pp == 2)
       r = Flx_oneroot_mod_2(f);
     else
-      r = Flx_oneroot_pre(f, pp, 0);
+      r = Flx_oneroot_pre(f, pp, SMALL_ULONG(pp)? 0: get_Fl_red(pp));
     set_avma(av);
     return (r == pp)? NULL: utoi(r);
   }
