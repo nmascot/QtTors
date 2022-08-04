@@ -1176,14 +1176,14 @@ classgp_make_pcp(double *height, long *ni, long h, long D, long D0, ulong u,
   GEN L, m, n, o, r, orient_p, orient_q, orient_reps;
   long L0, enum_cnt, GLfilter;
 
-  L = cgetg(MAX_GENS+1, t_VECSMALL);
-  m = cgetg(MAX_GENS+1, t_VECSMALL);
-  n = cgetg(MAX_GENS+1, t_VECSMALL);
-  o = cgetg(MAX_GENS+1, t_VECSMALL);
-  r = cgetg(MAX_RLEN+1, t_VECSMALL);
-  orient_p = cgetg(MAX_GENS+1, t_VECSMALL);
-  orient_q = cgetg(MAX_GENS+1, t_VECSMALL);
-  orient_reps = cgetg(MAX_GENS*MAX_GENS+1, t_VECSMALL);
+  L = zero_zv(MAX_GENS);
+  m = zero_zv(MAX_GENS);
+  n = zero_zv(MAX_GENS);
+  o = zero_zv(MAX_GENS);
+  r = zero_zv(MAX_RLEN);
+  orient_p = zero_zv(MAX_GENS);
+  orient_q = zero_zv(MAX_GENS);
+  orient_reps = zero_zv(MAX_GENS*MAX_GENS);
   G = mkvec5(mkvec5(L, n, o, m, r), mkvecsmall3(0, 0, 0),
              mkvec3(orient_p, orient_q, orient_reps),
              mkvecsmall5(h, inv, D, D0, u), mkmat2(Pu, Eu));
