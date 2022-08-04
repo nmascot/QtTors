@@ -303,7 +303,8 @@ BA  14- [libpari] gp_read_stream now return NULL when EOF is reached (was gnil)
     17- allow t_COL of objects in gconcat1 / shallowconcat1
     18- [libpari] Z_smoothen now uses (and returns) t_VEC arguments.
         Use Z_lsmoothen to input small primes as a t_VECSMALL.
-    19- polsubcyclo: faster algorithm for large conductor and small degree
+    19- poliscyclo: replace Bradford-Davenport's Graeffe method by their
+        invphi algorithm (much faster)
 BA  20- [libpari] QXX_QXQ_eval renamed to QXY_QXQ_evalx
     21- [libpari] ZX_Zp_root(f,a,p,): assume 0 <= a < p
 BA  22- [libpari] gen_factorback now take an extra parameter one.
@@ -334,8 +335,6 @@ BA  41- [libpari] pari_thread_start: do not allow threads started this way to
         launch more threads.
 BA  42- genus2red: 3rd component is now a pair [P,Q] such that y^2+Q*y=P is
         minimal everywhere.
-    43- poliscyclo: replace Bradford-Davenport's Graeffe method by their
-        invphi algorithm (much faster)
 
   Removed
      1- [libpari] obsolete functions qfi, qfr, qfi_1, qfr_1, redreal,
