@@ -2785,11 +2785,11 @@ real_MLL1(long *y, GEN K, ulong p, ulong d_pow, GEN velg, GEN vellg, ulong j0)
 }
 
 static void
-real_MLL(long *y, GEN K, long p, long d_pow, long n,
-    GEN velg, GEN vellg, GEN vG_K, long j0)
+real_MLL(long *y, GEN K, ulong p, ulong d_pow, ulong n,
+    GEN velg, GEN vellg, GEN vG_K, ulong j0)
 {
-  long i, j, row = lg(vellg)-1;
-  ulong k, h = gmael(K, 1, 2)[3], d = upowuu(p, d_pow);
+  ulong i, j, k, d = upowuu(p, d_pow), h = gmael(K, 1, 2)[3];
+  ulong row = lg(vellg)-1;
   for (j=1; j<=row; j++)
   {
     GEN ellg = gel(vellg, j);
