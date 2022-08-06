@@ -136,9 +136,19 @@ foreachpari(GEN x, GEN code)
 static int
 forfactoredpos(ulong a, ulong b, GEN code)
 {
-  const ulong step = 1024;
+  ulong x1, step = maxuu(2 * usqrt(b), 1024);
   pari_sp av = avma;
-  ulong x1;
+  if (b - a < usqrt(b) / 10)
+  {
+    ulong n;
+    for (n = a; n <= b; n++, set_avma(av))
+    {
+      GEN m = factoru(n);
+      set_lex(-1, mkvec2(utoipos(n), Flm_to_ZM(m)));
+      closure_evalvoid(code); if (loop_break()) return 1;
+    }
+    return 0;
+  }
   for(x1 = a;; x1 += step, set_avma(av))
   { /* beware overflow, fuse last two bins (avoid a tiny remainder) */
     ulong j, lv, x2 = (b >= 2*step && b - 2*step >= x1)? x1-1 + step: b;
@@ -175,9 +185,21 @@ zv_to_mZM(GEN v)
 static void
 forsquarefreepos(ulong a, ulong b, GEN code)
 {
-  const ulong step = 1024;
+  const ulong step = maxuu(1024, 2 * usqrt(b));
   pari_sp av = avma;
   ulong x1;
+  if (b - a < usqrt(b) / 10)
+  {
+    ulong n;
+    for (n = a; n <= b; n++, set_avma(av))
+    {
+      GEN m = factoru(n);
+      if (!uissquarefree_fact(m)) continue;
+      set_lex(-1, mkvec2(utoipos(n), Flm_to_ZM(m)));
+      closure_evalvoid(code); if (loop_break()) return;
+    }
+    return;
+  }
   for(x1 = a;; x1 += step, set_avma(av))
   { /* beware overflow, fuse last two bins (avoid a tiny remainder) */
     ulong j, lv, x2 = (b >= 2*step && b - 2*step >= x1)? x1-1 + step: b;
@@ -197,9 +219,21 @@ forsquarefreepos(ulong a, ulong b, GEN code)
 static void
 forsquarefreeneg(ulong a, ulong b, GEN code)
 {
-  const ulong step = 1024;
+  const ulong step = maxuu(1024, 2 * usqrt(b));
   pari_sp av = avma;
   ulong x2;
+  if (b - a < usqrt(b) / 10)
+  {
+    ulong n;
+    for (n = b; n >= a; n--, set_avma(av))
+    {
+      GEN m = factoru(n);
+      if (!uissquarefree_fact(m)) continue;
+      set_lex(-1, mkvec2(utoineg(n), zv_to_mZM(gel(m,1))));
+      closure_evalvoid(code); if (loop_break()) return;
+    }
+    return;
+  }
   for(x2 = b;; x2 -= step, set_avma(av))
   { /* beware overflow, fuse last two bins (avoid a tiny remainder) */
     ulong j, x1 = (x2 >= 2*step && x2-2*step >= a)? x2+1 - step: a;
@@ -257,16 +291,27 @@ Flm2negfact(GEN v, GEN M)
 static int
 forfactoredneg(ulong a, ulong b, GEN code)
 {
-  const ulong step = 1024;
+  ulong x2, step = maxuu(2 * usqrt(b), 1024);
   GEN P, E, M;
   pari_sp av;
-  ulong x2;
 
   P = cgetg(18, t_COL); gel(P,1) = gen_m1;
   E = cgetg(18, t_COL); gel(E,1) = gen_1;
   M = mkmat2(P,E);
   av = avma;
-  for(x2 = b;; x2 -= step, set_avma(av))
+  if (b - a < usqrt(b) / 10)
+  {
+    ulong n;
+    for (n = b; n >= a; n--, set_avma(av))
+    {
+      GEN m = factoru(n);
+      Flm2negfact(m, M);
+      set_lex(-1, mkvec2(utoineg(n), M));
+      closure_evalvoid(code); if (loop_break()) return 1;
+    }
+    return 0;
+  }
+  for (x2 = b;; x2 -= step, set_avma(av))
   { /* beware overflow, fuse last two bins (avoid a tiny remainder) */
     ulong j, x1 = (x2 >= 2*step && x2-2*step >= a)? x2+1 - step: a;
     GEN v = vecfactoru_i(x1, x2);
