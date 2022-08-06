@@ -1760,8 +1760,7 @@ find_jinv(
 }
 
 static GEN
-polclass_roots_modp(
-  long *n_trace_curves,
+polclass_roots_modp(long *n_trace_curves,
   norm_eqn_t ne, long rho_inv, GEN G, GEN db)
 {
   pari_sp av;
