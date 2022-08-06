@@ -185,13 +185,14 @@ gener_Zp(GEN q, GEN F)
     {
       p = gel(P,i);
       if (absequaliu(p, 2)) continue;
-      if (i < l-1) pari_err_DOMAIN("znprimroot", "argument","=",F,F);
+      if (i < l-1) pari_err_DOMAIN("znprimroot", "n","=",F,F);
       e = itos(gel(E,i));
     }
-    if (!p) pari_err_DOMAIN("znprimroot", "argument","=",F,F);
+    if (!p) pari_err_DOMAIN("znprimroot", "n","=",F,F);
   }
   else
     e = Z_isanypower(q, &p);
+  if (!BPSW_psp(e? p: q)) pari_err_DOMAIN("znprimroot", "n","=", q,q);
   return e > 1? pgener_Zp(p): pgener_Fp(q);
 }
 
@@ -211,7 +212,7 @@ znprimroot(GEN N)
   switch(mod4(N))
   {
     case 0: /* N = 0 mod 4 */
-      pari_err_DOMAIN("znprimroot", "argument","=",N,N);
+      pari_err_DOMAIN("znprimroot", "n","=",N,N);
       x = NULL; break;
     case 2: /* N = 2 mod 4 */
       n = shifti(N,-1); /* becomes odd */

@@ -246,7 +246,13 @@ x^2
 0
   ***   at top-level: znprimroot(8)
   ***                 ^-------------
-  *** znprimroot: domain error in znprimroot: argument = 8
+  *** znprimroot: domain error in znprimroot: n = 8
+  ***   at top-level: znprimroot(15)
+  ***                 ^--------------
+  *** znprimroot: domain error in znprimroot: n = 15
+  ***   at top-level: znprimroot(30)
+  ***                 ^--------------
+  *** znprimroot: domain error in znprimroot: n = 15
   ***   at top-level: znstar(0,1)
   ***                 ^-----------
   *** znstar: sorry, znstar(0,1) is not yet implemented.
@@ -261,4 +267,4 @@ x^2
   ***   at top-level: znconreyexp(znstar(192,1),[2,8,1,1]~)
   ***                 ^-------------------------------------
   *** znconreyexp: incorrect type in znconreyexp (t_COL).
-Total time spent: 863
+Total time spent: 1372
