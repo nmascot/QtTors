@@ -15,11 +15,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /* This files contains macros depending on system and compiler    */
 
 #ifdef __cplusplus
-#  define ANYARG ...
 #  define BEGINEXTERN extern "C" {
 #  define ENDEXTERN }
 #else
-#  define ANYARG
 #  define BEGINEXTERN
 #  define ENDEXTERN
 #endif
