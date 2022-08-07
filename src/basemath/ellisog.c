@@ -274,7 +274,6 @@ isogeny_from_kernel_point(GEN E, GEN P, int only_image, long vx, long vy)
   pari_sp av = avma;
   GEN isog, EE, f, g, h, h2, h3;
   GEN Q = P, t = gen_0, w = gen_0;
-  long c;
   if (!oncurve(E,P))
     pari_err_DOMAIN("isogeny_from_kernel_point", "point", "not on", E, P);
   if (ell_is_inf(P))
@@ -283,7 +282,7 @@ isogeny_from_kernel_point(GEN E, GEN P, int only_image, long vx, long vy)
     return mkvec2(E, isog_identity(vx,vy));
   }
 
-  isog = NULL; c = 1;
+  isog = NULL;
   for (;;)
   {
     GEN tQ, xQ = gel(Q,1), uQ = ec_2divpol_evalx(E, xQ);
@@ -301,7 +300,6 @@ isogeny_from_kernel_point(GEN E, GEN P, int only_image, long vx, long vy)
     if (stop) break;
 
     Q = elladd(E, P, Q);
-    ++c;
     /* IF x([c]P) = x([c-1]P) THEN [c]P = -[c-1]P and [2c-1]P = 0 */
     if (gequal(gel(Q,1), xQ)) break;
     if (gc_needed(av,1))

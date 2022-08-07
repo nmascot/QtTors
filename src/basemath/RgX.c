@@ -1997,7 +1997,7 @@ rem(GEN c, GEN T)
 int
 ZXQX_dvd(GEN x, GEN y, GEN T)
 {
-  long dx, dy, dz, i, p, T_ismonic;
+  long dx, dy, i, T_ismonic;
   pari_sp av = avma, av2;
   GEN y_lead;
 
@@ -2015,12 +2015,11 @@ ZXQX_dvd(GEN x, GEN y, GEN T)
   /* pay attention to sparse divisors */
   for (i = 1; i <= dy; i++)
     if (!signe(gel(y,i))) gel(y,i) = NULL;
-  dz = dx-dy; p = dz+1;
   av2 = avma;
   for (;;)
   {
     GEN m, x0 = gel(x,0), y0 = y_lead, cx = content(x0);
-    x0 = gneg(x0); p--;
+    x0 = gneg(x0);
     m = gcdii(cx, y0);
     if (!equali1(m))
     {
