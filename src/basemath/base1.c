@@ -1893,12 +1893,12 @@ get_red_G(nfmaxord_t *S, GEN *pro)
 {
   pari_sp av = avma;
   GEN G, u, u0 = NULL;
-  long i, prec, n = degpol(S->T);
+  long prec, n = degpol(S->T);
   nffp_t F;
 
   prec = nbits2prec(n+32);
   nffp_init(&F, S, prec);
-  for (i=1; ; i++)
+  for (;;)
   {
     F.prec = prec; make_M_G(&F, 0); G = F.G;
     if (u0) G = RgM_mul(G, u0);
