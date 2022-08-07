@@ -3077,8 +3077,8 @@ tridiv_bound(GEN n)
 }
 
 /* return a value <= (48 << 10) = 49152 < primelinit */
-static ulong
-utridiv_bound(ulong n)
+ulong
+tridiv_boundu(ulong n)
 {
 #ifdef LONG_IS_64BIT
   if (n & HIGHMASK)
@@ -3148,7 +3148,7 @@ factoru_sign(ulong n, ulong all, long hint, ulong *pU1, ulong *pU2)
   if (n == 1) retmkvec2(cgetg(1,t_VECSMALL), cgetg(1,t_VECSMALL));
 
   f = cgetg(3,t_VEC); av = avma;
-  lim = all; if (!lim) lim = utridiv_bound(n);
+  lim = all; if (!lim) lim = tridiv_boundu(n);
   /* enough room to store <= 15 primes and exponents (OK if n < 2^64) */
   (void)new_chunk(16*2);
   P = cgetg(16, t_VECSMALL); i = 1;
@@ -3261,7 +3261,7 @@ moebiusu(ulong n)
     s = -1;
   }
   av = avma;
-  u_forprime_init(&S, 3, utridiv_bound(n));
+  u_forprime_init(&S, 3, tridiv_boundu(n));
   test_prime = 0;
   while ((p = u_forprime_next_fast(&S)))
   {

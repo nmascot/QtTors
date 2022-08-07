@@ -131,6 +131,11 @@ foreachpari(GEN x, GEN code)
   pop_lex(1); clone_unlock_deep(x);
 }
 
+/* is it better to sieve [a,b] or to factor individually ? */
+static int
+no_sieve(ulong a, ulong b)
+{ return b - a < usqrt(b) / tridiv_boundu(b); }
+
 /* 0 < a <= b. Using small consecutive chunks to 1) limit memory use, 2) allow
  * cheap early abort */
 static int
@@ -138,7 +143,7 @@ forfactoredpos(ulong a, ulong b, GEN code)
 {
   ulong x1, step = maxuu(2 * usqrt(b), 1024);
   pari_sp av = avma;
-  if (b - a < usqrt(b) / 10)
+  if (no_sieve(a, b))
   {
     ulong n;
     for (n = a; n <= b; n++, set_avma(av))
@@ -188,7 +193,7 @@ forsquarefreepos(ulong a, ulong b, GEN code)
   const ulong step = maxuu(1024, 2 * usqrt(b));
   pari_sp av = avma;
   ulong x1;
-  if (b - a < usqrt(b) / 10)
+  if (no_sieve(a, b))
   {
     ulong n;
     for (n = a; n <= b; n++, set_avma(av))
@@ -222,7 +227,7 @@ forsquarefreeneg(ulong a, ulong b, GEN code)
   const ulong step = maxuu(1024, 2 * usqrt(b));
   pari_sp av = avma;
   ulong x2;
-  if (b - a < usqrt(b) / 10)
+  if (no_sieve(a, b))
   {
     ulong n;
     for (n = b; n >= a; n--, set_avma(av))
@@ -299,7 +304,7 @@ forfactoredneg(ulong a, ulong b, GEN code)
   E = cgetg(18, t_COL); gel(E,1) = gen_1;
   M = mkmat2(P,E);
   av = avma;
-  if (b - a < usqrt(b) / 10)
+  if (no_sieve(a, b))
   {
     ulong n;
     for (n = b; n >= a; n--, set_avma(av))

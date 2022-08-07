@@ -4182,6 +4182,7 @@ ulong   eulerphiu(ulong n);
 ulong   eulerphiu_fact(GEN f);
 GEN     factorint(GEN n, long flag);
 GEN     factoru(ulong n);
+ulong   tridiv_boundu(ulong n);
 int     ifac_isprime(GEN x);
 int     ifac_next(GEN *part, GEN *p, long *e);
 int     ifac_read(GEN part, GEN *p, long *e);

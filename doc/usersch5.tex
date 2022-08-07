@@ -8553,6 +8553,9 @@ $a\leq b$. Uses a sieve with primes up to $\sqrt{b}$.
 \fun{ulong}{tridiv_bound}{GEN n} returns the trial division bound used by
 \tet{Z_factor}$(n)$.
 
+\fun{GEN}{tridiv_boundu}{ulong n} returns the trial division bound used
+by \kbd{factoru}$n$.
+
 \fun{GEN}{Z_pollardbrent}{GEN N, long n, long seed} try to factor
 \typ{INT} $N$ using $n\geq 1$ rounds of Pollard iterations; \var{seed} is an
 integer whose value (mod $8$) selects the quadratic polynomial use to
