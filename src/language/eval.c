@@ -1342,34 +1342,35 @@ closure_eval(GEN C)
         break;
       }
 
-#define EVAL_f(f) \
+#define EVAL_f(f, type, resEQ) \
   switch (ep->arity) \
   { \
-    case 0: f(); break; \
-    case 1: sp--; f(st[sp]); break; \
-    case 2: sp-=2; f(st[sp],st[sp+1]); break; \
-    case 3: sp-=3; f(st[sp],st[sp+1],st[sp+2]); break; \
-    case 4: sp-=4; f(st[sp],st[sp+1],st[sp+2],st[sp+3]); break; \
-    case 5: sp-=5; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4]); break; \
-    case 6: sp-=6; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5]); break; \
-    case 7: sp-=7; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6]); break; \
-    case 8: sp-=8; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7]); break; \
-    case 9: sp-=9; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8]); break; \
-    case 10: sp-=10; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9]); break; \
-    case 11: sp-=11; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10]); break; \
-    case 12: sp-=12; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11]); break; \
-    case 13: sp-=13; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12]); break; \
-    case 14: sp-=14; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13]); break; \
-    case 15: sp-=15; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14]); break; \
-    case 16: sp-=16; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15]); break; \
-    case 17: sp-=17; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16]); break; \
-    case 18: sp-=18; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17]); break; \
-    case 19: sp-=19; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17],st[sp+18]); break; \
-    case 20: sp-=20; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17],st[sp+18],st[sp+19]); break; \
+    case 0: resEQ ((type (*)(void))f)(); break; \
+    case 1: sp--;  resEQ ((type (*)(long))f)(st[sp]); break; \
+    case 2: sp-=2; resEQ((type (*)(long,long))f)(st[sp],st[sp+1]); break; \
+    case 3: sp-=3; resEQ((type (*)(long,long,long))f)(st[sp],st[sp+1],st[sp+2]); break; \
+    case 4: sp-=4; resEQ((type (*)(long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3]); break; \
+    case 5: sp-=5; resEQ((type (*)(long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4]); break; \
+    case 6: sp-=6; resEQ((type (*)(long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5]); break; \
+    case 7: sp-=7; resEQ((type (*)(long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6]); break; \
+    case 8: sp-=8; resEQ((type (*)(long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7]); break; \
+    case 9: sp-=9; resEQ((type (*)(long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8]); break; \
+    case 10: sp-=10; resEQ((type (*)(long,long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9]); break; \
+    case 11: sp-=11; resEQ((type (*)(long,long,long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10]); break; \
+    case 12: sp-=12; resEQ((type (*)(long,long,long,long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11]); break; \
+    case 13: sp-=13; resEQ((type (*)(long,long,long,long,long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12]); break; \
+    case 14: sp-=14; resEQ((type (*)(long,long,long,long,long,long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13]); break; \
+    case 15: sp-=15; resEQ((type (*)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14]); break; \
+    case 16: sp-=16; resEQ((type (*)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15]); break; \
+    case 17: sp-=17; resEQ((type (*)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16]); break; \
+    case 18: sp-=18; resEQ((type (*)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17]); break; \
+    case 19: sp-=19; resEQ((type (*)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17],st[sp+18]); break; \
+    case 20: sp-=20; resEQ((type (*)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long))f)(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17],st[sp+18],st[sp+19]); break; \
     default: \
       pari_err_IMPL("functions with more than 20 parameters");\
       goto endeval; /*LCOV_EXCL_LINE*/ \
   }
+
 
     case OCcallgen:
       {
@@ -1377,7 +1378,7 @@ closure_eval(GEN C)
         GEN res;
         /* Macro Madness : evaluate function ep->value on arguments
          * st[sp-ep->arity .. sp]. Set res = result. */
-        EVAL_f(res = ((GEN (*)(ANYARG))ep->value));
+        EVAL_f(ep->value, GEN, res=);
         if (br_status) goto endeval;
         gel(st,sp++)=res;
         break;
@@ -1396,7 +1397,7 @@ closure_eval(GEN C)
       {
         entree *ep = (entree *)operand;
         long res;
-        EVAL_f(res = ((long (*)(ANYARG))ep->value));
+        EVAL_f(ep->value, long, res=);
         if (br_status) goto endeval;
         st[sp++] = res;
         break;
@@ -1405,7 +1406,7 @@ closure_eval(GEN C)
       {
         entree *ep = (entree *)operand;
         long res;
-        EVAL_f(res = ((int (*)(ANYARG))ep->value));
+        EVAL_f(ep->value, int, res=);
         if (br_status) goto endeval;
         st[sp++] = res;
         break;
@@ -1413,7 +1414,7 @@ closure_eval(GEN C)
     case OCcallvoid:
       {
         entree *ep = (entree *)operand;
-        EVAL_f(((void (*)(ANYARG))ep->value));
+        EVAL_f(ep->value, void,(void));
         if (br_status) goto endeval;
         break;
       }
