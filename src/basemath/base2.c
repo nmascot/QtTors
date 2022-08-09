@@ -317,6 +317,18 @@ diag_denomval(GEN M, GEN p)
   }
   return v;
 }
+
+/* n > 1 is composite, not a pure power, and has no prime divisor < 2^14;
+ * return a BPSW divisor of n and smallest k-th root of largest coprime cofactor */
+static GEN
+Z_fac(GEN n)
+{
+  GEN p = icopy(n), part = ifac_start(p, 0);
+  long e;
+  ifac_next(&part , &p, &e); n = diviiexact(n, powiu(p, e));
+  (void)Z_isanypower(n, &n); return mkvec2(p, n);
+}
+
 /* Warning: data computed for T = ZX_Q_normalize(T0). If S.unscale !=
  * gen_1, caller must take steps to correct the components if it wishes
  * to stick to the original T0. Return a vector of p-maximal orders, for
@@ -343,7 +355,7 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
         GEN p = gel(P,i);
         if (signe(p) > 0 && !BPSW_psp(p))
         {
-          fix_PE(&P, &E, i, gel(Z_factor(p), 1), S->dT);
+          fix_PE(&P, &E, i, Z_fac(p), S->dT);
           lP = lg(P); i--; continue;
         }
       }
@@ -379,8 +391,10 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
           set_avma(av);
           if (DEBUGLEVEL)
             pari_warn(warner,"large composite in nfmaxord:loop(), %Ps", p);
-          if (expi(p) < 100 || S->certify)
-            u = gel(Z_factor(p), 1); /* factor(n < 2^100) should take ~20ms */
+          if (expi(p) < 100)
+            u = Z_factor(p); /* factor(n < 2^100) should take ~20ms */
+          else if (S->certify)
+            u = Z_fac(p);
           else
           { /* give up, probably not maximal */
             GEN B, g, k = ZX_Dedekind(S->T, &g, p);
