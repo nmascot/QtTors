@@ -255,7 +255,7 @@ gen_pow_fold_i(GEN x, GEN N, void *E, GEN (*sqr)(void*,GEN),
         else y = sqr(E,y);
         if (gc_needed(av,1))
         {
-          if (DEBUGMEM>1) pari_warn(warnmem,"gen_pow_fold (%d)", j);
+          if (DEBUGMEM>1) pari_warn(warnmem,"gen_pow_fold (%ld,%d)", i,j);
           y = gerepilecopy(av, y);
         }
       }
