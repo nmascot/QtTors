@@ -414,8 +414,8 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
       GEN p = gel(P,i), O2;
       if (DEBUGLEVEL>2) err_printf("Treating p^k = %Ps^%ld\n",p,E[i]);
       O2 = maxord(p,S->T,E[i]);
-      if (S->certify && !BPSW_psp(p)
-                     && (odd(E[i]) || E[i] != 2*diag_denomval(O2, p)))
+      if (S->certify && (odd(E[i]) || E[i] != 2*diag_denomval(O2, p))
+                     && !BPSW_psp(p))
       {
         fix_PE(&P, &E, i, gel(Z_factor(p), 1), S->dT);
         lP = lg(P); i--;
