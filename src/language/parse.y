@@ -87,7 +87,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 %destructor { pari_discarded++; } seq matrix range matrix_index expr exprno lvalue matrixelts matrixeltsno matrixlines arg listarg definition funcid memberid backticks history compr in inseq deriv
 %%
 
-sequence: seq        {$$=$1;} /* skip the destructor */
+sequence: seq        {$$=$1; (void) pari_nerrs;} /* skip the destructor */
 ;
 
 seq: /**/ %prec SEQ  {$$=NOARG(@$);}
