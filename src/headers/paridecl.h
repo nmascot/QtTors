@@ -2961,7 +2961,6 @@ GEN     nf_deg1_prime(GEN nf);
 GEN     nfarchstar(GEN nf,GEN x,GEN arch);
 GEN     rnfconductor(GEN bnf, GEN polrel);
 GEN     rnfconductor0(GEN bnf, GEN T, long flag);
-long    rnfisabelian(GEN nf, GEN pol);
 GEN     rnfnormgroup(GEN bnr, GEN polrel);
 GEN     subgrouplist0(GEN bnr, GEN indexbound, long all);
 
@@ -4816,6 +4815,7 @@ GEN     nfroots_if_split(GEN *pnf, GEN pol);
 GEN     nfrootsof1(GEN x);
 GEN     polfnf(GEN a, GEN t);
 GEN     rnfabelianconjgen(GEN nf, GEN P);
+long    rnfisabelian(GEN nf, GEN pol);
 
 /* paricfg.c */
 

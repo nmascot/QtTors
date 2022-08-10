@@ -1858,18 +1858,6 @@ nf_deg1_prime(GEN nf)
   return NULL;
 }
 
-static long
-rnfisabelian_i(GEN nf, GEN pol)
-{
-  pari_sp av = avma;
-  GEN G = rnfabelianconjgen(nf, pol);
-  return gc_long(av, isintzero(G) ? 0: 1);
-}
-
-long
-rnfisabelian(GEN nf, GEN pol)
-{ pari_sp av = avma; return gc_long(av, rnfisabelian_i(nf, pol)); }
-
 /* Given bnf and T defining an abelian relative extension, compute the
  * corresponding conductor and congruence subgroup. Return
  * [cond,bnr(cond),H] where cond=[ideal,arch] is the conductor. */

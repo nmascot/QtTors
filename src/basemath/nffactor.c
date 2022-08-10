@@ -2219,12 +2219,10 @@ rnffrobeniuslift(GEN nf, GEN P, GEN Tp, GEN p, GEN bound, GEN den, GEN iden, GEN
 static GEN
 RgX_galconj_bound(GEN T, long prec)
 {
-  pari_sp av = avma;
   GEN L = QX_complex_roots(T, prec);
   GEN prep = vandermondeinverseinit(L);
   GEN M = vandermondeinverse(L, RgX_gtofp(T, prec), gen_1, prep);
-  GEN z = gmul(matrixnorm(M, prec), gsupnorm(L, prec));
-  return gerepileupto(av, z);
+  return gmul(matrixnorm(M, prec), gsupnorm(L, prec));
 }
 
 static GEN
@@ -2234,8 +2232,11 @@ rnfgaloisconj_bound(GEN P, GEN z, GEN den, long prec)
   long i, l = lg(z);
   GEN s = gen_0;
   for (i = 1; i < l; i++)
-    s = gadd(s, gsqr(gmul(gabs(RgX_cxeval(den, gel(z,i), NULL),prec),
-                          RgX_galconj_bound(RgXY_cxevalx(P, gel(z,i), NULL), prec))));
+  {
+    GEN a = gabs(RgX_cxeval(den, gel(z,i), NULL),prec);
+    GEN b = RgX_galconj_bound(RgXY_cxevalx(P, gel(z,i), NULL), prec);
+    s = gerepileupto(av, gadd(s, gsqr(gmul(a,b))));
+  }
   return gerepileupto(av, ceil_safe(s));
 }
 
@@ -2318,38 +2319,49 @@ rnfgaloisanalysis(GEN nf, GEN P, GEN aut, long m, GEN d, long *pt_o)
   *pt_o = omax; return R;
 }
 
-GEN
-rnfabelianconjgen(GEN nf, GEN P)
+static GEN
+rnfabelianconjgen_i(GEN nf, GEN P)
 {
-  pari_sp av = avma;
-  long prec, m, i;
+  long prec, m, i, l;
   GEN bnd, den, iden, T, Pr, gen, orders, d;
   nf = checknf(nf);
   T = nf_get_pol(nf);
   P = RgX_nffix("rnfgaloisconj", T, P, 1);
   P = Q_remove_denom(P, &d);
   Pr = RgX_to_nfX(nf, P);
-  prec = DEFAULTPREC + nbits2extraprec(expi(gsupnorm(Pr, DEFAULTPREC)) * degpol(T));
+  prec = DEFAULTPREC + nbits2extraprec(gexpo(Pr) * degpol(T));
   nf = nfnewprec_shallow(nf, prec);
   den = nfX_disc(nf, P);
   bnd = rnfgaloisconj_bound(P, nf_get_roots(nf), den, prec);
   iden = QXQ_inv(den, T);
   den = nf_to_scalar_or_basis(nf, den);
-  m = degpol(P);
-  gen = vectrunc_init(expu(m));
-  orders = cgetg(expu(m)+1,t_VECSMALL);
-  setlg(gen,1);
+  m = degpol(P); l = expu(m) + 1;
+  gen = cgetg(l, t_VEC); orders = cgetg(l,t_VECSMALL);
   for (i = 1; m > 1; i++)
   {
     long o;
-    GEN S, Tp = rnfgaloisanalysis(nf, P, gen, m, d, &o);
-    if (!Tp) return gc_const(av, gen_0);
+    GEN S, Tp;
+    setlg(gen, i);
+    Tp = rnfgaloisanalysis(nf, P, gen, m, d, &o);
+    if (!Tp) return NULL;
     S = rnffrobeniuslift(nf, P, gel(Tp,1), gel(Tp,2), bnd, den, iden, T);
-    if (!S) return gc_const(av, gen_0);
-    vectrunc_append(gen,S);
-    orders[i] = o;
-    m /= o;
+    if (!S) return NULL;
+    gel(gen,i) = S; orders[i] = o; m /= o;
   }
-  setlg(orders,i);
-  return gerepilecopy(av, mkvec2(gen, orders));
+  setlg(gen,i); setlg(orders,i); return mkvec2(gen, orders);
+}
+GEN
+rnfabelianconjgen(GEN nf, GEN P)
+{
+  pari_sp av = avma;
+  GEN G = rnfabelianconjgen_i(nf, P);
+  return G? gerepilecopy(av, G): gc_const(av, gen_0);
+}
+
+long
+rnfisabelian(GEN nf, GEN pol)
+{
+  pari_sp av = avma;
+  GEN G = rnfabelianconjgen_i(nf, pol);
+  return gc_long(av, G? 1: 0);
 }
