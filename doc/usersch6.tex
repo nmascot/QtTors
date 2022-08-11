@@ -416,7 +416,7 @@ These functions expect a true \var{bid} argument, attached to a modulus $I
 
 \fun{GEN}{bid_get_mod}{GEN bid} returns the modulus attached to the \var{bid}.
 
-\fun{GEN}{bid_get_grp}{GEN bid} returns the Abelian group attached
+\fun{GEN}{bid_get_grp}{GEN bid} returns the abelian group attached
 to $(\Z_K/I)^*$.
 
 \fun{GEN}{bid_get_ideal}{GEN bid} return the finite part $I_0$
@@ -2164,6 +2164,16 @@ internally a conditional \kbd{nf} attached to $K$ , whose \kbd{nf.zk} may not
 define the maximal order $\Z_K$ (see \kbd{nfroots}); \kbd{*pT} is then
 replaced by the conditional \kbd{nf} to avoid losing that information.
 
+\fun{GEN}{rnfabelianconjgen}{GEN nf, GEN P} \var{nf} being a number field
+structure attached to $K$ and $P$ being an irreducible polynomial in $K[X]$.
+This function returns \kbd{gen\_0} if $L = K[X]/(P)$ is not abelian over $K$,
+else it returns a pair $(g,o)$ where $g$ is a vector of $K$-automorphisms of
+$L$ generating the abelian group $G = \text{Gal}(L/K)$ and $o$ is a
+\typ{VECSMALL} of the same length giving the relative orders of the $g_i$:
+$o[1]$ is the order of $g_1$ and for $i \geq 2$, $o[i]$ is the order of $g_i$ in
+$G/(g_1,\dots,g_{i-1})$. The length need not be minimal: the $o[i]$ need not
+be the elementary divisors of $G$.
+
 \subsec{Units}
 
 \fun{GEN}{nfrootsof1}{GEN nf} returns a two-component vector $[w,z]$ where $w$
@@ -2797,7 +2807,7 @@ set to $U_{\text{inv}}$. The function is not memory clean.
 
 \fun{GEN}{ZV_snf_gcd}{GEN v, GEN N} given a vector $v$ of integers and a
 positive integer $N$, return the vector whose entries are the gcds
-$(v[i],N)$. Use case: if $v$ gives the cyclic components for some Abelian
+$(v[i],N)$. Use case: if $v$ gives the cyclic components for some abelian
 group $G$ of finite type, then this returns the structure of the finite
 groupe $G/G^N$.
 
