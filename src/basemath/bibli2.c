@@ -988,8 +988,8 @@ binomial(GEN n, long k)
       if (lgefint(n) == 3) return binomialuu(n[2],(ulong)k);
     }
     /* k > 1 */
-    y = cgetg(k+1,t_VEC);
-    for (i=1; i<=k; i++) gel(y,i) = subiu(n,i-1);
+    y = cgetg(k+1,t_VEC); gel(y,1) = n;
+    for (i = 2; i <= k; i++) gel(y,i) = subiu(n,i-1);
     y = diviiexact(ZV_prod(y), mpfact(k));
     return gerepileuptoint(av, y);
   }
