@@ -4741,6 +4741,7 @@ alg_pmaximal(GEN al, GEN p)
 
   pre = algcenter_precompute(al,p);
 
+  pari_sp av = avma;
   while (1) {
     zprad = algcenter_prad(al2, p, pre);
     projs = algcenter_p_projs(al2, p, pre);
@@ -4749,10 +4750,11 @@ alg_pmaximal(GEN al, GEN p)
     if (typ(prad) == t_INT) break;
     lord = algleftordermodp(al2,prad,p);
     if (!cmp_universal(lord,id)) break;
-    al2 = alg_change_overorder_shallow(al2,lord);
+    al2 = gerepilecopy(av, alg_change_overorder_shallow(al2,lord));
   }
 
   dec = algpdecompose0(al2,prad,p,projs);
+  av = avma;
   while (lg(dec)>2) {
     for (i=1; i<lg(dec); i++) {
       I = gel(dec,i);
@@ -4760,7 +4762,7 @@ alg_pmaximal(GEN al, GEN p)
       if (cmp_universal(lord,matid(n))) break;
     }
     if (i==lg(dec)) break;
-    al2 = alg_change_overorder_shallow(al2,lord);
+    al2 = gerepilecopy(av, alg_change_overorder_shallow(al2,lord));
     zprad = algcenter_prad(al2, p, pre);
     projs = algcenter_p_projs(al2, p, pre);
     if (lg(projs) == 2) projs = NULL;
