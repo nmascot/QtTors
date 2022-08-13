@@ -1376,8 +1376,7 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* pbid)
     checkprid(v);
     iv = gen_search(P, v, (void*)cmp_prime_ideal, cmp_nodata);
     chiv = gchari_eval(gc, NULL, v, 0, logchi, s, prec);
-    if (iv <= 0) chiv = mkvec(chiv);
-    else
+    if (iv > 0)
     {
       GEN cyc, w, Lsprk, bid, chip = NULL;
       long i, ic, l = lg(P);
@@ -1658,7 +1657,7 @@ gchar_identify_i(GEN gc, GEN idinit, GEN Lchiv)
   for (i = 1; i < l; i++)
   {
     GEN t = gel(Lchiv,i), u;
-    if (typ(gel(Lv,i)) != t_INT)
+    if (typ(gel(Lv,i)) != t_INT) /* finite place */
     {
       if (typ(t) == t_COMPLEX)
       {
