@@ -4731,17 +4731,12 @@ algcenter_p_projs(GEN al, GEN p, GEN pre)
 static GEN
 alg_pmaximal(GEN al, GEN p)
 {
-  GEN al2, prad, lord = gen_0, I, id, dec, zprad, projs, pre;
-  long n, i;
-  n = alg_get_absdim(al);
-  id = matid(n);
-  al2 = al;
+  pari_sp av;
+  long n = alg_get_absdim(al);
+  GEN id = matid(n), al2 = al, prad, lord = gen_0, dec, zprad, projs, pre;
 
   dbg_printf(0)("Round 2 (noncommutative) at p=%Ps, dim=%d\n", p, n);
-
-  pre = algcenter_precompute(al,p);
-
-  pari_sp av = avma;
+  pre = algcenter_precompute(al,p); av = avma;
   while (1) {
     zprad = algcenter_prad(al2, p, pre);
     projs = algcenter_p_projs(al2, p, pre);
@@ -4753,13 +4748,13 @@ alg_pmaximal(GEN al, GEN p)
     al2 = gerepilecopy(av, alg_change_overorder_shallow(al2,lord));
   }
 
-  dec = algpdecompose0(al2,prad,p,projs);
-  av = avma;
-  while (lg(dec)>2) {
-    for (i=1; i<lg(dec); i++) {
-      I = gel(dec,i);
+  dec = algpdecompose0(al2,prad,p,projs); av = avma;
+  while (lg(dec) > 2) {
+    long i;
+    for (i = 1; i < lg(dec); i++) {
+      GEN I = gel(dec,i);
       lord = algleftordermodp(al2,I,p);
-      if (cmp_universal(lord,matid(n))) break;
+      if (cmp_universal(lord,id)) break;
     }
     if (i==lg(dec)) break;
     al2 = gerepilecopy(av, alg_change_overorder_shallow(al2,lord));
