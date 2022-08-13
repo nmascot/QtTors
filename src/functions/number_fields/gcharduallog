@@ -3,10 +3,10 @@ Section: number_fields
 C-Name: gcharduallog
 Prototype: GG
 Help: gcharduallog(gc,chi): return logarithm vector of character chi
- in R^n. We have chareval(g,chi,x) = gcharduallog(g,chi)*gcharlog(g,x)
+ in R^n. We have gchareval(g,chi,x,0) = gcharduallog(g,chi)*gcharlog(g,x)
 Doc: Return internal logarithm vector of character \kbd{chi}
  as a \typ{VEC} in $\R^n$, so that for all \var{x},
- \kbd{chareval}(\var{gc},\var{chi},\var{x}) is equal to
+ \kbd{gchareval}(\var{gc},\var{chi},\var{x},$0$) is equal to
  \kbd{gcharduallog}(\var{gc},\var{chi}) * \kbd{gcharlog}(\var{gc},\var{x}).
 
  The components are organized as follows:
@@ -43,6 +43,6 @@ Doc: Return internal logarithm vector of character \kbd{chi}
  ? v = gcharlog(gc,pr);
  ? exp(2*I*Pi*f*v)
  % = -0.569867696226731232993110144 - 0.821736459454756074068598760*I
- ? exp(2*I*Pi*chareval(gc,chi,pr))
+ ? gchareval(gc,chi,pr)
  % = -0.569867696226731232993110144 - 0.821736459454756074068598760*I
  @eprog

@@ -310,10 +310,7 @@ chareval(GEN G, GEN chi, GEN x, GEN z)
       if (checkznstar_i(G)) return gerepileupto(av, znchareval(G, chi, x, z));
       /* don't implement chars on general bid: need an nf... */
     case typ_GCHAR:
-      if (z == NULL)
-        return gerepilecopy(av, gchareval(G, chi, x, 0));
-      else
-        pari_err_IMPL("evaluation of grossenchar only given in R/Z");
+        pari_err_TYPE("chareval [use gchareval to evaluate a grossencharacter]", G);
     default:
       pari_err_TYPE("chareval", G);
       return NULL;/* LCOV_EXCL_LINE */

@@ -1,6 +1,5 @@
 default(parisize,"16M");
 default(realprecision,38);
-cxchareval(gc,chi,x) = exp(2*I*Pi*chareval(gc,chi,x));
 lfunrobustcheckfeq(ldata) = {
   my(bitprec,extraprec);
   bitprec=bitprecision(1.);
@@ -28,7 +27,7 @@ gcharconductor(gc1,c)
 gcharconductor(gc1,5*c)
 gcharconductor(gc1,20*c)
 J = idealprimedec(bnf,163)[1];
-bestappr(cxchareval(gc1,c,J),10^6)
+bestappr(gchareval(gc1,c,J),10^6)
 dec = idealprimedec(bnf,11);
 t1 = dec[3];
 t2 = dec[4];
@@ -37,10 +36,10 @@ t4 = dec[1];
 exponent(nfeltembed(bnf,x) - [exp(2*I*Pi*2/5),exp(2*I*Pi/5)]) < -100
 [chi] = gcharalgebraic(gc1,[[1,2],[3,0]]);
 chi[#chi]
-round(10^10*cxchareval(gc1,chi,t1))
-round(10^10*cxchareval(gc1,chi,t3))
-exponent(cxchareval(gc1,chi,t4)/conj(cxchareval(gc1,chi,t1)) - 1) < -100
-exponent(cxchareval(gc1,chi,t3)/conj(cxchareval(gc1,chi,t2)) - 1) < -100
+round(10^10*gchareval(gc1,chi,t1))
+round(10^10*gchareval(gc1,chi,t3))
+exponent(gchareval(gc1,chi,t4)/conj(gchareval(gc1,chi,t1)) - 1) < -100
+exponent(gchareval(gc1,chi,t3)/conj(gchareval(gc1,chi,t2)) - 1) < -100
 L = lfuncreate([gc1,chi]);
 lfunparams(L)
 lfunrootres(L)[3] == 1
@@ -63,7 +62,7 @@ c = gcharidentify(gc2,[1,2],[[-1,0],[3,0]]);
 c=concat(c,-3/2);
 gcharconductor(gc2,c)
 t = idealadd(bnf,11,x-5);
-bestappr(cxchareval(gc2,c,t),10^6)
+bestappr(gchareval(gc2,c,t),10^6)
 LL = lfuncreate([gc2,c]);
 lfuncheckfeq(LL) + 110 < 0
 {c = gcharidentify(gc2,[1,2],[
@@ -79,11 +78,11 @@ gc = gcharinit(bnf,1);
 pr = idealprimedec(bnf,31)[2];
 c0 = gcharidentify(gc,[1,pr],[[0,0],1/3]); /* class group char, order 3 */
 J = idealprimedec(bnf,23)[1];
-bestappr(cxchareval(gc,c0,J),10^6)
+bestappr(gchareval(gc,c0,J),10^6)
 p = nextprime(1010);
 J = idealadd(bnf,p,x-459);
-bestappr(cxchareval(gc,c0,J),10^6)
-bestappr(cxchareval(gc,c0,J)^3,10^6)
+bestappr(gchareval(gc,c0,J),10^6)
+bestappr(gchareval(gc,c0,J)^3,10^6)
 l0=lfuncreate([gc,c0]);
 lfuncheckfeq(l0) + 110 < 0
 gcharconductor(gc,c0)
@@ -94,17 +93,17 @@ c1 = gcharidentify(gc,[1,pr],[[2,0],0.32447859496968861348669094505138887338]);
 c2 = c1+c0;
 c3 = c1+2*c0;
 J = idealadd(bnf, 1013, x-459);
-bestappr(cxchareval(gc,c1,J),10^6)
-bestappr(cxchareval(gc,c2,J),10^6)
-bestappr(cxchareval(gc,c3,J),10^6)
+bestappr(gchareval(gc,c1,J),10^6)
+bestappr(gchareval(gc,c2,J),10^6)
+bestappr(gchareval(gc,c3,J),10^6)
 J = idealprimedec(bnf,23)[1];
-bestappr(cxchareval(gc,c1,J),10^6)
-bestappr(cxchareval(gc,c2,J),10^6)
-bestappr(cxchareval(gc,c3,J),10^6)
+bestappr(gchareval(gc,c1,J),10^6)
+bestappr(gchareval(gc,c2,J),10^6)
+bestappr(gchareval(gc,c3,J),10^6)
 J = idealadd(bnf, 10007, x-4917);
-bestappr(cxchareval(gc,c1,J),10^6)
-bestappr(cxchareval(gc,c2,J),10^6)
-bestappr(cxchareval(gc,c3,J),10^6)
+bestappr(gchareval(gc,c1,J),10^6)
+bestappr(gchareval(gc,c2,J),10^6)
+bestappr(gchareval(gc,c3,J),10^6)
 l1=lfuncreate([gc,c1]);
 lfuncheckfeq(l1) + 110 < 0
 l2=lfuncreate([gc,c2]);
@@ -124,7 +123,7 @@ v3 = lfun([gc,chi+ps],2); round(10^10*v3)
 }
 exponent(v1*v2*v3 - Pi^2/5*lfun([gc,3*chi],4)) < -100
 p23 = idealprimedec(bnf,23)[1];
-round(10^10*cxchareval(gc,chi,p23))
+round(10^10*gchareval(gc,chi,p23))
 lfunrootres(lfuncreate([gc,chi]))[3] == 1
 
 print("Watkins examples 6.2");
@@ -160,17 +159,17 @@ c1 = gcharidentify(gc1,[2,pr],[[0,0],1/2]);
   0.16449709689005690003280624571231977687
 ])};
 J = idealhnf(K,29);
-bestappr(cxchareval(gc1,c1,J),10^6)
-bestappr(cxchareval(gc1,c3,J),10^6)
-bestappr(cxchareval(gc1,c4,J),10^6)
+bestappr(gchareval(gc1,c1,J),10^6)
+bestappr(gchareval(gc1,c3,J),10^6)
+bestappr(gchareval(gc1,c4,J),10^6)
 J = idealadd(K, 31, x+7);
-bestappr(cxchareval(gc1,c1,J),10^6)
-bestappr(cxchareval(gc1,c3,J),10^6)
-bestappr(cxchareval(gc1,c4,J),10^6)
+bestappr(gchareval(gc1,c1,J),10^6)
+bestappr(gchareval(gc1,c3,J),10^6)
+bestappr(gchareval(gc1,c4,J),10^6)
 J = idealadd(K, 37, x^2+7*x+16);
-bestappr(cxchareval(gc1,c1,J),10^6)
-bestappr(cxchareval(gc1,c3,J),10^6)
-bestappr(cxchareval(gc1,c4,J),10^6)
+bestappr(gchareval(gc1,c1,J),10^6)
+bestappr(gchareval(gc1,c3,J),10^6)
+bestappr(gchareval(gc1,c4,J),10^6)
 lfuncheckfeq(lfuncreate([gc1,c1])) + 110 < 0
 lfuncheckfeq(lfuncreate([gc1,c3])) + 100 < 0
 lfuncheckfeq(lfuncreate([gc1,c4])) + 100 < 0
@@ -262,7 +261,7 @@ pr3 = idealprimedec(bnf,107)[1];
   0.49348754119067815440785147793690542365
 ])};
 pr4 = idealadd(bnf, 127, x-53);
-bestappr(chareval(gc,chi,pr4),10^6)
+bestappr(gchareval(gc,chi,pr4,0),10^6)
 gcharconductor(gc,chi)
 L=lfuncreate([gc,chi]); \\L[3..5]
 lfuncheckfeq(L) < -100
@@ -293,7 +292,7 @@ N = idealadd(bnf, 10, y+5);
 gc = gcharinit(bnf,N);
 c = gcharidentify(gc,[1],[[0,-1.0880837675454989689105112261454316359]]);
 L = lfuncreate([gc,c]);
-round(cxchareval(gc,c,3))
+round(gchareval(gc,c,3))
 lfunrobustcheckfeq(L)+120<0
 N = idealadd(bnf, 142, y+125);
 gc = gcharinit(bnf,N);

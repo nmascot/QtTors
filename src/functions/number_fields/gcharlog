@@ -49,6 +49,6 @@ Doc: Return the internal (logarithmic) representation of the ideal $x$ suitable
       -0.840176314833856764413, 0.256149999363388073738*I]~
  ? exp(2*I*Pi*f*v)
  % = -4.5285995080704456583673312 + 2.1193835177957097598574507*I
- ? exp(2*I*Pi*chareval(gc,chi,pr))
+ ? gchareval(gc,chi,pr)
  % = -4.5285995080704456583673312 + 2.1193835177957097598574507*I
  @eprog

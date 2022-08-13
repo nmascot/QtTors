@@ -37,13 +37,6 @@ Doc:
  generators, or a \typ{INT} (Conrey label);
  see \secref{se:dirichletchar} or \kbd{??character}.
 
- \misctitle{Note on Hecke Grossencharacters}
- In the case where \var{G} describes a group of Hecke Grossencharacters
- (output by $G = \kbd{gcharinit(\var{bnf},\var{mod})})$,
- \var{chi} is a \typ{COL} of exponents modulo \var{G}\kbd{.cyc}, and~\var{x} an ideal
- of \var{G}\kbd{.bnf}.
- Consider installing the library function \kbd{gchareval} for more options.
-
  The character value is encoded as follows, depending on the optional
  argument $z$:
 

@@ -25,7 +25,7 @@ Doc: \kbd{gc} being a gchar structure initialised by \kbd{gcharinit}, returns
  \var{gc}\kbd{.mod} (see \kbd{idealstar}).
  Then~$\chi_v$ is encoded as~$[c_1,\dots,c_n,\theta]$ where~$[c_1,\dots,c_n]$
  defines a character on $G$
- (see \kbd{chareval}) and~$\chi_v(\pi_v) = \exp(2i\pi\theta)$. This \var{bid}
+ (see \kbd{gchareval}) and~$\chi_v(\pi_v) = \exp(2i\pi\theta)$. This \var{bid}
  structure only depends on \kbd{gc} and $v$ (and not on the character $\chi$);
  it can be recovered through the optional argument \var{BID}.
  \bprog

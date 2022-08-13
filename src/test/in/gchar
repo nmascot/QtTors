@@ -1,6 +1,5 @@
 default(parisize,"16M");
 default(realprecision,38);
-cxchareval(gc,chi,x) = exp(2*I*Pi*chareval(gc,chi,x));
 
 gcharinit(bnfinit('y),1);
 
@@ -28,7 +27,7 @@ gcharlocal(gc,c1,1)
 gcharlocal(gc,c1,2)
 gcharlocal(gc,c1,3)
 gcharlocal(gc,c1,4)
-bestappr(log(abs(cxchareval(gc,c1,pr)))/log(11))
+bestappr(log(abs(gchareval(gc,c1,pr)))/log(11))
 \\c2 = [0,1,0,0,0,0,0,-5]~;
 c2 = gcharidentify(gc,[1,2,3,4],[[0,5*I],[0,5*I],[10,5*I],[-10,5*I]]);
 gcharisalgebraic(gc,c2,&pq)
@@ -37,7 +36,7 @@ gcharlocal(gc,c2,1)
 gcharlocal(gc,c2,2)
 gcharlocal(gc,c2,3)
 gcharlocal(gc,c2,4)
-bestappr(log(abs(cxchareval(gc,c2,pr)))/log(11))
+bestappr(log(abs(gchareval(gc,c2,pr)))/log(11))
 
 print("gcharalgebraic");
 gc = gcharinit(polcyclo(5),25);
@@ -143,8 +142,8 @@ B=2;
 {forvec(V=[[0,1],[-B,B],[-B,B],[-B,B]],
   chi = V~;
   param = gcharduallog(gc,chi);
-  if(gcharidentify(gc,[pr],[chareval(gc,chi,pr)])!=chi,print("FAIL a: chi=",chi));
-  if(gcharidentify(gc,[pr,1,2],[chareval(gc,chi,pr),
+  if(gcharidentify(gc,[pr],[gchareval(gc,chi,pr,0)])!=chi,print("FAIL a: chi=",chi));
+  if(gcharidentify(gc,[pr,1,2],[gchareval(gc,chi,pr,0),
     [param[4],param[2]],[param[5],param[3]]])!=chi,print("FAIL b: chi=",chi)));
 };
 gcharidentify(gc,[1,2],[[0,1],[0,0]])
@@ -172,13 +171,13 @@ localbitprec(64);bitprecision(gcharnewprec(gc)[1])>=64
 localbitprec(764);bitprecision(gcharnewprec(gc)[1])>=764
 /* evaluate */
 p=idealprimedec(gc.nf,13)[1];
-localbitprec(64); v1 = chareval(gc,[137,7,1,0,-1283,1233]~,p);
-localbitprec(2048); v2 = chareval(gc,[137,7,1,0,-1283,1233]~,p);
+localbitprec(64); v1 = gchareval(gc,[137,7,1,0,-1283,1233]~,p,0);
+localbitprec(2048); v2 = gchareval(gc,[137,7,1,0,-1283,1233]~,p,0);
 exponent(v1-v2) < -100
 p=idealprimedec(gc.nf,nextprime(1<<32))[1];
 \\gcharlog(gc,p);
-localbitprec(132); v1 = chareval(gc,[137,7,1,0,-1283,1233]~,p);
-localbitprec(2048); v2 = chareval(gc,[137,7,1,0,-1283,1233]~,p);
+localbitprec(132); v1 = gchareval(gc,[137,7,1,0,-1283,1233]~,p,0);
+localbitprec(2048); v2 = gchareval(gc,[137,7,1,0,-1283,1233]~,p,0);
 exponent(v1-v2) < -132
 
 print("limit cases");
@@ -221,34 +220,34 @@ chi = [1,2,3,-2+I]~;
 pr = idealprimedec(bnf,2)[1];
 logchi = gcharduallog(gc,chi);
 logpr = gcharlog(gc,pr);
-ev1 = chareval(gc,chi,pr);
+ev1 = gchareval(gc,chi,pr,0);
 ev2 = logchi*logpr;
 ev2 -= round(real(ev2));
 exponent(ev1-ev2) < -100
 
-print("chareval");
+print("gchareval");
 bnf = bnfinit(x^2-5,1);
 gc = gcharinit(bnf,1);
 {pr =
 idealprimedec(bnf,4868320566074468416097809002841831981658439271775190047920287334713696332088188270302203142585474506572031649428572390977423717630750557541900820118557642144443115103994166347876446053933456365372443159385038281515406885479747287229391251928691579336473986380517198489368653247235220470411135182771495870761970425831248490802339741145177367606504253702366044757540837091578313318381751990985274838858471553879603486279186618215547339963941317895448200405735601843412836041079417187853293418139422395939702479069851901004480187793116104550625410950517848593134330788344046026982177143293369431992447318613826461691545456669249262035189314826400325163760162186599556491881653572410925778376382784596006650973201534577780715605881753754637909365503082172360234118525438866377677143768516149987111093650011641611864293773011677933805015609245095155892783139734857107226208996763683785018645448619606720812034222383494488841874984727092271722163949359822795927735020861595850675165350830336905890838102021)[1]};
-v1 = chareval(gc,[16876547436542378657653465325489780897097678654765346543]~,pr);
+v1 = gchareval(gc,[16876547436542378657653465325489780897097678654765346543]~,pr,0);
 default(realbitprecision,1024)
 gc = gcharnewprec(gc);
-v2 = chareval(gc,[16876547436542378657653465325489780897097678654765346543]~,pr);
+v2 = gchareval(gc,[16876547436542378657653465325489780897097678654765346543]~,pr,0);
 exponent(v1-v2) < -120
 default(realbitprecision,128)
 pr2 = idealprimedec(bnf,13)[1];
-round(exp(2*I*Pi*(chareval(gc,[1,-1]~,pr2) - chareval(gc,[1]~,pr2))))
-round(exp(2*Pi*(chareval(gc,[1,-I]~,pr2) - chareval(gc,[1]~,pr2))))
+round(exp(2*I*Pi*(gchareval(gc,[1,-1]~,pr2,0) - gchareval(gc,[1]~,pr2,0))))
+round(exp(2*Pi*(gchareval(gc,[1,-I]~,pr2,0) - gchareval(gc,[1]~,pr2,0))))
 
 print("gcharidentify 2");
 bnf = bnfinit(x^2-2,1);
 gc = gcharinit(bnf,1); round(gc.cyc)
 pr = idealprimedec(bnf,7)[1];
-th = chareval(gc,[5]~,pr);
+th = gchareval(gc,[5]~,pr,0);
 gcharidentify(gc,[pr],[th])
 chiw = gcharidentify(gc,[pr],[th+I*5/7]);
-exponent(chareval(gc,chiw,pr)-th-I*5/7) < -100
+exponent(gchareval(gc,chiw,pr,0)-th-I*5/7) < -100
 
 print("gcharlocal");
 bnf = bnfinit(x^2-5,1);
@@ -305,7 +304,7 @@ chi = gcharidentify(gc,[2],[[0,13.]]);
 gcharlocal(gc,chi,2)
 pr = idealprimedec(bnf,11)[1];
 chi = gcharidentify(gc,[pr],[0.3]);
-chareval(gc,chi,pr)
+gchareval(gc,chi,pr,0)
 bnf = bnfinit(x^2-5,1);
 gc = gcharinit(bnf,1);
 pr = idealprimedec(bnf,11)[1];
@@ -354,7 +353,7 @@ f = gcharduallog(gc,chi)
 pr = idealprimedec(bnf,2)[1];
 v = gcharlog(gc,pr);
 val1 = exp(2*I*Pi*f*v);
-val2 = exp(2*I*Pi*chareval(gc,chi,pr));
+val2 = gchareval(gc,chi,pr);
 exponent(val1-val2) < -100
 
 print("doc gcharisalgebraic");
@@ -405,7 +404,17 @@ f = gcharduallog(gc,chi);
 pr = idealprimedec(bnf,5)[1];
 v = gcharlog(gc,pr)
 exp(2*I*Pi*f*v)
-exp(2*I*Pi*chareval(gc,chi,pr))
+gchareval(gc,chi,pr)
+
+print("doc gchareval");
+bnf = bnfinit(x^2-5);
+gc = gcharinit(bnf,1);
+chi = [1]~;
+pr = idealprimedec(bnf,11)[1];
+a = gchareval(gc,chi,pr); round(10^10*a)
+b = gchareval(gc,chi,pr,0); round(10^10*b)
+exponent(a - exp(2*Pi*I*b)) < -100
+
 
 print("prime sort bug");
 bnf = bnfinit(x,1);
@@ -422,9 +431,9 @@ chi = [0,0,0,1,0,0,0,0,0,0]~;
 A = idealprimedec(bnf,2)[1];
 B = idealprimedec(bnf,5)[1];
 AB = idealmul(bnf,A,B);
-vA = chareval(gc,chi,A);
-vB = chareval(gc,chi,B);
-vAB = chareval(gc,chi,AB);
+vA = gchareval(gc,chi,A,0);
+vB = gchareval(gc,chi,B,0);
+vAB = gchareval(gc,chi,AB,0);
 v = vAB - vA - vB;
 v -= round(v);
 exponent(v) < -100
@@ -434,10 +443,11 @@ bnf = bnfinit(x^2+5,1);
 gc = gcharinit(bnf,1);
 round(gc.cyc)
 chi = [1,0]~;
-chareval(gc,chi,idealprimedec(bnf,2)[1]) != 0
-chareval(gc,chi,idealprimedec(bnf,3)[1]) != 0
+gchareval(gc,chi,idealprimedec(bnf,2)[1],0) != 0
+gchareval(gc,chi,idealprimedec(bnf,3)[1],0) != 0
 
 print("bug #2373");
+a = 'a;
 bnf=bnfinit(a^6-3*a^5+19*a^4-31*a^3+121*a^2-143*a+307);
 gc=gcharinit(bnf,46);
 pr=idealprimedec(bnf,37723331332351742373432849364353603676875519354218200736622011846348771299073);
@@ -490,8 +500,9 @@ gcharalgebraic(gc,[0]);
 gcharalgebraic(gc,[[]]);
 gcharalgebraic(gc,[[0,[]]]);
 gcharalgebraic(gc,[[[],0]]);
-chareval(gc,O(3^7),1);
-chareval(gc,[0,O(3^7)],1);
+gchareval(gc,O(3^7),1,0);
+gchareval(gc,[0,O(3^7)],1,0);
+chareval(gc,[0]~,1);
 gcharisalgebraic(gc,[1]);
 \\ regression tests
 gc = gcharinit(bnfinit(x^2-x-276,1), [2,[0,1]]);

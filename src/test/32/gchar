@@ -166,7 +166,7 @@ gcharduallog
 [89110698909568455589, -89110698909568455589, -300000000000000000000, -10000
 0000000000000000, 0]
 1
-chareval
+gchareval
 1
 169
 169
@@ -272,6 +272,10 @@ doc gcharlog
 135170*I
 -4.5285995080704456583673312416031761736 + 2.1193835177957097598574507313417
 135161*I
+doc gchareval
+-3804107379 - 9248176417*I
+-3121086862
+1
 prime sort bug
 1
 LLL erase bug
@@ -371,12 +375,15 @@ bad inputs
   ***   at top-level: gcharalgebraic(gc,[[[],0]])
   ***                 ^---------------------------
   *** gcharalgebraic: incorrect type in gcharalgebraic (2) (t_VEC).
-  ***   at top-level: chareval(gc,O(3^7),1)
-  ***                 ^---------------------
-  *** chareval: incorrect type in check_gchar [chi] (t_PADIC).
-  ***   at top-level: chareval(gc,[0,O(3^7)],1)
-  ***                 ^-------------------------
-  *** chareval: incorrect type in check_gchar [chi] (t_VEC).
+  ***   at top-level: gchareval(gc,O(3^7),1,0)
+  ***                 ^------------------------
+  *** gchareval: incorrect type in check_gchar [chi] (t_PADIC).
+  ***   at top-level: gchareval(gc,[0,O(3^7)],1,0)
+  ***                 ^----------------------------
+  *** gchareval: incorrect type in check_gchar [chi] (t_VEC).
+  ***   at top-level: chareval(gc,[0]~,1)
+  ***                 ^-------------------
+  *** chareval: incorrect type in chareval [use gchareval to evaluate a grossencharacter] (t_VEC).
   ***   at top-level: gcharisalgebraic(gc,[1])
   ***                 ^------------------------
   *** gcharisalgebraic: incorrect type in check_gchar [chi] (t_VEC).
@@ -395,4 +402,4 @@ bad inputs
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)]~,1)
   ***                 ^------------------------------
   *** gcharlocal: incorrect type in check_gchar_i [s] (t_PADIC).
-Total time spent: 2360
+Total time spent: 4939
