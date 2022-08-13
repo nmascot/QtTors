@@ -1,9 +1,11 @@
+  ***   Warning: new stack size = 40000000 (38.147 Mbytes).
 1/2*x^2 - 1/2*x
 20
 [1, 6, 15, 20, 15, 6, 1]
 4824670384888174806699998652284212509450915553158197754113741817487466430465
 0
 1
+1487335486
   ***   at top-level: binomial(1,2.)
   ***                 ^--------------
   *** binomial: incorrect type in binomial (t_REAL).
@@ -13,4 +15,4 @@
   ***   at top-level: binomial(1.)
   ***                 ^------------
   *** binomial: incorrect type in binomial (t_REAL).
-Total time spent: 0
+Total time spent: 300

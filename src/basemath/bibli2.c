@@ -941,17 +941,72 @@ dirdiv(GEN x, GEN y)
 /*******************************************************************/
 /**                      BINOMIAL COEFFICIENTS                    **/
 /*******************************************************************/
+/* Lucas's formula for v_p(\binom{n}{k}), used in the tough case p <= sqrt(n) */
+static long
+binomial_lval(ulong n, ulong k, ulong p)
+{
+  ulong r = 0, e = 0;
+  do
+  {
+    ulong a = n % p, b = k % p + r;
+    n /= p; k /= p;
+    if (a < b) { e++; r = 1; } else r = 0;
+  } while (n);
+  return e;
+}
 GEN
 binomialuu(ulong n, ulong k)
 {
-  pari_sp ltop = avma;
-  GEN z;
+  pari_sp av = avma;
+  ulong p, nk, sn;
+  long c, l;
+  forprime_t T;
+  GEN v, z;
   if (k > n) return gen_0;
-  k = minuu(k,n-k);
+  nk = n-k; if (k > nk) lswap(nk, k);
   if (!k) return gen_1;
   if (k == 1) return utoipos(n);
-  z = diviiexact(mulu_interval(n-k+1, n), mulu_interval(2UL, k));
-  return gerepileuptoint(ltop,z);
+  if (k == 2) return muluu(odd(n)? n: n-1, n>>1);
+  if (k < 1000 || ((double)k/ n) * log((double)n) < 0.5)
+  { /* k "small" */
+    z = diviiexact(mulu_interval(n-k+1, n), mulu_interval(2UL, k));
+    return gerepileuptoint(av, z);
+  }
+  sn = usqrt(n);
+  /* use Lucas's formula, k <= n/2 */
+  l = minuu(1UL << 20, n); v = cgetg(l+1, t_VECSMALL); c = 1;
+  u_forprime_init(&T, nk+1, n);
+  while ((p = u_forprime_next(&T))) /* all primes n-k < p <= n occur, v_p = 1 */
+  {
+    if (c == l) { ulong L = l << 1; v = vecsmall_lengthen(v, L); l = L; }
+    v[c++] = p;
+  }
+  u_forprime_init(&T, sn+1, n >> 1);
+  while ((p = u_forprime_next(&T))) /* p^2 > n, v_p <= 1 */
+    if (n % p < k % p)
+    {
+      if (c == l) { ulong L = l << 1; v = vecsmall_lengthen(v, L); l = L; }
+      v[c++] = p;
+    }
+  setlg(v, c); z = zv_prod_Z(v);
+  u_forprime_init(&T, 3, sn);
+  l = minuu(1UL << 20, sn); v = cgetg(l + 1, t_VEC); c = 1;
+  while ((p = u_forprime_next(&T))) /* p <= sqrt(n) */
+  {
+    ulong e = binomial_lval(n, k, p);
+    if (e)
+    {
+      if (c == l) { ulong L = l << 1; v = vec_lengthen(v, L); l = L; }
+      gel(v, c++) = powuu(p, e);
+    }
+  }
+  setlg(v, c); z = mulii(z, ZV_prod(v));
+  { /* p = 2 */
+    ulong e = hammingl(k);
+    e += (k == nk)? e: hammingl(nk);
+    e -= hammingl(n); if (e) z = shifti(z, e);
+  }
+  return gerepileuptoint(av, z);
 }
 
 GEN

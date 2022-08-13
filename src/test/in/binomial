@@ -1,9 +1,11 @@
+default(parisize,"40M");
 binomial(x,2)
 binomial(6,3)
 binomial(6)
 binomial(2^64-1,4)
 binomial(3,5)
 binomial(3,3)
+binomial(10001111,3532222) % (2^32 + 15)
 
 \\errors
 binomial(1,2.)
