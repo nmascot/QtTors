@@ -3616,7 +3616,7 @@ numerator(GEN x, GEN D)
   if (isint1(D)) return Q_remove_denom(x,NULL);
   if (!gequalX(D)) pari_err_TYPE("numerator", D);
   v = varn(D); /* optimization */
-  if (typ(x) == t_RFRAC && varn(gel(x,2)) == v) return gcopy(gel(x,2));
+  if (typ(x) == t_RFRAC && varn(gel(x,2)) == v) return gcopy(gel(x,1));
   return gerepileupto(av, gmul(x, denominator_v(x,v)));
 }
 GEN

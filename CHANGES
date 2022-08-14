@@ -132,6 +132,7 @@ BA 107- bnrclassfield: incorrect result when fundamental units are large, e.g.
    111- round(t_FRAC, &e): e was always -oo
    112- FpM_center_inplace would crash for p = 3 [#2387]
 BA 113- [gp interpreter] fix memory leak in pop_lex
+   114- numerator(1/x+1/y, 'x) -> x*y
 
   Added
 HC   1- new GP function eulerreal
