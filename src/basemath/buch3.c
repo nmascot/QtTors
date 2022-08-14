@@ -1509,10 +1509,7 @@ imageofgroup(GEN bnr, GEN bnr2, GEN H)
 }
 GEN
 bnrchar_primitive_raw(GEN bnr, GEN bnrc, GEN chi)
-{
-  GEN S = bnrsurjection(bnr, bnrc);
-  return abmap_char_image(S, chi);
-}
+{ return abmap_char_image(bnrsurjection(bnr, bnrc), chi); }
 
 /* convert A,B,C to [bnr, H] */
 GEN
