@@ -2848,7 +2848,7 @@ log_prk(GEN nf, GEN a, GEN sprk, GEN mod)
   if (mod)
   {
     cyc = ZV_snf_gcd(cyc, mod);
-    if (signe(remii(mod,p))) return vecmodii(ZC_Z_mul(U1,e), cyc);
+    if (signe(remii(mod,p))) return ZV_ZV_mod(ZC_Z_mul(U1,e), cyc);
   }
   if (signe(e))
   {
@@ -2863,7 +2863,7 @@ log_prk(GEN nf, GEN a, GEN sprk, GEN mod)
     y = ZC_Z_mul(y, Fp_inv(N, q));
   }
   y = ZC_lincomb(gen_1, e, ZM_ZC_mul(U2,y), U1);
-  return vecmodii(y, cyc);
+  return ZV_ZV_mod(y, cyc);
 }
 /* true nf */
 GEN
@@ -3029,7 +3029,7 @@ sprk_log_prk1_2(GEN nf, GEN a, GEN sprk)
   GEN U1, U2, y, L2 = sprk_get_L2(sprk);
   sprk_get_U2(sprk, &U1,&U2);
   y = ZM_ZC_mul(U2, log_prk1(nf, a, lg(U2)-1, L2, sprk_get_prk(sprk)));
-  return vecmodii(y, sprk_get_cyc(sprk));
+  return ZV_ZV_mod(y, sprk_get_cyc(sprk));
 }
 /* true nf; assume e >= 2 */
 GEN
@@ -3386,15 +3386,8 @@ check_nfelt(GEN x, GEN *den)
 }
 
 GEN
-vecmodii(GEN x, GEN y)
-{ pari_APPLY_same(modii(gel(x,i), gel(y,i))) }
-GEN
 ZV_snf_gcd(GEN x, GEN mod)
 { pari_APPLY_same(gcdii(gel(x,i), mod)); }
-
-GEN
-vecmoduu(GEN x, GEN y)
-{ pari_APPLY_ulong(uel(x,i) % uel(y,i)) }
 
 /* assume a true bnf and bid */
 GEN
@@ -3430,7 +3423,7 @@ ideallog_units0(GEN bnf, GEN bid, GEN MOD)
   }
   y = vec_prepend(y, zlog(nf, bnf_get_tuU(bnf), nfsign_tu(bnf, S.archp), &S));
   for (j = 1; j <= lU; j++)
-    gel(y,j) = vecmodii(ZMV_ZCV_mul(S.U, gel(y,j)), cyc);
+    gel(y,j) = ZV_ZV_mod(ZMV_ZCV_mul(S.U, gel(y,j)), cyc);
   return y;
 }
 GEN
@@ -3465,7 +3458,7 @@ ideallog_i(GEN nf, GEN x, zlog_S *S)
   else
     y = zlog(nf, x, NULL, S);
   y = ZMV_ZCV_mul(S->U, y);
-  return gerepileupto(av, vecmodii(y, bid_get_cyc(S->bid)));
+  return gerepileupto(av, ZV_ZV_mod(y, bid_get_cyc(S->bid)));
 }
 GEN
 ideallogmod(GEN nf, GEN x, GEN bid, GEN mod)

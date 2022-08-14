@@ -8969,6 +8969,10 @@ are exact.
 \fun{GEN}{ZC_Z_div}{GEN x, GEN y} returns $x/y$, where the resulting vector
 has rational entries.
 
+\fun{GEN}{ZV_ZV_mod}{GEN a, GEN b}. Assuming $a$ and $b$ are two \kbd{ZV}
+of the same length, returns the vector whose $i$-th component
+is \kbd{modii}$(a[i], b[i])$.
+
 \fun{GEN}{ZV_dotproduct}{GEN x,GEN y} as \kbd{RgV\_dotproduct} assuming $x$
 and $y$ have \typ{INT} entries.
 
@@ -9117,6 +9121,10 @@ are exact.
 
 \fun{GEN}{ZM_Z_div}{GEN x, GEN y} returns $x/y$, where the resulting matrix
 has rational entries.
+
+\fun{GEN}{ZM_ZV_mod}{GEN a, GEN b}. Assuming $a$ is a \kbd{ZM}
+whose columns have the same length as the \kbd{ZV} $b$, apply
+\kbd{ZV\_ZV\_mod}$(a[i],b)$ to all columns.
 
 \fun{GEN}{ZC_Q_mul}{GEN x, GEN y} returns $x*y$, where $y$ is a rational number
 and the resulting \typ{COL} has rational entries.

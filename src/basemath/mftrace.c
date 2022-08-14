@@ -6455,7 +6455,7 @@ mklvchi(GEN bnr, GEN cycn, GEN gb)
     for (n = 2; n < ordmax; n++)
       if (ugcd(n, ordmax) == 1)
       {
-        GEN tmp = vecmodii(gmulsg(n, chi), cyc);
+        GEN tmp = ZV_ZV_mod(gmulsg(n, chi), cyc);
         long j;
         for (j = i+1; j < l; j++)
           if (gel(vchi,j) && gequal(gel(vchi,j), tmp)) gel(vchi,j) = NULL;

@@ -630,7 +630,7 @@ bnrisprincipalmod(GEN bnr, GEN x, GEN MOD, long flag)
     if (!MOD && !(flag & nf_GEN)) MOD = gel(cycray,1);
     ex = ZM2_ZC2_mul(bnr_get_U(bnr), e, ideallogmod(nf, b, bid, MOD));
   }
-  ex = vecmodii(ex, cycray);
+  ex = ZV_ZV_mod(ex, cycray);
   if (!(flag & (nf_GEN|nf_GENMAT))) return gerepileupto(av, ex);
 
   /* compute generator */
@@ -1429,8 +1429,8 @@ bnrsurjection(GEN bnr1, GEN bnr2)
       M = shallowconcat(T, M);
     }
   }
-  /* could reduce the matrix mod cyc2 */
-  return mkvec3(ZM_mul(M, bnr_get_Ui(bnr1)), bnr_get_cyc(bnr1), cyc2);
+  M = ZM_ZV_mod(ZM_mul(M, bnr_get_Ui(bnr1)), cyc2);
+  return mkvec3(M, bnr_get_cyc(bnr1), cyc2);
 }
 
 /* nchi a normalized character, S a surjective map ; return S(nchi)
@@ -1485,7 +1485,7 @@ bnrmap(GEN A, GEN B)
     case t_COL: /* discrete log mod mA */
       if (lg(B) != lg(c) || !RgV_is_ZV(B))
         pari_err_TYPE("bnrmap [not a discrete log]", B);
-      B = vecmodii(ZM_ZC_mul(M, B), C);
+      B = ZV_ZV_mod(ZM_ZC_mul(M, B), C);
       return gerepileupto(av, B);
   }
   return gerepilecopy(av, B);
@@ -1546,7 +1546,7 @@ bnrisconductor0(GEN A,GEN B,GEN C)
 
 static GEN
 ideallog_to_bnr_i(GEN Ubid, GEN cyc, GEN z)
-{ return (lg(Ubid)==1)? zerocol(lg(cyc)-1): vecmodii(ZM_ZC_mul(Ubid,z), cyc); }
+{ return (lg(Ubid)==1)? zerocol(lg(cyc)-1): ZV_ZV_mod(ZM_ZC_mul(Ubid,z), cyc); }
 /* return bnrisprincipal(bnr, (x)), assuming z = ideallog(x); allow a
  * t_MAT for z, understood as a collection of ideallog(x_i) */
 static GEN
@@ -2709,9 +2709,7 @@ bnrautmatrix(GEN bnr, GEN aut)
   for (i = 1; i < l; i++)
     gel(M,i) = isprincipalray(bnr, nfgaloismatrixapply(nf, aut, gel(Gen,i)));
   M = ZM_mul(M, bnr_get_Ui(bnr));
-  l = lg(M);
-  for (i = 1; i < l; i++) gel(M,i) = vecmodii(gel(M,i), cyc);
-  return gerepilecopy(av, M);
+  return gerepilecopy(av, ZM_ZV_mod(M, cyc));
 }
 
 GEN

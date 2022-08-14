@@ -806,7 +806,7 @@ znconreylog(GEN bid, GEN x)
     case t_COL: /* log_bid(x) */
       Ui = znstar_get_Ui(bid);
       if (!RgV_is_ZV(x) || lg(x) != lg(Ui)) pari_err_TYPE("znconreylog", x);
-      return gerepileupto(av, vecmodii(ZM_ZC_mul(Ui,x), cycg));
+      return gerepileupto(av, ZV_ZV_mod(ZM_ZC_mul(Ui,x), cycg));
     case t_VEC:
       return gerepilecopy(av, znconreyfromchar(bid, x));
     default: pari_err_TYPE("znconreylog", x);

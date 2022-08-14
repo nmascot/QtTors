@@ -2360,6 +2360,16 @@ ZV_dvd(GEN x, GEN y)
     if ( ! dvdii( gel(x,i), gel(y,i) ) ) return 0;
   return 1;
 }
+INLINE GEN
+ZM_ZV_mod(GEN x, GEN y)
+{ pari_APPLY_same(ZV_ZV_mod(gel(x,i), y)) }
+INLINE GEN
+ZV_ZV_mod(GEN x, GEN y)
+{ pari_APPLY_same(modii(gel(x,i), gel(y,i))) }
+INLINE GEN
+vecmodii(GEN x, GEN y) { return ZV_ZV_mod(x,y); }
+INLINE GEN
+vecmoduu(GEN x, GEN y) { pari_APPLY_ulong(((ulong*)x)[i] % ((ulong*)y)[i]) }
 
 /* Fq */
 INLINE GEN

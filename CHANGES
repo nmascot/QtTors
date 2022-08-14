@@ -276,7 +276,8 @@ TF  96- new libpari functions FpX_factcyclo, Flx_factcyclo
     97- new libpari functions ZV_sort_shallow, ZV_sort_uniq_shallow,
         tridiv_boundu
 BA  98- rnfabelianconjgen
-    99- new libpari functions abmap_kernel, abmap_subgroup_image
+    99- new libpari functions abmap_kernel, abmap_subgroup_image, ZV_ZV_mod,
+        ZM_ZV_mod
 
   Changed
 HC   1- faster implementation of eulervec + cache result

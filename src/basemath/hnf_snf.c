@@ -2798,11 +2798,7 @@ snf_group(GEN H, GEN D, GEN *newU, GEN *newUi)
     }
     Ui = Hvec? ZM_diag_mul(H, V): ZM_mul(H, V);
     for (i = 1; i < l; i++) gel(Ui,i) = ZC_Z_divexact(gel(Ui,i), gel(D,i));
-    if (Hvec)
-    { for (i = 1; i < l; i++) gel(Ui,i) = vecmodii(gel(Ui,i), H); }
-    else
-      Ui = ZM_hnfrem(Ui, H);
-    *newUi = Ui;
+    *newUi = Hvec? ZM_ZV_mod(Ui, H): ZM_hnfrem(Ui, H);
   }
   return D;
 }
