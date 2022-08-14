@@ -2014,15 +2014,6 @@ of the GP function for details. \fl\ is an or-ed combination of the flags
 \tet{rnf_REL} (output relative data) and \tet{rnf_COND} (return 0 unless the
 modulus is the conductor).
 
-\fun{GEN}{bnrsurjection}{GEN BNR, GEN bnr} \kbd{BNR} and \kbd{bnr}
-defined over the same field $K$, for moduli $F$ and $f$ with
-$F\mid f$, returns the canonical surjection
-$\text{Cl}_K(F)\to \text{Cl}_K(f)$ as a triple $[M,\var{cyc}_F,\var{cyc}_f]$.
-$M$ gives the image of the fixed ray class group generators of \kbd{BNR} in
-terms of the ones in \kbd{bnr}, $\var{cyc}_F$ and $\var{cyc}_f$ are the cyclic
-structures of \kbd{BNR} and \kbd{bnr} respectively (as per \tet{bnr_get_cyc}).
-Shallow function.
-
 \fun{GEN}{ABC_to_bnr}{GEN A, GEN B, GEN C, GEN *H, int addgen} This is a
 quick conversion function designed to go from the too general (inefficient)
 $A$, $B$, $C$ form to the preferred \var{bnr}, $H$ form for class fields.
@@ -2030,6 +2021,33 @@ Given $A$, $B$, $C$ as explained above (omitted entries coded by \kbd{NULL}),
 return the attached \var{bnr}, and set $H$ to the attached subgroup. If
 \kbd{addgen} is $1$, make sure that if the \var{bnr} needed to be computed,
 then it contains generators.
+
+\subsec{Abelian maps}
+A map $f:A\to B$ between two abelian groups of finite type is given by a
+triple: $[M, \var{cyc}_A, \var{cyc}_B]$, where $\var{cyc}_A = [a_1,\dots, a_m]$
+and $\var{cyc}_B = [b_1,\dots, b_n]$ are the elementary divisors for $A$ and
+$B$ (see \kbd{ZM\_snf}) so that $A = \oplus_{i\leq m} (\Z/a_i\Z) g_i$
+and $B = \sim \oplus_{j\leq n} (\Z/b_j\Z) G_j $. The matrix $M$ gives the image
+of the generators $g_i$ in terms of the $G_j$: $(f(g_i))_{i\leq m} =
+(G_j)_{j\leq n} \cdot M$. The function \kbd{bnrmap} returns such a structure.
+
+\fun{GEN}{bnrsurjection}{GEN BNR, GEN bnr} \kbd{BNR} and \kbd{bnr}
+defined over the same field $K$, for moduli $F$ and $f$ with
+$f\mid F$, returns the canonical surjection
+$\text{Cl}_K(F)\to \text{Cl}_K(f)$ as an abelian map. I.e., a triple
+$[M,\var{cyc}_F,\var{cyc}_f]$. $M$ gives the image of the fixed ray class
+group generators of \kbd{BNR} in terms of the ones in \kbd{bnr},
+$\var{cyc}_F$ and $\var{cyc}_f$ are the cyclic structures of \kbd{BNR} and
+\kbd{bnr} respectively (as per \tet{bnr_get_cyc}). Shallow function.
+
+\fun{GEN}{abmap_kernel}{GEN S} returns the kernel of the abelian map $S$,
+ans a matrix $H$ in HNF: the subgroup is $(g_i)\cdot H$.
+
+\fun{GEN}{abmap_subgroup_image}{GEN S, GEN H} given a subgroup $H$ of
+$A$ (its generators are the $(g_i) H$); for efficiency, $H$ should be given in
+canonical form, i.e., as an HNF left divisor of $\var{diag}(a_1,\dots,a_m)$.
+Returns the subgroup $f(H)$ of $B$, as an HNF left divisor of
+$\var{diag}(b_1,\dots,b_n)$.
 
 \subsec{Grunwald--Wang theorem}
 
@@ -3241,16 +3259,16 @@ Return a \typ{VECSMALL} $v$ such that $v[i] = -1$ if $(i,N) > 1$ else
 $\chi(i) = e(v[i]/d)$, $1 \leq i \leq N$.
 
 \section{Hecke characters}
+% TODO Aurel or Pascal
+\fun{GEN}{eulerf_gchar}{GEN an, GEN p, long prec}
 
-\fun{GEN}{eulerf_gchar}{GEN an, GEN p, long prec} TODO
+\fun{GEN}{gchari_lfun}{GEN gc, GEN chi, GEN w}
 
-\fun{GEN}{gchari_lfun}{GEN gc, GEN chi, GEN w} TODO
+\fun{int}{is_gchar_group}{GEN gc}
 
-\fun{int}{is_gchar_group}{GEN gc} TODO
+\fun{GEN}{lfungchar}{GEN gc, GEN chi}
 
-\fun{GEN}{lfungchar}{GEN gc, GEN chi} TODO
-
-\fun{GEN}{vecan_gchar}{GEN an, long n, long prec} TODO
+\fun{GEN}{vecan_gchar}{GEN an, long n, long prec}
 
 \section{Central simple algebras}
 

@@ -223,7 +223,7 @@ LiftChar(GEN Qt, GEN cyc, GEN chi)
 
 /* Let C be a subgroup, system of representatives of the quotient */
 static GEN
-ag_subgroup_classes(GEN C)
+subgroup_classes(GEN C)
 {
   GEN U, D = ZM_snfall_i(C, &U, NULL, 1), e = cyc2elts(D);
   long i, l = lg(e);
@@ -240,7 +240,7 @@ ag_subgroup_classes(GEN C)
 
 /* Let s: A -> B given by [P,cycA,cycB] A and B, compute the kernel of s. */
 GEN
-ag_kernel(GEN S)
+abmap_kernel(GEN S)
 {
   GEN U, P = gel(S,1), cycA = gel(S,2), DB = diagonal_shallow(gel(S,3));
   long nA = lg(cycA)-1, rk;
@@ -250,7 +250,7 @@ ag_kernel(GEN S)
 }
 /* let H be a subgroup of A; return s(H) */
 GEN
-ag_subgroup_image(GEN S, GEN H)
+abmap_subgroup_image(GEN S, GEN H)
 { return ZM_hnfmodid(ZM_mul(gel(S,1), H),  gel(S,3)); }
 
 /* Let m and n be two moduli such that n|m and let C be a congruence
@@ -262,7 +262,7 @@ ComputeKernel(GEN bnrm, GEN bnrn, GEN dtQ)
   pari_sp av = avma;
   GEN S = bnrsurjection(bnrm, bnrn);
   GEN P = ZM_mul(gel(dtQ,3), gel(S,1));
-  return gerepileupto(av, ag_kernel(mkvec3(P, gel(S,2), gel(dtQ,2))));
+  return gerepileupto(av, abmap_kernel(mkvec3(P, gel(S,2), gel(dtQ,2))));
 }
 
 static long
@@ -303,7 +303,7 @@ IsGoodSubgroup(GEN H, GEN bnr, GEN map)
   PH = divcond(bnrH);
   S = bnrsurjection(bnr, bnrH);
   /* H as a subgroup of bnrH */
-  iH = ag_subgroup_image(S, p1);
+  iH = abmap_subgroup_image(S, p1);
   qH = InitQuotient(iH);
   for (j = 1; j < lg(P); j++)
   {
@@ -489,7 +489,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
               if (!ok) continue;
             }
             CR = InitChar(bnrm, AllChars(bnrm, QD, 1), 0, DEFAULTPREC);
-            data = mkvec4(bnrm, D, ag_subgroup_classes(Cm), CR);
+            data = mkvec4(bnrm, D, subgroup_classes(Cm), CR);
             if (DEBUGLEVEL>1)
               err_printf("\nTrying modulus = %Ps and subgroup = %Ps\n",
                          bnr_get_mod(bnrm), D);

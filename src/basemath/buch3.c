@@ -1436,7 +1436,7 @@ bnrsurjection(GEN bnr1, GEN bnr2)
 /* nchi a normalized character, S a surjective map ; return S(nchi)
  * still normalized wrt the original cyclic structure (S[2]) */
 static GEN
-ag_nchar_image(GEN S, GEN nchi)
+abmap_nchar_image(GEN S, GEN nchi)
 {
   GEN U, M = gel(S,1), Mc = diagonal_shallow(gel(S,3));
   long l = lg(M);
@@ -1446,10 +1446,10 @@ ag_nchar_image(GEN S, GEN nchi)
   return char_simplify(gel(nchi,1), ZV_ZM_mul(gel(nchi,2), U));
 }
 static GEN
-ag_char_image(GEN S, GEN chi)
+abmap_char_image(GEN S, GEN chi)
 {
   GEN nchi = char_normalize(chi, cyc_normalize(gel(S,2)));
-  GEN DC = ag_nchar_image(S, nchi);
+  GEN DC = abmap_nchar_image(S, nchi);
   return char_denormalize(gel(S,3), gel(DC,1), gel(DC,2));
 }
 
@@ -1477,11 +1477,11 @@ bnrmap(GEN A, GEN B)
       B = ZM_hnfmodid(B, C); break;
     case t_MAT: /* subgroup */
       if (!RgM_is_ZM(B)) pari_err_TYPE("bnrmap [not a subgroup]", B);
-      B = ZM_hnfmodid(B, c); B = ag_subgroup_image(A, B); break;
+      B = ZM_hnfmodid(B, c); B = abmap_subgroup_image(A, B); break;
     case t_VEC: /* character */
       if (!char_check(c, B))
         pari_err_TYPE("bnrmap [not a character mod mA]", B);
-      B = ag_char_image(A, B); break;
+      B = abmap_char_image(A, B); break;
     case t_COL: /* discrete log mod mA */
       if (lg(B) != lg(c) || !RgV_is_ZV(B))
         pari_err_TYPE("bnrmap [not a discrete log]", B);
@@ -1497,7 +1497,7 @@ bnrmap(GEN A, GEN B)
  *   chic(genc[i]) = zeta_C^chic[i]), C = cyc_normalize(bnr.cyc)[1] */
 GEN
 bnrchar_primitive(GEN bnr, GEN nchi, GEN bnrc)
-{ return ag_nchar_image(bnrsurjection(bnr, bnrc), nchi); }
+{ return abmap_nchar_image(bnrsurjection(bnr, bnrc), nchi); }
 
 /* s: <gen> = Cl_f -> Cl_f2 -> 0, H subgroup of Cl_f (generators given as
  * HNF on [gen]). Return subgroup s(H) in Cl_f2 */
@@ -1505,13 +1505,13 @@ static GEN
 imageofgroup(GEN bnr, GEN bnr2, GEN H)
 {
   if (!H) return diagonal_shallow(bnr_get_cyc(bnr2));
-  return ag_subgroup_image(bnrsurjection(bnr, bnr2), H);
+  return abmap_subgroup_image(bnrsurjection(bnr, bnr2), H);
 }
 GEN
 bnrchar_primitive_raw(GEN bnr, GEN bnrc, GEN chi)
 {
   GEN S = bnrsurjection(bnr, bnrc);
-  return ag_char_image(S, chi);
+  return abmap_char_image(S, chi);
 }
 
 /* convert A,B,C to [bnr, H] */
