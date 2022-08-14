@@ -8920,10 +8920,10 @@ of the form $a + b*n$, $n = 0, 1, \dots$ and set $a$ and $b$. Else return $0$.
 zero, and $0$ otherwise.
 
 \fun{int}{ZV_cmp}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
-the same length (lexicographic order, comparing absolute values).
+the same length (lexicographic order).
 
 \fun{int}{ZV_abscmp}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
-the same length (lexicographic order).
+the same length (lexicographic order, comparing absolute values).
 
 \fun{int}{ZV_equal}{GEN x, GEN y} returns $1$ if the two \kbd{ZV} are equal
 and $0$ otherwise. A \typ{COL} and a \typ{VEC} with the same entries are
