@@ -90,6 +90,11 @@ x^8 + 2/11*x^9 + 1/6*x^10 + 2/13*x^11 + 1/7*x^12 + 2/15*x^13 + 1/8*x^14 + 2/
 1.2554469815542412045782999961607539985 - 0.24161088425121476374403057661591
 870286*I
 -127
+-127
+-127
+-127
+-127
+-124
   ***   at top-level: airy(O(x))
   ***                 ^----------
   *** airy: incorrect type in airy (t_SER).
@@ -109,4 +114,4 @@ x^8 + 2/11*x^9 + 1/6*x^10 + 2/13*x^11 + 1/7*x^12 + 2/15*x^13 + 1/8*x^14 + 2/
   ***   at top-level: hypergeom([1,2,3,4],[],1/2)
   ***                 ^---------------------------
   *** hypergeom: sorry, this hypergeometric function is not yet implemented.
-Total time spent: 3020
+Total time spent: 4724

@@ -38,12 +38,20 @@ isnegint2(GEN a, long *pa)
 static int
 isnegint(GEN a) { return isnegint2(a, NULL); }
 static int
+isnegint_approx(GEN a, long bit)
+{
+  GEN b;
+  if (gexpo(imag_i(a)) > -bit) return 0;
+  a = real_i(a); if (gsigne(a) > 0) return 0;
+  b = ground(a); return gexpo(gsub(a, b)) < -bit;
+}
+static int
 is0(GEN a, long bit) { return gequal0(a) || gexpo(a) < -bit; }
 static int
 islong(GEN a, long *m, long prec)
 {
   *m = itos(ground(real_i(a)));
-  if (is0(gsubgs(a, *m), prec2nbits(prec))) return 1;
+  if (is0(gsubgs(a, *m), prec2nbits(prec) - 5)) return 1;
   return 0;
 }
 
@@ -504,14 +512,14 @@ static long
 F21ind(GEN a, GEN b, GEN c, GEN z, long bit)
 {
   GEN v = const_vec(6, mkoo());
-  long ind = 0;
+  long ind = 0, B = bit - 5;
   const long LD = LOWDEFAULTPREC;
-  if (!isnegint(cind(a,b,c, 1))) gel(v,1) = gabs(zind(z,1), LD);
+  if (!isnegint_approx(cind(a,b,c, 1),B)) gel(v,1) = gabs(zind(z,1), LD);
   gel(v,2) = gabs(zind(z,2), LD);
   gel(v,3) = gabs(z, LD);
-  if (!isnegint(cind(a,b,c, 4))) gel(v,4) = gabs(zind(z,4), LD);
-  if (!isnegint(cind(a,b,c, 5))) gel(v,5) = gabs(zind(z,5), LD);
-  if (!isnegint(cind(a,b,c, 6))) gel(v,6) = gabs(zind(z,6), LD);
+  if (!isnegint_approx(cind(a,b,c, 4),B)) gel(v,4) = gabs(zind(z,4), LD);
+  if (!isnegint_approx(cind(a,b,c, 5),B)) gel(v,5) = gabs(zind(z,5), LD);
+  if (!isnegint_approx(cind(a,b,c, 6),B)) gel(v,6) = gabs(zind(z,6), LD);
   ind = vecindexmin(v); /* |znew| <= 1; close to 1 ? */
   return (gexpo(gsubgs(gel(v,ind),1)) > -maxss(bit / 4, 32))? -ind: ind;
 }
