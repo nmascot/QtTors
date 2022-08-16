@@ -170,8 +170,7 @@ update_f(GEN f, GEN u)
 
 /* f is a vector of matrices and i an index whose bits give the non-zero
  * entries; the product of the non zero entries is the actual result.
- * if i odd, f[1] is implicitely [f[1],1;1,0] */
-
+ * if i odd, f[1] may be an int: implicitely represent [f[1],1;1,0] */
 static long
 update_fm(GEN f, GEN a, long i)
 {
@@ -236,7 +235,7 @@ static const struct bb_group
 ui_group={ NULL,ui_pow,NULL,NULL,NULL,ui_equal1,NULL};
 
 static void
-quadunit_mod(GEN D, GEN d, GEN N, GEN *pu, GEN *pv)
+quadunit_uvmod(GEN D, GEN d, GEN N, GEN *pu, GEN *pv)
 {
   GEN u1, u2, v1, v2, p, q, q1, u, v;
   int m = mpodd(D);
@@ -266,22 +265,24 @@ quadunit_mod(GEN D, GEN d, GEN N, GEN *pu, GEN *pv)
     }
     if (gc_needed(av, 2))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"quadunit_mod");
+      if(DEBUGMEM>1) pari_warn(warnmem,"quadunit_uvmod");
       gerepileall(av, 7, &p, &u1,&u2,&v1,&v2, &q,&q1);
     }
   }
   *pu = modii(u, N);
   *pv = modii(v, N); if (m) *pu = Fp_sub(*pu, *pv, N);
 }
-GEN
-quadunit_basecase(GEN D)
+/* fundamental unit is u + vx mod quadpoly(D); always called with D
+ * fundamental and relatively small but would work in all cases. Should be
+ * called whenever the fundamental unit is so "small" that asymptotically
+ * fast multiplication is not used in the continued fraction loop */
+static void
+quadunit_uv_basecase(GEN D, GEN *pu, GEN *pv)
 {
-  pari_sp av0 = avma;
-  GEN d, u1, u2, v1, v2, p, q, q1, u, v, a, b, c;
-  int m;
+  GEN u1, u2, v1, v2, p, q, q1, u, v, a, b, c, d = sqrtremi(D, &a);
+  int m = mpodd(D);
   long first = 1;
-  check_quaddisc_real(D, NULL, "quadunit");
-  m = mpodd(D); d = sqrtremi(D, &a);
+
   p = d; q1 = shifti(a, -1); q = gen_2;
   if (mpodd(d) != m) { p = subiu(d,1); q1 = addii(q1,d); } /* q1 = (D-p^2)/2 */
   u1 = gen_2; u2 = p;
@@ -310,19 +311,104 @@ quadunit_basecase(GEN D)
   u = diviiexact(addmulii(a, D, b), q);
   v = diviiexact(subii(c, addii(a, b)), q);
   if (m == 1) u = subii(u, v);
-  u = shifti(u, -1);
-  return gerepilecopy(av0, mkquad(quadpoly_i(D), u, v));
+  *pu = shifti(u, -1); *pv = v;
 }
 
-GEN
-quadunit(GEN D)
+/* D > 0, d = sqrti(D) */
+static GEN
+quadunit_q(GEN D, GEN d, long *pN)
 {
-  pari_sp av0 = avma, av;
-  GEN f, d, p, q, q1, u, v, a, b, c;
-  int m;
+  pari_sp av = avma;
+  GEN p, q, q1;
+  long first = 1;
+  p = (Mod2(d) == Mod2(D))? d: subiu(d, 1);
+  q = gen_2;
+  q1 = shifti(subii(D, sqri(p)), -1);
+  for(;;)
+  {
+    GEN r, A = dvmdii(addii(p, d), q, &r), p1 = p, t;
+    p = subii(d, r);
+    if (!first && equalii(p1, p)) { *pN = 1; return q; } /* even period */
+    first = 0;
+    t = q; q = submulii(q1, A, subii(p, p1)); q1 = t;
+    if (equalii(q, t)) { *pN = -1; return q; } /* odd period */
+    if (gc_needed(av, 2))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"quadunitnorm");
+      gerepileall(av, 3, &p, &q, &q1);
+    }
+  }
+}
+/* fundamental unit mod N */
+static GEN
+quadunit_mod(GEN D, GEN N)
+{
+  GEN q, u, v, d = sqrti(D);
+  pari_sp av = avma;
+  long s;
+  q = gerepileuptoint(av, quadunit_q(D, d, &s));
+  if (mpodd(N) && equali1(gcdii(q, N)))
+  {
+    quadunit_uvmod(D, d, N, &u, &v);
+    q = Fp_inv(shifti(q, 1), N);
+    u = Fp_mul(u, q, N);
+    v = Fp_mul(v, q, N); v = modii(shifti(v, 1), N);
+  }
+  else
+  {
+    GEN M = shifti(mulii(q, N), 1);
+    quadunit_uvmod(D, d, M, &u, &v);
+    u = diviiexact(u, q);
+    v = diviiexact(v, q); u = shifti(u,-1);
+  }
+  return deg1pol_shallow(v, u, 0);
+}
+/* y mod (N,T) congruent to fundamental unit of maximal order and disc D,
+ * return unit index of order of conductor N */
+static GEN
+quadunitindex_i(GEN D, GEN N, GEN F, GEN y, GEN T)
+{
+  GEN H = quadclassnoF_fact(D, gel(F,1), gel(F,2));
+  GEN P, E, a = Z_smoothen(H, gel(F,1), &P, &E), faH = mkmat2(P, E);
+  struct uimod S;
+
+  if (a) faH = merge_factor(Z_factor(a), faH,(void*)&cmpii,cmp_nodata);
+  /* multiple of unit index, in [H, factor(H)] format */
+  S.N = N; S.T = FpX_red(T, N);
+  return gen_order(y, mkvec2(H,faH), (void*)&S, &ui_group);
+}
+GEN
+quadunitindex(GEN D, GEN N)
+{
+  pari_sp av = avma;
+  GEN y, F;
+  long r, s;
+
+  check_quaddisc(D, &s, &r, "quadunitindex");
+  if ((F = check_arith_pos(N,"quadunitindex")))
+    N = typ(N) == t_VEC? gel(N,1): factorback(F);
+  if (equali1(N)) return gen_1;
+  if (s < 0) switch(itos_or_0(D)) {
+    case -3: return utoipos(3);
+    case -4: return utoipos(2);
+    default: return gen_1;
+  }
+  y = quadunit_mod(D, N); /* = fundamental unit (mod N) */
+  return gerepileuptoint(av, quadunitindex_i(D, N, F? F: Z_factor(N),
+                                             y, quadpoly_i(D)));
+}
+
+/* fundamental unit is u + vx mod quadpoly(D); always called with D
+ * fundamental but would work in all cases. Same algorithm as basecase,
+ * except we compute the product of elementary matrices with a product tree */
+static void
+quadunit_uv(GEN D, GEN *pu, GEN *pv)
+{
+  GEN a, b, c, u, v, p, q, q1, f, d = sqrtremi(D, &a);
+  pari_sp av = avma;
   long i = 0;
-  check_quaddisc_real(D, NULL, "quadunit");
-  m = mpodd(D); d = sqrtremi(D, &a); av = avma;
+  int m = mpodd(D);
+
   p = d; q1 = shifti(a, -1); q = gen_2;
   if (mpodd(d) != m) { p = subiu(d,1); q1 = addii(q1,d); } /* q1 = (D-p^2)/2 */
   f = zerovec(2 + (expi(D)>>1));
@@ -360,33 +446,51 @@ quadunit(GEN D)
   u = diviiexact(addmulii(a, D, b), q);
   v = diviiexact(subii(c, addii(a, b)), q);
   if (m == 1) u = subii(u, v);
-  u = shifti(u, -1);
-  return gerepilecopy(av0, mkquad(quadpoly_i(D), u, v));
+  *pu = shifti(u, -1); *pv = v;
 }
-/* D > 0, d = sqrti(D) */
-static GEN
-quadunit_q(GEN D, GEN d, long *pN)
+GEN
+quadunit(GEN D0)
 {
   pari_sp av = avma;
-  GEN p, q, q1;
-  long first = 1;
-  p = (Mod2(d) == Mod2(D))? d: subiu(d, 1);
-  q = gen_2;
-  q1 = shifti(subii(D, sqri(p)), -1);
-  for(;;)
-  {
-    GEN r, A = dvmdii(addii(p, d), q, &r), p1 = p, t;
-    p = subii(d, r);
-    if (!first && equalii(p1, p)) { *pN = 1; return q; } /* even period */
-    first = 0;
-    t = q; q = submulii(q1, A, subii(p, p1)); q1 = t;
-    if (equalii(q, t)) { *pN = -1; return q; } /* odd period */
-    if (gc_needed(av, 2))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"quadunitnorm");
-      gerepileall(av, 3, &p, &q, &q1);
+  GEN P, E, D, u, v;
+  long s = signe(D0);
+  /* check_quaddisc_real omitting test for squares */
+  if (typ(D0) != t_INT) pari_err_TYPE("quadunit", D0);
+  if (s <= 0) pari_err_DOMAIN("quadunit", "disc","<=",gen_0,D0);
+  if (mod4(D0) > 1) pari_err_DOMAIN("quadunit","disc % 4",">", gen_1,D0);
+  D = coredisc2_fact(Z_factor(D0), s, &P, &E);
+  /* test for squares done here for free */
+  if (equali1(D)) pari_err_DOMAIN("quadunit","issquare(disc)","=", gen_1,D0);
+  if (cmpiu(D, 2000000) < 0)
+    quadunit_uv_basecase(D, &u, &v);
+  else
+    quadunit_uv(D, &u, &v);
+  if (lg(P) != 1)
+  { /* non-trivial conductor N > 1 */
+    GEN N = factorback2(P,E), qD = quadpoly_i(D);
+    GEN n, y = deg1pol_shallow(v, u, 0); /* maximal order fund unit */
+    n = quadunitindex_i(D, N, mkvec2(P,E), FpX_red(y,N), qD); /* unit index */
+    y = ZXQ_powu(y, itou(n), qD); /* fund unit of order of conductor N */
+    v = gel(y,3); u = gel(y,2); /* u + v w_D */
+    if (mpodd(D))
+    { /* w_D = (1+sqrt(D))/2 */
+      if (mpodd(D0))
+      { /* w_D0 = (1 + N sqrt(D)) / 2 */
+        GEN v0 = v;
+        v = diviiexact(v, N);
+        u = addii(u, shifti(subii(v0, v), -1));
+      }
+      else
+      { /* w_D0 = N sqrt(D)/2, N is even */
+        v = shifti(v, -1);
+        u = addii(u, v);
+        v = diviiexact(v, shifti(N,-1));
+      }
     }
+    else /* w_D = sqrt(D), w_D0 = N sqrt(D) */
+      v = diviiexact(v, N);
   }
+  return gerepilecopy(av, mkquad(quadpoly_i(D0), u, v));
 }
 long
 quadunitnorm(GEN D)
@@ -396,49 +500,6 @@ quadunitnorm(GEN D)
   check_quaddisc(D, &s, &r, "quadunitnorm");
   if (s < 0) return 1;
   (void)quadunit_q(D, sqrti(D), &s); return gc_long(av, s);
-}
-GEN
-quadunitindex(GEN D, GEN N)
-{
-  pari_sp av = avma, av2;
-  GEN y, u, v, q, d, P, E, F, a, faH, H;
-  struct uimod S;
-  long r, s;
-
-  check_quaddisc(D, &s, &r, "quadunitindex");
-  if ((F = check_arith_pos(N,"quadunitindex")))
-    N = typ(N) == t_VEC? gel(N,1): factorback(F);
-  if (equali1(N)) return gen_1;
-  if (s < 0) switch(itos_or_0(D)) {
-    case -3: return utoipos(3);
-    case -4: return utoipos(2);
-    default: return gen_1;
-  }
-  if (!F) F = Z_factor(N);
-  d = sqrti(D); av2 = avma;
-  q = gerepileuptoint(av2, quadunit_q(D, d, &s));
-  if (mpodd(N) && equali1(gcdii(q, N)))
-  {
-    quadunit_mod(D, d, N, &u, &v);
-    q = Fp_inv(shifti(q, 1), N);
-    u = Fp_mul(u, q, N);
-    v = Fp_mul(v, q, N); v = modii(shifti(v, 1), N);
-  }
-  else
-  {
-    GEN M = shifti(mulii(q, N), 1);
-    quadunit_mod(D, d, M, &u, &v);
-    u = diviiexact(u, q);
-    v = diviiexact(v, q); u = shifti(u,-1);
-  }
-  /* fundamental unit = y mod N */
-  S.N = N; S.T = quadpoly_i(D); y = deg1pol_shallow(v, u, 0);
-  H = quadclassnoF_fact(D, gel(F,1), gel(F,2));
-  a = Z_smoothen(H, gel(F,1), &P, &E);
-  faH = mkmat2(P, E);
-  if (a) faH = merge_factor(Z_factor(a), faH,(void*)&cmpii,cmp_nodata);
-  y = gen_order(y, mkvec2(H, faH), (void*)&S, &ui_group);
-  return gerepileupto(av, y);
 }
 
 GEN
