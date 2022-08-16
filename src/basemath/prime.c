@@ -263,33 +263,6 @@ u_LucasMod_pre(ulong n, ulong P, ulong N, ulong NI)
   return v;
 }
 
-/* !(N & HIGHMASK) */
-static ulong
-u_LucasMod(ulong n, ulong P, ulong N)
-{
-  ulong v, v1, m;
-  long j;
-
-  if (n == 1) return P;
-  j = 1 + bfffo(n); /* < BIL */
-  v = P; v1 = P*P - 2;
-  m = n<<j; j = BITS_IN_LONG - j;
-  for (; j; m<<=1,j--)
-  { /* v = v_k, v1 = v_{k+1} */
-    if (m & HIGHBIT)
-    { /* set v = v_{2k+1}, v1 = v_{2k+2} */
-      v = Fl_sub((v*v1) % N, P, N);
-      v1= Fl_sub((v1*v1)% N, 2UL, N);
-    }
-    else
-    {/* set v = v_{2k}, v1 = v_{2k+1} */
-      v1= Fl_sub((v*v1) % N ,P, N);
-      v = Fl_sub((v*v) % N, 2UL, N);
-    }
-  }
-  return v;
-}
-
 static ulong
 get_disc(ulong n)
 {
@@ -322,27 +295,11 @@ uislucaspsp_pre(ulong n, ulong ni)
   }
   return 0;
 }
+/* never called; no need to optimize */
 int
 uislucaspsp(ulong n)
-{
-  long i, v;
-  ulong b, z, m;
+{ return uislucaspsp_pre(n, get_Fl_red(n)); }
 
-  if (n & HIGHMASK) return uislucaspsp_pre(n, get_Fl_red(n));
-  m = n + 1;
-  if (!m) return 0; /* neither 2^32-1 nor 2^64-1 are Lucas-pp */
-  b = get_disc(n); if (!b) return 0;
-  v = vals(m); m >>= v;
-  z = u_LucasMod(m, b, n);
-  if (z == 2 || z == n-2) return 1;
-  for (i=1; i<v; i++)
-  {
-    if (!z) return 1;
-    z = Fl_sub((z*z) % n, 2UL, n);
-    if (z == 2) return 0;
-  }
-  return 0;
-}
 /* N > 3. Caller should check that N is not a square first (taken care of here,
  * but inefficient) */
 static int
@@ -418,6 +375,7 @@ static int
 _uisprime(ulong n)
 {
 #ifdef LONG_IS_64BIT
+  ulong ni;
   if (n < 341531)
     return _uispsp(9345883071009581737UL, n);
   if (n < 1050535501)
@@ -427,12 +385,9 @@ _uisprime(ulong n)
     return _uispsp(4230279247111683200UL, n)
         && _uispsp(14694767155120705706UL, n)
         && _uispsp(16641139526367750375UL, n);
-  if (n & HIGHMASK)
-  {
-    ulong ni = get_Fl_red(n);
-    return (uispsp_pre(2, n, ni) && uislucaspsp_pre(n,ni));
-  }
-  return uispsp(2, n) && uislucaspsp(n);
+  /* n & HIGHMASK */
+  ni = get_Fl_red(n);
+  return (uispsp_pre(2, n, ni) && uislucaspsp_pre(n,ni));
 #else
   if (n < 360018361) return _uispsp(1143370UL, n) && _uispsp(2350307676UL, n);
   return uispsp(15, n) && uispsp(176006322UL, n) && _uispsp(4221622697UL, n);
