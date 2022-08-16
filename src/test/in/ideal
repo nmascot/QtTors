@@ -63,6 +63,7 @@ pr=idealprimedec(K,5)[1];
 idealismaximal(K,pr) == pr
 pr = idealprimedec(K,31)[2];
 idealismaximal(K,idealhnf(K,pr)) == pr
+idealismaximal(K, x^2+1)
 
 k=nfinit(polcyclo(5));
 idealfactor(k,101,100)

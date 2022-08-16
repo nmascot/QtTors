@@ -148,6 +148,7 @@
 7
 1
 1
+[5, [-1, -2, 1]~, 1, 2, [2, 0, 2; 1, 2, 0; 0, 1, 2]]
 matrix(0,2)
 
 [[2, [2, 0, 0, 0]~, 1, 4, 1] 1]
@@ -326,4 +327,4 @@ matrix(0,2)
   ***   at top-level: idealstar(K,[4,Vecsmall([1,1])])
   ***                 ^--------------------------------
   *** idealstar: incorrect type in Idealstar [incorrect archimedean component] (t_VECSMALL).
-Total time spent: 114
+Total time spent: 131
