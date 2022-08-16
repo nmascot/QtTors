@@ -794,26 +794,31 @@ static int
 ramified_root_simple(GEN nf, long n, GEN P, GEN v)
 {
   long i, l = lg(v);
-  for (i = 1; i < l; i++) if (v[i])
+  for (i = 1; i < l; i++)
   {
-    GEN vpr = idealprimedec(nf, gel(P,i));
-    long lpr = lg(vpr), j;
-    for (j = 1; j < lpr; j++)
+    long w = v[i] % n;
+    if (w)
     {
-      long e = pr_get_e(gel(vpr,j));
-      if ((e * v[i]) % n) return 0;
+      GEN vpr = idealprimedec(nf, gel(P,i));
+      long lpr = lg(vpr), j;
+      for (j = 1; j < lpr; j++)
+      {
+        long e = pr_get_e(gel(vpr,j));
+        if ((e * w) % n) return 0;
+      }
     }
   }
   return 1;
 }
-/* true nf; A is assumed to be the n-th power of an integral ideal,
- * return its n-th root; n > 1 */
+/* true nf, n > 1, A a non-zero integral ideal; check whether A is the n-th
+ * power of an ideal and set *pB to its n-th root if so */
 static long
 idealsqrtn_int(GEN nf, GEN A, long n, GEN *pB)
 {
   GEN C, root;
   long i, l;
 
+  if (typ(A) == t_MAT && ZM_isscalar(A, NULL)) A = gcoeff(A,1,1);
   if (typ(A) == t_INT) /* > 0 */
   {
     GEN P = nf_get_ramified_primes(nf), v, q;

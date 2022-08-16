@@ -133,6 +133,7 @@ K = nfinit(x^3 - 2);
 A = [46875, 30966, 9573; 0, 3, 0; 0, 0, 3];
 idealispower(K, A, 3, &B)
 B
+idealispower(K, A/6, 3)
 A = [9375, 2841, 198; 0, 3, 0; 0, 0, 3];
 idealispower(K, A, 3)
 idealispower(K, A, 1)
