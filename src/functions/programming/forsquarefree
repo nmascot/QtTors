@@ -81,7 +81,7 @@ Doc: evaluates \var{seq}, where the formal variable $N$ is $[n,
  @eprog\noindent Note that in the last loop, the fundamental discriminants
  $D$ are not evaluated in order (since \kbd{quaddisc(d)} for squarefree $d$
  is either $d$ or $4d$) but the set of numbers we run through is the same.
- Note worth the complication since it's slower than testing \kbd{isfundamental}.
+ Not worth the complication since it's slower than testing \kbd{isfundamental}.
  A faster, more complicated approach uses two loops. For simplicity, assume
  $X$ is divisible by $4$:
  \bprog
