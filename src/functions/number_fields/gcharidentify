@@ -15,6 +15,8 @@ Doc: \var{gc} being a Grossencharacter group as output by \kbd{gcharinit}, $Lv$ 
  representing~$\goth{p} \mapsto \exp(2i\pi \theta)$ (finite place),
  returns a Grossencharacter~$\psi$ belonging to~$g$ such that~$\psi_v \approx
  \chi_v$ for all~$v$.
+ At finite places, in place of a \typ{REAL} one can provide a \typ{VEC} whose
+ last component is $\theta$, as output by \kbd{gcharlocal}.
  To ensure proper identification, it is recommended to provide all infinite
  places together with a set of primes that generate the ray class group of
  modulus \var{gc}\kbd{.mod}.

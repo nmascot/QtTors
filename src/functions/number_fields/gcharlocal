@@ -17,7 +17,7 @@ Doc: \kbd{gc} being a gchar structure initialised by \kbd{gcharinit}, returns
  encoded as~$[k,\varphi]$;
 
  \item if~$v = \goth{p}$ is a finite place not dividing~\var{gc}\kbd{.mod},
- $\chi_v(\pi_v) = \exp(2i\pi \theta)$ is encoded as~$\theta$;
+ $\chi_v(\pi_v) = \exp(2i\pi \theta)$ is encoded as~$[\theta]$;
 
  \item if~$v = \goth{p}$ is a finite place dividing~\var{gc}\kbd{.mod},
  we can define a \var{bid} structure attached to the multiplicative group
