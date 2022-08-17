@@ -4431,7 +4431,6 @@ long    lfunthetacost0(GEN L, GEN tdom, long m, long bitprec);
 long    lfunthetacost(GEN ldata, GEN tdom, long m, long bitprec);
 GEN     lfunthetainit(GEN ldata, GEN tdom, long m, long bitprec);
 GEN     lfunthetacheckinit(GEN data, GEN tinf, long m, long bitprec);
-GEN     lfunvgasub(GEN v01, GEN v2);
 GEN     lfunzeros(GEN ldata, GEN lim, long divz, long bitprec);
 int     sdomain_isincl(double k, GEN dom, GEN dom0);
 GEN     theta_get_an(GEN tdata);

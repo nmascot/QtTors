@@ -407,7 +407,7 @@ lfundivpoles(GEN ldata1, GEN ldata2, long bitprec)
   setlg(r, i); return r;
 }
 
-GEN
+static GEN
 lfunvgasub(GEN v01, GEN v2)
 {
   GEN v1 = shallowcopy(v01), v;

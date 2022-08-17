@@ -1911,9 +1911,12 @@ listcond(GEN BAD, GEN achi, ulong min, ulong max)
 static GEN
 lfundivraw(GEN L)
 {
-  long k = itos(ldata_get_k(L));
+  long k = itos(ldata_get_k(L)), i;
+  GEN v = ldata_get_gammavec(L);
+  i = RgV_isin(v, stoi(-(k - 1) >> 2));
+  if (!i) pari_err_BUG("lfundivraw");
   L = shallowcopy(L);
-  gel(L, 3) = lfunvgasub(ldata_get_gammavec(L), mkvec(stoi(-(k - 1) >> 2)));
+  gel(L, 3) = vecsplice(v, i);
   setlg(L, 7); return L;
 }
 
