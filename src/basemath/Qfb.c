@@ -378,16 +378,19 @@ qfbsqr(GEN x)
 static GEN
 qfr_1_by_disc(GEN D)
 {
-  GEN y = cgetg(5,t_QFB), isqrtD;
-  pari_sp av = avma;
-  long r;
-
-  check_quaddisc_real(D, &r, "qfr_1_by_disc");
-  gel(y,1) = gen_1; isqrtD = sqrti(D);
-  if ((r & 1) != mod2(isqrtD)) /* we know isqrtD > 0 */
-    isqrtD = gerepileuptoint(av, subiu(isqrtD,1));
-  gel(y,2) = isqrtD; av = avma;
-  gel(y,3) = gerepileuptoint(av, shifti(subii(sqri(isqrtD), D),-2));
+  GEN y, r, s;
+  check_quaddisc_real(D, NULL, "qfr_1_by_disc");
+  y = cgetg(5,t_QFB);
+  s = sqrtremi(D, &r); togglesign(r); /* s^2 - r = D */
+  if (mpodd(r))
+  {
+    s = subiu(s,1);
+    r = subii(r, addiu(shifti(s, 1), 1));
+  }
+  r = shifti(r, -2); set_avma((pari_sp)y);
+  gel(y,1) = gen_1;
+  gel(y,2) = (s + lg(s) == y)? y: icopy(s); /* HACK */
+  gel(y,3) = icopy(r); /* HACK */
   gel(y,4) = icopy(D); return y;
 }
 
