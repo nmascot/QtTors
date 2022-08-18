@@ -386,11 +386,13 @@ qfr_1_by_disc(GEN D)
   {
     s = subiu(s,1);
     r = subii(r, addiu(shifti(s, 1), 1));
+    r = shifti(r, -2); set_avma((pari_sp)y); s = icopy(s);
   }
-  r = shifti(r, -2); set_avma((pari_sp)y);
+  else
+  { r = shifti(r, -2); set_avma((pari_sp)s); }
   gel(y,1) = gen_1;
-  gel(y,2) = (s + lg(s) == y)? y: icopy(s); /* HACK */
-  gel(y,3) = icopy(r); /* HACK */
+  gel(y,2) = s;
+  gel(y,3) = icopy(r);
   gel(y,4) = icopy(D); return y;
 }
 
