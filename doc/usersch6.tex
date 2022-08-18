@@ -1972,6 +1972,20 @@ is a character of the ray class group, the returned value is the character
 kernel. If \kbd{pdeg} is not \kbd{NULL}, \kbd{*pdeg} is set to the degree of the
 attached class field: the index of $H$ in the ray class group.
 
+\fun{void}{bnr_subgroup_sanitize}{GEN *pbnr, GEN *pH} given a \var{bnr}
+and a congruence subgroup, make sanity checks and compute the subgroup
+conductor. Then replace the pair to match the conductor: the \var{bnr}
+has the right conductor as modulus, and the subgroup is normalized.
+Instead of a \var{bnr}, this function also accepts a \var{bnf} (gets replaced
+by the \var{bnr} with trivial conductor). Instead of a subgroup,
+the function also accepts an integer $N$ (replaced by $\text{Cl}_f(K)^N$)
+or a character (replaced by its kernel).
+
+\fun{void}{bnr_char_sanitize}{GEN *pbnr, GEN *pchi} same idea as
+\kbd{bnr\_subgroup\_sanitize}: we are given a \var{bnr}
+and a ray class character, make sanity checks and update the data
+to use the conductor as modulus.
+
 \fun{GEN}{bnrconductor}{GEN bnr, GEN H, long flag} see the documentation of
 the GP function.
 
