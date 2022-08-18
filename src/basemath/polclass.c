@@ -1167,20 +1167,17 @@ static GEN
 classgp_make_pcp(double *height, long *ni, long h, long D, long D0, ulong u,
   GEN Pu, GEN Eu, long inv, long Lfilter, long orient)
 {
-  enum { MAX_GENS = 16, MAX_RLEN = MAX_GENS * (MAX_GENS - 1) / 2 };
-  pari_sp av, bv;
-  long curr_p, nelts, lvl = modinv_level(inv);
-  GEN G, DD, ident, T, v;
+  const long MAX_GENS = 16, lvl = modinv_level(inv);
+  pari_sp av, av2;
+  long curr_p, nelts, L0, enum_cnt, GLfilter, i, k, L1, L2;
+  GEN G, DD, ident, T, v, L, m, n, o, r, orient_p, orient_q, orient_reps;
   hashtable *tbl;
-  long i, k, L1, L2;
-  GEN L, m, n, o, r, orient_p, orient_q, orient_reps;
-  long L0, enum_cnt, GLfilter;
 
   L = zero_zv(MAX_GENS);
   m = zero_zv(MAX_GENS);
   n = zero_zv(MAX_GENS);
   o = zero_zv(MAX_GENS);
-  r = zero_zv(MAX_RLEN);
+  r = zero_zv(MAX_GENS * (MAX_GENS-1) / 2);
   orient_p = zero_zv(MAX_GENS);
   orient_q = zero_zv(MAX_GENS);
   orient_reps = zero_zv(MAX_GENS*MAX_GENS);
@@ -1188,19 +1185,15 @@ classgp_make_pcp(double *height, long *ni, long h, long D, long D0, ulong u,
              mkvec3(orient_p, orient_q, orient_reps),
              mkvecsmall5(h, inv, D, D0, u), mkmat2(Pu, Eu));
   av = avma;
+  if (h == 1)
+  {
+    *height = upper_bound_on_classpoly_coeffs(D, h, mkvecsmall(1));
+    return gc_const(av, G); /* no need to set *ni when h = 1 */
+  }
   if (!modinv_is_double_eta(inv) || !modinv_ramified(D, inv, &L0)) L0 = 0;
   enum_cnt = h / (1 + !!L0);
   GLfilter = ulcm(Lfilter, lvl);
-
-  if (h == 1) {
-    k = 0;
-    *height = upper_bound_on_classpoly_coeffs(D, h, mkvecsmall(1));
-    /* NB: No need to set *ni when h = 1 */
-    set_avma(av); return G;
-  }
-
-  DD = stoi(D);
-  bv = avma;
+  DD = stoi(D); av2 = avma;
   while (1) {
     k = 0;
     /* Hash table has an imaginary QFB as a key and the index of that
@@ -1216,7 +1209,7 @@ classgp_make_pcp(double *height, long *ni, long h, long D, long D0, ulong u,
     curr_p = 1;
 
     while (nelts < h) {
-      GEN gamma_i, beta;
+      GEN gamma_i = NULL, beta;
       hashentry *e;
       long N = lg(T)-1, ri = 1;
 
@@ -1226,12 +1219,9 @@ classgp_make_pcp(double *height, long *ni, long h, long D, long D0, ulong u,
         curr_p = L0;
         gamma_i = qfb_nform(D, curr_p);
         beta = qfbred_i(gamma_i);
-        if (equali1(gel(beta, 1)))
-        {
-          curr_p = 1;
-          gamma_i = next_generator(DD, D, u, GLfilter, &beta, &curr_p);
-        }
-      } else
+        if (equali1(gel(beta, 1))) { curr_p = 1; gamma_i  = NULL; }
+      }
+      if (!gamma_i)
         gamma_i = next_generator(DD, D, u, GLfilter, &beta, &curr_p);
       while ((e = hash_search(tbl, beta)) == NULL) {
         long j;
@@ -1275,7 +1265,7 @@ classgp_make_pcp(double *height, long *ni, long h, long D, long D0, ulong u,
       pari_err_IMPL("classgp_pcp");
     else
       GLfilter *= L[i+1];
-    set_avma(bv);
+    set_avma(av2);
   }
   v = cgetg(h + 1, t_VECSMALL);
   v[1] = 1;
@@ -1618,7 +1608,7 @@ oneroot_of_classpoly(
 
   /* Iterate over the primes L dividing w */
   for (i = 1; i <= nfactors; ++i) {
-    pari_sp bv = avma;
+    pari_sp av2 = avma;
     GEN phi;
     long jlvl, lvl_diff, depth = vdepths[i], L = factors[i];
     if (L > L_bound) { *endo_cert = 0; break; }
@@ -1636,7 +1626,7 @@ oneroot_of_classpoly(
     else if (lvl_diff > 0)
       /* otherwise j's level is greater than v(u) so we descend */
       j = descend_volcano(phi, j, p, pi, jlvl, L, depth, lvl_diff);
-    set_avma(bv);
+    set_avma(av2);
   }
   /* Prob(j has the wrong endomorphism ring) ~ \sum_{p|u_compl} 1/p
    * (and u_compl > L_bound), so just return it and rely on detection code in
