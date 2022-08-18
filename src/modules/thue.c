@@ -925,7 +925,7 @@ get_B0(long i1, GEN Delta2, GEN Lambda, GEN Deps5, long prec, baker_s *BS)
         l0 = subrr(errnum(BS->delta, q), ep);
         if (signe(l0) <= 0) break;
 
-        B0 = divrr(mplog(divrr(mulir(gel(Q,2), BS->c15), l0)),  BS->c13);
+        B0 = divrr(logr_abs(divrr(mulir(gel(Q,2), BS->c15), l0)),  BS->c13);
         if (DEBUGLEVEL>1) err_printf("Semirat. reduction: B0 -> %Ps\n",B0);
       }
       /* if no progress, stop */
