@@ -1200,7 +1200,7 @@ classgp_make_pcp(double *height, long *ni, long h, long D, long D0, ulong u,
      * form in T as its value */
     tbl = hash_create(h, (ulong(*)(void*)) hash_GEN,
                          (int(*)(void*,void*))&gidentical, 1);
-    ident = qfbred_i(primeform_u(DD, 1));
+    ident = primeform(DD, gen_1);
     hash_insert(tbl, ident, (void*)0);
 
     T = vectrunc_init(h + 1);
@@ -1261,10 +1261,10 @@ classgp_make_pcp(double *height, long *ni, long h, long D, long D0, ulong u,
       evec_n_to_m(m+1, n+1, k);
       if (!orient || orient_pcp(G, ni, D, u, tbl)) break;
       GLfilter *= L[1];
-    } else if (log2(GLfilter) + log2(L[i+1]) >= BITS_IN_LONG)
-      pari_err_IMPL("classgp_pcp");
-    else
-      GLfilter *= L[i+1];
+    } else {
+      GLfilter = umuluu_or_0(GLfilter, L[i+1]);
+      if (!GLfilter) pari_err_IMPL("classgp_pcp");
+    }
     set_avma(av2);
   }
   v = cgetg(h + 1, t_VECSMALL);
@@ -1278,11 +1278,8 @@ classgp_make_pcp(double *height, long *ni, long h, long D, long D0, ulong u,
   /* 4 * L1^2 * L2^2 must fit in a ulong */
   if (2 * (1 + log2(L1) + log2(L2)) >= BITS_IN_LONG)
     pari_err_IMPL("classgp_pcp");
-
-  if (L0 && (L[1] != L0 || o[1] != 2))
-    pari_err_BUG("classgp_pcp");
-  set_avma(av);
-  return G;
+  if (L0 && (L[1] != L0 || o[1] != 2)) pari_err_BUG("classgp_pcp");
+  return gc_const(av, G);
 }
 
 /* SECTION: Functions for calculating class polynomials. */
