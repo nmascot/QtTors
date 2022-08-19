@@ -13353,9 +13353,7 @@ of whose known coefficients are exact zeroes; this implies that
 $\kbd{sign}(x) = 0$ and $\kbd{lg}(x) \leq 3$.
 
 \fun{GEN}{ser_inv}{GEN x} return the inverse of the \typ{SER} $x$ using
-Newton iteration. This is in general slower than \kbd{ginv} unless the
-precision is huge (hundreds of terms, where the threshold depends strongly
-on the base field).
+Newton iteration.
 
 \fun{GEN}{psi1series}{long n, long v, long prec} creates the \typ{SER}
 $\psi(1 + x + O(x^n))$ in variable $v$.

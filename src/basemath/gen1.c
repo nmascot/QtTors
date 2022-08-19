@@ -2345,8 +2345,12 @@ div_ser(GEN x, GEN y, long vx)
     setvalp(z, v); return z;
   }
   if (lx < ly) ly = lx;
-  y = ser2pol_approx(y, ly, &e);
-  if (e) { v -= e; ly -= e; if (ly <= 2) pari_err_INV("div_ser", y0); }
+  y = ser2pol_i_normalize(y, ly, &e);
+  if (e)
+  {
+    pari_warn(warner,"normalizing a series with 0 leading term");
+    ly -= e; v -= e; if (ly <= 2) pari_err_INV("div_ser", y0);
+  }
   z = init_ser(ly, vx, v);
   if (ly == 3)
   {
@@ -2777,12 +2781,15 @@ gdiv(GEN x, GEN y)
         {
           GEN y0 = y;
           long v;
-          ly = lg(y); /* > 2 */
           av = avma; v = RgX_valrem(x, &x);
           if (v == LONG_MAX) return gerepileupto(av, Rg_get_0(x));
-          v -= valp(y);
-          y = ser2pol_approx(y, ly, &i); if (i) { ly -= i; v -= i; }
-          if (ly == 2) pari_err_INV("gdiv", y0);
+          v -= valp(y); ly = lg(y); /* > 2 */
+          y = ser2pol_i_normalize(y, ly, &i);
+          if (i)
+          {
+            pari_warn(warner,"normalizing a series with 0 leading term");
+            ly -= i; v -= i; if (ly <= 2) pari_err_INV("gdiv", y0);
+          }
           z = init_ser(ly, vx, v);
           return gerepilecopy(av, fill_ser(z, RgXn_div(x, y, ly-2)));
         }

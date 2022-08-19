@@ -1147,12 +1147,11 @@ ser2pol_i(GEN x, long lx)
 }
 
 GEN
-ser2pol_approx(GEN x, long l, long *v)
+ser2pol_i_normalize(GEN x, long l, long *v)
 {
   long i = 2, j = l-1, k;
   GEN y;
   while (i < l && gequal0(gel(x,i))) i++;
-  if (i != 2) pari_warn(warner,"normalizing a series with 0 leading term");
   *v = i - 2; if (i == l) return zeropol(varn(x));
   while (j > i && gequal0(gel(x,j))) j--;
   l = j - *v + 1;
@@ -1167,8 +1166,13 @@ ser_inv(GEN b)
   pari_sp av = avma;
   long e, l = lg(b);
   GEN x, y;
-  y = ser2pol_approx(b, l, &e);
-  y = RgXn_inv_i(y, l - 2 - e);
+  y = ser2pol_i_normalize(b, l, &e);
+  if (e)
+  {
+    pari_warn(warner,"normalizing a series with 0 leading term");
+    l -= e; if (l <= 2) pari_err_INV("inv_ser", b);
+  }
+  y = RgXn_inv_i(y, l-2);
   x = RgX_to_ser(y, l); setvalp(x, - valp(b) - e);
   return gerepilecopy(av, x);
 }
