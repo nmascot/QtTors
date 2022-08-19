@@ -1147,7 +1147,7 @@ carberkowitz(GEN x, long v)
     }
     for (i = 1; i <= r+1; i++) gel(V,i) = gel(Q,i);
   }
-  V = RgV_to_RgX(vecreverse(V), v); /* not gtopoly: fail if v > gvar(V) */
+  V = RgV_to_RgX_reverse(V, v); /* not gtopoly: fail if v > gvar(V) */
   V = odd(lx)? gcopy(V): RgX_neg(V);
   return fix_pol(av0, V);
 }
