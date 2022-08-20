@@ -4951,7 +4951,6 @@ void    pari_mt_close(void);
 GEN     subcyclopclgp(GEN fH, GEN p, long flag);
 GEN     subcycloiwasawa(GEN fH, GEN p, long n);
 GEN     subcyclohminus(GEN fH, GEN p);
-GEN     znsubgroupgenerators(GEN H, long flag);
 
 /* plotport.c */
 
@@ -5363,6 +5362,7 @@ GEN     factor_Aurifeuille_prime(GEN p, long n);
 GEN     galoissubcyclo(GEN N, GEN sg, long flag, long v);
 GEN     polsubcyclo(long n, long d, long v);
 GEN     polsubcyclofast(GEN n, long ell, long s, long fli);
+GEN     znsubgroupgenerators(GEN H, long flag);
 
 /* subfield.c */
 
