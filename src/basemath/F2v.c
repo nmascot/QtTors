@@ -107,9 +107,8 @@ F2m_to_Flm(GEN x) { pari_APPLY_same(F2v_to_Flv(gel(x,i))) }
 GEN
 ZV_to_F2v(GEN x)
 {
-  long l = lg(x)-1;
+  long i, j, k, l = lg(x)-1;
   GEN z = cgetg(nbits2lg(l), t_VECSMALL);
-  long i,j,k;
   z[1] = l;
   for(i=1,k=1,j=BITS_IN_LONG; i<=l; i++,j++)
   {
