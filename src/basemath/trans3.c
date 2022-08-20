@@ -631,12 +631,14 @@ besselzero(GEN nu, long n, GEN (*B)(GEN,GEN,long), long bit)
 {
   pari_sp av = avma;
   long prec = nbits2prec(bit), a;
-  GEN z;
+  GEN b, m;
   if (n <= 0) pari_err_DOMAIN("besselzero", "n", "<=", gen_0, stoi(n));
   if (n > LONG_MAX / 4) pari_err_OVERFLOW("besselzero");
   a = 4 * n - (B == jbessel? 1: 3);
-  z = gmul(mppi(prec), gmul2n(gaddgs(gmul2n(nu,1), a), -2));
-  return gerepilecopy(av, besselrefine(z, nu, B, bit));
+  b = gmul(mppi(prec), gmul2n(gaddgs(gmul2n(nu,1), a), -2));
+  m = gmul2n(gsqr(nu),2);
+  b = gsub(b, gdiv(gsubgs(m, 1), gmul2n(b, 3)));
+  return gerepilecopy(av, besselrefine(b, nu, B, bit));
 }
 GEN
 besseljzero(GEN nu, long k, long b) { return besselzero(nu, k, jbessel, b); }
