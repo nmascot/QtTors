@@ -250,6 +250,14 @@ znchargauss(G,[1,0]~,3)
 [g,chi]=znchar(Mod(1,16));znchargauss(g,chi,0)
 [g,chi]=znchar(Mod(15,16));znchargauss(g,chi,0)
 
+qp(m, p, flag = 0)=
+{ my(d = quaddisc(m), f = lcm(d, p), H);
+  H = vectorsmall(f, a, a % p == 1 && kronecker(d,a) > 0);
+  znsubgroupgenerators(H,flag);
+}
+qp(36322, 5)
+qp(36322, 5, 1)
+
 \\ Errors, keep at end of file
 znprimroot(8)
 znprimroot(15)

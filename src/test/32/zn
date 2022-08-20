@@ -244,6 +244,8 @@ x^2
 4.0000000000000000000000000000000000000*I
 8
 0
+[41, 61, 111, 131]
+[41, 31261, 324611, 506221]
   ***   at top-level: znprimroot(8)
   ***                 ^-------------
   *** znprimroot: domain error in znprimroot: n = 8
@@ -267,4 +269,4 @@ x^2
   ***   at top-level: znconreyexp(znstar(192,1),[2,8,1,1]~)
   ***                 ^-------------------------------------
   *** znconreyexp: incorrect type in znconreyexp (t_COL).
-Total time spent: 1372
+Total time spent: 1408
