@@ -626,19 +626,80 @@ besselrefine(GEN z, GEN nu, GEN (*B)(GEN,GEN,long), long bit)
   return gprec_w(z, nbits2prec(bit));
 }
 
+/* solve tan(fi) - fi = y, y >= 0; Temme's method */
+static double
+fi(double y)
+{
+  double p, pp, r;
+  if (y == 0) return 0;
+  if (y > 100000) return M_PI/2;
+  if (y < 1)
+  {
+    p = pow(3*y, 1.0/3); pp = p * p;
+    p = p * (1 + pp * (-210 * pp + (27 - 2*pp)) / 1575);
+  }
+  else
+  {
+    p = 1 / (y + M_PI/2); pp = p * p;
+    p = M_PI/2 - p*(1 + pp*(2310 + pp*(3003 + pp*(4818 + pp*(8591 + pp*16328)))) / 3465);
+  }
+  pp = (y + p) * (y + p); r = (p - atan(p + y)) / pp;
+  return p - (1 + pp) * r * (1 + r / (p + y));
+}
+
 static GEN
 besselzero(GEN nu, long n, GEN (*B)(GEN,GEN,long), long bit)
 {
   pari_sp av = avma;
-  long prec = nbits2prec(bit), a;
-  GEN b, m;
+  long prec = nbits2prec(bit);
+  int J = B == jbessel;
+  GEN z;
   if (n <= 0) pari_err_DOMAIN("besselzero", "n", "<=", gen_0, stoi(n));
   if (n > LONG_MAX / 4) pari_err_OVERFLOW("besselzero");
-  a = 4 * n - (B == jbessel? 1: 3);
-  b = gmul(mppi(prec), gmul2n(gaddgs(gmul2n(nu,1), a), -2));
-  m = gmul2n(gsqr(nu),2);
-  b = gsub(b, gdiv(gsubgs(m, 1), gmul2n(b, 3)));
-  return gerepilecopy(av, besselrefine(b, nu, B, bit));
+  if (is_real_t(typ(nu)) && gsigne(nu) >= 0)
+  { /* Temme */
+    double x, c, b, a = gtodouble(nu), t = J? 0.25: 0.75;
+    if (n >= 3*a - 8)
+    {
+      double aa = a*a, mu = 4*aa, mu2 = mu*mu, p, p0, p1, q1;
+      p = 7 * mu - 31; p0 = mu-1;
+      if (1 + p == p) /* p large */
+        p1 = q1 = 0;
+      else
+      {
+        p1 = 4 * (253 * mu2 - 3722 * mu + 17869) / (15 * p);
+        q1 = 1.6 * (83 * mu2 - 982 * mu + 3779) / p;
+      }
+      b = (n + a/2 - t) * M_PI;
+      c = 1 / (64 * b * b);
+      x = b - p0 * (1 - p1 * c) / (8 * b * (1 - q1 * c));
+    }
+    else
+    {
+      double u, v, w, xx, bb = a >= 3? pow(a, -2./3): 1;
+      if (n == 1)
+        x = J? -2.33811: -1.17371;
+      else
+      {
+        double pp1 = 5./48, qq1 = -5./36, y = 3./8 * M_PI;
+        x = y * (4 * n - 4 * t); v = 1 / (x*x);
+        x = - pow(x, 2.0/3) * (1 + v) * (pp1 + qq1 * v);
+      }
+      u = x * bb; v = fi(2.0/3 * pow(-u, 1.5));
+      w = 1 / cos(v); xx = 1 - w*w; c = sqrt(u/xx);
+      x = w * (a + c / (48*a*u) * (-5/u-c * (-10/xx + 6)));
+    }
+    z = dbltor(x);
+  }
+  else
+  { /* generic, hope for the best */
+    long a = 4 * n - (J? 1: 3);
+    GEN b, m;
+    b = gmul(mppi(prec), gmul2n(gaddgs(gmul2n(nu,1), a), -2));
+    m = gmul2n(gsqr(nu),2);
+    z = gsub(b, gdiv(gsubgs(m, 1), gmul2n(b, 3)));
+  }
+  return gerepilecopy(av, besselrefine(z, nu, B, bit));
 }
 GEN
 besseljzero(GEN nu, long k, long b) { return besselzero(nu, k, jbessel, b); }
