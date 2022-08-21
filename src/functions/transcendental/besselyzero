@@ -15,7 +15,9 @@ Doc: $k$-th zero of the $Y$-Bessel function of index \var{nu}, close
  %3 = 3.9576784193148578683756771869174012814
  ? besselyzero(I) \\ @com{also works for complex orders, here $Y_i$}
  %4 = 1.03930... + 1.3266...*I
- @eprog\noindent The function uses a simple Newton iteration due to Temme.
- If $\nu$ is real and nonnegative, the result is guaranteed; for general
- $\nu$ the method is heuristic and the convergence to the correct value is
- only guaranteed for $k$ large enough.
+ @eprog\noindent The function uses a Newton iteration due to Temme.
+ If $\nu$ is real and nonnegative, the result is guaranteed and we really
+ return the $k$-th positive zero of $Y_\nu$. For general $\nu$, the result
+ is not well defined, we just use Newton iteration with $\pi(\nu/2 + k - 3/4)$
+ as a starting value. (N.B. Using this method for large real $\nu$ would give
+ completely different results than the $y_{\nu,k}$ unless $k$ is large enough.)
