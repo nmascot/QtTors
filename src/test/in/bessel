@@ -65,7 +65,7 @@ besseljzero(0, 10)
 besselyzero(0, 1)
 besselyzero(0, 10)
 for (i = 1, 15, print(i,":", besseljzero(i)))
-for (i = 1, 14, print(i,":", besselyzero(i)))
+for (i = 1, 13, print(i,":", besselyzero(i)))
 
 \\ ERRORS
 for(i=1,#F,print(iferr(F[i](O(2),1),E,E)));
