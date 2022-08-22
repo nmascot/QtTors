@@ -2638,6 +2638,60 @@ END:
   return gerepilecopy(av, mkvec2(I, aI));
 }
 
+/* I integral ZM (not HNF), G ZM, rounded Cholesky form of a weighted
+ * T2 matrix. Reduce I wrt G */
+GEN
+idealpseudored(GEN I, GEN G)
+{ return ZM_mul(I, ZM_lll(ZM_mul(G, I), 0.99, LLL_IM)); }
+
+/* Same I, G; m in I with T2(m) small */
+GEN
+idealpseudomin(GEN I, GEN G)
+{
+  GEN u = ZM_lll(ZM_mul(G, I), 0.99, LLL_IM);
+  return ZM_ZC_mul(I, gel(u,1));
+}
+/* Same I,G; irrational m in I with T2(m) small */
+GEN
+idealpseudomin_nonscalar(GEN I, GEN G)
+{
+  GEN u = ZM_lll(ZM_mul(G, I), 0.99, LLL_IM);
+  GEN m = ZM_ZC_mul(I, gel(u,1));
+  if (ZV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
+  return m;
+}
+/* Same I,G; t_VEC of irrational m in I with T2(m) small */
+GEN
+idealpseudominvec(GEN I, GEN G)
+{
+  long i, j, k, n = lg(I)-1;
+  GEN x, L, b = idealpseudored(I, G);
+  L = cgetg(1 + (n*(n+1))/2, t_VEC);
+  for (i = k = 1; i <= n; i++)
+  {
+    x = gel(b,i);
+    if (!ZV_isscalar(x)) gel(L,k++) = x;
+  }
+  for (i = 2; i <= n; i++)
+  {
+    long J = minss(i, 4);
+    for (j = 1; j < J; j++)
+    {
+      x = ZC_add(gel(b,i),gel(b,j));
+      if (!ZV_isscalar(x)) gel(L,k++) = x;
+    }
+  }
+  setlg(L,k); return L;
+}
+
+GEN
+idealred_elt(GEN nf, GEN I)
+{
+  pari_sp av = avma;
+  GEN u = idealpseudomin(I, nf_get_roundG(nf));
+  return gerepileupto(av, u);
+}
+
 GEN
 idealmin(GEN nf, GEN x, GEN vdir)
 {
