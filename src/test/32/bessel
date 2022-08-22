@@ -883,6 +883,10 @@ bessely
 18:20.541379428638668923555592458448947646
 19:21.583973613353356322685017972736158141
 20:22.625159280072318034841395413055408526
+7.3122392097548233110029969918958058997 E-44
+1.6724995288520292841114715831119972199 E-31
+12109828087520543559410637777.994596959
+-2.2989094375886282011570325214217497288 E40
 error("domain error in Qp_log: argument = 0")
 error("domain error in Qp_log: argument = 0")
 error("incorrect type in isint (t_PADIC).")
@@ -905,4 +909,4 @@ error("incorrect type in besseln (t_STR).")
   ***   at top-level: besselyzero(0,-1)
   ***                 ^-----------------
   *** besselyzero: domain error in besselzero: n <= 0
-Total time spent: 48
+Total time spent: 53

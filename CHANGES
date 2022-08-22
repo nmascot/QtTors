@@ -135,6 +135,7 @@ BA 113- [gp interpreter] fix memory leak in pop_lex
    114- numerator(1/x+1/y, 'x) -> x*y
    115- colors = "no" (or "") handled incorrectly [#2402]
    116- thue(thueinit(x^3-3*x^2+1,1), 2187) -> domain error in mplog [#2397]
+   117- Bessel function of huge order -> oo loop [e.g. besselj(220, 112)]
 
   Added
 HC   1- new GP function eulerreal

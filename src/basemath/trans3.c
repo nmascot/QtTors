@@ -36,8 +36,13 @@ _abs(GEN x)
 { return gabs(gtofp(x,LOWDEFAULTPREC), LOWDEFAULTPREC); }
 /* can we use asymptotic expansion ? */
 static int
-bessel_asymp(GEN z, long bit)
-{ return gcmpgs(_abs(z), (bit+10)/2) >= 0; }
+bessel_asymp(GEN n, GEN z, long bit)
+{
+  GEN Z, N;
+  long t = typ(n);
+  if (!is_real_t(t) && t != t_COMPLEX) return 0;
+  Z = _abs(z); N = gaddgs(_abs(n), 1);
+  return gcmpgs(gdiv(Z, gsqr(N)), (bit+10)/2) >= 0; }
 
 /* Region I: 0 < Arg z <= Pi, II: -Pi < Arg z <= 0 */
 static int
@@ -197,7 +202,7 @@ jbesselintern(GEN n, GEN z, long J, long prec)
       i = precision(z); if (i) prec = i;
       if (flz0 && gequal0(n)) return real_1(prec);
       bit = prec2nbits(prec);
-      if (bessel_asymp(z, bit))
+      if (bessel_asymp(n, z, bit))
       {
         GEN R = J? bessjasymp(n, z, bit): bessiasymp(n, z, bit);
         if (typ(R) == t_COMPLEX && isexactzero(imag_i(n))
@@ -292,7 +297,7 @@ jbesselh(GEN n, GEN z, long prec)
         return gerepileupto(av, gmul2n(p1,2*k));
       }
       if ( (pr = precision(z)) ) prec = pr;
-      if (bessel_asymp(z, prec2nbits(prec)))
+      if (bessel_asymp(n, z, prec2nbits(prec)))
         return jbessel(gadd(ghalf,n), z, prec);
       y = cgetc(prec); av = avma;
       p1 = gsqrt(gdiv(z, Pi2n(-1,prec)), prec);
@@ -492,7 +497,7 @@ kbesselintern(GEN n, GEN z, long N, long prec)
       i = precision(z); if (i) prec = i;
       i = precision(n); if (i && prec > i) prec = i;
       bit = prec2nbits(prec);
-      if (bessel_asymp(z, bit))
+      if (bessel_asymp(n, z, bit))
       {
         GEN R = N? bessyasymp(n, z, bit): besskasymp(n, z, bit);
         if (typ(R) == t_COMPLEX && isexactzero(imag_i(n))
