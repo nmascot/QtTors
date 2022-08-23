@@ -14,8 +14,8 @@ Doc:
  return an integral model of $C$ with minimal discriminant.
  If $pr$ is given, it must be a list of primes and
  the model is then only garanteed minimal at the elements of $pr$.
- $m$ is set to the mapping from the original model to the new one,
- a three-component vector $[e,[a,b;c,d],H]$ such that
+ If present, $m$ is set to the mapping from the original model to the new
+ one: a three-component vector $[e,[a,b;c,d],H]$ such that
  if $(x,y)$ is a point on $W$, the corresponding point on $C$ is given by
  $$
    x_C = (a*x+b)/(c*x+d)
