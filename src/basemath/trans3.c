@@ -687,8 +687,8 @@ besselzero(GEN nu, long n, GEN (*B)(GEN,GEN,long), long bit)
       else
       {
         double pp1 = 5./48, qq1 = -5./36, y = 3./8 * M_PI;
-        x = y * (4 * n - 4 * t); v = 1 / (x*x);
-        x = - pow(x, 2.0/3) * (1 + v) * (pp1 + qq1 * v);
+        x = 4 * y * (n - t); v = 1 / (x*x);
+        x = - pow(x, 2.0/3) * (1 + v * (pp1 + qq1 * v));
       }
       u = x * bb; v = fi(2.0/3 * pow(-u, 1.5));
       w = 1 / cos(v); xx = 1 - w*w; c = sqrt(u/xx);
