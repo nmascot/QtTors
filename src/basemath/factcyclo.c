@@ -838,7 +838,8 @@ Fp_next_gen3(long x, long i, GEN v_t_p, GEN t, GEN Data)
       if (itx <= mitk) gel(v_t_p, itx) = Fp_red(t, pu); /* mod p^u */
       for (k = 1; k<ld; k++)
       {
-        long y = Fl_mul(x, div[k], n), ity = i_t[y];
+        ulong y = Fl_mul(x, div[k], n);
+        long ity = i_t[y];
         GEN v;
         if (ity > mitk || !isintzero(gel(v_t_p, ity))) continue;
         v = FpX_eval(gel(vT, i_t[div[k]]), t, prs); /* mod p^(r+s) */
@@ -896,7 +897,8 @@ Fl_next_gen3(long x, long i, GEN v_t_p, ulong t, GEN Data)
       if (itx <= mitk) v_t_p[itx] = t%pu; /* mod p^u */
       for (k = 1; k < ld; k++)
       {
-        long y = Fl_mul(x, div[k], n), ity = i_t[y], v;
+        ulong y = Fl_mul(x, div[k], n), v;
+        long ity = i_t[y];
         if (ity > mitk || v_t_p[ity]) continue;
         v = Flx_eval(gel(vT, i_t[div[k]]), t, prs); /* mod p^(r+s) */
         if (r) v /= pr; /* mod p^s */

@@ -54,6 +54,7 @@ factormod((x+1)^2, 10^20+39)
     for(i=1,100,
       if(i%p && factormodcyclo(i,p)!=factormod(polcyclo(i),p)[,1],error([p,i]))))
 }
+factormodcyclo(4879,29);
 
 \\ errors, keep at end of file
 polrootsmod(x^3-1, 2^101-1)
