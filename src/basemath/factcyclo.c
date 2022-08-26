@@ -173,7 +173,7 @@ gausspol_el(GEN H, ulong n, ulong d, ulong f, ulong g, ulong el)
   vz_n = Fl_powers(z_n, n-1, el)+1;
   for (k = 0; k < f; k++)
   {
-    long gk = Fl_powu(g, k, n), t = 0;
+    ulong gk = Fl_powu(g, k, n), t = 0;
     for(j = 1; j <= d; j++)
       t = Fl_add(t, vz_n[Fl_mul(H[j], gk, n)], el);
     L[1+k] = t;
@@ -295,7 +295,8 @@ mk_v_t_el(GEN vT, GEN Data, ulong el)
     if (k > 1 && !isintzero(gel(vT, k))) continue; /* k=1 is always handled */
     for (i=1; i<=f; i++)
     {
-      ulong j, t = 0, x = Fl_mul(k, GH[i], n), y = i_t[x]; /* x!=0, y!=0 */
+      ulong t = 0, x = Fl_mul(k, GH[i], n);
+      long j, y = i_t[x]; /* x!=0, y!=0 */
       if (v_t_el[y]) continue;
       for (j = 1; j <= d; j++) t = Fl_add(t, vz_n[Fl_mul(x, H[j], n)], el);
       v_t_el[y] = t;
@@ -1445,7 +1446,7 @@ Flx_pol_newton_general(GEN Data, GEN N2, GEN vT, ulong x)
   long p = N2[1], pr = N2[2], pu = N2[3], pru = N2[4];
   GEN R = cgetg(1+mitk, t_VECSMALL);
 
-  for (k = 1; k <= n_T; k++) R[kT[k]] = Flx_eval(gel(vT, kT[k]), x, pru) / pr;
+  for (k = 1; k <= n_T; k++) uel(R,kT[k]) = Flx_eval(gel(vT, kT[k]), x, pru) / pr;
   return Flx_Newton_perm(d, R, i_t, pu, p);
 }
 
@@ -1562,7 +1563,7 @@ Flx_1st_lift_2(GEN z, ulong p)
 {
   long i, r = lg(z);
   GEN x = cgetg(r, t_VECSMALL);
-  for (i = 2; i<r; i++) x[i] = (i&1) ? Fl_neg(z[i], p) : z[i];
+  for (i = 2; i<r; i++) uel(x,i) = (i&1) ? Fl_neg(uel(z,i), p) : uel(z,i);
   return (r&1) ? x : Flx_neg(x, p);
 }
 
