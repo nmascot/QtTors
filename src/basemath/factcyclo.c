@@ -1059,9 +1059,13 @@ FpX_1st_lift(GEN z, GEN p, ulong e, ulong el, GEN vP)
 static GEN
 FpX_lift(GEN z, GEN p, ulong e, ulong el, ulong r, ulong s, GEN vP)
 {
-  if (s == 0) z = (el==2) ? FpX_1st_lift_2(z, p) : FpX_1st_lift(z, p, e, el, vP);
-  if (s > 0) z = RgX_inflate(z, upowuu(el, r-s));
-  else if (r >= 2) z = RgX_inflate(z, upowuu(el, r-1));
+  if (s == 0)
+  {
+    z = (el==2) ? FpX_1st_lift_2(z, p) : FpX_1st_lift(z, p, e, el, vP);
+    if (r >= 2) z = RgX_inflate(z, upowuu(el, r-1));
+  }
+  else
+    z = RgX_inflate(z, upowuu(el, r-s));
   return z;
 }
 
@@ -1426,8 +1430,8 @@ FpX_factcyclo_i(ulong n, GEN p, long fl)
     z = FpX_factcyclo_just_conductor(fK, p, fl? 1: f);
   if (n > fK)
   {
-    ulong i, l = lg(z);
     GEN vP = const_vec(n, NULL);
+    long i, l = fl? 2: lg(z);
     for (i = 1; i < l; i++)
       gel(z, i) = FpX_conductor_lift(gel(z, i), p, fn, fK, vP);
   }
@@ -1584,9 +1588,13 @@ Flx_1st_lift(GEN z, ulong p, ulong e, ulong el, GEN vP)
 static GEN
 Flx_lift(GEN z, ulong p, ulong e, ulong el, ulong r, ulong s, GEN vP)
 {
-  if (s == 0) z = (el==2) ? Flx_1st_lift_2(z, p) : Flx_1st_lift(z, p, e, el, vP);
-  if (s > 0) z = Flx_inflate(z, upowuu(el, r-s));
-  else if (r >= 2) z = Flx_inflate(z, upowuu(el, r-1));
+  if (s == 0)
+  {
+    z = (el==2) ? Flx_1st_lift_2(z, p) : Flx_1st_lift(z, p, e, el, vP);
+    if (r >= 2) z = Flx_inflate(z, upowuu(el, r-1));
+  }
+  else
+    z = Flx_inflate(z, upowuu(el, r-s));
   return z;
 }
 
@@ -1854,8 +1862,8 @@ Flx_factcyclo_i(ulong n, ulong p, ulong fl)
     z = Flx_factcyclo_just_conductor(fK, p, fl? 1: f);
   if (n > fK)
   {
-    long i, l = lg(z);
     GEN vP = const_vec(n, NULL);
+    long i, l = fl? 2: lg(z);
     for (i = 1; i < l; i++)
       gel(z, i) = Flx_conductor_lift(gel(z, i), p, fn, fK, vP);
   }
