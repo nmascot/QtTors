@@ -1299,19 +1299,19 @@ FpX_factcyclo_prime_power(long el, long e, GEN p, long m)
 }
 
 static GEN
-FpX_factcyclo_fact(ulong n, GEN p, ulong m, long ascent)
+FpX_factcyclo_fact(GEN fn, GEN p, ulong m, long ascent)
 {
-  GEN fa = factoru(n), EL = gel(fa, 1), E = gel(fa, 2), v1, v2;
-  long l = lg(EL), i, n1, n2;
+  GEN EL = gel(fn, 1), E = gel(fn, 2), v1, v2;
+  long l = lg(EL), i, j, n1, n2;
 
-  n1 = ascent ? upowuu(EL[1], E[1]):upowuu(EL[l-1], E[l-1]);
-  v1 = ascent ? FpX_factcyclo_prime_power(EL[1], E[1], p, m)
-              : FpX_factcyclo_prime_power(EL[l-1], E[l-1], p, m);
+  j = ascent? 1: l-1;
+  n1 = upowuu(EL[j], E[j]);
+  v1 = FpX_factcyclo_prime_power(EL[j], E[j], p, m);
   for (i = 2; i < l; i++)
   {
-    n2 = ascent ? upowuu(EL[i], E[i]):upowuu(EL[l-i], E[l-i]);
-    v2 = ascent ? FpX_factcyclo_prime_power(EL[i], E[i], p, m)
-                : FpX_factcyclo_prime_power(EL[l-i], E[l-i], p, m);
+    j = ascent? i: l-i;
+    n2 = upowuu(EL[j], E[j]);
+    v2 = FpX_factcyclo_prime_power(EL[j], E[j], p, m);
     v1 = FpX_factcyclo_lift(n1, v1, n2, v2, p, m);
     n1 *= n2;
   }
@@ -1395,13 +1395,13 @@ FpX_factcyclo_just_conductor_init(GEN *pData, ulong n, GEN p, ulong m)
 static GEN
 FpX_factcyclo_just_conductor(ulong n, GEN p, ulong m)
 {
-  GEN Data;
+  GEN Data, fn;
   ulong action = FpX_factcyclo_just_conductor_init(&Data, n, p, m);
+  fn = gel(Data,3);
   if (action & GENERAL)
     return FpX_factcyclo_gen(gel(Data,2), n, p, m);
   else if (action & NEWTON_POWER)
   {
-    GEN fn = gel(Data,3);
     return FpX_factcyclo_prime_power_i(ucoeff(fn,1,1), ucoeff(fn,1,2), p, m);
   }
   else if (action & NEWTON_GENERAL)
@@ -1409,7 +1409,7 @@ FpX_factcyclo_just_conductor(ulong n, GEN p, ulong m)
   else if (action & NEWTON_GENERAL_NEW)
     return FpX_factcyclo_newton_general_new3(Data);
   else
-    return FpX_factcyclo_fact(n, p, m, action & ASCENT);
+    return FpX_factcyclo_fact(fn, p, m, action & ASCENT);
 }
 
 static GEN
@@ -1805,19 +1805,19 @@ Flx_factcyclo_prime_power(long el, long e, long p, long m)
 }
 
 static GEN
-Flx_factcyclo_fact(ulong n, ulong p, ulong m, long ascent)
+Flx_factcyclo_fact(GEN fn, ulong p, ulong m, long ascent)
 {
-  GEN fa = factoru(n), EL = gel(fa, 1), E = gel(fa, 2), v1, v2;
-  long l = lg(EL), i, n1, n2;
+  GEN EL = gel(fn, 1), E = gel(fn, 2), v1, v2;
+  long l = lg(EL), i, j, n1, n2;
 
-  n1 = ascent ? upowuu(EL[1], E[1]):upowuu(EL[l-1], E[l-1]);
-  v1 = ascent ? Flx_factcyclo_prime_power(EL[1], E[1], p, m)
-              : Flx_factcyclo_prime_power(EL[l-1], E[l-1], p, m);
+  j = ascent? 1: l-1;
+  n1 = upowuu(EL[j], E[j]);
+  v1 = Flx_factcyclo_prime_power(EL[j], E[j], p, m);
   for (i = 2; i < l; i++)
   {
-    n2 = ascent ? upowuu(EL[i], E[i]):upowuu(EL[l-i], E[l-i]);
-    v2 = ascent ? Flx_factcyclo_prime_power(EL[i], E[i], p, m)
-                : Flx_factcyclo_prime_power(EL[l-i], E[l-i], p, m);
+    j = ascent? i: l-i;
+    n2 = upowuu(EL[j], E[j]);
+    v2 = Flx_factcyclo_prime_power(EL[j], E[j], p, m);
     v1 = Flx_factcyclo_lift(n1, v1, n2, v2, p, m);
     n1 *= n2;
   }
@@ -1827,21 +1827,19 @@ Flx_factcyclo_fact(ulong n, ulong p, ulong m, long ascent)
 static GEN
 Flx_factcyclo_just_conductor(ulong n, ulong p, ulong m)
 {
-  GEN Data;
+  GEN Data, fn;
   ulong action = FpX_factcyclo_just_conductor_init(&Data, n, utoipos(p), m);
+  fn = gel(Data,3);
   if (action & GENERAL)
     return Flx_factcyclo_gen(gel(Data,2), n, p, m);
   else if (action & NEWTON_POWER)
-  {
-    GEN fn = gel(Data,3);
     return Flx_factcyclo_prime_power_i(ucoeff(fn,1,1), ucoeff(fn,1,2), p, m);
-  }
   else if (action & NEWTON_GENERAL)
     return Flx_factcyclo_newton_general(Data);
   else if (action & NEWTON_GENERAL_NEW)
     return Flx_factcyclo_newton_general_new3(Data);
   else
-    return Flx_factcyclo_fact(n, p, m, action & ASCENT);
+    return Flx_factcyclo_fact(fn, p, m, action & ASCENT);
 }
 
 static GEN
