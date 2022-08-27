@@ -1039,8 +1039,11 @@ FpX_1st_lift_2(GEN z, GEN p)
   long i, r = lg(z);
   GEN x = cgetg(r, t_POL);
   x[1] = evalsigne(1) | evalvarn(0);
-  for (i = 2; i < r; i++) gel(x, i) = (i&1) ? Fp_neg(gel(z, i), p) : gel(z, i);
-  return (r&1) ? x : FpX_neg(x, p);
+  if (odd(r))
+    for (i = 2; i < r; i++) gel(x,i) = odd(i)? Fp_neg(gel(z,i), p): gel(z,i);
+  else
+    for (i = 2; i < r; i++) gel(x,i) = odd(i)? gel(z,i): Fp_neg(gel(z,i), p);
+  return x;
 }
 
 static GEN
@@ -1560,8 +1563,11 @@ Flx_1st_lift_2(GEN z, ulong p)
 {
   long i, r = lg(z);
   GEN x = cgetg(r, t_VECSMALL);
-  for (i = 2; i<r; i++) uel(x,i) = (i&1) ? Fl_neg(uel(z,i), p) : uel(z,i);
-  return (r&1) ? x : Flx_neg(x, p);
+  if (odd(r))
+    for (i = 2; i<r; i++) uel(x,i) = odd(i)? Fl_neg(uel(z,i), p) : uel(z,i);
+  else
+    for (i = 2; i<r; i++) uel(x,i) = odd(i)? uel(z,i): Fl_neg(uel(z,i), p);
+  return x;
 }
 
 /* el does not divides e.
