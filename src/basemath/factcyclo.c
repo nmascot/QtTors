@@ -1427,7 +1427,7 @@ FpX_factcyclo_i(ulong n, GEN p, long fl)
   if (n > fK)
   {
     ulong i, l = lg(z);
-    GEN vP = const_vec(n, NULL), fn = factoru(n);
+    GEN vP = const_vec(n, NULL);
     for (i = 1; i < l; i++)
       gel(z, i) = FpX_conductor_lift(gel(z, i), p, fn, fK, vP);
   }
@@ -1855,7 +1855,7 @@ Flx_factcyclo_i(ulong n, ulong p, ulong fl)
   if (n > fK)
   {
     long i, l = lg(z);
-    GEN vP = const_vec(n, NULL), fn = factoru(n);
+    GEN vP = const_vec(n, NULL);
     for (i = 1; i < l; i++)
       gel(z, i) = Flx_conductor_lift(gel(z, i), p, fn, fK, vP);
   }
