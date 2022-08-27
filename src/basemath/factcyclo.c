@@ -295,8 +295,8 @@ mk_v_t_el(GEN vT, GEN Data, ulong el)
     if (k > 1 && !isintzero(gel(vT, k))) continue; /* k=1 is always handled */
     for (i=1; i<=f; i++)
     {
-      ulong t = 0, x = Fl_mul(k, GH[i], n);
-      long j, y = i_t[x]; /* x!=0, y!=0 */
+      ulong j, t = 0, x = Fl_mul(k, GH[i], n);
+      long y = i_t[x]; /* x!=0, y!=0 */
       if (v_t_el[y]) continue;
       for (j = 1; j <= d; j++) t = Fl_add(t, vz_n[Fl_mul(x, H[j], n)], el);
       v_t_el[y] = t;
