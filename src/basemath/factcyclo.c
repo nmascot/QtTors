@@ -1049,9 +1049,8 @@ FpX_1st_lift_2(GEN z, GEN p)
 static GEN
 FpX_1st_lift(GEN z, GEN p, ulong e, ulong el, GEN vP)
 {
-   GEN P, z2, z3;
-   if (isintzero(gel(vP, e))) gel(vP, e) = FpX_polcyclo(e, p);
-   P = gel(vP, e);
+   GEN z2, z3, P = gel(vP, e);
+   if (!gel(vP, e)) P = gel(vP, e) = FpX_polcyclo(e, p);
    z2 = RgX_inflate(z, el);
    z3 = FpX_normalize(FpX_gcd(P, z2, p), p);
    return FpX_div(z2, z3, p);
@@ -1068,9 +1067,9 @@ FpX_lift(GEN z, GEN p, ulong e, ulong el, ulong r, ulong s, GEN vP)
 
 /* e is the conductor of the splitting field of p in Q(zeta_n) */
 static GEN
-FpX_conductor_lift(GEN z, GEN p, ulong n, ulong e, GEN vP)
+FpX_conductor_lift(GEN z, GEN p, GEN fn, ulong e, GEN vP)
 {
-  GEN fn = factoru(n), EL = gel(fn, 1), En = gel(fn, 2);
+  GEN EL = gel(fn, 1), En = gel(fn, 2);
   long i, r = lg(EL), new_e = e;
 
   for(i = 1; i < r; i++)
@@ -1428,9 +1427,9 @@ FpX_factcyclo_i(ulong n, GEN p, long fl)
   if (n > fK)
   {
     ulong i, l = lg(z);
-    GEN vP = const_vec(n, gen_0);
+    GEN vP = const_vec(n, NULL), fn = factoru(n);
     for (i = 1; i < l; i++)
-      gel(z, i) = FpX_conductor_lift(gel(z, i), p, n, fK, vP);
+      gel(z, i) = FpX_conductor_lift(gel(z, i), p, fn, fK, vP);
   }
   return fl? gel(z,1): gen_sort(z,(void*)cmpii, &gen_cmp_RgX);
 }
@@ -1575,9 +1574,8 @@ Flx_1st_lift_2(GEN z, ulong p)
 static GEN
 Flx_1st_lift(GEN z, ulong p, ulong e, ulong el, GEN vP)
 {
-   GEN P, z2, z3;
-   if (isintzero(gel(vP, e))) gel(vP, e) = Flx_polcyclo(e, p);
-   P = gel(vP, e);
+   GEN z2, z3, P = gel(vP, e);
+   if (!gel(vP, e)) P = gel(vP, e) = Flx_polcyclo(e, p);
    z2 = Flx_inflate(z, el);
    z3 = Flx_normalize(Flx_gcd(P, z2, p), p);
    return Flx_div(z2, z3, p);
@@ -1594,9 +1592,9 @@ Flx_lift(GEN z, ulong p, ulong e, ulong el, ulong r, ulong s, GEN vP)
 
 /* e is the conductor of the splitting field of p in Q(zeta_n) */
 static GEN
-Flx_conductor_lift(GEN z, ulong p, ulong n, ulong e, GEN vP)
+Flx_conductor_lift(GEN z, ulong p, GEN fn, ulong e, GEN vP)
 {
-  GEN fn = factoru(n), EL = gel(fn, 1), En = gel(fn, 2);
+  GEN EL = gel(fn, 1), En = gel(fn, 2);
   long i, r = lg(EL), new_e = e;
 
   for (i = 1; i < r; i++)
@@ -1857,9 +1855,9 @@ Flx_factcyclo_i(ulong n, ulong p, ulong fl)
   if (n > fK)
   {
     long i, l = lg(z);
-    GEN vP = const_vec(n, gen_0);
+    GEN vP = const_vec(n, NULL), fn = factoru(n);
     for (i = 1; i < l; i++)
-      gel(z, i) = Flx_conductor_lift(gel(z, i), p, n, fK, vP);
+      gel(z, i) = Flx_conductor_lift(gel(z, i), p, fn, fK, vP);
   }
   return fl? gel(z,1): gen_sort(z,(void*)cmpGuGu, &gen_cmp_RgX);
 }
