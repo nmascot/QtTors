@@ -174,7 +174,7 @@ gausspol_el(GEN H, ulong n, ulong d, ulong f, ulong g, ulong el)
   for (k = 0; k < f; k++)
   {
     ulong gk = Fl_powu(g, k, n), t = 0;
-    for(j = 1; j <= d; j++)
+    for (j = 1; j <= d; j++)
       t = Fl_add(t, vz_n[Fl_mul(H[j], gk, n)], el);
     L[1+k] = t;
     x[1+(k+f-1)%f] = t;
@@ -257,7 +257,7 @@ gausspol(GEN T, GEN H, GEN N, ulong d, ulong f, ulong g)
   if (DEBUGLEVEL >= 6) timer_start(&ti);
   if (DEBUGLEVEL == 2) err_printf("gausspol:start=(%ld,%ld)\n",start,second);
   G1 = get_G(H, d0, d1, Data, start, &el, &M1);
-  for(n_el=second; n_el; n_el++)
+  for (n_el=second; n_el; n_el++)
   {
     GEN m, G2, M2;
     G2 = get_G(H, d0, d1, Data, n_el, &el, &M2);
@@ -449,7 +449,7 @@ get_kTdiv(GEN kT, long n)
 {
   long i, k = 0, l = lg(kT);
   GEN div = cgetg(l, t_VECSMALL);
-  for(i = 1; i < l; i++) if (n%kT[i]==0) div[++k] = kT[i];
+  for (i = 1; i < l; i++) if (n%kT[i]==0) div[++k] = kT[i];
   setlg(div, k+1);
   return div;
 }
@@ -706,14 +706,14 @@ set_action(GEN fn, GEN p, long d, long f)
     if (DEBUGLEVEL == 4) err_printf("(%ld,%ld), ", D[i], F[i]);
   }
   if (maxdeg == 1) return action;
-  if((p[2] != 2 && use_newton_general(d, f, maxdeg)) ||
-     (p[2] == 2 && f <= 40))  /* does not decompose n */
+  if ((p[2] != 2 && use_newton_general(d, f, maxdeg)) ||
+      (p[2] == 2 && f <= 40))  /* does not decompose n */
   {
     action |= (20 < d)? NEWTON_GENERAL_NEW: NEWTON_GENERAL;
     return action;
   }
 
-  if(d <= 20) action |= GENERAL;
+  if (d <= 20) action |= GENERAL;
   else if (p[2] == 2) action &= ~GENERAL;
   else if (d <= 50) action |= GENERAL;
   else if (maxdeg <= 3*d) action &= ~GENERAL;
@@ -741,7 +741,7 @@ FpX_Newton_perm(long d, GEN R, GEN v, GEN pu, GEN p)
 {
   GEN S = cgetg(d+2, t_VEC);
   long k;
-  gel(S,1) = utoi(d); for(k = 1; k <= d; k++) gel(S, k+1) = gel(R, v[k]);
+  gel(S,1) = utoi(d); for (k = 1; k <= d; k++) gel(S, k+1) = gel(R, v[k]);
   return FpX_red(FpX_fromNewton(RgV_to_RgX(S, 0), pu), p);
 }
 static GEN
@@ -749,7 +749,7 @@ Flx_Newton_perm(long d, GEN R, GEN v, ulong pu, ulong p)
 {
   GEN S = cgetg(d+2, t_VEC);
   long k;
-  S[1] = d; for(k = 1; k <= d; k++) gel(S, k+1) = gel(R, v[k]);
+  S[1] = d; for (k = 1; k <= d; k++) gel(S, k+1) = gel(R, v[k]);
   return Flx_red(Flx_fromNewton(Flv_to_Flx(S, 0), pu), p);
 }
 
@@ -978,7 +978,7 @@ newton_general_new_pre3(GEN Data)
   pr = powiu(p, r); prs = powiu(p, r+s); /* Usually, r=0, s=1, pr=1, pru=p */
   if (lgefint(prs)>3)  /* ULONG_MAX < p^(r+s), usually occur */
   {
-    for(k = 1; k <= n_T; k++)
+    for (k = 1; k <= n_T; k++)
     {
       long itk = kT[k];
       GEN z = r? RgX_Rg_mul(gel(vT, itk), pr): gel(vT, itk);
@@ -1072,7 +1072,7 @@ FpX_conductor_lift(GEN z, GEN p, GEN fn, ulong e, GEN vP)
   GEN EL = gel(fn, 1), En = gel(fn, 2);
   long i, r = lg(EL), new_e = e;
 
-  for(i = 1; i < r; i++)
+  for (i = 1; i < r; i++)
   {
     long el = EL[i], en = En[i], ee = u_lval(e, el);
     if (ee < en)
@@ -1343,7 +1343,7 @@ header(GEN fn, long n, long d, long f, GEN p)
   GEN EL = gel(fn, 1), E = gel(fn, 2);
   long i, l = lg(EL)-1;
   err_printf("n=%lu=", n);
-  for(i = 1; i <= l; i++)
+  for (i = 1; i <= l; i++)
   {
     long el = EL[i], e = E[i];
     err_printf("%ld", el);
