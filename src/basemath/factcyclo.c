@@ -1485,7 +1485,7 @@ Flx_factcyclo_newton_general(GEN Data)
   /* R and vT are mod p^(r+u) */
   R = (r+u==s) ? Rs : ZV_sort_shallow(ZX_Zp_liftroots(T, Rs, p, s, r+u));
   pr = powiu(p, r); pru = powiu(p, r+u); /* Usually, r=0, s=1, pr=1, pru=p */
-  if (lgefint(pru) > 3)  /* ULONG_MAX < p^(r+u), probably not occur */
+  if (lgefint(pru) > 3)  /* ULONG_MAX < p^(r+u), probably won't occur */
   {
     for (k = 1; k <= n_T; k++)
     {
@@ -1496,6 +1496,7 @@ Flx_factcyclo_newton_general(GEN Data)
     Data3 = mkvec4(p, pr, pu, pru);
     for (i = 1; i <= m; i++)
       gel(R,i) = ZX_to_nx(FpX_pol_newton_general(Data2, Data3, vT, gel(R,i)));
+    if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_pol_newton_general");
   }
   else
   {
@@ -1542,19 +1543,15 @@ Flx_factcyclo_newton_general_new3(GEN Data)
   /* Data2 = [vT, gGH, Rs, Rrs, i_t, kt, p, pu, pr, prs,
               [n, r, s, n_t, mitk, d], div] */
   if (DEBUGLEVEL >= 6) timer_start(&ti);
-  if (lgefint(pu) > 3)  /* ULONG_MAX < p^u, probably not occur */
-  {
-    for (i = 1; i <= m; i++)
+  if (lgefint(pu) > 3)  /* ULONG_MAX < p^u, probably won't occur */
+  { for (i = 1; i <= m; i++)
       gel(pols, i) = ZX_to_nx(FpX_pol_newton_general_new3(Data2, i));
-    return pols;
-  }
+    if (DEBUGLEVEL >= 6) timer_printf(&ti, "FpX_pol_newton_general_new3"); }
   else
-  {
-    for (i = 1; i <= m; i++)
+  { for (i = 1; i <= m; i++)
       gel(pols, i) = Flx_pol_newton_general_new3(Data2, i);
-    return pols;
-  }
-  if (DEBUGLEVEL >= 6) timer_printf(&ti, "Flx_pol_newton_general_new3");
+    if (DEBUGLEVEL >= 6) timer_printf(&ti, "Flx_pol_newton_general_new3"); }
+  return pols;
 }
 
 /* return normalized z(-x) */
