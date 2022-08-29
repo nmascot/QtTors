@@ -341,37 +341,99 @@ ellnfis_divisible_by(GEN E, GEN K, GEN P, GEN xn)
   return NULL;
 }
 
-/* P is not the point at infinity; w a variable number of highest priority */
+/* E curve over K (nf or NULL); xp = ellxn(E, N) */
 static long
-ellisdivisible_divpol_i(GEN E, GEN P, GEN n, long w, GEN *pQ)
+ellisdivisible_divpol_N(GEN K, GEN E, GEN P, GEN xp, GEN N, GEN *pQ)
 {
-  GEN xP, R, K = NULL, N = NULL;
-  long i, l;
+  GEN R = nfroots(K, RgX_sub(RgX_Rg_mul(gel(xp,2), gel(P,1)), gel(xp,1)));
+  long i, l = lg(R);
+  /* R = abscissas of all Q s.t. n Q = [x(P), .], i.e. P or -P */
+  for(i = 1; i < l; i++)
+  {
+    GEN Q, x = gel(R,i), a = ellordinate(E,x,0);
+    if (lg(a) == 1) continue;
+    Q = mkvec2(x, gel(a,1));
+    if (!gequal(P,ellmul(E,Q,N))) Q = mkvec2(x, gel(a,2)); /* nQ = -P */
+    if (pQ) *pQ = Q;
+    return 1;
+  }
+  return 0;
+}
+
+static long
+ellisdivisible_divpol_i(GEN K, GEN C, GEN Q, GEN n, long v, GEN *pQ)
+{
+  GEN xp;
+  if (!isprimepower(absi_shallow(n), NULL))
+  {
+    GEN f = absZ_factor(n), P = gel(f,1), E = gel(f,2);
+    long i, l = lg(P);
+    for (i = 1; i < l; i++)
+    {
+      GEN q = powii(gel(P,i), gel(E,i));
+      xp = ellxn(C, itou(q), v);
+      if (!ellisdivisible_divpol_N(K, C, Q, xp, q, &Q)) return 0;
+    }
+    if (pQ) *pQ = signe(n) < 0? ellneg(C, Q): Q;
+    return 1;
+  }
+  xp = ellxn(C, itou(n), v);
+  return ellisdivisible_divpol_N(K, C, Q, xp, n, pQ);
+}
+
+/* Q is not the point at infinity; do we have Q = [n]Q' on curve C/K ? */
+static long
+ellisdivisible_divpol(GEN K, GEN C, GEN Q, GEN n, GEN *pQ)
+{
+  long t, v;
+  if (typ(n) != t_INT)
+  { /* ellxn */
+    long d, d2 = degpol(gel(n,1));
+    if (d2 < 0) return 0;
+    if (!uissquareall(d2,(ulong*)&d)) pari_err_TYPE("ellisdivisible",n);
+    return ellisdivisible_divpol_N(K, C, Q, n, utoi(d), pQ);
+  }
+  v = fetch_var_higher();
+  t = ellisdivisible_divpol_i(K, C, Q, n, v, pQ);
+  delete_var(); return t;
+}
+long
+ellisdivisible(GEN E, GEN Q, GEN n, GEN *pQ)
+{
+  pari_sp av = avma;
+  GEN K = NULL;
+  checkell(E); checkellpt(Q);
   switch(ell_get_type(E))
   {
     case t_ELL_Q: break;
     case t_ELL_NF: K = ellnf_get_nf(E); break;
     default: pari_err_TYPE("ellisdivisible",E);
   }
+  if (ell_is_inf(Q))
+  {
+    if (pQ) *pQ = ellinf();
+    return 1;
+  }
   switch(typ(n))
   {
     case t_INT:
-      N = n;
-      if (!isprime(absi_shallow(n)))
-      {
-        GEN f = absZ_factor(n), LP = gel(f,1), LE = gel(f,2);
-        l = lg(LP);
-        for (i = 1; i < l; i++)
-        {
-          long j, e = itos(gel(LE,i));
-          GEN xp = ellxn(E,itos(gel(LP,i)), w);
-          for (j = 1; j <= e; j++)
-            if (!ellisdivisible(E, P, xp, &P)) return 0;
+      if (!signe(n)) return 0;
+      if (!K)
+      { /* could use elltors instead of a multiple ? */
+        ulong nn = itou(n), n2 = u_ppo(nn, torsbound(E, 0));
+        if (nn > n2)
+        { /* n2 coprime to torsion */
+          if (!(Q = ellQ_isdivisible(E, Q, n2))) return 0;
+          if (signe(n) < 0) Q = ellneg(E, Q);
+          if (nn == 1)
+          {
+            if (pQ) *pQ = Q;
+            return 1;
+          }
+          /* we may have changed n into |n/n2| (and Q in -Q if n < 0) */
+          n = utoipos(nn/n2);
         }
-        if (pQ) *pQ = signe(n) < 0? ellneg(E, P): P;
-        return 1;
       }
-      n = ellxn(E, itou(n), w);
       break;
     case t_VEC:
       if (lg(n) == 3 && typ(gel(n,1)) == t_POL && typ(gel(n,2)) == t_POL) break;
@@ -379,72 +441,7 @@ ellisdivisible_divpol_i(GEN E, GEN P, GEN n, long w, GEN *pQ)
       pari_err_TYPE("ellisdivisible",n);
       break;
   }
-  if (!N)
-  {
-    long d, d2 = degpol(gel(n,1));
-    if (d2 < 0)
-      N = gen_0;
-    else
-    {
-      if (!uissquareall(d2,(ulong*)&d)) pari_err_TYPE("ellisdivisible",n);
-      N = stoi(d);
-    }
-  }
-  if (!signe(N)) return 0;
-  xP = gel(P,1);
-  R = nfroots(K, RgX_sub(RgX_Rg_mul(gel(n,2), xP), gel(n,1)));
-  l = lg(R);
-  for(i = 1; i < l; i++)
-  {
-    GEN Q,y, x = gel(R,i), a = ellordinate(E,x,0);
-    if (lg(a) == 1) continue;
-    y = gel(a,1);
-    Q = mkvec2(x,y);
-    if (!gequal(P,ellmul(E,Q,N))) Q = ellneg(E,Q); /* nQ = -P */
-    if (pQ) *pQ = Q;
-    return 1;
-  }
-  return 0;
-}
-static long
-ellisdivisible_divpol(GEN E, GEN P, GEN n, GEN *pQ)
-{
-  long w = fetch_var_higher(), t = ellisdivisible_divpol_i(E, P, n, w, pQ);
-  delete_var(); return t;
-}
-
-long
-ellisdivisible(GEN E, GEN P, GEN n, GEN *pQ)
-{
-  pari_sp av = avma;
-  checkell(E); checkellpt(P);
-  if (ell_is_inf(P))
-  {
-    if (pQ) *pQ = ellinf();
-    return 1;
-  }
-  if (typ(n) == t_INT)
-  {
-    if (!signe(n)) return 0;
-    if (ell_get_type(E) == t_ELL_Q)
-    {
-      ulong nn = itou(n), n2 = u_ppo(nn, 210);
-      nn /= n2;
-      if (n2 > 1)
-      {
-        P = ellQ_isdivisible(E, P, n2);
-        if (!P) return 0;
-        if (signe(n) < 0) P = ellneg(E, P);
-        if (nn == 1)
-        {
-          if (pQ) *pQ = P;
-          return 1;
-        }
-        n = utoipos(nn); /* we may have changed n into -n (and P in -P) */
-      }
-    }
-  }
-  if (!ellisdivisible_divpol(E, P, n, pQ)) return gc_long(av, 0);
+  if (!ellisdivisible_divpol(K, E, Q, n, pQ)) return gc_long(av, 0);
   if (!pQ) return gc_long(av, 1);
   *pQ = gerepilecopy(av, *pQ); return 1;
 }
