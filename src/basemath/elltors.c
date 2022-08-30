@@ -382,7 +382,7 @@ ellisdivisible(GEN E, GEN Q, GEN n, GEN *pQ)
   switch(typ(n))
   {
     case t_INT:
-      if (!signe(n)) return 0;
+      if (!signe(n) || is_bigint(n)) return 0;
       if (!K)
       { /* could use elltors instead of a multiple ? */
         ulong nn = itou(n), n2 = u_ppo(nn, torsbound(E, 0));

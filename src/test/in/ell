@@ -164,6 +164,7 @@ if (ellisdivisible(eK, P6, 2, &Q), Q)
 
 \\ #2408
 e=ellinit([-25,0]); p=[-4,6]; q=ellmul(e,p,4); ellisdivisible(e,q,4)
+ellisdivisible(e,q,2^64)
 
 e = ellinit([1.,2,3,4,5]);
 e.eta
