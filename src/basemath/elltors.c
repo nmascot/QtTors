@@ -322,48 +322,28 @@ nftorsbound(GEN E, ulong psylow)
   return mkvec2(B1,B2);
 }
 
-/* Checks whether the point P is divisible by n in E(K), where xn is
- * [phi_n, psi_n^2]
- * If true, returns a point Q such that nQ = P or -P. Else, returns NULL */
+/* Checks whether the point P != oo is divisible by n in E(K), where xn is
+ * [phi_n, psi_n^2]. If so, returns a point Q such that nQ = P or -P.
+ * Else, returns NULL */
 static GEN
 ellnfis_divisible_by(GEN E, GEN K, GEN P, GEN xn)
 {
-  GEN r, x = gel(P,1);
-  long i, l;
-  if (ell_is_inf(P)) return P;
-  r = nfroots(K, RgX_sub(RgX_Rg_mul(gel(xn,2), x), gel(xn,1)));
-  l = lg(r);
-  for(i=1; i<l; i++)
+  GEN R = nfroots(K, RgX_sub(RgX_Rg_mul(gel(xn,2), gel(P,1)), gel(xn,1)));
+  long i, l = lg(R);
+  for (i = 1; i < l; i++)
   {
-    GEN a = gel(r,i), y = ellordinate(E,a,0);
-    if (lg(y) != 1) return mkvec2(a, gel(y,1));
+    GEN x = gel(R,i), y = ellordinate(E,x,0);
+    if (lg(y) != 1) return mkvec2(x, gel(y,1));
   }
   return NULL;
 }
 
-/* E curve over K (nf or NULL); xp = ellxn(E, N) */
-static long
-ellisdivisible_divpol_N(GEN K, GEN E, GEN P, GEN xp, GEN N, GEN *pQ)
+/* Q is not the point at infinity; do we have Q = [n]Q' on curve C/K ?
+ * return P such that [n] P = \pm Q or NULL if none exist */
+static GEN
+ellnfis_divisible_by_i(GEN C, GEN K, GEN Q, GEN n, long v)
 {
-  GEN R = nfroots(K, RgX_sub(RgX_Rg_mul(gel(xp,2), gel(P,1)), gel(xp,1)));
-  long i, l = lg(R);
-  /* R = abscissas of all Q s.t. n Q = [x(P), .], i.e. P or -P */
-  for(i = 1; i < l; i++)
-  {
-    GEN Q, x = gel(R,i), a = ellordinate(E,x,0);
-    if (lg(a) == 1) continue;
-    Q = mkvec2(x, gel(a,1));
-    if (!gequal(P,ellmul(E,Q,N))) Q = mkvec2(x, gel(a,2)); /* nQ = -P */
-    if (pQ) *pQ = Q;
-    return 1;
-  }
-  return 0;
-}
-
-static long
-ellisdivisible_divpol_i(GEN K, GEN C, GEN Q, GEN n, long v, GEN *pQ)
-{
-  GEN xp;
+  GEN xn;
   if (!isprimepower(absi_shallow(n), NULL))
   {
     GEN f = absZ_factor(n), P = gel(f,1), E = gel(f,2);
@@ -371,37 +351,22 @@ ellisdivisible_divpol_i(GEN K, GEN C, GEN Q, GEN n, long v, GEN *pQ)
     for (i = 1; i < l; i++)
     {
       GEN q = powii(gel(P,i), gel(E,i));
-      xp = ellxn(C, itou(q), v);
-      if (!ellisdivisible_divpol_N(K, C, Q, xp, q, &Q)) return 0;
+      xn = ellxn(C, itou(q), v);
+      if (!(Q = ellnfis_divisible_by(C, K, Q, xn))) return 0;
     }
-    if (pQ) *pQ = signe(n) < 0? ellneg(C, Q): Q;
-    return 1;
+    return Q;
   }
-  xp = ellxn(C, itou(n), v);
-  return ellisdivisible_divpol_N(K, C, Q, xp, n, pQ);
+  xn = ellxn(C, itou(n), v);
+  return ellnfis_divisible_by(C, K, Q, xn);
 }
 
-/* Q is not the point at infinity; do we have Q = [n]Q' on curve C/K ? */
-static long
-ellisdivisible_divpol(GEN K, GEN C, GEN Q, GEN n, GEN *pQ)
-{
-  long t, v;
-  if (typ(n) != t_INT)
-  { /* ellxn */
-    long d, d2 = degpol(gel(n,1));
-    if (d2 < 0) return 0;
-    if (!uissquareall(d2,(ulong*)&d)) pari_err_TYPE("ellisdivisible",n);
-    return ellisdivisible_divpol_N(K, C, Q, n, utoi(d), pQ);
-  }
-  v = fetch_var_higher();
-  t = ellisdivisible_divpol_i(K, C, Q, n, v, pQ);
-  delete_var(); return t;
-}
 long
 ellisdivisible(GEN E, GEN Q, GEN n, GEN *pQ)
 {
   pari_sp av = avma;
-  GEN K = NULL;
+  GEN P = NULL, N = NULL, K = NULL;
+  long v;
+
   checkell(E); checkellpt(Q);
   switch(ell_get_type(E))
   {
@@ -434,16 +399,29 @@ ellisdivisible(GEN E, GEN Q, GEN n, GEN *pQ)
           n = utoipos(nn/n2);
         }
       }
-      break;
+      v = fetch_var_higher();
+      P = ellnfis_divisible_by_i(E, K, Q, n, v);
+      delete_var(); N = n; break;
     case t_VEC:
-      if (lg(n) == 3 && typ(gel(n,1)) == t_POL && typ(gel(n,2)) == t_POL) break;
+      if (lg(n) == 3 && typ(gel(n,1)) == t_POL && typ(gel(n,2)) == t_POL)
+      { /* ellxn */
+        long d, d2 = degpol(gel(n,1));
+        if (d2 < 0) return gc_long(av, 0);
+        if (!uissquareall(d2,(ulong*)&d)) pari_err_TYPE("ellisdivisible",n);
+        P = ellnfis_divisible_by(E, K, Q, n);
+        N = utoi(d); break;
+      } /* fall through */
     default:
       pari_err_TYPE("ellisdivisible",n);
       break;
   }
-  if (!ellisdivisible_divpol(K, E, Q, n, pQ)) return gc_long(av, 0);
+  if (!P) return gc_long(av, 0);
   if (!pQ) return gc_long(av, 1);
-  *pQ = gerepilecopy(av, *pQ); return 1;
+  if (gequal(Q, ellmul(E, P, N)))
+    P = gerepilecopy(av, P);
+  else
+    P = gerepileupto(av, ellneg(E, P));
+  *pQ = P; return 1;
 }
 
 /* 2-torsion point of abscissa x */
@@ -472,9 +450,9 @@ ellnftorsprimary(GEN E, long p, long N1, long N2, long v)
   long n1, n2;
 
   /* compute E[p] = < P1 > or < P1, P2 > */
-  P1 = P2 = ellinf();
   X = nfroots(K, elldivpol(E,p,v));
-  if(lg(X) == 1) return ptor0();
+  if (lg(X) == 1) return ptor0();
+  P2 = ellinf();
   if (p==2)
   {
     P1 = tor2(E, gel(X,1));
