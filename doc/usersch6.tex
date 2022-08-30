@@ -3273,16 +3273,33 @@ Return a \typ{VECSMALL} $v$ such that $v[i] = -1$ if $(i,N) > 1$ else
 $\chi(i) = e(v[i]/d)$, $1 \leq i \leq N$.
 
 \section{Hecke characters}
-% TODO Aurel or Pascal
-\fun{GEN}{eulerf_gchar}{GEN an, GEN p, long prec}
 
-\fun{GEN}{gchari_lfun}{GEN gc, GEN chi, GEN w}
+The functions in this section are specific to Hecke characters. The
+argument \kbd{gc} is a \kbd{gchar} structure as returned by
+\kbd{gcharinit(bnf, mod)}, and the character \kbd{chi} is a \typ{COL}
+of components on the SNF generators of \kbd{gc}.
 
-\fun{int}{is_gchar_group}{GEN gc}
+\fun{GEN}{eulerf_gchar}{GEN an, GEN p, long prec} \kbd{an} being the
+first component of a Hecke L-function \kbd{Ldata} (as output by
+\kbd{lfungchar}) and $p$ a prime number, return the Euler factor
+at $p$.
 
-\fun{GEN}{lfungchar}{GEN gc, GEN chi}
+\fun{GEN}{gchari_lfun}{GEN gc, GEN chi, GEN w} \kbd{chi} being a
+\typ{VEC} describing a Hecke character encoded on the internal
+basis \kbd{gc[1]}, return the \kbd{Ldata}
+structure corresponding to the Hecke L-function associated to \kbd{chi}.
 
-\fun{GEN}{vecan_gchar}{GEN an, long n, long prec}
+\fun{int}{is_gchar_group}{GEN gc} return $1$ if \kbd{gc} is a valid
+gchar structure and $0$ otherwise.
+
+\fun{GEN}{lfungchar}{GEN gc, GEN chi} return the \kbd{Ldata} structure
+corresponding to the Hecke L-function associated to \kbd{chi}.
+
+\fun{GEN}{vecan_gchar}{GEN an, long n, long prec} \kbd{an} being the
+first component of a Hecke L-function \kbd{Ldata} (as output by
+\kbd{lfungchar}), return a \typ{VEC} of length $n$ containing the
+first $n$ Dirichlet coefficients of this L-function, computed to
+absolute precision \kbd{prec}.
 
 \section{Central simple algebras}
 
