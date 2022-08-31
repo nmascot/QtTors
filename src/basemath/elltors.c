@@ -390,7 +390,7 @@ ellisdivisible(GEN E, GEN Q, GEN n, GEN *pQ)
         { /* n2 coprime to torsion */
           if (!(Q = ellQ_isdivisible(E, Q, n2))) return 0;
           if (signe(n) < 0) Q = ellneg(E, Q);
-          if (nn == 1)
+          if (nn == n2)
           {
             if (pQ) *pQ = Q;
             return 1;
