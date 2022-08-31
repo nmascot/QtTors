@@ -382,7 +382,19 @@ ellisdivisible(GEN E, GEN Q, GEN n, GEN *pQ)
   switch(typ(n))
   {
     case t_INT:
-      if (!signe(n) || is_bigint(n)) return 0;
+      if (!signe(n)) return 0;
+      if (is_bigint(n))
+      { /* only possible if P is torsion */
+        GEN x, o = ellorder(E, Q, NULL);
+        if (isintzero(o)) return gc_long(av, 0);
+        x = Z_ppo(n, o);
+        Q = ellmul(E, Q, Fp_inv(x, o));
+        n = diviiexact(n, x);
+        if (is_bigint(n)) pari_err_IMPL("ellisdivisible for huge n");
+        if (!ellisdivisible(E, Q, n, pQ)) return gc_long(av, 0);
+        if (!pQ) return gc_long(av, 1);
+        *pQ = gerepilecopy(av, *pQ); return 1;
+      }
       if (!K)
       { /* could use elltors instead of a multiple ? */
         ulong nn = itou(n), n2 = u_ppo(nn, torsbound(E, 0));
