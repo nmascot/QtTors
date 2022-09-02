@@ -38,9 +38,7 @@ Doc: creates a row vector whose components are the
  provides it but not quite: $e$ may contain $0$ exponents, which are not
  allowed in factorizations. These must be sieved out as in:
  \bprog
- tofact(P,E) =
-   my(v = select(x->x, E, 1)); Mat([vecextract(P,v), vecextract(E,v)]);
-
+ ? tofact(P,E) = matreduce(Mat([P,E]));
  ? tofact([2,3,5,7]~, [4,0,2,0]~)
  %4 =
  [2 4]
