@@ -360,6 +360,7 @@ ellnfis_divisible_by_i(GEN C, GEN K, GEN Q, GEN n, long v)
   return ellnfis_divisible_by(C, K, Q, xn);
 }
 
+static GEN ellorder_nf(GEN E, GEN P, GEN B);
 long
 ellisdivisible(GEN E, GEN Q, GEN n, GEN *pQ)
 {
@@ -385,12 +386,15 @@ ellisdivisible(GEN E, GEN Q, GEN n, GEN *pQ)
       if (!signe(n)) return 0;
       if (is_bigint(n))
       { /* only possible if P is torsion */
-        GEN x, o = ellorder(E, Q, NULL);
+        GEN x, o, ex = cyc_get_expo(abgrp_get_cyc(elltors(E)));
+        if (equali1(ex)) return gc_long(av, 0);
+        o = K? ellorder_nf(E, Q, ex): ellorder(E, Q, NULL);
         if (isintzero(o)) return gc_long(av, 0);
         x = Z_ppo(n, o);
         Q = ellmul(E, Q, Fp_inv(x, o));
-        n = diviiexact(n, x);
-        if (is_bigint(n)) pari_err_IMPL("ellisdivisible for huge n");
+        n = diviiexact(n, x); /* all primes dividing n divide o = ord(Q) | ex */
+        if (!dvdii(diviiexact(ex,o), n)) return gc_long(av, 0);
+        if (is_bigint(n)) pari_err_IMPL("ellisdivisible for huge torsion");
         if (!ellisdivisible(E, Q, n, pQ)) return gc_long(av, 0);
         if (!pQ) return gc_long(av, 1);
         *pQ = gerepilecopy(av, *pQ); return 1;
@@ -685,11 +689,11 @@ ellorder_Q(GEN E, GEN P)
   }
   return gc_long(av,k);
 }
-/* E a t_ELL_NF */
+/* E a t_ELL_NF, B a multiplicative bound for exponent(E_tor) or NULL */
 static GEN
-ellorder_nf(GEN E, GEN P)
+ellorder_nf(GEN E, GEN P, GEN B)
 {
-  GEN K = ellnf_get_nf(E), B;
+  GEN K = ellnf_get_nf(E);
   pari_sp av = avma;
   GEN dx, dy, d4, d6, D, ND, Ep, Pp, Q, gp, modpr, pr, T, k;
   forprime_t S;
@@ -697,7 +701,7 @@ ellorder_nf(GEN E, GEN P)
   if (ell_is_inf(P)) return gen_1;
   if (gequal(P, ellneg(E,P))) return gen_2;
 
-  B = gel(nftorsbound(E, 0), 1);
+  if (!B) B = gel(nftorsbound(E, 0), 1);
   dx = Q_denom(gel(P,1));
   dy = Q_denom(gel(P,2));
   d4 = Q_denom(ell_get_c4(E));
@@ -756,7 +760,7 @@ ellorder(GEN E, GEN P, GEN o)
       if (lg(E)==1) pari_err_IMPL("ellorder for curve with singular reduction");
     }
   }
-  if (ell_get_type(E)==t_ELL_NF) return ellorder_nf(E, P);
+  if (ell_get_type(E)==t_ELL_NF) return ellorder_nf(E, P, NULL);
   checkell_Fq(E);
   fg = ellff_get_field(E);
   if (!o) o = ellff_get_o(E);

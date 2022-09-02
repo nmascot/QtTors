@@ -170,6 +170,7 @@ e=ellinit([1,0,0,-45,81]);
 ellisdivisible(e, [6,3], 2)
 ellisdivisible(e, [6,3], 2*7^64)
 ellisdivisible(e, [6,3], 5*7^64)
+ellisdivisible(e, [6,3], 5^64)
 
 e = ellinit([1.,2,3,4,5]);
 e.eta
