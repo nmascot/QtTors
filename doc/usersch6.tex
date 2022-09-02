@@ -93,6 +93,9 @@ and $0$ otherwise.
 \fun{int}{is_nf_extfactor}{GEN F} return $1$ if $F$ is an extended ideal
 factorization (allowing $0$ or negative exponents) and $0$ otherwise.
 
+\fun{int}{RgV_is_prV}{GEN v} returns $1$ if the vector $v$ contains only
+prime ideals and $0$ otherwise.
+
 \fun{GEN}{get_prid}{GEN ideal} return the underlying prime ideal structure
 if one can be extracted from \kbd{ideal} (ideal or extended ideal), and
 return \kbd{NULL} otherwise.

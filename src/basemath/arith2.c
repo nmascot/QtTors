@@ -235,7 +235,7 @@ RgV_is_ZV0(GEN v)
   return 1;
 }
 
-static int
+int
 RgV_is_prV(GEN v)
 {
   long l = lg(v), i;
