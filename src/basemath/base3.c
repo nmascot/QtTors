@@ -751,7 +751,31 @@ idealfactorback(GEN nf, GEN L, GEN e, int red)
 {
   nf = checknf(nf);
   if (red) return gen_factorback(L, e, (void*)nf, &idmulred, &idpowred, NULL);
-  else     return gen_factorback(L, e, (void*)nf, &idmul, &idpow, NULL);
+  if (!e && typ(L) == t_MAT && lg(L) == 3) { e = gel(L,2); L = gel(L,1); }
+  if (is_vec_t(typ(L)) && RgV_is_prV(L))
+  { /* don't use gen_factorback since *= pr^v can be done more efficiently */
+    pari_sp av = avma;
+    long i, l = lg(L);
+    GEN a;
+    if (!e) e = const_vec(l-1, gen_1);
+    else switch(typ(e))
+    {
+      case t_VECSMALL: e = zv_to_ZV(e); break;
+      case t_VEC: case t_COL:
+        if (!RgV_is_ZV(e))
+          pari_err_TYPE("factorback [not an exponent vector]", e);
+        break;
+      default: pari_err_TYPE("idealfactorback", e);
+    }
+    if (l != lg(e))
+      pari_err_TYPE("factorback [not an exponent vector]", e);
+    if (l == 1 || ZV_equal0(e)) return gc_const(av, gen_1);
+    a = idealpow(nf, gel(L,1), gel(e,1));
+    for (i = 2; i < l; i++)
+      if (signe(gel(e,i))) a = idealmulpowprime(nf, a, gel(L,i), gel(e,i));
+    return gerepileupto(av, a);
+  }
+  return gen_factorback(L, e, (void*)nf, &idmul, &idpow, NULL);
 }
 static GEN
 eltmul(void *nf, GEN x, GEN y) { return nfmul((GEN) nf, x, y); }

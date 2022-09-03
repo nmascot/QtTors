@@ -285,6 +285,7 @@ BA  98- rnfabelianconjgen
    100- bnr_char_sanitize, bnr_subgroup_sanitize
 TF 101- GP function znsubgroupgenerators
    102- [libpari] RgV_is_prV
+   103- improve idealfactorback [using ideamulpowprime]
 
   Changed
 HC   1- faster implementation of eulervec + cache result
