@@ -168,6 +168,48 @@ rnfelttrace(GEN rnf, GEN x)
   return gerepileupto(av, x);
 }
 
+static GEN
+famatQ_to_famatZ(GEN fa)
+{
+  GEN E, F, Q, P = gel(fa,1);
+  long i, j, l = lg(P);
+  if (l == 1 || RgV_is_ZV(P)) return fa;
+  Q = cgetg(2*l, t_COL);
+  F = cgetg(2*l, t_COL); E = gel(fa, 2);
+  for (i = j = 1; i < l; i++)
+  {
+    GEN p = gel(P,i);
+    if (typ(p) == t_INT)
+    { gel(Q, j) = p; gel(F, j) = gel(E, i); j++; }
+    else
+    {
+      gel(Q, j) = gel(p,1); gel(F, j) = gel(E, i); j++;
+      gel(Q, j) = gel(p,2); gel(F, j) = negi(gel(E, i)); j++;
+    }
+  }
+  setlg(Q, j); setlg(F, j); return mkmat2(Q, F);
+}
+static GEN
+famat_cba(GEN fa)
+{
+  GEN Q, F, P = gel(fa, 1), E = gel(fa, 2);
+  long i, j, lQ, l = lg(P);
+  if (l == 1) return fa;
+  Q = ZV_cba(P); lQ = lg(Q);
+  F = cgetg(lQ, t_COL);
+  for (j = 1; j < lQ; j++)
+  {
+    GEN v = gen_0, q = gel(Q,j);
+    for (i = 1; i < l; i++)
+    {
+      long e = Z_pval(gel(P,i), q);
+      if (e) v = addii(v, muliu(gel(E,i), e));
+    }
+    gel(F, j) = v;
+  }
+  return mkmat2(Q, F);
+}
+
 /* assume nf is a genuine nf, fa a famat */
 static GEN
 famat_norm(GEN nf, GEN fa)
@@ -178,7 +220,10 @@ famat_norm(GEN nf, GEN fa)
 
   G = cgetg_copy(g, &l);
   for (i = 1; i < l; i++) gel(G,i) = nfnorm(nf, gel(g,i));
-  fa = famat_reduce(mkmat2(G, gel(fa,2)));
+  fa = mkmat2(G, gel(fa,2));
+  fa = famatQ_to_famatZ(fa);
+  fa = famat_reduce(fa);
+  fa = famat_cba(fa);
   return gerepileupto(av, factorback(fa));
 }
 GEN
