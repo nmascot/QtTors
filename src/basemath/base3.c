@@ -173,11 +173,13 @@ static GEN
 famat_norm(GEN nf, GEN fa)
 {
   pari_sp av = avma;
-  GEN g = gel(fa,1), e = gel(fa,2), N = gen_1;
-  long i, l = lg(g);
-  for (i = 1; i < l; i++)
-    N = gmul(N, powgi(nfnorm(nf, gel(g,i)), gel(e,i)));
-  return gerepileupto(av, N);
+  GEN G, g = gel(fa,1);
+  long i, l;
+
+  G = cgetg_copy(g, &l);
+  for (i = 1; i < l; i++) gel(G,i) = nfnorm(nf, gel(g,i));
+  fa = famat_reduce(mkmat2(G, gel(fa,2)));
+  return gerepileupto(av, factorback(fa));
 }
 GEN
 nfnorm(GEN nf, GEN x)
