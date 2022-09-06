@@ -12,7 +12,7 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
-/* This file is based on ratpoints-2.1.3 by Michael Stoll, see
+/* This file is based on ratpoints-2.2.1 by Michael Stoll, see
  * http://www.mathe2.uni-bayreuth.de/stoll/programs/
  * Original copyright / license: */
 /***********************************************************************
