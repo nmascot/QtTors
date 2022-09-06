@@ -1525,15 +1525,21 @@ elltwist(GEN E, GEN P)
 {
   pari_sp av = avma;
   GEN a1, a2, a3, a4, a6, a, b, c, ac, D, D2, V, DOM = NULL;
-  long lE;
+  long prec = DEFAULTPREC, isell = (lg(E) == 17);
 
+  if (typ(E) != t_VEC) pari_err_TYPE("elltwist",E);
+  if (isell) switch(ell_get_type(E))
+  {
+    case t_ELL_Q:
+    case t_ELL_Rg: prec = ellR_get_prec(E); break;
+  }
   if (!P)
   {
     GEN a4, a6, e, p;
     /* Could avoid this ellinit. Don't bother. */
-    if (!checkell_i(E))
+    if (!isell)
     {
-      e = E; E = ellinit_i(E, NULL, DEFAULTPREC);
+      e = E; E = ellinit_i(E, NULL, prec);
       if (!E) pari_err_TYPE("elltwist", e);
     }
     switch (ell_get_type(E))
@@ -1548,13 +1554,11 @@ elltwist(GEN E, GEN P)
       default: pari_err_TYPE("elltwist [missing P]", E);
     }
   }
-  if (typ(E) != t_VEC) pari_err_TYPE("elltwist",E);
-  lE = lg(E);
-  if (lE == 17 && ell_get_type(E) == t_ELL_NF)
+  if (isell && ell_get_type(E) == t_ELL_NF)
     if (!(DOM = ellnf_get_bnf(E))) DOM = ellnf_get_nf(E);
   if (typ(P) == t_INT)
   {
-    if (equali1(P)) return ellinit(E, DOM, DEFAULTPREC);
+    if (equali1(P)) return ellinit(E, DOM, prec);
     P = quadpoly(P);
   }
   else
@@ -1563,7 +1567,7 @@ elltwist(GEN E, GEN P)
     if (degpol(P) != 2 )
       pari_err_DOMAIN("elltwist", "degree(P)", "!=", gen_2, P);
   }
-  switch(lE)
+  switch(lg(E))
   {
     case 3:
       a1 = a2 = a3 = gen_0;
@@ -1593,7 +1597,7 @@ elltwist(GEN E, GEN P)
     gel(V,4) = gsub(gmul(a4, D2), gmul(gmul(gmulsg(2, a3D), a1), ac));
     gel(V,5) = gmul(gsub(gmul(a6, D), gmul(gsqr(a3), ac)), D2);
   }
-  E = ellinit_i(V, DOM, DEFAULTPREC);
+  E = ellinit_i(V, DOM, prec);
   if (!E) pari_err_TYPE("elltwist", V);
   return gerepilecopy(av, E);
 }
