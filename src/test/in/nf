@@ -173,3 +173,4 @@ e=2^1000; Q=nfinit(x);
 nfeltnorm(Q, [2, e; 2, -e])
 nfeltnorm(Q, [2/3, e; 6, 1-e; 15, 2*e+1; 1/5, 2*e-3])
 nfeltnorm(Q, [-2, 1+e; 2, 1-e])
+nfeltnorm(Q, Mat([1,1]))

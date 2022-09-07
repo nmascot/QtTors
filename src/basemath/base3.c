@@ -200,11 +200,12 @@ famat_cba(GEN fa)
   for (j = 1; j < lQ; j++)
   {
     GEN v = gen_0, q = gel(Q,j);
-    for (i = 1; i < l; i++)
-    {
-      long e = Z_pval(gel(P,i), q);
-      if (e) v = addii(v, muliu(gel(E,i), e));
-    }
+    if (!equali1(q))
+      for (i = 1; i < l; i++)
+      {
+        long e = Z_pval(gel(P,i), q);
+        if (e) v = addii(v, muliu(gel(E,i), e));
+      }
     gel(F, j) = v;
   }
   return mkmat2(Q, F);
