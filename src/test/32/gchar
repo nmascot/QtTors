@@ -285,6 +285,38 @@ bestS fix
 1
 1
 bug #2373
+over Q
+[0, 1]
+[0, 256150*I]~
+1/5
+200000
+[0, -I]
+[256150*I]
+
+[-1]
+
+[[-2]~]
+[1, [0]]
+1
+[[-1, 0]]
+[-1]~
+[0, 0, 1]
+[0, 0, 256150*I]~
+1/5
+200000
+[0, -I]
+[256150*I]
+[0, 110318*I]
+
+[-1]
+
+[[-1]~]
+[1, [0]]
+1
+[[-1, 0]]
+[-1]~
+bug in length checks
+[0, -I]
 bad inputs
   ***   at top-level: gcharinit([],1)
   ***                 ^---------------
@@ -402,4 +434,4 @@ bad inputs
   ***   at top-level: gcharlocal(gc,[0,1,O(5^2)]~,1)
   ***                 ^------------------------------
   *** gcharlocal: incorrect type in check_gchar_i [s] (t_PADIC).
-Total time spent: 4939
+Total time spent: 2981

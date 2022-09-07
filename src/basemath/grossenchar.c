@@ -676,7 +676,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm)
 static void
 gchar_snfbasis_shallow(GEN gc, GEN rel)
 {
-  long n, r1, r2;
+  long n, r1, r2, lU, lUi;
   GEN nf, cyc, U, Ui;
 
   nf = gchar_get_nf(gc);
@@ -700,8 +700,12 @@ gchar_snfbasis_shallow(GEN gc, GEN rel)
   }
 
   rel = shallowtrans(rel);
+  lU = lg(U);
+  lUi = lg(Ui);
   U = shallowtrans(U);
+  if (lg(U)==1 && lUi>1) U = zeromat(0,lUi-1);
   Ui = shallowtrans(Ui);
+  if (lg(Ui)==1 && lU>1) Ui = zeromat(0,lU-1);
 
   gchar_set_nfree(gc, n-1);
   gchar_set_ntors(gc, (lg(cyc)-1) - (n-1));
@@ -733,6 +737,12 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
   ncm = gchar_get_nalg(gc);
   nm = ns+nc+n; /* ns + nc + r1 + r2 + r2 */
   mprec = gprecision(m);
+
+  if (lg(m)==1)
+  {
+    gchar_set_basis(gc,zeromat(0,nm));
+    return;
+  }
 
   while (1)
   {
@@ -1164,11 +1174,17 @@ check_gchar(GEN gc, GEN chi, GEN *s)
   return check_gchar_i(chi, lg(gchar_get_cyc(gc))-1, s);
 }
 
+static long
+safelgcols(GEN m)
+{
+  return lg(m)==1 ? 1 : lg(gel(m,1));
+}
+
 static GEN
 check_gchari(GEN gc, GEN chi, GEN *s)
 {
   if (typ(chi)!=t_VEC) pari_err_TYPE("check_gchari [chi]", chi);
-  return check_gchar_i(chi, lg(gel(gchar_get_basis(gc),1)), s);
+  return check_gchar_i(chi, safelgcols(gchar_get_basis(gc)), s);
 }
 
 /* from coordinates on snf basis, return coordinates on internal basis, set
@@ -1352,7 +1368,8 @@ gcharlocal(GEN gc, GEN chi, GEN v, long prec, GEN* pbid)
       pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", "<=", gen_0, v);
     if (tau > r1+r2)
       pari_err_DOMAIN("gcharlocal [index of an infinite place]", "v", ">", stoi(r1+r2), v);
-    phi = gel(logchi, n0 + tau);
+    if (r1+r2 == 1) phi = gen_0;
+    else            phi = gel(logchi, n0 + tau);
     if (tau <= r1) /* v real */
     {
       GEN moo = gel(gchar_get_mod(gc),2);
@@ -1902,9 +1919,10 @@ gchari_lfun(GEN gc, GEN chi, GEN s0)
   cond_oo =  gcharlog_conductor_oo(gc, chilog);
 
   NN = mulii(idealnorm(nf, cond_f), absi_shallow(nf_get_disc(nf)));
-  /* FIXME: shift by s */
-  if (equali1(NN)) return lfuncreate(gen_1);
-  if (ZV_equal0(chi)) return lfuncreate(nf);
+  if (equali1(NN)) return lfunshift(lfuncreate(gen_1), gneg(s), 0,
+      prec2nbits(gchar_get_evalprec(gc)));
+  if (ZV_equal0(chi)) return lfunshift(lfuncreate(nf), gneg(s), 0,
+      prec2nbits(gchar_get_evalprec(gc)));
 
   /* vga_r = vector(r1,k,I*c[ns+nc+k]-s + cond_oo[k]);
    * vga_c = vector(r2,k,I*c[ns+nc+r1+k]+abs(c[ns+nc+r1+r2+k])/2-s) */

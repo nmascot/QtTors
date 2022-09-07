@@ -312,6 +312,42 @@ L = lfuncreate([gc,chi]);
 round(10^6*lfunparams(L))
 round(lfunan(L,10))
 
+print("over Q");
+bnf = bnfinit(y,1);
+gc = gcharinit(bnf,1);
+chi = [1]~;
+L = lfuncreate([gc,chi]);
+lfunparams(L)
+lfunan(L,10)
+lfuncheckfeq(L) < -100
+gc = gcharinit(bnf,4);
+chi = [1]~;
+L = lfuncreate([gc,chi]);
+lfunparams(L)
+lfunan(L,10)
+lfuncheckfeq(L) < -100
+gc = gcharinit(bnf,60);
+chi = [0,0,1]~;
+L = lfuncreate([gc,chi]);
+lfunparams(L)
+lfunan(L,10)
+lfuncheckfeq(L) < -100
+
+print("shifted zeta_K");
+bnf = bnfinit(x^2-5,1);
+gc = gcharinit(bnf,1);
+chi = [0,1]~;
+L = lfuncreate([gc,chi]);
+lfunparams(L)
+lfunan(L,10)
+lfuncheckfeq(L) < -100
+gc = gcharinit(bnf,60);
+chi = [0,0,0,1]~;
+L = lfuncreate([gc,chi]);
+lfunparams(L)
+lfunan(L,10)
+lfuncheckfeq(L) < -100
+
 print("bad inputs");
 bnf = bnfinit(x^4 - x^3 + 3*x^2 + 2*x + 1, 1);
 gc = gcharinit(bnf, 1);
