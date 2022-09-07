@@ -209,6 +209,24 @@ famat_cba(GEN fa)
   }
   return mkmat2(Q, F);
 }
+static long
+famat_sign(GEN fa)
+{
+  GEN P = gel(fa,1), E = gel(fa,2);
+  long i, l = lg(P), s = 1;
+  for (i = 1; i < l; i++)
+    if (signe(gel(P,i)) < 0 && mpodd(gel(E,i))) s = -s;
+  return s;
+}
+static GEN
+famat_abs(GEN fa)
+{
+  GEN Q, P = gel(fa,1);
+  long i, l;
+  Q = cgetg_copy(P, &l);
+  for (i = 1; i < l; i++) gel(Q,i) = absi_shallow(gel(P,i));
+  return mkmat2(Q, gel(fa,2));
+}
 
 /* assume nf is a genuine nf, fa a famat */
 static GEN
@@ -216,15 +234,17 @@ famat_norm(GEN nf, GEN fa)
 {
   pari_sp av = avma;
   GEN G, g = gel(fa,1);
-  long i, l;
+  long i, l, s;
 
   G = cgetg_copy(g, &l);
   for (i = 1; i < l; i++) gel(G,i) = nfnorm(nf, gel(g,i));
   fa = mkmat2(G, gel(fa,2));
   fa = famatQ_to_famatZ(fa);
-  fa = famat_reduce(fa);
+  s = famat_sign(fa);
+  fa = famat_reduce(famat_abs(fa));
   fa = famat_cba(fa);
-  return gerepileupto(av, factorback(fa));
+  g = factorback(fa);
+  return gerepileupto(av, s < 0? gneg(g): g);
 }
 GEN
 nfnorm(GEN nf, GEN x)
