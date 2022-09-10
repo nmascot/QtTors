@@ -16,4 +16,7 @@ Doc: \kbd{gp}, and in fact any program using the PARI
  computation is over, PARI will restore the stack size to the originally
  requested \kbd{parisize}.
 
+ If \tet{parisizemax} is unset, this command has a very unintuitive behaviour
+ since it must abort pending operations, see \kbd{??allocatemem}.
+
  The default value is 4M, resp.~8M on a 32-bit, resp.~64-bit machine.
