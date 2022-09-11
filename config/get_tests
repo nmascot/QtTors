@@ -10,7 +10,7 @@ test_extra_out="ploth io parallel install time"
 test_extra_OUT="env"
 
 test_extra_all_out="$test_extra_out $test_extra_OUT"
-pattern_out=`echo $test_extra_all_out | sed -e 's/ /|/g'`
+pattern_out=`echo $test_extra_all_out | sed -e 's/ /\\\\|/g'`
 
 # included in 'make bench'
 test_basic="\
@@ -28,8 +28,7 @@ test_basic="\
 "
 
 # included in 'make test-all' in addition to regular components of 'make bench'
-test_extra=`ls "$TOP"/src/test/in | grep -E -v "\b($pattern_out)\b"`
-test_extra=`echo $test_extra | sed -e 's/\n/ /g'`
+test_extra=`ls "$TOP"/src/test/in | grep -v "\b$pattern_out\b" | tr '\n' ' '`
 
 all_tests="$test_extra $test_extra_out $test_extra_OUT"
 top_test_extra="test-`echo $all_tests | sed -e 's/ \\([^ ]\\)/ test-\\1/g'`"

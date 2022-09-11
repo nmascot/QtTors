@@ -55,8 +55,8 @@ if test -n "$myuname"; then
   sunos)    case "$3" in 5*) osname=solaris;; esac
 	    case "$5" in
 	    sun4|sun4[ce]) ;; #arch=sparcv7;;
-	    sun4[dm]) cpu="TI,|FMI,|Cypress,|Ross,"
-	      case "`(prtconf||devinfo)2>&- |egrep $cpu`" in
+	    sun4[dm])
+	      case "`(prtconf||devinfo)2>&- | grep 'TI,\|FMI,\|Cypress,\|Ross,'`" in
 	      *TI,TMS390Z5[05]*) arch=sparcv8_super;; # SuperSparc I or II
 	      *TI,TMS390S1[05]*) arch=sparcv8_micro;; # MicroSparc I
 	      *FMI,MB86904*)     arch=sparcv8_micro;; # MicroSparc II
