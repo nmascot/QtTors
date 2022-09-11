@@ -797,25 +797,23 @@ ZpX_gcd(GEN f1, GEN f2, GEN p, GEN pm)
   set_avma(av); return pol_0(v);
 }
 
-/* Return m > 0, such that p^m ~ 2^16 for initial value of m; p > 1 */
+/* Return m > 0, such that p^m ~ 2^16 for initial value of m; assume p prime */
 static long
 init_m(GEN p)
 {
   ulong pp;
   if (lgefint(p) > 3) return 1;
   pp = p[2]; /* m ~ 16 / log2(pp) */
-  switch(pp)
+  if (pp < 41) switch(pp)
   {
     case 2: return 16;
     case 3: return 10;
-    case 4: return 8;
-    case 5: case 6: return 6;
-    case 7: case 8: case 9: return 5;
+    case 5: return 6;
+    case 7: return 5;
+    case 11: case 13: return 4;
+    default: return 3;
   }
-  if (pp < 17) return 4;
-  if (pp < 41) return 3;
-  if (pp < 257)return 2;
-  return 1;
+  return pp < 257? 2: 1;
 }
 
 /* reduced resultant mod p^m (assumes x monic) */
