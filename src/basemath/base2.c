@@ -801,8 +801,21 @@ ZpX_gcd(GEN f1, GEN f2, GEN p, GEN pm)
 static long
 init_m(GEN p)
 {
+  ulong pp;
   if (lgefint(p) > 3) return 1;
-  return (long)(16 / log2(p[2]));
+  pp = p[2]; /* m ~ 16 / log2(pp) */
+  switch(pp)
+  {
+    case 2: return 16;
+    case 3: return 10;
+    case 4: return 8;
+    case 5: case 6: return 6;
+    case 7: case 8: case 9: return 5;
+  }
+  if (pp < 17) return 4;
+  if (pp < 41) return 3;
+  if (pp < 257)return 2;
+  return 1;
 }
 
 /* reduced resultant mod p^m (assumes x monic) */
