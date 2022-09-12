@@ -22,6 +22,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #  include <windows.h>
 #  include "../systems/mingw/mingw.h"
 #endif
+#ifdef DEBUG_FLOATS
+#  undef  _GNU_SOURCE
+#  define _GNU_SOURCE
+#  include <fenv.h>
+#endif
 #include "pari.h"
 #include "paripriv.h"
 #include "gp.h"
@@ -561,6 +566,9 @@ main(int argc, char **argv)
     puts("### Errors on startup, exiting...\n\n");
     exit(1);
   }
+#ifdef DEBUG_FLOATS
+  feenableexcept(FE_INVALID);
+#endif
 #ifdef __CYGWIN32__
   cyg_environment(argc, argv);
 #endif
