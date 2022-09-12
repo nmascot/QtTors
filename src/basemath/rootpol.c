@@ -223,21 +223,21 @@ static long
 newton_polygon(GEN p, long k)
 {
   pari_sp av = avma;
-  double *logcoef, slope;
-  long n = degpol(p), i, j, h, l, *vertex;
-
-  logcoef = (double*)stack_malloc_align((n+1)*sizeof(double), sizeof(double));
-  vertex = (long*)new_chunk(n+1);
+  long n = degpol(p), i, j, h, l, *vertex = (long*)new_chunk(n+1);
+  double *L = (double*)stack_malloc_align((n+1)*sizeof(double), sizeof(double));
 
   /* vertex[i] = 1 if i a vertex of convex hull, 0 otherwise */
-  for (i=0; i<=n; i++) { logcoef[i] = dbllog2(gel(p,2+i)); vertex[i] = 0; }
+  for (i=0; i<=n; i++) { L[i] = dbllog2(gel(p,2+i)); vertex[i] = 0; }
   vertex[0] = 1; /* sentinel */
   for (i=0; i < n; i=h)
   {
-    slope = logcoef[i+1]-logcoef[i];
-    for (j = h = i+1; j<=n; j++)
+    double slope;
+    h = i+1;
+    while (L[i] == -pariINFINITY) { i = h; h = i+1; vertex[h] = 1; }
+    slope = L[h] - L[i];
+    for (j = i+2; j<=n; j++) if (L[j] != -pariINFINITY)
     {
-      double pij = (logcoef[j]-logcoef[i])/(double)(j-i);
+      double pij = (L[j] - L[i])/(double)(j - i);
       if (slope < pij) { slope = pij; h = j; }
     }
     vertex[h] = 1;
@@ -245,7 +245,7 @@ newton_polygon(GEN p, long k)
   h = k;   while (!vertex[h]) h++;
   l = k-1; while (!vertex[l]) l--;
   set_avma(av);
-  return (long)floor((logcoef[h]-logcoef[l])/(double)(h-l) + 0.5);
+  return (long)floor((L[h]-L[l])/(double)(h-l) + 0.5);
 }
 
 /* change z into z*2^e, where z is real or complex of real */
