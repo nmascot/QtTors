@@ -1291,9 +1291,9 @@ Babai_dpe(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, dpe_t **mu, dpe_t *
         /* we have |X| >= 2 */
         if (tmp->e < BITS_IN_LONG-1)
         {
-          long xx = (long) pari_rint(ldexp(tmp->d, tmp->e)); /* X fits in an long */
-          if (xx > 0) /* = xx */
+          if (tmp->d > 0)
           {
+            ulong xx = (ulong) pari_rint(ldexp(tmp->d, tmp->e)); /* X fits in an ulong */
             for (k=zeros+1; k<j; k++)
               dpe_submuluz(Dmael(mu,kappa,k), Dmael(mu,j,k), xx, Dmael(mu,kappa,k));
             for (i=1; i<=n; i++)
@@ -1311,9 +1311,9 @@ Babai_dpe(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, dpe_t **mu, dpe_t *
             for (i=kappa+1; i<=maxG; i++)
               gmael(G,i,kappa) = submuliu_inplace(gmael(G,i,kappa), gmael(G,i,j), xx);
           }
-          else /* = -xx */
+          else
           {
-            xx = -xx;
+            ulong xx = (ulong) pari_rint(ldexp(-tmp->d, tmp->e)); /* X fits in an ulong */
             for (k=zeros+1; k<j; k++)
               dpe_addmuluz(Dmael(mu,kappa,k), Dmael(mu,j,k), xx, Dmael(mu,kappa,k));
             for (i=1; i<=n; i++)
@@ -1335,9 +1335,9 @@ Babai_dpe(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, dpe_t **mu, dpe_t *
         else
         {
           long e = tmp->e - BITS_IN_LONG + 1;
-          long xx = (long) pari_rint(ldexp(tmp->d, BITS_IN_LONG - 1));
-          if (xx > 0)
+          if (tmp->d > 0)
           {
+            ulong xx = (ulong) pari_rint(ldexp(tmp->d, BITS_IN_LONG - 1));
             for (k=zeros+1; k<j; k++)
             {
               dpe_t x;
@@ -1350,7 +1350,7 @@ Babai_dpe(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, dpe_t **mu, dpe_t *
             for (i=1; i<=d; i++)
               gmael(U,kappa,i) = submuliu2n(gmael(U,kappa,i), gmael(U,j,i), xx, e);
             btop = avma;
-            ztmp = submuliu2n(mulshift(gmael(G,j,j), sqrs(xx), 2*e),
+            ztmp = submuliu2n(mulshift(gmael(G,j,j), sqru(xx), 2*e),
                 gmael(G,kappa,j), xx, e+1);
             ztmp = addii(gmael(G,kappa,kappa), ztmp);
             gmael(G,kappa,kappa) = gerepileuptoint(btop, ztmp);
@@ -1362,7 +1362,7 @@ Babai_dpe(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, dpe_t **mu, dpe_t *
               gmael(G,i,kappa) = submuliu2n(gmael(G,i,kappa), gmael(G,i,j), xx, e);
           } else
           {
-            xx = -xx;
+            ulong xx = (ulong) pari_rint(ldexp(-tmp->d, BITS_IN_LONG - 1));
             for (k=zeros+1; k<j; k++)
             {
               dpe_t x;
@@ -1375,7 +1375,7 @@ Babai_dpe(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, dpe_t **mu, dpe_t *
             for (i=1; i<=d; i++)
               gmael(U,kappa,i) = addmuliu2n(gmael(U,kappa,i), gmael(U,j,i), xx, e);
             btop = avma;
-            ztmp = addmuliu2n(mulshift(gmael(G,j,j), sqrs(xx), 2*e),
+            ztmp = addmuliu2n(mulshift(gmael(G,j,j), sqru(xx), 2*e),
                 gmael(G,kappa,j), xx, e+1);
             ztmp = addii(gmael(G,kappa,kappa), ztmp);
             gmael(G,kappa,kappa) = gerepileuptoint(btop, ztmp);
