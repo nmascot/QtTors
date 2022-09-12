@@ -1121,9 +1121,9 @@ static GEN
 modlog2(GEN x, long *sh)
 {
   double d = rtodbl(x), qd = (fabs(d) + M_LN2/2)/M_LN2;
-  long q = (long)qd;
+  long q;
   if (dblexpo(qd) >= BITS_IN_LONG-1) pari_err_OVERFLOW("expo()");
-  if (d < 0) q = -q;
+  q = d < 0 ? - (long) qd: (long) qd;
   *sh = q;
   if (q) {
     long l = realprec(x) + 1;
