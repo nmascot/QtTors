@@ -573,6 +573,7 @@ fplll_fast(GEN *pB, GEN *pU, double delta, double eta, long keepfirst)
     del(r,j) = cget_dblvec(d+1);
     del(appB,j) = cget_dblvec(n+1);
     del(G,j) = cget_dblvec(d+1);
+    for (i=1; i<=d; i++) dmael(G,j,i) = 0.;
   }
   expoB = cgetg(d+1, t_VECSMALL);
   for (i=1; i<=d; i++) expoB[i] = set_line(del(appB,i), gel(B,i), n);
