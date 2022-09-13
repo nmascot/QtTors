@@ -1178,15 +1178,13 @@ ComputeCoeff(GEN dtcr, LISTray *R, long n, long deg)
 /********************************************************************/
 static void
 deg11(LISTray *R, long p, GEN bnr, GEN pr) {
-  GEN z = isprincipalray(bnr, pr);
   vecsmalltrunc_append(R->L1, p);
-  vectrunc_append(R->L1ray, z);
+  vectrunc_append(R->L1ray, isprincipalray(bnr, pr));
 }
 static void
-deg12(LISTray *R, long p, GEN bnr, GEN Lpr) {
-  GEN z = isprincipalray(bnr, gel(Lpr,1));
+deg12(LISTray *R, long p, GEN bnr, GEN pr) {
   vecsmalltrunc_append(R->L11, p);
-  vectrunc_append(R->L11ray, z);
+  vectrunc_append(R->L11ray, isprincipalray(bnr, pr));
 }
 static void
 deg0(LISTray *R, long p) { vecsmalltrunc_append(R->L0, p); }
@@ -1197,50 +1195,58 @@ static void
 InitPrimesQuad(GEN bnr, ulong N0, LISTray *R)
 {
   pari_sp av = avma;
-  GEN bnf = bnr_get_bnf(bnr), cond = gel(bnr_get_mod(bnr), 1);
-  long p,i,l, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
-  GEN prime, Lpr, nf = bnf_get_nf(bnf), dk = nf_get_disc(nf);
+  GEN bnf = bnr_get_bnf(bnr), F = gel(bnr_get_mod(bnr), 1);
+  GEN v, N, nf = bnf_get_nf(bnf), dk = nf_get_disc(nf);
+  long l = 1 + primepi_upper_bound(N0);
+  ulong i, p, FZ = itou(gcoeff(F,1,1)), FZ2 = itou(gcoeff(F,2,2));
   forprime_t T;
 
-  l = 1 + primepi_upper_bound(N0);
+  FZ2 = ugcd(FZ, FZ2); /* content(F) */
   R->L0 = vecsmalltrunc_init(l);
-  R->L2 = vecsmalltrunc_init(l); R->condZ = condZ;
+  R->L2 = vecsmalltrunc_init(l); R->condZ = FZ;
   R->L1 = vecsmalltrunc_init(l); R->L1ray = vectrunc_init(l);
   R->L11= vecsmalltrunc_init(l); R->L11ray= vectrunc_init(l);
-  prime = utoipos(2);
+  N = utoipos(2);
   u_forprime_init(&T, 2, N0);
   while ( (p = u_forprime_next(&T)) )
   {
-    prime[2] = p;
+    N[2] = p;
     switch (kroiu(dk, p))
     {
     case -1: /* inert */
-      if (condZ % p == 0) deg0(R,p); else deg2(R,p);
+      if (FZ % p == 0) deg0(R,p); else deg2(R,p);
       break;
     case 1: /* split */
-      Lpr = idealprimedec(nf, prime);
-      if      (condZ % p != 0) deg12(R, p, bnr, Lpr);
-      else if (contZ % p == 0) deg0(R,p);
+      if (FZ2 % p == 0) deg0(R,p);
       else
       {
-        GEN pr = idealval(nf, cond, gel(Lpr,1))? gel(Lpr,2): gel(Lpr,1);
-        deg11(R, p, bnr, pr);
+        GEN Lpr = idealprimedec(nf, N);
+        if (FZ % p) deg12(R, p, bnr, gel(Lpr,1));
+        else
+        {
+          long t = ZC_prdvd(gel(F,2), gel(Lpr,1))? 2: 1;
+          deg11(R, p, bnr, gel(Lpr,t));
+        }
       }
       break;
     default: /* ramified */
-      if (condZ % p == 0)
+      if (FZ % p == 0)
         deg0(R,p);
       else
-        deg11(R, p, bnr, idealprimedec_galois(nf,prime));
+        deg11(R, p, bnr, idealprimedec_galois(nf, N));
       break;
     }
   }
   /* precompute isprincipalray(x), x in Z */
-  R->rayZ = cgetg(condZ, t_VEC);
-  for (i=1; i<condZ; i++)
-    gel(R->rayZ,i) = (ugcd(i,condZ) == 1)? isprincipalray(bnr, utoipos(i)): gen_0;
+  v = coprimes_zv(FZ);
+  R->rayZ = cgetg(FZ, t_VEC);
+  for (i = 1; i < FZ; i++)
+  {
+    N[2] = i;
+    gel(R->rayZ,i) = v[i]? isprincipalray(bnr, N): gen_0;
+  }
   gerepileall(av, 7, &(R->L0), &(R->L2), &(R->rayZ),
-              &(R->L1), &(R->L1ray), &(R->L11), &(R->L11ray) );
+              &(R->L1), &(R->L1ray), &(R->L11), &(R->L11ray));
 }
 
 static void
