@@ -43,7 +43,7 @@ ulong
 F3v_coeff(GEN x,long v)
 {
   long pos = (v-1)>>TWOPOTTRITS_IN_LONG;
-  long r = (v-1)&(BITS_IN_LONG-1);
+  long r = (v-1)&(TRITS_IN_LONG-1);
   ulong u=(ulong)x[2+pos];
   return (u>>(2*r))&3UL;
 }
@@ -52,7 +52,7 @@ void
 F3v_clear(GEN x, long v)
 {
   long pos = (v-1)>>TWOPOTTRITS_IN_LONG;
-  long r = (v-1)&(BITS_IN_LONG-1);
+  long r = (v-1)&(TRITS_IN_LONG-1);
   ulong *u=(ulong*)&x[2+pos];
   *u&=~(3UL<<(2*r));
 }
@@ -61,7 +61,7 @@ void
 F3v_set(GEN x, long v, ulong n)
 {
   long pos = (v-1)>>TWOPOTTRITS_IN_LONG;
-  long r = (v-1)&(BITS_IN_LONG-1);
+  long r = (v-1)&(TRITS_IN_LONG-1);
   ulong *u=(ulong*)&x[2+pos];
   *u&=~(3UL<<(2*r));
   *u|=(n<<(2*r));
@@ -71,7 +71,7 @@ INLINE void
 F3v_setneg(GEN x, long v)
 {
   long pos = (v-1)>>TWOPOTTRITS_IN_LONG;
-  long r = (v-1)&(BITS_IN_LONG-1);
+  long r = (v-1)&(TRITS_IN_LONG-1);
   ulong *u=(ulong*)&x[2+pos];
   if ((*u>>(2*r))&3UL)
     *u^=(3UL<<(2*r));
