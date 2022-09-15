@@ -133,7 +133,7 @@ A general overview (slides and video) of new features is available at
     See the tutorial (slides and video) at
       http://pari.math.u-bordeaux.fr/Events/PARI2022/index.html#CYCLO
   - New module to generate and compute with Hecke characters:
-      chareval         gcharalgebraic   gcharconductor
+      gchareval        gcharalgebraic   gcharconductor
       gcharduallog     gcharidentify    gcharinit        gcharisalgebraic
       gcharlocal       gcharlog         gcharnewprec
     See ??"Hecke Grossencharacters" as well as the tutorial at
