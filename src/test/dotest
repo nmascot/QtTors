@@ -88,7 +88,7 @@ for testdata in $testlist; do
       gp=$execdir/gp-$suf$exe_suff
       (echo 'gettime();0;'; cat $file_in; \
        echo 'print("Total time spent: ",gettime);') \
-       | $RUNTEST $gp -q --test  > $file_test 2>&1
+       | $RUNTEST $gp -q --test $GPTESTOPT  > $file_test 2>&1
       if test -n "$crlf"; then
         # when building on windows, remove extra cr so diff's will match
         cat $file_test | tr -d '\r' | diff -c $file_out - > $file_diff
