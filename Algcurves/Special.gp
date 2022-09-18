@@ -1,0 +1,366 @@
+FnIsConst(f)=
+{
+	my(t);
+	t = type(simplify(f));
+	if(t=="t_INT",return(1));
+	if(t=="t_FRAC",return(1));
+	if(t=="t_POLMOD",return(1));
+	0;
+}
+
+Pt2Branch(C,P)=
+{
+	my(f,F,p,x,y,z,t,a,B);
+	[f,F] = C[1];
+  p = C[2];
+  [x,y,z,t,a] = C[3];
+	if(type(P)=="t_VEC",
+    if(!PtIsOnCrv(F,P),
+      error("This point is not on this curve")
+    );
+    if(PtIsSing(F,P),
+      error("This point is singular, specify branch number instead")
+    );
+    if(#P==2,
+      P=[P[1],P[2],1]
+    );
+    B = BranchesAt(f,F,p,P,a,t)[1];
+		if(B==0,error("Unable to compute branch in this characteristic"));
+		B;
+  ,
+    C[5][P][3]
+  );
+}
+
+CrvRatAux(f,N,D,x,y,t)=
+{
+	my(n,g,L,u,m,R,L1,u1,R1,L2,u2,R2,L3,u3,R3,A,B,e,a,b);
+	n = poldegree(f,x);
+	g = t*D-N;
+	L = vector(3);
+	u = -1;
+	m = 0;
+	while(m<3,
+		R = polresultant(subst(f,y,u),subst(g,y,u),x);
+		if(poldegree(R,t)==n,
+			m++;
+			L[m] = [u,R];
+		);
+		u++
+	);
+	[L1,L2,L3] = Vec(L);
+	[u1,R1] = L1;
+	[u2,R2] = L2;
+	[u3,R3] = L3;
+	A = (-u1*R2+u3*R2);
+	B = (u2*R1-u3*R1);
+	e = 1;
+	while(1,
+		e *= 2;
+		a = R3+O(t^e);
+		if(a==0,next);
+		a = 1/a;
+		b = B*a;
+		a = A*a;
+		for(i=1,e-1,
+			if(polcoef(a,i),
+				x = -polcoef(b,i)/polcoef(a,i);
+				return((-u1*x*R2+u2*R1)/(R1-x*R2));
+			)
+		)
+	);
+}
+
+CrvRat(C,P,Q)=
+{
+	my(f,F,L,T,N,D,X,Y,x,y,z,t,a);
+  [f,F] = C[1];
+	[x,y,z,t,a] = C[3];
+	if(P==0,
+		error("Please specify a rational point or branch")
+	);
+	if(type(P)=="t_VEC",
+		if(!PtIsOnCrv(F,P),
+    	error("This point is not on this curve")
+  	);
+  	if(PtIsSing(F,P),
+    	error("This point is singular, specify branch number instead")
+  	)
+	);
+	if(Q,
+		if(type(Q)=="t_VEC",
+    	if(!PtIsOnCrv(F,Q),
+      	error("This point is not on this curve")
+    	);
+    	if(PtIsSing(F,Q),
+      	error("This point is singular, specify branch number instead")
+    	);
+		);
+		D = [P,1;Q,-1]
+	,
+		D = [P,1]
+	);
+	L = RiemannRoch(C,D);
+	T = select(f->!FnIsConst(f),L)[1];
+	D = denominator(T);
+	N = numerator(T);
+	X = CrvRatAux(f,N,D,y,x,t);
+	Y = CrvRatAux(f,N,D,x,y,t);
+	[X,Y];
+}
+
+FnsBranchMatRat(F,B,e,x,y)=
+{
+	my(A,a,t,d,n,m,M,S,c);
+	A = B[3];
+	a = variable(A);
+	d = poldegree(A);
+	\\F = substvec(F,[x,y],BranchExpand(B[1],e));
+	F = BranchEval(F,B[1],e,x,y);
+	t = variable(F);
+	n = #F;
+	m = valuation(F,t);
+	M = serprec(F,t);
+	if(M==+oo,M=e+m);
+	S = matrix((M-m)*d,n);
+	for(j=1,n,
+		for(i=m,M-1,
+			c = liftpol(polcoef(F[j],i));
+			for(k=0,d-1,
+				S[d*(i-m)+k+1,j] = polcoef(c,k,a)
+			)
+		)
+	);
+	S;
+}
+
+FnsBranchMat(F,B,e,x,y)=
+{
+  my(t,n,m,M,S);
+  F = substvec(F,[x,y],BranchExpand(B[1],e));
+  t = variable(F);
+  n = #F;
+	m = valuation(F,t);
+  M = serprec(F,t);
+  S = matrix((M-m),n);
+  for(j=1,n,
+    for(i=m,M-1,
+       S[i-m+1,j] = polcoef(F[j],i)
+    )
+  );
+  S;
+}
+
+DiffsBranchMat(W,den,B,e,x,y)=
+{
+  my(k=1,b,D,t,n,m,M,S);
+	while(1,
+		b = BranchExpand(B[1],e);
+		D = substvec(den,[x,y],b);
+		if(D,break);
+		e += k;
+		k += 1;
+	);
+  W = substvec(W,[x,y],b)*deriv(b[1])/D;
+  t = variable(W);
+  n = #W;
+  m = valuation(W,t);
+  M = serprec(W,t);
+  S = matrix((M-m),n);
+  for(j=1,n,
+    for(i=m,M-1,
+       S[i-m+1,j] = polcoef(W[j],i)
+    )
+  );
+  S;
+}
+
+CrvEll(C,P)=
+{
+	my(x,y,B,L,LB,X,Y,e,K,E);
+	[x,y] = C[3][1..2];
+	if(C[6]!=1,
+			error("This curve does not have genus 1")
+	);
+	B = Pt2Branch(C,P);
+	L = RiemannRoch(C,[P,3]);
+	LB = substvec(L,[x,y],BranchExpand(B[1],2));
+	X = L[select(f->valuation(f,t)==-2,LB,1)[1]];
+	Y = L[select(f->valuation(f,t)==-3,LB,1)[1]];
+	L = [1,X,Y,X^2,X*Y,X^3,Y^2];
+	e = 5;
+	while(1,
+		K = matker(FnsBranchMat(L,B,e,x,y));
+		if(#K==1,break);
+		e *=2
+	);
+	K = K[,1];
+	E = ellinit([K[5]/K[7],-K[4]/K[7],-K[3]*K[6]/K[7]^2,K[2]*K[6]/K[7]^2,-K[1]*K[6]^2/K[7]^3]);
+	[E,-K[6]/K[7]*[X,Y]];
+}
+
+FnsRel(L,F,B,vars)=
+{
+	my([x,y,z,t,a]=vars,n=#L,e,M,K,N,m);
+	e = n+2;
+	while(1,
+		M = FnsBranchMatRat(L,B,e,x,y);
+    K = matker(M);
+		N = FnNormalise(L*K,F,x,t);
+		m = #select(s->s,N);
+		if(m==0,return(K));
+		e += m+1;
+	);
+}
+
+CrvIsHyperell(C)=
+{
+	my(W=C[7][1],g,W2,g2,k=1,K);
+	g = C[6];
+	g2 = (g*(g+1))/2;
+	W2 = vector(g2);
+	for(i=1,g,
+		for(j=1,i,
+			W2[k] = W[i]*W[j];
+			k++
+		)
+	);
+	K = FnsRel(W2,C[1][1],C[4][1][2][1],C[3]);
+	g2-#K == 2*g-1;
+}
+
+CrvHyperell_sub(b,u,v,n,vars,p)=
+{
+	\\ TODO char 2
+	my(x,y,z,t,a,d,e,nd,uB,vB,m,o,M,ui,uv,K,A,B,C,D,R,S,c);
+	[x,y,z,t,a] = vars;
+	d = poldegree(b[3],a);
+	b = b[1];
+	e = ceil(3*(n+1)/d)+1;
+	uB = BranchEval(u,b,2,x,y);
+	vB = BranchEval(v,b,2,x,y);
+	m = 0;
+	if((o = valuation(uB,t)) < 0,
+		m += (n+1)*o
+	);
+	if((o = valuation(vB,t)) < 0,
+    m += 2*o
+  );
+	nd = ceil(n/d);
+	e = 4*(nd-m)+1;
+	uB = BranchEval(u,b,e,x,y);
+  vB = BranchEval(v,b,e,x,y);
+	M = matrix(d*(4*nd+-m+1),3*n+3);
+	ui = 1;
+	for(i=0,n,
+		uv = ui;
+		for(k=0,4*nd-m,c = liftpol(polcoef(uv,m+k-1,t));for(l=0,d-1,M[d*k+l+1,1+i]=polcoef(c,l,a)));
+		uv *= vB;
+		for(k=0,4*nd-m,c = liftpol(polcoef(uv,m+k-1,t));for(l=0,d-1,M[d*k+l+1,n+2+i]=polcoef(c,l,a)));
+		uv *= vB;
+		for(k=0,4*nd-m,c = liftpol(polcoef(uv,m+k-1,t));for(l=0,d-1,M[d*k+l+1,2*n+3+i]=polcoef(c,l,a)));
+		ui *= uB
+	);
+	K = matker(M)[,1];
+	C = Polrev(K[1..n+1],x);
+	B = Polrev(K[n+2..2*n+2],x);
+	A = Polrev(K[2*n+3..3*n+3],x);
+	if(p==2,error("Characteristic 2 not implemented"));
+	if(A==0,return(0));
+	D = B^2-4*A*C;
+	if(D==0,return(0));
+	S = factor(D); \\ TODO sqfree
+	S[,2] = apply(x->x\2,S[,2]);
+	S = factorback(S);
+	R = D/S^2;
+	A = subst(A,x,u);
+	B = subst(B,x,u);
+	S = subst(S,x,u);
+	v = (2*A*v+B)/S;
+	if(p==0,
+		c = content(R);
+		n = numerator(c);
+		n /= core(n);
+		R /= n;
+		v /= sqrtint(n);
+		d = denominator(c);
+		d /= core(d);
+		R *= d;
+    v *= sqrtint(d)
+	);
+	[R,[u,v]];
+}
+
+CrvHyperell(C,P=0)=
+{
+	my(g=C[6],F=C[1][1],B,W=C[7],u,res,e,M,m,K2,K1);
+	if(g<=1,error("Genus too low:",g));
+	if(CrvIsHyperell(C)==0,return(0));
+	F = C[1][1];
+	B = if(P,Pt2Branch(C,P),C[4][1][2][1]);
+	if(g==2,
+		u = W[1][2]/W[1][1];
+	,
+	  if(poldegree(B[3])>1,
+		  error("Please supply a rational point")
+		);
+		e = 2*g;
+		while(1,
+			M = DiffsBranchMat(W[1],W[2],B,e,x,y);
+			m = #M~;
+			if(m>2*g-2,break);
+			e += 2*g-m;
+		);
+		e = g-2;
+		while(1,
+			K2 = matker(M[1..e,]);
+			m = #K2;
+			if(m==2,break);
+			e += m-2;
+		);
+		e++;
+		while(1,
+      K1 = matker(M[1..e,]);
+      m = #K1;
+      if(m==1,break);
+      e += m-1;
+    );
+		W = W[1];
+		K1 = K1[,1];
+		K = matconcat([K1,K2[,1]]);
+		u = if(matrank(K)==1,(W*K1)/(W*K2[,2]),(W*K1)/(W*K2[,1]));
+	);
+	res = CrvHyperell_sub(B,u,x,poldegree(F,y),C[3],C[2]);
+	if(res,return(res));
+	CrvHyperell_sub(B,u,y,poldegree(F,x),C[3]);
+}
+
+CanProj(C,uvw=0,P=0)=
+{
+	my(x,y,u,v,w,g=C[6],B,W=C[7][1],K,M,f,n);
+	[u,v,w] = apply(i->W[i],if(uvw,uvw,[3,2,1]));
+	[x,y] = C[3][1..2];
+  B = if(P,Pt2Branch(C,P),C[4][1][2][1]);
+	d = 2*g-2;
+	d2 = (d+2)*(d+1)/2;
+	M = f = vector(d2);
+	n = 1;
+	for(i=0,d,
+		for(j=0,d-i,
+      f[n] = x^i*y^j;
+			M[n] = u^i*v^j*w^(d-i-j);
+			n++;
+		)
+	);
+	M = FnsBranchMatRat(M,B,d2+1,x,y);
+	K = matker(M);
+	f = f*K[,1];
+	[f,[u/w,v/w]];
+}
+
+Crv3(C,P=0)=
+{
+  my(x,y,u,v,w,g=C[6],B,W=C[7],K,M,f);
+  if(g!=3,error("Genus is ",g," not 3"));
+  if(CrvIsHyperell(C),CrvHyperell(C),CanProj(C));
+}
