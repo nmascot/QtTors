@@ -985,6 +985,11 @@ ulong descend_volcano(GEN phi, ulong j, ulong p, ulong pi, long level, long L, l
 long next_surface_nbr(ulong *nJ, GEN phi, long L, long h, ulong J, const ulong *pJ, ulong p, ulong pi);
 GEN enum_roots(ulong j, norm_eqn_t ne, GEN fdb, GEN G, GEN vshape);
 
+/* plncrv.c */
+long TotalDegree(GEN F);
+GEN PolHomogenise(GEN f, GEN z, long D);
+GEN ZetaFromPointCount(GEN N, ulong p, ulong g);
+
 /* pic.c */
 GEN ZpXQMinv(GEN A, GEN T, GEN pe, GEN p, long e);
 GEN ZpXQ_FrobMat(GEN T, GEN p, long e, GEN pe);
