@@ -985,17 +985,37 @@ ulong descend_volcano(GEN phi, ulong j, ulong p, ulong pi, long level, long L, l
 long next_surface_nbr(ulong *nJ, GEN phi, long L, long h, ulong J, const ulong *pJ, ulong p, ulong pi);
 GEN enum_roots(ulong j, norm_eqn_t ne, GEN fdb, GEN G, GEN vshape);
 
-/* plncrv.c */
-long TotalDegree(GEN F);
-GEN PolHomogenise(GEN f, GEN z, long D);
-GEN ZetaFromPointCount(GEN N, ulong p, ulong g);
-
 /* pic.c */
+GEN AddFlipChain(GEN n, long signmatters);
+GEN rand_subset(ulong n, ulong r);
+GEN VecSmallCompl(GEN v, ulong n);
+GEN mat2col0(GEN A);
+GEN M2ABCD(GEN M, GEN IJ);
+GEN RgM_drop_rows(GEN A, GEN I);
+GEN ZpXQ_FrobMat(GEN T, GEN p, long e, GEN pe);
+GEN ZpXQ_Frob(GEN x, GEN FrobMat, GEN T, GEN pe);
 GEN ZpXQMinv(GEN A, GEN T, GEN pe, GEN p, long e);
 GEN ZpXQ_FrobMat(GEN T, GEN p, long e, GEN pe);
+GEN VecExtend(GEN V);
+GEN VecSmallExtend(GEN V);
+GEN M2ABCD_1block(GEN M, ulong top, ulong left, GEN uv);
+void Get_ff_aT(GEN AT, GEN p, ulong* pa, GEN* pT);
+GEN FnEvalAt(GEN F, GEN P, GEN vars, GEN T, GEN p, long e, GEN pe);
+GEN CurveApplyAut(GEN aut, GEN P, GEN vars, GEN T, GEN pe, GEN p, long e);
 GEN JgetT(GEN J);
 GEN Jgetp(GEN J);
+GEN Jgetpe(GEN J);
+GEN JgetFrobMat(GEN J);
+GEN JgetFrobCyc(GEN J);
 GEN JgetLp(GEN J);
+GEN JgetEvalData(GEN J);
+void JgetTpe(GEN J, GEN* T, GEN* pe, GEN* p, long* e);
+long Jgetg(GEN J);
+long Jgetd0(GEN J);
+GEN JgetW0(GEN J);
+GEN JgetV(GEN J, ulong n);
+GEN JgetV_all(GEN J);
+GEN JgetKV(GEN J, ulong n);
 GEN DivMul(GEN f, GEN W, GEN T, GEN p);
 GEN DivAdd1(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, ulong maxtattempts, long flag); /* No coefs */
 GEN DivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, ulong maxtattempts); /* Coefs +-1 */
@@ -1003,6 +1023,8 @@ GEN DivAdd0(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, ulong m
 GEN PicRefreshPairings(GEN J, GEN FRparams, GEN T, GEN Pairings, GEN UsedNames, GEN Want, GEN WantNames);
 GEN PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN TnewPairings, int* replace);
 GEN VecExtend1_shallow(GEN V, GEN X);
+GEN FqM_MinorCompl(GEN M, GEN T, GEN p);
+GEN PicDeflate_U(GEN J, GEN W, ulong nIGS);
 GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B);
 
 ENDEXTERN
