@@ -1267,7 +1267,7 @@ MRRsubspace(GEN Mqexps, GEN D, GEN B, GEN T, GEN pe, GEN p, long e)
         gcoeff(K,i,j) = gcoeff(Ms,B?n+B[s]:n,j);
     }
   }
-  K = matkerpadic(K,T,pe,p,e);
+  K = ZqM_ker(K,T,pe,p,e);
   return gerepileupto(av,K);
 }
 

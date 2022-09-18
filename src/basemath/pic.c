@@ -360,7 +360,7 @@ VecSmallCompl(GEN v, ulong n)
 }
 
 GEN
-matkerpadic(GEN A, GEN T, GEN pe, GEN p, long e)
+ZqM_ker(GEN A, GEN T, GEN pe, GEN p, long e)
 { /* Assumes good red, i.e. the rank does not decrease mod p */
   pari_sp av = avma, av1;
   GEN IJ,I,J,J1,P,A1,A2,B,K;
@@ -407,7 +407,7 @@ matkerpadic(GEN A, GEN T, GEN pe, GEN p, long e)
 }
 
 GEN
-mateqnpadic(GEN A, GEN T, GEN pe, GEN p, long e)
+ZqM_eqn(GEN A, GEN T, GEN pe, GEN p, long e)
 { /* Assumes good red, i.e. the rank does not decrease mod p */
   pari_sp av = avma, av1;
   GEN IJ,I,J,I1,P,A1,A2,B,E;
@@ -454,7 +454,7 @@ mateqnpadic(GEN A, GEN T, GEN pe, GEN p, long e)
 }
 
 GEN
-mat2col(GEN A)
+mat2col0(GEN A)
 { /* shallowconcat1? */
   ulong n,m,i,j=1;
   GEN C;
@@ -1006,7 +1006,7 @@ DivSub(GEN WA, GEN WB, GEN KV, ulong d, GEN T, GEN p, long e, GEN pe, ulong nIGS
   GEN KB,K,s,res;
   nZ = lg(KV);
   nV = lg(gel(KV,1))-1;
-  KB = mateqnpadic(WB,T,pe,p,e);
+  KB = ZqM_eqn(WB,T,pe,p,e);
   nB = lg(gel(KB,1))-1;
   /* Prepare a mat K of size a v stack of KV + nIGS copies of KB */
   /* and copy KV at the top */
@@ -1031,7 +1031,7 @@ DivSub(GEN WA, GEN WB, GEN KV, ulong d, GEN T, GEN p, long e, GEN pe, ulong nIGS
           gcoeff(K,nV+(n-1)*nB+E,P) = Fq_mul(gel(s,P),gcoeff(KB,E,P),T,pe);
       }
     }
-    res = matkerpadic(K,T,pe,p,e);
+    res = ZqM_ker(K,T,pe,p,e);
     r = lg(res)-1;
     if(r==d) return gerepileupto(av,res);
     if(DEBUGLEVEL>=4) err_printf("divsub(%lu/%lu)",r,d);
@@ -1047,7 +1047,7 @@ DivSub_dimval(GEN WA, GEN WB, long dim, GEN KV, GEN T, GEN p, long e, GEN pe)
   GEN KB,K,L;
   nZ = lg(KV);
   nV = lg(gel(KV,1))-1;
-  KB = mateqnpadic(WB,T,pe,p,e);
+  KB = ZqM_eqn(WB,T,pe,p,e);
   nB = lg(gel(KB,1))-1;
   nA = lg(WA)-1;
 
@@ -1070,8 +1070,8 @@ DivSub_dimval(GEN WA, GEN WB, long dim, GEN KV, GEN T, GEN p, long e, GEN pe)
         gcoeff(K,nV+(n-1)*nB+E,P) = Fq_mul(gcoeff(WA,P,n),gcoeff(KB,E,P),T,pe);
     }
   }
-  L = matkerpadic(K,T,pe,p,e);
-  /* Is L even of the right dim mop p ? */
+  L = ZqM_ker(K,T,pe,p,e);
+  /* Is L even of the right dim mod p ? */
   if(lg(L)-1 != dim)
     return gc_ulong(av,0);
   /* return vp(K*L) */
@@ -1096,7 +1096,7 @@ PicNeg(GEN J, GEN W, long flag)
   g = Jgetg(J);
   d0 = Jgetd0(J);
 
-  /* (s) = -2_0-D-N */
+  /* (s) = -2D_0-D-N */
   if(flag & 1) s = RandVec_padic(W,T,p,pe);
   else s = gel(W,1);
   sV = DivMul(s,V,T,pe); /* L(4D_0-D-N) */
@@ -1197,7 +1197,7 @@ PicRand(GEN J, GEN randseed)
     for(i=1;i<=nS;i++)
       gcoeff(K,i,j) = gcoeff(V,S[i],j);
   }
-  K = matkerpadic(K,T,pe,p,e);
+  K = ZqM_ker(K,T,pe,p,e);
   K = FqM_mul(V,K,T,pe);
   return gerepileupto(av,K);
 }
@@ -1507,7 +1507,7 @@ ZpXQ_FrobMat(GEN T, GEN p, long e, GEN pe)
 }
 
 GEN
-Frob(GEN x, GEN FrobMat, GEN T, GEN pe)
+ZpXQ_Frob(GEN x, GEN FrobMat, GEN T, GEN pe)
 {
   pari_sp av = avma;
   GEN cx,cy,y;
@@ -1542,7 +1542,7 @@ PicFrob(GEN J, GEN W)
   {
     gel(W2,j) = cgetg(nZ,t_COL);
     for(i=1;i<nZ;i++)
-      gcoeff(W2,FrobCyc[i],j) = Frob(gcoeff(W,i,j),FrobMat,T,pe);
+      gcoeff(W2,FrobCyc[i],j) = ZpXQ_Frob(gcoeff(W,i,j),FrobMat,T,pe);
   }
   return W2;
 }
@@ -1566,7 +1566,7 @@ PicFrobInv(GEN J, GEN W)
   {
     gel(W2,j) = cgetg(nZ,t_COL);
     for(i=1;i<nZ;i++)
-      gcoeff(W2,i,j) = Frob(gcoeff(W,FrobCyc[i],j),FrobMatInv,T,pe);
+      gcoeff(W2,i,j) = ZpXQ_Frob(gcoeff(W,FrobCyc[i],j),FrobMatInv,T,pe);
   }
   return gerepileupto(av,W2);
 }
@@ -1595,7 +1595,7 @@ PicFrobPow(GEN J, GEN W, long n)
   {
     gel(W2,j) = cgetg(nZ,t_COL);
     for(i=1;i<nZ;i++)
-      gcoeff(W2,cyc[i],j) = Frob(gcoeff(W,i,j),M,T,pe);
+      gcoeff(W2,cyc[i],j) = ZpXQ_Frob(gcoeff(W,i,j),M,T,pe);
   }
   return gerepileupto(av,W2);
 }
@@ -1696,7 +1696,7 @@ PicChart(GEN J, GEN W, ulong P0, GEN P1) /* /!\ Not Galois-equivariant ! */
     for(P=1;P<=n1;P++) gel(col,P) = gcoeff(W,P+P0,j);
     gel(K,j) = col;
   }
-  K = matkerpadic(K,T,pe,p,e);
+  K = ZqM_ker(K,T,pe,p,e);
   if(lg(K)!=2)
   {
     pari_printf("Genericity 1 failed in PicChart\n");
@@ -1713,7 +1713,7 @@ PicChart(GEN J, GEN W, ulong P0, GEN P1) /* /!\ Not Galois-equivariant ! */
   }
   if(P1)
     U = Subspace_normalize(U,P1,T,pe,p,e,1);
-  return gerepilecopy(av,mat2col(U));
+  return gerepilecopy(av,mat2col0(U));
 }
 
 GEN
@@ -2081,8 +2081,8 @@ CurveApplyFrob(GEN P, GEN FrobMat, GEN T, GEN pe)
   pari_sp av = avma;
   GEN Q;
   Q = cgetg(3,t_VEC);
-  gel(Q,1) = Frob(gel(P,1),FrobMat,T,pe);
-  gel(Q,2) = Frob(gel(P,2),FrobMat,T,pe);
+  gel(Q,1) = ZpXQ_Frob(gel(P,1),FrobMat,T,pe);
+  gel(Q,2) = ZpXQ_Frob(gel(P,2),FrobMat,T,pe);
   return gerepileupto(av,Q);
 }
 
@@ -2192,7 +2192,7 @@ Get_ff_aT(GEN AT, GEN p, ulong* pa, GEN* pT)
     {
       av = avma;
       t = fetch_var();
-      name_var(t,"t");
+      name_var(t,"a");
       T = liftint(ffinit(p,a,t));
       *pT = gerepileupto(av,T);
     }
@@ -2305,7 +2305,7 @@ PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long 
   if(DEBUGLEVEL>=2) printf("picinit: Computing equation matrices\n");
   KV = cgetg(4,t_VEC);
   E = stoi(e);
-  worker = strtofunction("_mateqnpadic");
+  worker = strtofunction("_ZqM_eqn");
   mt_queue_start_lim(&pt,worker,3);
   for(k=1;k<=3||pending;k++)
   {
@@ -2414,8 +2414,8 @@ JacLift(GEN J, ulong e2)
       gel(Z2,j) = mkvec2(x,y);
       j = FrobCyc[j];
       if(j==i) break; /* End of orbit */
-      x = Frob(x,FrobMat2,T,pe2);
-      y = Frob(y,FrobMat2,T,pe2);
+      x = ZpXQ_Frob(x,FrobMat2,T,pe2);
+      y = ZpXQ_Frob(y,FrobMat2,T,pe2);
     }
   }
   Z2 = gerepilecopy(avZ,Z2);
@@ -2486,7 +2486,7 @@ JacLift(GEN J, ulong e2)
   gel(params,3) = pe2;
   gel(params,4) = p;
   gel(params,5) = E2;
-  worker = strtofunction("_mateqnpadic");
+  worker = strtofunction("_ZqM_eqn");
   mt_queue_start_lim(&pt,worker,3);
   for(k=1;k<=3||pending;k++)
   {
@@ -2706,7 +2706,7 @@ PicLift_worker(GEN V0j, ulong shift, GEN uv, GEN AinvB, GEN CAinv, GEN T, GEN pe
   drho = FqM_mul(CAinv,drho,T,pe21); /* CA^-1aA^-1B - CA^-1b */
   drho = ZXM_add(gel(abcd,4),drho); /* d + CA^-1aA^-1B - CA^-1b */
   drho = ZXM_sub(drho,FqM_mul(gel(abcd,3),AinvB,T,pe21)); /* d + CA^-1aA^-1B - CA^-1b - cA^-1B */
-  drho = mat2col(drho);
+  drho = mat2col0(drho);
   return gerepilecopy(av,drho);
 }
 
@@ -2875,7 +2875,7 @@ PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
   }
   efin2 = efin/2; /* Upper bound for e21 for all iterations */
   pefin2 = powis(p,efin2);
-  U0 = matkerpadic(Vs,T,pefin2,p,efin2); /* # = nV-nW = d0 */
+  U0 = ZqM_ker(Vs,T,pefin2,p,efin2); /* # = nV-nW = d0 */
   V0 = cgetg(d0+1,t_VEC);
   for(i=1;i<=d0;i++) gel(V0,i) = DivMul(FqM_FqC_mul(V,gel(U0,i),T,pefin2),V,T,pefin2); /* s*V for s in subspace of V whose rows in sW are 0 */
   /* TODO parallel? */
@@ -2952,9 +2952,9 @@ PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
       if(done) gel(K,workid) = done;
     }
     mt_queue_end(&pt);
-    gel(K,nGW*d0+1) = mat2col(rho);
+    gel(K,nGW*d0+1) = mat2col0(rho);
     /* Find a random solution to the inhomogeneous system */
-    KM = matkerpadic(K,T,pe21,p,e21);
+    KM = ZqM_ker(K,T,pe21,p,e21);
     KM = gerepileupto(avrho,KM);
     if(DEBUGLEVEL>=3||(lg(KM)==1)) printf("picliftors: dim ker lift: %ld\n",lg(KM)-1);
     if(cmpii(pe21,powiu(l,g+1))<=0)
@@ -3000,7 +3000,7 @@ PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
           P1 = FqM_indexrank(c0,T,p);
           P1 = gel(P1,1);
           c0 = Subspace_normalize(c0,P1,T,pefin,p,efin,1);
-          c0 = mat2col(c0);
+          c0 = mat2col0(c0);
           gerepileall(av2,2,&c0,&P1);
           av3 = avma;
         }
@@ -3057,7 +3057,7 @@ PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
           av3 = av2;
           continue; /* Try again with this new chart */
         }
-        Ktors = matkerpadic(Clifts,T,pe21,p,e21); /* Find comb with coord = 0 */
+        Ktors = ZqM_ker(Clifts,T,pe21,p,e21); /* Find comb with coord = 0 */
         n = lg(Ktors)-1;
         if(n!=1)
         { /* l-tors is etale, so this can only happen if Chart is not diffeo - > change chart */
@@ -3498,7 +3498,7 @@ OnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T, GEN
         gel(Z,j) = z;
         j = ActOni(Jfrobmat,j,l);
         if(gel(Z,j)) break;
-        z = Frob(z,QqFrobMat,T,pe);
+        z = ZpXQ_Frob(z,QqFrobMat,T,pe);
       }
     }
     /* Multiple roots? */
@@ -3759,7 +3759,7 @@ PicNorm(GEN J, GEN F1, GEN F2, GEN WE, ulong n)
       gcoeff(M,i,j) = Fq_mul(gcoeff(S,i,j),gel(F1,i),T,pe);
   }
   for(j=1;j<=nVn2;j++) gel(M,nS+j) = gel(SS,j);
-  M1 = detratio(matkerpadic(M,T,pe,p,e),T,p,e,pe);
+  M1 = detratio(ZqM_ker(M,T,pe,p,e),T,p,e,pe);
   if(ZX_is0mod(M1,p))
   {
     if(DEBUGLEVEL>=3) err_printf("PicNorm: F1 has zeros on D, giving up\n");
@@ -3771,7 +3771,7 @@ PicNorm(GEN J, GEN F1, GEN F2, GEN WE, ulong n)
     for(i=1;i<=nZ;i++)
       gcoeff(M,i,j) = Fq_mul(gcoeff(S,i,j),gel(F2,i),T,pe);
   }
-  M2 = detratio(matkerpadic(M,T,pe,p,e),T,p,e,pe);
+  M2 = detratio(ZqM_ker(M,T,pe,p,e),T,p,e,pe);
   if(ZX_is0mod(M2,p))
   {
     if(DEBUGLEVEL>=3) err_printf("PicNorm: F2 has zeros on D, giving up\n");
@@ -4254,12 +4254,12 @@ HyperRRdata(GEN f, GEN P12)
   if(P12)
   {
     P1 = gel(P12,1);
-    if(PtIsOnHyperellCurve(f,P1)!=1)
+    if(hyperellisoncurve(f,P1)!=1)
       pari_err(e_MISC,"the point %Ps is not on the hyperelliptic curve defined by %Ps",P1,f);
     x1 = gel(P1,1);
     y1 = gel(P1,2);
     P2 = gel(P12,2);
-    if(PtIsOnHyperellCurve(f,P2)!=1)
+    if(hyperellisoncurve(f,P2)!=1)
       pari_err(e_MISC,"the point %Ps is not on the hyperelliptic curve defined by %Ps",P2,f);
     x2 = gel(P2,1);
     y2 = gel(P2,2);
@@ -5326,7 +5326,7 @@ PicTorsBasis(GEN J, GEN l, GEN Chi)
     for(i=1;i<lg(Phi);i++)
     {
       phi = polcyclo(Diva[i],0);
-      if(degree(FpX_gcd(phi,Chi?Chi:Lp,l)))
+      if(degree(FpX_gcd(phi,ChiT,l)))
         gel(Phi,++j) = phi;
     }
     nPhi = j;

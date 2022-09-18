@@ -991,6 +991,8 @@ GEN rand_subset(ulong n, ulong r);
 GEN VecSmallCompl(GEN v, ulong n);
 GEN mat2col0(GEN A);
 GEN M2ABCD(GEN M, GEN IJ);
+GEN ZqM_ker(GEN A, GEN T, GEN pe, GEN p, long e);
+GEN ZqM_eqn(GEN A, GEN T, GEN pe, GEN p, long e);
 GEN RgM_drop_rows(GEN A, GEN I);
 GEN ZpXQ_FrobMat(GEN T, GEN p, long e, GEN pe);
 GEN ZpXQ_Frob(GEN x, GEN FrobMat, GEN T, GEN pe);
@@ -1026,5 +1028,8 @@ GEN VecExtend1_shallow(GEN V, GEN X);
 GEN FqM_MinorCompl(GEN M, GEN T, GEN p);
 GEN PicDeflate_U(GEN J, GEN W, ulong nIGS);
 GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B);
+
+/* plncrv.c */
+GEN ZetaFromPointCount(GEN N, ulong p, ulong g);
 
 ENDEXTERN
