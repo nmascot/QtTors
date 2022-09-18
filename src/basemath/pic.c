@@ -1272,18 +1272,18 @@ PicIsZero(GEN J, GEN W)
 ulong
 PicIsTors_val(GEN J, GEN W, GEN F)
 {
-	pari_sp av = avma;
-	ulong res;
-	W = PicFrobPoly(J,W,F);
+  pari_sp av = avma;
+  ulong res;
+  W = PicFrobPoly(J,W,F);
   res = PicIsZero_val(J,W);
-	avma = av;
-	return res;
+  avma = av;
+  return res;
 }
 
 int
 PicIsTors(GEN J, GEN W, GEN F)
 {
-	pari_sp av = avma;
+  pari_sp av = avma;
   int res;
   W = PicFrobPoly(J,W,F);
   res = PicIsZero(J,W);
@@ -4023,8 +4023,8 @@ ZetaFromPointCount(GEN N, ulong p, ulong g)
   pari_sp av = avma;
   GEN Z,L,Pi;
   ulong i;
-	if(g==0)
-		return pol_1(0);
+  if(g==0)
+    return pol_1(0);
   Z = cgetg(g+2,t_SER);
   Z[1] = 0;
   setsigne(Z,1);
