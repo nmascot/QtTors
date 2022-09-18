@@ -1272,13 +1272,23 @@ PicIsZero(GEN J, GEN W)
 ulong
 PicIsTors_val(GEN J, GEN W, GEN F)
 {
-  return PicIsZero_val(J,PicFrobPoly(J,W,F));
+	pari_sp av = avma;
+	ulong res;
+	W = PicFrobPoly(J,W,F);
+  res = PicIsZero_val(J,W);
+	avma = av;
+	return res;
 }
 
 int
 PicIsTors(GEN J, GEN W, GEN F)
 {
-  return PicIsZero(J,PicFrobPoly(J,W,F));
+	pari_sp av = avma;
+  int res;
+  W = PicFrobPoly(J,W,F);
+  res = PicIsZero(J,W);
+  avma = av;
+  return res;
 }
 
 GEN
