@@ -1571,21 +1571,21 @@ GEN tCurveNewRandPt(GEN f, GEN df, GEN f0, GEN vars, GEN Z0, GEN bad, GEN T, GEN
   GEN x,fx,y,badpt,P,P0;
   vT = varn(T);
   dT = degree(T);
-  pari_printf("Looking for new pt, f0=%Ps, T=%Ps, dT=%ld, vT=%ld\n",f0,T,dT,vT);
+  //pari_printf("Looking for new pt, f0=%Ps, T=%Ps, dT=%ld, vT=%ld\n",f0,T,dT,vT);
   av1 = avma;
   for(;;)
   {
     avma = av1;
     x = random_FpX(dT,vT,p);
-    pari_printf("Trying x=%Ps\n",x);
+    //pari_printf("Trying x=%Ps\n",x);
     fx = gsubst(f0,vars[1],x);
     fx = FqX_red(fx,T,p);
-    pari_printf("fx=%Ps\n",fx);
+    //pari_printf("fx=%Ps\n",fx);
     y = FqX_roots(fx,T,p);
     if(lg(y)==1) continue; /* No roots */
     y = gel(y,itos(genrand(stoi(lg(y)-1)))+1);
     P0 = mkvec2(x,y);
-    pari_printf("Considering P0=%Ps\n",P0);
+    //pari_printf("Considering P0=%Ps\n",P0);
     if(BadVecSearch(Z0,P0)) continue; /* Already got this point */
     badpt = FnEvalAt(bad,P0,vars,T,p,1,p);
     badpt = Fq_red(badpt,T,p);
@@ -1631,8 +1631,8 @@ tCurveAutFrobClosure(GEN P, GEN P0, GEN Auts, GEN vars, GEN FrobMat, GEN T, GEN 
   ulong nAuts,nO,nmax;
   ulong i,j,k,m,n;
 
-  printf("Into Orb closure\n");
-  pari_printf("With P0=%Ps\n",P0);
+  //printf("Into Orb closure\n");
+  //pari_printf("With P0=%Ps\n",P0);
   OP = cgetg(2,t_VEC); /* Orbit of P, will grow as needed */
   OP0 = cgetg(2,t_VEC); /* Same mod M */
   gel(OP,1) = P;
@@ -1666,30 +1666,30 @@ tCurveAutFrobClosure(GEN P, GEN P0, GEN Auts, GEN vars, GEN FrobMat, GEN T, GEN 
           if(i)
           {
             P = tCurveApplyAut(gmael(Auts,i,1),P,vars,T,pe,p,e,h);
-            pari_printf("Applying aut %Ps to %Ps ",gmael(Auts,i,1),P0);
+            //pari_printf("Applying aut %Ps to %Ps ",gmael(Auts,i,1),P0);
             P0 = CurveApplyAut(gmael(Auts,i,1),P0,vars,T,p,p,1);
-            pari_printf("yields %Ps\n",P0);
+            //pari_printf("yields %Ps\n",P0);
           }
           else
           {
             P = tCurveApplyFrob(P,FrobMat,T,pe);
-            pari_printf("Frobbing %Ps ",P0);
+            //pari_printf("Frobbing %Ps ",P0);
             P0 = mkvec2(Fq_pow(gel(P0,1),p,T,p),Fq_pow(gel(P0,2),p,T,p));
-            pari_printf("yields %Ps\n",P0);
+            //pari_printf("yields %Ps\n",P0);
           }
           /* Is the result a point we already know? */
           k = BadVecSearch(OP0,P0);
           if(k)
           { /* We're back to a pt we know, stop search */
-            printf("Found in pos %lu\n",k);
+            //printf("Found in pos %lu\n",k);
             (i?gel(sAuts,i):sFrob)[m] = k;
-                      pari_printf("Frob: %Ps\n",sFrob);
-          pari_printf("Aut 1: %Ps\n",gel(sAuts,1));
+                     //pari_printf("Frob: %Ps\n",sFrob);
+          //pari_printf("Aut 1: %Ps\n",gel(sAuts,1));
             break;
           }
           /* This is a new pt. Add it to orbit and create placeholders for its transfos */
           nO++;
-          printf("Not found, new point %lu\n",nO);
+          //printf("Not found, new point %lu\n",nO);
           (i?gel(sAuts,i):sFrob)[m] = nO;
           if(nO==nmax) /* Must extend all vectors */
           {
@@ -1711,11 +1711,11 @@ tCurveAutFrobClosure(GEN P, GEN P0, GEN Auts, GEN vars, GEN FrobMat, GEN T, GEN 
             gel(sAuts,j)[nO]=0;
             setlg(gel(sAuts,j),nO+1);
           }
-          pari_printf("Frob: %Ps\n",sFrob);
-          pari_printf("Aut 1: %Ps\n",gel(sAuts,1));
+          //pari_printf("Frob: %Ps\n",sFrob);
+          //pari_printf("Aut 1: %Ps\n",gel(sAuts,1));
         }
       }
-      printf("End of %lu-orbit\n",i);
+      //printf("End of %lu-orbit\n",i);
     }
   }
   printf("End of orbit, size %lu",nO);
@@ -1764,7 +1764,7 @@ tPicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long
     P = tCurveNewRandPt(f,df,f0,vars,Z0,bad,T,pe,p,e,h);
     P0 = gel(P,2);
     P = gel(P,1);
-    pari_printf("New point: %Ps, residue %Ps\n",P,P0);
+    //pari_printf("New point: %Ps, residue %Ps\n",P,P0);
     /* Compute closure under Frob and Auts */
     OP = tCurveAutFrobClosure(P,P0,Auts,vars,FrobMat,T,pe,p,e,h);
     nOP = lg(gel(OP,1))-1; /* # new pts */
@@ -1786,8 +1786,8 @@ tPicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long
     /* Update # pts */
     n += nOP;
   }
-  pari_printf("Frob: %Ps\n",FrobCyc);
-  pari_printf("Aut 1: %Ps\n",gmael(AutData,1,1));
+  //pari_printf("Frob: %Ps\n",FrobCyc);
+  //pari_printf("Aut 1: %Ps\n",gmael(AutData,1,1));
 
   if(DEBUGLEVEL>=2) printf("picinit: Evaluating rational functions\n");
   V = cgetg(6,t_VEC);
@@ -2274,7 +2274,7 @@ tPicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, GEN 
 GEN
 tPicLiftTors(GEN J, GEN W, GEN l, long hini)
 {
-  pari_sp av=avma,av2,av3;
+  pari_sp av=avma,avrho,av1,av2,av3;
   GEN T,p,pe,V;
   long va,vt,e,hfin,h1,h2,h12,mask;
   ulong g,d0,nV,nW,nZ,nGW=2;
@@ -2321,8 +2321,7 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
   /* TODO parallel? */
 
   r = 3*d0+1-g; /* Wanted rank of GWV */
-  Ulifts = cgetg(g+2,t_VEC);
-  //clifts = cgetg(g+2,t_MAT); TODO
+  av1 = avma; /* To collect mem at each main loop iteration */
   /* Main loop */
   for(h1=1,h2=2;;)
   {
@@ -2344,6 +2343,7 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
       }
     }
 
+    avrho = avma;
     uv = FqM_MinorCompl(ZqXnM_to_ZqM(GWV),T,p); /* How to split GWV TODO constant? */
     ABCD = M2ABCD(GWV,uv); /* Splitting */
     Ainv = ZqXnM_inv(gel(ABCD,1),T,pe,p,e); // All prec h2
@@ -2373,13 +2373,15 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
     }
     gel(K,nGW*d0+1) = mat2col0(rho);
     /* Find a random solution to the inhomogeneous system */
-    KM = ZqXnM_ker(K,T,pe,p,e); /* Prec h12 */
-    /* TODO gerepile */
+    KM = gerepileupto(avrho,ZqXnM_ker(K,T,pe,p,e)); /* Prec h12 */
     if(DEBUGLEVEL>=3||(lg(KM)==1)) printf("tpicliftors: dim ker lift: %ld\n",lg(KM)-1);
     U012 = ZqXnM_redprec(U0,h12);
+    Ulifts = cgetg(g+2,t_VEC);
+    clifts = cgetg(g+2,t_MAT);
     av2 = av3 = avma;
     while(1)
     {
+      avma = av3;
       if(c0==NULL) /* Compute coords of 0 if not already done */
       {
         /* Find coords of 0 */
@@ -2392,7 +2394,7 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
           if(P0>nZ+g-d0)
             pari_err(e_MISC,"tpiclifttors: Run out of charts while computing coords of 0");
         }
-        //c0 = gerepileupto(av3,c0);
+        c0 = gerepileupto(av3,c0);
         nc = lg(c0)-1;
         /* Find indep set of rows to normalize */
         c0 = col2mat(c0,nc/nW,nW);
@@ -2400,12 +2402,9 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
         P1 = gel(P1,1);
         c0 = ZqXn_Subspace_normalize(c0,P1,T,pe,p,e,1);
         c0 = mat2col0(c0);
-        //gerepileall(av2,2,&c0,&P1);
-        //av3 = avma;
+        gerepileall(av2,2,&c0,&P1);
+        av3 = avma;
       }
-      printf("c0 OK\n");
-      Ulifts = cgetg(g+2,t_VEC); // TODO
-      clifts = cgetg(g+2,t_MAT); // TODO
       /* Find g+1 lifts TODO in parallel */
       c02 = ZqXnC_redprec(c0,h2);
       liftsOK = 1;
@@ -2420,7 +2419,6 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
         }
         gel(Ulifts,i) = gel(Uc,1);
         gel(clifts,i) = gel(Uc,2);
-        //return gerepileupto(av,gel(clifts,i));
         printf("OK\n");
       }
       if(liftsOK==0)
@@ -2432,19 +2430,9 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
           pari_err(e_MISC,"tpiclifttors: run out of charts while computing coords of 0");
         P0_tested = 0;
         c0 = NULL; /* Coords of 0 must be recomputed */
-        //av3 = av2;
+        av3 = av2;
         continue; /* Try again with this new chart */
       }
-      /*printf("clifts:\n");
-      pari_printf("%Ps\n",clifts);
-      printf("Ulifts:\n");
-      pari_printf("%Ps\n",Ulifts);*/
-      /*for(i=1;i<=g+1;i++)
-      {
-        printf("Col %lu\n",i);
-        pari_printf("%Ps\n",gel(clifts,i));
-      }*/
-      //return gerepilecopy(av,clifts);
       Ktors = ZqXnM_ker(clifts,T,pe,p,e); /* Find comb with coord = 0 */
       n = lg(Ktors)-1;
       printf("dim Ktors = %lu\n",n);
@@ -2462,7 +2450,7 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
           pari_err(e_MISC,"tpiclifttors: run out of charts while computing coords of 0");
         P0_tested = 0;
         c0 = NULL; /* Coords of 0 must be recomputed */
-        //av3 = av2;
+        av3 = av2;
         continue; /* Try again with this new chart */
       }
       Ktors = ZqXnC_setprec(gel(Ktors,1),h2,varn(T));
@@ -2481,30 +2469,25 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
       U2 = gel(Ulifts,1);
       for(i=2;i<=g+1;i++)
         U2 =ZqXnM_add(U2,gel(Ulifts,i));
-      //U2 = gerepileupto(av3,U2);
+      U2 = gerepileupto(av3,U2);
       /* But first check if really l-tors, as the chart might not be injective ! */
       if(P0_tested == 0)
       {
-        if(DEBUGLEVEL>=3) pari_printf("piclifttors: Checking %Ps-tors\n",l);
+        if(DEBUGLEVEL>=3) pari_printf("tpiclifttors: Checking %Ps-tors\n",l);
         W = tPicInflate_U(J2,U2,NULL);
-        printf("Inflated");
         if(!tPicIsTors(J2,W,l))
         {
-          printf("a\n");
           if(DEBUGLEVEL>=3) printf("Not actually l-torsion!!! Changing charts\n");
           P0++;
           c0 = NULL;
-          //av3 = av2;
+          av3 = av2;
           continue;
         }
-        printf("b\n");
         P0_tested = 1;
       }
       break;
     }
-    //U = tPicLift_RandLift_U(U,U012,KM,T,p,pe,e,h1,h2); // U prec h2, U0 oo, KM h12 */
     /* END LIFTING */
-    printf("End lifting\n");
     if(h2==hfin)
     {
       if(W == NULL) /* Update W, if not already done, and return it */
@@ -2516,7 +2499,10 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
     if(mask&1) h2--;
     mask>>=1;
     U = U2;
-    // TODO gerepile
+    if(c0)
+      gerepileall(av1,3,&U,&c0,&P1);
+    else
+      U = gerepileupto(av1,U);
   }
   return gerepileupto(av,W);
 }
