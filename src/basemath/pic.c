@@ -10,7 +10,7 @@ timers_printf(const char* msg1, const char* msg2, pari_timer* pCPU, pari_timer* 
 
 /* Linear algebra */
 
-long
+int
 ZX_is0mod(GEN x, GEN p)
 {
   pari_sp av = avma;
@@ -18,10 +18,7 @@ ZX_is0mod(GEN x, GEN p)
   long res;
   red = (typ(x)==t_POL?FpX_red(x,p):Fp_red(x,p));
   res = gequal0(red);
-  /* signe(red) */
-  avma = av;
-  return res;
-  /* return gc_bool(av,...); */
+  return gc_bool(av,res);
 }
 
 GEN
@@ -726,7 +723,7 @@ AddFlipChain(GEN n, long signmatters)
   }
   setlg(A,j+1);
   setsigne(n,sn);
-  avma = av;
+  set_avma(av);
   return gerepilecopy(av,A);
 }
 
@@ -910,7 +907,7 @@ DivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN p, GEN pe, ulong excess)
       return gerepileupto(av,WAB);
     if(DEBUGLEVEL>=4) err_printf("divadd(%lu/%lu)",r,d);
     excess++;
-    avma = av;
+    set_avma(av);
   }
 }
 
@@ -959,7 +956,7 @@ DivAdd1(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, long flag)
     }
     if(DEBUGLEVEL>=4) err_printf("divadd1(%lu/%lu)",r,d);
     excess++;
-    avma = av1;
+    set_avma(av1);
   }
 }
 
@@ -1000,7 +997,7 @@ DivSub(GEN WA, GEN WB, GEN KV, ulong d, GEN T, GEN p, long e, GEN pe, ulong nIGS
     r = lg(res)-1;
     if(r==d) return gerepileupto(av,res);
     if(DEBUGLEVEL>=4) err_printf("divsub(%lu/%lu)",r,d);
-    avma = av1;
+    set_avma(av1);
   }
 }
 
@@ -1008,7 +1005,7 @@ ulong
 DivSub_dimval(GEN WA, GEN WB, long dim, GEN KV, GEN T, GEN p, long e, GEN pe)
 { /* Finds the highest p-adic accuracy at which DivSub(WA,WB) has dimension dim */
   pari_sp av = avma;
-  ulong nZ,P,nE,E,nV,nA,nB,n,res;
+  ulong nZ,P,nE,E,nV,nA,nB,n;
   GEN KB,K,L;
   nZ = lg(KV);
   nV = lg(gel(KV,1))-1;
@@ -1038,20 +1035,12 @@ DivSub_dimval(GEN WA, GEN WB, long dim, GEN KV, GEN T, GEN p, long e, GEN pe)
   L = matkerpadic(K,T,pe,p,e);
   /* Is L even of the right dim mop p ? */
   if(lg(L)-1 != dim)
-  {
-    avma = av;
-    return 0;
-  }
+    return gc_ulong(av,0);
   /* return vp(K*L) */
   L = FqM_mul(K,L,T,pe);
   if(gequal0(L))
-  {
-    avma = av;
-    return (ulong)e;
-  }
-  res = gvaluation(L,p);
-  avma = av;
-  return res;
+    return gc_ulong(av,(ulong)e);
+  return gc_ulong(av,gvaluation(L,p));
 }
 
 GEN
@@ -1130,7 +1119,7 @@ rand_subset(ulong n, ulong r)
       S[m] = i;
     }
   }
-  avma = av;
+  set_avma(av);
   return S;
 }
 
@@ -1193,8 +1182,7 @@ PicMember_val(GEN J, GEN W)
   wV = DivMul(w,V,T,pe);
 
   res = DivSub_dimval(W,wV,lg(W)-1,KV,T,p,e,pe);
-  avma = av;
-  return res;
+  return gc_ulong(av,res);
 }
 
 int
@@ -1226,8 +1214,7 @@ PicEq_val(GEN J, GEN WA, GEN WB)
   /* Find { v in V | v*WA c s*WB } = L(2D0-B-A1) */
   /* This space is nontrivial iff. A~B */
   r = DivSub_dimval(WA,sWB,1,KV,T,p,e,pe);
-  avma = av;
-  return r;
+  return gc_ulong(av,r);
 }
 
 int
@@ -1254,8 +1241,7 @@ PicIsZero_val(GEN J, GEN W)
   KV1 = JgetKV(J,1);
 
   r = DivSub_dimval(V1,W,1,KV1,T,p,e,pe);
-  avma = av;
-  return r;
+  return gc_ulong(av,r);
 }
 
 int
@@ -1276,8 +1262,7 @@ PicIsTors_val(GEN J, GEN W, GEN F)
   ulong res;
   W = PicFrobPoly(J,W,F);
   res = PicIsZero_val(J,W);
-  avma = av;
-  return res;
+  return gc_ulong(av,res);
 }
 
 int
@@ -1287,8 +1272,7 @@ PicIsTors(GEN J, GEN W, GEN F)
   int res;
   W = PicFrobPoly(J,W,F);
   res = PicIsZero(J,W);
-  avma = av;
-  return res;
+  return gc_bool(av,res);
 }
 
 GEN
@@ -1418,8 +1402,8 @@ PicLC(GEN J, GEN C, GEN W)
   }
   if(j==1)
   { /* 0 linear combination */
-    avma = av;
-    return JgetW0(J);
+    set_avma(av);
+    return gcopy(JgetW0(J));
   }
   c = gel(C1,1);
   if(j%2) c = negi(c);
@@ -1678,8 +1662,7 @@ PicChart(GEN J, GEN W, ulong P0, GEN P1) /* /!\ Not Galois-equivariant ! */
   if(lg(K)!=2)
   {
     pari_printf("Genericity 1 failed in PicChart\n");
-    avma = av;
-    return NULL;
+    return gc_NULL(av);
   }
   s = FqM_FqC_mul(W,gel(K,1),T,pe); /* Generator of L(2D0-D-C) */
 
@@ -1970,7 +1953,7 @@ RRspaceEval(GEN L, GEN vars, GEN pts, GEN T, GEN pe, GEN p, long e)
   }
   else /* Rational case */
   {
-    avma = av;
+    set_avma(av);
     res = cgetg(2,t_VEC);
     gel(res,1) = FnsEvalAt_Rescale(L,pts,vars,T,p,e,pe);
     return res;
@@ -2001,7 +1984,7 @@ CurveRandPt(GEN f, GEN T, GEN p, long e, GEN bad)
   av1 = avma;
   for(;;)
   {
-    avma = av1;
+    set_avma(av1);
     x = random_FpX(dT,vT,p);
     if(ZX_is0mod(x,p)) continue; /* Want x != 0 */
     fx = poleval(f,x);
@@ -2033,12 +2016,10 @@ FindMod(GEN P, GEN Z, ulong n, GEN p, int check)
     if(gequal(Pp,FpXV_red(gel(Z,i),p)))
     {
       if(check && !gequal(P,gel(Z,i))) pari_err(e_MISC,"Points agree mod p but not mod pe");
-      avma = av;
-      return i;
+      return gc_ulong(av,i);
     }
   }
-  avma = av;
-  return 0;
+  return gc_ulong(av,0);
 }
 
 GEN
@@ -2570,7 +2551,7 @@ PicDeflate(GEN J, GEN W, ulong nIGS)
   av = avma;
   while(1)
   {
-    avma = av;
+    set_avma(av);
     for(i=1;i<=nIGS;i++) gel(IGS,i) = RandVec_padic(W,T,p,pe);
     av1 = avma;
     IV = cgetg(nIGS*nV+1,t_MAT);
@@ -2587,7 +2568,7 @@ PicDeflate(GEN J, GEN W, ulong nIGS)
     r = FqM_rank(IV,T,p);
     if(r==nV+nW+g-1)
     {
-      avma = av1;
+      set_avma(av1);
       return IGS;
     }
     printf("IGS[%lu,%lu]\n",r,nV+nW+g-1);
@@ -2735,10 +2716,7 @@ PicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, GEN K
   /* Mul by l, get coordinates, and compare them to those of W0 */
   c = PicChart(J,W,P0,P1);
   if(c==NULL)
-  {
-    avma = av;
-    return gen_0;
-  }
+    return gc_const(av,gen_0);
   c = gerepileupto(avU,c);
   for(i=1;i<=nc;i++) /* The coords are c0 mod pe1 -> divide */
     gel(c,i) = ZX_Z_divexact(FpX_sub(gel(c,i),gel(c0,i),pe2),pe1);
@@ -2749,7 +2727,7 @@ PicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, GEN K
 GEN
 PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
 {
-  pari_sp av=avma,av1,av2,av3,avrho,avtesttors;
+  pari_sp av=avma,av1,av2,av3,avrho;
   GEN T,p,V;
   long efin,e1,e2,e21,e2ini,efin2,mask,mask2;
   GEN pefin,pe1,pe21,pe2,pefin2,pe,lg1;
@@ -2770,7 +2748,6 @@ PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
   GEN randseed,vFixedParams,args,worker,done;
   long pending,workid;
   ulong r,i,j,k,n;
-  ulong testtors;
 
   J1 = NULL;
   if(eini==0)
@@ -2831,7 +2808,7 @@ PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
     mask = mask2;
     W = gerepileupto(av,W);
   }
-  else avma = av;
+  else set_avma(av);
 
   sW = gel(FqM_indexrank(W,T,p),1); /* rows s.t. this block is invertible, # = nW, we won't change them */
   Vs = cgetg(nV+1,t_MAT); /* V with only the rows in sW */
@@ -2947,7 +2924,7 @@ PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
       av2 = av3 = avma;
       while(1)
       {
-        avma = av3;
+        set_avma(av3);
         if(c0==NULL) /* Compute coords of 0 if not already done */
         {
           /* Find coords of 0 */
@@ -3065,10 +3042,7 @@ PicLiftTors(GEN J, GEN W, GEN l, long eini, long multiple_allowed)
         {
           if(DEBUGLEVEL>=3) pari_printf("piclifttors: Checking %Ps-tors\n",l);
           W = PicInflate_U(J2,U2,NULL);
-          avtesttors = avma;
-          testtors = PicIsZero_val(J2,PicMul(J2,W,l,0));
-          avma = avtesttors;
-          if(testtors<e2)
+          if(!PicIsTors(J2,W,l))
           {
             if(DEBUGLEVEL>=3) printf("Not actually l-torsion!!! Changing charts\n");
             P0++;
@@ -3147,8 +3121,7 @@ Chordi(ulong i1, ulong i2, ulong l, ulong d)
   for(n=1;n<=d;n++)
     c3[n] = (2*l-(c1[n]+c2[n]))%l;
   n = c2i(c3,l);
-  avma = av;
-  return n;
+  return gc_ulong(av,n);
 }
 
 ulong
@@ -3161,8 +3134,7 @@ mulOni(long k,ulong i, ulong l, ulong d)
   for(n=1;n<=d;n++)
     c[n] *= k;
   i = c2i(c,l);
-  avma = av;
-  return i;
+  return gc_ulong(av,i);
 }
 
 ulong
@@ -3175,8 +3147,7 @@ ActOni(GEN m, ulong i, ulong l)
   c = i2c(i,l,d);
   c = Flm_Flc_mul(m,c,l);
   i = c2i(c,l);
-  avma = av;
-  return i;
+  return gc_ulong(av,i);
 }
 
 GEN
@@ -3478,7 +3449,7 @@ OnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T, GEN
     Z1 = gen_indexsort_uniq(Z,(void*)&cmp_universal,&cmp_nodata);
     if(lg(Z1)<lg(Z))
     {
-      avma = av1;
+      set_avma(av1);
       Fi = gen_0;
     }
     else
@@ -3488,7 +3459,7 @@ OnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T, GEN
         Fi = gerepilecopy(av1,mkvec2(Fi,Z));
       else
       { /* Bestappr failed */
-        avma = av1;
+        set_avma(av1);
         Fi = gen_m1;
       }
     }
@@ -3542,7 +3513,7 @@ AllPols(GEN J, GEN Z, ulong l, GEN JFrobMat)
         }
       }
     }
-    if(All0) avma = avj; /* Drop this j */
+    if(All0) set_avma(avj); /* Drop this j */
     else j0++;
   }
   if(DEBUGLEVEL>=3) printf("AllPols: Reducing lF from %lu to %lu\n",lF-1,j0-1);
@@ -3648,7 +3619,7 @@ FindSuppl(GEN W, ulong nS, GEN V, GEN Vbis, GEN T, GEN p, GEN pe)
   av1 = avma;
   do
   {
-    avma = av1;
+    set_avma(av1);
     if(Vbis)
     {
       for(j=1;j<=nS;j++)
@@ -3736,8 +3707,7 @@ PicNorm(GEN J, GEN F1, GEN F2, GEN WE, ulong n)
   if(ZX_is0mod(M1,p))
   {
     if(DEBUGLEVEL>=3) err_printf("PicNorm: F1 has zeros on D, giving up\n");
-    avma = av;
-    return NULL;
+    return gc_NULL(av);
   }
 
   for(j=1;j<=nS;j++)
@@ -3749,8 +3719,7 @@ PicNorm(GEN J, GEN F1, GEN F2, GEN WE, ulong n)
   if(ZX_is0mod(M2,p))
   {
     if(DEBUGLEVEL>=3) err_printf("PicNorm: F2 has zeros on D, giving up\n");
-    avma = av;
-    return NULL;
+    return gc_NULL(av);
   }
 
   return gerepileupto(av,ZpXQ_div(M1,M2,T,pe,p,e)); /* TODO can save divisions by taking detratios together */
@@ -3886,7 +3855,7 @@ PicFreyRuckMulti(GEN J, GEN Wtors, GEN l, GEN Wtest, GEN W0, GEN C)
     res = PicFreyRuckMulti1(J,Wtors1,l,Wtest1,W01,F1,F2,F3,C);
     if(res) return gerepileupto(av,res);
     if(DEBUGLEVEL>=3) err_printf("Error in Frey-Ruck, retrying\n");
-    avma = av1;
+    set_avma(av1);
     Wtors1 = PicNeg(J,Wtors,1);
     W01 = PicNeg(J,W0,1);
     for(i=1;i<ntest;i++)
@@ -4089,7 +4058,7 @@ PlaneZeta(GEN f, ulong p)
     av1 = avma;
     for(ix=0;ix<pa;ix++) /* Loop over F_q */
     {
-      avma = av1;
+      set_avma(av1);
       m = ix;
       for(i=1;i<=a;i++)
       {
@@ -4142,7 +4111,7 @@ SuperZeta(GEN f, ulong m, ulong p) /* y^m = f(x), assumes f sqfree and gcd(deg(f
     av1 = avma;
     for(ix=0;ix<pa;ix++) /* Loop over Fq */
     {
-      avma = av1;
+      set_avma(av1);
       mx = ix;
       for(i=1;i<=a;i++)
       {
@@ -4176,8 +4145,7 @@ PtIsOnSuperellCurve(GEN f, ulong m, GEN P)
   pari_sp av = avma;
   long res;
   res = gequal(gpowgs(gel(P,2),m),poleval(f,gel(P,1)));
-  avma = av;
-  return res;
+  return gc_long(av,res);
 }
 
 long
@@ -4204,8 +4172,7 @@ PtIsOnHyperellCurve(GEN F, GEN P)
     fx = poleval(F,x);
   }
   res = gequal(y2,fx);
-  avma = av;
-  return res;
+  return gc_long(av,res);
 }
 
 long
@@ -4271,8 +4238,7 @@ PtIsOnPlaneCurve(GEN F, GEN P)
       val = gsubst(val,vars[3],gen_1);
   }
   res = gequal0(val);
-  avma = av;
-  return res;
+  return gc_long(av,res);
 }
 
 // RR spaces, easy cases
@@ -4495,7 +4461,7 @@ SuperAut(ulong m, GEN T, GEN p, long e)
   m1 = ugcdiu(q1,m);
   if(m1==1)
   {
-    avma = av;
+    set_avma(av);
     return cgetg(1,t_VEC);
   }
   if(DEBUGLEVEL)
@@ -4566,16 +4532,10 @@ SmoothIsGeneric(GEN f, ulong d, GEN p, long x, long y, GEN P)
   pari_sp av = avma;
   ulong i,j,n;
   if(gequal0(modii(polcoef_i(f,d,x),p)))
-  {
-    avma = av;
-    return 0;
-  }
+    return gc_bool(av,0);
   if(gequal0(modii(polcoef_i(f,d,y),p)))
-  {
-    avma = av;
-    return 0;
-  }
-  avma = av;
+    return gc_bool(av,0);
+  set_avma(av);
   if(P==NULL) return 1;
   for(i=1;i<=2;i++)
   {
@@ -4941,7 +4901,7 @@ PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN TnewPai
   if(rk==1) /* No relation? */
   {
     if(DEBUGLEVEL>=3) printf("UpdatePairings: good, no relation.\n");
-    avma = avK;
+    set_avma(avK);
     *replace = 0;
     return R2;
   }
@@ -4965,13 +4925,12 @@ PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN TnewPai
     if(DEBUGLEVEL>=4) pari_printf("UpdatePairings: the new test gives pairings %Ps.\n",Rnew);
     if(gequal0(FpV_FpC_mul(Rnew,KR2,l))==0) /* Find new test which disproves this fake relation */
       break;
-    avma = avK;
+    set_avma(avK);
     if(nwatch>=10) /* TODO adjust */
     {
       if(DEBUGLEVEL)
         printf("UpdatePairings: Unable to find suitable new pairing after %lu attempts, giving up.\n",nwatch);
-      avma = av;
-      return NULL;
+      return gc_NULL(av);
     }
   }
   /* Now we have d+1 forms of rank d; find one we can drop */
@@ -5013,8 +4972,7 @@ FpM_GuessLastColFromCharpoly(GEN A, GEN chi, GEN p)
   if(lg(M)!=2)
   {
     if(DEBUGLEVEL>=3) printf("Unable to guess last column from charpoly.\n");
-    avma = av;
-    return NULL;
+    return gc_NULL(av);
   }
   u = Fp_inv(gcoeff(M,n,1),p);
   for(i=1;i<n;i++)
@@ -5068,7 +5026,7 @@ PicTors_FrobGen(GEN J, GEN l, GEN B, GEN MFrob)
     av1 = avma;
     pari_printf("The matrix of Frob_%Ps is\n",Jgetp(J));
     printp(mkvec(M));
-    avma = av1;
+    set_avma(av1);
   }
   gel(res,3) = M;
   n = lg(piv);
@@ -5451,10 +5409,7 @@ PicTorsBasis(GEN J, GEN l, GEN Chi)
       }
       PicTorsBasis_UsePt(J,Pt,ChiT,d,&r,&BW,&Bo,&BT,&matFrob,FRparams,&matPairings,&LinTests,&LinTestsNames,&NewTestName);
       if(LinTests==NULL) /* Got stuck and want to give up? */
-      {
-        avma = av;
-        return NULL;
-      }
+        return gc_NULL(av);
     }
     if(r==d) break; /* Finished? */
     if(DEBUGLEVEL)
@@ -5465,10 +5420,7 @@ PicTorsBasis(GEN J, GEN l, GEN Chi)
     if(DEBUGLEVEL>=3)
       printf("Now nwatch=%lu, giving up beyond %lu\n",nwatch,2*nPhi);
     if(nwatch>2*nPhi)
-    {
-      avma = av;
-      return gen_0;
-    }
+     return gc_const(av,gen_0);
   }
   res = cgetg(4,t_VEC);
   gel(res,1) = BT;
@@ -5646,7 +5598,7 @@ ProjGalRep_aux(GEN f, GEN Z, ulong l, ulong d, ulong ld, GEN T, GEN p, long e, G
     /* Multiple roots ? TODO no need to recheck after increasing accuracy */
     if(lg(gen_indexsort_uniq(PZ,(void*)&cmp_universal,&cmp_nodata))<lg(PZ))
     {
-      avma = av;
+      set_avma(av);
       return ProjGalRep_aux(f,Z,l,d,ld,T,p,e,pe,m+1);
     }
     setlg(PV,n+1);
@@ -5726,7 +5678,7 @@ HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
   av1 = avma;
   do
   {
-    avma = av1;
+    set_avma(av1);
     J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),pol_x(1),p,utoi(a),e,Lp);
     R = PicTorsGalRep(J,l,chi);
   } while(R==NULL);
@@ -5757,7 +5709,7 @@ SuperGalRep(GEN f, ulong m, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a
   av1 = avma;
   do
   {
-    avma = av1;
+    set_avma(av1);
     J = PicInit(gel(RRdata,1),Auts,itou(gel(RRdata,2)),itou(gel(RRdata,3)),gel(RRdata,4),pol_x(1),p,T,e,Lp);
     R = PicTorsGalRep(J,l,chi);
   } while(R==NULL);
@@ -5788,7 +5740,7 @@ SmoothGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
   av1 = avma;
   do
   {
-    avma = av1;
+    set_avma(av1);
     J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,utoi(a),e,Lp);
     R = PicTorsGalRep(J,l,chi);
   } while(R==NULL);

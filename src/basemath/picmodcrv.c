@@ -593,12 +593,12 @@ elladd_padic(GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
   av0 = avma;
   if(gequal(P,P0))
   {
-    avma = av;
+    set_avma(av);
     return Q;
   }
   if(gequal(Q,P0))
   {
-    avma = av;
+    set_avma(av);
     return P;
   }
   xP = gel(P,1);
@@ -612,7 +612,7 @@ elladd_padic(GEN a4, GEN P, GEN Q, GEN T, GEN pe, GEN p, long e)
       pari_err(e_IMPL,"case P!=Q but P=Q mod p");
     if(gequal0(FpX_red(ZX_add(yP,yQ),pe)))
     {
-      avma = av0;
+      set_avma(av0);
       return P0;
     }
     dx = ZX_Z_mul(yP,gen_2);
@@ -659,8 +659,7 @@ FpX_split_deg(GEN F, GEN p)
   y = FpX_Frobenius(F,p);
   for(i=1;!gequal(y,x);i++)
     y = Fq_pow(y,p,F,p);
-  avma = av;
-  return i;
+  return gc_ulong(av,i);
 }
 
 GEN
@@ -694,8 +693,7 @@ EllTorsIsSplit_lv(GEN a4, GEN a6, ulong l, ulong v, GEN p, ulong d, GEN T, GEN q
   {
     if(DEBUGLEVEL)
       printf("EllSplitTors: E[%lu^%lu] not defined in degree %lu.\n",l,v,d);
-    avma = av;
-    return 0;
+    return gc_ulong(av,0);
   }
   if(l!=2 || v>1)
   {
@@ -709,13 +707,11 @@ EllTorsIsSplit_lv(GEN a4, GEN a6, ulong l, ulong v, GEN p, ulong d, GEN T, GEN q
       {
         if(DEBUGLEVEL)
           printf("EllSplitTors: E[%lu^%lu] not split.\n",l,v);
-        avma = av;
-        return 0;
+        return gc_ulong(av,0);
       }
     }
   }
-  avma = av;
-  return r;
+  return gc_ulong(av,r);
 }
 
 ulong
@@ -729,11 +725,8 @@ EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
   nu = polsym(chiE,d);
   nud = gel(nu,d+1); /* alpha^d+beta^d */
   NE = subii(addiu(q,1),nud); /* #E(Fq) */
-  if(umodiu(NE,N*N))
-  { /* Must have N^2 | #E(Fq) */
-    avma = av;
-    return 0;
-  }
+  if(umodiu(NE,N*N)) /* Must have N^2 | #E(Fq) */
+    return gc_ulong(av,0);
   g = subii(sqri(ap),muliu(p,4)); /* ap^2-4p */
   fa = factoru(ugcdiu(g,N)); /* Primes l|N such that Frobp not ss on E[l] */
   nfa = lg(gel(fa,1));
@@ -748,8 +741,7 @@ EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
     if(Fl_powu(umodiu(ap,l),d,l) != Fl_powu(2,d,l))
     {
       if(DEBUGLEVEL) printf("EllSplitTors: Frob^%lu unipotent on E[%lu].\n",d,l);
-      avma = av;
-      return 0;
+      return gc_ulong(av,0);
     }
   }
   /* M = Cofactor supported by primes l such that Frobp ss on E[l] */
@@ -759,8 +751,7 @@ EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
     if(umodiu(nud,M)!=(2%M))
     {
       if(DEBUGLEVEL) printf("EllSplitTors: Frob^%lu nontrivial on E[%lu].\n",d,M);
-      avma = av;
-      return 0;
+      return gc_ulong(av,0);
     }
   }
   /* So now Frob^d trivial on E[l] but maybe not E[l^v] for l good,
@@ -775,10 +766,7 @@ EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
     v = gel(fa,2)[i];
     r = EllTorsIsSplit_lv(a4,a6,l,v,p,d,T,q2);
     if(r==0)
-    {
-      avma = av;
-      return 0;
-    }
+      return gc_ulong(av,0);
     c = ulcm(c,r);
   }
   fa = factoru(M);
@@ -803,15 +791,11 @@ EllTorsIsSplit(GEN a4, GEN a6, ulong N, GEN p, ulong d, GEN T, GEN q, GEN q2)
     {
       r = EllTorsIsSplit_lv(a4,a6,l,v,p,d,T,q2);
       if(r==0)
-      {
-        avma = av;
-        return 0;
-      }
+       return gc_ulong(av,0);
       c = ulcm(c,r);
     }
   }
-  avma = av;
-  return c;
+  return gc_ulong(av,c);
 }
 
 GEN
@@ -830,7 +814,7 @@ EllSplitTors(ulong N, GEN p, GEN T, GEN Badj)
   av1 = avma;
   for(nwatch=1;nwatch<1000;nwatch++) /* TODO adjust */
   {
-    avma = av1;
+    set_avma(av1);
     if(DEBUGLEVEL>=2) printf("EllSplitTors: Trying new curve.\n");
     a4 = genrand(p);
     if(gequal0(a4)) continue; /* Avoid j=0 */
@@ -927,10 +911,7 @@ EllWithTorsBasis(ulong N, GEN T, GEN pe, GEN p, long e, GEN Badj)
   ulong nfaN,i,l,v,lv1,lv;
   E = EllSplitTors(N,p,T,Badj);
   if(E==NULL) /* Couldn't find E, and giving up? */
-  {
-    avma = av;
-    return NULL;
-  }
+    return gc_NULL(av);
   a4 = gel(E,1);
   a6 = gel(E,2);
   A4 = scalarpol(a4,varn(T));
@@ -1140,10 +1121,7 @@ GetMl1(ulong N, GEN Pts, GEN PtTags, GEN T, GEN p, long e, GEN zNpref_pows, GEN 
   pe = powis(p,e);
   E = EllWithTorsBasis(N,T,pe,p,e,Badj);
   if(E==NULL) /* Couldn't find E, and giving up? */
-  {
-    avma = av;
-    return NULL;
-  }
+    return gc_NULL(av);
   a4 = gmael(E,1,1);
   P = gel(E,2);
   Q = gel(E,3);
@@ -1731,10 +1709,7 @@ ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE
   setlg(list_j,1);
   E = GetMl1(N,Pts,PtsTags,T,p,e,NULL,list_j); /* NULL: no preferred zeta_N for now */
   if(E==NULL) /* Could not find E, and giving up? */
-  {
-    avma = av;
-    return NULL;
-  }
+    return gc_NULL(av);
   if(DEBUGLEVEL) pari_printf("modpicinit: Working on y^2=x^3+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
   Ml1 = gel(E,2);
   PtsFrob = gel(E,3);
@@ -1787,10 +1762,7 @@ ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE
     if(DEBUGLEVEL) printf("modpicinit: Getting extra elliptic curve %lu/%lu\n",i,nbE);
     E = GetMl1(N,Pts,PtsTags,T,p,e,zNpows,list_j);
     if(E==NULL) /* Could not find E, and giving up? */
-    {
-      avma = av;
-      return NULL;
-    }
+      return gc_NULL(av);
     if(DEBUGLEVEL) pari_printf("modpicinit: working on y^2=x^3+%Psx+%Ps (j=%Ps)\n",gmael(E,1,1),gmael(E,1,2),gmael(E,1,3));
     setlg(list_j,i+1);
     gel(list_j,i) = gmael(E,1,3);
@@ -2390,10 +2362,7 @@ PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
           pari_printf("PicTors_TpEigen: Throwing in Frob-iterate %lu of point %lu (B = %Ps)\n",iFrob,iBatch,B);
         d2 = PicTors_TpClosure(J,&BT,&matTp,T,PT,FRparams,LinTests,LinTestsNames,&R,&NewTestName);
         if(d2==-1) /* Got stuck and want to give up? */
-        {
-          avma = av;
-          return NULL;
-        }
+          return gc_NULL(av);
         if(DEBUGLEVEL>=2) printf("PicTors_TpEigen: taking Tp closure increases dim by %lu\n",d2);
         if(d2==0)
         {
@@ -2447,10 +2416,7 @@ PicTors_TpEigen(GEN J, GEN l, GEN ap, GEN epsp, GEN chi)
         if(++iFrob==dB) break;
       }
       if(nwatch>2*nPhi)
-      {
-        avma = av;
-        return NULL;
-      }
+        return gc_NULL(av);
     }
   }
 }
@@ -2485,7 +2451,7 @@ mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qprec)
   nwatch = 0;
   do
   {
-    avma = av1;
+    set_avma(av1);
     if(nwatch>2)
     {
       nwatch = 0;
