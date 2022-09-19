@@ -157,7 +157,6 @@ CrvZeta_loc(GEN f, GEN BadU, GEN T, ulong p, GEN u1, GEN s, ulong r, ulong l)
     }
   }
   //pari_printf("Done: %Ps\n",done);
-  avma = av;
-  return n;
+  return gc_ulong(av,n);
 }
 
