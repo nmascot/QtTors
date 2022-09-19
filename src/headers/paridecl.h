@@ -6670,8 +6670,8 @@ INLINE void    pari_err_ROOTS0(const char *f);
 
 /* pic.c */
 void timers_printf(const char* msg1, const char* msg2, pari_timer* pCPU, pari_timer* pW);
-GEN matkerpadic(GEN A, GEN T, GEN pe, GEN p, long e);
-GEN mateqnpadic(GEN A, GEN T, GEN pe, GEN p, long e);
+GEN ZqM_ker(GEN A, GEN T, GEN pe, GEN p, long e);
+GEN ZqM_eqn(GEN A, GEN T, GEN pe, GEN p, long e);
 GEN PicCard(GEN J);
 GEN PicAdd(GEN J, GEN W1, GEN W2);
 GEN PicChord(GEN J, GEN W1, GEN W2, long flag);

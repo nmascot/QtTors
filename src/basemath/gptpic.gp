@@ -46,6 +46,11 @@ install("tPicDeflate_U","GGU")
 install("tPicMember_val","GG");
 install("tPicEq_val","GGG");
 install("tPicIsZero_val","GG");
+install("tPicIsTors_val","GGG");
+install("tPicMember","iGG");
+install("tPicEq","iGGG");
+install("tPicIsZero","iGG");
+install("tPicIsTors","iGGG");
 install("tPicLiftTors","GGGL");
 f = x^6-x^4+(t-1)*(x+1)*x;
 f0 = subst(f,t,0);

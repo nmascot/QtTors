@@ -273,7 +273,7 @@ GEN ZqXn_div(GEN A, GEN B, GEN T, GEN pe, GEN p, long e)
   return ZqXn_mul(A,ZqXn_inv(B,T,pe,p,e),T,pe);
 }
 
-long
+int
 ZqXn_is0mod(GEN x, GEN p)
 {
   pari_sp av = avma;
@@ -282,16 +282,12 @@ ZqXn_is0mod(GEN x, GEN p)
   if(typ(x)==t_POL)
   {
     if(typ(gel(x,2))==t_POL)
-      x = gel(x,2); // COnstant coef of series
+      x = gel(x,2); // Constant coef of series
     red = FpX_red(x,p);
   }
   else
     red = Fp_red(x,p);
-  res = gequal0(red);
-  /* signe(red) */
-  avma = av;
-  return res;
-  /* return gc_bool(av,...); */
+  return gc_bool(av,gequal0(red));
 }
 
 GEN ZqXn_relFrob(GEN A, GEN FrobMat, GEN T, GEN pe)
@@ -307,6 +303,31 @@ GEN ZqXn_relFrob(GEN A, GEN FrobMat, GEN T, GEN pe)
 }
 
 /* Linear algebra over Zq[t]/(p^e,t^h) */
+
+GEN
+ZqXnC_setprec(GEN C, ulong h, long vT)
+{
+  GEN D;
+  ulong n,i;
+  n = lg(C);
+  D = cgetg(n,t_COL);
+  for(i=1;i<n;i++)
+    gel(D,i) = ZqXn_setprec(gel(C,i),h,vT);
+  return D;
+}
+
+GEN
+ZqXnC_redprec(GEN C, ulong h)
+{
+  GEN D;
+  ulong n,i;
+  n = lg(C);
+  D = cgetg(n,t_COL);
+  for(i=1;i<n;i++)
+    gel(D,i) = ZqXn_redprec(gel(C,i),h);
+  return D;
+}
+
 
 GEN
 ZqXnC_add(GEN A, GEN B)
@@ -567,6 +588,21 @@ GEN ZqXnM_ZqXnC_mul(GEN A, GEN B, GEN T, GEN pe)
     gel(C,i) = c;
   }
   return gerepilecopy(av,C);
+}
+
+GEN ZqXnM_ZqXn_mul(GEN A, GEN b, GEN T, GEN pe)
+{
+  GEN C;
+  long m,n,i,j;
+  RgM_dimensions(A,&m,&n);
+  C = cgetg(n+1,t_MAT);
+  for(j=1;j<=n;j++)
+  {
+    gel(C,j) = cgetg(m+1,t_COL);
+    for(i=1;i<=m;i++)
+      gcoeff(C,i,j) = ZqXn_mul(gcoeff(A,i,j),b,T,pe);
+  }
+  return C;
 }
 
 GEN
@@ -1010,6 +1046,20 @@ tDivSub_dimval(GEN WA, GEN WB, long dim, GEN KV, GEN T, GEN p, long e, GEN pe)
   return gerepileupto(av,res);
 }
 
+int val_allOK(GEN x, ulong h, long e)
+{ /* Analyse the output of dimval */
+  ulong i;
+  if(gequal0(x))
+    return 0;
+  if(gequal1(x))
+    return 1;
+  for(i=1;i<=h;i++)
+  {
+    if(x[i]!=e) return 0;
+  }
+  return 1;
+}
+
 GEN
 tPicNeg(GEN J, GEN W, long flag)
 { /* flag: 1: choose s randomly, 2: also return s */
@@ -1092,17 +1142,20 @@ tPicMember_val(GEN J, GEN W)
   JgetTpe(J,&T,&pe,&p,&e);
   V = JgetV(J,2);
   KV = JgetKV(J,2);
-  printf("a");
 
   do
     w = ZqXn_RandVec_1(W,pe);
   while(gequal0(w));
-  printf("b");
   wV = tDivMul(w,V,T,pe);
-  printf("c");
   res = tDivSub_dimval(W,wV,lg(W)-1,KV,T,p,e,pe);
-  printf("d");
   return gerepileupto(av,res);
+}
+
+int
+tPicMember(GEN J, GEN W)
+{
+  pari_sp av = avma;
+  return gc_bool(av,val_allOK(tPicMember_val(J,W),Jgeth(J),Jgete(J)));
 }
 
 GEN
@@ -1125,6 +1178,13 @@ tPicEq_val(GEN J, GEN WA, GEN WB)
   return gerepileupto(av,res);
 }
 
+int
+tPicEq(GEN J, GEN WA, GEN WB)
+{
+  pari_sp av = avma;
+  return gc_bool(av,val_allOK(tPicEq_val(J,WA,WB),Jgeth(J),Jgete(J)));
+}
+
 GEN
 tPicIsZero_val(GEN J, GEN W)
 {
@@ -1138,6 +1198,13 @@ tPicIsZero_val(GEN J, GEN W)
 
   res = tDivSub_dimval(V1,W,1,KV1,T,p,e,pe);
   return gerepileupto(av,res);
+}
+
+int
+tPicIsZero(GEN J, GEN W)
+{
+  pari_sp av = avma;
+  return gc_bool(av,val_allOK(tPicIsZero_val(J,W),Jgeth(J),Jgete(J)));
 }
 
 GEN
@@ -1264,6 +1331,49 @@ tPicFrob(GEN J, GEN W)
       gcoeff(W2,FrobCyc[i],j) = ZqXn_relFrob(gcoeff(W,i,j),FrobMat,T,pe);
   }
   return W2;
+}
+
+GEN
+tPicFrobPoly(GEN J, GEN W, GEN F)
+{
+  pari_sp av = avma;
+  ulong d,i;
+  GEN n,FW,res;
+
+  if(gequal0(F))
+    return gcopy(JgetW0(J));
+  d = degree(F);
+  FW = W;
+  n = truecoeff(F,0);
+  if(d&1L) n = negi(n);
+  res = tPicMul(J,W,n,2);
+  for(i=1;i<=d;i++)
+  {
+    FW = tPicFrob(J,FW);
+    n = truecoeff(F,i);
+    if((d+1-i)&1L) n = negi(n);
+    res = tPicChord(J,res,tPicMul(J,FW,n,2),0);
+  }
+  return gerepileupto(av,res);
+}
+
+GEN
+tPicIsTors_val(GEN J, GEN W, GEN F)
+{
+  pari_sp av = avma;
+  GEN res;
+  W = tPicFrobPoly(J,W,F);
+  res = tPicIsZero_val(J,W);
+  pari_printf("IsTors_val: %Ps\n");
+  return gerepileupto(av,res);
+}
+
+int
+tPicIsTors(GEN J, GEN W, GEN F)
+{
+  pari_sp av = avma;
+  W = tPicFrobPoly(J,W,F);
+  return gc_bool(av,val_allOK(tPicIsZero_val(J,W),Jgeth(J),Jgete(J)));
 }
 
 GEN
@@ -2083,8 +2193,6 @@ tPicLift_worker(GEN V0j, ulong shift, GEN uv, GEN AinvB, GEN CAinv, GEN T, GEN p
   return gerepilecopy(av,drho);
 }
 
-/* TODO!!! Not tested below */
-
 GEN
 tPicLift_RandLift_U(GEN U, GEN U0, GEN KM, GEN T, GEN p, GEN pe, long e, ulong h1, ulong h2)
 { /* U prec h2, U0 h12, KM h12 */
@@ -2123,8 +2231,6 @@ tPicLift_RandLift_U(GEN U, GEN U0, GEN KM, GEN T, GEN p, GEN pe, long e, ulong h
         {
           gmael3(newU,i,m,s+2) = ZX_add(gmael3(newU,i,m,s+2),gel(c,s+2-h1));
         }
-        /*gmael(newU,i,m) =
-          ZqXn_add(gmael(newU,i,m),ZqXn_Z_mul(ZqXn_mul(gel(K,k),gcoeff(U0,m,j),T,pe21),pe1)); */
       }
       k++;
     }
@@ -2133,20 +2239,20 @@ tPicLift_RandLift_U(GEN U, GEN U0, GEN KM, GEN T, GEN p, GEN pe, long e, ulong h
 }
 
 GEN
-tPicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, GEN KM, GEN pe1, GEN pe21, long e21, GEN c0, ulong P0, GEN P1)
+tPicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, GEN KM, ulong h1, ulong h2, GEN c0, ulong P0, GEN P1)
 {
   pari_sp av=avma,avU;
-  GEN T,p,pe2;
-  long e2;
+  GEN T,p,pe;
+  long e;
   GEN W,c,res;
   ulong nc,i;
   setrand(randseed);
-  JgetTpe(J,&T,&pe2,&p,&e2);
-  nc = lg(c0)-1;
+  JgetTpe(J,&T,&pe,&p,&e);
+  nc = lg(c0)-1; /* Size of coords */
 
   res = cgetg(3,t_VEC);
   /* Get a random lift */
-  //gel(res,1) = U = tPicLift_RandLift_U(U,U0,KM,T,p,pe1,pe21,e21);
+  gel(res,1) = U = tPicLift_RandLift_U(U,U0,KM,T,p,pe,e,h1,h2);
   avU = avma;
   W = tPicInflate_U(J,U,I);
   W = tPicMul(J,W,l,0);
@@ -2159,24 +2265,25 @@ tPicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, GEN 
     return gen_0;
   }
   c = gerepileupto(avU,c);
-  for(i=1;i<=nc;i++) /* The coords are c0 mod pe1 -> divide */
-    /*gel(c,i) = TODO_ZX_Z_divexact(FpX_sub(gel(c,i),gel(c0,i),pe2),pe1);*/
+  for(i=1;i<=nc;i++) /* The coords are c0 mod t^h1 -> divide */
+    gel(c,i) = ZqXn_dropdiv(ZqXn_sub(gel(c,i),gel(c0,i)),h1);
   gel(res,2) = gerepileupto(avU,c);
   return res;
 }
 
-/* End TODO!!! */
-
 GEN
 tPicLiftTors(GEN J, GEN W, GEN l, long hini)
 {
-  pari_sp av=avma;
+  pari_sp av=avma,av2,av3;
   GEN T,p,pe,V;
   long va,vt,e,hfin,h1,h2,h12,mask;
   ulong g,d0,nV,nW,nZ,nGW=2;
   ulong r,i,j,k;
   GEN Wq,Jq,Uq,sW,Vs,U0,V0,U,GWV,wV,uv,ABCD,Ainv,CAinv,AinvB,rho,K,KM;
   GEN J2,Vh2,AinvB12,CAinv12,V0j12,U012;
+  GEN c0=NULL,c02,P1=NULL,Ulifts,clifts,Uc,Ktors,red,U2;
+  int liftsOK=0,P0_tested=0;
+  ulong nc,n,P0=1;
 
   JgetTpe(J,&T,&pe,&p,&e);
   hfin = Jgeth(J);
@@ -2214,6 +2321,8 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
   /* TODO parallel? */
 
   r = 3*d0+1-g; /* Wanted rank of GWV */
+  Ulifts = cgetg(g+2,t_VEC);
+  //clifts = cgetg(g+2,t_MAT); TODO
   /* Main loop */
   for(h1=1,h2=2;;)
   {
@@ -2266,18 +2375,148 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
     /* Find a random solution to the inhomogeneous system */
     KM = ZqXnM_ker(K,T,pe,p,e); /* Prec h12 */
     /* TODO gerepile */
-    if(DEBUGLEVEL>=3||(lg(KM)==1)) printf("picliftors: dim ker lift: %ld\n",lg(KM)-1);
+    if(DEBUGLEVEL>=3||(lg(KM)==1)) printf("tpicliftors: dim ker lift: %ld\n",lg(KM)-1);
     U012 = ZqXnM_redprec(U0,h12);
-    U = tPicLift_RandLift_U(U,U012,KM,T,p,pe,e,h1,h2); // U prec h2, U0 oo, KM h12 */
-    /* TODO get more copies and make l-torsion */
-
+    av2 = av3 = avma;
+    while(1)
+    {
+      if(c0==NULL) /* Compute coords of 0 if not already done */
+      {
+        /* Find coords of 0 */
+        for(;;)
+        {
+          if(DEBUGLEVEL>=2) printf("tpiclifttors: Computing coords of 0, P0=%lu\n",P0);
+          c0 = tPicChart(J,JgetW0(J),P0,NULL);
+          if(c0) break;
+          P0++;
+          if(P0>nZ+g-d0)
+            pari_err(e_MISC,"tpiclifttors: Run out of charts while computing coords of 0");
+        }
+        //c0 = gerepileupto(av3,c0);
+        nc = lg(c0)-1;
+        /* Find indep set of rows to normalize */
+        c0 = col2mat(c0,nc/nW,nW);
+        P1 = FqM_indexrank(ZqXnM_to_ZqM(c0),T,p);
+        P1 = gel(P1,1);
+        c0 = ZqXn_Subspace_normalize(c0,P1,T,pe,p,e,1);
+        c0 = mat2col0(c0);
+        //gerepileall(av2,2,&c0,&P1);
+        //av3 = avma;
+      }
+      printf("c0 OK\n");
+      Ulifts = cgetg(g+2,t_VEC); // TODO
+      clifts = cgetg(g+2,t_MAT); // TODO
+      /* Find g+1 lifts TODO in parallel */
+      c02 = ZqXnC_redprec(c0,h2);
+      liftsOK = 1;
+      for(i=1;i<=g+1;i++)
+      {
+        printf("Lift...");
+        Uc = tPicLiftTors_Chart_worker(utoi(pari_rand()),J2,l,U,U012,sW,KM,h1,h2,c02,P0,P1);
+        if(Uc==gen_0)
+        {
+          liftsOK = 0;
+          break;
+        }
+        gel(Ulifts,i) = gel(Uc,1);
+        gel(clifts,i) = gel(Uc,2);
+        //return gerepileupto(av,gel(clifts,i));
+        printf("OK\n");
+      }
+      if(liftsOK==0)
+      { /* This chart does not work. Take the next one, reset data, and restart */
+        if(DEBUGLEVEL>=3) printf("tpiclifttors: Changing chart\n");
+        P0++; /* New chart */
+        printf("P0=%lu\n",P0);
+        if(P0>nZ+g-d0)
+          pari_err(e_MISC,"tpiclifttors: run out of charts while computing coords of 0");
+        P0_tested = 0;
+        c0 = NULL; /* Coords of 0 must be recomputed */
+        //av3 = av2;
+        continue; /* Try again with this new chart */
+      }
+      /*printf("clifts:\n");
+      pari_printf("%Ps\n",clifts);
+      printf("Ulifts:\n");
+      pari_printf("%Ps\n",Ulifts);*/
+      /*for(i=1;i<=g+1;i++)
+      {
+        printf("Col %lu\n",i);
+        pari_printf("%Ps\n",gel(clifts,i));
+      }*/
+      //return gerepilecopy(av,clifts);
+      Ktors = ZqXnM_ker(clifts,T,pe,p,e); /* Find comb with coord = 0 */
+      n = lg(Ktors)-1;
+      printf("dim Ktors = %lu\n",n);
+      if(n!=1)
+      { /* l-tors is etale, so this can only happen if Chart is not diffeo - > change chart */
+        P0++; /* New chart */
+        if(DEBUGLEVEL>=3)
+        {
+          printf("tpiclifttors: Dim ker tors = %ld (expected 1), changing charts\n",n);
+          if(DEBUGLEVEL>=5)
+            printf("nZ=%lu, g=%lu, d0=%lu\nP0=%lu\n",nZ,g,d0,P0);
+        }
+        P0++; /* New chart */
+        if(P0>nZ+g-d0)
+          pari_err(e_MISC,"tpiclifttors: run out of charts while computing coords of 0");
+        P0_tested = 0;
+        c0 = NULL; /* Coords of 0 must be recomputed */
+        //av3 = av2;
+        continue; /* Try again with this new chart */
+      }
+      Ktors = ZqXnC_setprec(gel(Ktors,1),h2,varn(T));
+      red = gel(Ktors,1);
+      for(i=2;i<=g+1;i++)
+        red = ZqXn_add(red,gel(Ktors,i));
+      if(ZqXn_is0mod(red,p)) /* Want nonzero sum */
+      {
+        if(DEBUGLEVEL>=3) printf("tpiclifttors: Sum of Ktors is zero!\n");
+        continue;
+      }
+      Ktors = ZqXn_ZqXnC_mul(ZqXn_inv(red,T,pe,p,e),Ktors,T,pe); /* Normalise so that sum = 1 */
+      W = NULL; /* If done, return updated W; else update U. */
+      for(i=1;i<=g+1;i++)
+        gel(Ulifts,i) = ZqXnM_ZqXn_mul(gel(Ulifts,i),gel(Ktors,i),T,pe);
+      U2 = gel(Ulifts,1);
+      for(i=2;i<=g+1;i++)
+        U2 =ZqXnM_add(U2,gel(Ulifts,i));
+      //U2 = gerepileupto(av3,U2);
+      /* But first check if really l-tors, as the chart might not be injective ! */
+      if(P0_tested == 0)
+      {
+        if(DEBUGLEVEL>=3) pari_printf("piclifttors: Checking %Ps-tors\n",l);
+        W = tPicInflate_U(J2,U2,NULL);
+        printf("Inflated");
+        if(!tPicIsTors(J2,W,l))
+        {
+          printf("a\n");
+          if(DEBUGLEVEL>=3) printf("Not actually l-torsion!!! Changing charts\n");
+          P0++;
+          c0 = NULL;
+          //av3 = av2;
+          continue;
+        }
+        printf("b\n");
+        P0_tested = 1;
+      }
+      break;
+    }
+    //U = tPicLift_RandLift_U(U,U012,KM,T,p,pe,e,h1,h2); // U prec h2, U0 oo, KM h12 */
     /* END LIFTING */
-    if(h2==hfin) break;
+    printf("End lifting\n");
+    if(h2==hfin)
+    {
+      if(W == NULL) /* Update W, if not already done, and return it */
+        W = tPicInflate_U(J,U2,NULL);
+      break;
+    }
     h1 = h2;
     h2<<=1;
     if(mask&1) h2--;
     mask>>=1;
+    U = U2;
+    // TODO gerepile
   }
-  W = tPicInflate_U(J,U,NULL);
   return gerepileupto(av,W);
 }
