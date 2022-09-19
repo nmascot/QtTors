@@ -46,6 +46,18 @@ C-Name: PicLift_worker
 Prototype: GUGGGGG
 Help:
 
+Function: _tPicLiftTors_Chart_worker
+Section: programming/internals
+C-Name: tPicLiftTors_Chart_worker
+Prototype: GGGGGGGUUGUG
+Help:
+
+Function: _tPicLift_worker
+Section: programming/internals
+C-Name: tPicLift_worker
+Prototype: GUGGGGG
+Help:
+
 Function: _PicTorsBasis_worker
 Section: programming/internals
 C-Name: PicTorsBasis_worker

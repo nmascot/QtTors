@@ -2276,10 +2276,13 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
   ulong g,d0,nV,nW,nZ,nGW=2;
   ulong r,i,j,k;
   GEN Wq,Jq,Uq,sW,Vs,U0,V0,U,GWV,wV,uv,ABCD,Ainv,CAinv,AinvB,rho,K,KM;
-  GEN J2,Vh2,AinvB12,CAinv12,V0j12,U012;
-  GEN c0=NULL,c02,P1=NULL,Ulifts,clifts,Uc,Ktors,red,U2;
+  GEN J2,Vh2;
+  GEN c0=NULL,P1=NULL,Ulifts,clifts,Ktors,red,U2;
   int liftsOK=0,P0_tested=0;
   ulong nc,n,P0=1;
+  struct pari_mt pt;
+  GEN vFixedParams,args,worker,done,randseed;
+  long workid,pending;
 
   JgetTpe(J,&T,&pe,&p,&e);
   hfin = Jgeth(J);
@@ -2327,7 +2330,7 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
     GWV = cgetg(nGW*nV+1,t_MAT); /* w*V for w in GW */
     /* We need it to have rk r, it is already the case mod t^h1 */
     Vh2 = ZqXnM_redprec(V,h2);
-    U = ZqXnM_setprec(U,h2,va); // TODO necessary?
+    //U = ZqXnM_setprec(U,h2,va); // TODO necessary?
     k = 1;
     for(i=1;i<=nGW;i++)
     {
@@ -2355,25 +2358,44 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
 
     /* Now deform the w in GW by t^e1*V0. Actually we deform U1 by t^e1*U0. */
     /* TODO do not deform U1[1]? */
-    /* TODO parallel */
-    AinvB12 = ZqXnM_redprec(AinvB,h12);
-    CAinv12 = ZqXnM_redprec(CAinv,h12);
     K = cgetg(nGW*d0+2,t_MAT); /* Lin sys to solve in prec h12 */
-    for(j=1;j<=d0;j++)
+    vFixedParams = cgetg(6,t_VEC);
+    gel(vFixedParams,1) = uv;
+    gel(vFixedParams,2) = ZqXnM_redprec(AinvB,h12);
+    gel(vFixedParams,3) = ZqXnM_redprec(CAinv,h12);
+    gel(vFixedParams,4) = T;
+    gel(vFixedParams,5) = pe;
+    args = cgetg(3,t_VEC);
+    worker = snm_closure(is_entry("_tPicLift_worker"),vFixedParams);
+    pending = 0;
+    i = nGW;
+    j = 0;
+    mt_queue_start_lim(&pt,worker,nGW*d0);
+    for(k=1;k<=nGW*d0||pending;k++)
     {
-      V0j12 = ZqXnM_redprec(gel(V0,j),h12);
-      for(i=1;i<=nGW;i++)
+      if(k<=nGW*d0)
       {
-        gel(K,j+d0*(i-1)) = tPicLift_worker(V0j12,(i-1)*nV,uv,AinvB12,CAinv12,T,pe);
+        if(++i>nGW)
+        {
+          i = 1;
+          gel(args,1) = ZqXnM_redprec(gel(V0,++j),h12);
+        }
+        gel(args,2) = utoi((i-1)*nV);
+        mt_queue_submit(&pt,j+d0*(i-1),args);
       }
+      else mt_queue_submit(&pt,k,NULL);
+      done = mt_queue_get(&pt,&workid,&pending);
+      if(done) gel(K,workid) = done;
     }
+    mt_queue_end(&pt);
     gel(K,nGW*d0+1) = mat2col0(rho);
     /* Find a random solution to the inhomogeneous system */
     KM = gerepileupto(avrho,ZqXnM_ker(K,T,pe,p,e)); /* Prec h12 */
     if(DEBUGLEVEL>=3||(lg(KM)==1)) printf("tpicliftors: dim ker lift: %ld\n",lg(KM)-1);
-    U012 = ZqXnM_redprec(U0,h12);
     Ulifts = cgetg(g+2,t_VEC);
     clifts = cgetg(g+2,t_MAT);
+    vFixedParams = cgetg(12,t_VEC);
+    randseed = cgetg(2,t_VEC);
     av2 = av3 = avma;
     while(1)
     {
@@ -2402,21 +2424,45 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
         av3 = avma;
       }
       /* Find g+1 lifts TODO in parallel */
-      c02 = ZqXnC_redprec(c0,h2);
+      gel(vFixedParams,1) = J2;
+      gel(vFixedParams,2) = l;
+      gel(vFixedParams,3) = U;
+      gel(vFixedParams,4) = ZqXnM_redprec(U0,h12);
+      gel(vFixedParams,5) = sW;
+      gel(vFixedParams,6) = KM;
+      gel(vFixedParams,7) = utoi(h1);
+      gel(vFixedParams,8) = utoi(h2);
+      gel(vFixedParams,9) = ZqXnC_redprec(c0,h2);
+      gel(vFixedParams,10) = utoi(P0);
+      gel(vFixedParams,11) = P1;
+      worker = snm_closure(is_entry("_tPicLiftTors_Chart_worker"),vFixedParams);
+      pending = 0;
       liftsOK = 1;
-      for(i=1;i<=g+1;i++)
+      mt_queue_start_lim(&pt,worker,g+1);
+      for(i=1;i<=g+1||pending;i++)
       {
-        printf("Lift...");
-        Uc = tPicLiftTors_Chart_worker(utoi(pari_rand()),J2,l,U,U012,sW,KM,h1,h2,c02,P0,P1);
-        if(Uc==gen_0)
+        if(i<=g+1)
         {
-          liftsOK = 0;
-          break;
+          gel(randseed,1) = utoi(pari_rand());
+          mt_queue_submit(&pt,i,randseed);
         }
-        gel(Ulifts,i) = gel(Uc,1);
-        gel(clifts,i) = gel(Uc,2);
-        printf("OK\n");
+        else mt_queue_submit(&pt,i,NULL);
+        done = mt_queue_get(&pt,&workid,&pending);
+        if(done)
+        {
+          if(done==gen_0)
+          {
+            if(DEBUGLEVEL>=3) printf("tpiclifttors: Lift %ld had a chart issue\n",workid);
+            liftsOK = 0;
+          }
+          else
+          {
+            gel(Ulifts,workid) = gel(done,1);
+            gel(clifts,workid) = gel(done,2);
+          }
+        }
       }
+      mt_queue_end(&pt);
       if(liftsOK==0)
       { /* This chart does not work. Take the next one, reset data, and restart */
         if(DEBUGLEVEL>=3) printf("tpiclifttors: Changing chart\n");
@@ -2494,7 +2540,7 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
     h2<<=1;
     if(mask&1) h2--;
     mask>>=1;
-    U = U2;
+    U = ZqXnM_setprec(U2,h2,va);
     if(c0)
       gerepileall(av1,3,&U,&c0,&P1);
     else
