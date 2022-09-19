@@ -934,7 +934,7 @@ tDivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN p, GEN pe, ulong excess)
       return gerepileupto(av,WAB);
     if(DEBUGLEVEL>=4) err_printf("divadd(%lu/%lu)",r,d);
     excess++;
-    avma = av;
+    set_avma(av);
   }
 }
 
@@ -975,7 +975,7 @@ tDivSub(GEN WA, GEN WB, GEN KV, ulong d, GEN T, GEN p, long e, GEN pe, ulong nIG
     r = lg(res)-1;
     if(r==d) return gerepileupto(av,res);
     if(DEBUGLEVEL>=4) err_printf("divsub(%lu/%lu)",r,d);
-    avma = av1;
+    set_avma(av1);
   }
 }
 
@@ -1014,10 +1014,7 @@ tDivSub_dimval(GEN WA, GEN WB, long dim, GEN KV, GEN T, GEN p, long e, GEN pe)
   L = ZqXnM_ker(K,T,pe,p,e);
   /* Is L even of the right dim mod p ? */
   if(lg(L)-1 != dim)
-  {
-    avma = av;
-    return gcopy(gen_0);
-  }
+    return gc_const(av,gen_0);
   /* Now L of size nZ * dim */
   L = ZqXnM_mul(K,L,T,pe);
   /* Now L of size nE * dim */
@@ -1405,8 +1402,7 @@ tPicChart(GEN J, GEN W, ulong P0, GEN P1) /* /!\ Not Galois-equivariant ! */
   if(lg(K)!=2)
   {
     pari_printf("Genericity 1 failed in PicChart\n");
-    avma = av;
-    return NULL;
+    return gc_NULL(av);
   }
   s = ZqXnM_ZqXnC_mul(W,gel(K,1),T,pe); /* Generator of L(2D0-D-C) */
 
@@ -1574,7 +1570,7 @@ GEN tCurveNewRandPt(GEN f, GEN df, GEN f0, GEN vars, GEN Z0, GEN bad, GEN T, GEN
   av1 = avma;
   for(;;)
   {
-    avma = av1;
+    set_avma(av1);
     x = random_FpX(dT,vT,p);
     //pari_printf("Trying x=%Ps\n",x);
     fx = gsubst(f0,vars[1],x);
@@ -2040,7 +2036,7 @@ tPicDeflate(GEN J, GEN W, ulong nIGS)
   av = avma;
   while(1)
   {
-    avma = av;
+    set_avma(av);
     for(i=1;i<=nIGS;i++) gel(IGS,i) = ZqXn_RandVec(W,T,p,pe);
     av1 = avma;
     IV = cgetg(nIGS*nV+1,t_MAT);
@@ -2057,7 +2053,7 @@ tPicDeflate(GEN J, GEN W, ulong nIGS)
     r = FqM_rank(ZqXnM_to_ZqM(IV),T,p);
     if(r==nV+nW+g-1)
     {
-      avma = av1;
+      set_avma(av1);
       return IGS;
     }
     printf("IGS[%lu,%lu]\n",r,nV+nW+g-1);
@@ -2256,10 +2252,7 @@ tPicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, GEN 
   /* Mul by l, get coordinates, and compare them to those of W0 */
   c = tPicChart(J,W,P0,P1);
   if(c==NULL)
-  {
-    avma = av;
-    return gen_0;
-  }
+   return gc_const(av,gen_0);
   c = gerepileupto(avU,c);
   for(i=1;i<=nc;i++) /* The coords are c0 mod t^h1 -> divide */
     gel(c,i) = ZqXn_dropdiv(ZqXn_sub(gel(c,i),gel(c0,i)),h1);
@@ -2399,7 +2392,7 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
     av2 = av3 = avma;
     while(1)
     {
-      avma = av3;
+      set_avma(av3);
       if(c0==NULL) /* Compute coords of 0 if not already done */
       {
         /* Find coords of 0 */
