@@ -6733,3 +6733,8 @@ GEN TrE2qexp(GEN vw, ulong N, GEN H, GEN M, ulong w, GEN zpows, ulong B, GEN T, 
 GEN M4qexp_worker(GEN pageV1, GEN V2gens, GEN U0, GEN T, GEN pe);
 GEN ModPicInit_gp(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec);
 GEN mfgalrep(GEN f, GEN l, GEN prange, ulong D, long UseTp, ulong nbE, ulong qprec);
+
+/* tpic.c */
+GEN ZqXnM_ker(GEN A, GEN T, GEN pe, GEN p, long e);
+GEN ZqXnM_eqn(GEN A, GEN T, GEN pe, GEN p, long e);
+GEN tFnsEvalAt(GEN Fns, GEN Z, GEN vars, GEN T, GEN pe, GEN p, long e, ulong h);

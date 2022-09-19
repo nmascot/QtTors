@@ -4,10 +4,22 @@ C-Name: ZqM_eqn
 Prototype: GGGGL
 Help:
 
+Function: _ZqXnM_eqn
+Section: programming/internals
+C-Name: ZqXnM_eqn
+Prototype: GGGGL
+Help:
+
 Function: _RRspace_eval
 Section: programming/internals
 C-Name: RRspaceEval
 Prototype: GGGGGGL
+Help:
+
+Function: _tFnsEvalAt
+Section: programming/internals
+C-Name: tFnsEvalAt
+Prototype: GGGGGGLU
 Help:
 
 Function: _OnePol

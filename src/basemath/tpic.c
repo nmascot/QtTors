@@ -278,7 +278,6 @@ ZqXn_is0mod(GEN x, GEN p)
 {
   pari_sp av = avma;
   GEN red;
-  long res;
   if(typ(x)==t_POL)
   {
     if(typ(gel(x,2))==t_POL)
@@ -1718,7 +1717,7 @@ tCurveAutFrobClosure(GEN P, GEN P0, GEN Auts, GEN vars, GEN FrobMat, GEN T, GEN 
       //printf("End of %lu-orbit\n",i);
     }
   }
-  printf("End of orbit, size %lu",nO);
+  //printf("End of orbit, size %lu",nO);
   res = mkvecn(4,OP,OP0,sFrob,sAuts);
   return gerepilecopy(av,res);
 }
@@ -1809,7 +1808,7 @@ tPicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long
   W0 = V1;
   if(DEBUGLEVEL>=2) printf("picinit: Computing equation matrices\n");
   KV = cgetg(4,t_VEC);
-  /*E = stoi(e);
+  E = stoi(e);
   worker = strtofunction("_ZqXnM_eqn");
   mt_queue_start_lim(&pt,worker,3);
   for(k=1;k<=3||pending;k++)
@@ -1818,23 +1817,23 @@ tPicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long
     done = mt_queue_get(&pt,&workid,&pending);
     if(done) gel(KV,workid) = done;
   }
-  mt_queue_end(&pt);*/
-  for(k=1;k<=3;k++)
-    gel(KV,k) = ZqXnM_eqn(gel(V,k),T,pe,p,e);
+  mt_queue_end(&pt);
   if(DEBUGLEVEL>=2) printf("picinit: Constructing evaluation maps\n");
+  H = utoi(h);
   L12 = gel(L,3);
   if(gequal0(L12)) U = gen_0;
   else
   {
-    /*params = cgetg(8,t_VEC);
-    gel(params,2) = vars;
-    gel(params,3) = Z;
+    params = cgetg(9,t_VEC);
+    gel(params,2) = Z;
+    gel(params,3) = vars;
     gel(params,4) = T;
     gel(params,5) = pe;
     gel(params,6) = p;
     gel(params,7) = E;
+    gel(params,8) = H;
     U = cgetg(4,t_VEC);
-    worker = strtofunction("_tRRspace_eval");
+    worker = strtofunction("_tFnsEvalAt");
     mt_queue_start_lim(&pt,worker,2);
     for(i=1;i<=2||pending;i++)
     {
@@ -1845,16 +1844,13 @@ tPicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long
       }
       else mt_queue_submit(&pt,0,NULL);
       done = mt_queue_get(&pt,&workid,&pending);
-      if(done) gel(U,workid) = done;
+      if(done) gel(U,workid) = mkvec(done);
     }
-    mt_queue_end(&pt);*/
-    U = cgetg(4,t_VEC);
-    for(k=1;k<=2;k++)
-      gel(U,k) = mkvec(tFnsEvalAt(gel(L12,k),Z,vars,T,pe,p,e,h));
+    mt_queue_end(&pt);
     gel(U,3) = gen_0;
   }
   if(Lp==NULL) Lp = gen_0;
-  J = mkvecn(lgtJ,f,stoi(g),stoi(d0),L,T,p,stoi(e),pe,FrobMat,Lp,V,KV,W0,U,Z,FrobCyc,AutData,utoi(h));
+  J = mkvecn(lgtJ,f,stoi(g),stoi(d0),L,T,p,E,pe,FrobMat,Lp,V,KV,W0,U,Z,FrobCyc,AutData,H);
   return gerepilecopy(av,J);
 }
 
