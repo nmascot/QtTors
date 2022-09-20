@@ -133,7 +133,7 @@ list_el_n(ulong el0, ulong n, GEN d1, long n_el)
 static ulong
 start_el_n(ulong n)
 {
-  ulong MAXHLONG = 1L<<(BITS_IN_LONG-1), el = (MAXHLONG/n)*n + 1;
+  ulong MAXHLONG = 1UL<<(BITS_IN_LONG-1), el = (MAXHLONG/n)*n + 1;
   if ((el&1)==0) el += n; /* if el is even, then n is odd */
   return el + (n << 1);
 }
