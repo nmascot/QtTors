@@ -721,31 +721,25 @@ mextraprec(GEN m_inv, GEN m, GEN gc)
 }
 
 /* c) transpose inverse + clean rationals.
-   prec = target prec for m^-1,
-   mprec = prec of m */
+ * prec = target prec for m^-1,
+ * mprec = prec of m */
 static void
 gcharmat_tinverse(GEN gc, GEN m, long prec)
 {
   GEN m_inv;
-  long k, n, r1, r2, ns, nc, ncm, nm, bitprec, mprec, targetmprec = 0;
-  bitprec = prec2nbits(prec);
+  long k, r1, r2, ns, nc, ncm, nm, mprec, bitprec = prec2nbits(prec);
 
   nf_get_sign(gchar_get_nf(gc), &r1, &r2);
-  n = r1+2*r2;
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
   ncm = gchar_get_nalg(gc);
-  nm = ns+nc+n; /* ns + nc + r1 + r2 + r2 */
-  mprec = gprecision(m);
+  nm = ns + nc + r1 + 2*r2;
+  if (lg(m)==1) { gchar_set_basis(gc,zeromat(0,nm)); return; }
 
-  if (lg(m)==1)
-  {
-    gchar_set_basis(gc,zeromat(0,nm));
-    return;
-  }
-
+  mprec = gprecision(m); /* possibly 0, if m is exact */
   while (1)
   {
+    long targetmprec = 0;
     GEN v0, mm;
     /* insert at column ns+nc+r1+r2, or last column if cm */
     v0 = vec_v0(nm, ns+nc+1, r1, r2);
@@ -759,6 +753,7 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
       m_inv = vecsplice(m_inv, ncm? nm: nm-r2); /* remove v0 */
       if (DEBUGLEVEL>1) err_printf("v0 removed: %Ps\n", m_inv);
       m_inv = shallowtrans(m_inv);
+      if (!mprec) break;
       /* enough precision? */
       /* |B - A^(-1)| << |B|.|Id-B*A| */
       if (gexpo(m_inv) + gexpo(gsub(RgM_mul(m_inv, m), gen_1)) + expu(lg(m))
@@ -771,7 +766,7 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
       else targetmprec = 0;
     }
     mprec = maxss(precdbl(mprec), targetmprec);
-    if (mprec == 2) mprec = 3;
+    if (mprec < 3) mprec = 3;
     m = gcharmatnewprec_shallow(gc, mprec); /* m0 * u0 to higher prec */
   }
   /* clean rationals */
@@ -779,7 +774,6 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
   { /* reduce mod exponent of the group, TODO reduce on each component */
     GEN zmcyc = locs_get_cyc(gchar_get_zm(gc));
     GEN e = ZV_lcm(zmcyc);
-    long k;
     for (k = 1; k <= nc; k++)
       shallow_clean_rat(gel(m_inv, ns+k), 1, nm - 1, /*zmcyc[k]*/e, prec);
   }
