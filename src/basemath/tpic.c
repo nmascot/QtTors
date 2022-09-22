@@ -2597,4 +2597,31 @@ tPicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
   return XPicTorsSpaceFrobEval(J,gens,cgens,l,matFrob,matAuts,"_tTorsSpaceFrob_worker","_tPicEval_worker");
 }
 
-
+GEN
+ZqXnV_mroots_to_pol(GEN Z,GEN T, GEN pe)
+{
+  pari_sp av = avma;
+  GEN a,C,F;
+  ulong n,k,j;
+  n = lg(Z);
+  if(n==1)
+    return scalarpol(gen_1,0);
+  C = cgetg(n,t_VEC);
+  gel(C,1) = gel(Z,1);
+  for(k=2;k<n;k++)
+  {
+    a = gel(Z,k);
+    gel(C,k) = ZqXn_add(a,gel(C,k-1));
+    for(j=k-1;j>1;j--)
+      gel(C,j) = ZqXn_add(gel(C,j-1),ZqXn_mul(a,gel(C,j),T,pe));
+    gel(C,1) = ZqXn_mul(gel(C,1),a,T,pe);
+  }
+  F = cgetg(n+2,t_POL);
+  F[1] = 0;
+  setsigne(F,1);
+  setvarn(F,0);
+  for(k=1;k<n;k++)
+    gel(F,k+1) = ZqXn_red(gel(C,k),T,pe);
+  gel(F,n+1) = gcopy(gen_1);
+  return gerepileupto(av,F);
+}
