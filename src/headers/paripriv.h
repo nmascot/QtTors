@@ -1029,6 +1029,7 @@ GEN VecExtend1_shallow(GEN V, GEN X);
 GEN FqM_MinorCompl(GEN M, GEN T, GEN p);
 GEN PicDeflate_U(GEN J, GEN W, ulong nIGS);
 GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B);
+GEN XPicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matAuts, const char* TorsSpaceWorker, const char* EvalWorker);
 
 /* plncrv.c */
 GEN ZetaFromPointCount(GEN N, ulong p, ulong g);

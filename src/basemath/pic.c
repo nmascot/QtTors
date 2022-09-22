@@ -3269,7 +3269,7 @@ XPicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
   // Prepare closure for parallel code
   vJ = cgetg(2,t_VEC);
   gel(vJ,1) = J;
-  worker = snm_closure(is_entry("_TorsSpaceFrob_worker"),vJ);
+  worker = snm_closure(is_entry(TorsSpaceWorker),vJ);
   // matFrob and matAuts, version Flm
   mfrob = M2Flm(matFrob,l,d,d);
   nAuts = lg(matAuts);
@@ -3416,7 +3416,7 @@ XPicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matA
   if(DEBUGLEVEL) printf("TorsSpaceFrob: Evaluating %lu points\n",nmodF);
   vW = cgetg(2,t_VEC);
   ZmodF = cgetg(nmodF+1,t_VEC);
-  worker = snm_closure(is_entry("_PicEval_worker"),vJ);
+  worker = snm_closure(is_entry(EvalWorker),vJ);
   mt_queue_start_lim(&pt,worker,nmodF);
   for(n=1;n<=nmodF||pending;n++)
   {

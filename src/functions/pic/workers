@@ -1,4 +1,4 @@
-Function: _mateqnpadic
+Function: _ZqM_eqn
 Section: programming/internals
 C-Name: ZqM_eqn
 Prototype: GGGGL
@@ -31,6 +31,12 @@ Help:
 Function: _PicEval_worker
 Section: programming/internals
 C-Name: PicEval_worker
+Prototype: GG
+Help:
+
+Function: _tPicEval_worker
+Section: programming/internals
+C-Name: tPicEval_worker
 Prototype: GG
 Help:
 
@@ -73,6 +79,12 @@ Help:
 Function: _TorsSpaceFrob_worker
 Section: programming/internals
 C-Name: TorsSpaceFrob_worker
+Prototype: GGGGG
+Help:
+
+Function: _tTorsSpaceFrob_worker
+Section: programming/internals
+C-Name: tTorsSpaceFrob_worker
 Prototype: GGGGG
 Help:
 
