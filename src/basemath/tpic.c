@@ -1330,6 +1330,34 @@ tPicFrob(GEN J, GEN W)
 }
 
 GEN
+tPicFrobPow(GEN J, GEN W, long n)
+{
+  pari_sp av = avma;
+  GEN W2,T,pe,M,cyc;
+  ulong a,m,nW,nZ,i,j;
+
+  T = JgetT(J);
+  a = degpol(T);
+  m = umodsu(n,a);
+  if(m==0) return gcopy(W);
+  if(m==1) return tPicFrob(J,W);
+  pe = Jgetpe(J);
+  M = FpM_powu(JgetFrobMat(J),m,pe);
+  cyc = perm_powu(JgetFrobCyc(J),m);
+  nW = lg(W);
+  nZ = lg(cyc);
+
+  W2 = cgetg(nW,t_MAT);
+  for(j=1;j<nW;j++)
+  {
+    gel(W2,j) = cgetg(nZ,t_COL);
+    for(i=1;i<nZ;i++)
+      gcoeff(W2,cyc[i],j) = ZqXn_relFrob(gcoeff(W,i,j),M,T,pe);
+  }
+  return gerepileupto(av,W2);
+}
+
+GEN
 tPicFrobPoly(GEN J, GEN W, GEN F)
 {
   pari_sp av = avma;
@@ -1360,7 +1388,6 @@ tPicIsTors_val(GEN J, GEN W, GEN F)
   GEN res;
   W = tPicFrobPoly(J,W,F);
   res = tPicIsZero_val(J,W);
-  pari_printf("IsTors_val: %Ps\n");
   return gerepileupto(av,res);
 }
 
@@ -2541,3 +2568,225 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
   }
   return gerepileupto(av,W);
 }
+
+/* GalRep */
+
+GEN
+tTorsSpaceFrob_worker(GEN W1, GEN X1, GEN W2, GEN X2, GEN J)
+{
+  pari_sp av = avma;
+  GEN W;
+  ulong x1,x2;
+  x1 = itou(X1);
+  if(W2==gen_0)
+  {
+    W = tPicNeg(J,W1,0);
+    W = tPicFrobPow(J,W,x1);
+    return gerepileupto(av,W);
+  }
+  x2 = itou(X2);
+  W1 = tPicFrobPow(J,W1,x1);
+  W2 = tPicFrobPow(J,W2,x2);
+  W = tPicChord(J,W1,W2,0);
+  return gerepileupto(av,W);
+}
+
+/*GEN
+PicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matAuts)
+{
+  pari_sp av = avma;
+  ulong d,ld,ndone,ngens,nmodF,newmodF,new,ntodo,i,j,k,m,n,ij,ik,xj,xk,x,nAuts,a;
+  GEN vJ,vW,VmodF,ImodF,ZmodF,ImodF2,done,mfrob,mauts,c,todo,W,Wj,Wk;
+  struct pari_mt pt;
+  GEN worker,res;
+  long pending;
+
+  d = lg(matFrob)-1; // Dim of rep
+  ld = upowuu(l,d);
+  VmodF = cgetg(ld+1,t_VEC); // list of W's mod Frob
+  ImodF = cgetg(ld+1,t_VECSMALL); // list of indices of these W's
+  done = cgetg(ld+1,t_VEC); // All space: each entry is either
+  // NULL: we don't have this pt yet
+  // gen_m1: we will get this pt by applying Auts and Frob
+  // Vecmall([n,m]): this pt is Frob^m * VmodF[n]
+  // Vecsmall([0,0]): this is the origin
+  for(n=1;n<ld;n++) // Initialise
+    gel(done,n) = NULL;
+  gel(done,ld) = mkvecsmall2(0,0);
+  ndone = 1; // Number of pts; we stop when this reaches ld
+  nmodF = 0; // Number of pts mod Frob
+  ngens = lg(gens)-1;
+  // Prepare closure for parallel code
+  vJ = cgetg(2,t_VEC);
+  gel(vJ,1) = J;
+  worker = snm_closure(is_entry("_tTorsSpaceFrob_worker"),vJ);
+  // matFrob and matAuts, version Flm
+  mfrob = M2Flm(matFrob,l,d,d);
+  nAuts = lg(matAuts);
+  mauts = cgetg(nAuts,t_VEC);
+  for(a=1;a<nAuts;a++) gel(mauts,a) = M2Flm(gel(matAuts,a),l,d,d);
+  // Now we are ready to begin
+  // We will always keep done closed under Frob
+
+  // Throw in generators and their Frob orbits
+  for(n=1;n<=ngens;n++)
+  {
+    nmodF++; // new Frob orbit
+    gel(VmodF,nmodF) = gel(gens,n); // store W in VmodF
+    c = gel(cgens,n); // get its coordinates
+    ImodF[nmodF] = i = c2i(c,l);
+    gel(done,i) = mkvecsmall2(nmodF,0); // store [nmodF,0] in done[i]
+    ndone++; // got new pt
+    for(x=1;;x++) // go through Frob orbit
+    {
+      i = ActOni(mfrob,i,l); // Move index by Frob
+      if(gel(done,i)) break; // end of orbit?
+      gel(done,i) = mkvecsmall2(nmodF,x); // Record [nmodF,x], meaning x-th translate of this Frob orbit, in done
+      ndone++; // got new pt
+    }
+  }
+  // Loop until everything is covered
+  todo = cgetg(ld,t_VEC); // list of operations to be executed in parallel; used later
+  while(ndone<ld)
+  {
+    if(DEBUGLEVEL) printf("TorsSpaceFrob: Main loop, touched %lu/%lu\n",ndone,ld);
+    // Use Auts as much as possible
+    do
+    {
+      newmodF = 0; // number of new Fob orbs we get at this iteration. If it's still 0 in the end, we are done with Auts.
+      for(i=1;i<=nmodF;i++) // Try to apply to all pts mod Frob...
+      { // TODO only new orbits need to be checked
+        j = ImodF[i];
+        for(a=1;a<nAuts;a++) // ... all auts
+        {
+          k = ActOni(gel(mauts,a),j,l);
+          W = gel(done,k);
+          if(W==NULL || W==gen_m1) // does this yield a new pt, and therefore a new Frob orbit?
+          {
+            W = gel(VmodF,i); // this new pt, before Aut
+            W = PicAut(J,W,a); // after Aut
+            nmodF++; // new Frob orbit
+            newmodF++; // new Frob orbit at this iteration
+            gel(VmodF,nmodF) = W; // record representative of Frob orbit
+            ImodF[nmodF] = k; // and its index
+            gel(done,k) = mkvecsmall2(nmodF,0); // store [nmodF,0] in done
+            ndone++; // new pt
+            for(x=1;;x++) // go through Frob orb
+            {
+              k = ActOni(mfrob,k,l); // Move index by Frob
+              W = gel(done,k);
+              if(W && W!=gen_m1) break; // end of orbit?
+              gel(done,k) = mkvecsmall2(nmodF,x); // Record [nmodF,x], meaning x-th translate of this Frob orbit, in done
+              ndone++; // new pt
+            }
+          }
+        }
+      }
+      //printf("Applying auts gave %lu new Frob orbits\n",newmodF);
+    } while(newmodF);
+    if(DEBUGLEVEL>=2 && nAuts>1) printf("TorsSpaceFrob: done with auts, now touched %lu/%lu\n",ndone,ld);
+    if(ndone==ld) break; // Are we done?
+    // TODO gerepile?
+    // Now use group law
+    // Prepare list of operations, we will run them in parallel later
+    ntodo = 0;
+    for(j=1;j<ld;j++)
+    {
+      for(k=j;k<=ld;k++)
+      {
+        if(gel(done,j)&&gel(done,k)&&gel(done,j)!=gen_m1&&gel(done,k)!=gen_m1) // Loop over pair of known pts
+        {
+          i = Chordi(j,k,l,d);
+          if(gel(done,i)==NULL) // Do we already know their chord?
+          {
+            // Record the computation that needs to be done
+            ij = gel(done,j)[1];
+            xj = gel(done,j)[2];
+            ik = gel(done,k)[1];
+            xk = gel(done,k)[2];
+            Wj = ij?gel(VmodF,ij):gen_0;
+            Wk = ik?gel(VmodF,ik):gen_0;
+            ntodo++;
+            gel(todo,ntodo) = mkvec2(mkvecn(4,Wj,utoi(xj),Wk,utoi(xk)),utoi(i));
+            // Mark that we are about to get this Frob orbit...
+            while(gel(done,i)==NULL)
+            {
+              gel(done,i) = gen_m1;
+              i = ActOni(mfrob,i,l);
+            }
+            // ...and all it translates by auts
+            do
+            {
+              new = 0; // number of new pts we get at this iteration. If it's still 0 in the end, we are done with Auts.
+              for(m=1;m<=ld;m++) // Try to apply to all pts...
+              {
+                if(gel(done,m)==NULL) continue; // ... that we already have or will have ...
+                for(a=1;a<nAuts;a++) // ... all auts
+                {
+                  n = ActOni(gel(mauts,a),m,l);
+                  while(gel(done,n)==NULL) // will this yield a new pt, and therefore a new Frob orbit?
+                  {
+                    gel(done,n) = gen_m1;
+                    new++;
+                    n = ActOni(mfrob,n,l);
+                  }
+                }
+              }
+            } while(new);
+          }
+        }
+      }
+    }
+    // Execute operations in J in parallel
+    if(DEBUGLEVEL>=2) printf("TorsSpaceFrob: computing %lu new points\n",ntodo);
+    mt_queue_start_lim(&pt,worker,ntodo);
+    for(n=1;n<=ntodo||pending;n++)
+    {
+      if(n<=ntodo) mt_queue_submit(&pt,itos(gmael(todo,n,2)),gmael(todo,n,1));
+      else mt_queue_submit(&pt,0,NULL);
+      res = mt_queue_get(&pt,(long*)&i,&pending);
+      if(res)
+      {
+        nmodF++;
+        // Record new Frob orbit
+        gel(VmodF,nmodF) = res;
+        ImodF[nmodF] = i;
+        // Mark the orbit as known
+        for(x=0;gel(done,i)==gen_m1;x++)
+        {
+          gel(done,i) = mkvecsmall2(nmodF,x);
+          ndone++;
+          i = ActOni(mfrob,i,l);
+        }
+      }
+    }
+    mt_queue_end(&pt);
+  }
+
+  if(DEBUGLEVEL) printf("TorsSpaceFrob: Evaluating %lu points\n",nmodF);
+  vW = cgetg(2,t_VEC);
+  ZmodF = cgetg(nmodF+1,t_VEC);
+  worker = snm_closure(is_entry("_tPicEval_worker"),vJ);
+  mt_queue_start_lim(&pt,worker,nmodF);
+  for(n=1;n<=nmodF||pending;n++)
+  {
+    if(n<=nmodF)
+    {
+      gel(vW,1) = gel(VmodF,n);
+      mt_queue_submit(&pt,n,vW);
+    }
+    else mt_queue_submit(&pt,0,NULL);
+    res = mt_queue_get(&pt,(long*)&i,&pending);
+    if(res)
+      gel(ZmodF,i) = res; // TODO gerepile
+  }
+  mt_queue_end(&pt);
+
+  ImodF2 = cgetg(nmodF+1,t_VECSMALL);
+  for(n=1;n<=nmodF;n++) ImodF2[n] = ImodF[n];
+  res = mkvec2(ZmodF,ImodF2);
+  return gerepilecopy(av,res); // TODO do not copy
+}*/
+
+
+

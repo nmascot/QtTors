@@ -3242,7 +3242,7 @@ M2Flm(GEN A, ulong l, ulong m, ulong n)
 }
 
 GEN
-PicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matAuts)
+XPicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matAuts, const char* TorsSpaceWorker, const char* EvalWorker)
 {
   pari_sp av = avma;
   ulong d,ld,ndone,ngens,nmodF,newmodF,new,ntodo,i,j,k,m,n,ij,ik,xj,xk,x,nAuts,a;
@@ -3436,6 +3436,12 @@ PicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matAu
   for(n=1;n<=nmodF;n++) ImodF2[n] = ImodF[n];
   res = mkvec2(ZmodF,ImodF2);
   return gerepilecopy(av,res); // TODO do not copy
+}
+
+GEN
+PicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matAuts)
+{
+  return XPicTorsSpaceFrobEval(J,gens,cgens,l,matFrob,matAuts,"_TorsSpaceFrob_worker","_PicEval_worker");
 }
 
 GEN
