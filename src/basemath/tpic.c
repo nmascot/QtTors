@@ -1574,6 +1574,9 @@ GEN tCrvLiftPty(GEN F, GEN dF, GEN F0, GEN vars, GEN x0, GEN y0, GEN T, GEN pe, 
     y = ZqXn_sub(y,dz);
     //pari_printf("%Ps\n",y);
   }
+  //printf("End liftPty\n");
+  //gel(P,2) = y;
+  //pari_printf("Verif: %Ps\n",tFnEvalAt(F,P,vars,T,pe,p,e,h));
   return gerepileupto(av,ZqXn_red(y,NULL,pe));
 }
 
@@ -1928,17 +1931,14 @@ ulong Jgeth(GEN J) { return itou(gel(J,18));}
 
 GEN tPicSetPrec(GEN J, ulong h)
 {
-  GEN J0,T;
+  GEN J0;
   ulong nZ,m,i,j,h0;
-  long vT;
   if(h==0)
     return tPicTruncate(J);
   h0 = Jgeth(J);
   if(h>h0)
     pari_err(e_IMPL,"Unable to perform this reduction for now");
-  T = JgetT(J);
-  vT = varn(T);
-  J0 = cgetg(lgtJ,t_VEC);
+  J0 = cgetg(lgtJ+1,t_VEC);
   for(i=1;i<=10;i++) /* From f to Lp */
     gel(J0,i) = gcopy(gel(J,i));
   gel(J0,11) = cgetg(6,t_VEC);
@@ -1948,7 +1948,7 @@ GEN tPicSetPrec(GEN J, ulong h)
   gel(J0,12) = cgetg(4,t_VEC);
   for(i=1;i<=3;i++) /* KV */
     gmael(J0,12,i) = ZqXnM_redprec(gmael(J,12,i),h);
-  gel(J0,13) = ZqXnM_setprec(gel(J,13),h,vT); /* W0 */
+  gel(J0,13) = ZqXnM_redprec(gel(J,13),h); /* W0 */
   if(!gequal0(gel(J,14))) /* EvalData */
   {
     gel(J0,14) = cgetg(4,t_VEC);
@@ -1966,8 +1966,8 @@ GEN tPicSetPrec(GEN J, ulong h)
   for(i=1;i<nZ;i++)
   {
     gmael(J0,15,i) = cgetg(3,t_VEC);
-    gmael3(J0,15,i,1) = ZqXn_redprec(gmael4(J,15,i,1,2),h);
-    gmael3(J0,15,i,2) = ZqXn_redprec(gmael4(J,15,i,2,2),h);
+    gmael3(J0,15,i,1) = ZqXn_redprec(gmael3(J,15,i,1),h);
+    gmael3(J0,15,i,2) = ZqXn_redprec(gmael3(J,15,i,2),h);
   }
   gel(J0,16) = gcopy(gel(J,16)); /* FrobCyc */
   gel(J0,17) = gcopy(gel(J,17)); /* AutData */
@@ -2354,7 +2354,7 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
     k = 1;
     for(i=1;i<=nGW;i++)
     {
-      wV = tDivMul(ZqXnM_ZqXnC_mul(Vh2,gel(U,i),T,pe),V,T,pe); // Prec h2
+      wV = tDivMul(ZqXnM_ZqXnC_mul(Vh2,gel(U,i),T,pe),Vh2,T,pe); // Prec h2
       for(j=1;j<=nV;j++)
       {
         gel(GWV,k) = gel(wV,j);
@@ -2625,3 +2625,226 @@ ZqXnV_mroots_to_pol(GEN Z,GEN T, GEN pe)
   gel(F,n+1) = gcopy(gen_1);
   return gerepileupto(av,F);
 }
+
+GEN
+tPolExpID(GEN Z, GEN T, GEN pe) /* bestappr of prod(x-z), z in Z */
+{
+  pari_sp av=avma;
+  GEN f;
+  f = ZqXnV_mroots_to_pol(Z,T,pe);
+  if(poldegree(f,varn(T))>0) pari_err(e_MISC,"Irrational coefficient: %Ps",f);
+  f = simplify_shallow(f);
+  f = gmodulo(f,pe);
+  f = bestappr(f,NULL);
+  return gerepileupto(av,f);
+}
+
+GEN
+tOnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T, GEN pe)
+{ /* Actually returns a vector of n1*n2 pols (all elem. symm. fns) */
+  pari_sp av = avma, av1;
+  GEN R,Z,Z1,F,Fi,z;
+  ulong d,ld,j,k,n,i1,i2,i;
+  long n1,n2,n12;
+  n = lg(N);
+  //pari_printf("N=%Ps\nD=%Ps\n",N,D);
+  RgM_dimensions(gel(N,1),&n2,&n1);
+  /* N, D vectors of length n-1 of n2*n1 matrices
+   * N[i]*D[i] = value at pt indexed by ImodF[i]
+   * Get the others by applying Frob */
+  d = lg(Jfrobmat)-1;
+  ld = upowuu(l,d);
+  n12 = n1*n2;
+  R = cgetg(n,t_VEC);
+  Z = cgetg(n12+1,t_VEC);
+  for(k=1;k<n;k++)
+  {
+    i=1;
+    for(i1=1;i1<=n1;i1++)
+    {
+      for(i2=1;i2<=n2;i2++)
+      {
+        gel(Z,i) = ZqXn_mul(gmael3(N,k,i1,i2),gmael3(D,k,i1,i2),T,pe);
+        i++;
+      }
+    }
+    gel(R,k) = ZqXnV_mroots_to_pol(Z,T,pe);
+  }
+  R = gerepileupto(av,R);
+  F = cgetg(n12+1,t_VEC);
+  Z = cgetg(ld,t_VEC);
+  for(i=0;i<n12;i++)
+  {
+    av1 = avma;
+    for(j=1;j<ld;j++) gel(Z,j) = NULL; /* Mark roots as unknown */
+    for(k=1;k<n;k++)
+    {
+      z = polcoef(gel(R,k),i,0);
+      j = ImodF[k];
+      for(;;)
+      {
+        gel(Z,j) = z;
+        j = ActOni(Jfrobmat,j,l);
+        if(gel(Z,j)) break;
+        z = ZqXn_relFrob(z,QqFrobMat,T,pe);
+      }
+    }
+    /* Multiple roots? */
+    Z1 = gen_indexsort_uniq(Z,(void*)&cmp_universal,&cmp_nodata);
+    if(lg(Z1)<lg(Z))
+    {
+      set_avma(av1);
+      Fi = gen_0;
+    }
+    else
+    {
+      Fi = tPolExpID(Z,T,pe);
+      if(typ(Fi)!=t_VEC)
+        Fi = gerepilecopy(av1,mkvec2(Fi,Z));
+      else
+      { /* Bestappr failed */
+        set_avma(av1);
+        Fi = gen_m1;
+      }
+    }
+    gel(F,i+1) = Fi;
+  }
+  return gerepileupto(av,F);
+}
+
+GEN
+tAllPols(GEN J, GEN Z, ulong l, GEN JFrobMat)
+{
+  pari_sp av = avma, avj;
+  GEN QqFrobMat,T,pe,p;
+  GEN F,ImodF,Jfrobmat,Ft,F1,f,pols,args,res;
+  ulong d,nF,lF,npols,n,i,j,j0,i1,i2,m,k,nmult,nfail;
+  long e;
+  int All0;
+  long n1,n2,n12;
+  struct pari_mt pt;
+  GEN worker,done;
+  long pending,workid;
+
+  JgetTpe(J,&T,&pe,&p,&e);
+  QqFrobMat = JgetFrobMat(J);
+  F = gel(Z,1);
+  ImodF = gel(Z,2);
+  d = lg(JFrobMat)-1;
+  Jfrobmat = M2Flm(JFrobMat,l,d,d); /* JFrobMat, version Flm */
+  nF = lg(F); /* Number of vectors */
+  RgM_dimensions(gel(F,1),&n2,&n1);
+  n12 = n1*n2;
+  lF = lg(gmael3(F,1,1,1))-1; /* Size of each vector */
+  /* F = list of nF-1 matrices of size n2*n1 of vectors of size lF */
+  Ft = cgetg(lF,t_VEC);
+  /* Ft[j,i,i1,i2] = F[i,i1,i2,j], keeping only the j such that F[.,.,.,j] not identically 0 */
+  for(j=j0=1;j<lF;j++)
+  {
+    All0 = 1;
+    avj = avma;
+    gel(Ft,j0) = cgetg(nF,t_VEC);
+    for(i=1;i<nF;i++)
+    {
+      gmael(Ft,j0,i) = cgetg(n1+1,t_MAT);
+      for(i1=1;i1<=n1;i1++)
+      {
+        gmael3(Ft,j0,i,i1) = cgetg(n2+1,t_COL);
+        for(i2=1;i2<=n2;i2++)
+        {
+          f = gmael4(Ft,j0,i,i1,i2) = gmael4(F,i,i1,i2,j);
+          if(gequal0(f)==0) All0 = 0;
+        }
+      }
+    }
+    if(All0) set_avma(avj); /* Drop this j */
+    else j0++;
+  }
+  if(DEBUGLEVEL>=3) printf("AllPols: Reducing lF from %lu to %lu\n",lF-1,j0-1);
+  lF = j0;
+  F1 = cgetg(lF,t_VEC);
+  npols = 0;
+  for(i=1;i<lF;i++) /* Find the i such that the ith coord of all the vectors in all the matrices are invertible, and store there inverses */
+  {
+    npols++;
+    gel(F1,i) = cgetg(nF,t_VEC);
+    for(j=1;j<nF;j++)
+    {
+      gmael(F1,i,j) = cgetg(n1+1,t_MAT);
+      for(i1=1;i1<=n1;i1++)
+      {
+        gmael3(F1,i,j,i1) = cgetg(n2+1,t_COL);
+        for(i2=1;i2<=n2;i2++)
+        {
+          f = gmael4(Ft,i,j,i1,i2);
+          if(ZqXn_is0mod(f,p))
+          {
+            gel(F1,i) = NULL;
+            npols--;
+            i2=n2+1;i1=n1+1;j=nF;
+          }
+          else
+            gmael4(F1,i,j,i1,i2) = ZqXn_inv(f,T,pe,p,e); /* TODO do it later in case we give up this i */
+        }
+      }
+    }
+  }
+  pending = 0;
+  nmult = nfail = 0;
+  worker = strtofunction("_tOnePol");
+  args = cgetg(9,t_VEC);
+  gel(args,3) = ImodF;
+  gel(args,4) = Jfrobmat;
+  gel(args,5) = utoi(l);
+  gel(args,6) = QqFrobMat;
+  gel(args,7) = T;
+  gel(args,8) = pe;
+  npols *= (lF-2)*n12;
+  pols = cgetg(npols+1,t_VEC);
+  mt_queue_start_lim(&pt,worker,npols);
+  done = NULL;
+  for(i=j=m=n=1;i<lF||pending;n++,j++)
+  {
+    if(j==lg(F1))
+    {
+      j=1;
+      i++;
+    }
+    if(gel(F1,j)==NULL || i==j) continue; /* Skip if denom=0 or if denom=num */
+    if(i<lF)
+    {
+      gel(args,1) = gel(Ft,i);
+      gel(args,2) = gel(F1,j);
+      mt_queue_submit(&pt,n,args);
+    }
+    else mt_queue_submit(&pt,0,NULL);
+    done = mt_queue_get(&pt,&workid,&pending);
+    if(done)
+    {
+      for(k=1;k<=n12;k++)
+      {
+        res = gel(done,k);
+        if(gequal(res,gen_m1))
+        { /* Bestappr failed */
+          nfail++;
+         continue;
+        }
+        if(gequal0(res))
+        { /* Repeated roots */
+          nmult++;
+          continue;
+        }
+        gel(pols,m++) = res;
+      }
+    }
+  }
+  mt_queue_end(&pt);
+  if(DEBUGLEVEL)
+    printf("Out of %lu polynomials, %lu had repeated roots, %lu could not be identified, and %lu were identified.\n",npols,nmult,nfail,m-1);
+  if(nmult==npols)
+    pari_err(e_MISC,"No squarefree polynomial, try again with another evaluation map");
+  setlg(pols,m);
+  return gerepilecopy(av,pols);
+}
+
+

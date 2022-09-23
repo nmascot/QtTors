@@ -28,6 +28,12 @@ C-Name: OnePol
 Prototype: GGGGUGGG
 Help:
 
+Function: _tOnePol
+Section: programming/internals
+C-Name: tOnePol
+Prototype: GGGGUGGG
+Help:
+
 Function: _PicEval_worker
 Section: programming/internals
 C-Name: PicEval_worker

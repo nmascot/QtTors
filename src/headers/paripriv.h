@@ -1030,6 +1030,8 @@ GEN FqM_MinorCompl(GEN M, GEN T, GEN p);
 GEN PicDeflate_U(GEN J, GEN W, ulong nIGS);
 GEN PicTorsGalRep_from_basis(GEN J, GEN J1, GEN l, GEN B);
 GEN XPicTorsSpaceFrobEval(GEN J, GEN gens, GEN cgens, ulong l, GEN matFrob, GEN matAuts, const char* TorsSpaceWorker, const char* EvalWorker);
+GEN M2Flm(GEN A, ulong l, ulong m, ulong n);
+ulong ActOni(GEN m, ulong i, ulong l);
 
 /* plncrv.c */
 GEN ZetaFromPointCount(GEN N, ulong p, ulong g);

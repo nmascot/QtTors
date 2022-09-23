@@ -6742,3 +6742,4 @@ GEN tPicLift_worker(GEN V0j, ulong shift, GEN uv, GEN AinvB, GEN CAinv, GEN T, G
 GEN tPicLiftTors_Chart_worker(GEN randseed, GEN J, GEN l, GEN U, GEN U0, GEN I, GEN KM, ulong h1, ulong h2, GEN c0, ulong P0, GEN P1);
 GEN tPicEval_worker(GEN W, GEN J);
 GEN tTorsSpaceFrob_worker(GEN W1, GEN X1, GEN W2, GEN X2, GEN J);
+GEN tOnePol(GEN N, GEN D, GEN ImodF, GEN Jfrobmat, ulong l, GEN QqFrobMat, GEN T, GEN pe);
