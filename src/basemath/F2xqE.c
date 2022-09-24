@@ -144,6 +144,7 @@ static GEN
 F2xqE_add_slope(GEN P, GEN Q, GEN a, GEN T, GEN *slope)
 {
   GEN Px, Py, Qx, Qy, R;
+  *slope = NULL; /* -Wall */
   if (ell_is_inf(P)) return Q;
   if (ell_is_inf(Q)) return P;
   Px = gel(P,1); Py = gel(P,2);
