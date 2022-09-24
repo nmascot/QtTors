@@ -113,8 +113,9 @@ output a database to STREAM in canonical 822 format.
 
 sub write
 {
-        my @order=("Function","Class","Section","C-Name","Prototype","Help",
-                   "Iterator","Wrapper","Description","Doc");
+        my @order=("Function","Class","Section","C-Name","Prototype",
+                   "Obsolete","Help", "Iterator","Wrapper","Description",
+                   "Doc","Variant");
         my %knowfields=map {$_ => 1}  @order;
 	my %data=%{shift()};
         my $STREAM=shift;
@@ -130,7 +131,8 @@ sub write
                 }
 	        foreach my $field (sort keys %{$data{$func}})
                 {
-                        next if ($knowfields{$field});
+			next if ($knowfields{$field});
+			warn("Unknown field $field in $func");
 		        my $val=$data{$func}->{$field};
                         $val =~ s/\n/\n /g;
 		        print $STREAM $field.": $val\n";
