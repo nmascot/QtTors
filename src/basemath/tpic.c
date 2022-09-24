@@ -1386,7 +1386,10 @@ tPicIsTors_val(GEN J, GEN W, GEN F)
 {
   pari_sp av = avma;
   GEN res;
-  W = tPicFrobPoly(J,W,F);
+  if(type(F)==t_INT)
+    W = tPicFrobMul(J,W,F,0);
+  else
+    W = tPicFrobPoly(J,W,F);
   res = tPicIsZero_val(J,W);
   return gerepileupto(av,res);
 }
@@ -2558,11 +2561,9 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
       break;
     }
     h1 = h2;
-    printf("End loop, h2 = %lu, mask=%lu\n",h2,mask);
     h2<<=1;
     if(mask&1) h2--;
     mask>>=1;
-    printf("now h2=%lu, mask=%lu\n",h2,mask);
     U = ZqXnM_setprec(U2,h2,va);
     if(c0)
       gerepileall(av1,3,&U,&c0,&P1);

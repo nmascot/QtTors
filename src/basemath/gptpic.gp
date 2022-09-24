@@ -10,6 +10,7 @@ p=17;e=2;pe=p^e;h=13;a=3;
 T=liftall(ffinit(p,a,'a));
 RandZqXn()=Pol(vector(h,i,random(pe*variable(T)^(poldegree(T)-1))),t);
 A = matrix(3,2,i,j,RandZqXn());
+install("PlaneZeta","GU");
 install("ZqXn_0","ULL");
 install("ZqXn_1","ULL");
 install("ZqXn_from_Z","GULL");
@@ -73,15 +74,6 @@ J0 = tPicTruncate(J);*/
 /*Wq = picrandtors(J0,l);
 W = tPicLiftTors(J,Wq,l,-1);*/
 
-/*J00 = picsetprec(J0,1);
-[B,MFrob,MAuts] = PicTorsBasis(J00,l,Chi);
-[G,C] = PicTors_FrobGen(J00,l,B,MFrob);
-WT00 = G[1];
-WT0 = piclifttors(J0,WT00,l,1,1);
-WT = tPicLiftTors(J,WT0,l,-1);
-Z = tPicTorsSpaceFrobEval(J,[WT],C,l,MFrob,MAuts);
-X = tAllPols(J,Z,l,MFrob);*/
-
 /*L = [1,x,x^2,x^3,y];
 LL = [1,x,x^2,x^3,x^4,x^5,x^6,y,x*y,x^2*y,x^3*y];
 f = x^6-x^4+(t-1)*(x+1)*x;
@@ -98,5 +90,18 @@ f=x^3*y+y^3*z+z^3*x*(1+t);
 P1=[1,0,0];
 P2=[0,1,0];
 P=[[P1],[P2]];
-p=5;
-L=SmoothRRdata(f,p,P,t);
+l=2;Chi=0;p=5;e=128;pe=p^e;a=6;h=40;
+[f,Auts,g,d0,L] = SmoothRRdata(f,p,P,t);
+Lp = PlaneZeta(subst(f,t,0),p);
+J = tPicInit(f,Auts,g,d0,L,y,p,a,e,h,Lp);
+
+J0 = tPicTruncate(J);
+J00 = picsetprec(J0,1);
+[B,MFrob,MAuts] = PicTorsBasis(J00,l,Chi);
+[G,C] = PicTors_FrobGen(J00,l,B,MFrob);
+WT00 = G[1];
+WT0 = piclifttors(J0,WT00,l,1,1);
+WT = tPicLiftTors(J,WT0,l,-1);
+Z = tPicTorsSpaceFrobEval(J,[WT],C,l,MFrob,MAuts);
+X = tAllPols(J,Z,l,MFrob);
+
