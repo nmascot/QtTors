@@ -6818,7 +6818,7 @@ mfinit_Nkchi(long N, long k, GEN CHI, long space, long flraw)
   GEN M = NULL, mf = NULL, mf1 = mkvec4(utoi(N), stoi(k), CHI, utoi(space));
   long sb = mfsturmNk(N, k);
   if (k < 0 || badchar(N, k, CHI)) return mfEMPTY(mf1);
-  if (k == 0) /*nothing*/;
+  if (k == 0 || space == mf_EISEN) /*nothing*/;
   else if (k == 1)
   {
     switch (space)
@@ -6827,7 +6827,6 @@ mfinit_Nkchi(long N, long k, GEN CHI, long space, long flraw)
       case mf_FULL:
       case mf_CUSP: mf = mf1init(N, CHI, NULL, get_vDIH(N,NULL), space, flraw);
                     break;
-      case mf_EISEN:break;
       case mf_OLD: pari_err_IMPL("mfinit in weight 1 for old space");
       default: pari_err_FLAG("mfinit");
     }
@@ -6839,8 +6838,6 @@ mfinit_Nkchi(long N, long k, GEN CHI, long space, long flraw)
     cachenew_t cache;
     switch(space)
     {
-      case mf_EISEN:
-        break;
       case mf_NEW:
         mf = mfnewinit(N, k, CHI, &cache, 1);
         if (mf && !flraw) { M = MF_get_M(mf); z = MF_get_Mindex(mf); }
@@ -6851,8 +6848,7 @@ mfinit_Nkchi(long N, long k, GEN CHI, long space, long flraw)
         mf = mfinitcusp(N, k, CHI, &cache, space);
         if (mf && !flraw)
         {
-          GEN S = MF_get_S(mf);
-          M = bhnmat_extend(M, sb+1, 1, S, &cache);
+          M = bhnmat_extend(M, sb+1, 1, MF_get_S(mf), &cache);
           if (space != mf_FULL) gel(mf,5) = mfcleanCHI(M, CHI, abundant(N));
         }
         dbg_cachenew(&cache);
