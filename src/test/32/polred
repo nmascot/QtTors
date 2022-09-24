@@ -86,7 +86,8 @@ x^4 + Mod(-1/24*z^3 - 1/8*z^2 - 59/24*z - 27/8, z^4 + 50*z^2 + 45)*x^3 + Mod
 y^2 + Mod(t^3, t^4 + t^3 + t^2 + t + 1)*y + Mod(8*t^2 - 46*t + 8, t^4 + t^3 
 + t^2 + t + 1)
 [x^6 - 2*x^3 + 2, Mod(-1/2*x^4 + x, x^6 - 2*x^3 + 2)]
+[y^4 - 2*y^2 - 2*y + 1, Mod(-1/2*y^3 + 1/2*y + 1, y^4 - 2*y^2 - 2*y + 1)]
   ***   at top-level: polredbest(x^6+30*x^5+133*x^4-2340*x^3-12284*x
   ***                 ^----------------------------------------------
   *** polredbest: not an irreducible polynomial in set_LLL_basis: x^6 + 30*x^5 + 133*x^4 - 2340*x^3 - 12284*x^2 + 29519*x - 3856.
-Total time spent: 4994
+Total time spent: 4437

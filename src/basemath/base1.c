@@ -2610,17 +2610,17 @@ polredbest_aux(nfmaxord_t *S, GEN *pro, GEN *px, GEN *pdx, GEN *pb)
   *px = x;
 }
 static GEN
-polredbest_i(GEN T0, long flag)
+polredbest_i(GEN T, long flag)
 {
-  GEN T = T0, a;
   nfmaxord_t S;
+  GEN a;
   nfinit_basic_partial(&S, T);
   polredbest_aux(&S, NULL, &T, NULL, flag? &a: NULL);
   if (flag == 2)
     T = mkvec2(T, a);
   else if (flag == 1)
   {
-    GEN b = (T0 == T)? pol_x(varn(T)): QXQ_reverse(a, T0);
+    GEN b = (S.T0 == T)? pol_x(varn(T)): QXQ_reverse(a, S.T0);
     /* charpoly(Mod(a,T0)) = T; charpoly(Mod(b,T)) = S.x */
     if (degpol(T) == 1) b = grem(b,T);
     T = mkvec2(T, mkpolmod(b,T));
