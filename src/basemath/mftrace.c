@@ -6845,14 +6845,13 @@ mfinit_Nkchi(long N, long k, GEN CHI, long space, long flraw)
       case mf_OLD:
       case mf_CUSP:
       case mf_FULL:
-        mf = mfinitcusp(N, k, CHI, &cache, space);
-        if (mf && !flraw)
+        if (!(mf = mfinitcusp(N, k, CHI, &cache, space))) break;
+        if (!flraw)
         {
           M = bhnmat_extend(M, sb+1, 1, MF_get_S(mf), &cache);
           if (space != mf_FULL) gel(mf,5) = mfcleanCHI(M, CHI, abundant(N));
         }
-        dbg_cachenew(&cache);
-        break;
+        dbg_cachenew(&cache); break;
       default: pari_err_FLAG("mfinit");
     }
     if (z) gel(mf,5) = mfclean2(M, z, P, ord);
