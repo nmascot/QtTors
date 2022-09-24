@@ -1965,12 +1965,14 @@ ZX_cmp(GEN x, GEN y)
 static int
 ZX_is_better(GEN y, GEN x, GEN *dx)
 {
-  GEN d = ZX_disc(y);
+  pari_sp av;
   int cmp;
+  GEN d;
   if (!*dx) *dx = ZX_disc(x);
+  av = avma; d = ZX_disc(y);
   cmp = abscmpii(d, *dx);
   if (cmp < 0) { *dx = d; return 1; }
-  return cmp? 0: (ZX_cmp(y, x) < 0);
+  return gc_bool(av, cmp? 0: (ZX_cmp(y, x) < 0));
 }
 
 static void polredbest_aux(nfmaxord_t *S, GEN *pro, GEN *px, GEN *pdx, GEN *pa);
@@ -2478,9 +2480,7 @@ filter(GEN y, GEN b, long n)
     GEN yi = gel(y,i), ai = gel(b,i);
     if (degpol(yi) == n)
     {
-      pari_sp av = avma;
-      if (!dx) dx = ZX_disc(yi);
-      else if (!ZX_is_better(yi,x,&dx)) { set_avma(av); continue; }
+      if (!dx) dx = ZX_disc(yi); else if (!ZX_is_better(yi,x,&dx)) continue;
       x = yi; a = ai; continue;
     }
     gel(y,k) = yi;
@@ -2576,7 +2576,7 @@ Polred(GEN x, long flag, GEN fa)
 }
 
 /* finds "best" polynomial in polred_aux list, defaulting to S->T if none of
- * them is primitive. *px is the ZX, characteristic polynomial of Mod(*pb,S->T),
+ * them is primitive. *px a ZX, characteristic polynomial of Mod(*pb,S->T),
  * *pdx its discriminant if pdx != NULL. Set *pro = polroots(S->T) */
 static void
 polredbest_aux(nfmaxord_t *S, GEN *pro, GEN *px, GEN *pdx, GEN *pb)
@@ -2593,8 +2593,7 @@ polredbest_aux(nfmaxord_t *S, GEN *pro, GEN *px, GEN *pdx, GEN *pb)
     for (i=1; i<l; i++)
     {
       GEN yi = gel(y,i);
-      pari_sp av = avma;
-      if (ZX_is_better(yi,x,&dx)) { x = yi; b = gel(a,i); } else set_avma(av);
+      if (ZX_is_better(yi,x,&dx)) { x = yi; b = gel(a,i); }
     }
     *pb = b;
   }
@@ -2604,8 +2603,7 @@ polredbest_aux(nfmaxord_t *S, GEN *pro, GEN *px, GEN *pdx, GEN *pb)
     for (i=1; i<l; i++)
     {
       GEN yi = gel(y,i);
-      pari_sp av = avma;
-      if (ZX_is_better(yi,x,&dx)) x = yi; else set_avma(av);
+      if (ZX_is_better(yi,x,&dx)) x = yi;
     }
   }
   if (pdx) { if (!dx) dx = ZX_disc(x); *pdx = dx; }
