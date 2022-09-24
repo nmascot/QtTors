@@ -6817,7 +6817,6 @@ mfinit_Nkchi(long N, long k, GEN CHI, long space, long flraw)
 {
   GEN M = NULL, mf = NULL, mf1 = mkvec4(utoi(N), stoi(k), CHI, utoi(space));
   long sb = mfsturmNk(N, k);
-  cachenew_t cache;
   if (k < 0 || badchar(N, k, CHI)) return mfEMPTY(mf1);
   if (k == 0) /*nothing*/;
   else if (k == 1)
@@ -6837,6 +6836,7 @@ mfinit_Nkchi(long N, long k, GEN CHI, long space, long flraw)
   {
     long ord = mfcharorder(CHI);
     GEN z = NULL, P = (ord <= 2)? NULL: mfcharpol(CHI);
+    cachenew_t cache;
     switch(space)
     {
       case mf_EISEN:
