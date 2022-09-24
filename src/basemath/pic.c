@@ -4206,16 +4206,27 @@ PtIsOnHyperellCurve(GEN F, GEN P)
 }
 
 long
-PtIsOnPlaneCurve(GEN F, GEN P)
+PtIsOnPlaneCurve(GEN F, GEN P, long* varskip)
 {
   pari_sp av = avma;
   GEN vars, val;
-  long res,nvars;
+  long res,nvars,i;
 
   vars = variables_vecsmall(F);
   nvars = lg(vars);
+  if(varskip)
+  {
+    for(i=1;i<nvars;i++)
+    {
+      if(vars[i]==*varskip)
+      {
+        nvars = i;
+        break;
+      }
+    }
+  }
   if(lg(P) > nvars)
-    F = PolHomogenise(F,gel(P,nvars),-1);
+    F = PolHomogenise(F,gel(P,nvars),-1,varskip);
   val = gsubst(F,vars[1],gel(P,1));
   val = gsubst(val,vars[2],gel(P,2));
   if(nvars==4)
@@ -4515,39 +4526,54 @@ SmoothRR(ulong n, ulong d, GEN x, GEN y)
 }
 
 int
-SmoothIsGeneric(GEN f, ulong d, GEN p, long x, long y, GEN P)
+SmoothIsGeneric(GEN f, ulong d, GEN p, long x, long y, GEN P, long* varskip)
 { /* Coeff of x^d and y^d must be nonzero, and none of the pts in P at infty */
   pari_sp av = avma;
   ulong i,j,n;
-  if(gequal0(modii(polcoef_i(f,d,x),p)))
+  if(varskip)
+    f = gsubst(f,*varskip,gen_0);
+  if(gequal0(gmodulo(polcoef_i(f,d,x),p)))
     return gc_bool(av,0);
   if(gequal0(modii(polcoef_i(f,d,y),p)))
     return gc_bool(av,0);
-  set_avma(av);
-  if(P==NULL) return 1;
+  if(P==NULL) return gc_bool(av,1);
+  if(varskip)
+    P = gsubst(P,*varskip,gen_0);
   for(i=1;i<=2;i++)
   {
     n = lg(gel(P,i));
     for(j=1;j<n;j++)
     {
       if(gequal0(modii(gmael3(P,i,j,3),p)))
-        return 0;
+        return gc_bool(av,0);
     }
   }
-  return 1;
+  return gc_bool(av,1);
 }
 
 GEN
-SmoothGeneric(GEN f0, ulong d, GEN pr, GEN P0)
+SmoothGeneric(GEN f0, ulong d, GEN pr, GEN P0, long* varskip)
 {
   pari_sp av = avma;
   GEN f,A,Vars,vars,xy1,uvw,u,v,w,P,p,B,B2,C,ci,cij;
-  ulong i,j,n,b,b2;
+  ulong nvars,i,j,n,b,b2;
 
   P = gen_0;
   Vars = variables_vec(f0);
   vars = variables_vecsmall(f0);
-  if(lg(Vars)==4)
+  nvars = lg(Vars);
+  if(varskip)
+  {
+    for(i=1;i<nvars;i++)
+    {
+      if(vars[i]==*varskip)
+      {
+        nvars = i;
+        break;
+      }
+    }
+  }
+  if(nvars==4)
     f0 = gsubst(f0,vars[3],gen_1); /* Dehomogenise */
   if(P0)
   { /* Switch to proj coords */
@@ -4585,7 +4611,7 @@ SmoothGeneric(GEN f0, ulong d, GEN pr, GEN P0)
       b2 = 0;
       b++;
     }
-    if(SmoothIsGeneric(f,d,pr,vars[1],vars[2],P0?P:NULL)) break;
+    if(SmoothIsGeneric(f,d,pr,vars[1],vars[2],P0?P:NULL,varskip)) break;
     /* get random change of vars */
     B = utoi(b);
     B2 = utoi(2*b+1);
@@ -4643,14 +4669,21 @@ SmoothGeneric(GEN f0, ulong d, GEN pr, GEN P0)
 }
 
 GEN
-SmoothRRdata(GEN f, GEN p, GEN P)
+SmoothRRdata(GEN f, GEN p, GEN P, GEN VarSkip)
 {
   pari_sp av = avma;
   ulong d,i,j,n,g,d0,m;
   long lx,ly;
+  long varskip=0;
+  long* pvarskip=NULL;
   GEN res,vars,x,y,L,M,MP;
 
-  d = TotalDegree(f);
+  if(!gequal0(VarSkip))
+  {
+    varskip = varn(VarSkip);
+    pvarskip = &varskip;
+  }
+  d = TotalDegree(f,pvarskip);
   if(d<=2)
     pari_err(e_MISC,"This curve has genus zero");
   if(P)
@@ -4670,12 +4703,12 @@ SmoothRRdata(GEN f, GEN p, GEN P)
       }
       for(j=1;j<n;j++)
       {
-        if(PtIsOnPlaneCurve(f,gmael(P,i,j))==0)
+        if(PtIsOnPlaneCurve(f,gmael(P,i,j),pvarskip)==0)
           pari_err(e_MISC,"The point %Ps is not on this curve",gmael(P,i,j));
       }
     }
   }
-  res = SmoothGeneric(f,d,p,P);
+  res = SmoothGeneric(f,d,p,P,pvarskip);
   f = gel(res,1);
   vars = variables_vec(f);
   x = gel(vars,1);
@@ -4713,7 +4746,7 @@ SmoothPicInit(GEN f, GEN p, GEN AT, long e, GEN P)
 {
   pari_sp av = avma;
   GEN J,Lp,RRdata;
-  RRdata = SmoothRRdata(f,p,P);
+  RRdata = SmoothRRdata(f,p,P,gen_0);
   Lp = PlaneZeta(gel(RRdata,1),itou(p));
   J = PicInit(gel(RRdata,1),gel(RRdata,2),itou(gel(RRdata,3)),itou(gel(RRdata,4)),gel(RRdata,5),gen_1,p,AT,e,Lp);
   return gerepileupto(av,J);
@@ -5731,7 +5764,7 @@ SmoothGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
   pari_sp av = avma, av1;
   GEN RRdata, Lp, J, R;
   ulong a;
-  RRdata = SmoothRRdata(f,p,P);
+  RRdata = SmoothRRdata(f,p,P,gen_0);
   Lp = PlaneZeta(gel(RRdata,1),itou(p));
 	if(chi == NULL || gequal0(chi)) chi = Lp;
   a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));

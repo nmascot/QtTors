@@ -2,32 +2,37 @@
 #include "paripriv.h"
 
 long
-TotalDegree(GEN F)
+TotalDegree(GEN F, long* varskip)
 {
   GEN Fi;
   long D,d,di,i;
   if(gequal0(F)) return -1;
   if(typ(F)!=t_POL) return 0;
+  if(varskip)
+  {
+    if(varn(F)==*varskip)
+      return 0;
+  }
   d = degree(F);
   D = -1;
   for(i=0;i<=d;i++)
   {
     Fi = gel(F,i+2);
     if(gequal0(Fi)) continue;
-    di = i+TotalDegree(Fi);
+    di = i+TotalDegree(Fi,varskip);
     if(di>D) D = di;
   }
   return D;
 }
 
 GEN
-PolHomogenise(GEN f, GEN z, long D)
+PolHomogenise(GEN f, GEN z, long D, long* varskip)
 {
   pari_sp av = avma;
   GEN F;
   long d,i;
   if(gequal0(f)) return gcopy(gen_0);
-  if(typ(f)!=t_POL)
+  if(typ(f)!=t_POL || (varskip && (varn(f)==*varskip)))
   {
     if(D==-1) return gcopy(f);
     F = gmul(f,gpowgs(z,D));
@@ -35,10 +40,10 @@ PolHomogenise(GEN f, GEN z, long D)
   }
   F = gcopy(f);
   d = degree(f);
-  if(D==-1) D = TotalDegree(F);
+  if(D==-1) D = TotalDegree(F,varskip);
   for(i=0;i<=d;i++)
   {
-    gel(F,i+2) = PolHomogenise(gel(f,i+2),z,D-i);
+    gel(F,i+2) = PolHomogenise(gel(f,i+2),z,D-i,varskip);
   }
   return gerepilecopy(av,F);
 }

@@ -2308,6 +2308,7 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
   hfin = Jgeth(J);
   if(hini >= hfin) return gcopy(W);
   mask = quadratic_prec_mask(hfin); /* Best scheme to reach prec efin */
+  mask >>= 1;
   /* TODO determine where to start */
   g = Jgetg(J);
   d0 = Jgetd0(J);
@@ -2557,9 +2558,11 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
       break;
     }
     h1 = h2;
+    printf("End loop, h2 = %lu, mask=%lu\n",h2,mask);
     h2<<=1;
     if(mask&1) h2--;
     mask>>=1;
+    printf("now h2=%lu, mask=%lu\n",h2,mask);
     U = ZqXnM_setprec(U2,h2,va);
     if(c0)
       gerepileall(av1,3,&U,&c0,&P1);
