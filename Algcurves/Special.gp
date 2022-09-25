@@ -134,6 +134,31 @@ FnsBranchMatRat(F,B,e,x,y)=
 	S;
 }
 
+FnsBranchMatRat_conic(u,v,B,e,x,y)=
+{
+  my(A,a,t,d,m,M,S,c);
+  A = B[3];
+  a = variable(A);
+  d = poldegree(A);
+  [u,v] = BranchEval([u,v],B[1],e,x,y);
+	F = [u^2,u*v,v^2,u,v];
+  t = variable(F);
+  m = valuation(F,t);
+  M = serprec(F,t);
+  if(M==+oo,M=e+m);
+  S = matrix((M-m)*d,6);
+  for(j=1,5,
+    for(i=m,M-1,
+      c = liftpol(polcoef(F[j],i));
+      for(k=0,d-1,
+        S[d*(i-m)+k+1,j] = polcoef(c,k,a)
+      )
+    )
+  );
+	S[-m*d+1,6] = 1;
+  S;
+}
+
 FnsBranchMat(F,B,e,x,y)=
 {
   my(t,n,m,M,S);
@@ -364,3 +389,33 @@ Crv3(C,P=0)=
   if(g!=3,error("Genus is ",g," not 3"));
   if(CrvIsHyperell(C),CrvHyperell(C),CanProj(C));
 }
+
+Crv0Conic(C)=
+{
+	my(x,y,B,SB,d,L,u,v,K,D=0,e=4);
+	[x,y] = C[3][1..2];
+	B = C[4][1][2][1];
+	SB = C[5];
+	\\ Look for branch of deg 1 or 2; else take antican
+	for(i=1,#SB,
+		d = poldegree(SB[i][3][3]);
+		if(d<=2,
+			D = Mat([i,2/d]);
+			break
+		)
+	);
+	if(D==0,
+		D = dxDiv(C);
+		D[,2] *= -1;
+	);
+	L = RiemannRoch(C,D);
+	u = L[2]/L[1];
+	v = L[3]/L[1];
+	until(#K==1,
+		K = FnsBranchMatRat_conic(u,v,B,e,x,y);
+		K = matker(K);
+		e *= 2;
+	);
+	[K[,1]~,[u,v]];
+}
+

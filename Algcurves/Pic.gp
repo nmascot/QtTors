@@ -84,16 +84,34 @@ LLLediv(C,d,p=10)=
 
 BDivSub(A,B)= \\ DivSub on branches
 {
+  my(C);
+  C = List();
+  for(i=1,#B~,
+    for(j=1,#A~,
+      if(B[i,1]==A[j,1],
+        A[j,2] -= B[i,2];
+        next(2)
+      )
+    );
+    listput(C,[B[i,1],-B[i,2]]~)
+  );
+  C = matconcat([A~,Mat(C)]);
+  C = select(c->c[2],Vec(C));
+  matconcat(C)~;
+}
+
+BDivAdd(A,B)= \\ DivSub on branches
+{
 	my(C);
 	C = List();
 	for(i=1,#B~,
 		for(j=1,#A~,
 			if(B[i,1]==A[j,1],
-				A[j,2] -= B[i,2];
+				A[j,2] += B[i,2];
 				next(2)
 			)
 		);
-		listput(C,[B[i,1],-B[i,2]]~)
+		listput(C,[B[i,1],B[i,2]]~)
 	);
 	C = matconcat([A~,Mat(C)]);
 	C =	select(c->c[2],Vec(C));

@@ -190,6 +190,13 @@ RiemannRoch(C,D)=
   for(i=1,#D~,
     [P,nP] = D[i,];
     \\ What kind of P?
+		if(type(P)=="t_VEC" && type(P[1]=="t_VEC"), \\ Raw branch
+			for(i=1,#SB,
+				if(P==SB[i][3],
+					P = i; \\ TODO shunt what follows -> simpler
+					break)
+			)
+		);
     if(type(P)=="t_INT" || #P==1, \\ branch
       if(type(P)=="t_VEC",
         [k1,k2] = P[1];
@@ -330,7 +337,7 @@ FonOC(C,f)=
 
 FnNormalise(f,F,x,t)=subst(lift(Mod(subst(f,x,t),subst(F,x,t))),t,x); \\ put in K(x)[y]
 
-FnDiv(C,f,aff)=
+FnDiv(C,f,Print)=
 {
   my(p,x,y,z,t,a,SB,Of,Df,Nf,R,fa,D,U,BU,b,v,P,DNf);
   p = C[2];
@@ -347,7 +354,6 @@ FnDiv(C,f,aff)=
   Df *= DNf;
   R = polresultant(C[1][1],Nf,y); \\ Any zeroes of f have x = a root of this
   fa = Vec(Set(concat(factor(R)[,1],factor(Df)[,1]))); \\ Interesting finite places
-  \\ TODO reuse the ones we already have
   D = List();
   for(i=1,#fa+1,
     U = if(i>#fa,0,fa[i]);
@@ -376,9 +382,93 @@ FnDiv(C,f,aff)=
     )
   );
   D = matconcat(vecsort(Vec(D),2,4)~);
-  if(aff,
+  if(Print,
     DivPrint(D)
   ,
     D
   );
 }
+
+dxDiv(C,Print)=
+{ \\ Divisor of dx
+  my(f,p,x,y,z,t,a,SB,R,fa,D,U,BU,b,v,P);
+  f = C[1][1];
+	p = C[2];
+  [x,y,z,t,a] = C[3];
+  SB = C[4];
+  nSB=#SB;
+	fa = factor(poldisc(f,y))[,1]; \\ Interesting finite places
+  D = List();
+  for(i=1,#fa+1,
+    U = if(i>#fa,0,fa[i]);
+    BU = 0;
+    for(i=1,nSB,
+      if(SB[i][1]==U,
+        BU = SB[i][2];
+        break
+      )
+    );
+    if(BU==0,
+      BU = BranchesAbove(C[1][1],subst(U,x,a),p,x,t,a);
+      if(BU==0,error("Unable to handle this characterisitic"));
+    );
+    for(j=1,#BU,
+      b = BU[j];
+			P = b[1][1];
+      v = valuation(deriv(P,t),t);
+      if(v,
+        P = BranchOrigin(b[1]);
+        if(PtIsSing(C[1][2],P),
+          listput(D,[b[1..3],v])
+        ,
+          listput(D,[P,v])
+        )
+      )
+    )
+  );
+  D = matconcat(vecsort(Vec(D),2,4)~);
+  if(Print,
+    DivPrint(D)
+  ,
+    D
+  );
+}
+
+DiffDiv(C,f,Print)=
+{
+	my(D,D1,D2);
+	D1 = FnDiv(C,f,0);
+	D2 = dxDiv(C,0);
+	D = BDivAdd(D1,D2);
+	if(Print,
+		DivPrint(D)
+	,
+		D
+	);
+}
+
+PtDeg(P)=
+{
+	my(x,y,a);
+	if(type(P[1])=="t_VEC",
+		poldegree(P[3]) \\ Branch
+	,
+	  x = P[1];
+	  y = P[2];
+	  if(#P==3,
+		  if(P[3],
+				x /= P[3];
+				y /= P[3];
+			)
+		);
+		x = liftint(x);
+		y = liftint(y);
+		if(type(x)=="t_POLMOD",return(poldegree(x.mod)));
+		if(type(y)=="t_POLMOD",return(poldegree(y.mod)));
+		1
+	);
+}
+		
+  
+
+DivDeg(D)=sum(i=1,#D~,D[i,2]*PtDeg(D[i,1]));
