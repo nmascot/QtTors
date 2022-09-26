@@ -419,3 +419,149 @@ Crv0Conic(C)=
 	[K[,1]~,[u,v]];
 }
 
+ConicCheck(C,P)=
+{
+	my(x,y,Q);
+	if(#P==3,return(ConicCheck(C,P[1..2]/P[3])));
+	[x,y]=P;
+	Q=[x^2,x*y,y^2,x,y,1]~;
+	C*Q;
+}
+
+Zsqfree(n)=
+{ \\ n = r*s^2;
+	my(fa1,fa2,v);
+	if(n==0,return([0,1]));
+	fa1 = fa2 = factor(n);
+	for(i=1,#fa1~,
+		v = fa1[i,2];
+		if(v%2,
+			fa1[i,2] = 1; fa2[i,2] = (v-1)/2;
+		,
+			fa1[i,2] = 0; fa2[i,2] = v/2;
+		)
+	);
+	apply(factorback,[fa1,fa2]);
+}
+
+ConicRat(C)=
+{ \\ C coefs of ax^2+bxy+cy^2+dx+ey+f=0, find rat point, or prove none exists and return []
+	my([a,b,c,d,e,f]=C,P,d1,f1,D,M1,x,y);
+	if(a==0 && b==0 && c==0,\\ Line
+	  if(d==0,
+			if(e==0,error("Not a curve"));
+			P = [0,-f,e];
+		,
+			P = [-f,0,d];
+		);
+		return(P/content(P));
+	);
+	if(b^2==4*a*c, \\ Parabolic case
+		if(c==0,
+			P = ConicRat([c,b,a,e,d,f]);
+			if(P!=[],P = [P[2],P[1],P[3]]);
+			return(P);
+		);
+		\\ Now c!=0
+		d1 = 2*(2*c*d-b*e);
+		f1 = 4*c*f-e^2;
+		\\ (bx+2cy+e)^2 + d1x + f1 = 0
+		if(d1==0,
+			if(f1==0,error("Double line"));
+			f1 = -f1;
+			if(issquare(f1),error("Reducible over Q"));
+			f1 = core(f1);
+			print("Irreducible over Q but reducible over Q(sqrt",f1,")");
+			return([]);
+		);
+		P = [-f1,(b*f1-e*d1)/(2*c),d1];
+		return(P/content(P));
+	);
+	\\ General case
+	if(a==0 && c==0,
+		if(d*e==b*f,error("Reducible over Q"));
+		return([]);
+		/*P = [e,d,-b];
+		return(P/content(P));*/
+	);
+	if(c==0,
+    P = ConicRat([c,b,a,e,d,f]);
+    if(P!=[],P = [P[2],P[1],P[3]]);
+    return(P);
+  );
+	\\ Now c!=0
+	D = 4*a*c-b^2;
+	M1 = 4*((c*d)^2-b*c*d*e+a*c*e^2+b^2*c*f-a*f*(2*c)^2);
+	if(M1==0,
+		if(issquare(D),error("Reducible over Q"));
+    D = core(D);
+    print("Irreducible over Q but reducible over Q(sqrt",D,")");
+    return([]);
+	);
+	if(D>0 && M1<0,return([]));
+	P = ConicLegendre(M1,-D);
+	if(P==[],return([]));
+	x = (P[3]+(b*e-2*d*c)*P[1])/D;
+	y = (P[2]-b*x-e*P[1])/(2*c);
+	P = [x,y,P[1]];
+	P/content(P);
+}
+
+/*ConicDiagRat(a,b,c)=
+{ \\ ax^2+by^2+cz^2=0
+	my(a2,b2,P);
+	\\ -acx^2-bcy^2=(cz)^2
+	[a,a2] = Zsqfree(-a*c);
+	[b,b2] = Zsqfree(-b*c);
+	\\ a(a2x)^2+b(b2y)^2=(cz)^2
+	if(a<0 && b<0,return([]));
+	P = ConicLegendre(a,b);
+	if(P==[],return([]));
+	P = [P[1]/a2,P[2]/b2,P[3]/abs(c)];
+	P/content(P);
+}*/
+
+SqrtMod(x,n)=
+{ \\ n sqfree
+	my(fa,l,p,r);
+	if(x^2==x,return(x));
+	fa = factor(n)[,1];
+	l = #fa;
+	r = vector(l);
+	for(i=1,l,
+		p = fa[i];
+		if(!issquare(Mod(x,p)),return([]));
+		r[i] = sqrt(Mod(x,p));
+	);
+	chinese(r);
+}
+
+ConicLegendre(a,b)=
+{ \\ ax^2+by^2=z^2, a,b integers not both negative
+	my(r,b1,P);
+	if(issquare(a,&r),return([1,0,r]));
+	[b,b1] = Zsqfree(b);
+	if(b1!=1,
+		P = ConicLegendre(a,b);
+		if(P!=[],
+			P = [b1*P[1],P[2],b1*P[3]];
+			P /= content(P);
+		);
+		return(P);
+	);
+	if(b==1,return([0,1,1]));
+	if(abs(a)>abs(b),
+		P = ConicLegendre(b,a);
+		return(if(P==[],[],[P[2],P[1],P[3]]))
+	);
+	\\ Now |a| <= |b| and a is not a square, so any sol has y!=0
+	r = SqrtMod(a,b);
+	if(r==[],return([]));
+	r = centerlift(r);
+	b1 = (r^2-a)/b;
+	P = ConicLegendre(a,b1); \\ Think in temrs of b and bb1 being norms in Q(sqrta)
+	if(P==[],return([]));
+	P=[P[3]-r*P[1],b1*P[2],r*P[3]-a*P[1]];
+	apply(abs,P)/content(P);
+}
+
