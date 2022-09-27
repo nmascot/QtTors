@@ -1,6 +1,7 @@
 PolarBranchMat(L,den,b,m,x,y,t,a)=
 { \\ Matrix of coefs of parts up to O(t^m) of l(b) for l in L
   my(n=#L,M,p=2,be,pe,Le,d,c);
+	if(n==0,return(Mat([])));
   while(1,
     be = BranchExpand(b[1],p);
     Le = subst(subst(L,x,be[1]),y,be[2])*(1/subst(den,x,be[1]));

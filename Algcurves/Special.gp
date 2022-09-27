@@ -143,7 +143,7 @@ FnsBranchMatRat_conic(u,v,B,e,x,y)=
   [u,v] = BranchEval([u,v],B[1],e,x,y);
 	F = [u^2,u*v,v^2,u,v];
   t = variable(F);
-  m = valuation(F,t);
+  m = min(0,valuation(F,t));
   M = serprec(F,t);
   if(M==+oo,M=e+m);
   S = matrix((M-m)*d,6);
@@ -155,7 +155,7 @@ FnsBranchMatRat_conic(u,v,B,e,x,y)=
       )
     )
   );
-	S[-m*d+1,6] = 1;
+	if(m<=0 && M>=1,S[-m*d+1,6] = 1);
   S;
 }
 
@@ -409,11 +409,14 @@ Crv0Conic(C)=
 		D[,2] *= -1;
 	);
 	L = RiemannRoch(C,D);
+	breakpoint();
+	if(#L!=3,error(""));
 	u = L[2]/L[1];
 	v = L[3]/L[1];
 	until(#K==1,
 		K = FnsBranchMatRat_conic(u,v,B,e,x,y);
 		K = matker(K);
+		print(K);
 		e *= 2;
 	);
 	[K[,1]~,[u,v]];
@@ -480,9 +483,16 @@ ConicRat(C)=
 	\\ General case
 	if(a==0 && c==0,
 		if(d*e==b*f,error("Reducible over Q"));
-		return([]);
-		/*P = [e,d,-b];
-		return(P/content(P));*/
+		if(d,
+			P = [-f,0,d]
+		,
+			if(e,
+				P = [0,-f,e]
+			,
+				P = [b,-f,b]
+			)
+		);
+		return(P/content(P));
 	);
 	if(c==0,
     P = ConicRat([c,b,a,e,d,f]);
@@ -565,3 +575,21 @@ ConicLegendre(a,b)=
 	apply(abs,P)/content(P);
 }
 
+Crv0Rat(C)=
+{
+	my(E,uv,P,D);
+	\\ TODO try simpler stuff first
+	[E,uv] = Crv0Conic(C);
+	P = ConicRat(E);
+	if(P==[],return([]));
+	if(P[3],
+		D = FnDiv(C,uv[1]-P[1]/P[3])
+	,
+		D = FnDiv(C,if(P[1],uv[1],uv[2]))
+	);
+	for(i=1,#D~,
+		P = D[i,1];
+		if(PtDeg(P)==1,return(P))
+	);
+	error("Bug in Crv0Rat");
+}

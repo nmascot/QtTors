@@ -190,7 +190,7 @@ RiemannRoch(C,D)=
   for(i=1,#D~,
     [P,nP] = D[i,];
     \\ What kind of P?
-		if(type(P)=="t_VEC" && type(P[1]=="t_VEC"), \\ Raw branch
+		if(type(P)=="t_VEC" && type(P[1])=="t_VEC", \\ Raw branch
 			for(i=1,#SB,
 				if(P==SB[i][3],
 					P = i; \\ TODO shunt what follows -> simpler
