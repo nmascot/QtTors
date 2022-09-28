@@ -86,11 +86,19 @@ L2 = ;
 L = [L,LL,[L1,L2]];
 J = tPicInit(y^2-x^6-1+t,[],2,6,L,y,p,a,e,h,0);*/
 
-f=x^3*y+y^3*z+z^3*x*(1+t);
+/*f=x^3*y+y^3*z+z^3*x*(1+t);
 P1=[1,0,0];
 P2=[0,1,0];
 P=[[P1],[P2]];
 l=2;Chi=0;p=5;e=128;pe=p^e;a=6;h=40;
+[f,Auts,g,d0,L] = SmoothRRdata(f,p,P,t);
+Lp = PlaneZeta(subst(f,t,0),p);
+J = tPicInit(f,Auts,g,d0,L,y,p,a,e,h,Lp);*/
+f=x^4+(2-t)*y^4+2*x^3+x*(x+y)+(t-1)*(y+x^2+x);
+P1=[0,0];
+P2=[-1,0];
+P=[[P1],[P2]];
+l=2;Chi=0;p=5;e=256;pe=p^e;a=7;h=40;
 [f,Auts,g,d0,L] = SmoothRRdata(f,p,P,t);
 Lp = PlaneZeta(subst(f,t,0),p);
 J = tPicInit(f,Auts,g,d0,L,y,p,a,e,h,Lp);

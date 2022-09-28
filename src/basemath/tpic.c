@@ -1386,8 +1386,8 @@ tPicIsTors_val(GEN J, GEN W, GEN F)
 {
   pari_sp av = avma;
   GEN res;
-  if(type(F)==t_INT)
-    W = tPicFrobMul(J,W,F,0);
+  if(typ(F)==t_INT)
+    W = tPicMul(J,W,F,0);
   else
     W = tPicFrobPoly(J,W,F);
   res = tPicIsZero_val(J,W);
