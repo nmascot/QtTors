@@ -59,7 +59,7 @@ export(IntClosure1);
 
 IntClosure(f,B,x,y,t,a)=
 {
-  my(dy,lf,y1,OCU,dens,H,P);
+  my(dy,lf,y1,OCU,dens);
   dy = poldegree(f,y);
   lf = polcoef(f,dy,y);
   y1 = if(poldegree(lf),lf*y,y);
@@ -74,8 +74,7 @@ IntClosure(f,B,x,y,t,a)=
   OCU = apply(lu->matrix(dy,dy,i,j,polcoef(lu[1][j],i-1,y)),OCU);
   for(i=1,#OCU,OCU[i]*=prod(j=1,#OCU,if(i==j,1,dens[j])));
   OCU = matconcat(OCU);
-  [H,P] = mathnf(OCU,1); \\ TODO bug 2415
-	OCU = OCU*P[,#OCU-dy+1..#OCU];
+  OCU = mathnf(OCU);
   print("done");
   OCU = vector(dy,j,sum(i=1,dy,OCU[i,j]*y^(i-1)));
   OCU = apply(o->o/content(o,1),OCU);
