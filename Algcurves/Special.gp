@@ -409,7 +409,6 @@ Crv0Conic(C)=
 		D[,2] *= -1;
 	);
 	L = RiemannRoch(C,D);
-	breakpoint();
 	if(#L!=3,error(""));
 	u = L[2]/L[1];
 	v = L[3]/L[1];
