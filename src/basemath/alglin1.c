@@ -1946,17 +1946,15 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
 
   if (lgefint(p)==3)
   {
-    pari_sp ltop=avma;
-    ulong l= p[2];
+    pari_sp av = avma;
+    ulong l = p[2];
     GEN Tl = ZXT_to_FlxT(T,l);
     GEN Ml = ZXM_to_FlxM(x, l, get_Flx_var(Tl));
-    GEN p1 = FlxqM_ker_i(Ml, Tl, l, deplin);
-    if (deplin)
-    {
-      if (!p1) return gc_NULL(ltop);
-      return gerepileupto(ltop, FlxC_to_ZXC(p1));
-    }
-    else return gerepileupto(ltop, FlxM_to_ZXM(p1));
+    GEN K = FlxqM_ker_i(Ml, Tl, l, deplin);
+    if (!deplin) K = FlxM_to_ZXM(K);
+    else if (!K) return gc_NULL(av);
+    else K = FlxC_to_ZXC(K);
+    return gerepileupto(av, K);
   }
   return FqM_ker_gen(x, T, p, deplin);
 }
