@@ -3,31 +3,31 @@ install("RgXY_RgX_div","GGL");
 AlgLagrange(a,d,b)= \\ a,b in K[t]/T, [K(x):K]=d | deg T
 { \\ Attempts to express b as a poly in a
   my(T,n,v,M,aj=1);
-	T = a.mod;
-	n = poldegree(T);
-	v = variable(T);
-	M = matrix(n,d+1);
-	for(j=1,d,
-		for(i=1,n,
-			M[i,j] = polcoef(aj,i-1,v)
-		);
-		aj = liftpol(aj*a)
-	);
-	b = liftpol(b);
-	for(i=1,n,
-		M[i,d+1] = polcoef(b,i-1,v)
-	);
-	M = matker(M);
-	if(#M==0,
-		[]
-	,
-		Polrev(M[1..d,1]/-M[d+1,1])
-	);
+  T = a.mod;
+  n = poldegree(T);
+  v = variable(T);
+  M = matrix(n,d+1);
+  for(j=1,d,
+    for(i=1,n,
+      M[i,j] = polcoef(aj,i-1,v)
+    );
+    aj = liftpol(aj*a)
+  );
+  b = liftpol(b);
+  for(i=1,n,
+    M[i,d+1] = polcoef(b,i-1,v)
+  );
+  M = matker(M);
+  if(#M==0,
+    []
+  ,
+    Polrev(M[1..d,1]/-M[d+1,1])
+  );
 }
 
 PtEq(P,Q)=
 {
-	my(k,m,L);
+  my(k,m,L);
   if(#P==3,
     \\ P homog
     if(P[3],
@@ -63,7 +63,7 @@ PtEq(P,Q)=
               \\ P at oo not y=0, Q at oo not y=0 -> check x/y 
               subst(minpoly(P[1]/P[2],'x),'x,Q[1]/Q[2])==0
             ,
-						  \\ P at oo not y=0 Q at oo y=0
+              \\ P at oo not y=0 Q at oo y=0
               0
             )
           ,
@@ -72,36 +72,36 @@ PtEq(P,Q)=
           )
         )
       )
-		)		
+    )    
   ,
-		\\ P affine
-		if(#Q==3,
-			\\ P affine, Q homog
-			PtEq(Q,P)
-		,
-		  \\ P,Q affine
-			if(type(P[1])=="t_POLMOD",
-				\\ P alg
-				if(type(Q[1])=="t_POLMOD",
-					\\ P,Q alg, now the fun starts TODO char p
-					k = 0;
-					while(1,
-						m = minpoly(P[1]+k*P[2],'x);
-						L = AlgLagrange(P[1]+k*P[2],poldegree(m),P[2]); \\ attempt to express yP as poly in xP + k yP
-						if(L==[],k++;next);
+    \\ P affine
+    if(#Q==3,
+      \\ P affine, Q homog
+      PtEq(Q,P)
+    ,
+      \\ P,Q affine
+      if(type(P[1])=="t_POLMOD",
+        \\ P alg
+        if(type(Q[1])=="t_POLMOD",
+          \\ P,Q alg, now the fun starts TODO char p
+          k = 0;
+          while(1,
+            m = minpoly(P[1]+k*P[2],'x);
+            L = AlgLagrange(P[1]+k*P[2],poldegree(m),P[2]); \\ attempt to express yP as poly in xP + k yP
+            if(L==[],k++;next);
             return(subst(m,'x,Q[1]+k*Q[2])==0 && subst(L,'x,Q[1]+k*Q[2])==Q[2])
-					)
-				,
-				  \\ P alg, Q rat
-					P == Q
-			  )
-			,
-			  \\ P rat
-				P == Q
-			)
-		)
-	);
-}		
+          )
+        ,
+          \\ P alg, Q rat
+          P == Q
+        )
+      ,
+        \\ P rat
+        P == Q
+      )
+    )
+  );
+}    
     
 
 /* Format divisor: [.., [n,P], .. ] *
@@ -139,7 +139,7 @@ RRrecord0(D0,U,nP,P,B0,f,p,x,t,a)=
     );
     if(BU==0, \\ No, so compute them
       BU = BranchesAbove(f,subst(U,x,a),p,x,t,a);
-	    if(BU==0,error("Unable to handle this characterisitic"));
+      if(BU==0,error("Unable to handle this characterisitic"));
     );
     mU = vector(#BU);
     D0 = concat(D0,[[U,aU,BU,mU]]);
@@ -163,9 +163,89 @@ RRrecord0(D0,U,nP,P,B0,f,p,x,t,a)=
   D0;
 }
 
+FindInBOO(BOO,b)=
+{
+	for(i=1,#BOO,
+		if(BOO[i]==b,return(i));
+	);
+	error("Not found in BOO");
+}
+
+PtUB(P,F,B,B0,BOO,SB,lf)=
+{ \\ P -> U,b,iOO. P can be coded in many different ways.
+  my(tyP,U,b,BU,BP,lP,k1,k2);
+  tyP = type(P);
+  if(tyP=="t_INT",
+		[U,b] = SB[P][2..3]; \\ # of sing branch
+		return([U,b,if(U,0,FindInBOO(BOO,b))]);
+	);
+  if(tyP=="t_VEC",
+    lP = #P;
+    if(lP==1,
+      [k1,k2] = P[1]; \\ Sing branch TODO deprecated syntax?
+			U = B[k1];
+			b = B[k1][2][k2];
+		  return([U,b,if(U,0,FindInBOO(BOO,b))]);
+    );
+    if(lP==3 && type(P[1])=="t_VEC", \\ Raw branch, find it
+      for(i=1,#SB,
+        if(P==SB[i][3],
+					[U,b] = SB[i][2..3];
+		      return([U,b,if(U,0,FindInBOO(BOO,b))]);
+				)
+      );
+      error("Unknown raw branch");
+    );
+    \\ P is a pt
+    if(!PtIsOnCrv(F,P),error("Point ",P," is not on curve"));
+    if(PtIsSing(F,P),error("Point ",P," is singular, specify branch number instead"));
+    if(lP==2,
+      P=[P[1],P[2],1]; \\ Homogenise
+    );
+    \\ Now P is a pt in homog coords
+    if(P[3],
+      \\ P is a finite pt
+      U = minpoly(P[1]/P[3]);
+      return([U,P[1..2]/P[3],0]);
+    ,
+      \\ P is at oo
+      if(P[1],
+        for(i=1,#BOO, \\ Find branch
+          b = BOO[i];
+          if(PtEq(BranchOrigin(b[1]),P),
+            return([0,b,i]);
+          )
+        );
+        error("Branch with origin ",P," not found");
+      , \\ Annoying case: P=[0:1:0] -> don't know x
+        \\ Look in finite branches first
+        for(i=1,#B0,
+          U = B0[i][1];
+          if(Mod(lf,U),next); \\ Skip if U does not divide lf
+          BU = B0[i][2];
+          for(j=1,#BU,
+            BP = BranchOrigin(BU[j][1]);
+            if(BP[1]==0 && BP[3]==0, \\ Found
+              return([U,BU[j],0]);
+            )
+          )
+        );
+        \\ Not found yet so it is at x=oo
+        for(i=1,nOO,
+          BP = BranchOrigin(BOO[i][1]);
+          if(BP[1]==0 && BP[3]==0, \\ Found
+            return([0,BOO[i],i]);
+          )
+        )
+      );
+    );
+  );
+  error("Point ",P," not understood");
+}
+
 RiemannRoch(C,D)=
 {
-  my(f,F,p,x,y,z,t,a,B,BOO,B0,SB,g,OC,OCden,dx,dy,mOO,D0,k,k1,k2,nP,P,U,BP,den,m0,aU,BU,mU,dden,dOO,mOO2,l,V,N,L,M,K);
+  my(f,F,p,x,y,z,t,a,B,BOO,B0,SB,g,OC,OCden,dx,dy,mOO,D0,k,nP,P,U,BP,iOO,den,m0,aU,BU,mU,dden,dOO,mOO2,l,V,N,L,M,K);
   if(type(D)=="t_VEC",
     D = Mat(D)
   );
@@ -189,79 +269,13 @@ RiemannRoch(C,D)=
   D0 = [];
   for(i=1,#D~,
     [P,nP] = D[i,];
-    \\ What kind of P?
-		if(type(P)=="t_VEC" && type(P[1])=="t_VEC", \\ Raw branch
-			for(i=1,#SB,
-				if(P==SB[i][3],
-					P = i; \\ TODO shunt what follows -> simpler
-					break)
-			)
-		);
-    if(type(P)=="t_INT" || #P==1, \\ branch
-      if(type(P)=="t_VEC",
-        [k1,k2] = P[1];
-        U = B[k1][1];
-        BP = B[k1][2][k2];
-      , \\ Sing branch
-        [P,U,BP] = SB[P]
-      );
-      if(U,
-        D0 = RRrecord0(D0,U,nP,BP,B0,f,p,x,t,a) \\ above finite x
-      , \\ Above x=oo, find it and update mOO
-        for(i=1,nOO,
-          if(BOO[i]==BP,
-            mOO[i] = nP;
-            break
-          )
-        )
-      )
-    , \\ P is a pt
-      if(!PtIsOnCrv(F,P),error("Point ",P," is not on curve"));
-      if(PtIsSing(F,P),error("Point ",P," is singular, specify branch number instead"));
-      if(#P==2,
-        P=[P[1],P[2],1]; \\ Homogenise
-      );
-      if(P[1]==0 && P[3]==0, \\ Annoying case: P=[0:1:0] -> don't know x
-        found010 = 0;
-        for(i=1,#B0,
-          U = B0[i][1];
-          if(Mod(lf,U),next);
-          BU = B0[i][2];
-          for(j=1,#BU,
-            BP = BranchOrigin(BU[j][1]);
-            if(BP[1]==0 && BP[3]==0, \\ Found
-              D0 = RRrecord0(D0,U,nP,BU[j],B0,f,p,x,t,a);
-              found010 = 1;
-              break(2)
-            )
-          )
-        );
-        if(found010==0, \\ It is at x=oo
-          for(i=1,nOO,
-            BP = BranchOrigin(BOO[i][1]);
-            if(BP[1]==0 && BP[3]==0, \\ Found
-              mOO[i] = nP;
-              found010 = 1;
-              break
-            )
-          )
-        );
-        if(found010==0,error(P," not found"));
-        next
-      );    
-      if(P[3]==0, \\ oo, find branch
-        for(i=1,nOO,
-          if(PtEq(BranchOrigin(BOO[i][1]),P),
-            mOO[i] = nP;
-            break
-          )
-        )
-      , \\ finite, record in D0
-        U = minpoly(P[1]/P[3]);
-        D0 = RRrecord0(D0,U,nP,P,B0,f,p,x,t,a)
-      )
-    )
-  );
+    [U,BP,iOO] = PtUB(P,F,B,B0,BOO,SB,lf); \\ Analyse P
+		if(U,
+			D0 = RRrecord0(D0,U,nP,BP,B0,f,p,x,t,a);
+		,
+			mOO[iOO] = nP;
+		)
+	);
   \\ D parsed. Compute den, adjust mOO and adjust and convert D0 into m0.
   den = 1;
   m0 = List();
@@ -365,9 +379,9 @@ FnDiv(C,f,Print)=
       )
     );
     if(BU==0,
-			BU = BranchesAbove(C[1][1],subst(U,x,a),p,x,t,a);
-			if(BU==0,error("Unable to handle this characterisitic"));
-		);
+      BU = BranchesAbove(C[1][1],subst(U,x,a),p,x,t,a);
+      if(BU==0,error("Unable to handle this characterisitic"));
+    );
     for(j=1,#BU,
       b = BU[j];
       v = BranchValuation(f,b[1],x,y);
@@ -393,11 +407,11 @@ dxDiv(C,Print)=
 { \\ Divisor of dx
   my(f,p,x,y,z,t,a,SB,R,fa,D,U,BU,b,v,P);
   f = C[1][1];
-	p = C[2];
+  p = C[2];
   [x,y,z,t,a] = C[3];
   SB = C[4];
   nSB=#SB;
-	fa = factor(poldisc(f,y))[,1]; \\ Interesting finite places
+  fa = factor(poldisc(f,y))[,1]; \\ Interesting finite places
   D = List();
   for(i=1,#fa+1,
     U = if(i>#fa,0,fa[i]);
@@ -410,12 +424,13 @@ dxDiv(C,Print)=
     );
     if(BU==0,
       BU = BranchesAbove(C[1][1],subst(U,x,a),p,x,t,a);
-      if(BU==0,error("Unable to handle this characterisitic"));
+      if(BU==0,error("Unable to handle this characteristic"));
     );
     for(j=1,#BU,
       b = BU[j];
-			P = b[1][1];
-      v = valuation(deriv(P,t),t);
+      v = b[2];
+      \\P = b[1][1];
+      \\v = valuation(deriv(P,t),t);
       if(v,
         P = BranchOrigin(b[1]);
         if(PtIsSing(C[1][2],P),
@@ -436,39 +451,39 @@ dxDiv(C,Print)=
 
 DiffDiv(C,f,Print)=
 {
-	my(D,D1,D2);
-	D1 = FnDiv(C,f,0);
-	D2 = dxDiv(C,0);
-	D = BDivAdd(D1,D2);
-	if(Print,
-		DivPrint(D)
-	,
-		D
-	);
+  my(D,D1,D2);
+  D1 = FnDiv(C,f,0);
+  D2 = dxDiv(C,0);
+  D = BDivAdd(D1,D2);
+  if(Print,
+    DivPrint(D)
+  ,
+    D
+  );
 }
 
 PtDeg(P)=
 {
-	my(x,y,a);
-	if(type(P[1])=="t_VEC",
-		poldegree(P[3]) \\ Branch
-	,
-	  x = P[1];
-	  y = P[2];
-	  if(#P==3,
-		  if(P[3],
-				x /= P[3];
-				y /= P[3];
-			)
-		);
-		x = liftint(x);
-		y = liftint(y);
-		if(type(x)=="t_POLMOD",return(poldegree(x.mod)));
-		if(type(y)=="t_POLMOD",return(poldegree(y.mod)));
-		1
-	);
+  my(x,y,a);
+  if(type(P[1])=="t_VEC",
+    poldegree(P[3]) \\ Branch
+  ,
+    x = P[1];
+    y = P[2];
+    if(#P==3,
+      if(P[3],
+        x /= P[3];
+        y /= P[3];
+      )
+    );
+    x = liftint(x);
+    y = liftint(y);
+    if(type(x)=="t_POLMOD",return(poldegree(x.mod)));
+    if(type(y)=="t_POLMOD",return(poldegree(y.mod)));
+    1
+  );
 }
-		
+    
   
 
 DivDeg(D)=sum(i=1,#D~,D[i,2]*PtDeg(D[i,1]));
