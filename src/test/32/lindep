@@ -6,6 +6,7 @@ x^2 + (-y^3 - y^2 - 5*y - 1)
 0
 (y - 1)*x + 1
 x + (-5*y - 1)
+y*x + y^2
 (27*T - 4)*x^3 + 3*x + 1
 [(27*T^2 - 4*T)*x^2 + (54*T - 2)*x + 6, 0]
 [x - 2*T, -2*T^3 + 2*T]
@@ -36,4 +37,4 @@ Mod(-x + 1, x^2 - 2)
 Mod(-2*x + 1, 4*x^2 - 2)
 Mod(3*x + 1, x^3 - 2)
 "t_FRAC"
-Total time spent: 4
+Total time spent: 2

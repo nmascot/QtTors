@@ -4,3 +4,4 @@ Done for version 2.16.0 (released ??/??/2023):
 BA   1- ploth long help was misformatted
      2- polredbest(y^4 - y^3 - 1/4, 1) -> Error [#2414]
      3- mathnf over polynomial rings: wrong when rank not maximal [#2415]
+BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV

@@ -1950,8 +1950,13 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
     ulong l= p[2];
     GEN Tl = ZXT_to_FlxT(T,l);
     GEN Ml = ZXM_to_FlxM(x, l, get_Flx_var(Tl));
-    GEN p1 = FlxM_to_ZXM(FlxqM_ker(Ml,Tl,l));
-    return gerepileupto(ltop,p1);
+    GEN p1 = FlxqM_ker_i(Ml, Tl, l, deplin);
+    if (deplin)
+    {
+      if (!p1) return gc_NULL(ltop);
+      return gerepileupto(ltop, FlxC_to_ZXC(p1));
+    }
+    else return gerepileupto(ltop, FlxM_to_ZXM(p1));
   }
   return FqM_ker_gen(x, T, p, deplin);
 }
