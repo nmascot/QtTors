@@ -415,7 +415,6 @@ Crv0Conic(C)=
 	until(#K==1,
 		K = FnsBranchMatRat_conic(u,v,B,e,x,y);
 		K = matker(K);
-		print(K);
 		e *= 2;
 	);
 	[K[,1]~,[u,v]];

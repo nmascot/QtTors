@@ -325,7 +325,8 @@ RiemannRoch(C,D)=
     L = L*K;
   );
   den *= OCden;
-  apply(l->RgXY_RgX_div(l,den,dy),L);
+  L = apply(l->RgXY_RgX_div(l,den,dy),L);
+	apply(l->l/content(l,1),L);
 }
 
 FonOC(C,f)=
@@ -413,8 +414,8 @@ dxDiv(C,Print)=
   nSB=#SB;
   fa = factor(poldisc(f,y))[,1]; \\ Interesting finite places
   D = List();
-  for(i=1,#fa+1,
-    U = if(i>#fa,0,fa[i]);
+  for(i=0,#fa,
+    U = if(i,fa[i],0);
     BU = 0;
     for(i=1,nSB,
       if(SB[i][1]==U,
@@ -429,8 +430,7 @@ dxDiv(C,Print)=
     for(j=1,#BU,
       b = BU[j];
       v = b[2];
-      \\P = b[1][1];
-      \\v = valuation(deriv(P,t),t);
+			v = if(U,v-1,-v-1);
       if(v,
         P = BranchOrigin(b[1]);
         if(PtIsSing(C[1][2],P),
