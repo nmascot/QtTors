@@ -3,3 +3,4 @@ Done for version 2.16.0 (released ??/??/2023):
   Fixed
 BA   1- ploth long help was misformatted
      2- polredbest(y^4 - y^3 - 1/4, 1) -> Error [#2414]
+     3- mathnf over polynomial rings: wrong when rank not maximal [#2415]

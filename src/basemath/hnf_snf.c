@@ -2656,8 +2656,11 @@ RgM_hnfall(GEN A, GEN *pB, long remove)
     { if (ldef) ldef--; }
     else
     {
-      gcoeff(A,li,def) = T;
-      if (B && !gequal1(d)) gel(B, def) = RgC_Rg_div(gel(B, def), d);
+      if (!gequal1(d))
+      {
+        gel(A,def) = RgC_Rg_div(gel(A,def), d);
+        if (B) gel(B, def) = RgC_Rg_div(gel(B, def), d);
+      }
       RgM_reduce(A, B, li, def, vx);
       def--;
     }
