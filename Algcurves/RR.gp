@@ -406,7 +406,7 @@ FnDiv(C,f,Print)=
 
 dxDiv(C,Print)=
 { \\ Divisor of dx
-  my(f,p,x,y,z,t,a,SB,R,fa,D,U,BU,b,v,P);
+  my(f,p,x,y,z,t,a,SB,nSB,fa,D,U,BU,b,v,P);
   f = C[1][1];
   p = C[2];
   [x,y,z,t,a] = C[3];
