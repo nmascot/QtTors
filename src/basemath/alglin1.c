@@ -3666,6 +3666,7 @@ RgM_deplin_FqM(GEN x, GEN pol, GEN p)
   GEN b, T = RgX_to_FpX(pol, p);
   if (signe(T) == 0) pari_err_OP("deplin",x,pol);
   b = FqM_deplin(RgM_to_FqM(x, T, p), T, p);
+  if (!b) return gc_NULL(av);
   return gerepileupto(av, b);
 }
 
