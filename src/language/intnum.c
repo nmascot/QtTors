@@ -2311,9 +2311,14 @@ sdmob(GEN s, long n, GEN fan)
 static GEN
 logzetan(GEN s, GEN P, long prec)
 {
+  pari_sp av = avma;
   GEN Z = gzeta(s, prec);
   long i, l = lg(P);
-  for (i = 1; i < l; i++) Z = gsub(Z, gdiv(Z, gpow(gel(P,i), s, prec)));
+  for (i = 1; i < l; i++)
+  {
+    Z = gsub(Z, gdiv(Z, gpow(gel(P,i), s, prec)));
+    if (gc_needed(av,2)) Z = gerepileupto(av, Z);
+  }
   return glog(Z, prec);
 }
 static GEN
