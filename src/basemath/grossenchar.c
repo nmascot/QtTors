@@ -155,7 +155,7 @@ gchar_Sval(GEN nf, GEN S, GEN x)
 }
 
 /* true nf; log_prk(x*pi_pr^{-v_pr(x)}), sign(sigma(x)) */
-GEN
+static GEN
 gchar_logm(GEN nf, GEN locs, GEN x)
 {
   GEN moo, loga, Lsprk = locs_get_Lsprk(locs);
