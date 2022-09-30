@@ -51,7 +51,7 @@ Doc:
  %3 = 0
  ? Pol(0,'x) == Pol(0,'y)  \\ equal (constant: ignore variable)
  %4 = 1
- ? Pol(0,'x) == Pol(0,'y)  \\ not identical
+ ? Pol(0,'x) === Pol(0,'y)  \\ not identical
  %5 = 0
 
  ? 0 == Pol(0) \\ equal
