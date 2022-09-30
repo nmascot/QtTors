@@ -155,7 +155,7 @@ gchar_Sval(GEN nf, GEN S, GEN x)
 }
 
 /* true nf; log_prk(x*pi_pr^{-v_pr(x)}), sign(sigma(x)) */
-static GEN
+GEN
 gchar_logm(GEN nf, GEN locs, GEN x)
 {
   GEN moo, loga, Lsprk = locs_get_Lsprk(locs);
@@ -253,6 +253,7 @@ hnf_block(GEN m, long r0, long nr, long c0, long nc)
   return gerepilecopy(av, uu);
 }
 
+/* (matrix, starting row, nb rows, starting column, nb columns) */
 static GEN
 lll_block(GEN m, long r0, long nr, long c0, long nc)
 {
@@ -296,13 +297,13 @@ static GEN
 cm_select(GEN nf, GEN cm, long prec)
 {
   GEN emb, keys, v, m_sel, imag_emb;
-  long nc, d_cm, r_cm, c, i, j, r2 = nf_get_r2(nf);
+  long nalg, d_cm, r_cm, c, i, j, r2 = nf_get_r2(nf);
   pari_sp av;
 
   d_cm = degpol(gel(cm, 1)); /* degree of the cm field; even */
-  nc = d_cm / 2; /* nb of clusters */
-  r_cm = nf_get_degree(nf) / d_cm; /* nb by cluster; nc * r_cm = r2 */
-  m_sel = zeromatcopy(nc, r2); /* selection matrix */
+  nalg = d_cm / 2; /* nb of clusters */
+  r_cm = nf_get_degree(nf) / d_cm; /* nb by cluster; nalg * r_cm = r2 */
+  m_sel = zeromatcopy(nalg, r2); /* selection matrix */
   av = avma;
   /* group complex embeddings */
   emb = nfeltembed(nf, gel(cm, 2), NULL, prec);
@@ -311,7 +312,7 @@ cm_select(GEN nf, GEN cm, long prec)
   keys = gadd(gmul(mppi(prec), real_i(emb)), gabs(imag_emb, prec));
   v = indexsort(keys);
 
-  for (j = c = 1; c <= nc; c++)
+  for (j = c = 1; c <= nalg; c++)
   {
     int ref = gsigne(gel(imag_emb, v[j]));
     gcoeff(m_sel, c, v[j]) = gen_1;
@@ -573,7 +574,7 @@ static GEN
 gchar_hnfreduce_shallow(GEN gc, GEN cm)
 {
   GEN bnf = gchar_get_bnf(gc), nf = gchar_get_nf(gc), u, u0, m;
-  long order, r1, r2, ns, nc, n, nu, nm, ncm = 0, mprec;
+  long order, r1, r2, ns, nc, n, nu, nm, nalg = 0, mprec;
 
   nf_get_sign(nf, &r1, &r2);
   n = r1 + 2*r2;
@@ -612,7 +613,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm)
     /* reduce on Norm arguments */
     v = cm_select(nf, cm, gchar_get_nfprec(gc));
     if (DEBUGLEVEL>2) err_printf("cm_select -> %Ps\n", v);
-    ncm = nbrows(v);
+    nalg = nbrows(v);
     gchar_set_u0(gc, u0);
     for(;;)
     {
@@ -631,22 +632,22 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm)
       m = gcharmatnewprec_shallow(gc, mprec);
     }
     if (DEBUGLEVEL>2) err_printf("rounded Nargs -> %Ps\n", Nargs);
-    u = hnf_block(Nargs, 0, ncm, ns+nc, n-1);
+    u = hnf_block(Nargs, 0, nalg, ns+nc, n-1);
     u0 = ZM_mul(u0, u); m = RgM_ZM_mul(m, u);
     if (DEBUGLEVEL>2) err_printf("after cm reduction -> %Ps\n", m);
   }
 
   /* apply LLL on Lambda_m, may need to increase prec */
-  gchar_set_nalg(gc, ncm);
+  gchar_set_nalg(gc, nalg);
   gchar_set_u0(gc, u0);
 
   /* TODO factor these two LLL reduction codes in a function? */
-  if (ncm > 0)
+  if (nalg > 0)
   {
     GEN u = NULL;
     while (1)
     {
-      u = lll_block(m, ns+nc, n, ns+nc, ncm); if (u) break;
+      u = lll_block(m, ns+nc, n, ns+nc, nalg); if (u) break;
       mprec = precdbl(mprec);
       /* recompute m0 * u0 to higher prec */
       m = gcharmatnewprec_shallow(gc, mprec);
@@ -661,7 +662,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm)
     GEN u = NULL;
     while (1)
     {
-      u = lll_block(m, ns+nc, n, ns+nc+ncm, n-1-ncm); if (u) break;
+      u = lll_block(m, ns+nc, n, ns+nc+nalg, n-1-nalg); if (u) break;
       mprec = precdbl(mprec);
       /* recompute m0 * u0 to higher prec */
       m = gcharmatnewprec_shallow(gc, mprec);
@@ -727,12 +728,12 @@ static void
 gcharmat_tinverse(GEN gc, GEN m, long prec)
 {
   GEN m_inv;
-  long k, r1, r2, ns, nc, ncm, nm, mprec, bitprec = prec2nbits(prec);
+  long k, r1, r2, ns, nc, nalg, nm, mprec, bitprec = prec2nbits(prec);
 
   nf_get_sign(gchar_get_nf(gc), &r1, &r2);
   ns = gchar_get_ns(gc);
   nc = gchar_get_nc(gc);
-  ncm = gchar_get_nalg(gc);
+  nalg = gchar_get_nalg(gc);
   nm = ns + nc + r1 + 2*r2;
   if (lg(m)==1) { gchar_set_basis(gc,zeromat(0,nm)); return; }
 
@@ -743,14 +744,14 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
     GEN v0, mm;
     /* insert at column ns+nc+r1+r2, or last column if cm */
     v0 = vec_v0(nm, ns+nc+1, r1, r2);
-    mm = shallowmatinsert(m, v0, ncm? nm: nm-r2);
+    mm = shallowmatinsert(m, v0, nalg? nm: nm-r2);
     if (DEBUGLEVEL>1) err_printf("add v0 -> %Ps\n", mm);
     mm = shallowtrans(mm);
     m_inv = RgM_inv(mm); /* invert matrix, may need to increase prec */
     if (m_inv)
     {
       if (DEBUGLEVEL>1) err_printf("inverse: %Ps\n",m_inv);
-      m_inv = vecsplice(m_inv, ncm? nm: nm-r2); /* remove v0 */
+      m_inv = vecsplice(m_inv, nalg? nm: nm-r2); /* remove v0 */
       if (DEBUGLEVEL>1) err_printf("v0 removed: %Ps\n", m_inv);
       m_inv = shallowtrans(m_inv);
       if (!mprec) break;
@@ -782,11 +783,11 @@ gcharmat_tinverse(GEN gc, GEN m, long prec)
     for (k = 1; k <= r2; k++)
       shallow_clean_rat(gel(m_inv,nm-k+1), 1, nm-1, NULL, prec);
   }
-  if (ncm)
+  if (nalg)
   {
     long i, j, e;
     for (i = 1; i<=r1+r2; i++)
-      for (j = 1; j <= ncm; j++)
+      for (j = 1; j <= nalg; j++)
       {
         e = gexpo(gcoeff(m_inv, ns+nc+j, ns+nc+i));
         if (e > -20) /* TODO is this bound too permissive? */
