@@ -2017,7 +2017,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     if (CHECK->f_post) res = CHECK->f_post(CHECK, res, u);
     return res;
   }
-  if (!res) pari_err_PREC("fincke_pohst");
+  if (!res) return NULL;
 
   z = cgetg(4,t_VEC);
   gel(z,1) = gcopy(gel(res,1));
