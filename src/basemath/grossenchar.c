@@ -245,11 +245,8 @@ hnf_block(GEN m, long r0, long nr, long c0, long nc)
   block = rowreverse(block);
 
   (void)ZM_hnfall(block, &u, 1);
-  vecreverse_inplace(u);
-  uu = matid(nm);
-  /* embed in matid */
-  for (k = 1; k <= nc; k++)
-    gel(uu,c0+k) = embedcol(gel(u,k),nm,c0);
+  vecreverse_inplace(u); uu = matid(nm); /* embed in matid */
+  for (k = 1; k <= nc; k++) gel(uu,c0+k) = embedcol(gel(u,k),nm,c0);
   return gerepilecopy(av, uu);
 }
 
@@ -262,9 +259,8 @@ lll_block(GEN m, long r0, long nr, long c0, long nc)
   pari_sp av = avma;
 
   block = matslice(m, r0+1, r0+nr, c0+1, c0+nc);
-  u = lll(block); vecreverse_inplace(u);
-  if (lg(u) <= nc) return NULL;
-  uu = matid(nm); /* embed in matid */
+  u = lll(block); if (lg(u) <= nc) return NULL;
+  vecreverse_inplace(u); uu = matid(nm); /* embed in matid */
   for (k = 1; k <= nc; k++) gel(uu,c0+k) = embedcol(gel(u,k),nm,c0);
   return gerepilecopy(av, uu);
 }
@@ -628,8 +624,7 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm)
       }
       if (emax < bit) break;
       if (DEBUGLEVEL>1) err_printf("cm select: doubling prec\n");
-      mprec = precdbl(mprec);
-      m = gcharmatnewprec_shallow(gc, mprec);
+      mprec = precdbl(mprec); m = gcharmatnewprec_shallow(gc, mprec);
     }
     if (DEBUGLEVEL>2) err_printf("rounded Nargs -> %Ps\n", Nargs);
     u = hnf_block(Nargs, 0, nalg, ns+nc, n-1);
@@ -647,10 +642,8 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm)
     GEN u = NULL;
     while (1)
     {
-      u = lll_block(m, ns+nc, n, ns+nc, nalg); if (u) break;
-      mprec = precdbl(mprec);
-      /* recompute m0 * u0 to higher prec */
-      m = gcharmatnewprec_shallow(gc, mprec);
+      if ((u = lll_block(m, ns+nc, n, ns+nc, nalg))) break;
+      mprec = precdbl(mprec); m = gcharmatnewprec_shallow(gc, mprec);
     }
     u0 = ZM_mul(u0, u); m = RgM_ZM_mul(m, u);
     if (DEBUGLEVEL>1) err_printf("after LLL reduction (CM block) -> %Ps\n", m);
@@ -662,10 +655,8 @@ gchar_hnfreduce_shallow(GEN gc, GEN cm)
     GEN u = NULL;
     while (1)
     {
-      u = lll_block(m, ns+nc, n, ns+nc+nalg, n-1-nalg); if (u) break;
-      mprec = precdbl(mprec);
-      /* recompute m0 * u0 to higher prec */
-      m = gcharmatnewprec_shallow(gc, mprec);
+      if ((u = lll_block(m, ns+nc, n, ns+nc+nalg, n-1-nalg))) break;
+      mprec = precdbl(mprec); m = gcharmatnewprec_shallow(gc, mprec);
     }
     u0 = ZM_mul(u0, u); m = RgM_ZM_mul(m, u);
     if (DEBUGLEVEL>1) err_printf("after LLL reduction (trans block) -> %Ps\n", m);
@@ -861,7 +852,7 @@ gcharmatnewprec_shallow(GEN gc, long mprec)
   }
   gchar_set_nf(gc, nf);
   gchar_set_nfprec(gc, nfprec);
-  return gmul(m0, u0);
+  return RgM_ZM_mul(m0, u0);
 }
 
 static void _check_gchar_group(GEN gc, long flag);
