@@ -115,7 +115,7 @@ F2xqE_dbl_slope(GEN P, GEN a, GEN T, GEN *slope)
   if (typ(a)==t_VECSMALL)
   {
     GEN a2 = a;
-    if (!lgpol(gel(P,1))) return ellinf();
+    if (!lgpol(gel(P,1))) { *slope = NULL; return ellinf(); }
     *slope = F2x_add(x, F2xq_div(y, x, T));
     Q = cgetg(3,t_VEC);
     gel(Q, 1) = F2x_add(F2xq_sqr(*slope, T), F2x_add(*slope, a2));
@@ -144,9 +144,8 @@ static GEN
 F2xqE_add_slope(GEN P, GEN Q, GEN a, GEN T, GEN *slope)
 {
   GEN Px, Py, Qx, Qy, R;
-  *slope = NULL; /* -Wall */
-  if (ell_is_inf(P)) return Q;
-  if (ell_is_inf(Q)) return P;
+  if (ell_is_inf(P)) { *slope = NULL; return Q; }
+  if (ell_is_inf(Q)) { *slope = NULL; return P; }
   Px = gel(P,1); Py = gel(P,2);
   Qx = gel(Q,1); Qy = gel(Q,2);
   if (F2x_equal(Px, Qx))
@@ -154,7 +153,7 @@ F2xqE_add_slope(GEN P, GEN Q, GEN a, GEN T, GEN *slope)
     if (F2x_equal(Py, Qy))
       return F2xqE_dbl_slope(P, a, T, slope);
     else
-      return ellinf();
+      { *slope = NULL; return ellinf(); }
   }
   *slope = F2xq_div(F2x_add(Py, Qy), F2x_add(Px, Qx), T);
   R = cgetg(3,t_VEC);
