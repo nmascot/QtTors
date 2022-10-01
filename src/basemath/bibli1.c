@@ -1963,7 +1963,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
       retmkvec3(gen_0, gen_0, cgetg(1,t_MAT));
     }
     u = lllfp(a, 0.75, LLL_GRAM | LLL_IM);
-    if (lg(u) != lg(a)) return NULL;
+    if (lg(u) != lg(a)) return gc_NULL(av);
     r = qf_apply_RgM(a,u);
     i = gprecision(r);
     if (i)
@@ -1974,7 +1974,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     }
     if (DEBUGLEVEL>2) err_printf("first LLL: prec = %ld\n", prec);
     r = qfgaussred_positive(r);
-    if (!r) return NULL;
+    if (!r) return gc_NULL(av);
     for (i=1; i<l; i++)
     {
       GEN s = gsqrt(gcoeff(r,i,i), prec);
@@ -1984,12 +1984,12 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   }
   /* now r~ * r = a in LLL basis */
   rinv = RgM_inv_upper(r);
-  if (!rinv) return NULL;
+  if (!rinv) return gc_NULL(av);
   rinvtrans = shallowtrans(rinv);
   if (DEBUGLEVEL>2)
     err_printf("Fincke-Pohst, final LLL: prec = %ld\n", gprecision(rinvtrans));
   v = lll(rinvtrans);
-  if (lg(v) != lg(rinvtrans)) return NULL;
+  if (lg(v) != lg(rinvtrans)) return gc_NULL(av);
 
   rinvtrans = RgM_mul(rinvtrans, v);
   v = ZM_inv(shallowtrans(v),NULL);
@@ -2009,15 +2009,14 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     GEN q;
     if (CHECK && CHECK->f_init) bound = CHECK->f_init(CHECK, r, u);
     q = gaussred_from_QR(r, gprecision(vnorm));
-    if (!q) pari_err_PREC("fincke_pohst");
-    res = smallvectors(q, bound, stockmax, CHECK);
+    if (q) res = smallvectors(q, bound, stockmax, CHECK);
   } pari_ENDCATCH;
+  if (!res) return gc_NULL(av);
   if (CHECK)
   {
     if (CHECK->f_post) res = CHECK->f_post(CHECK, res, u);
     return res;
   }
-  if (!res) return NULL;
 
   z = cgetg(4,t_VEC);
   gel(z,1) = gcopy(gel(res,1));
