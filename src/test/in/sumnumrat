@@ -16,6 +16,8 @@ sumnumrat(0,0)
 prodnumrat(1,1)
 prodeulerrat(1)
 sumeulerrat(0)
+sumeulerrat(1/p,2,10^7)
+prodeulerrat(1+1/p,2,10^7)
 \\ #2357
 exponent(prodeulerrat(1/(1-1/x^2)) - zeta(2))
 

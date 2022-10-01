@@ -2309,21 +2309,35 @@ sdmob(GEN s, long n, GEN fan)
 }
 /* log (zeta(s) * prod_i (1 - P[i]^-s) */
 static GEN
-logzetan(GEN s, GEN P, long prec)
+logzetan(GEN s, GEN P, long N, long prec)
 {
   pari_sp av = avma;
   GEN Z = gzeta(s, prec);
-  long i, l = lg(P);
-  for (i = 1; i < l; i++)
+  if (P)
   {
-    Z = gsub(Z, gdiv(Z, gpow(gel(P,i), s, prec)));
-    if (gc_needed(av,2)) Z = gerepileupto(av, Z);
+    long i, l = lg(P);
+    for (i = 1; i < l; i++)
+    {
+      Z = gsub(Z, gdiv(Z, gpow(gel(P,i), s, prec)));
+      if (gc_needed(av,2)) Z = gerepileupto(av, Z);
+    }
+  }
+  else
+  {
+    forprime_t T;
+    ulong p;
+    u_forprime_init(&T, 2, N); av = avma;
+    while ((p = u_forprime_next(&T)))
+    {
+      Z = gsub(Z, gdiv(Z, gpow(utoipos(p), s, prec)));
+      if (gc_needed(av,2)) Z = gerepileupto(av, Z);
+    }
   }
   return glog(Z, prec);
 }
 static GEN
-sumlogzeta(GEN ser, GEN s, GEN P, double rs, double lN, long vF, long lim,
-           long prec)
+sumlogzeta(GEN ser, GEN s, GEN P, long N, double rs, double lN, long vF,
+           long lim, long prec)
 {
   GEN z = gen_0, v = vecfactoru_i(vF,lim);
   pari_sp av = avma;
@@ -2335,7 +2349,7 @@ sumlogzeta(GEN ser, GEN s, GEN P, double rs, double lN, long vF, long lim,
     if (!gequal0(t))
     { /* (n Re(s) - 1) log2(N) bits cancel in logzetan */
       long prec2 = prec + nbits2extraprec((n*rs-1) * lN);
-      GEN L = logzetan(gmulsg(n,gprec_wensure(s,prec2)), P, prec2);
+      GEN L = logzetan(gmulsg(n,gprec_wensure(s,prec2)), P, N, prec2);
       z = gerepileupto(av, gadd(z, gmul(L, t)));
       z = gprec_wensure(z, prec);
     }
@@ -2353,18 +2367,34 @@ rfrac_evalfp(GEN F, GEN x, long prec)
   return rdivii(a, b, prec + EXTRAPRECWORD);
 }
 
-/* { F(p^s): p in P, p >= a }, F t_RFRAC */
+/* op_p F(p^s): p in P, p >= a, F t_RFRAC */
 static GEN
-vFps(GEN P, long a, GEN F, GEN s, long prec)
+opFps(GEN(*op)(GEN,GEN), GEN P, long N, long a, GEN F, GEN s, long prec)
 {
-  long i, j, l = lg(P);
-  GEN v = cgetg(l, t_VEC);
-  for (i = j = 1; i < l; i++)
+  GEN S = op == gadd? gen_0: gen_1;
+  pari_sp av = avma;
+  if (P)
   {
-    GEN p = gel(P,i); if (cmpiu(p, a) < 0) continue;
-    gel(v, j++) = rfrac_evalfp(F, gpow(p, s, prec), prec);
+    long i, j, l = lg(P);
+    for (i = j = 1; i < l; i++)
+    {
+      GEN p = gel(P,i); if (cmpiu(p, a) < 0) continue;
+      S = op(S, rfrac_evalfp(F, gpow(p, s, prec), prec));
+      if (gc_needed(av,2)) S = gerepileupto(av, S);
+    }
   }
-  setlg(v, j); return v;
+  else
+  {
+    forprime_t T;
+    ulong p;
+    u_forprime_init(&T, a, N); av = avma;
+    while ((p = u_forprime_next(&T)))
+    {
+      S = op(S, rfrac_evalfp(F, gpow(utoipos(p), s, prec), prec));
+      if (gc_needed(av,2)) S = gerepileupto(av, S);
+    }
+  }
+  return S;
 }
 
 static void
@@ -2407,9 +2437,9 @@ sumeulerrat(GEN F, GEN s, long a, long prec)
   lim = (long)ceil(B / (rs*lN - log2(r)));
   ser = gmul(real_1(prec2), F);
   ser = rfracrecip_to_ser_absolute(ser, lim+1);
-  P = primes_interval(gen_2, utoipos(N));
-  z = sumlogzeta(ser, s, P, rs, lN, vF, lim, prec);
-  z = gadd(z, vecsum(vFps(P, a, F, s, prec)));
+  P = N < 1000000? primes_interval(gen_2, utoipos(N)): NULL;
+  z = sumlogzeta(ser, s, P, N, rs, lN, vF, lim, prec);
+  z = gadd(z, opFps(&gadd, P, N, a, F, s, prec));
   return gerepilecopy(av, gprec_wtrunc(z, prec));
 }
 
@@ -2460,9 +2490,9 @@ prodeulerrat(GEN F, GEN s, long a, long prec)
       || lim * log2(r) > 4 * B) NF = gmul(NF, real_1(prec2));
   ser = integser(rfrac_to_ser_i(rfrac_logderiv(NF,DF), lim+3));
   /* ser = log f, f = F(1/x) + O(x^(lim+1)) */
-  P = primes_interval(gen_2, utoipos(N));
-  z = gexp(sumlogzeta(ser, s, P, rs, lN, vF, lim, prec), prec);
-  z = gmul(z, vecprod(vFps(P, a, F, s, prec)));
+  P = N < 1000000? primes_interval(gen_2, utoipos(N)): NULL;
+  z = gexp(sumlogzeta(ser, s, P, N, rs, lN, vF, lim, prec), prec);
+  z = gmul(z, opFps(&gmul, P, N, a, F, s, prec));
   return gerepilecopy(ltop, gprec_wtrunc(z, prec));
 }
 
