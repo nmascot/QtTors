@@ -388,7 +388,7 @@ extern char *current_psfile, *pari_datadir;
 /* Define this to thoroughly check "random" garbage collecting */
 #ifdef DEBUG_LOWSTACK
 #  define low_stack(x,l) 1
-#  define gc_needed(av,n) 1
+#  define gc_needed(av,n) ((void)av,1)
 #else
 #  define low_stack(x,l) ((void)(x),avma < (pari_sp)(l))
 #  define gc_needed(av,n) (avma < (pari_sp)stack_lim(av,n) && (av) > ((pari_mainstack->bot >> 1) + (pari_mainstack->top >> 1)))
