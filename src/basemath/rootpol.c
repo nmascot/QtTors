@@ -233,7 +233,7 @@ newton_polygon(GEN p, long k)
   {
     double slope;
     h = i+1;
-    while (L[i] == -pariINFINITY) { i = h; h = i+1; vertex[h] = 1; }
+    while (L[i] == -pariINFINITY) { vertex[h] = 1; i = h; h = i+1; }
     slope = L[h] - L[i];
     for (j = i+2; j<=n; j++) if (L[j] != -pariINFINITY)
     {

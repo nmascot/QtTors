@@ -101,6 +101,8 @@ polroots(x^5-1370*x^3+375380*x+2477386)
 \\#2286
 polroots(1.E-47*t^6 + 1.E-47*t^5 + 4.E-46*t^4)
 
+polroots(4*x^3+4*x^2+28*x+144) \\ newton_polygon regression
+
 polzagier(-1,1)
 
 \\ Errors
