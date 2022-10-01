@@ -3003,6 +3003,12 @@ gchar_set_evalprec(GEN gc, long prec) { gmael(gc, 8, 1)[1] = prec; }
 INLINE void
 gchar_set_prec(GEN gc, long prec) { gmael(gc, 8, 1)[2] = prec; }
 INLINE void
+gchar_copy_precs(GEN gc, GEN gc2)
+{
+  gel(gc2, 8) = shallowcopy(gel(gc,8));
+  gmael(gc2, 8, 1) = shallowcopy(gmael(gc, 8, 1));
+}
+INLINE void
 gchar_set_nfprec(GEN gc, long prec) { gmael(gc, 8, 1)[3] = prec; }
 INLINE long
 gchar_get_ntors(GEN gc)   { return  gmael(gc, 8, 2)[1]; }

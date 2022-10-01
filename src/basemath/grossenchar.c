@@ -859,8 +859,7 @@ static void _check_gchar_group(GEN gc, long flag);
 static void
 check_gchar_group(GEN gc) { _check_gchar_group(gc, 0); }
 
-/* increase prec if needed. FIXME: hardcodes gc[8] */
-/* newprec: requested precision for m_inv */
+/* increase prec if needed. newprec: requested precision for m_inv */
 static GEN
 gcharnewprec_i(GEN gc, long newprec)
 {
@@ -876,8 +875,7 @@ gcharnewprec_i(GEN gc, long newprec)
     if (DEBUGLEVEL) pari_warn(warnprec,"gcharnewprec",newprec);
     nfprec += newprec - prec;
     prec = newprec;
-    gel(gc2, 8) = shallowcopy(gel(gc,8));
-    gmael(gc2, 8, 1) = shallowcopy(gmael(gc, 8, 1));
+    gchar_copy_precs(gc, gc2);
     gchar_set_prec(gc2, prec);
     gchar_set_nfprec(gc2, nfprec);
   }
