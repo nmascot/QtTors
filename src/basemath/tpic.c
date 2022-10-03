@@ -907,15 +907,16 @@ tDivMul(GEN f, GEN W, GEN T, GEN pe)
 }
 
 GEN
-tDivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN p, GEN pe, ulong excess)
+tDivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, ulong maxattempts)
 { /* Does products s*t, with s=sum n_i s_i, n_i = 0 50%, -1 25%, +1 25%; similarly for t */
   /* Fails from time to time but overall good speedup */
   pari_sp av=avma;
-  ulong nZ,j,P,r;
+  ulong nZ,j,P,r,n;
   GEN WAB,s,t,st;
   nZ = lg(gel(WA,1));
-  while(1)
+  for(n=1;maxattempts==0 || n<=maxattempts;n++)
   {
+    if(DEBUGLEVEL>=5) printf("tDivAdd attempt %lu out of %lu\n",n,maxattempts);
     WAB = cgetg(d+excess+1,t_MAT);
     for(j=1;j<=d+excess;j++)
     {
@@ -932,10 +933,11 @@ tDivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN p, GEN pe, ulong excess)
     r = lg(WAB)-1;
     if(r==d)
       return gerepileupto(av,WAB);
-    if(DEBUGLEVEL>=4) err_printf("divadd(%lu/%lu)",r,d);
+    if(DEBUGLEVEL>=4) err_printf("tdivadd(%lu/%lu)",r,d);
     excess++;
     set_avma(av);
   }
+  return NULL;
 }
 
 GEN
@@ -974,7 +976,7 @@ tDivSub(GEN WA, GEN WB, GEN KV, ulong d, GEN T, GEN p, long e, GEN pe, ulong nIG
     res = ZqXnM_ker(K,T,pe,p,e);
     r = lg(res)-1;
     if(r==d) return gerepileupto(av,res);
-    if(DEBUGLEVEL>=4) err_printf("divsub(%lu/%lu)",r,d);
+    if(DEBUGLEVEL>=4) err_printf("tdivsub(%lu/%lu)",r,d);
     set_avma(av1);
   }
 }
@@ -1220,7 +1222,7 @@ tPicChord(GEN J, GEN WA, GEN WB, long flag)
   d0 = Jgetd0(J);
 
   /* L(4D0-A-B) */
-  WAWB = tDivAdd(WA,WB,2*d0+1-g,T,p,pe,0);
+  WAWB = tDivAdd(WA,WB,2*d0+1-g,T,pe,p,0,0);
   /* L(3D0-A-B) */
   WAB = tDivSub(V1,WAWB,KV3,d0+1-g,T,p,e,pe,2);
   if(gc_needed(av,1)) WAB = gerepileupto(av,WAB);
@@ -1757,7 +1759,7 @@ tPicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long
 {
   pari_sp av = avma;
   ulong a,nZ,nV2,nAuts,n,nOP,m,i,j;
-  GEN f0,df,vars,pe,T,FrobMat,Z,Z0,P,P0,FrobCyc,AutData,OP,V1,V2,V20,W0,V,M,I,KV,U,params,L12,J;
+  GEN f0,df,vars,pe,T,FrobMat,Z,Z0,P,P0,L10,FrobCyc,AutData,OP,V1,V2,V20,V3,V5,W0,V,M,I,KV,U,params,L12,J;
   struct pari_mt pt;
   GEN worker,done,E,H;
   long workid,pending,k;
@@ -1785,6 +1787,7 @@ tPicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long
     gmael(AutData,i,2) = gmael(Auts,i,2);
   }
   f0 = gsubst(f,vars[3],gen_0);
+  L10 = gsubst(gel(L,1),vars[3],gen_0);
   df = deriv(f,vars[2]);
   /* Loop until we have enough pts */
   while(n<nZ)
@@ -1813,6 +1816,18 @@ tPicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long
       gmael(AutData,i,1) = gconcat(gmael(AutData,i,1),gmael(OP,4,i));
     /* Update # pts */
     n += nOP;
+    if(n>=5*d0+1-g && n<nZ) // Try early stop
+    {
+      V1 = FnsEvalAt_Rescale(L10,Z0,vars,T,p,1,p);
+      V2 = DivAdd(V1,V1,2*d0+1-g,T,p,p,0,10);
+      V3 = V2 ? DivAdd(V1,V2,3*d0+1-g,T,p,p,0,10) : NULL;
+      V5 = V3 ? DivAdd(V3,V2,5*d0+1-g,T,p,p,0,5) : NULL;
+    }
+    if(V5)
+    {
+      if(DEBUGLEVEL>=2||1) printf("picinit: nZ=%lu instead of %lu+\n",n,nZ);
+      break;
+    }
   }
   //pari_printf("Frob: %Ps\n",FrobCyc);
   //pari_printf("Aut 1: %Ps\n",gmael(AutData,1,1));
@@ -1821,7 +1836,7 @@ tPicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long
   V = cgetg(6,t_VEC);
   gel(V,1) = V1 = tFnsEvalAt(gel(L,1),Z,vars,T,pe,p,e,h);
   gel(V,2) = V2 = tFnsEvalAt(gel(L,2),Z,vars,T,pe,p,e,h);
-  gel(V,3) = tDivAdd(V1,V2,3*d0+1-g,T,p,pe,0);
+  gel(V,3) = tDivAdd(V1,V2,3*d0+1-g,T,pe,p,0,0);
   V20 = ZqXnM_to_ZqM_shallow(V2);
   gel(V,5) = I = gel(FqM_indexrank(V20,T,p),1); /* Rows of V2 forming invertible block */
   /* That invertible block */
@@ -2012,7 +2027,7 @@ tPicEval(GEN J, GEN W)
   for(i1=1;i1<n1;i1++)
   {
     av1 = avma;
-    S1 = tDivAdd(W,gel(U1,i1),2*d0+1,T,p,pe,0); /* L(4D0-D-E1) */
+    S1 = tDivAdd(W,gel(U1,i1),2*d0+1,T,pe,p,0,0); /* L(4D0-D-E1) */
     S1 = tDivSub(V,S1,KV,1,T,p,e,pe,2); /* L(2D0-D-E1), generically 1-dimensional */
     S1 = gerepileupto(av1,gel(S1,1));
     S1 = tDivMul(S1,V,T,pe); /* L(4D0-D-E1-ED) */
@@ -2023,7 +2038,7 @@ tPicEval(GEN J, GEN W)
     for(i2=1;i2<n2;i2++)
     {
       av2 = avma;
-      S2 = tDivAdd(S1,gel(U2,i2),2*d0+1,T,p,pe,0); /* L(4D0-E1-E2-ED) */
+      S2 = tDivAdd(S1,gel(U2,i2),2*d0+1,T,pe,p,0,0); /* L(4D0-E1-E2-ED) */
       S2 = gerepileupto(av2,S2);
       S2 = tDivSub(V,S2,KV,1,T,p,e,pe,2); /* L(2D0-E1-E2-ED), generically 1-dimensional */
       s2 = gel(S2,1); /* Generator */
