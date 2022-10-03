@@ -992,7 +992,9 @@ GEN JgetT(GEN J);
 GEN Jgetp(GEN J);
 GEN JgetLp(GEN J);
 GEN DivMul(GEN f, GEN W, GEN T, GEN p);
-GEN DivAdd1(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, long flag);
+GEN DivAdd1(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, ulong maxtattempts, long flag); /* No coefs */
+GEN DivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, ulong maxtattempts); /* Coefs +-1 */
+GEN DivAdd0(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, ulong maxtattempts); /* Rand coefs */
 GEN PicRefreshPairings(GEN J, GEN FRparams, GEN T, GEN Pairings, GEN UsedNames, GEN Want, GEN WantNames);
 GEN PicTors_UpdatePairings(GEN J, GEN FRparams, GEN BT, GEN R, GEN Tnew, GEN TnewPairings, int* replace);
 GEN VecExtend1_shallow(GEN V, GEN X);

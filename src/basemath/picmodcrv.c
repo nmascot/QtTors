@@ -1956,7 +1956,7 @@ ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE
   {
     d = 3*d0+1-g;
     if(DEBUGLEVEL) printf("modpicinit: M6(GammaH)(-3C0), dim %lu\n",d);
-    V3 = DivAdd(V2,V1,d,T,p,pe,d0,0); // TODO tune excess=d0
+    V3 = DivAdd(V2,V1,d,T,pe,p,d0,0); // TODO tune excess=d0
   }
   gel(V,3) = V3;
   /* Finish constructing J */

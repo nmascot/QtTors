@@ -880,7 +880,7 @@ DivMul(GEN f, GEN W, GEN T, GEN pe)
 }
 
 GEN
-DivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN p, GEN pe, ulong excess, ulong maxattempts)
+DivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, ulong maxattempts)
 { /* Does products s*t, with s=sum n_i s_i, n_i = 0 50%, -1 25%, +1 25%; similarly for t */
   /* Fails from time to time but overall good speedup */
   pari_sp av=avma;
@@ -914,9 +914,9 @@ DivAdd(GEN WA, GEN WB, ulong d, GEN T, GEN p, GEN pe, ulong excess, ulong maxatt
 }
 
 GEN
-DivAdd0(GEN WA, GEN WB, ulong d, GEN T, GEN p, GEN pe, ulong excess, ulong maxattempts)
-{ /* Does products s*t, with s=sum n_i s_i, n_i = 0 50%, -1 25%, +1 25%; similarly for t */
-  /* Fails from time to time but overall good speedup */
+DivAdd0(GEN WA, GEN WB, ulong d, GEN T, GEN pe, GEN p, ulong excess, ulong maxattempts)
+{ /* Does products s*t, with s and t lin combs with random coefs in Fq */
+  /* Slowest but safest version */
   pari_sp av=avma;
   ulong nZ,j,P,r,n;
   GEN WAB,s,t,st;
@@ -1330,7 +1330,7 @@ PicChord(GEN J, GEN WA, GEN WB, long flag)
   d0 = Jgetd0(J);
 
   /* L(4D0-A-B) */
-  WAWB = DivAdd(WA,WB,2*d0+1-g,T,p,pe,0,0);
+  WAWB = DivAdd(WA,WB,2*d0+1-g,T,pe,p,0,0);
   /* L(3D0-A-B) */
   WAB = DivSub(V1,WAWB,KV3,d0+1-g,T,p,e,pe,2);
   if(gc_needed(av,1)) WAB = gerepileupto(av,WAB);
@@ -2270,7 +2270,7 @@ PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long 
     {
       V1 = FnsEvalAt_Rescale(gel(L,1),Z,vars,T,p,1,p);
       V2 = FnsEvalAt_Rescale(gel(L,2),Z,vars,T,p,1,p);
-      V3 = DivAdd(V1,V2,3*d0+1-g,T,p,pe,0,10);
+      V3 = DivAdd(V1,V2,3*d0+1-g,T,p,p,0,10);
       V5 = V3 ? DivAdd(V3,V2,5*d0+1-g,T,p,p,0,5) : NULL;
     }
     if(V5)
@@ -2285,7 +2285,7 @@ PicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long 
   { // Recompute at high accuracy
     V1 = FnsEvalAt_Rescale(gel(L,1),Z,vars,T,p,e,pe);
     V2 = FnsEvalAt_Rescale(gel(L,2),Z,vars,T,p,e,pe);
-    V3 = DivAdd(V1,V2,3*d0+1-g,T,p,pe,0,0);
+    V3 = DivAdd(V1,V2,3*d0+1-g,T,pe,p,0,0);
   }
   gel(V,1) = V1;
   gel(V,2) = V2;
@@ -2479,7 +2479,7 @@ JacLift(GEN J, ulong e2)
       gcoeff(M,i,j) = gcoeff(V2,I[i],j);
   }
   gel(V,4) = ZpXQMinv(M,T,pe2,p,e2);
-  gel(V,3) = DivAdd(gel(V,1),gel(V,2),3*d0+1-g,T,p,pe2,0,0);
+  gel(V,3) = DivAdd(gel(V,1),gel(V,2),3*d0+1-g,T,pe2,p,0,0);
   W0 = gel(V,1); /* TODO can it happen that W0 != V1 even though all data is present? */
   setlg(params,6);
   gel(params,2) = T;
@@ -2553,7 +2553,7 @@ PicEval(GEN J, GEN W)
   for(i1=1;i1<n1;i1++)
   {
     av1 = avma;
-    S1 = DivAdd(W,gel(U1,i1),2*d0+1,T,p,pe,0,0); /* L(4D0-D-E1) */
+    S1 = DivAdd(W,gel(U1,i1),2*d0+1,T,pe,p,0,0); /* L(4D0-D-E1) */
     S1 = DivSub(V,S1,KV,1,T,p,e,pe,2); /* L(2D0-D-E1), generically 1-dimensional */
     S1 = gerepileupto(av1,gel(S1,1));
     S1 = DivMul(S1,V,T,pe); /* L(4D0-D-E1-ED) */
@@ -2564,7 +2564,7 @@ PicEval(GEN J, GEN W)
     for(i2=1;i2<n2;i2++)
     {
       av2 = avma;
-      S2 = DivAdd(S1,gel(U2,i2),2*d0+1,T,p,pe,0,0); /* L(4D0-E1-E2-ED) */
+      S2 = DivAdd(S1,gel(U2,i2),2*d0+1,T,pe,p,0,0); /* L(4D0-E1-E2-ED) */
       S2 = gerepileupto(av2,S2);
       S2 = DivSub(V,S2,KV,1,T,p,e,pe,2); /* L(2D0-E1-E2-ED), generically 1-dimensional */
       s2 = gel(S2,1); /* Generator */
@@ -3747,7 +3747,7 @@ PicNorm(GEN J, GEN F1, GEN F2, GEN WE, ulong n)
   nZ = lg(gel(V,1))-1;
   Vn = JgetV(J,n);
 
-  WEVn = DivAdd(Vn,WE,nVn2-nS,T,p,pe,0,0); /* Vn*WE = V_{n+2}(-E) */
+  WEVn = DivAdd(Vn,WE,nVn2-nS,T,pe,p,0,0); /* Vn*WE = V_{n+2}(-E) */
   S = FindSuppl(WE,nS,V,NULL,T,p,pe); /* V = V(-E) + S, dim S = nS */
   SS = FindSuppl(WEVn,nS,V,Vn,T,p,pe); /* V_{n+2} = V_{n+2}(-E) + S, dim SS = nS */
 
