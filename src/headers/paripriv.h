@@ -1002,6 +1002,7 @@ GEN VecSmallExtend(GEN V);
 GEN M2ABCD_1block(GEN M, ulong top, ulong left, GEN uv);
 void Get_ff_aT(GEN AT, GEN p, ulong* pa, GEN* pT);
 GEN FnEvalAt(GEN F, GEN P, GEN vars, GEN T, GEN p, long e, GEN pe);
+GEN FnsEvalAt_Rescale(GEN Fns, GEN Z, GEN vars, GEN T, GEN p, long e, GEN pe);
 GEN CurveApplyAut(GEN aut, GEN P, GEN vars, GEN T, GEN pe, GEN p, long e);
 GEN JgetT(GEN J);
 GEN Jgetp(GEN J);
