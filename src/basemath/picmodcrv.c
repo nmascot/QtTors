@@ -1625,14 +1625,14 @@ GEN
 ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE, ulong qprec)
 { /* J_H(N) over Zq/p^e, q=p^a */
   /* TODO sort cusps? */
-  pari_sp av = avma;
+  pari_sp av = avma, av1;
   long t;
   GEN J,T,pe,H1;
   GEN Cusps,CuspsGal,CuspsQexp,CuspsMats,CuspsWidths,CuspsTags,CuspsGalDegs,CuspsGalDiamp,CuspsGalDiampDegs;
-  GEN Pts,PtsTags,MPts,PtsFrob,PtsDiamp,PtsDiamp0;
+  GEN Pts,PtsTags,MPts,PtsFrob,PtsDiamp,PtsDiamp0,PtsFrob0;
   GEN list_j,E,Ml1,zN,zNpows,TH,M2gens,geni,M2,B,M2qexps;
-  GEN C0o,C0,C02,E1o,E1,E2o,E2,M,U0,V1,V2,V,KV,EvalData,I,M4Q,V2qexps,V2gens,pageV2;
-  ulong up,g,d0,nCusps,nCuspsGal,nCuspsGalDiamp,mQ,nPts,d,d1,nB,i,j,k,s,sprec;
+  GEN C0o,C0,C02,E1o,E1,E2o,E2,M,U0,M20,V1,V2,V3,V5,V,KV,EvalData,I,M4Q,V2qexps,V2gens,pageV2;
+  ulong up,g,d0,nCusps,nCuspsGal,nCuspsGalDiamp,mQ,nZ,nPts,d,d1,nB,i,j,k,s,sprec;
   struct pari_mt pt;
   GEN worker,params,ie,done;
   long pending,workid;
@@ -1835,39 +1835,63 @@ ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE
     }
   }
   mt_queue_end(&pt);
-  if(DEBUGLEVEL) printf("\nmodpicinit: Pruning, dim %lu, eval on >= %lu pts\n",d-zv_sum(C0),5*d0+1);
-  /* Reduce # pts at which we evaluate */
-  if(UseTp)
-  {
-    Pts = SubPerms_inf(mkvec2(PtsFrob,PtsDiamp),5*d0+1);
-    PtsFrob = gmael(Pts,2,1); /* Induced perm */
-    PtsDiamp = gmael(Pts,2,2); /* Induced perm */
-    Pts = gel(Pts,1); /* Selected indices */
-  }
-  else
-  {
-    Pts = SubPerms_inf(mkvec(PtsFrob),5*d0+1);
-    PtsFrob = gmael(Pts,2,1); /* Induced perm */
-    Pts = gel(Pts,1); /* Selected indices */
-  }
-  nPts = lg(Pts);
-  if(DEBUGLEVEL) printf("modpicinit: Wanted to reduce nZ to %lu, actually got %lu\n",5*d0+1,nPts-1);
-  V1 = cgetg(d+1,t_MAT);
-  for(j=1;j<=d;j++)
-  {
-    gel(V1,j) = cgetg(nPts,t_COL);
-    for(i=1;i<nPts;i++)
-      gcoeff(V1,i,j) = gcoeff(M2,Pts[i],j);
-  }
+  if(DEBUGLEVEL) printf("\nmodpicinit: Pruning, dim %lu, eval on >= %lu pts (%lu safe)\n",d-zv_sum(C0),5*d0+1-g,5*d0+1);
   /* M2 -> S2(>=3cusps) = M2(-C0) */
   U0 = MRRsubspace(M2qexps,C0,NULL,T,pe,p,e);
-  gel(V,1) = V1 = FqM_mul(V1,U0,T,pe);
+  M20 = FqM_mul(M2,U0,T,pe);
+  d = d0+1-g;
+  /* Reduce # pts at which we evaluate */
+  PtsFrob0 = PtsFrob;
+  PtsDiamp0 = PtsDiamp;
+  av1 = avma;
+  V1 = V2 = V2gens = V3 = NULL; /* Else gcc freaks out */
+  for(nZ=5*d0+1-g;nZ<=5*d0+1;nZ++) // TODO nZ=nPts?
+  {
+    if(UseTp)
+    {
+      Pts = SubPerms_inf(mkvec2(PtsFrob0,PtsDiamp0),nZ);
+      PtsFrob = gmael(Pts,2,1); /* Induced perm */
+      PtsDiamp = gmael(Pts,2,2); /* Induced perm */
+      Pts = gel(Pts,1); /* Selected indices */
+    }
+    else
+    {
+      Pts = SubPerms_inf(mkvec(PtsFrob0),nZ);
+      PtsFrob = gmael(Pts,2,1); /* Induced perm */
+      Pts = gel(Pts,1); /* Selected indices */
+    }
+    nPts = lg(Pts);
+    if(DEBUGLEVEL) printf("modpicinit: Wanted to reduce nZ to %lu, actually got %lu\n",nZ,nPts-1);
+    V1 = cgetg(d+1,t_MAT);
+    for(j=1;j<=d;j++)
+    {
+      gel(V1,j) = cgetg(nPts,t_COL);
+      for(i=1;i<nPts;i++)
+        gcoeff(V1,i,j) = gcoeff(M20,Pts[i],j);
+    }
+    // Check enough pts
+    V2 = DivAdd1(V1,V1,2*d0+1-g,T,p,p,d0,0,1);// TODO tune excess=d0
+    V2gens = gel(V2,2);
+    V2 = gel(V2,1);
+    V3 = DivAdd(V2,V1,3*d0+1-g,T,p,p,d0,0); // TODO tune excess=d0
+    V5 = DivAdd(V2,V3,5*d0+1-g,T,p,p,d0,5); // TODO tune excess=d0
+    if(V5) break;
+    if(DEBUGLEVEL>=2) printf("V5 FAILED\n");
+    set_avma(av1);
+  }
+  if(DEBUGLEVEL) printf("Out of pruning, nZ=%lu vs %lu\n",nPts-1,5*d0+1);
+  gel(V,1) = V1;
+  // TODO do not recalc if e==1
   /* Forms of weight 4 */
-  d = 2*d0+1-g;
-  if(DEBUGLEVEL) printf("modpicinit: M4(GammaH)(-2C0), dim %lu\n",d);
-  V2 = DivAdd1(V1,V1,d,T,pe,p,d0,1); // TODO tune excess=d0
-  V2gens = gel(V2,2);
-  gel(V,2) = V2 = gel(V2,1);
+  if(e>1)
+  {
+    d = 2*d0+1-g;
+    if(DEBUGLEVEL) printf("modpicinit: M4(GammaH)(-2C0), dim %lu\n",d);
+    V2 = DivAdd1(V1,V1,d,T,pe,p,d0,0,1); // TODO tune excess=d0
+    V2gens = gel(V2,2);
+    V2 = gel(V2,1);
+  }
+  gel(V,2) = V2;
   gel(V,5) = I = gel(FqM_indexrank(V2,T,p),1); /* Rows of V2 forming invertible block */
   M = cgetg(d+1,t_MAT);
   for(j=1;j<=d;j++)
@@ -1928,9 +1952,13 @@ ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE
   }
   gel(EvalData,3) = FqM_mul(M4Q,gel(V,4),T,pe);
   /* Forms of weight 6 */
-  d = 3*d0+1-g;
-  if(DEBUGLEVEL) printf("modpicinit: M6(GammaH)(-3C0), dim %lu\n",d);
-  gel(V,3) = DivAdd1(V2,V1,d,T,pe,p,d0,0); // TODO tune excess=d0
+  if(e>1)
+  {
+    d = 3*d0+1-g;
+    if(DEBUGLEVEL) printf("modpicinit: M6(GammaH)(-3C0), dim %lu\n",d);
+    V3 = DivAdd(V2,V1,d,T,p,pe,d0,0); // TODO tune excess=d0
+  }
+  gel(V,3) = V3;
   /* Finish constructing J */
   gel(J,7) = ie;
   if(DEBUGLEVEL) printf("modpicinit: Computing equation matrices\n");
