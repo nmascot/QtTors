@@ -955,6 +955,8 @@ csa inv 4: 1
 csa inv 5: 1
 csa trace: 1
 csa trace 2: 1
+csa abs trace: 1
+csa abs trace 2: 1
 1
 testcharpol
 1
@@ -1096,6 +1098,7 @@ x^2 + Mod(-y + 13, y^2 - 5)
 [8, -8, 0, 0]~
 [0, 1, -1, 0]~
 11
+22
 3
 [[1, 0, 0, 0; 0, 1, 0, 0; 0, 0, 1, 0; 0, 0, 0, 1], [0, y, 0, 0; 1, 0, 0, 0; 
 0, 0, 0, y; 0, 0, 1, 0], [0, 0, y^2, 0; 0, 0, 0, -y^2; 1, 0, 0, 0; 0, -1, 0,
@@ -1150,6 +1153,8 @@ algsplitm sqr alM: 1
 algsplitm sqr alM 2: 1
 algtrace alM: 1
 algtrace alM 2: 1
+algtrace abs alM: 1
+algtrace abs alM 2: 1
 algtrace prod alM: 1
 algnorm alM: 1
 algnorm alM 2: 1
@@ -1394,6 +1399,7 @@ trivial algebra over a quadratic field
 
 x + Mod(2*y - 1, y^2 + 1)
 Mod(-y - 3, y^2 + 1)
+1
 Mod(-y - 3, y^2 + 1)
 1
 1
@@ -1431,6 +1437,7 @@ at(1), Mat(1), [Mat(1)], 0, [1]]
 x - 1/3
 4/5
 4/5
+4/5
 1
 1
 1
@@ -1455,6 +1462,7 @@ v^0: 1
 mt(v)1
 spl(v)1
 trace(v): 1
+trace abs(v): 1
 norm(v): 1
 charpoly(v): 1
 v+v: 1
@@ -1475,6 +1483,7 @@ trace(v) char 2: 1
 [1/12]~
 [1/49]~
 [-1/84]~
+12
 12
 -1/7
 x - 12
@@ -1499,6 +1508,8 @@ non associative algebra
 csa without maximal order
 simplify bug #1671
 testing simplify: degree 1 cyclic over Q
+1
+1
 1
 1
 1
@@ -1554,7 +1565,11 @@ testing simplify: degree 1 cyclic over Q(i)
 1
 1
 1
+1
+1
 testing simplify: degree 1 csa over Q
+1
+1
 1
 1
 1
@@ -1610,7 +1625,11 @@ testing simplify: degree 1 csa over Q(i)
 1
 1
 1
+1
+1
 testing simplify: quatalg over Q(s5)
+1
+1
 1
 1
 1
@@ -1666,6 +1685,8 @@ testing simplify: quatalg csa over Q
 1
 1
 1
+1
+1
 
 [1   0]
 
@@ -1690,8 +1711,8 @@ testing simplify: quatalg csa over Q
   ***   at top-level: algrandom(1,1)
   ***                 ^--------------
   *** algrandom: incorrect type in checkalg [please apply alginit()] (t_INT).
-  ***   at top-level: algrandom(1,I)
-  ***                 ^--------------
+  ***   at top-level: algrandom(almt,I)
+  ***                 ^-----------------
   *** algrandom: incorrect type in algrandom (t_COMPLEX).
 0
   ***   at top-level: algdim([1,[1],0,0,0,0,0,0,0,0])
@@ -1752,8 +1773,8 @@ testing simplify: quatalg csa over Q
   ***   at top-level: algdivl(almt,m,zero)
   ***                 ^--------------------
   *** algdivl: forbidden division t_MAT (1 x 2) \ t_COL (4 elts).
-  ***   at top-level: algdivl(almt,m,[zero,zero;zero,zero])
-  ***                 ^-------------------------------------
+  ***   at top-level: algdivl(almt,Mat([[zero]~]),[zero,zero;zero,ze
+  ***                 ^----------------------------------------------
   *** algdivl: inconsistent dimensions in algdivl.
   ***   at top-level: algdivl(almt,m,m)
   ***                 ^-----------------
@@ -1835,10 +1856,13 @@ testing simplify: quatalg csa over Q
   *** algissplit: incorrect type in algissplit [use alginit] (t_VEC).
   ***   at top-level: algisramified(almt)
   ***                 ^-------------------
-  *** algisramified: incorrect type in algisramified [use alginit] (t_VEC).
+  *** algisramified: incorrect type in algissplit [use alginit] (t_VEC).
   ***   at top-level: algramifiedplaces(almt)
   ***                 ^-----------------------
-  *** algramifiedplaces: incorrect type in algramifiedplaces [use alginit] (t_VEC).
+  *** algramifiedplaces: incorrect type in algramifiedplaces [not a central simple algebra over a number field] (t_VEC).
+  ***   at top-level: alghasse(al)
+  ***                 ^------------
+  *** alghasse: must provide a place pl.
   ***   at top-level: alghasse(al,-1)
   ***                 ^---------------
   *** alghasse: domain error in is_place_emb: pl <= 0
@@ -1935,10 +1959,19 @@ testing simplify: quatalg csa over Q
   *** algmul: incorrect type in algmul (t_COL).
   ***   at top-level: algdivl(al,[;],matid(1))
   ***                 ^------------------------
-  *** algdivl: impossible inverse in algdivl: [;].
+  *** algdivl: inconsistent dimensions in algdivl.
   ***   at top-level: algdivl(al,matid(1),matrix(1,2))
   ***                 ^--------------------------------
   *** algdivl: inconsistent dimensions in algdivl (nonsquare).
+  ***   at top-level: algdivl(al,matrix(0,3),[;])
+  ***                 ^---------------------------
+  *** algdivl: inconsistent dimensions in algdivl (nonsquare).
+  ***   at top-level: algdivl(al,[;],matrix(0,3))
+  ***                 ^---------------------------
+  *** algdivl: inconsistent dimensions in algdivl (nonsquare).
+  ***   at top-level: algdivl(al,matrix(1,1),[;])
+  ***                 ^---------------------------
+  *** algdivl: inconsistent dimensions in algdivl.
   ***   at top-level: alginv(al,[0,0]~)
   ***                 ^-----------------
   *** alginv: impossible inverse in alginv: [0, 0]~.
@@ -2104,6 +2137,243 @@ testing simplify: quatalg csa over Q
   ***   at top-level: alginit(nfinit(y),[0,[[],[]],[]])
   ***                 ^---------------------------------
   *** alginit: domain error in alg_hasse: degree <= 1
+  ***   at top-level: algrandom(,1)
+  ***                 ^-------------
+  *** algrandom: incorrect type in algrandom (t_INT).
+  ***   at top-level: algrandom(,-1.)
+  ***                 ^---------------
+  *** algrandom: domain error in algrandom: b < 0
+  ***   at top-level: algneg(,[1..4])
+  ***                 ^---------------
+  *** algneg: incorrect type in H_model (t_VEC).
+  ***   at top-level: algneg(,Mod(1,2))
+  ***                 ^-----------------
+  *** algneg: incorrect type in H_model (t_INTMOD).
+  ***   at top-level: algneg(,[1..5]~)
+  ***                 ^----------------
+  *** algneg: incorrect type in H_model (t_COL).
+  ***   at top-level: algneg(,[1,2,3,I]~)
+  ***                 ^-------------------
+  *** algneg: incorrect type in H_model (t_COL).
+  ***   at top-level: algadd(,1,[]~)
+  ***                 ^--------------
+  *** algadd: incorrect type in H_model (t_COL).
+  ***   at top-level: algadd(,O(3^3),I)
+  ***                 ^-----------------
+  *** algadd: incorrect type in H_model (t_PADIC).
+  ***   at top-level: algadd(,I,[1;2])
+  ***                 ^----------------
+  *** algadd: forbidden H_add t_COMPLEX , t_MAT (2 x 1).
+  ***   at top-level: algadd(,Mat([1,2]),[3;4])
+  ***                 ^-------------------------
+  *** algadd: inconsistent dimensions in alM_add (rows).
+  ***   at top-level: algadd(,Mat(1),Mat(O(3)))
+  ***                 ^-------------------------
+  *** algadd: incorrect type in H_model (t_PADIC).
+  ***   at top-level: algadd(,I,Mat(2))
+  ***                 ^-----------------
+  *** algadd: forbidden H_add t_COMPLEX , t_MAT (1 x 1).
+  ***   at top-level: algtrace(,O(x^2))
+  ***                 ^-----------------
+  *** algtrace: incorrect type in H_model (t_SER).
+  ***   at top-level: algtrace(,[[1..4]~;[2..5]~])
+  ***                 ^----------------------------
+  *** algtrace: inconsistent dimensions in algtrace_mat (nonsquare).
+  ***   at top-level: algtomatrix(,1+I*'x)
+  ***                 ^--------------------
+  *** algtomatrix: incorrect type in H_model (t_POL).
+  ***   at top-level: algmul(,[1,2,3,4]~,'x)
+  ***                 ^----------------------
+  *** algmul: incorrect type in H_model (t_POL).
+  ***   at top-level: algmul(,'y,I)
+  ***                 ^-------------
+  *** algmul: incorrect type in H_model (t_POL).
+  ***   at top-level: algmul(,[1,2;3,4],1+I)
+  ***                 ^----------------------
+  *** algmul: forbidden H_mul t_MAT (2 x 2) , t_COMPLEX.
+  ***   at top-level: algsqr(,O(3^3))
+  ***                 ^---------------
+  *** algsqr: incorrect type in H_model (t_PADIC).
+  ***   at top-level: algnorm(,Mod(1,2))
+  ***                 ^------------------
+  *** algnorm: incorrect type in H_model (t_INTMOD).
+  ***   at top-level: algcharpoly(,sin)
+  ***                 ^-----------------
+  *** algcharpoly: incorrect type in H_model (t_CLOSURE).
+  ***   at top-level: alginv(,'x)
+  ***                 ^-----------
+  *** alginv: incorrect type in H_model (t_POL).
+  ***   at top-level: alginv(,0)
+  ***                 ^----------
+  *** alginv: impossible inverse in alginv: 0.
+  ***   at top-level: algdivl(,'x,1)
+  ***                 ^--------------
+  *** algdivl: incorrect type in H_model (t_POL).
+  ***   at top-level: algdivl(,[1,2,3,4]~,'y)
+  ***                 ^-----------------------
+  *** algdivl: incorrect type in H_model (t_POL).
+  ***   at top-level: algdivl(,0,1)
+  ***                 ^-------------
+  *** algdivl: impossible inverse in algdivl: 0.
+  ***   at top-level: algdivl(,[;],1)
+  ***                 ^---------------
+  *** algdivl: forbidden H_divl t_MAT (0 x 0) , t_INT.
+  ***   at top-level: algdivl(,[1,2,3,4]~,[;])
+  ***                 ^------------------------
+  *** algdivl: forbidden H_divl t_COL (4 elts) , t_MAT (0 x 0).
+  ***   at top-level: algdivl(,[1;2],Pi)
+  ***                 ^------------------
+  *** algdivl: forbidden H_divl t_MAT (2 x 1) , t_REAL.
+  ***   at top-level: algpoleval(,'x,'x)
+  ***                 ^------------------
+  *** algpoleval: incorrect type in H_model (t_POL).
+  ***   at top-level: algpoleval(,'x,[1,2;3,4])
+  ***                 ^-------------------------
+  *** algpoleval: incorrect type in H_poleval (t_MAT).
+  ***   at top-level: algpoleval(,O(3),[1,2,3,4]~)
+  ***                 ^----------------------------
+  *** algpoleval: incorrect type in algpoleval (t_PADIC).
+  ***   at top-level: algdivl(,matrix(0,3),[;])
+  ***                 ^-------------------------
+  *** algdivl: inconsistent dimensions in H_divl (nonsquare).
+  ***   at top-level: algdivl(,[;],matrix(0,3))
+  ***                 ^-------------------------
+  *** algdivl: inconsistent dimensions in H_divl (nonsquare).
+  ***   at top-level: algdivl(,matrix(1,1),[;])
+  ***                 ^-------------------------
+  *** algdivl: inconsistent dimensions in H_divl.
+  ***   at top-level: algramifiedplaces(H)
+  ***                 ^--------------------
+  *** algramifiedplaces: incorrect type in algramifiedplaces [not a central simple algebra over a number field] (t_VEC).
+  ***   at top-level: H0=H;H0[1]=O(2);algrandom(H0,1.)
+  ***                                 ^----------------
+  *** algrandom: incorrect type in checkalg [please apply alginit()] (t_VEC).
+  ***   at top-level: algsqr(H,[]~)
+  ***                 ^-------------
+  *** algsqr: incorrect type in H_model (t_COL).
+  ***   at top-level: algsqr(H,O(x))
+  ***                 ^--------------
+  *** algsqr: incorrect type in H_model (t_SER).
+  ***   at top-level: algalgtobasis(H,1)
+  ***                 ^------------------
+  *** algalgtobasis: incorrect type in algalgtobasis [use alginit] (t_VEC).
+  ***   at top-level: algbasistoalg(H,1)
+  ***                 ^------------------
+  *** algbasistoalg: incorrect type in algbasistoalg [use alginit] (t_VEC).
+  ***   at top-level: algcentralproj(H,[1])
+  ***                 ^---------------------
+  *** algcentralproj: incorrect type in algcentralproj [not a table algebra] (t_VEC).
+  ***   at top-level: algcharpoly(R,[1,2,3,4]~)
+  ***                 ^-------------------------
+  *** algcharpoly: incorrect type in R_charpoly (t_COL).
+  ***   at top-level: algcharpoly(C,[1,2,3,4]~)
+  ***                 ^-------------------------
+  *** algcharpoly: incorrect type in C_charpoly (t_COL).
+  ***   at top-level: algdisc(R)
+  ***                 ^----------
+  *** algdisc: incorrect type in algdisc [real algebra] (t_VEC).
+  ***   at top-level: algdisc(C)
+  ***                 ^----------
+  *** algdisc: incorrect type in algdisc [real algebra] (t_VEC).
+  ***   at top-level: algdisc(H)
+  ***                 ^----------
+  *** algdisc: incorrect type in algdisc [real algebra] (t_VEC).
+  ***   at top-level: algdivl(C,[;],1)
+  ***                 ^----------------
+  *** algdivl: forbidden C_divl t_MAT (0 x 0) , t_INT.
+  ***   at top-level: algdivl(C,[1,2,3,4]~,[1,2,3,4]~)
+  ***                 ^--------------------------------
+  *** algdivl: incorrect type in C_divl (t_COL).
+  ***   at top-level: algdivl(C,matrix(2,1),matrix(1,1))
+  ***                 ^----------------------------------
+  *** algdivl: inconsistent dimensions in C_divl (nonsquare).
+  ***   at top-level: algdivl(C,matrix(2,2),matrix(3,3))
+  ***                 ^----------------------------------
+  *** algdivl: inconsistent dimensions in C_divl.
+  ***   at top-level: alginit(1.,1)
+  ***                 ^-------------
+  *** alginit: domain error in alginit: real Hasse invariant [must be 0 or 1/2] out of range
+  ***   at top-level: alginv(C,[1..4]~)
+  ***                 ^-----------------
+  *** alginv: incorrect type in alginv_i (t_COL).
+  ***   at top-level: alginv(C,0)
+  ***                 ^-----------
+  *** alginv: impossible inverse in alginv: 0.
+  ***   at top-level: alglatadd(H,[matid(4),1],[matid(4),1])
+  ***                 ^--------------------------------------
+  *** alglatadd: incorrect type in alglataddinter [real algebra] (t_VEC).
+  ***   at top-level: alglatcontains(H,[matid(4),1],[1..4]~)
+  ***                 ^--------------------------------------
+  *** alglatcontains: incorrect type in alglatcontains [real algebra] (t_VEC).
+  ***   at top-level: alglatelement(H,[matid(4),1],[1..4]~)
+  ***                 ^-------------------------------------
+  *** alglatelement: incorrect type in alglatelement [real algebra] (t_VEC).
+  ***   at top-level: alglathnf(H,matid(4))
+  ***                 ^---------------------
+  *** alglathnf: incorrect type in alglathnf [real algebra] (t_VEC).
+  ***   at top-level: alglatindex(H,[matid(4),1],[matid(4),1])
+  ***                 ^----------------------------------------
+  *** alglatindex: incorrect type in alglatindex [real algebra] (t_VEC).
+  ***   at top-level: alglatinter(H,[matid(4),1],[matid(4),1])
+  ***                 ^----------------------------------------
+  *** alglatinter: incorrect type in alglataddinter [real algebra] (t_VEC).
+  ***   at top-level: alglatlefttransporter(H,[matid(4),1],[matid(4)
+  ***                 ^----------------------------------------------
+  *** alglatlefttransporter: incorrect type in alglatlefttransporter [real algebra] (t_VEC).
+  ***   at top-level: alglatmul(H,[matid(4),1],[matid(4),1])
+  ***                 ^--------------------------------------
+  *** alglatmul: incorrect type in alglatmul [real algebra] (t_VEC).
+  ***   at top-level: alglatrighttransporter(H,[matid(4),1],[matid(4
+  ***                 ^----------------------------------------------
+  *** alglatrighttransporter: incorrect type in alglatrighttransporter [real algebra] (t_VEC).
+  ***   at top-level: alglatsubset(H,[matid(4),1],[matid(4),1])
+  ***                 ^-----------------------------------------
+  *** alglatsubset: incorrect type in alglatsubset [real algebra] (t_VEC).
+  ***   at top-level: algnorm(R,[1..4]~)
+  ***                 ^------------------
+  *** algnorm: incorrect type in R_norm (t_COL).
+  ***   at top-level: algnorm(C,[1..4]~)
+  ***                 ^------------------
+  *** algnorm: incorrect type in C_norm (t_COL).
+  ***   at top-level: algquotient(H,[;])
+  ***                 ^------------------
+  *** algquotient: incorrect type in alg_quotient [not a table algebra] (t_VEC).
+  ***   at top-level: algrelmultable(H)
+  ***                 ^-----------------
+  *** algrelmultable: incorrect type in alg_get_relmultable [algebra not given via mult. table] (t_VEC).
+  ***   at top-level: algsplittingdata(H)
+  ***                 ^-------------------
+  *** algsplittingdata: incorrect type in alg_get_splittingdata [algebra not given via mult. table] (t_VEC).
+  ***   at top-level: algsubalg(H,[1;0;0;0])
+  ***                 ^----------------------
+  *** algsubalg: incorrect type in algsubalg [real algebra] (t_VEC).
+  ***   at top-level: algtableinit(H)
+  ***                 ^---------------
+  *** algtableinit: incorrect type in algtableinit (t_VEC).
+  ***   at top-level: algtensor(H,H)
+  ***                 ^--------------
+  *** algtensor: sorry, tensor of noncyclic algebras is not yet implemented.
+  ***   at top-level: algtomatrix(R,[1,2,3,4]~)
+  ***                 ^-------------------------
+  *** algtomatrix: incorrect type in R_tomatrix (t_COL).
+  ***   at top-level: algtomatrix(C,[1,2,3,4]~)
+  ***                 ^-------------------------
+  *** algtomatrix: incorrect type in C_tomatrix (t_COL).
+  ***   at top-level: algtrace(R,[1,2,3,4]~)
+  ***                 ^----------------------
+  *** algtrace: incorrect type in R_trace (t_COL).
+  ***   at top-level: algtrace(C,[1,2,3,4]~)
+  ***                 ^----------------------
+  *** algtrace: incorrect type in C_trace (t_COL).
+  ***   at top-level: algtrace(H0,1)
+  ***                 ^--------------
+  *** algtrace: incorrect type in algtrace [apply alginit] (t_VEC).
+  ***   at top-level: algnorm(H0,1)
+  ***                 ^-------------
+  *** algnorm: incorrect type in algnorm [apply alginit] (t_VEC).
+  ***   at top-level: algcharpoly(H0,1)
+  ***                 ^-----------------
+  *** algcharpoly: incorrect type in algcharpoly [apply alginit] (t_VEC).
 new algsimpledec
 0
 [0, [[[0, 0, 0, 0, 0, 0, Mat(1), Mat(1), [Mat(1)], 0, [1]], Mat([1, 1, 0]), 
@@ -2231,6 +2501,10 @@ trace
 1
 1
 1
+abs trace
+1
+1
+1
 algtomatrix
 1
 1
@@ -2314,6 +2588,10 @@ trace
 1
 1
 1
+abs trace
+1
+1
+1
 algtomatrix
 1
 1
@@ -2384,6 +2662,404 @@ algleftmultable
 1
 1
 1
+Hamilton quaternions
+["t_REAL", "t_REAL", "t_REAL", "t_REAL"]~
+38
+1
+308
+H_neg
+1
+1
+1
+1
+1
+1
+H_add
+1
+1
+1
+1
+1
+1
+H_trace
+1
+1
+1
+1
+1
+1
+1
+1
+H_tomatrix
+1
+1
+
+[1 0]
+
+[0 1]
+
+
+[1 0]
+
+[0 1]
+
+
+[1 0 0 0]
+
+[0 1 0 0]
+
+[0 0 1 0]
+
+[0 0 0 1]
+
+
+[1 0 0 0]
+
+[0 1 0 0]
+
+[0 0 1 0]
+
+[0 0 0 1]
+
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+3x3 matrices
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+
+[-100 - 1000*I             0]
+
+[            0 -100 + 1000*I]
+
+[      1 + 2*I      -3 - 4*I]
+
+[      3 - 4*I       1 - 2*I]
+
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+nonsquare matrices
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+  ***   at top-level: algpow(,m,-9)
+  ***                 ^-------------
+  *** algpow: impossible inverse in alginv: (...).
+1
+  ***   at top-level: algdivr(,m,n)
+  ***                 ^-------------
+  *** algdivr: impossible inverse in alginv: (...).
+1
+1
+1
+1
+1
+[;]
+4
+-I
+-1
+1.0000000000000000000
+0
+2
+4
+4
+1/2
+Vecsmall([1])
+2
+1
+0
+1
+1
+1
+1
+0
+[[1, 0, 0, 0; 0, 1, 0, 0; 0, 0, 1, 0; 0, 0, 0, 1], [0, -1, 0, 0; 1, 0, 0, 0;
+ 0, 0, 0, -1; 0, 0, 1, 0], [0, 0, -1, 0; 0, 0, 0, 1; 1, 0, 0, 0; 0, -1, 0, 0
+], [0, 0, 0, -1; 0, 0, -1, 0; 0, 1, 0, 0; 1, 0, 0, 0]]
+1
+[[4, 4], [4, 4], [4, 4], [4, 4]]
+1
+1
+1
+1
+1
+1
+0
+1
+I
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+4
+1
+1
+1
+1
+4
+1.0000000000000000000
+1
+1.0000000000000000000
+0
+1
+1
+1
+0
+Vecsmall([0])
+1
+1
+1
+1
+0
+1
+1
+1
+[Mat(1)]
+1
+[[1, 1]]
+1
+0
+1
+1.0000000000000000000
+1
+1
+"t_REAL"
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+4
+I
+1
+I
+0
+1
+1
+2
+0
+Vecsmall([])
+1
+1
+1
+1
+0
+1
+1
+1
+[[1, 0; 0, 1], [0, -1; 1, 0]]
+1
+[[2, 2], [2, 2]]
+1
+1
+1
+0
+1
+I
+1
+1
+"t_COMPLEX"
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+["t_REAL"]
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
 nfgrunwaldwang SEGV #1669
 x^2 + Mod(-17, y)
   ***   at top-level: nfgrunwaldwang(nfinit(x),[2,3],[1,2],Vecsmall(
@@ -2421,4 +3097,4 @@ GW modified arguments
   ***   at top-level: al2=algtensor(al,al)
   ***                     ^----------------
   *** algtensor: sorry, tensor of noncyclic algebras is not yet implemented.
-Total time spent: 1781
+Total time spent: 1560

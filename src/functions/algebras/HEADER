@@ -47,6 +47,15 @@ Doc:
  $(L/K, \Frob, \pi^h)$ for some integer $h$. The element $h/d\in
  \Q/\Z$ is called the \emph{Hasse invariant} of $A$.
 
+ Let ${\bf H}$ be the Hamilton quaternion algebra, that is the 4-dimensional
+ algebra over $\R$ with basis~$1,i,j,ij$ and multiplication given
+ by~$i^2=j^2=-1$ and $ji=-ij$, which is also the cyclic
+ algebra~$(\C/\R,z\mapsto \bar{z},-1)$.
+ Every central simple algebra $A$ of degree $d$ over $\R$ is isomorphic
+ to~$M_d(\R)$ or $M_{d/2}({\bf H})$. We define the \emph{Hasse invariant}
+ of~$A$ to be~$0\in\Q/\Z$ in the first case and~$1/2\in\Q/\Z$ in the second
+ case.
+
  \subsec{Orders in algebras} %GPHELPskip
 
  Let~$A$ be an algebra of finite dimension over~$\Q$. An \emph{order}
@@ -116,3 +125,8 @@ Doc:
  interpret the column vector as a basis representation if the coefficients are
  \typ{INT} or \typ{FRAC}, and as an algebraic representation if the coefficients
  are \typ{POL} or \typ{POLMOD}.
+
+ An element of the Hamilton quaternion algebra ${\bf H}$ can be represented as a
+ \typ{REAL}, a \typ{COMPLEX} representing an element of~$\C = \R+\R i\subset
+ {\bf H}$, or a $4$ components \typ{COL} of \typ{REAL} encoding the coordinates
+ on the basis~$1,i,j,ij$.

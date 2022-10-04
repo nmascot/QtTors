@@ -14,6 +14,8 @@ Doc: Given an algebra \var{al} output by \tet{alginit} or by \tet{algtableinit},
 
  \item $3$: central simple algebra output by \tet{alginit} and represented by
  a cyclic algebra.
+
+ \item $4$: division algebra over~$\R$ ($\R$, $\C$ or Hamilton quaternion algebra~${\bf H}$).
  \bprog
  ? algtype([])
  %1 = 0
@@ -42,4 +44,7 @@ Doc: Given an algebra \var{al} output by \tet{alginit} or by \tet{algtableinit},
  ? A = alginit(nfinit(y), [-1,-1]);
  ? algtype(A)
  %14 = 3
+ ? H = alginit(1.,1/2);
+ ? algtype(H)
+ %16 = 4
  @eprog

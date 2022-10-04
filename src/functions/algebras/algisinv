@@ -1,11 +1,11 @@
 Function: algisinv
 Section: algebras
 C-Name: algisinv
-Prototype: iGGD&
-Help: algisinv(al,x,{&ix}): tests whether x is invertible and sets ix to the
- inverse of x.
-Doc: Given an element $x$ in \var{al}, tests whether $x$ is invertible, and sets
- $ix$ to the inverse of $x$.
+Prototype: iDGGD&
+Help: algisinv({al},x,{&ix}): tests whether x is invertible in al (Hamilton
+ quaternions if omitted) and sets ix to the inverse of x.
+Doc: Given an element $x$ in \var{al} (Hamilton quaternions if omitted), tests
+ whether $x$ is invertible, and sets $ix$ to the inverse of $x$.
  \bprog
  ? A = alginit(nfinit(y), [-1,1]);
  ? algisinv(A,[-1,1]~)
@@ -16,4 +16,4 @@ Doc: Given an element $x$ in \var{al}, tests whether $x$ is invertible, and sets
  %4 = [Mod(Mod(-1/3, y), x^2 + 1), Mod(Mod(2/3, y), x^2 + 1)]~
  @eprog
 
- Also accepts matrices with coefficients in \var{al}.
+ Also accepts square matrices with coefficients in \var{al}.

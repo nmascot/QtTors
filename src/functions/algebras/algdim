@@ -4,7 +4,8 @@ C-Name: algdim
 Prototype: lGD0,L,
 Help: algdim(al,{abs=0}): dimension of the algebra al.
 Doc: If \var{al} is a table algebra output by \tet{algtableinit} or if~$abs=1$,
- returns the dimension of \var{al} over its prime subfield ($\Q$ or $\F_p$).
+ returns the dimension of \var{al} over its prime subfield ($\Q$ or $\F_p$) or
+ over $\R$ for real algebras.
  If~\var{al} is a central simple algebra output by \tet{alginit} and~$abs=0$,
  returns the dimension of \var{al} over its center.
 
@@ -15,4 +16,7 @@ Doc: If \var{al} is a table algebra output by \tet{algtableinit} or if~$abs=1$,
  %3 = 4
  ? algdim(A,1)
  %4 = 12
+ ? C = alginit(I,0); \\complex numbers as a real algebra
+ ? algdim(C,1)
+ %6 = 2
  @eprog

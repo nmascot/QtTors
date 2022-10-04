@@ -1,10 +1,10 @@
 Function: algneg
 Section: algebras
 C-Name: algneg
-Prototype: GG
-Help: algneg(al,x): element -x in al.
+Prototype: DGG
+Help: algneg({al},x): element -x in al (Hamilton quaternions if omitted).
 Doc: Given an element $x$ in \var{al}, computes its opposite $-x$ in the
- algebra \var{al}.
+ algebra \var{al} (Hamilton quaternions if omitted).
  \bprog
  ? A = alginit(nfinit(y), [-1,-1]);
  ? algneg(A,[1,1,0,0]~)

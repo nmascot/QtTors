@@ -1092,6 +1092,8 @@ print("csa inv 4: ", alginv(al,bb) == algalgtobasis(al,alginv(al,b)));
 print("csa inv 5: ", alginv(al,algadd(al,a,bb)) == algalgtobasis(al,alginv(al,algadd(al,a,b))));
 print("csa trace: ", algtrace(al,cc) == 2*c[1]);
 print("csa trace 2: ", algtrace(al,c) == 2*c[1]);
+print("csa abs trace: ", algtrace(al,cc,1) == 4*trace(Mod(c[1],T)));
+print("csa abs trace 2: ", algtrace(al,c,1) == 4*trace(Mod(c[1],T)));
 
 D = 12;
 flag = 1;
@@ -1260,6 +1262,7 @@ algtomatrix(A,[0,0,0,2]~)
 algpow(A,[1,1,0,0]~,7)
 algsub(A,[1,1,0,0]~,[1,0,1,0]~)
 algtrace(A,[5,0,0,1]~)
+algtrace(A,[5,0,0,1]~,1)
 algtype(A)
 
 nf = nfinit(y^3-5);
@@ -1347,6 +1350,10 @@ print("algsplitm sqr alM 2: ", algtomatrix(al, M2)^2 ==
  algtrace(al,M1[2,2]));}
 {print("algtrace alM 2: ", algtrace(al,M2) == algtrace(al,M2[1,1]) +
  algtrace(al,M2[2,2]));}
+{print("algtrace abs alM: ", algtrace(al,M1,1) == 2*(algtrace(al,M1[1,1],1) +
+ algtrace(al,M1[2,2],1)));}
+{print("algtrace abs alM 2: ", algtrace(al,M2,1) == 2*(algtrace(al,M2[1,1],1) +
+ algtrace(al,M2[2,2],1)));}
 {print("algtrace prod alM: ", algtrace(al, algmul(al,M1,M2)) == algtrace(al,
 algmul(al,M2,M1)));}
 {print("algnorm alM: ", algnorm(al,algmul(al,M1,M2)) == algnorm(al,M1) *
@@ -1452,6 +1459,7 @@ algtomatrix(al,a)
 algtomatrix(al,a,1)
 algcharpoly(al,b)
 algtrace(al,c)
+algtrace(al,c,1) == trace(trace(algbasistoalg(al,c)[1]))
 algnorm(al,c)
 algiscommutative(al)
 algissemisimple(al)
@@ -1481,6 +1489,7 @@ algtomatrix(al,a,1)
 algtomatrix(al,b)
 algcharpoly(al,b)
 algtrace(al,c)
+algtrace(al,c,1)
 algnorm(al,c)
 algiscommutative(al)
 algissemisimple(al)
@@ -1524,6 +1533,7 @@ print("v^0: ", algpow(al, [;], 0) == [;]);
 print("mt(v)", algtomatrix(al, [;], 1) == [;]);
 print("spl(v)", algtomatrix(al, [;]) == [;]);
 print("trace(v): ", algtrace(al, [;]) == 0);
+print("trace abs(v): ", algtrace(al, [;], 1) == 0);
 print("norm(v): ", algnorm(al, [;]) == 1);
 print("charpoly(v): ", algcharpoly(al, [;]) == 1 && type(algcharpoly(al,[;])) == "t_POL");
 print("v+v: ", algadd(al,[;],[;]) == [;]);
@@ -1548,6 +1558,7 @@ alginv(almt0,a)
 algsqr(almt0,b)
 algdivl(almt0,a,b)
 algtrace(almt0,a)
+algtrace(almt0,a,1)
 algnorm(almt0,b)
 algcharpoly(almt0,a)
 algtomatrix(almt0,b,1)
@@ -1670,6 +1681,7 @@ test(str,al)={
  print(algnorm(al,x) == algnorm(sal,x));
  print(algtomatrix(al,x,1) == algtomatrix(sal,x,1));
  print(algtrace(al,x) == algtrace(sal,x));
+ print(algtrace(al,x,1) == algtrace(sal,x,1));
  print(alginv(al,x) == alginv(sal,x));
  print(algpow(al,x,42) == algpow(sal,x,42));
  print(algmul(al,x,y) == algmul(sal,x,y));
@@ -1685,6 +1697,7 @@ test(str,al)={
  print(algnorm(al,x) == algnorm(sal,x));
  print(algtomatrix(al,x,1) == algtomatrix(sal,x,1));
  print(algtrace(al,x) == algtrace(sal,x));
+ print(algtrace(al,x,1) == algtrace(sal,x,1));
  print(alginv(al,x) == alginv(sal,x));
  print(algpow(al,x,42) == algpow(sal,x,42));
  print(algmul(al,x,y) == algmul(sal,x,y));
@@ -1741,7 +1754,7 @@ algdegree(almt);
 alghassei(almt);
 alghassef(almt);
 algrandom(1,1)
-algrandom(1,I)
+algrandom(almt,I)
 algtype(1)
 algdim([1,[1],0,0,0,0,0,0,0,0])
 algdim([1,[1],0,0,0,0,0,0,0,0],1)
@@ -1764,7 +1777,7 @@ algsub(almt, [zero;zero;zero], [zero;zero]);
 algmul(almt, m, [zero;zero;zero]);
 algsqr(almt, [zero;zero]);
 algdivl(almt, m, zero);
-algdivl(almt, m, [zero,zero;zero,zero]);
+algdivl(almt, Mat([[zero]~]), [zero,zero;zero,zero]);
 algdivl(almt, m, m);
 alginv(almt, m);
 algtomatrix(almt,m,1);
@@ -1795,6 +1808,7 @@ algisdivision(almt);
 algissplit(almt);
 algisramified(almt);
 algramifiedplaces(almt);
+alghasse(al);
 alghasse(al, -1);
 alghasse(al, 3);
 alghasse(al, 2^100);
@@ -1830,6 +1844,9 @@ algsqr(al,[f^3,[]]~);
 algmul(al,[;],[1,2]~);
 algdivl(al,[;],matid(1));
 algdivl(al,matid(1),matrix(1,2));
+algdivl(al,matrix(0,3),[;]);
+algdivl(al,[;],matrix(0,3));
+algdivl(al,matrix(1,1),[;]);
 alginv(al,[0,0]~);
 al0mt = algtableinit([matid(1)]);
 algalgtobasis(al0mt,[1]~);
@@ -1921,6 +1938,89 @@ algpoleval(al,x+1,[1,mb]);
 alginit(nfinit(y),["a",[[],[]],[]]);
 alginit(nfinit(y),[1,[[],[]],[]]);
 alginit(nfinit(y),[0,[[],[]],[]]);
+algrandom(,1);
+algrandom(,-1.);
+algneg(,[1..4]);
+algneg(,Mod(1,2));
+algneg(,[1..5]~);
+algneg(,[1,2,3,I]~);
+algadd(,1,[]~);
+algadd(,O(3^3),I);
+algadd(,I,[1;2]);
+algadd(,Mat([1,2]),[3;4]);
+algadd(,Mat(1),Mat(O(3)));
+algadd(,I,Mat(2));
+algtrace(,O(x^2));
+algtrace(,[[1..4]~;[2..5]~]);
+algtomatrix(,1+I*'x);
+algmul(,[1,2,3,4]~,'x);
+algmul(,'y,I);
+algmul(,[1,2;3,4],1+I);
+algsqr(,O(3^3));
+algnorm(,Mod(1,2));
+algcharpoly(,sin);
+alginv(,'x);
+alginv(,0);
+algdivl(,'x,1);
+algdivl(,[1,2,3,4]~,'y);
+algdivl(,0,1);
+algdivl(,[;],1);
+algdivl(,[1,2,3,4]~,[;]);
+algdivl(,[1;2],Pi);
+algpoleval(,'x,'x);
+algpoleval(,'x,[1,2;3,4]);
+algpoleval(,O(3),[1,2,3,4]~)
+algdivl(,matrix(0,3),[;]);
+algdivl(,[;],matrix(0,3));
+algdivl(,matrix(1,1),[;]);
+H = alginit(1.,1/2);
+R = alginit(1.,0);
+C = alginit(I,0);
+algramifiedplaces(H);
+H0 = H; H0[1] = O(2); algrandom(H0,1.);
+algsqr(H,[]~);
+algsqr(H,O(x));
+algalgtobasis(H,1);
+algbasistoalg(H,1);
+algcentralproj(H,[1]);
+algcharpoly(R,[1,2,3,4]~)
+algcharpoly(C,[1,2,3,4]~)
+algdisc(R)
+algdisc(C)
+algdisc(H)
+algdivl(C,[;],1)
+algdivl(C,[1,2,3,4]~,[1,2,3,4]~)
+algdivl(C,matrix(2,1),matrix(1,1))
+algdivl(C,matrix(2,2),matrix(3,3))
+alginit(1.,1);
+alginv(C,[1..4]~);
+alginv(C,0);
+alglatadd(H,[matid(4),1],[matid(4),1]);
+alglatcontains(H,[matid(4),1],[1..4]~);
+alglatelement(H,[matid(4),1],[1..4]~);
+alglathnf(H,matid(4));
+alglatindex(H,[matid(4),1],[matid(4),1]);
+alglatinter(H,[matid(4),1],[matid(4),1]);
+alglatlefttransporter(H,[matid(4),1],[matid(4),1]);
+alglatmul(H,[matid(4),1],[matid(4),1]);
+alglatrighttransporter(H,[matid(4),1],[matid(4),1]);
+alglatsubset(H,[matid(4),1],[matid(4),1]);
+algnorm(R,[1..4]~);
+algnorm(C,[1..4]~);
+algquotient(H,[;]);
+algrelmultable(H);
+algsplittingdata(H);
+algsubalg(H,[1;0;0;0]);
+algtableinit(H);
+algtensor(H,H);
+algtomatrix(R,[1,2,3,4]~);
+algtomatrix(C,[1,2,3,4]~);
+algtrace(R,[1,2,3,4]~);
+algtrace(C,[1,2,3,4]~);
+H0 = H; H0[9] = concat(H0[9],[matid(4)]);
+algtrace(H0,1);
+algnorm(H0,1);
+algcharpoly(H0,1);
 \\end bad inputs
 
 
@@ -2089,6 +2189,10 @@ print("trace");
 algtrace(al,m2)+algtrace(al,m3) == algtrace(al,algadd(al,m2,m3))
 algtrace(al,m1)+algtrace(al,m3) == algtrace(al,algadd(al,m1,m3))
 algtrace(al,m1)+algtrace(al,m2) == algtrace(al,algadd(al,m1,m2))
+print("abs trace");
+algtrace(al,m2,1)+algtrace(al,m3,1) == algtrace(al,algadd(al,m2,m3),1)
+algtrace(al,m1,1)+algtrace(al,m3,1) == algtrace(al,algadd(al,m1,m3),1)
+algtrace(al,m1,1)+algtrace(al,m2,1) == algtrace(al,algadd(al,m1,m2),1)
 print("algtomatrix");
 sm1 = algtomatrix(al,m1);
 sm2 = algtomatrix(al,m2);
@@ -2191,6 +2295,10 @@ print("trace");
 algtrace(al,a2)+algtrace(al,a3) == algtrace(al,algadd(al,a2,a3))
 algtrace(al,a1)+algtrace(al,a3) == algtrace(al,algadd(al,a1,a3))
 algtrace(al,a1)+algtrace(al,a2) == algtrace(al,algadd(al,a1,a2))
+print("abs trace");
+algtrace(al,a2,1)+algtrace(al,a3,1) == algtrace(al,algadd(al,a2,a3),1)
+algtrace(al,a1,1)+algtrace(al,a3,1) == algtrace(al,algadd(al,a1,a3),1)
+algtrace(al,a1,1)+algtrace(al,a2,1) == algtrace(al,algadd(al,a1,a2),1)
 print("algtomatrix");
 sa1 = algtomatrix(al,a1);
 sa2 = algtomatrix(al,a2);
@@ -2294,6 +2402,427 @@ M2 = algtomatrix(al,m2,1);
 #M2[,1]==32
 M1+M2 == algtomatrix(al,algadd(al,m1,m2),1)
 M1*M2 == algtomatrix(al,algmul(al,m1,m2),1)
+
+print("Hamilton quaternions");
+a = algrandom(,1.);
+apply(type,a)
+b = algrandom(,1.);
+precision(b)
+algrandom(,0.)==0
+localprec(300); precision(algrandom(,1.))
+print("H_neg");
+algneg(,a) == -a
+algneg(,[a,b;b,a]) == [-a,-b;-b,-a]
+algneg(,2.) == -2
+algneg(,I) == -I
+algneg(,1/2) == -1/2
+algneg(,3) == -3
+print("H_add");
+algadd(,a,b) == a+b
+algadd(,I,[1..4]~) == [1,3,3,4]~
+algadd(,[1..4]~,10.) == [11.,2,3,4]~
+algadd(,2.*I,3/2) == 3/2 + 2.*I
+algadd(,[a;b],[2;I]) == [algadd(,a,2);algadd(,b,I)]
+algsub(,a,b) == a-b
+print("H_trace");
+algtrace(,a) == 2*a[1]
+algtrace(,b,1) == 4*b[1]
+algtrace(,[a,0;1,b]) == algtrace(,a) + algtrace(,b)
+algtrace(,[a,0;1,b],1) == 8*(a[1]+b[1])
+algtrace(,1) == 2
+algtrace(,1/2+I) == 1
+algtrace(,matid(2)) == 4
+algtrace(,matid(2),1) == 16
+print("H_tomatrix");
+algtomatrix(,a+b) == algtomatrix(,a)+algtomatrix(,b)
+algtomatrix(,a+b,1) == algtomatrix(,a,1)+algtomatrix(,b,1)
+algtomatrix(,[1,0,0,0]~)
+algtomatrix(,1)
+algtomatrix(,[1,0,0,0]~,1)
+algtomatrix(,1,1)
+algtomatrix(,[0,1,0,0]~) == algtomatrix(,I)
+algtomatrix(,[0,1,0,0]~,1) == algtomatrix(,I,1)
+algtomatrix(,I)^2 == -1
+algtomatrix(,I,1)^2 == -1
+algtomatrix(,[0,0,1,0]~)^2 == -1
+algtomatrix(,[0,0,1,0]~,1)^2 == -1
+algtomatrix(,[0,0,0,1]~)^2 == -1
+algtomatrix(,[0,0,0,1]~,1)^2 == -1
+algtomatrix(,I)*algtomatrix(,[0,0,1,0]~) == algtomatrix(,[0,0,0,1]~)
+M = Mat(1); M[1,1] = a;
+algtomatrix(,M) == algtomatrix(,a)
+algtomatrix(,M,1) == algtomatrix(,a,1)
+M = [1.+I,2;3/2-I,Pi*I];
+N = [-7,3+4/5*I;sqrt(2),exp(sqrt(5)*I)];
+P = matrix(2,2,i,j,algrandom(,1.));
+exponent(algtrace(,algmul(,M,N)) - algtrace(,algmul(,N,M))) < -120
+exponent(algmul(,M,algmul(,N,P)) - algmul(,algmul(,M,N),P)) < -120
+algtomatrix(,M)*algtomatrix(,N) == algtomatrix(,M*N)
+exponent(algtomatrix(,M,1)*algtomatrix(,N,1) - algtomatrix(,M*N,1)) < -120
+trace(algtomatrix(,M)) == algtrace(,M[1,1])+algtrace(,M[2,2])
+trace(algtomatrix(,N)) == algtrace(,N[1,1])+algtrace(,N[2,2])
+{exponent(trace(algtomatrix(,M,1)) - 2*(algtrace(,M[1,1],1) +
+  algtrace(,M[2,2],1))) < -120}
+{exponent(trace(algtomatrix(,N,1)) - 2*(algtrace(,N[1,1],1) +
+  algtrace(,N[2,2],1))) < -120}
+print("3x3 matrices");
+M = matrix(3,3,i,j,algrandom(,1.));
+N = matrix(3,3,i,j,algrandom(,2.));
+P = matrix(3,3,i,j,algrandom(,3.));
+exponent(algtrace(,algmul(,M,N)) - algtrace(,algmul(,N,M))) < -120
+exponent(algmul(,M,algmul(,N,P)) - algmul(,algmul(,M,N),P)) < -120
+exponent(algmul(,M,algadd(,N,P)) - algadd(,algmul(,M,N),algmul(,M,P))) < -120
+exponent(algtomatrix(,M)*algtomatrix(,N) - algtomatrix(,algmul(,M,N))) < -120
+exponent(algtomatrix(,M,1)*algtomatrix(,N,1) - algtomatrix(,algmul(,M,N),1)) < -120
+algtomatrix(,M+N) == algtomatrix(,M)+algtomatrix(,N)
+exponent(algtomatrix(,M+N,1) - (algtomatrix(,M,1)+algtomatrix(,N,1))) < -120
+trace(algtomatrix(,M)) == algtrace(,M[1,1])+algtrace(,M[2,2])+algtrace(,M[3,3])
+{exponent(trace(algtomatrix(,N)) - (algtrace(,N[1,1]) + algtrace(,N[2,2]) +
+  algtrace(,N[3,3]))) < -120}
+{exponent(trace(algtomatrix(,M,1)) - 3*(algtrace(,M[1,1],1) +
+  algtrace(,M[2,2],1) + algtrace(,M[3,3],1))) < -120}
+{exponent(trace(algtomatrix(,N,1)) - 3*(algtrace(,N[1,1],1) +
+  algtrace(,N[2,2],1) + algtrace(,N[3,3],1))) < -110}
+algtomatrix(,[-100-1000*I;[1,2,3,4]~])
+c = algrandom(,3.);
+exponent(algmul(,a,algmul(,b,c)) - algmul(,algmul(,a,b),c)) < -120
+algtrace(,algmul(,a,b)) == algtrace(,algmul(,b,a))
+algmul(,1,a) == a
+algmul(,b,1) == b
+algmul(,I,I) == [-1,0,0,0]~
+algmul(,[0,0,1,0]~,[0,0,1,0]~) == [-1,0,0,0]~
+algmul(,[0,0,0,1]~,[0,0,0,1]~) == [-1,0,0,0]~
+algmul(,I,[0,0,1,0]~) == [0,0,0,1]~
+exponent(algmul(,a,algadd(,b,c)) - algadd(,algmul(,a,b),algmul(,a,c))) < -120
+exponent(algtomatrix(,algmul(,a,b)) - algtomatrix(,a)*algtomatrix(,b)) < -120
+exponent(algtomatrix(,algmul(,a,b),1) - algtomatrix(,a,1)*algtomatrix(,b,1)) < -120
+algsqr(,M) == algmul(,M,M)
+algnorm(,M) == real(matdet(algtomatrix(,M)))
+algnorm(,M,1) == matdet(algtomatrix(,M,1))
+z=sqrt(2)+Pi*I;
+algsqr(,sqrt(2)+Pi*I) == z^2
+algnorm(,a) == norml2(a)
+algnorm(,a,1) == norml2(a)^2
+algnorm(,b) == norml2(b)
+algnorm(,b,1) == norml2(b)^2
+algnorm(,c) == norml2(c)
+algnorm(,c,1) == norml2(c)^2
+exponent(algnorm(,c) - real(matdet(algtomatrix(,c)))) < -120
+exponent(algnorm(,c,1) - matdet(algtomatrix(,c,1))) < -110
+algnorm(,c) == algmul(,c,algsub(,algtrace(,c),c))[1]
+algnorm(,z) == norm(z)
+algnorm(,z,1) == norm(z)^2
+algcharpoly(,a) == x^2 - algtrace(,a)*x + algnorm(,a)
+exponent(algcharpoly(,a) - real(charpoly(algtomatrix(,a)))) < -120
+algcharpoly(,a,,1) == (x^2 - algtrace(,a)*x + algnorm(,a))^2
+exponent(algcharpoly(,a,,1) - charpoly(algtomatrix(,a,1))) < -120
+algcharpoly(,z) == x^2 - algtrace(,z)*x + algnorm(,z)
+algcharpoly(,z,,1) == (x^2 - algtrace(,z)*x + algnorm(,z))^2
+algnorm(,algmul(,a,b)) == algnorm(,a)*algnorm(,b)
+exponent(algnorm(,algmul(,M,N)) - algnorm(,M)*algnorm(,N)) < -110
+exponent(algcharpoly(,N) - real(charpoly(algtomatrix(,N)))) < -110
+m = matrix(3,3,i,j,vectorv(4,k,random(3)));
+pol = algcharpoly(,m);
+pol == real(charpoly(algtomatrix(,m)))
+polcoef(pol,5) == -algtrace(,m)
+polcoef(pol,0) == algnorm(,m)
+pol = algcharpoly(,m,,1);
+pol == charpoly(algtomatrix(,m,1))
+polcoef(pol,35) == -algtrace(,m,1)
+polcoef(pol,0) == algnorm(,m,1)
+print("nonsquare matrices");
+M = matrix(4,7,i,j,algrandom(,1.));
+N = matrix(7,5,i,j,algrandom(,1.));
+P = matrix(5,8,i,j,algrandom(,1.));
+exponent(algmul(,M,algmul(,N,P)) - algmul(,algmul(,M,N),P)) < -120
+exponent(algsqr(,a) - algmul(,a,a)) < -120
+exponent(algsqr(,b) - algmul(,b,b)) < -120
+exponent(algsqr(,c) - algmul(,c,c)) < -120
+!algisinv(,0)
+!algisinv(,vectorv(4))
+algisinv(,a)
+ai = alginv(,a); exponent(algsub(,algmul(,a,ai),1)) < -120
+algisinv(,b,&bi)
+bi == alginv(,b)
+exponent(algsub(,algmul(,b,bi),1)) < -120
+algisinv(,z)
+alginv(,z) == 1/z
+exponent(algsub(,algmul(,a,algdivl(,a,b)),b)) < -120
+algdivl(,b,c) == algmul(,alginv(,b),c)
+algdivl(,b,0) == 0
+algisdivl(,0,0)
+!algisdivl(,0,a)
+exponent(algnorm(,[1,a;2,I])) > -64
+m = [1,a;2,I];
+algisinv(,m,&mi)
+mi == alginv(,m)
+exponent(algsub(,algmul(,m,mi),matid(2))) < -120
+exponent(algsub(,algmul(,mi,m),matid(2))) < -120
+n = [I-3/2,b;c,z];
+ni = alginv(,n);
+exponent(algsub(,algmul(,n,ni),matid(2))) < -120
+exponent(algsub(,algmul(,ni,n),matid(2))) < -120
+mni = alginv(,algmul(,m,n));
+exponent(algsub(,mni, algmul(,ni,mi))) < -120
+exponent(algsub(,algmul(,algdivr(,n,m),m),n)) < -120
+ra = bestappr(a);
+rb = bestappr(b);
+rc = bestappr(c);
+m = [ra,rb;algmul(,rc,ra),algmul(,rc,rb)];
+algnorm(,m) == 0
+!algisinv(,m)
+n = algmul(,m,[1,[6,7,8,9]~;3,4+I]);
+algisdivl(,m,n,&quo)
+algmul(,m,quo) == n
+quo == algdivl(,m,n)
+exponent(algsub(, algpow(,a,3), algmul(,a,algsqr(,a)))) < -120
+algpow(,a,0) == 1
+algpow(,a,-2) == algsqr(,alginv(,a))
+algpow(,[;],0) == [;]
+algpow(,[;],7) == [;]
+algpow(,[;],-5) == [;]
+algpow(,m,0) == matid(2)
+algpow(,m,3) == algmul(,algsqr(,m),m)
+algpow(,m,-9)
+exponent(algsub(,algmul(,algdivr(,a,b),b),a)) < -120
+algdivr(,m,n)
+exponent(algpoleval(,x^4-7*x,z) - (z^4-7*z)) < -110
+exponent(algsub(,algpoleval(,x^2,a),algsqr(,a))) < -120
+{exponent(algsub(,algpoleval(,x^3-x+1,b),
+  algadd(,algsub(,algpow(,b,3),b),1))) < -120}
+exponent(algpoleval(,algcharpoly(,a),a)) < -120
+exponent(algpoleval(,algcharpoly(,b),b)) < -120
+algdivl(,[;],[;])
+H = alginit(1.,1/2);
+algtype(H)
+algaut(H)
+algb(H)
+algcenter(H)
+algchar(H)
+algdegree(H)
+algdim(H)
+algdim(H,1)
+alghasse(H)
+alghassei(H)
+algindex(H)
+algisassociative(H)
+algiscommutative(H)
+algisdivision(H)
+algisramified(H)
+algissemisimple(H)
+algissimple(H)
+algissplit(H)
+mt = algmultable(H)
+algisassociative(mt)
+apply(matsize,mt)
+mt[1] == 1
+mt[2]^2 == -1
+mt[3]^2 == -1
+mt[4] == mt[2]*mt[3]
+mt[3]*mt[2] == -mt[4]
+Mat([m[,1] | m <- mt]) == matid(4)
+algradical(H)
+algsimpledec(H) == [0,[H]]
+algsplittingfield(H)
+algadd(H,a,b) == algadd(,a,b)
+algcharpoly(H,a) == algcharpoly(,a)
+algdivl(H,a,b) == algdivl(,a,b)
+algdivr(H,a,b) == algdivr(,a,b)
+alginv(H,a) == alginv(,a)
+algisdivl(H,a,b) == algisdivl(,a,b)
+algisinv(H,a) == algisinv(,a)
+algmul(H,a,b) == algmul(,a,b)
+algneg(H,a) == algneg(,a)
+algnorm(H,a) == algnorm(,a)
+algpoleval(H,x^3+x+1,a) == algpoleval(,x^3+x+1,a)
+algpow(H,a,5) == algpow(,a,5)
+algpow(H,a,0) == algpow(,a,0)
+algpow(H,a,-3) == algpow(,a,-3)
+#algrandom(H,1.)
+algsqr(H,a) == algsqr(,a)
+algsub(H,a,b) == algsub(,a,b)
+algtomatrix(H,a) == algtomatrix(,a)
+algtrace(H,a) == algtrace(,a)
+
+R = alginit(1.,0);
+algtype(R)
+algaut(R)
+algb(R)
+algcenter(R)
+algchar(R)
+algdegree(R)
+algdim(R)
+algdim(R,1)
+alghasse(R)
+alghassei(R)
+algindex(R)
+algisassociative(R)
+algiscommutative(R)
+algisdivision(R)
+algisramified(R)
+algissemisimple(R)
+algissimple(R)
+algissplit(R)
+mt = algmultable(R)
+algisassociative(mt)
+apply(matsize,mt)
+mt[1] == 1
+algradical(R)
+algsimpledec(R) == [0,[R]]
+algsplittingfield(R)
+algbasis(R) == matid(1)
+alginvbasis(R) == matid(1)
+a = algrandom(R,1.);
+type(a)
+b = algrandom(R,2.);
+m22 = matrix(2,2,i,j,algrandom(R,1.));
+m22b = matrix(2,2,i,j,algrandom(R,1.));
+m23 = matrix(2,3,i,j,algrandom(R,1.));
+m32 = matrix(3,2,i,j,algrandom(R,1.));
+algadd(R,a,b) == a+b
+algadd(R,m22,m22b) == m22 + m22b
+algneg(R,a) == -a
+algsub(R,a,b) == a-b
+algsub(R,m22,m22) == 0
+algmul(R,a,b) == a*b
+algmul(R,m22,m23) == m22*m23
+algsqr(R,a) == a^2
+algsqr(R,m22) == m22^2
+algtomatrix(R,a) == Mat(a)
+algtomatrix(R,b,1) == Mat(b)
+algtomatrix(R,m22) == m22
+algtomatrix(R,m22b,1) == m22b
+algnorm(R,a) == a
+algnorm(R,b,1) == b
+algnorm(R,m22) == matdet(m22)
+algnorm(R,m22b,1) == matdet(m22b)^2
+algtrace(R,a) == a
+algtrace(R,b,1) == b
+algtrace(R,m22) == trace(m22)
+algtrace(R,m22b,1) == 2*trace(m22b)
+algcharpoly(R,a) == x-a
+algcharpoly(R,b,,1) == x-b
+algcharpoly(R,m22) == charpoly(m22)
+algcharpoly(R,m22b,,1) == charpoly(m22b)^2
+exponent(algdivl(R,a,b) - b/a) < -100
+exponent(algdivl(R,m22,m22b) - m22^(-1)*m22b) < -100
+{m22noninv = matrix(2,1,i,j,round(algrandom(R,10.))) *
+  matrix(1,2,i,j,round(algrandom(R,10.)))};
+algnorm(R,m22noninv) == 0
+exponent(m22noninv * algdivl(R,m22noninv,m22noninv*m22) - m22noninv*m22) < -100
+exponent(m22*alginv(R,m22) - matid(2)) < -100
+exponent(algdivr(R,a,b) - a/b) < -100
+algdivr(R,m22,m22b) == m22*m22b^(-1)
+!algisdivl(R,0.,1)
+algisdivl(R,0.,0.)
+!algisdivl(R,m22noninv,m22)
+!algisinv(R,0.)
+!algisinv(R,m22noninv)
+algisinv(R,a)
+algisinv(R,m22b)
+algpow(R,a,8) == a^8
+exponent(algpow(R,a,-2) - a^(-2)) < -100
+algpow(R,a,0) == 1.
+algpow(R,m22,3) == m22^3
+exponent(algpow(R,m22,-5) - m22^(-5)) < -100
+algpow(R,m22,0) == matid(2)
+algpoleval(R,x^3-x+1,a) == a^3-a+1
+
+C = alginit(I,0);
+algtype(C)
+algaut(C)
+algb(C)
+algcenter(C)
+algchar(C)
+algdegree(C)
+algdim(C)
+algdim(C,1)
+alghasse(C)
+alghassei(C)
+algindex(C)
+algisassociative(C)
+algiscommutative(C)
+algisdivision(C)
+algisramified(C)
+algissemisimple(C)
+algissimple(C)
+algissplit(C)
+mt = algmultable(C)
+algisassociative(mt)
+apply(matsize,mt)
+mt[1] == 1
+mt[2]^2 == -1
+Mat([m[,1] | m <- mt]) == matid(2)
+algradical(C)
+algsimpledec(C) == [0,[C]]
+algsplittingfield(C)
+algbasis(C) == matid(2)
+alginvbasis(C) == matid(2)
+z = algrandom(C,1.);
+type(z)
+u = algrandom(C,2.);
+mc22 = matrix(2,2,i,j,algrandom(C,1.));
+mc22b = matrix(2,2,i,j,algrandom(C,1.));
+mc23 = matrix(2,3,i,j,algrandom(C,1.));
+mc32 = matrix(3,2,i,j,algrandom(C,1.));
+algadd(C,z,u) == z+u
+algadd(C,m22,mc22) == m22 + mc22
+algneg(C,z) == -z
+algsub(C,z,u) == z-u
+algsub(C,m22,mc22) == m22 - mc22
+algmul(C,z,u) == z*u
+algmul(C,mc32,mc22) == mc32*mc22
+algsqr(C,u) == u^2
+algsqr(C,mc22) == mc22^2
+algtomatrix(R,z) == Mat(z)
+algtomatrix(C,u,1) == [real(u),-imag(u);imag(u),real(u)]
+algtomatrix(C,mc22) == mc22
+matsize(algtomatrix(C,mc22,1)) == [4,4]
+Set(apply(type,concat(Vec(algtomatrix(C,mc22,1)))))
+algtomatrix(C,mc22,1)+algtomatrix(C,mc22b,1) == algtomatrix(C,mc22+mc22b,1)
+{exponent(algtomatrix(C,mc22,1)*algtomatrix(C,mc22b,1)
+  - algtomatrix(C,mc22*mc22b,1)) < -100}
+algnorm(C,z) == z
+algnorm(C,u,1) == norm(u)
+algnorm(C,mc22) == matdet(mc22)
+algnorm(C,mc22b,1) == norm(matdet(mc22b))^2
+algtrace(C,z) == z
+algtrace(C,u,1) == 2*real(u)
+algtrace(C,mc22) == trace(mc22)
+algtrace(C,mc22b,1) == 4*real(trace(mc22b))
+algcharpoly(C,z) == x-z
+algcharpoly(C,u,,1) == x^2 - 2*real(u)*x + norm(u)
+algcharpoly(C,m22) == charpoly(m22)
+P = charpoly(m22b);
+algcharpoly(C,m22b,,1) == real(P*conj(P))^2
+algdivl(C,z,u) == u/z
+exponent(algdivl(C,mc22,mc22b) - mc22^(-1)*mc22b) < -100
+{mc22noninv = matrix(2,1,i,j,round(algrandom(C,10.))) *
+  matrix(1,2,i,j,round(algrandom(C,10.)))};
+algnorm(C,mc22noninv) == 0
+exponent(mc22noninv*algdivl(C,mc22noninv,mc22noninv*mc22)-mc22noninv*mc22)<-100
+exponent(mc22*alginv(C,mc22) - matid(2)) < -100
+exponent(algdivr(C,z,u) - z/u) < -100
+algdivr(C,mc22,mc22b) == mc22*mc22b^(-1)
+!algisdivl(R,0.+0.*I,I)
+algisdivl(R,0.+0.*I,0.*I)
+!algisdivl(C,mc22noninv,mc22)
+!algisinv(C,0.*I)
+!algisinv(C,m22noninv)
+algisinv(C,z)
+algisinv(C,mc22b)
+algpow(C,z,11) == z^11
+exponent(algpow(C,z,-6) - z^(-6)) < -100
+algpow(C,z,0) == 1.
+algpow(C,mc22,5) == mc22^5
+exponent(algpow(C,mc22,-3) - mc22^(-3)) < -100
+algpow(C,mc22,0) == matid(2)
+algpoleval(C,x^3-x+1,z) == z^3-z+1
+
+
+
+
+
 
 
 

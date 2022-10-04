@@ -37,7 +37,8 @@ enum  {
   al_NULL = 0,
   al_TABLE,
   al_CSA,
-  al_CYCLIC
+  al_CYCLIC,
+  al_REAL
 };
 
 /* models for elements of algebras */
@@ -47,6 +48,14 @@ enum {
   al_ALGEBRAIC,
   al_BASIS,
   al_MATRIX
+};
+
+/* models for elements of M_n(Hamilton quaternions) */
+enum {
+  H_INVALID = 0,
+  H_SCALAR,
+  H_QUATERNION,
+  H_MATRIX
 };
 
 /* idealtyp */
