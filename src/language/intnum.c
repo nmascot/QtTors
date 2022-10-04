@@ -2325,11 +2325,11 @@ logzetan(GEN s, GEN P, long N, long prec)
   else
   {
     forprime_t T;
-    ulong p;
-    u_forprime_init(&T, 2, N); av = avma;
-    while ((p = u_forprime_next(&T)))
+    GEN p;
+    forprime_init(&T, gen_2, utoi(N)); av = avma;
+    while ((p = forprime_next(&T)))
     {
-      Z = gsub(Z, gdiv(Z, gpow(utoipos(p), s, prec)));
+      Z = gsub(Z, gdiv(Z, gpow(p, s, prec)));
       if (gc_needed(av,2)) Z = gerepileupto(av, Z);
     }
   }
@@ -2386,11 +2386,11 @@ opFps(GEN(*op)(GEN,GEN), GEN P, long N, long a, GEN F, GEN s, long prec)
   else
   {
     forprime_t T;
-    ulong p;
-    u_forprime_init(&T, a, N); av = avma;
-    while ((p = u_forprime_next(&T)))
+    GEN p;
+    forprime_init(&T, utoi(a), utoi(N)); av = avma;
+    while ((p = forprime_next(&T)))
     {
-      S = op(S, rfrac_evalfp(F, gpow(utoipos(p), s, prec), prec));
+      S = op(S, rfrac_evalfp(F, gpow(p, s, prec), prec));
       if (gc_needed(av,2)) S = gerepileupto(av, S);
     }
   }
