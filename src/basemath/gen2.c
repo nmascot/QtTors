@@ -2429,8 +2429,8 @@ quadtofp(GEN x, long prec)
   else
   { /* if (b) x ~ (u + z) / 2 and quadnorm(x) ~ (u^2 - z^2) / 4
      * else x ~ u + z and quadnorm(x) ~ u^2 - z^2 */
-    long s = signe(u);
-    if (s == -signe(v)) /* conjugate expression avoids cancellation */
+    long s = gsigne(u);
+    if (s == -gsigne(v)) /* conjugate expression avoids cancellation */
     {
       z = gdiv(quadnorm(x), gsub(u, z));
       if (b) shiftr_inplace(z, 1);

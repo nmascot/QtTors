@@ -47,6 +47,7 @@ ceil(2*w)
 ceil(-2*w)
 round(2*w)
 round(-2*w)
+quadgen(5) + 2/3 + 0.\\ #2419
 
 \\ Errors keep at end of file
 floor(w8)

@@ -43,6 +43,7 @@ w
 -4294967297
 4294967297
 -4294967297
+2.2847006554165615148712535010323047844
   ***   at top-level: floor(w8)
   ***                 ^---------
   *** floor: incorrect type in gfloor (t_QUAD).
@@ -55,4 +56,4 @@ w
   ***   at top-level: floor(Mod(0,3)*quadgen(5))
   ***                 ^--------------------------
   *** floor: incorrect type in gfloor (t_QUAD).
-Total time spent: 2
+Total time spent: 1
