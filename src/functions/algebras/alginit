@@ -24,11 +24,11 @@ Doc: initializes the central simple algebra defined by data $B$, $C$ and
           0, 0, 0,1;
           1, 0, 0,0;
           0,-1, 0,0];
-   mk = [0, 0, 0, 0;
+   mk = [0, 0, 0, -1;
           0, 0,-1, 0;
           0, 1, 0, 0;
-          1, 0, 0,-1];
-   A = alginit(nfinit(y), [matid(4), mi,mj,mk],  0); }
+          1, 0, 0, 0];
+   A = alginit(nfinit(y), [matid(4), mi,mj,mk], , 0); }
  @eprog represents (in a complicated way) the quaternion algebra $(-1,-1)_\Q$.
  See below for a simpler solution.
 
