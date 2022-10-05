@@ -1545,12 +1545,26 @@ elltwist(GEN E, GEN P)
     switch (ell_get_type(E))
     {
       case t_ELL_Fp:
+      {
+        GEN Et, S = obj_check(E, FF_CARD);
         p = ellff_get_field(E);
         e = ellff_get_a4a6(E);
         Fp_elltwist(gel(e,1), gel(e, 2), p, &a4, &a6);
-        return gerepilecopy(av, ellinit_i(mkvec2(a4,a6), p, 0));
+        Et = ellinit_i(mkvec2(a4,a6), p, 0);
+        if (S) obj_insert_shallow(Et, FF_CARD, subii(shifti(addiu(p,1), 1), S));
+        return gerepilecopy(av, Et);
+      }
       case t_ELL_Fq:
-        return gerepilecopy(av, ellinit_i(FF_elltwist(E), NULL, 0));
+      {
+        GEN Et = ellinit_i(FF_elltwist(E), NULL, 0);
+        GEN S = obj_check(E, FF_CARD);
+        if (S)
+        {
+          GEN q = FF_q(ellff_get_field(Et));
+          obj_insert_shallow(Et, FF_CARD, subii(shifti(addiu(q, 1), 1), S));
+        }
+        return gerepilecopy(av, Et);
+      }
       default: pari_err_TYPE("elltwist [missing P]", E);
     }
   }
