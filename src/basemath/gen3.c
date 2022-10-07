@@ -4000,7 +4000,7 @@ RgM_mulreal(GEN x, GEN y)
   return z;
 }
 
-/* Compute Re(x * y), symetric result, x and y vectors of compatible
+/* Compute Re(x * y), symmetric result, x and y vectors of compatible
  * dimensions; assume scalar entries */
 GEN
 RgC_RgV_mulrealsym(GEN x, GEN y)
@@ -4174,7 +4174,7 @@ simplify(GEN x)
 /*                EVALUATION OF SOME SIMPLE OBJECTS                */
 /*                                                                 */
 /*******************************************************************/
-/* q is a real symetric matrix, x a RgV. Horner-type evaluation of q(x)
+/* q is a real symmetric matrix, x a RgV. Horner-type evaluation of q(x)
  * using (n^2+3n-2)/2 mul */
 GEN
 qfeval(GEN q, GEN x)
@@ -4348,7 +4348,7 @@ init_qf_apply(GEN q, GEN M, long *l)
   else         { if (k != 1 && lgcols(M) == *l) return; }
   pari_err_DIM("qf_apply_RgM");
 }
-/* Return X = M'.q.M, assuming q is a symetric matrix and M is a
+/* Return X = M'.q.M, assuming q is a symmetric matrix and M is a
  * matrix of compatible dimensions. X_ij are X_ji identical, not copies */
 GEN
 qf_apply_RgM(GEN q, GEN M)

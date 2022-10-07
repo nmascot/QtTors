@@ -1574,7 +1574,7 @@ suitable(GEN x, long k, GEN *pp, long *pi)
   }
 }
 
-/* Gauss reduction (arbitrary symetric matrix, only the part above the
+/* Gauss reduction (arbitrary symmetric matrix, only the part above the
  * diagonal is considered). If signature is nonzero, return only the
  * signature, in which case gsigne() should be defined for elements of a. */
 static GEN
@@ -1692,7 +1692,7 @@ rot(GEN x, GEN y, GEN s, GEN u) {
   affrr(y1,y);
 }
 
-/* Diagonalization of a REAL symetric matrix. Return a vector [L, r]:
+/* Diagonalization of a REAL symmetric matrix. Return a vector [L, r]:
  * L = vector of eigenvalues
  * r = matrix of eigenvectors */
 GEN

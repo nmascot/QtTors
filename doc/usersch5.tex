@@ -2485,7 +2485,7 @@ Assumes that $\kbd{prec} > 2$.
 \fun{long}{itos}{GEN x} converts the \typ{INT}~\kbd{x} to a \kbd{long} if
 possible, otherwise raise an exception. We consider the conversion
 to be possible if and only if $|x| \leq \kbd{LONG\_MAX}$, i.e. $|x| < 2^{63}$
-on a 64-bit architecture. Since the range is symetric, the output of
+on a 64-bit architecture. Since the range is symmetric, the output of
 \kbd{itos} can safely be negated.
 
 \fun{long}{itos_or_0}{GEN x} converts the \typ{INT}~\kbd{x} to a \kbd{long} if
@@ -9467,7 +9467,7 @@ $(x_iy_j)$).
 
 \fun{GEN}{RgC_RgV_mulrealsym}{GEN x, GEN y} returns the real part of $x\times
 y$ (whose entries are \typ{INT}, \typ{FRAC}, \typ{REAL} or \typ{COMPLEX}),
-assuming the result is symetric.
+assuming the result is symmetric.
 
 The following two functions are not well defined in general and only provided
 for convenience in specific cases:
@@ -9587,7 +9587,7 @@ but for a $1$ at position $i$.
 \fun{int}{RgM_is_ZM}{GEN x} return 1 if the \typ{MAT}~$x$ has only
 \typ{INT} coefficients, and 0 otherwise.
 
-\fun{long}{qfiseven}{GEN M} return 1 if the square symetric typ{ZM}~$x$
+\fun{long}{qfiseven}{GEN M} return 1 if the square symmetric typ{ZM}~$x$
 is an even quadratic form (all diagonal coefficients are even), and 0 otherwise.
 
 \fun{int}{RgM_is_QM}{GEN x} return 1 if the \typ{MAT}~$x$ has only
