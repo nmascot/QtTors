@@ -916,7 +916,7 @@ main(int argc, char **argv)
         default: error(argv);
       }
     } else {
-      if (!isdigit((int)*s)) error(argv);
+      if (!isdigit((unsigned char)*s)) error(argv);
       r = atol(s); if (r >= (long)numberof(param) || r < 0) error(argv);
       v[n++] = r;
     }

@@ -129,7 +129,7 @@ tm_parse_command(tm_cmd *c, const char *ch)
     else
     { /* read integer */
       t = s;
-      while (isdigit((int)*s)) s++;
+      while (isdigit((unsigned char)*s)) s++;
       strncpy(u, t, s - t); u[s-t] = 0;
     }
     pari_stack_pushp(&s_A, u);

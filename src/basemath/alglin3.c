@@ -127,9 +127,9 @@ static long
 str_to_long(char *s, char **pt)
 {
   long a = atol(s);
-  while (isspace((int)*s)) s++;
+  while (isspace((unsigned char)*s)) s++;
   if (*s == '-' || *s == '+') s++;
-  while (isdigit((int)*s) || isspace((int)*s)) s++;
+  while (isdigit((unsigned char)*s) || isspace((unsigned char)*s)) s++;
   *pt = s; return a;
 }
 
@@ -150,7 +150,7 @@ get_range(char *s, long *a, long *b, long *cmpl, long lx)
   if (*s == '.')
   {
     s++; if (*s != '.') return 0;
-    do s++; while (isspace((int)*s));
+    do s++; while (isspace((unsigned char)*s));
     if (*s)
     {
       *b = str_to_long(s, &s);

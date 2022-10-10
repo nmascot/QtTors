@@ -51,7 +51,7 @@ my_int(char *s)
   ulong n = 0;
   char *p = s;
 
-  while (isdigit((int)*p)) {
+  while (isdigit((unsigned char)*p)) {
     ulong m;
     if (n > (~0UL / 10)) pari_err(e_SYNTAX,"integer too large",s,s);
     n *= 10; m = n;
@@ -84,7 +84,7 @@ get_int(const char *s, long dflt)
   int minus = 0;
 
   if (*p == '-') { minus = 1; p++; }
-  if (!isdigit((int)*p)) return gc_long(av, dflt);
+  if (!isdigit((unsigned char)*p)) return gc_long(av, dflt);
 
   n = (long)my_int(p);
   if (n < 0) pari_err(e_SYNTAX,"integer too large",s,s);
@@ -381,7 +381,7 @@ gp_get_color(char **st)
   char *s, *v = *st;
   int trans;
   long c;
-  if (isdigit((int)*v))
+  if (isdigit((unsigned)*v))
     { c = atol(v); trans = 1; } /* color on transparent background */
   else
   {
@@ -473,13 +473,13 @@ sd_format(const char *v, long flag)
       pari_err(e_SYNTAX,"default: inexistent format",v,v);
     fmt->format = c; v++;
 
-    if (isdigit((int)*v))
-      { while (isdigit((int)*v)) v++; } /* FIXME: skip obsolete field width */
+    if (isdigit((unsigned char)*v))
+      { while (isdigit((unsigned char)*v)) v++; } /* FIXME: skip obsolete field width */
     if (*v++ == '.')
     {
       if (*v == '-') fmt->sigd = -1;
       else
-        if (isdigit((int)*v)) fmt->sigd=atol(v);
+        if (isdigit((unsigned char)*v)) fmt->sigd=atol(v);
     }
   }
   if (flag == d_RETURN)

@@ -138,7 +138,7 @@ static char *
 read_arg(long *nread, char *t, long argc, char **argv)
 {
   long i = *nread;
-  if (isdigit((int)*t)) return t;
+  if (isdigit((unsigned char)*t)) return t;
   if (*t || i==argc) usage(argv[0]);
   *nread = i+1; return argv[i];
 }
@@ -147,7 +147,7 @@ static char *
 read_arg_equal(long *nread, char *t, long argc, char **argv)
 {
   long i = *nread;
-  if (*t=='=' && isdigit((int)t[1])) return t+1;
+  if (*t=='=' && isdigit((unsigned char)t[1])) return t+1;
   if (*t || i==argc) usage(argv[0]);
   *nread = i+1; return argv[i];
 }

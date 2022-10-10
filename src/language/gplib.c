@@ -39,13 +39,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 void
 pari_skip_space(char **s) {
   char *t = *s;
-  while (isspace((int)*t)) t++;
+  while (isspace((unsigned char)*t)) t++;
   *s = t;
 }
 void
 pari_skip_alpha(char **s) {
   char *t = *s;
-  while (isalpha((int)*t)) t++;
+  while (isalpha((unsigned char)*t)) t++;
   *s = t;
 }
 
@@ -508,7 +508,7 @@ ok_external_help(char **s)
   const char **L;
   long n;
   if (!**s) return 1;
-  if (!isalpha((int)**s)) return 3; /* operator or section number */
+  if (!isalpha((unsigned char)**s)) return 3; /* operator or section number */
   if (!strncmp(*s,"t_",2)) { *s += 2; return 2; } /* type name */
 
   L = gphelp_keyword_list();
@@ -569,12 +569,12 @@ help(const char *s0, int flag)
   entree *ep;
   char *s = get_sep(s0);
 
-  if (isdigit((int)*s)) { digit_help(s,flag); return; }
+  if (isdigit((unsigned char)*s)) { digit_help(s,flag); return; }
   if (flag & h_APROPOS) { external_help(s,-1); return; }
   /* Get meaningful answer on '\ps 5' (e.g. from <F1>) */
-  if (*s == '\\' && isalpha((int)*(s+1)))
+  if (*s == '\\' && isalpha((unsigned char)*(s+1)))
   { char *t = s+1; pari_skip_alpha(&t); *t = '\0'; }
-  if (isalpha((int)*s))
+  if (isalpha((unsigned char)*s))
   {
     char *t = s;
     if (!strncmp(s, "default", 7))
@@ -836,8 +836,8 @@ static ulong
 read_uint(char **s)
 {
   long v = atol(*s);
-  if (!isdigit((int)**s)) err_gprc("not an integer", *s, *s);
-  while (isdigit((int)**s)) (*s)++;
+  if (!isdigit((unsigned char)**s)) err_gprc("not an integer", *s, *s);
+  while (isdigit((unsigned char)**s)) (*s)++;
   return v;
 }
 static ulong
@@ -1800,7 +1800,7 @@ escape(const char *tch, int ismain)
       else
       {
         d = atol(s); if (*s == '-') s++;
-        while (isdigit((int)*s)) s++;
+        while (isdigit((unsigned char)*s)) s++;
       }
       x = pari_get_hist(d);
       switch (c)
@@ -1825,22 +1825,22 @@ escape(const char *tch, int ismain)
       if (!*s) s = (GP_DATA->echo)? "0": "1";
       (void)sd_echo(s,d_ACKNOWLEDGE); break;
     case 'g':
-        if (isdigit(*s))
+        if (isdigit((unsigned char)*s))
         {
           const char *t = s + 1;
-          if (isdigit(*t)) t++; /* atol(s) < 99 */
+          if (isdigit((unsigned char)*t)) t++; /* atol(s) < 99 */
           t = get_name(t);
           if (*t) { d = atol(s); ack_setdebug(t, d); break; }
         }
-        else if (*s == '"' || isalpha(*s))
+        else if (*s == '"' || isalpha((unsigned char)*s))
         {
           char *t = get_name(s);
-          if (t[1] && !isdigit(t[1]))
+          if (t[1] && !isdigit((unsigned char)t[1]))
           {
             char *T = t + strlen(t) - 1;
-            if (isdigit(*T))
+            if (isdigit((unsigned char)*T))
             {
-              if (isdigit(T[-1])) T--; /* < 99 */
+              if (isdigit((unsigned char)T[-1])) T--; /* < 99 */
               d = atol(T); *T = 0;
               ack_setdebug(get_name(t), d); /* get_name in case of ".." */
             }

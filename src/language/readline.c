@@ -259,7 +259,7 @@ pari_completion(pari_rl_interface *rl, char *text, int START, int END)
 
   *rl->completion_append_character = ' ';
   current_ep = NULL;
-  while (line[first] && isspace((int)line[first])) first++;
+  while (line[first] && isspace((unsigned char)line[first])) first++;
   if (line[first] == '?')
   {
       if (line[first+1] == '?')
@@ -299,7 +299,7 @@ pari_completion(pari_rl_interface *rl, char *text, int START, int END)
 
     i = start;
 
-    while (i && isspace((int)line[i-1])) i--;
+    while (i && isspace((unsigned char)line[i-1])) i--;
     iend = i;
     while (i && is_keyword_char(line[i-1])) i--;
 
@@ -310,9 +310,9 @@ pari_completion(pari_rl_interface *rl, char *text, int START, int END)
       return get_matches(rl, -1, text, rl->filename_completion_function);
 
     j = start + 1;
-    while (j <= END && isspace((int)line[j])) j++;
+    while (j <= END && isspace((unsigned char)line[j])) j++;
     k = END;
-    while (k > j && isspace((int)line[k])) k--;
+    while (k > j && isspace((unsigned char)line[k])) k--;
     /* If we are in empty parens, insert the default arguments */
     if ((GP_DATA->readline_state & DO_ARGS_COMPLETE) && k == j
          && (line[j] == ')' || !line[j])

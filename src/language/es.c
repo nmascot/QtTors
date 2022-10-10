@@ -139,7 +139,7 @@ filtre0(filtre_t *F)
 
     /* weed out comments and spaces */
     if (c=='\\' && *s=='\\') { F->in_comment = ONE_LINE_COMMENT; continue; }
-    if (isspace((int)c)) continue;
+    if (isspace((unsigned char)c)) continue;
     *t++ = c;
     switch(c)
     {
@@ -806,7 +806,7 @@ absrtostr_width_frac(GEN x, int width_frac)
 static char *
 absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
 {
-  const char format = (char)tolower((int)FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
+  const char format = (char)tolower((unsigned char)FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
   long beta, ls, point, lx, sx = signe(x), ex = expo(x);
   char *s, *buf, *buf0;
   GEN z;
@@ -2188,12 +2188,12 @@ print_functions_hash(const char *s)
   long m, n, Max, Total;
   entree *ep;
 
-  if (isdigit((int)*s) || *s == '$')
+  if (isdigit((unsigned char)*s) || *s == '$')
   {
     m = functions_tblsz-1; n = atol(s);
     if (*s=='$') n = m;
     if (m<n) pari_err(e_MISC,"invalid range in print_functions_hash");
-    while (isdigit((int)*s)) s++;
+    while (isdigit((unsigned char)*s)) s++;
 
     if (*s++ != '-') m = n;
     else
@@ -2209,7 +2209,7 @@ print_functions_hash(const char *s)
     }
     return;
   }
-  if (is_keyword_char((int)*s))
+  if (is_keyword_char(*s))
   {
     ep = is_entry(s);
     if (!ep) pari_err(e_MISC,"no such function");
@@ -2269,9 +2269,9 @@ get_texvar(long v, char *buf, unsigned int len)
   if (!ep) pari_err(e_MISC, "this object uses debugging variables");
   s = ep->name;
   if (strlen(s) >= len) pari_err(e_MISC, "TeX variable name too long");
-  while (isalpha((int)*s)) *t++ = *s++;
+  while (isalpha((unsigned char)*s)) *t++ = *s++;
   *t = 0;
-  if (isdigit((int)*s) || *s == '_') {
+  if (isdigit((unsigned char)*s) || *s == '_') {
     int seen1 = 0, seen = 0;
 
     /* Skip until the first non-underscore */
@@ -2746,7 +2746,7 @@ bruti_intern(GEN g, pariout_t *T, pari_str *S, int addsign)
       str_alloc(S, lg(g)); /* careful! */
       av = avma;
       if (addsign && signe(g) < 0) str_putc(S, '-');
-      str_puts(S, absrtostr(g, T->sp, (char)toupper((int)T->format), T->sigd) );
+      str_puts(S, absrtostr(g, T->sp, (char)toupper((unsigned char)T->format), T->sigd) );
       set_avma(av); break;
     }
 
@@ -4310,7 +4310,7 @@ file_is_binary(FILE *f)
 {
   int r, c = fgetc(f);
   ungetc(c,f);
-  r = (c != EOF && isprint(c) == 0 && isspace(c) == 0);
+  r = (c != EOF && isprint((unsigned char)c) == 0 && isspace((unsigned char)c) == 0);
 #ifdef _WIN32
   if (r) { setmode(fileno(f), _O_BINARY); rewind(f); }
 #endif

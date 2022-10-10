@@ -326,7 +326,7 @@ print_text(const char *s) { print_prefixed_text(pariOut, s,NULL,NULL); }
 INLINE void
 out_print_text(PariOUT *out, const char *s) { print_prefixed_text(out, s,NULL,NULL); }
 INLINE long
-is_keyword_char(char c) { return (isalnum((int)c) || c=='_'); }
+is_keyword_char(char c) { return (isalnum((unsigned char)c) || c=='_'); }
 
 /* Interfaces (GP, etc.) */
 hashtable *hash_from_link(GEN e, GEN names, int use_stack);

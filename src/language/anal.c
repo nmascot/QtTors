@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  * this, and arg is not-negated. */
 
 static int
-IS_ID(char c) { return isalnum((int)c) || c == '_'; }
+IS_ID(char c) { return isalnum((unsigned char)c) || c == '_'; }
 long
 eval_mnemonic(GEN str, const char *tmplate)
 {
@@ -64,7 +64,7 @@ eval_mnemonic(GEN str, const char *tmplate)
     char *buf;
     static char b[80];
 
-    while (isspace((int)*arg)) arg++;
+    while (isspace((unsigned char)*arg)) arg++;
     if (!*arg) break;
     e = arg; while (IS_ID(*e)) e++;
     /* Now the ID is whatever is between arg and e. */
@@ -102,13 +102,13 @@ FIND:
     if (*id++ != '|') pari_err(e_MISC,"Missing | in mnemonic template");
     e = id;
     while (*e >= '0' && *e <= '9') e++;
-    while (isspace((int)*e)) e++;
+    while (isspace((unsigned char)*e)) e++;
     if (*e && *e != ';' && *e != ',')
       pari_err(e_MISC, "Non-numeric argument in mnemonic template");
     numarg = atol(id);
     if (negate) retval &= ~numarg; else retval |= numarg;
-    while (isspace((int)*arg)) arg++;
-    if (*arg && !ispunct((int)*arg++)) /* skip punctuation */
+    while (isspace((unsigned char)*arg)) arg++;
+    if (*arg && !ispunct((unsigned char)*arg++)) /* skip punctuation */
       pari_err(e_MISC,"Junk after id in mnemonic");
   }
   return retval;
@@ -221,9 +221,9 @@ isreturn(char c)
 static int
 is_long(const char *s)
 {
-  while (isspace(*s)) s++;
+  while (isspace((unsigned char)*s)) s++;
   if (*s == '+' || *s == '-') s++;
-  while (isdigit(*s)) s++;
+  while (isdigit((unsigned char)*s)) s++;
   return *s == ',';
 }
 /* if is known that 2 commas follow s; base-10 unsigned integer followed
@@ -231,9 +231,9 @@ is_long(const char *s)
 static int
 is_ulong(const char *s)
 {
-  while (isspace(*s)) s++;
+  while (isspace((unsigned char)*s)) s++;
   if (*s == '+') s++;
-  while (isdigit(*s)) s++;
+  while (isdigit((unsigned char)*s)) s++;
   return *s == ',';
 }
 static long
@@ -312,7 +312,7 @@ static void
 check_name(const char *name)
 {
   const char *s = name;
-  if (isalpha((int)*s))
+  if (isalpha((unsigned char)*s))
     while (is_keyword_char(*++s)) /* empty */;
   if (*s) pari_err(e_SYNTAX,"not a valid identifier", s, name);
 }
@@ -460,7 +460,7 @@ static GEN
 binary_read(const char **ps, long B, int is(int), ulong num(const char *s, long n))
 {
   const char *s = *ps;
-  while (is((int)**ps)) (*ps)++;
+  while (is((unsigned char)**ps)) (*ps)++;
   return strtobin_len(s, *ps-s, B, num);
 }
 
@@ -503,7 +503,7 @@ dec_read_more(const char **ps)
 {
   pari_sp av = avma;
   const char *s = *ps;
-  while (isdigit((int)**ps)) (*ps)++;
+  while (isdigit((unsigned char)**ps)) (*ps)++;
   return gerepileuptoint(av, dec_strtoi_len(s, *ps-s));
 }
 
@@ -511,7 +511,7 @@ static ulong
 number(int *n, const char **s)
 {
   ulong m = 0;
-  for (*n = 0; *n < MAX_DIGITS && isdigit((int)**s); (*n)++,(*s)++)
+  for (*n = 0; *n < MAX_DIGITS && isdigit((unsigned char)**s); (*n)++,(*s)++)
     m = 10*m + (**s - '0');
   return m;
 }
@@ -568,7 +568,7 @@ real_read(pari_sp av, const char **s, GEN y, long prec)
     case '.':
     {
       const char *old = ++*s;
-      if (isalpha((int)**s) || **s=='.')
+      if (isalpha((unsigned char)**s) || **s=='.')
       {
         if (**s == 'E' || **s == 'e') {
           n = exponent(s);
@@ -577,7 +577,7 @@ real_read(pari_sp av, const char **s, GEN y, long prec)
         }
         --*s; return y; /* member */
       }
-      if (isdigit((int)**s)) y = real_read_more(y, s);
+      if (isdigit((unsigned char)**s)) y = real_read_more(y, s);
       n = old - *s;
       if (**s != 'E' && **s != 'e')
       {
@@ -630,7 +630,7 @@ strtor(const char *s, long prec)
 
 static void
 skipdigits(char **lex) {
-  while (isdigit((int)**lex)) ++*lex;
+  while (isdigit((unsigned char)**lex)) ++*lex;
 }
 
 static int
@@ -641,7 +641,7 @@ skipexponent(char **lex)
   {
     ++*lex;
     if ( **lex=='+' || **lex=='-' ) ++*lex;
-    if (!isdigit((int)**lex))
+    if (!isdigit((unsigned char)**lex))
     {
       *lex=old;
       return KINTEGER;
@@ -660,7 +660,7 @@ skipconstante(char **lex)
   {
     char *old = ++*lex;
     if (**lex == '.') { --*lex; return KINTEGER; }
-    if (isalpha((int)**lex))
+    if (isalpha((unsigned char)**lex))
     {
       skipexponent(lex);
       if (*lex == old)
@@ -702,7 +702,7 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
     yylloc->end=*lex;
     return 0;
   }
-  if (isalpha((int)**lex))
+  if (isalpha((unsigned char)**lex))
   {
     while (is_keyword_char(**lex)) ++*lex;
     yylloc->end=*lex;
@@ -743,11 +743,11 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
   }
   if (ishex((const char**)lex))
   {
-    while (isxdigit((int)**lex)) ++*lex;
+    while (isxdigit((unsigned int)**lex)) ++*lex;
     yylloc->end = *lex;
     return KINTEGER;
   }
-  if (isdigit((int)**lex))
+  if (isdigit((unsigned char)**lex))
   {
     int token=skipconstante(lex);
     yylloc->end = *lex;
