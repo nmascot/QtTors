@@ -1537,7 +1537,7 @@ elltwist(GEN E, GEN P)
   }
   if (!P)
   {
-    GEN Et, S, a4, a6, e, fg, q = NULL;
+    GEN Et, S, a4, a6, e, fg, q;
     if (!isell)
     { /* Could avoid this ellinit. Don't bother. */
       e = E; E = ellinit_i(E, NULL, prec);
@@ -1554,6 +1554,7 @@ elltwist(GEN E, GEN P)
         fg = ellff_get_field(E); q = FF_q(fg);
         Et = ellinit_Fq(FF_elltwist(E), fg); break;
       default: pari_err_TYPE("elltwist [missing P]", E);
+        return NULL;/*LCOV_EXCL_LINE*/
     }
     if ((S = obj_check(E, FF_CARD)))
       obj_insert_shallow(Et, FF_CARD, elltwist_card(S, q));
