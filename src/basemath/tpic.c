@@ -186,7 +186,89 @@ GEN Zq_ZqXn_mul(GEN A, GEN B, GEN T, GEN pe)
   return C;
 }
 
+GEN ZqXn_mul_subKara(GEN A, GEN B, GEN T, GEN pe)
+{ // Not mem clean
+  GEN A0,A1,B0,B1,C0,c0,C,D,E;
+  ulong m,h,h2,m2,i;
+  long dC0;
+  m = lg(A);
+  h = m-2;
+  //printf("Into subK, h=%lu\n",h);
+  if(h==1)
+    return scalarpol(Fq_mul(gel(A,2),gel(B,2),T,pe),varn(A));
+  h2 = h>>1;
+  //printf("h2=%lu\n",h2);
+  m2 = h2+2;
+  A0 = cgetg(m2,t_POL);
+  A0[1] = 0;
+  setsigne(A0,1);
+  setvarn(A0,varn(A));
+  A1 = cgetg(m2,t_POL);
+  A1[1] = 0;
+  setsigne(A1,1);
+  setvarn(A1,varn(A));
+  B0 = cgetg(m2,t_POL);
+  B0[1] = 0;
+  setsigne(B0,1);
+  setvarn(B0,varn(A));
+  B1 = cgetg(m2,t_POL);
+  B1[1] = 0;
+  setsigne(B1,1);
+  setvarn(B1,varn(A));
+  for(i=0;i<h2;i++)
+  {
+    gel(A0,i+2) = gel(A,i+2);
+    gel(A1,i+2) = gel(A,h2+i+2);
+    gel(B0,i+2) = gel(B,i+2);
+    gel(B1,i+2) = gel(B,h2+i+2);
+  }
+  //printf("S ");
+  C0 = FqX_mul(A0,B0,T,pe);
+  //printf("C0 ");
+  dC0 = degree(C0);
+  C = cgetg(m,t_POL);
+  C[1] = 0;
+  setsigne(C,1);
+  setvarn(C,varn(A));
+  for(i=0;i<=dC0;i++)
+    gel(C,i+2) = gel(C0,i+2);
+  if(dC0<h)
+  {
+    c0 = pol_0(varn(T));
+    for(i=dC0+1;i<h;i++)
+      gel(C,i+2) = c0;
+  }
+  //printf("C ");
+  E = ZqXn_mul_subKara(A1,B1,T,pe);
+  //printf("E ");
+  for(i=0;i<h2;i++)
+  {
+    gel(A1,i+2) = ZX_add(gel(A1,i+2),gel(A0,i+2));
+    gel(B1,i+2) = ZX_add(gel(B1,i+2),gel(B0,i+2));
+  }
+  D = ZqXn_mul_subKara(A1,B1,T,pe);
+  //printf("D0 ");
+  for(i=0;i<h2;i++)
+    gel(D,i+2) = ZX_sub(gel(D,i+2),ZX_add(gel(C,i+2),gel(E,i+2)));
+  //printf("D ");
+  for(i=0;i<h2;i++)
+    gel(C,h2+i+2) = ZX_add(gel(C,h2+i+2),gel(D,i+2));
+  //printf("done\n");
+  return C;
+}
+
 GEN ZqXn_mul(GEN A, GEN B, GEN T, GEN pe)
+{ // TODO try Karatsuba
+  pari_sp av = avma;
+  GEN C;
+
+  if(lg(A)==3)
+    return scalarpol(Fq_mul(gel(A,2),gel(B,2),T,pe),varn(A));
+  C = ZqXn_mul_subKara(A,B,T,pe);
+  return gerepilecopy(av,C);
+}
+
+/*GEN ZqXn_mul(GEN A, GEN B, GEN T, GEN pe)
 { // TODO try Karatsuba
   pari_sp av = avma;
   ulong m,h,i,j;
@@ -206,7 +288,7 @@ GEN ZqXn_mul(GEN A, GEN B, GEN T, GEN pe)
     gel(C,j+2) = Fq_red(c,T,pe);
   }
   return gerepilecopy(av,C);
-}
+}*/
 
 GEN ZqXn_inv(GEN A, GEN T, GEN pe, GEN p, long e)
 {
