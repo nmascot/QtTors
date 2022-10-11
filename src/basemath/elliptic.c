@@ -1520,6 +1520,8 @@ ellchangepointinv(GEN x, GEN ch)
   return gerepilecopy(av,y);
 }
 
+static GEN
+elltwist_card(GEN h, GEN q) { return subii(shifti(addiu(q, 1), 1), h); }
 GEN
 elltwist(GEN E, GEN P)
 {
@@ -1535,38 +1537,27 @@ elltwist(GEN E, GEN P)
   }
   if (!P)
   {
-    GEN a4, a6, e, p;
-    /* Could avoid this ellinit. Don't bother. */
+    GEN Et, S, a4, a6, e, fg, q = NULL;
     if (!isell)
-    {
+    { /* Could avoid this ellinit. Don't bother. */
       e = E; E = ellinit_i(E, NULL, prec);
       if (!E) pari_err_TYPE("elltwist", e);
     }
     switch (ell_get_type(E))
     {
       case t_ELL_Fp:
-      {
-        GEN Et, S = obj_check(E, FF_CARD);
-        p = ellff_get_field(E);
+        q = ellff_get_field(E);
         e = ellff_get_a4a6(E);
-        Fp_elltwist(gel(e,1), gel(e, 2), p, &a4, &a6);
-        Et = ellinit_i(mkvec2(a4,a6), p, 0);
-        if (S) obj_insert_shallow(Et, FF_CARD, subii(shifti(addiu(p,1), 1), S));
-        return gerepilecopy(av, Et);
-      }
+        Fp_elltwist(gel(e,1), gel(e,2), q, &a4, &a6);
+        Et = ellinit_Fp(mkvec2(a4,a6), q); break;
       case t_ELL_Fq:
-      {
-        GEN Et = ellinit_i(FF_elltwist(E), NULL, 0);
-        GEN S = obj_check(E, FF_CARD);
-        if (S)
-        {
-          GEN q = FF_q(ellff_get_field(Et));
-          obj_insert_shallow(Et, FF_CARD, subii(shifti(addiu(q, 1), 1), S));
-        }
-        return gerepilecopy(av, Et);
-      }
+        fg = ellff_get_field(E); q = FF_q(fg);
+        Et = ellinit_Fq(FF_elltwist(E), fg); break;
       default: pari_err_TYPE("elltwist [missing P]", E);
     }
+    if ((S = obj_check(E, FF_CARD)))
+      obj_insert_shallow(Et, FF_CARD, elltwist_card(S, q));
+    return gerepilecopy(av, Et);
   }
   if (isell && ell_get_type(E) == t_ELL_NF)
     if (!(DOM = ellnf_get_bnf(E))) DOM = ellnf_get_nf(E);
