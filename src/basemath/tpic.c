@@ -189,13 +189,21 @@ GEN Zq_ZqXn_mul(GEN A, GEN B, GEN T, GEN pe)
 GEN ZqXn_mul_subKara(GEN A, GEN B, GEN T, GEN pe)
 { // Not mem clean
   GEN A0,A1,B0,B1,C0,c0,C,D,E;
-  ulong m,h,h2,m2,i;
-  long dC0;
+  ulong m,h,h2,m2,dC0,i;
   m = lg(A);
   h = m-2;
   //printf("Into subK, h=%lu\n",h);
   if(h==1)
-    return scalarpol(Fq_mul(gel(A,2),gel(B,2),T,pe),varn(A));
+	{
+		C = cgetg(3,t_POL);
+		C[1] = 0;
+  	setsigne(C,1);
+  	setvarn(C,varn(A));
+		gel(C,2) = Fq_mul(gel(A,2),gel(B,2),T,pe);
+		return C;
+	}
+	//pari_printf("A=%Ps\nB=%Ps\n",A,B);
+	//printf("t_POL is %d\n",t_POL);
   h2 = h>>1;
   //printf("h2=%lu\n",h2);
   m2 = h2+2;
@@ -215,80 +223,90 @@ GEN ZqXn_mul_subKara(GEN A, GEN B, GEN T, GEN pe)
   B1[1] = 0;
   setsigne(B1,1);
   setvarn(B1,varn(A));
-  for(i=0;i<h2;i++)
+  for(i=2;i<m2;i++)
   {
-    gel(A0,i+2) = gel(A,i+2);
-    gel(A1,i+2) = gel(A,h2+i+2);
-    gel(B0,i+2) = gel(B,i+2);
-    gel(B1,i+2) = gel(B,h2+i+2);
+    gel(A0,i) = gel(A,i);
+    gel(A1,i) = gel(A,h2+i);
+    gel(B0,i) = gel(B,i);
+    gel(B1,i) = gel(B,h2+i);
   }
   //printf("S ");
   C0 = FqX_mul(A0,B0,T,pe);
   //printf("C0 ");
-  dC0 = degree(C0);
+  dC0 = lg(C0);
+	//printf("dC0=%lu ",dC0);
   C = cgetg(m,t_POL);
   C[1] = 0;
   setsigne(C,1);
   setvarn(C,varn(A));
-  for(i=0;i<=dC0;i++)
-    gel(C,i+2) = gel(C0,i+2);
-  if(dC0<h)
+  for(i=2;i<dC0;i++)
+	{
+		gel(C,i) = gel(C0,i);
+		//c0 = gel(C0,i);
+    //gel(C,i) = typ(c0)==t_POL?c0:scalarpol(c0,varn(T));
+	}
+  if(dC0<m)
   {
     c0 = pol_0(varn(T));
-    for(i=dC0+1;i<h;i++)
-      gel(C,i+2) = c0;
+    for(i=dC0;i<m;i++)
+      gel(C,i) = c0;
   }
   //printf("C ");
   E = ZqXn_mul_subKara(A1,B1,T,pe);
   //printf("E ");
-  for(i=0;i<h2;i++)
+  for(i=2;i<m2;i++)
   {
-    gel(A1,i+2) = ZX_add(gel(A1,i+2),gel(A0,i+2));
-    gel(B1,i+2) = ZX_add(gel(B1,i+2),gel(B0,i+2));
+    gel(A1,i) = ZX_add(gel(A1,i),gel(A0,i));
+    gel(B1,i) = ZX_add(gel(B1,i),gel(B0,i));
   }
   D = ZqXn_mul_subKara(A1,B1,T,pe);
+	//printf("lgC:%ld lgD:%ld lgE:%ld ",lg(C),lg(D),lg(E));
   //printf("D0 ");
-  for(i=0;i<h2;i++)
-    gel(D,i+2) = ZX_sub(gel(D,i+2),ZX_add(gel(C,i+2),gel(E,i+2)));
+	//printf("c0:%ld ",typ(gel(C,2)));
+	//printf("d0:%ld e0:%ld ",typ(gel(D,2)),typ(gel(E,2)));
+  for(i=2;i<m2;i++)
+    gel(D,i) = ZX_sub(gel(D,i),ZX_add(gel(C,i),gel(E,i)));
   //printf("D ");
-  for(i=0;i<h2;i++)
-    gel(C,h2+i+2) = ZX_add(gel(C,h2+i+2),gel(D,i+2));
+  for(i=2;i<m2;i++)
+    gel(C,h2+i) = ZX_add(gel(C,h2+i),gel(D,i));
   //printf("done\n");
   return C;
 }
 
 GEN ZqXn_mul(GEN A, GEN B, GEN T, GEN pe)
-{ // TODO try Karatsuba
+{
   pari_sp av = avma;
-  GEN C;
+  GEN C,C0,c;
+	ulong m,i,j;
 
-  if(lg(A)==3)
-    return scalarpol(Fq_mul(gel(A,2),gel(B,2),T,pe),varn(A));
-  C = ZqXn_mul_subKara(A,B,T,pe);
-  return gerepilecopy(av,C);
-}
-
-/*GEN ZqXn_mul(GEN A, GEN B, GEN T, GEN pe)
-{ // TODO try Karatsuba
-  pari_sp av = avma;
-  ulong m,h,i,j;
-  GEN C,c;
-
-  m = lg(A);
-  h = m-2;
+	m = lg(A);
   C = cgetg(m,t_POL);
   C[1] = 0;
   setsigne(C,1);
   setvarn(C,varn(A));
-  for(j=0;j<h;j++)
-  {
-    c = ZX_mul(gel(A,2),gel(B,j+2));
-    for(i=1;i<=j;i++)
-      c = ZX_add(c,ZX_mul(gel(A,i+2),gel(B,j+2-i)));
-    gel(C,j+2) = Fq_red(c,T,pe);
-  }
-  return gerepilecopy(av,C);
-}*/
+  if(m<=5)
+	{
+		C = cgetg(m,t_POL);
+		for(j=2;j<m;j++)
+    {
+      c = ZX_mul(gel(A,2),gel(B,j));
+      for(i=3;i<=j;i++)
+        c = ZX_add(c,ZX_mul(gel(A,i),gel(B,j+2-i)));
+      gel(C,j) = Fq_red(c,T,pe);
+    }
+	}
+	else
+	{
+    C0 = ZqXn_mul_subKara(A,B,T,pe);
+		C = cgetg(m,t_POL);
+		for(i=2;i<m;i++)
+			gel(C,i) = FpX_red(gel(C0,i),pe);
+	}
+  C[1] = 0;
+  setsigne(C,1);
+  setvarn(C,varn(A));
+  return gerepileupto(av,C);
+}
 
 GEN ZqXn_inv(GEN A, GEN T, GEN pe, GEN p, long e)
 {
@@ -2544,7 +2562,7 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
         gerepileall(av2,2,&c0,&P1);
         av3 = avma;
       }
-      /* Find g+1 lifts TODO in parallel */
+      /* Find g+1 lifts in parallel */
       gel(vFixedParams,1) = J2;
       gel(vFixedParams,2) = l;
       gel(vFixedParams,3) = U;
