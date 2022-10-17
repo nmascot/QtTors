@@ -367,6 +367,50 @@ chi2 = [1,0,0,-3]~;
 gcharisalgebraic(gc,chi2,&typ)
 typ
 gcharlocal(gc,chi2,1)
+bnf = bnfinit(x^4+15*x^2+45,1);
+gc = gcharinit(bnf,1);
+gc.cyc[1..-2]
+[chi] = gcharalgebraic(gc,[[2,0],[2,0]]);
+Lsum = 0;
+{forvec(v=vectorv(2,i,[0,gc.cyc[i]-1]),
+  Lan = round(lfunan([gc,chi+concat(v,[0,0,0,0]~)],20));
+  Lsum += Lan;
+  print(abs(Lan));
+)};
+Lsum
+E = ellinit([0, 0, 1, -270, -1708]);
+bnf = bnfinit(x^2+3,1);
+p3 = idealprimedec(bnf,3)[1];
+gc = gcharinit(bnf,Mat([p3,2]));
+gc.cyc[1..-2]
+[chi] = gcharalgebraic(gc,[[1,0]]);
+LE = lfuncreate(E);
+lfunan(LE,20)
+Lchi = lfuncreate([gc,chi]);
+round(lfunan(Lchi,20))
+L = lfungenus2([-2*x^4 - 2*x^3 + 2*x^2 + 3*x - 2, x^3]);
+bnf = bnfinit(a^4 - a^3 + 2*a^2 + 4*a + 3, 1);
+pr = idealprimedec(bnf,13)[1];
+gc = gcharinit(bnf,pr);
+gc.cyc[1..-2]
+chitors = [1,0,0,0,0]~;
+typ = [[1,0],[1,0]];
+[chi0] = gcharalgebraic(gc,typ);
+igood = oo; nbgood = 0;
+{for(i=0,gc.cyc[1]-1,
+   chi = chi0 + i*chitors;
+   Lchi = lfuncreate([gc,chi]);
+   if(lfunparams(L) == lfunparams(Lchi)
+     && exponent(lfunan(L,10) - lfunan(Lchi,10)) < -50,
+     igood=i; nbgood++
+   );
+)};
+nbgood
+chi = chi0 + igood*chitors;
+Lchi = lfuncreate([gc,chi]);
+lfunan(L,30)
+round(lfunan(Lchi,30))
+
 
 print("doc gcharlocal");
 bnf = bnfinit(x^3-x-1);

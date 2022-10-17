@@ -486,6 +486,7 @@ Doc:
  integers except the last one, which can be an arbitrary complex number, or
  omitted instead of~$0$.
 
- \item Hecke Grossencharacters have $L$-functions and can be given to all \kbd{lfun} objects as a 2 components
- vector \kbd{[\var{gc},\var{chi}]}.
+ \item Hecke Grossencharacters have $L$-functions and can be given to all
+ \kbd{lfun} functions as a 2 components vector \kbd{[\var{gc},\var{chi}]}, see
+ also Section~\ref{se:lfungchar}.
 

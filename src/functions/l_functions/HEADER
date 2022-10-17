@@ -258,14 +258,15 @@ Doc:
  primitive characters have the same conductor). The function is then
  vector-valued, where the values are ordered as the characters in \kbd{vchi}.
 
- \subsec{General Hecke $L$-functions} %GPHELPskip
+ \subsec{General Hecke $L$-functions} \label{se:lfungchar} %GPHELPskip
 
  Given a Hecke \tev{Grossencharacter} $\chi: \A^\times\to \C^\times$ of
  conductor~$\goth{f}$, we let
  $$L(\chi, s) = \sum_{A \subset \Z_K,\ A+\goth{f}=\Z_K} \chi(A)\, \left(N_{K/\Q}A\right)^{-s}.$$
 
  Let $C_K(\goth{m})=\A^\times/(K^\times\cdot U(\goth{m}))$ be a id\`ele class
- group of modulus $\goth{m}$ given by a \var{gchar} structure~\var{gc}.
+ group of modulus $\goth{m}$ given by a \var{gchar} structure~\var{gc} (see
+ \tet{gcharinit} and Section~\ref{se:GCHAR}).
  A Grossencharacter $\chi$ on $C_K(\goth{m})$ is given by a row
  vector of size \kbd{\#\var{gc}.cyc}.
 
@@ -274,8 +275,11 @@ Doc:
  ? gc.cyc
  %3 = [4, 2, 0, 0]
  ? gcharlog(gc,idealprimedec(gc.bnf,5)[1]) \\@com logarithm map $C_K(\goth{m})\to \R^n$
- ? gcharduallog(gc,[1,0,0,1]) \\@com row vector of exponents in $\R^n$
- ? lfunzeros([gc,[1,0,0,1]],1) \\@com non algebraic $L$-function
+ ? chi = [1,0,0,1,0]~;
+ ? gcharduallog(gc,chi) \\@com row vector of coefficients in $\R^n$
+ ? L = lfuncreate([gc,chi]); \\@com non algebraic $L$-function
+ ? lfunzeros(L,1)
+ ? lfuneuler(L,2) \\@com Euler factor at 2
  @eprog
 
  Finite order Hecke characters are a special case.
