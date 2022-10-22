@@ -2136,12 +2136,9 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN CR, long prec)
 static GEN
 GenusFieldQuadReal(GEN disc)
 {
-  long i, i0 = 0, l;
-  pari_sp av = avma;
-  GEN T = NULL, p0 = NULL, P;
+  GEN T = NULL, p0 = NULL, P = gel(Z_factor(disc), 1);
+  long i, i0 = 0, l = lg(P);
 
-  P = gel(Z_factor(disc), 1);
-  l = lg(P);
   for (i = 1; i < l; i++)
   {
     GEN p = gel(P,i);
@@ -2165,7 +2162,7 @@ GenusFieldQuadReal(GEN disc)
     t = mkpoln(3, gen_1, gen_0, negi(d)); /* x^2 - d */
     T = T? ZX_compositum_disjoint(T, t): t;
   }
-  return gerepileupto(av, polredbest(T, 0));
+  return polredbest(T, 0);
 }
 static GEN
 GenusFieldQuadImag(GEN disc)
