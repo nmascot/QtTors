@@ -2820,7 +2820,7 @@ quadhilbertimag(GEN D)
     }
   L = qfbforms(D);
   h = lg(L)-1;
-  if ((1L << vals(h)) == h) /* power of 2 */
+  if (! (h & (h - 1))) /* power of 2 */
   { /* check whether > |Cl|/2 elements have order <= 2 ==> 2-elementary */
     long lim = (h>>1) + 1;
     for (i=1; i <= lim; i++)
