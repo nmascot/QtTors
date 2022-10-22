@@ -2170,14 +2170,9 @@ GenusFieldQuadReal(GEN disc)
 static GEN
 GenusFieldQuadImag(GEN disc)
 {
-  long i, l;
-  pari_sp av = avma;
-  GEN T = NULL, P;
-
-  P = gel(absZ_factor(disc), 1);
-  l = lg(P);
-  l--; /* remove last prime */
-  for (i = 1; i < l; i++)
+  GEN T = NULL, P = gel(absZ_factor(disc), 1);
+  long i, n = lg(P)-1;
+  for (i = 1; i < n; i++) /* remove last prime */
   {
     GEN p = gel(P,i), d, t;
     if (absequaliu(p, 2))
@@ -2192,7 +2187,7 @@ GenusFieldQuadImag(GEN disc)
     t = mkpoln(3, gen_1, gen_0, negi(d)); /* x^2 - d */
     T = T? ZX_compositum_disjoint(T, t): t;
   }
-  return gerepileupto(av, polredbest(T, 0));
+  return polredbest(T, 0);
 }
 
 /* if flag != 0, computes a fast and crude approximation of the result */
