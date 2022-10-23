@@ -24,6 +24,7 @@ edit            @se:readline@2
 \t              @\b{t}@2
 \u              @\b{u}@2
 \um             @\b{um}@2
+\uv             @\b{uv}@2
 \v              @\b{v}@2
 \w              @\b{w}@2
 \x              @\b{x}@2

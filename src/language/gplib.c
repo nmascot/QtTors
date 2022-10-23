@@ -1729,7 +1729,7 @@ cmp_epname(void *E, GEN e, GEN f)
   return strcmp(((entree*)e)->name, ((entree*)f)->name);
 }
 static void
-print_all_user_fun(int member)
+print_all_user_fun(long t, int member)
 {
   pari_sp av = avma;
   long iL = 0, lL = 1024;
@@ -1741,7 +1741,8 @@ print_all_user_fun(int member)
     {
       const char *f;
       int is_member;
-      if (EpVALENCE(ep) != EpVAR || typ((GEN)ep->value)!=t_CLOSURE) continue;
+      if (EpVALENCE(ep) != EpVAR || t != (typ((GEN)ep->value)==t_CLOSURE))
+        continue;
       f = ep->name;
       is_member = (f[0] == '_' && f[1] == '.');
       if (member != is_member) continue;
@@ -1906,7 +1907,10 @@ escape(const char *tch, int ismain)
     case 's': dbg_pari_heap(); break;
     case 't': gentypes(); break;
     case 'u':
-      print_all_user_fun((*s == 'm')? 1: 0);
+      if (*s=='v')
+        print_all_user_fun(0,0);
+      else
+        print_all_user_fun(1,(*s == 'm')? 1: 0);
       break;
     case 'v': pari_print_version(); break;
     case 'y':
