@@ -232,6 +232,13 @@ rfrac_denom_mul_scal(GEN d, GEN y)
   return D;
 }
 
+static int
+Leading_is_neg(GEN x)
+{
+  while (typ(x) == t_POL) x = leading_coeff(x);
+  return is_real_t(typ(x))? gsigne(x) < 0: 0;
+}
+
 /* d a t_POL, n a coprime t_POL of same var or "scalar". Not memory clean */
 GEN
 gred_rfrac_simple(GEN n, GEN d)
@@ -246,7 +253,7 @@ gred_rfrac_simple(GEN n, GEN d)
     if (typ(n) != t_POL || varn(n) != varn(d)) n = scalarpol(n, varn(d));
     return n;
   }
-
+  if (Leading_is_neg(d)) { d = gneg(d); n = gneg(n); }
   cd = content(d);
   while (typ(n) == t_POL && !degpol(n)) n = gel(n,2);
   cn = (typ(n) == t_POL && varn(n) == varn(d))? content(n): n;

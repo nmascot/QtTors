@@ -10,3 +10,5 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
 
   Changed
      1- binomial(negative t_INT, t_INT): use Kronenburg's definition
+     2- normalize t_RFRAC so that leading coeff of denoimator is "positive";
+        compare: 1/(1-x) and 1/(x-1)

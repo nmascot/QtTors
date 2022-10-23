@@ -18,7 +18,7 @@ O(x^5)
 0.34657359027997265470861606072908828404
 4.2907022622606505026505656858632022811 E122
 320
-x/(-x + 1)
+-x/(x - 1)
 x/(x^2 - 2*x + 1)
   ***   at top-level: polylog(3,2,5)
   ***                 ^--------------
@@ -29,4 +29,4 @@ x/(x^2 - 2*x + 1)
   ***   at top-level: polylog(3,"",0)
   ***                 ^---------------
   *** polylog: incorrect type in polylog (t_STR).
-Total time spent: 1
+Total time spent: 3
