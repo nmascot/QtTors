@@ -6,6 +6,11 @@
 0
 1
 1487335486
+3
+0
+3
+-1
+-4
   ***   at top-level: binomial(1,2.)
   ***                 ^--------------
   *** binomial: incorrect type in binomial (t_REAL).
@@ -15,4 +20,4 @@
   ***   at top-level: binomial(1.)
   ***                 ^------------
   *** binomial: incorrect type in binomial (t_REAL).
-Total time spent: 300
+Total time spent: 215

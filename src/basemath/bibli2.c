@@ -1012,23 +1012,23 @@ binomialuu(ulong n, ulong k)
 GEN
 binomial(GEN n, long k)
 {
-  long i, prec;
+  long i, prec, tn = typ(n);
   pari_sp av;
   GEN y;
 
-  if (k <= 1)
-  {
-    if (is_noncalc_t(typ(n))) pari_err_TYPE("binomial",n);
-    if (k < 0) return gen_0;
-    if (k == 0) return gen_1;
-    return gcopy(n);
-  }
   av = avma;
-  if (typ(n) == t_INT)
+  if (tn == t_INT)
   {
-    if (signe(n) > 0)
-    {
-      GEN z = subiu(n, k);
+    long sn;
+    GEN z;
+    if (k == 0) return gen_1;
+    sn = signe(n);
+    if (sn == 0) return gen_0; /* k != 0 */
+    if (sn > 0)
+    { /* n > 0 */
+      if (k < 0) return gen_0;
+      if (k == 1) return icopy(n);
+      z = subiu(n, k);
       if (cmpiu(z, k) < 0)
       {
         switch(signe(z))
@@ -1042,13 +1042,35 @@ binomial(GEN n, long k)
       set_avma(av);
       if (lgefint(n) == 3) return binomialuu(n[2],(ulong)k);
     }
+    else
+    { /* n < 0, k != 0; use Kronenburg's definition */
+      if (k > 0)
+        z = binomial(subsi(k - 1, n), k);
+      else
+      {
+        z = subis(n, k); if (signe(z) < 0) return gen_0;
+        n = stoi(-k-1); k = itos(z);
+        z = binomial(n, k);
+      }
+      if (odd(k)) togglesign_safe(&z);
+      return gerepileuptoint(av, z);
+    }
+    /* n >= 0 and huge, k != 0 */
+    if (k < 0) return gen_0;
+    if (k == 1) return icopy(n);
     /* k > 1 */
     y = cgetg(k+1,t_VEC); gel(y,1) = n;
     for (i = 2; i <= k; i++) gel(y,i) = subiu(n,i-1);
     y = diviiexact(ZV_prod(y), mpfact(k));
     return gerepileuptoint(av, y);
   }
-
+  if (is_noncalc_t(tn)) pari_err_TYPE("binomial",n);
+  if (k <= 1)
+  {
+    if (k < 0) return gen_0;
+    if (k == 0) return gen_1;
+    return gcopy(n);
+  }
   prec = precision(n);
   if (prec && k > 200 + 0.8*prec2nbits(prec)) {
     GEN A = mpfactr(k, prec), B = ggamma(gsubgs(n,k-1), prec);

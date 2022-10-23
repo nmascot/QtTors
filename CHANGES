@@ -8,3 +8,5 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
      5- polroots(4*x^3+4*x^2+28*x+144) -> overflow [#2418]
      6- conversion to float of t_QUAD with t_FRAC components [#2419]
 
+  Changed
+     1- binomial(negative t_INT, t_INT): use Kronenburg's definition
