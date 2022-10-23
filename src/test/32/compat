@@ -170,7 +170,7 @@ A function with that name existed in GP-1.39.15. Please update your script.
 New syntax: bin(x,y) ===> binomial(x,y)
 
 binomial(x,{k}): binomial coefficient x*(x-1)...*(x-k+1)/k! defined for k in Z 
-and any x. If k is omitted and x an integer, return the vector 
+and any x. If k is omitted and x a nonnegative integer, return the vector 
 [binomial(x,0),...,binomial(x,x)].
 
 
@@ -4505,4 +4505,4 @@ New syntax: texprint(x) ===> printtex(x)
 printtex({str}*): outputs its string arguments in TeX format.
 
 
-Total time spent: 7
+Total time spent: 8
