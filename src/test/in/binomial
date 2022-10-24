@@ -11,6 +11,9 @@ binomial(-2,-1)
 binomial(-2,2)
 binomial(-1,-4)
 binomial(-2,3)
+binomial(Mod(0,3),2)
+binomial(Mod(0,3),-1)
+binomial(Mod(0,3),0)
 
 \\errors
 binomial(1,2.)

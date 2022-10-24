@@ -1067,8 +1067,8 @@ binomial(GEN n, long k)
   if (is_noncalc_t(tn)) pari_err_TYPE("binomial",n);
   if (k <= 1)
   {
-    if (k < 0) return gen_0;
-    if (k == 0) return gen_1;
+    if (k < 0) return Rg_get_0(n);
+    if (k == 0) return Rg_get_1(n);
     return gcopy(n);
   }
   prec = precision(n);
