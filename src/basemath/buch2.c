@@ -1179,10 +1179,10 @@ log2Mbound(GEN nf)
 }
 
 static GEN
-vec_chinese_unit(GEN bnf)
+vec_chinese_units(GEN bnf)
 {
   GEN nf = bnf_get_nf(bnf), SUnits = bnf_get_sunits(bnf);
-  ulong bnd = (ulong)ceil(log2Mbound(nf) + log2fubound(bnf));
+  double bnd = ceil(log2Mbound(nf) + log2fubound(bnf));
   GEN X, dX, Y, U, f = nf_get_index(nf);
   long j, l, v = nf_get_varn(nf);
   if (!SUnits) err_units(); /* no compact units */
@@ -1201,7 +1201,9 @@ vec_chinese_unit(GEN bnf)
     }
     gel(X,j) = typ(t) == t_INT? scalarpol_shallow(t,v): t;
   }
-  return chinese_unit(nf, X, dX, U, bnd);
+  if (bnd > ULONG_MAX)
+    pari_err_OVERFLOW("vec_chinese_units [units too large]");
+  return chinese_unit(nf, X, dX, U, (ulong)bnd);
 }
 
 static GEN
@@ -1209,7 +1211,7 @@ makeunits(GEN bnf)
 {
   GEN nf = bnf_get_nf(bnf), fu = bnf_get_fu_nocheck(bnf);
   GEN tu = nf_to_scalar_or_basis(nf, bnf_get_tuU(bnf));
-  fu = (typ(fu) == t_MAT)? vec_chinese_unit(bnf): matalgtobasis(nf, fu);
+  fu = (typ(fu) == t_MAT)? vec_chinese_units(bnf): matalgtobasis(nf, fu);
   return vec_prepend(fu, tu);
 }
 
