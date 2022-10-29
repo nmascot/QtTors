@@ -17,10 +17,13 @@ Doc: \idx{binomial coefficient} $\binom{x}{k}$.
  ? binomial('x, 2)
  %3 = 1/2*x^2 - 1/2*x
  @eprog\noindent When $x$ is a negative integer and $k$ is negative,
- we use Maarten Kronenburg's
- extension, so that the symmetry relation $\binom{x}{k} = \binom{x}{x - k}$
- becomes valid for all integers $x$
- and $k$, see~\kbd{https://arxiv.org/abs/1105.3689}. The binomial theorem
+ we use Daniel Loeb's extension,
+ $$ \lim_{t\to 1} \Gamma(x+t) / \Gamma(k+t) / \Gamma(x-k+t), $$
+ so that the symmetry relation $\binom{x}{k} = \binom{x}{x - k}$
+ becomes valid for all integers $x$ and $k$.
+ (Sets with a negative number of elements, \emph{Adv. Math.} {\bf 91} (1992),
+ no. 1, 64--74. See also~\kbd{https://arxiv.org/abs/1105.3689})
+ The binomial theorem
  holds for all complex numbers $a$, $b$, $x$ with $|b| < |a|$:
  $$ (a + b)^x = \sum_{k\geq 0} \binom{x}{k} a^{x-k} b^k\,. $$
 
