@@ -147,11 +147,10 @@ List of the PARI types:
   t_VEC    : row vector        [ code ] [  x_1  ] ... [  x_k  ]
   t_COL    : column vector     [ code ] [  x_1  ] ... [  x_k  ]
   t_MAT    : matrix            [ code ] [ col_1 ] ... [ col_k ]
-  t_LIST   : list              [ cod1 ] [ cod2 ][ vec ]
+  t_LIST   : list              [ cod1 ] [ cod2 ] [ vec ]
   t_STR    : string            [ code ] [ man_1 ] ... [ man_k ]
   t_VECSMALL: vec. small ints  [ code ] [ x_1 ] ... [ x_k ]
-  t_CLOSURE: functions [ code ] [ arity ] [ code ] [ operand ] [ data ] [ te
-xt ]
+  t_CLOSURE: functions         [ code ] [ arity ] [ proto ] [ operand ] ... 
   t_ERROR  : error context     [ code ] [ errnum ] [ dat_1 ] ... [ dat_k ]
   t_INFINITY: a*infinity       [ code ] [ a ]
 
