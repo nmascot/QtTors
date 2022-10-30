@@ -1201,7 +1201,7 @@ vec_chinese_units(GEN bnf)
     }
     gel(X,j) = typ(t) == t_INT? scalarpol_shallow(t,v): t;
   }
-  if (bnd > ULONG_MAX)
+  if (dblexpo(bnd) >= BITS_IN_LONG)
     pari_err_OVERFLOW("vec_chinese_units [units too large]");
   return chinese_unit(nf, X, dX, U, (ulong)bnd);
 }
