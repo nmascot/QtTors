@@ -329,7 +329,7 @@ ellformalw(GEN e, long n, long v)
   checkell(e);
   a1 = ell_get_a1(e); a2 = ell_get_a2(e); a3 = ell_get_a3(e);
   a4 = ell_get_a4(e); a6 = ell_get_a6(e); a63 = gmulgu(a6,3);
-  w[1] = evalsigne(1)|evalvarn(v)|evalvalp(3);
+  w[1] = evalsigne(1)|evalvarn(v)|evalvalser(3);
   gel(w,2) = gen_1; /* t^3 + O(t^4) */
   /* use Newton iteration, doubling accuracy at each step
    *

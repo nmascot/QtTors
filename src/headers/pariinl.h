@@ -12,6 +12,7 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
+
 /*********************************************************************/
 /*                       MALLOC/FREE WRAPPERS                        */
 /*********************************************************************/
@@ -422,7 +423,7 @@ INLINE GEN
 zeroser(long v, long e)
 {
   GEN x = cgetg(2, t_SER);
-  x[1] = evalvalp(e) | evalvarn(v); return x;
+  x[1] = evalvalser(e) | evalvarn(v); return x;
 }
 INLINE int
 ser_isexactzero(GEN x)
@@ -3232,3 +3233,4 @@ pari_err_VAR(const char *f, GEN x, GEN y) { pari_err(e_VAR, f,x,y); }
 INLINE void
 pari_err_PRIORITY(const char *f, GEN x, const char *op, long v)
 { pari_err(e_PRIORITY, f,x,op,v); }
+

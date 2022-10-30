@@ -396,7 +396,7 @@ ellL1_bitprec(GEN E, long r, long bitprec)
   if (r == 0 && ellrootno_global(e) < 0) { set_avma(av); return gen_0; }
   vec = Lpoints(&C, e, 0., bitprec);
   t = r ? scalarser(gen_1, 0, r):  zeroser(0, 0);
-  setvalp(t, 1);
+  setvalser(t, 1);
   return gerepileupto(av, ellL1_der(e, vec, &C, t, r, prec));
 }
 
@@ -428,7 +428,7 @@ ellanalyticrank_bitprec(GEN E, GEN eps, long bitprec)
   {
     GEN Lrk;
     GEN t = rk ? scalarser(gen_1, 0, rk):  zeroser(0, 0);
-    setvalp(t, 1);
+    setvalser(t, 1);
     Lrk = ellL1_der(e, vec, &C, t, rk, prec);
     if (DEBUGLEVEL) timer_printf(&ti, "L^(%ld)=%Ps", rk, Lrk);
     if (abscmprr(Lrk, eps) > 0)

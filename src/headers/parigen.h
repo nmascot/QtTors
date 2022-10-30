@@ -60,7 +60,7 @@ typedef long *GEN;
  *  x[1].real  SIGNBITS, EXPOBITS
  *       int   SIGNBITS, LGBITS
  *       pol   SIGNBITS, VARNBITS
- *       ser   SIGNBITS, VARNBITS, VALPBITS
+ *       ser   SIGNBITS, VARNBITS, VALSERBITS
  *       padic VALPBITS, PRECPBITS */
 #define TYPnumBITS   7
 #define SIGNnumBITS  2
@@ -73,10 +73,11 @@ typedef long *GEN;
 
 /* no user serviceable parts below :-) */
 #define   LGnumBITS (BITS_IN_LONG - 1 - TYPnumBITS)
+#define VALSERnumBITS (BITS_IN_LONG - SIGNnumBITS - VARNnumBITS)
 #define VALPnumBITS (BITS_IN_LONG - SIGNnumBITS - VARNnumBITS)
 #define EXPOnumBITS (BITS_IN_LONG - SIGNnumBITS)
 #define PRECPSHIFT VALPnumBITS
-#define  VARNSHIFT VALPnumBITS
+#define  VARNSHIFT VALSERnumBITS
 #define   TYPSHIFT (BITS_IN_LONG - TYPnumBITS)
 #define  SIGNSHIFT (BITS_IN_LONG - SIGNnumBITS)
 
@@ -86,6 +87,7 @@ typedef long *GEN;
 #define PRECPBITS   (~VALPBITS)
 #define LGBITS      ((1UL<<LGnumBITS)-1)
 #define VALPBITS    ((1UL<<VALPnumBITS)-1)
+#define VALSERBITS  ((1UL<<VALSERnumBITS)-1)
 #define VARNBITS    (MAXVARN<<VARNSHIFT)
 #define MAXVARN     ((1UL<<VARNnumBITS)-1)
 #define NO_VARIABLE (-1)
@@ -94,6 +96,7 @@ typedef long *GEN;
 
 #define HIGHEXPOBIT (1UL<<(EXPOnumBITS-1))
 #define HIGHVALPBIT (1UL<<(VALPnumBITS-1))
+#define HIGHVALSERBIT (1UL<<(VALSERnumBITS-1))
 #define CLONEBIT    (1UL<<LGnumBITS)
 
 #define evaltyp(x)    (((ulong)(x)) << TYPSHIFT)
@@ -101,6 +104,7 @@ typedef long *GEN;
 #define evalsigne(x)  (((ulong)(x)) << SIGNSHIFT)
 #define _evalexpo(x)  (HIGHEXPOBIT + (x))
 #define _evalvalp(x)  (HIGHVALPBIT + (x))
+#define _evalvalser(x)  (HIGHVALSERBIT + (x))
 #define _evalprecp(x) (((long)(x)) << PRECPSHIFT)
 #define evallgefint(x)  (x)
 #define evallgeflist(x) (x)
@@ -138,6 +142,10 @@ typedef long *GEN;
 #define valp(x)       ((long) ((((ulong)((x)[1])) & VALPBITS) - HIGHVALPBIT))
 #define setvalp(x,s)  (((ulong*)(x))[1]=\
                        (((ulong*)(x))[1]&(~VALPBITS)) | (ulong)evalvalp(s))
+
+#define valser(x)       ((long) ((((ulong)((x)[1])) & VALSERBITS) - HIGHVALSERBIT))
+#define setvalser(x,s)  (((ulong*)(x))[1]=\
+                        (((ulong*)(x))[1]&(~VALSERBITS)) | (ulong)evalvalser(s))
 
 #define precp(x)      ((long) (((ulong)((x)[1])) >> PRECPSHIFT))
 #define setprecp(x,s) (((ulong*)(x))[1]=\

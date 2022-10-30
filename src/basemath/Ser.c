@@ -45,7 +45,7 @@ RgX_to_ser_i(GEN x, long l, long v, int copy)
       i++;
     }
   }
-  y[1] = evalvarn(vx) | evalvalp(v); /* must come here because of LONG_MAX */
+  y[1] = evalvarn(vx) | evalvalser(v); /* must come here because of LONG_MAX */
   if (lx > l) lx = l;
   /* 2 <= lx <= l */
   if (copy)
@@ -110,7 +110,7 @@ _rfrac_to_ser(GEN x, long l, long copy)
   }
   if (warn) pari_warn(warner,"normalizing a series with 0 leading term");
   a = RgX_to_ser_i(a, l, 0, copy);
-  setvalp(a, valp(a) + e); return a;
+  setvalser(a, valser(a) + e); return a;
 }
 GEN
 rfrac_to_ser(GEN x, long l) { return _rfrac_to_ser(x, l, 1); }
@@ -123,7 +123,7 @@ RgV_to_ser_i(GEN x, long v, long l, int copy)
   long j, lx = minss(lg(x), l-1);
   GEN y;
   if (lx == 1) return zeroser(v, l-2);
-  y = cgetg(l, t_SER); y[1] = evalsigne(1)|evalvarn(v)|evalvalp(0);
+  y = cgetg(l, t_SER); y[1] = evalsigne(1)|evalvarn(v)|evalvalser(0);
   x--;
   if (copy)
     for (j = 2; j <= lx; j++) gel(y,j) = gcopy(gel(x,j));
@@ -171,7 +171,7 @@ rfracrecip_to_ser_absolute(GEN R, long N)
   long v = rfracrecip(&n, &d); /* R(1/x) = x^v * n/d, val(n) = val(d) = 0 */
   if (N <= v) return zeroser(varn(d), N);
   R = rfrac_to_ser_i(mkrfrac(n, d), N-v+2);
-  setvalp(R, v); return R;
+  setvalser(R, v); return R;
 }
 
 /* assume prec >= 0 */
@@ -185,11 +185,11 @@ scalarser(GEN x, long v, long prec)
   {
     if (isrationalzero(x)) return zeroser(v, prec);
     y = cgetg(3, t_SER);
-    y[1] = evalsigne(0) | _evalvalp(prec) | evalvarn(v);
+    y[1] = evalsigne(0) | _evalvalser(prec) | evalvarn(v);
     gel(y,2) = gcopy(x); return y;
   }
   l = prec + 2; y = cgetg(l, t_SER); s = !gequal0(x);
-  y[1] = evalsigne(s) | _evalvalp(0) | evalvarn(v);
+  y[1] = evalsigne(s) | _evalvalser(0) | evalvarn(v);
   gel(y,2) = gcopy(x); for (i=3; i<l; i++) gel(y,i) = gen_0;
   return y;
 }

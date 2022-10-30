@@ -149,7 +149,7 @@ grem(GEN x, GEN y)
         case t_SER:
           if (RgX_is_monomial(y))
           {
-            if (lg(x)-2 + valp(x) < degpol(y)) pari_err_OP("%",x,y);
+            if (lg(x)-2 + valser(x) < degpol(y)) pari_err_OP("%",x,y);
             av = avma;
             return gerepileupto(av, gmod(ser2rfrac_i(x), y));
           }

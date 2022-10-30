@@ -656,8 +656,9 @@ strictly less than \hbox{\kbd{-HIGHEXPOBIT}} when the exponent is not defined
 (e.g. for a \typ{PADIC} or \typ{INTMOD} component).
 
 \fun{long}{valp}{GEN x} returns the $p$-adic valuation (for
-a \typ{PADIC}) or $X$-adic valuation (for a \typ{SER}, taken with respect to
-the main variable) of~\kbd{x}.
+a \typ{PADIC}).
+
+\fun{long}{valser}{GEN x} returns the $X$-adic valuation (for a \typ{SER}).
 
 \fun{long}{precp}{GEN x} returns the precision of the \typ{PADIC}~\kbd{x}.
 
@@ -815,9 +816,11 @@ needed (use \kbd{togglesign}).
 \typ{REAL}~\kbd{x} to \kbd{s}. The value \kbd{s} must be a 24-bit signed
 number.
 
-\fun{void}{setvalp}{GEN x, long s} sets the $p$-adic or $X$-adic valuation
-of~\kbd{x} to~\kbd{s}, if \kbd{x} is a \typ{PADIC} or a \typ{SER},
-respectively.
+\fun{void}{setvalp}{GEN x, long s} sets the $p$-adic valuation
+of~\kbd{x} to~\kbd{s}, if \kbd{x} is a \typ{PADIC}.
+
+\fun{void}{setvalser}{GEN x, long s} sets the $X$-adic valuation
+of~\kbd{x} to~\kbd{s}, if \kbd{x} is a \typ{SER}, respectively.
 
 \fun{void}{setprecp}{GEN x, long s} sets the $p$-adic precision of the
 \typ{PADIC}~\kbd{x} to~\kbd{s}.

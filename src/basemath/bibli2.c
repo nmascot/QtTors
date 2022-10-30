@@ -760,7 +760,7 @@ gprec_wtrunc(GEN x, long pr)
 static GEN
 serlaplace(GEN x)
 {
-  long i, l = lg(x), e = valp(x);
+  long i, l = lg(x), e = valser(x);
   GEN t, y = cgetg(l,t_SER);
   if (e < 0) pari_err_DOMAIN("laplace","valuation","<",gen_0,stoi(e));
   t = mpfact(e); y[1] = x[1];
@@ -810,12 +810,12 @@ convol(GEN x, GEN y)
   if (typ(x) != t_SER) pari_err_TYPE("convol",x);
   if (typ(y) != t_SER) pari_err_TYPE("convol",y);
   if (varn(y) != vx) pari_err_VAR("convol", x,y);
-  ex = valp(x);
-  ey = valp(y);
+  ex = valser(x);
+  ey = valser(y);
   if (ser_isexactzero(x))
   {
     z = scalarser(gadd(Rg_get_0(x), Rg_get_0(y)), varn(x), 1);
-    setvalp(z, maxss(ex,ey)); return z;
+    setvalser(z, maxss(ex,ey)); return z;
   }
   lx = lg(x) + ex; x -= ex;
   ly = lg(y) + ey; y -= ey;
@@ -825,7 +825,7 @@ convol(GEN x, GEN y)
   if (lx - ex < 3) return zeroser(vx, lx-2);
 
   z = cgetg(lx - ex, t_SER);
-  z[1] = evalvalp(ex) | evalvarn(vx);
+  z[1] = evalvalser(ex) | evalvarn(vx);
   for (j = ex+2; j<lx; j++) gel(z,j-ex) = gmul(gel(x,j),gel(y,j));
   return normalizeser(z);
 }

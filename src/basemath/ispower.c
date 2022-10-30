@@ -652,7 +652,7 @@ issquare(GEN x)
 
     case t_SER:
       if (!signe(x)) return 1;
-      if (valp(x)&1) return 0;
+      if (valser(x)&1) return 0;
       return issquare(gel(x,2));
 
     case t_RFRAC:
@@ -896,7 +896,7 @@ ispower(GEN x, GEN K, GEN *pt)
       return 1;
 
     case t_SER:
-      if (signe(x) && (!dvdsi(valp(x), K) || !ispower(gel(x,2), K, NULL)))
+      if (signe(x) && (!dvdsi(valser(x), K) || !ispower(gel(x,2), K, NULL)))
         return 0;
       if (pt) *pt = gsqrtn(x, K, NULL, DEFAULTPREC);
       return 1;

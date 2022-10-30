@@ -5,6 +5,11 @@ This file lists the incompatible changes between Version 2.x and older versions
      This is incompatible with the old definition (= 0) when k <= n < 0 are
      negative integers.
 
+* Specific to the PARI library:
+===============================
+   - t_SER: valser, evalvalser, setvalser must be used instead of
+            valp, evalvalp, setvalp
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.14 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    - qfbredsl2(q, S): change format of S: was [D,isD], is now isD
    - elltwist now returns an ellinit, and accepts the same input formats

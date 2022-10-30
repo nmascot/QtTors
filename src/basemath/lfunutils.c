@@ -304,7 +304,7 @@ rtopoles(GEN r)
 }
 /* re = polar part; overestimate when re = gen_0 (unknown) */
 static long
-orderpole(GEN re) { return typ(re) == t_SER? -valp(re): 1; }
+orderpole(GEN re) { return typ(re) == t_SER? -valser(re): 1; }
 static GEN
 lfunmulpoles(GEN ldata1, GEN ldata2, long bitprec)
 {
@@ -401,7 +401,7 @@ lfundivpoles(GEN ldata1, GEN ldata2, long bitprec)
       if (orderpole(s1) == orderpole(s2)) continue;
     }
     z = gdiv(lfun(ldata1,be,bitprec), lfun(ldata2,be,bitprec));
-    if (valp(z) < 0) gel(r,i++) = mkvec2(be, z);
+    if (valser(z) < 0) gel(r,i++) = mkvec2(be, z);
   }
   if (i == 1) return NULL;
   setlg(r, i); return r;
@@ -602,7 +602,7 @@ simple_pole(GEN r)
   GEN S;
   if (isintzero(r)) return gen_0;
   S = deg1ser_shallow(gen_0, r, 1);
-  setvalp(S, -1); return S;
+  setvalser(S, -1); return S;
 }
 
 GEN

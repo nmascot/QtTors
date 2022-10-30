@@ -1296,7 +1296,7 @@ InitPrimes(GEN bnr, ulong N0, LISTray *R)
 static GEN /* cf polcoef */
 _sercoeff(GEN x, long n)
 {
-  long i = n - valp(x);
+  long i = n - valser(x);
   return (i < 0)? gen_0: gel(x,i+2);
 }
 
@@ -1341,11 +1341,11 @@ ppgamma(ST_t *T, long prec)
   sqpi = sqrtr_abs(mppi(prec)); /* Gamma(1/2) */
 
   G1 = gexp(integser(psi1series(r-1, 0, prec)), prec); /* Gamma(1 + x) */
-  G = shallowcopy(G1); setvalp(G,-1); /* Gamma(x) */
+  G = shallowcopy(G1); setvalser(G,-1); /* Gamma(x) */
 
   /* expansion of log(Gamma(u) / Gamma(1/2)) at u = 1/2 */
   G2 = cgetg(r+2, t_SER);
-  G2[1] = evalsigne(1) | _evalvalp(1) | evalvarn(0);
+  G2[1] = evalsigne(1) | _evalvalser(1) | evalvarn(0);
   gel(G2,2) = gneg(gadd(gmul2n(mplog2(prec), 1), mpeuler(prec)));
   for (i = 1; i < r; i++) gel(G2,i+2) = mulri(gel(G1,i+2), int2um1(i));
   G2 = gmul(sqpi, gexp(G2, prec)); /* Gamma(1/2 + x) */

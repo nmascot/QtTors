@@ -31,6 +31,13 @@ evalvalp(long x)
   return v;
 }
 INLINE long
+evalvalser(long x)
+{
+  long v = _evalvalser(x);
+  if (v & ~VALSERBITS) pari_err_OVERFLOW("valser()");
+  return v;
+}
+INLINE long
 evalexpo(long x)
 {
   long v = _evalexpo(x);

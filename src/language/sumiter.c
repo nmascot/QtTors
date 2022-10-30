@@ -1851,11 +1851,11 @@ laurentseries(void *E, GEN (*f)(void*,GEN x, long), long M, long v, long prec)
   {
     long i, dr, vr;
     GEN s;
-    s = cgetg(d+2, t_SER); s[1] = evalsigne(1) | evalvalp(1) | evalvarn(v);
+    s = cgetg(d+2, t_SER); s[1] = evalsigne(1) | evalvalser(1) | evalvarn(v);
     gel(s, 2) = gen_1; for (i = 3; i <= d+1; i++) gel(s, i) = gen_0;
     s = f(E, s, prec);
     if (typ(s) != t_SER || varn(s) != v) pari_err_TYPE("laurentseries", s);
-    vr = valp(s);
+    vr = valser(s);
     if (M < vr) { set_avma(av); return zeroser(v, M); }
     dr = lg(s) + vr - 3 - M;
     if (dr >= 0) return gerepileupto(av, s);

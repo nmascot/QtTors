@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 static GEN
 mysercoeff(GEN x, long n)
 {
-  long N = n - valp(x);
+  long N = n - valser(x);
   return (N < 0)? gen_0: gel(x, N+2);
 }
 
@@ -240,7 +240,7 @@ static int
 serisscalar(GEN x)
 {
   long i;
-  if (valp(x)) return 0;
+  if (valser(x)) return 0;
   for (i = lg(x)-1; i > 3; i--) if (!gequal0(gel(x,i))) return 0;
   return 1;
 }
@@ -274,7 +274,7 @@ static GEN
 serpole(GEN r)
 {
   GEN s = cgetg(3, t_SER);
-  s[1] = evalsigne(1)|evalvalp(-1)|evalvarn(0);
+  s[1] = evalsigne(1)|evalvalser(-1)|evalvarn(0);
   gel(s,2) = r; return s;
 }
 /* a0 +  a1 x + O(x^e), e >= 0 */
@@ -374,7 +374,7 @@ polgammaeval(GEN F, GEN s)
       if (!gequal0(r)) break;
     }
     if (e > 1) r = gdiv(r, mpfact(e));
-    r = serpole(r); setvalp(r, e);
+    r = serpole(r); setvalser(r, e);
   }
   return r;
 }
@@ -590,7 +590,7 @@ normalizepoles(GEN r, GEN k)
     GEN rj = gel(r,j), a = gel(rj,1), ra = gel(rj,2);
     if (!is_scalar_t(typ(a)) || typ(ra) != t_SER)
       pari_err_TYPE("lfunrootres [poles]",r);
-    if (valp(ra) >= 0) continue;
+    if (valser(ra) >= 0) continue;
     gel(v,iv++) = rj;
   }
   setlg(v, iv); return v;
@@ -636,7 +636,7 @@ lfunrtoR_i(GEN ldata, GEN r, GEN eno, long prec)
     GEN rj = gel(r,j), a = gel(rj,1), ra = gel(rj,2);
     GEN Ra = rtoR(a, ra, FVga, N, prec);
     GEN b = gsub(k, conj_i(a));
-    if (lg(Ra)-2 < -valp(Ra))
+    if (lg(Ra)-2 < -valser(Ra))
       pari_err(e_MISC,
         "please give more terms in L function's Taylor development at %Ps", a);
     gel(R,jR++) = mkvec2(a, Ra);
@@ -1548,7 +1548,7 @@ lfunsumcoth(GEN R, GEN s, GEN h, long prec)
   for (j = 1; j < lg(R); ++j)
   {
     GEN r = gel(R,j), be = gel(r,1), Rj = gel(r, 2);
-    long e = valp(Rj);
+    long e = valser(Rj);
     GEN z1 = gexpm1(gmul(h, gsub(s,be)), prec); /* exp(h(s-beta))-1 */
     GEN c1 = gaddgs(gdivsg(2, z1), 1); /* coth((h/2)(s-beta)) */
     GEN C1 = veccothderivn(c1, 1-e);
@@ -1587,7 +1587,7 @@ lfunlambda_product(GEN L, GEN s, GEN sdom, long bitprec)
 /* s a t_SER */
 static long
 der_level(GEN s)
-{ return signe(s)? lg(s)-3: valp(s)-1; }
+{ return signe(s)? lg(s)-3: valser(s)-1; }
 
 /* s a t_SER; return coeff(s, X^0) */
 static GEN
@@ -1686,7 +1686,7 @@ is_ser(GEN x)
 static GEN
 lfunser(GEN L)
 {
-  long v = valp(L);
+  long v = valser(L);
   if (v > 0) return gen_0;
   if (v == 0) L = gel(L, 2);
   else
@@ -1703,7 +1703,7 @@ lfunservec(GEN x)
 static GEN
 lfununext(GEN L)
 {
-  setlg(L, maxss(lg(L)-1, valp(L)? 2: 3));
+  setlg(L, maxss(lg(L)-1, valser(L)? 2: 3));
   return normalizeser(L);
 }
 static GEN
@@ -1788,9 +1788,9 @@ sersplit1(GEN s, GEN *head)
   long i, l = lg(s);
   GEN y;
   *head = simplify_shallow(mysercoeff(s, 0));
-  if (valp(s) > 0) return s;
+  if (valser(s) > 0) return s;
   y = cgetg(l-1, t_SER); y[1] = s[1];
-  setvalp(y, 1);
+  setvalser(y, 1);
   for (i=3; i < l; i++) gel(y,i-1) = gel(s,i);
   return normalizeser(y);
 }
@@ -1820,7 +1820,7 @@ lfunlambdaord(GEN linit, GEN s)
 static GEN
 derser(GEN res, long m)
 {
-  long v = valp(res);
+  long v = valser(res);
   if (v > m) return gen_0;
   if (v >= 0)
     return gmul(mysercoeff(res, m), mpfact(m));
@@ -1845,9 +1845,9 @@ lfunderiv(GEN lmisc, long m, GEN s, long flag, long bitprec)
   {
     long v, l = lg(s)-1;
     GEN sh;
-    if (valp(s) < 0) pari_err_DOMAIN("lfun","valuation", "<", gen_0, s);
+    if (valser(s) < 0) pari_err_DOMAIN("lfun","valuation", "<", gen_0, s);
     S = sersplit1(s, &sh);
-    v = valp(S);
+    v = valser(S);
     s = deg1ser_shallow(gen_1, sh, varn(S), m + (l+v-1)/v);
   }
   else
@@ -1863,7 +1863,7 @@ lfunderiv(GEN lmisc, long m, GEN s, long flag, long bitprec)
     res = gsubst(derivn(res, m, -1), varn(S), S);
   else if (typ(res)==t_SER)
   {
-    long v = valp(res);
+    long v = valser(res);
     if (v > m) { set_avma(ltop); return gen_0; }
     if (v >= 0)
       res = gmul(mysercoeff(res, m), mpfact(m));
@@ -1948,7 +1948,7 @@ theta_add_polar_part(GEN S, GEN R, GEN t, long prec)
   for (j = 1; j < l; j++)
   {
     GEN Rj = gel(R,j), b = gel(Rj,1), Rb = gel(Rj,2);
-    long v = -valp(Rb);
+    long v = -valser(Rb);
     if (v > 1 && !logt) logt = glog(t, prec);
     S = gsub(S, gmul(theta_pole_contrib(Rb,v,logt), gpow(t,b,prec)));
   }

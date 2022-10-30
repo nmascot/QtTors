@@ -162,7 +162,7 @@ direuler_factor(GEN s, long n)
       break;
     }
     case t_SER:
-      if (!signe(s) || valp(s) || !gequal1(gel(s,2))) err_direuler(s);
+      if (!signe(s) || valser(s) || !gequal1(gel(s,2))) err_direuler(s);
       break;
     default: pari_err_TYPE("direuler", s);
   }

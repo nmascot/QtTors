@@ -124,7 +124,7 @@ gammapoles(GEN Vga, long *pdV, long bit)
 static GEN
 sercoeff(GEN x, long n, long prec)
 {
-  long N = n - valp(x);
+  long N = n - valser(x);
   return (N < 0)? gen_0: gprec_wtrunc(gel(x, N+2), prec);
 }
 
@@ -464,7 +464,7 @@ Klargeinit(GEN Vga, long nlimmax, long *status, long prec)
   /* d >= 2 */
   *status = 0; prec += prec >> 1;
   SMd = get_SMd(Vga);
-  se = gsinh(RgX_to_ser(pol_x(0), d+2), 0); setvalp(se,0);
+  se = gsinh(RgX_to_ser(pol_x(0), d+2), 0); setvalser(se,0);
   se = gdeflate(se, 0, 2); /* se(x^2) = sinh(x)/x */
   vsinh = gpowers(se, d);
   vd = gpowers(utoipos(2*d), d);

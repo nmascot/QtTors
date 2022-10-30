@@ -3774,7 +3774,7 @@ bestappr_Q(GEN x, GEN k)
 static GEN
 bestappr_ser(GEN x, long B)
 {
-  long dN, v = valp(x), lx = lg(x);
+  long dN, v = valser(x), lx = lg(x);
   GEN t;
   x = normalizepol(ser2pol_i(x, lx));
   dN = lx-2;

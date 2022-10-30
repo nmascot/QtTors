@@ -1165,7 +1165,7 @@ serhypergeom(GEN N, GEN D, GEN y, long prec)
   GEN S, pn, vN, vD, y0 = NULL;
   long v, l, i;
   if (!signe(y)) return gadd(gen_1, y);
-  v = valp(y);
+  v = valser(y);
   if (v < 0) pari_err_DOMAIN("hypergeom","valuation", "<", gen_0, y);
   l = lg(y);
   if (v) S = gen_1;
@@ -1173,7 +1173,7 @@ serhypergeom(GEN N, GEN D, GEN y, long prec)
   {
     y0 = gel(y, 2);
     y = serchop0(y);
-    l = 3 + (l - 3) / valp(y);
+    l = 3 + (l - 3) / valser(y);
     S = hypergeom(N, D, y0, prec);
   }
   vN = RgV_vpoch(N, l-1);

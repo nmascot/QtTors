@@ -2028,11 +2028,11 @@ ellmul_CM(GEN e, GEN P, GEN n)
     GEN p2,q2, ss = gen_0;
     do
     {
-      long ep = (-valp(z2)) >> 1;
+      long ep = (-valser(z2)) >> 1;
       ss = gadd(ss, gmul(gel(z2,2), pol_xnall(ep, 0)));
       z2 = gsub(z2, gmul(gel(z2,2), gpowgs(z1, ep)));
     }
-    while (valp(z2) <= 0);
+    while (valser(z2) <= 0);
     p2 = gadd(p0, gmul(ss,p1)); p0 = p1; p1 = p2;
     q2 = gadd(q0, gmul(ss,q1)); q0 = q1; q1 = q2;
     if (!signe(z2)) break;
@@ -2924,7 +2924,7 @@ ellwpseries_aux(GEN c4, GEN c6, long v, long PRECDL)
   pari_sp av;
   GEN _1, t, res = cgetg(PRECDL+2,t_SER), *P = (GEN*)(res + 2);
 
-  res[1] = evalsigne(1) | _evalvalp(-2) | evalvarn(v);
+  res[1] = evalsigne(1) | _evalvalser(-2) | evalvarn(v);
   if (!PRECDL) { setsigne(res,0); return res; }
 
   for (i=1; i<PRECDL; i+=2) P[i]= gen_0;
@@ -3004,7 +3004,7 @@ ellwp0(GEN w, GEN z, long flag, long prec)
   y = toser_i(z);
   if (y)
   {
-    long vy = varn(y), v = valp(y);
+    long vy = varn(y), v = valser(y);
     GEN P, Q, c4,c6;
     if (!get_c4c6(w,&c4,&c6,prec)) pari_err_TYPE("ellwp",w);
     if (v <= 0) pari_err(e_IMPL,"ellwp(t_SER) away from 0");
@@ -3040,7 +3040,7 @@ ellzeta(GEN w, GEN z, long prec0)
   y = toser_i(z);
   if (y)
   {
-    long vy = varn(y), v = valp(y);
+    long vy = varn(y), v = valser(y);
     GEN P, Q, c4,c6;
     if (!get_c4c6(w,&c4,&c6,prec0)) pari_err_TYPE("ellzeta",w);
     if (v <= 0) pari_err(e_IMPL,"ellzeta(t_SER) away from 0");
@@ -3115,7 +3115,7 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
   y = toser_i(z);
   if (y)
   {
-    long vy = varn(y), v = valp(y);
+    long vy = varn(y), v = valser(y);
     GEN P, Q, c4,c6;
     if (!get_c4c6(w,&c4,&c6,prec0)) pari_err_TYPE("ellsigma",w);
     if (v <= 0) pari_err_IMPL("ellsigma(t_SER) away from 0");
@@ -3126,7 +3126,7 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
     /* (log \sigma)' = \zeta; remove log-singularity first */
     P = integser(serchop0(P));
     P = gexp(P, prec0);
-    setvalp(P, valp(P)+1);
+    setvalser(P, valser(P)+1);
     Q = gsubst(P, varn(P), y);
     return gerepileupto(av, Q);
   }
@@ -6784,7 +6784,7 @@ static GEN
 triv_ser(GEN t, long v)
 {
   GEN s = cgetg(3,t_SER);
-  s[1] = evalsigne(1) | _evalvalp(v) | evalvarn(0);
+  s[1] = evalsigne(1) | _evalvalser(v) | evalvarn(0);
   gel(s,2) = t; return s;
 }
 
@@ -6800,8 +6800,8 @@ elltaniyama(GEN e, long prec)
   if (!prec) retmkvec2(triv_ser(gen_1,-2), triv_ser(gen_m1,-3));
 
   x = cgetg(prec+3,t_SER);
-  x[1] = evalsigne(1) | _evalvalp(-2) | evalvarn(0);
-  d = ginv(RgV_to_ser(ellanQ(e,prec+1), 0, prec+3)); setvalp(d,-1);
+  x[1] = evalsigne(1) | _evalvalser(-2) | evalvarn(0);
+  d = ginv(RgV_to_ser(ellanQ(e,prec+1), 0, prec+3)); setvalser(d,-1);
   /* 2y(q) + a1x + a3 = d qx'(q). Solve for x(q),y(q):
    * 4y^2 = 4x^3 + b2 x^2 + 2b4 x + b6 */
   c = gsqr(d);
@@ -6842,7 +6842,7 @@ elltaniyama(GEN e, long prec)
     {
       GEN b6 = ell_get_b6(e);
       GEN U = cgetg(9, t_SER);
-      U[1] = evalsigne(1) | _evalvalp(-2) | evalvarn(0);
+      U[1] = evalsigne(1) | _evalvalser(-2) | evalvarn(0);
       gel(U,2) = gel(x,2);
       gel(U,3) = gel(x,3);
       gel(U,4) = gel(x,4);
@@ -6851,7 +6851,7 @@ elltaniyama(GEN e, long prec)
       gel(U,7) = gel(x,7);
       gel(U,8) = gen_0; /* defined mod q^5 */
       /* write x = U + x_4 q^4 + O(q^5) and expand original equation */
-      w = derivser(U); setvalp(w,-2); /* q X' */
+      w = derivser(U); setvalser(w,-2); /* q X' */
       /* 4X^3 + b2 U^2 + 2b4 U + b6 */
       s1 = gadd(b6, gmul(U, gadd(gmul2n(b4,1), gmul(U,gadd(b2,gmul2n(U,2))))));
       /* s2 = (qX')^2 - (4X^3 + b2 U^2 + 2b4 U + b6) = 28 x_4 + O(q) */
@@ -6860,7 +6860,7 @@ elltaniyama(GEN e, long prec)
     }
     gel(X,n+2) = gerepileupto(av2, s1);
   }
-  w = gmul(d,derivser(x)); setvalp(w, valp(w)+1);
+  w = gmul(d,derivser(x)); setvalser(w, valser(w)+1);
   w = gsub(w, ec_h_evalx(e,x));
   c = cgetg(3,t_VEC);
   gel(c,1) = gcopy(x);

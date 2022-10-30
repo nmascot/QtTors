@@ -146,11 +146,11 @@ gatan(GEN x, long prec)
       av = avma; return gerepilecopy(av, mulcxmI(gatanh(mulcxI(x),prec)));
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) < 0) pari_err_DOMAIN("atan","valuation", "<", gen_0, x);
+      if (valser(y) < 0) pari_err_DOMAIN("atan","valuation", "<", gen_0, x);
       if (lg(y)==2) return gerepilecopy(av, y);
       /* lg(y) > 2 */
       a = integser(gdiv(derivser(y), gaddsg(1,gsqr(y))));
-      if (!valp(y)) a = gadd(a, gatan(gel(y,2),prec));
+      if (!valser(y)) a = gadd(a, gatan(gel(y,2),prec));
       return gerepileupto(av, a);
   }
   return trans_eval("atan",gatan,x,prec);
@@ -203,17 +203,17 @@ gasin(GEN x, long prec)
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
       /* lg(y) > 2*/
-      if (valp(y) < 0) pari_err_DOMAIN("asin","valuation", "<", gen_0, x);
+      if (valser(y) < 0) pari_err_DOMAIN("asin","valuation", "<", gen_0, x);
       p1 = gsubsg(1,gsqr(y));
       if (gequal0(p1))
       {
         GEN t = Pi2n(-1,prec);
         if (gsigne(gel(y,2)) < 0) setsigne(t, -1);
-        return gerepileupto(av, scalarser(t, varn(y), valp(p1)>>1));
+        return gerepileupto(av, scalarser(t, varn(y), valser(p1)>>1));
       }
       p1 = gdiv(derivser(y), gsqrt(p1,prec));
       a = integser(p1);
-      if (!valp(y)) a = gadd(a, gasin(gel(y,2),prec));
+      if (!valser(y)) a = gadd(a, gasin(gel(y,2),prec));
       return gerepileupto(av, a);
   }
   return trans_eval("asin",gasin,x,prec);
@@ -270,17 +270,17 @@ gacos(GEN x, long prec)
       return gerepilecopy(av, mulcxmI(y));
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) < 0) pari_err_DOMAIN("acos","valuation", "<", gen_0, x);
+      if (valser(y) < 0) pari_err_DOMAIN("acos","valuation", "<", gen_0, x);
       if (lg(y) > 2)
       {
         p1 = gsubsg(1,gsqr(y));
-        if (gequal0(p1)) { set_avma(av); return zeroser(varn(y), valp(p1)>>1); }
+        if (gequal0(p1)) { set_avma(av); return zeroser(varn(y), valser(p1)>>1); }
         p1 = integser(gdiv(gneg(derivser(y)), gsqrt(p1,prec)));
         /*y(t) = 1+O(t)*/
-        if (gequal1(gel(y,2)) && !valp(y)) return gerepileupto(av, p1);
+        if (gequal1(gel(y,2)) && !valser(y)) return gerepileupto(av, p1);
       }
       else p1 = y;
-      a = (lg(y)==2 || valp(y))? Pi2n(-1, prec): gacos(gel(y,2),prec);
+      a = (lg(y)==2 || valser(y))? Pi2n(-1, prec): gacos(gel(y,2),prec);
       return gerepileupto(av, gadd(a,p1));
   }
   return trans_eval("acos",gacos,x,prec);
@@ -394,8 +394,8 @@ gcosh(GEN x, long prec)
       return gerepileupto(av, gmul2n(p1,-1));
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gequal0(y) && valp(y) == 0) return gerepilecopy(av, y);
-      v = valp(y);
+      if (gequal0(y) && valser(y) == 0) return gerepilecopy(av, y);
+      v = valser(y);
       if (v > 0) y = sertoser(y, lg(y) - 2 + v);
       p1 = gexp(y,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
@@ -482,7 +482,7 @@ gsinh(GEN x, long prec)
       return gerepileupto(av, gmul2n(p1,-1));
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gequal0(y) && valp(y) == 0) return gerepilecopy(av, y);
+      if (gequal0(y) && valser(y) == 0) return gerepilecopy(av, y);
       p1 = gexp(y, prec); p1 = gsub(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
   }
@@ -641,17 +641,17 @@ gasinh(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
-      if (valp(y) < 0) pari_err_DOMAIN("asinh","valuation", "<", gen_0, x);
+      if (valser(y) < 0) pari_err_DOMAIN("asinh","valuation", "<", gen_0, x);
       p1 = gaddsg(1,gsqr(y));
       if (gequal0(p1))
       {
         GEN t = PiI2n(-1,prec);
         if ( gsigne(imag_i(gel(y,2))) < 0 ) setsigne(gel(t,2), -1);
-        return gerepileupto(av, scalarser(t, varn(y), valp(p1)>>1));
+        return gerepileupto(av, scalarser(t, varn(y), valser(p1)>>1));
       }
       p1 = gdiv(derivser(y), gsqrt(p1,prec));
       a = integser(p1);
-      if (!valp(y)) a = gadd(a, gasinh(gel(y,2),prec));
+      if (!valser(y)) a = gadd(a, gasinh(gel(y,2),prec));
       return gerepileupto(av, a);
   }
   return trans_eval("asinh",gasinh,x,prec);
@@ -720,7 +720,7 @@ gacosh(GEN x, long prec)
       GEN a, d;
       long v;
       av = avma; if (!(y = toser_i(x))) break;
-      v = valp(y);
+      v = valser(y);
       if (v < 0) pari_err_DOMAIN("acosh","valuation", "<", gen_0, x);
       if (gequal0(y))
       {
@@ -728,7 +728,7 @@ gacosh(GEN x, long prec)
         return gerepileupto(av, gadd(y, PiI2n(-1, prec)));
       }
       d = gsubgs(gsqr(y),1);
-      if (gequal0(d)) { set_avma(av); return zeroser(varn(y), valp(d)>>1); }
+      if (gequal0(d)) { set_avma(av); return zeroser(varn(y), valser(d)>>1); }
       d = gdiv(derivser(y), gsqrt(d,prec));
       a = integser(d);
       if (v)
@@ -895,10 +895,10 @@ gatanh(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) < 0) pari_err_DOMAIN("atanh","valuation", "<", gen_0, x);
+      if (valser(y) < 0) pari_err_DOMAIN("atanh","valuation", "<", gen_0, x);
       z = gdiv(derivser(y), gsubsg(1,gsqr(y)));
       a = integser(z);
-      if (!valp(y)) a = gadd(a, gatanh(gel(y,2),prec));
+      if (!valser(y)) a = gadd(a, gatanh(gel(y,2),prec));
       return gerepileupto(av, a);
   }
   return trans_eval("atanh",gatanh,x,prec);
@@ -1518,7 +1518,7 @@ static GEN
 serlngamma0(GEN y, long prec)
 {
   GEN t;
-  if (valp(y)) pari_err_DOMAIN("lngamma","valuation", "!=", gen_0, y);
+  if (valser(y)) pari_err_DOMAIN("lngamma","valuation", "!=", gen_0, y);
   t = derivser(y);
   /* don't compute psi if y'=0 */
   if (signe(t)) t = gmul(t, gpsi(y,prec));
@@ -1531,7 +1531,7 @@ sergamma(GEN y, long prec)
   GEN z, y0, Y;
   if (lg(y) == 2) pari_err_DOMAIN("gamma", "argument", "=", gen_0,y);
   /* exp(lngamma) */
-  if (valp(y) > 0) return gdiv(gexp(glngamma(gaddgs(y,1),prec),prec),y);
+  if (valser(y) > 0) return gdiv(gexp(glngamma(gaddgs(y,1),prec),prec),y);
   y0 = simplify_shallow(gel(y,2));
   z = NULL; Y = y;
   if (isint(y0, &y0))
@@ -2055,7 +2055,7 @@ psi1series(long n, long v, long prec)
   long i, l = n+3;
   GEN s = cgetg(l, t_SER), z = constzeta(n + 1, prec);
 
-  s[1] = evalsigne(1)|evalvalp(0)|evalvarn(v);
+  s[1] = evalsigne(1)|evalvalser(0)|evalvarn(v);
   for (i = 1; i <= n+1; i++)
   {
     GEN c = gel(z,i); /* zeta(i) */
@@ -2138,7 +2138,7 @@ Hseries(long m, long L, long v, long prec)
   long i, k, bit, l = L+3, M = m < 0? 1-m: m;
   pari_sp av = avma;
   GEN H = cgetg(l, t_SER);
-  H[1] = evalsigne(1)|evalvarn(v)|evalvalp(0);
+  H[1] = evalsigne(1)|evalvarn(v)|evalvalser(0);
   prec++;
   bit = -prec2nbits(prec);
   for(k = 2; k < l; k++) gel(H,k) = gen_1; /* i=1 */
@@ -2165,7 +2165,7 @@ static GEN
 serpsi(GEN y, long prec)
 {
   GEN Q = NULL, z0, Y = y, Y2;
-  long L = lg(y)-2, v  = varn(y), vy = valp(y);
+  long L = lg(y)-2, v  = varn(y), vy = valser(y);
 
   if (!L) pari_err_DOMAIN("psi", "argument", "=", gen_0,y);
   if (vy < 0) pari_err_DOMAIN("psi", "series valuation", "<", gen_0,y);
@@ -2193,7 +2193,7 @@ serpsi(GEN y, long prec)
       else
       {
         Q = scalarser(gen_m1, v, 1);
-        setvalp(Q,-1);
+        setvalser(Q,-1);
       }
     }
   }

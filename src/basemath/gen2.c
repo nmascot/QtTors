@@ -420,7 +420,7 @@ gequal1(GEN x)
       return gequal1(gel(x,2)) && gequal0(gel(x,3));
 
     case t_POL: return is_monomial_test(x, 2, &gequal1);
-    case t_SER: return is_monomial_test(x, 2 - valp(x), &gequal1);
+    case t_SER: return is_monomial_test(x, 2 - valser(x), &gequal1);
 
     case t_RFRAC: return gequal(gel(x,1), gel(x,2));
     case t_COL: return col_test(x, &gequal1);
@@ -470,7 +470,7 @@ gequalm1(GEN x)
       return !degpol(gel(x,1)) || gequalm1(gel(x,2));
 
     case t_POL: return is_monomial_test(x, 2, &gequalm1);
-    case t_SER: return is_monomial_test(x, 2 - valp(x), &gequalm1);
+    case t_SER: return is_monomial_test(x, 2 - valser(x), &gequalm1);
 
     case t_RFRAC:
       av = avma; return gc_bool(av, gmequal_try(gel(x,1), gel(x,2)));
@@ -997,8 +997,8 @@ serequal(GEN x, GEN y)
 {
   long LX, LY, lx, ly, vx, vy;
   if (!signe(x) && !signe(y)) return 1;
-  lx = lg(x); vx = valp(x); LX = lx + vx;
-  ly = lg(y); vy = valp(y); LY = ly + vy;
+  lx = lg(x); vx = valser(x); LX = lx + vx;
+  ly = lg(y); vy = valser(y); LY = ly + vy;
   if (LX > LY) lx = LY - vx; else ly = LX - vy;
   while (lx >= 3 && ly >= 3)
     if (!gequal(gel(x,--lx), gel(y,--ly))) return 0;
@@ -1239,7 +1239,7 @@ gvaluation(GEN x, GEN p)
     {
       case t_PADIC: return valp(x);
       case t_POL: return RgX_val(x);
-      case t_SER: return valp(x);
+      case t_SER: return valser(x);
       default: pari_err_TYPE("gvaluation", x);
     }
   tp  = typ(p);
@@ -1341,7 +1341,7 @@ gvaluation(GEN x, GEN p)
         {
           long val = RgX_val(p);
           if (!val) pari_err_DOMAIN("gvaluation", "p", "=", p, p);
-          return (long)(valp(x) / val);
+          return (long)(valser(x) / val);
         }
         if (varncmp(vx, vp) > 0) return 0;
       }
@@ -2051,7 +2051,7 @@ gabs(GEN x, long prec)
 
     case t_SER:
      if (!signe(x)) pari_err_DOMAIN("abs", "argument", "=", gen_0, x);
-     if (valp(x)) pari_err_DOMAIN("abs", "series valuation", "!=", gen_0, x);
+     if (valser(x)) pari_err_DOMAIN("abs", "series valuation", "!=", gen_0, x);
      return is_negative(gel(x,2))? gneg(x): gcopy(x);
 
     case t_VEC: case t_COL: case t_MAT:
@@ -2672,7 +2672,7 @@ sizedigit(GEN x)
 GEN
 normalizeser(GEN x)
 {
-  long i, lx = lg(x), vx=varn(x), vp=valp(x);
+  long i, lx = lg(x), vx=varn(x), vp=valser(x);
   GEN y, z;
 
   if (lx == 2) { setsigne(x,0); return x; }
@@ -2683,7 +2683,7 @@ normalizeser(GEN x)
     if (isexactzero(z)) {
       /* dangerous case: already normalized ? */
       if (!signe(x)) return x;
-      setvalp(x,vp+1); /* no: normalize */
+      setvalser(x,vp+1); /* no: normalize */
     }
     setsigne(x,0); return x;
   }
@@ -2697,13 +2697,13 @@ normalizeser(GEN x)
     i -= 3; y = x + i;
     stackdummy((pari_sp)y, (pari_sp)x);
     gel(y,2) = z;
-    y[1] = evalsigne(0) | evalvalp(lx-2+vp) | evalvarn(vx);
+    y[1] = evalsigne(0) | evalvalser(lx-2+vp) | evalvarn(vx);
     y[0] = evaltyp(t_SER) | _evallg(3);
     return y;
   }
 
   i -= 2; y = x + i; lx -= i;
-  y[1] = evalsigne(1) | evalvalp(vp+i) | evalvarn(vx);
+  y[1] = evalsigne(1) | evalvalser(vp+i) | evalvarn(vx);
   y[0] = evaltyp(t_SER) | evallg(lx);
 
   stackdummy((pari_sp)y, (pari_sp)x);

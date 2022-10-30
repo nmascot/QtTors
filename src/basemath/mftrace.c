@@ -137,7 +137,7 @@ MF_get_Mindex(GEN mf) { return gmael(mf,5,1); }
 
 /* ordinary gtocol forgets about initial 0s */
 GEN
-sertocol(GEN S) { return gtocol0(S, -(lg(S) - 2 + valp(S))); }
+sertocol(GEN S) { return gtocol0(S, -(lg(S) - 2 + valser(S))); }
 /*******************************************************************/
 /*     Linear algebra in cyclotomic fields (TODO: export this)     */
 /*******************************************************************/
@@ -835,7 +835,7 @@ mfcoefsser(GEN F, long n) { return RgV_to_ser_full(mfcoefs_i(F,n,1)); }
 static GEN
 sertovecslice(GEN S, long n)
 {
-  GEN v = gtovec0(S, -(lg(S) - 2 + valp(S)));
+  GEN v = gtovec0(S, -(lg(S) - 2 + valser(S)));
   long l = lg(v), n2 = n + 2;
   if (l < n2) pari_err_BUG("sertovecslice [n too large]");
   return (l == n2)? v: vecslice(v, 1, n2-1);
@@ -8687,7 +8687,7 @@ static GEN
 simple_pole(GEN r)
 {
   GEN S = deg1ser_shallow(gen_0, r, 0, 1);
-  setvalp(S, -1); return S;
+  setvalser(S, -1); return S;
 }
 
 /* F form, E embedding; mfa = mfatkininit or root number (eigenform case) */

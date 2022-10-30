@@ -237,7 +237,7 @@ jbesselintern(GEN n, GEN z, long J, long prec)
       if (!(y = toser_i(z))) break;
       if (issmall(n,&ki)) n = utoi(labs(ki));
       y = gmul2n(gsqr(y),-2); if (J) y = gneg(y);
-      v = valp(y);
+      v = valser(y);
       if (v < 0) pari_err_DOMAIN(f, "valuation", "<", gen_0, z);
       if (v == 0) pari_err_IMPL(stack_strcat(f, " around a!=0"));
       m = lg(y) - 2;
@@ -321,7 +321,7 @@ jbesselh(GEN n, GEN z, long prec)
       long t, v;
       av = avma; if (!(y = toser_i(z))) break;
       if (gequal0(y)) return gerepileupto(av, gpowgs(y,k));
-      v = valp(y);
+      v = valser(y);
       if (v < 0) pari_err_DOMAIN("besseljh","valuation", "<", gen_0, z);
       t = lg(y)-2;
       if (v) y = sertoser(y, t + (2*k+1)*v);
@@ -560,7 +560,7 @@ kbesselintern(GEN n, GEN z, long N, long prec)
       {
         long v, mv, k = labs(ki), m = lg(y)-2;
         y = gmul2n(gsqr(y),-2); if (N) y = gneg(y);
-        v = valp(y);
+        v = valser(y);
         if (v < 0) pari_err_DOMAIN(f, "valuation", "<", gen_0, z);
         if (v == 0) pari_err_IMPL(stack_strcat(f, " around a!=0"));
         mv = m - (v >> 1);
@@ -2207,7 +2207,7 @@ gpolylog_i(void *E, GEN x, long prec)
       if (!m) { set_avma(av); return mkfrac(gen_m1,gen_2); }
       if (m==1) return gerepileupto(av, Li1(y, prec));
       if (gequal0(y)) return gerepilecopy(av, y);
-      v = valp(y);
+      v = valser(y);
       if (v < 0) pari_err_DOMAIN("polylog","valuation", "<", gen_0, x);
       if (v > 0) {
         n = (lg(y)-3 + v) / v;
@@ -2378,11 +2378,11 @@ qq(GEN x, long prec)
   return y;
 }
 
-/* return (y * X^d) + x. Assume d > 0, x != 0, valp(x) = 0 */
+/* return (y * X^d) + x. Assume d > 0, x != 0, valser(x) = 0 */
 static GEN
 ser_addmulXn(GEN y, GEN x, long d)
 {
-  long i, lx, ly, l = valp(y) + d; /* > 0 */
+  long i, lx, ly, l = valser(y) + d; /* > 0 */
   GEN z;
 
   lx = lg(x);
@@ -2464,7 +2464,7 @@ inteta(GEN q)
     long l = lg(q), v, n;
     pari_sp av;
 
-    v = valp(q); /* handle valuation separately to avoid overflow */
+    v = valser(q); /* handle valuation separately to avoid overflow */
     if (v <= 0) pari_err_DOMAIN("eta", "v_p(q)", "<=",gen_0,q);
     y = ser2pol_i(q, l); /* t_SER inefficient when input has low degree */
     n = degpol(y);
@@ -2474,7 +2474,7 @@ inteta(GEN q)
       setvarn(z, varn(y)); return RgX_to_ser(z, l+v);
     }
     q = leafcopy(q); av = avma;
-    setvalp(q, 0);
+    setvalser(q, 0);
     y = scalarser(gen_1, varn(q), l+v);
     vps = vqn = 0;
     for(n = 0;; n++)
@@ -2680,7 +2680,7 @@ ser_eta(long prec)
 {
   GEN e = cgetg(prec+2, t_SER), ed = e+2;
   long n, j;
-  e[1] = evalsigne(1)|_evalvalp(0)|evalvarn(0);
+  e[1] = evalsigne(1)|_evalvalser(0)|evalvarn(0);
   gel(ed,0) = gen_1;
   for (n = 1; n < prec; n++) gel(ed,n) = gen_0;
   for (n = 1, j = 0; n < prec; n++)
@@ -2709,7 +2709,7 @@ ser_E(long prec)
   GEN e = cgetg(prec+2, t_SER), ed = e+2;
   GEN F = vecfactoru_i(2, prec); /* F[n] = factoru(n+1) */
   long n;
-  e[1] = evalsigne(1)|_evalvalp(0)|evalvarn(0);
+  e[1] = evalsigne(1)|_evalvalser(0)|evalvarn(0);
   gel(ed,0) = utoipos(65520);
   for (n = 1; n < prec; n++) gel(ed,n) = coeffEu(gel(F,n));
   return e;
@@ -2721,7 +2721,7 @@ ser_j2(long prec, long v)
   pari_sp av = avma;
   GEN iD = gpowgs(ginv(ser_eta(prec)), 24); /* q/Delta */
   GEN J = gmul(ser_E(prec), iD);
-  setvalp(iD,-1); /* now 1/Delta */
+  setvalser(iD,-1); /* now 1/Delta */
   J = gadd(gdivgu(J, 691), iD);
   J = gerepileupto(av, J);
   if (prec > 1) gel(J,3) = utoipos(744);
@@ -2747,7 +2747,7 @@ ser_j(long prec, long v)
     gel(S5,n) = mului(21, usumdivk_fact(fa,5));
   }
   J = cgetg(prec+2, t_SER),
-  J[1] = evalvarn(v)|evalsigne(1)|evalvalp(-1);
+  J[1] = evalvarn(v)|evalsigne(1)|evalvalser(-1);
   j = J+3;
   gel(j,-1) = gen_1;
   gel(j,0) = utoipos(744);

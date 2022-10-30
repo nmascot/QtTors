@@ -1401,7 +1401,7 @@ zero_gcd(GEN x)
     case t_COMPLEX: return c_zero_gcd(x);
     case t_REAL: return gen_1;
     case t_PADIC: return powis(gel(x,2), valp(x));
-    case t_SER: return pol_xnall(valp(x), varn(x));
+    case t_SER: return pol_xnall(valser(x), varn(x));
     case t_POLMOD: {
       GEN d = gel(x,2);
       if (typ(d) == t_POL && varn(d) == varn(gel(x,1))) return content(d);
@@ -1752,7 +1752,7 @@ ggcd(GEN x, GEN y)
         case t_POL: return RgX_gcd(x,y);
         case t_SER:
           z = ggcd(content(x), content(y));
-          return monomialcopy(z, minss(valp(y),gval(x,vx)), vx);
+          return monomialcopy(z, minss(valser(y),gval(x,vx)), vx);
         case t_RFRAC: return cont_gcd_rfrac(y, x);
       }
       break;
@@ -1761,8 +1761,8 @@ ggcd(GEN x, GEN y)
       z = ggcd(content(x), content(y));
       switch(ty)
       {
-        case t_SER:   return monomialcopy(z, minss(valp(x),valp(y)), vx);
-        case t_RFRAC: return monomialcopy(z, minss(valp(x),gval(y,vx)), vx);
+        case t_SER:   return monomialcopy(z, minss(valser(x),valser(y)), vx);
+        case t_RFRAC: return monomialcopy(z, minss(valser(x),gval(y,vx)), vx);
       }
       break;
 

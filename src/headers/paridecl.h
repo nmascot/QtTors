@@ -5789,6 +5789,7 @@ INLINE long   evalexpo(long x);
 INLINE long   evallg(long x);
 INLINE long   evalprecp(long x);
 INLINE long   evalvalp(long x);
+INLINE long   evalvalser(long x);
 INLINE long   expi(GEN x);
 INLINE long   expu(ulong x);
 INLINE void   fixlg(GEN z, long ly);

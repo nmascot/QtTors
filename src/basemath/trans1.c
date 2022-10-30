@@ -1027,7 +1027,7 @@ ser_pow_1(GEN x, GEN n)
 {
   long lx, mi, i, j, d;
   GEN y = cgetg_copy(x, &lx), X = x+2, Y = y + 2;
-  y[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(x));
+  y[1] = evalsigne(1) | _evalvalser(0) | evalvarn(varn(x));
   d = mi = lx-3; while (mi>=1 && isrationalzero(gel(X,mi))) mi--;
   gel(Y,0) = gen_1;
   for (i=1; i<=d; i++)
@@ -1044,7 +1044,7 @@ ser_pow_1(GEN x, GEN n)
   return y;
 }
 
-/* we suppose n != 0, valp(x) = 0 and leading-term(x) != 0. Not stack clean */
+/* we suppose n != 0, valser(x) = 0 and leading-term(x) != 0. Not stack clean */
 static GEN
 ser_pow(GEN x, GEN n, long prec)
 {
@@ -1074,7 +1074,7 @@ val_from_i(GEN E)
 static GEN
 ser_powfrac(GEN x, GEN q, long prec)
 {
-  GEN y, E = gmulsg(valp(x), q);
+  GEN y, E = gmulsg(valser(x), q);
   long e;
 
   if (!signe(x))
@@ -1085,9 +1085,9 @@ ser_powfrac(GEN x, GEN q, long prec)
   if (typ(E) != t_INT)
     pari_err_DOMAIN("sqrtn", "valuation", "!=", mkintmod(gen_0, gel(q,2)), x);
   e = val_from_i(E);
-  y = leafcopy(x); setvalp(y, 0);
+  y = leafcopy(x); setvalser(y, 0);
   y = ser_pow(y, q, prec);
-  setvalp(y, e); return y;
+  setvalser(y, e); return y;
 }
 
 static GEN
@@ -1227,7 +1227,7 @@ gpow(GEN x, GEN n, long prec)
     case t_POL: case t_RFRAC: x = toser_i(x); /* fall through */
     case t_SER:
       if (tn == t_FRAC) return gerepileupto(av, ser_powfrac(x, n, prec));
-      if (valp(x))
+      if (valser(x))
         pari_err_DOMAIN("gpow [irrational exponent]",
                         "valuation", "!=", gen_0, x);
       if (lg(x) == 2) return gerepilecopy(av, x); /* O(1) */
@@ -1505,7 +1505,7 @@ Zn_sqrt(GEN d, GEN fn)
 static GEN
 sqrt_ser(GEN b, long prec)
 {
-  long e = valp(b), vx = varn(b), lx, lold, j;
+  long e = valser(b), vx = varn(b), lx, lold, j;
   ulong mask;
   GEN a, x, lta, ltx;
 
@@ -1514,7 +1514,7 @@ sqrt_ser(GEN b, long prec)
   x = cgetg_copy(b, &lx);
   if (e & 1)
     pari_err_DOMAIN("sqrtn", "valuation", "!=", mkintmod(gen_0, gen_2), b);
-  a[1] = x[1] = evalsigne(1) | evalvarn(0) | _evalvalp(0);
+  a[1] = x[1] = evalsigne(1) | evalvarn(0) | _evalvalser(0);
   lta = gel(a,2);
   if (gequal1(lta)) ltx = lta;
   else if (!issquareall(lta,&ltx)) ltx = gsqrt(lta,prec);
@@ -1534,14 +1534,14 @@ sqrt_ser(GEN b, long prec)
     setlg(x, l + 2);
     y = sqr_ser_part(x, lold, l-1) - lold;
     for (j = lold+2; j < l+2; j++) gel(y,j) = gsub(gel(y,j), gel(a,j));
-    y += lold; setvalp(y, lold);
+    y += lold; setvalser(y, lold);
     y = normalizeser(y);
     y = gsub(x, gdiv(y, x2)); /* = gmul2n(gsub(x, gdiv(a,x)), -1); */
     lx = minss(l+2, lg(y));
     for (j = lold+2; j < lx; j++) gel(x,j) = gel(y,j);
     lold = l;
   }
-  x[1] = evalsigne(1) | evalvarn(vx) | _evalvalp(e >> 1);
+  x[1] = evalsigne(1) | evalvarn(vx) | _evalvalser(e >> 1);
   return x;
 }
 
@@ -2262,7 +2262,7 @@ gexpm1(GEN x, long prec)
       long ey;
       GEN y;
       if (!(y = toser_i(x))) break;
-      ey = valp(y);
+      ey = valser(y);
       if (ey < 0) pari_err_DOMAIN("expm1","valuation", "<", gen_0, x);
       if (gequal0(y)) return gcopy(y);
       if (ey)
@@ -2470,12 +2470,12 @@ serchop_i(GEN s, long n)
   GEN y;
   if (l == 2 || (l == 3 && isexactzero(gel(s,2))))
   {
-    if (valp(s) < n) { s = shallowcopy(s); setvalp(s,n); }
+    if (valser(s) < n) { s = shallowcopy(s); setvalser(s,n); }
     return s;
   }
-  m = n - valp(s); if (m < 0) return s;
+  m = n - valser(s); if (m < 0) return s;
   if (l-m <= 2) return zeroser(varn(s), n);
-  y = cgetg(l-m, t_SER); y[1] = s[1]; setvalp(y, valp(y)+m);
+  y = cgetg(l-m, t_SER); y[1] = s[1]; setvalser(y, valser(y)+m);
   for (i=m+2; i < l; i++) gel(y,i-m) = gel(s,i);
   return normalizeser(y);
 }
@@ -2490,7 +2490,7 @@ serchop(GEN s, long n)
 static GEN
 serexp(GEN x, long prec)
 {
-  long i, j, lx, ly, mi, e = valp(x);
+  long i, j, lx, ly, mi, e = valser(x);
   GEN y, xd, yd;
   pari_sp av;
 
@@ -2503,7 +2503,7 @@ serexp(GEN x, long prec)
     ly = lx+e; y = cgetg(ly,t_SER);
     mi = lx-1; while (mi>=3 && isrationalzero(gel(x,mi))) mi--;
     mi += e-2;
-    y[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(x));
+    y[1] = evalsigne(1) | _evalvalser(0) | evalvarn(varn(x));
     /* zd[i] = coefficient of X^i in z */
     xd = x+2-e; yd = y+2; ly -= 2;
     X = gel(xd,e); if (e != 1) X = gmulgu(X, e); /* left on stack */
@@ -2723,7 +2723,7 @@ zellagmcx(GEN a0, GEN b0, GEN r, GEN t, long prec)
 static long
 ser_cmp_expo(GEN A, GEN B)
 {
-  long e = -(long)HIGHEXPOBIT, d = valp(B) - valp(A);
+  long e = -(long)HIGHEXPOBIT, d = valser(B) - valser(A);
   long i, la = lg(A), v = varn(B);
   for (i = 2; i < la; i++)
   {
@@ -2755,7 +2755,7 @@ ser_agm1(GEN y, long prec)
       if (e < l2 || e >= eold) break;
       eold = e;
     }
-    else if (valp(p1)-valp(b1) >= l || gequal0(p1)) break;
+    else if (valser(p1)-valser(b1) >= l || gequal0(p1)) break;
   }
   return a1;
 }
@@ -3233,7 +3233,7 @@ glog(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (!signe(y)) pari_err_DOMAIN("log", "argument", "=", gen_0, x);
-      if (valp(y)) pari_err_DOMAIN("log", "series valuation", "!=", gen_0, x);
+      if (valser(y)) pari_err_DOMAIN("log", "series valuation", "!=", gen_0, x);
       p1 = integser(gdiv(derivser(y), y)); /* log(y)' = y'/y */
       if (!gequal1(gel(y,2))) p1 = gadd(p1, glog(gel(y,2),prec));
       return gerepileupto(av, p1);
@@ -3291,7 +3291,7 @@ log1p_i(GEN x, long prec)
       long ey;
       GEN y;
       if (!(y = toser_i(x))) break;
-      ey = valp(y);
+      ey = valser(y);
       if (ey < 0) pari_err_DOMAIN("log1p","valuation", "<", gen_0, x);
       if (gequal0(y)) return gcopy(y);
       if (ey)
@@ -3511,7 +3511,7 @@ gcos(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepileupto(av, gaddsg(1,y));
-      if (valp(y) < 0)
+      if (valser(y) < 0)
         pari_err_DOMAIN("cos","valuation", "<", gen_0, x);
       gsincos(y,&u,&v,prec);
       return gerepilecopy(av,v);
@@ -3575,7 +3575,7 @@ gsin(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
-      if (valp(y) < 0)
+      if (valser(y) < 0)
         pari_err_DOMAIN("sin","valuation", "<", gen_0, x);
       gsincos(y,&u,&v,prec);
       return gerepilecopy(av,u);
@@ -3729,7 +3729,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) { *s = gerepilecopy(av,y); *c = gaddsg(1,*s); return; }
 
-      ex = valp(y); lx = lg(y); ex2 = 2*ex+2;
+      ex = valser(y); lx = lg(y); ex2 = 2*ex+2;
       if (ex < 0) pari_err_DOMAIN("gsincos","valuation", "<", gen_0, x);
       if (ex2 > lx)
       {
@@ -3757,7 +3757,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       mi += ex-2;
       pc = cgetg(ly,t_SER); *c = pc;
       ps = cgetg(lx,t_SER); *s = ps;
-      pc[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(y));
+      pc[1] = evalsigne(1) | _evalvalser(0) | evalvarn(varn(y));
       gel(pc,2) = gen_1; ps[1] = y[1];
       for (i=2; i<ex+2; i++) gel(ps,i) = gcopy(gel(y,i));
       for (i=3; i< ex2; i++) gel(pc,i) = gen_0;
@@ -3846,7 +3846,7 @@ gsinc(GEN x, long prec)
       long ex;
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepileupto(av, gaddsg(1,y));
-      ex = valp(y);
+      ex = valser(y);
       if (ex < 0) pari_err_DOMAIN("sinc","valuation", "<", gen_0, x);
       if (ex)
       {
@@ -3932,7 +3932,7 @@ gtan(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
-      if (valp(y) < 0)
+      if (valser(y) < 0)
         pari_err_DOMAIN("tan","valuation", "<", gen_0, x);
       gsincos(y,&s,&c,prec);
       return gerepileupto(av, gdiv(s,c));
@@ -3983,7 +3983,7 @@ gcotan(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) pari_err_DOMAIN("cotan", "argument", "=", gen_0, y);
-      if (valp(y) < 0) pari_err_DOMAIN("cotan","valuation", "<", gen_0, x);
+      if (valser(y) < 0) pari_err_DOMAIN("cotan","valuation", "<", gen_0, x);
       gsincos(y,&s,&c,prec);
       return gerepileupto(av, gdiv(c,s));
   }

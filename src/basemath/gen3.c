@@ -346,7 +346,7 @@ serprec(GEN x, long v)
       {
         long l = lg(x); /* Mod(0,2) + O(x) */
         if (l == 3 && !signe(x) && !isinexact(gel(x,2))) l--;
-        return l - 2 + valp(x);
+        return l - 2 + valser(x);
       }
       if (varncmp(v,w) < 0) return LONG_MAX;
       return vec_serprec(x, v, 2);
@@ -469,7 +469,7 @@ pollead(GEN x, long v)
 
     case t_SER:
       if (v < 0 || v == w) return signe(x)? gcopy(gel(x,2)): gen_0;
-      if (varncmp(v, w) > 0) x = polcoef_i(x, valp(x), v);
+      if (varncmp(v, w) > 0) x = polcoef_i(x, valser(x), v);
       break;
 
     default:
@@ -1128,7 +1128,7 @@ gshift(GEN x, long n)
 /*                                                                 */
 /*******************************************************************/
 
-/* Convert t_SER --> t_POL, ignoring valp. INTERNAL ! */
+/* Convert t_SER --> t_POL, ignoring valser. INTERNAL ! */
 GEN
 ser2pol_i(GEN x, long lx)
 {
@@ -1138,10 +1138,10 @@ ser2pol_i(GEN x, long lx)
   if (!signe(x))
   { /* danger */
     if (i == 1) return zeropol(varn(x));
-    y = cgetg(3,t_POL); y[1] = x[1] & ~VALPBITS;
+    y = cgetg(3,t_POL); y[1] = x[1] & ~VALSERBITS;
     gel(y,2) = gel(x,2); return y;
   }
-  y = cgetg(i+1, t_POL); y[1] = x[1] & ~VALPBITS;
+  y = cgetg(i+1, t_POL); y[1] = x[1] & ~VALSERBITS;
   for ( ; i > 1; i--) gel(y,i) = gel(x,i);
   return y;
 }
@@ -1155,7 +1155,7 @@ ser2pol_i_normalize(GEN x, long l, long *v)
   *v = i - 2; if (i == l) return zeropol(varn(x));
   while (j > i && gequal0(gel(x,j))) j--;
   l = j - *v + 1;
-  y = cgetg(l, t_POL); y[1] = x[1] & ~VALPBITS;
+  y = cgetg(l, t_POL); y[1] = x[1] & ~VALSERBITS;
   k = l; while (k > 2) gel(y, --k) = gel(x,j--);
   return y;
 }
@@ -1173,7 +1173,7 @@ ser_inv(GEN b)
     l -= e; if (l <= 2) pari_err_INV("inv_ser", b);
   }
   y = RgXn_inv_i(y, l-2);
-  x = RgX_to_ser(y, l); setvalp(x, - valp(b) - e);
+  x = RgX_to_ser(y, l); setvalser(x, - valser(b) - e);
   return gerepilecopy(av, x);
 }
 
@@ -1288,7 +1288,7 @@ serdeflate(GEN x, long v, long d)
   if (varncmp(vx, v) < 0) return vdeflate(x,v,d);
   if (varncmp(vx, v) > 0) return gcopy(x);
   av = avma;
-  V = valp(x);
+  V = valser(x);
   lx = lg(x);
   if (lx == 2) return zeroser(v, V / d);
   y = ser2pol_i(x, lx);
@@ -1300,7 +1300,7 @@ serdeflate(GEN x, long v, long d)
   }
   if (dy > 0) y = RgX_deflate(y, d);
   y = RgX_to_ser(y, 3 + (lx-3)/d);
-  setvalp(y, V/d); return gerepilecopy(av, y);
+  setvalser(y, V/d); return gerepilecopy(av, y);
 }
 static GEN
 poldeflate(GEN x, long v, long d)
@@ -1431,7 +1431,7 @@ sertrunc(GEN x, long n)
   long i, l = n + 2;
   GEN y;
   if (l >= lg(x)) return x;
-  if (n <= 0) return zeroser(varn(x), n + valp(x));
+  if (n <= 0) return zeroser(varn(x), n + valser(x));
   y = cgetg(l, t_SER);
   for (i = 2; i < l; i++) gel(y,i) = gel(x,i);
   y[1] = x[1]; return y;
@@ -1509,7 +1509,7 @@ gsubst(GEN x, long v, GEN y)
     case t_SER:
       vx = varn(x);
       if (varncmp(vx, v) > 0) return subst_higher(x, y, matn);
-      ex = valp(x);
+      ex = valser(x);
       if (varncmp(vx, v) < 0)
       {
         if (lx == 2) return matn >= 0? scalarmat(x, matn): gcopy(x);
@@ -1531,7 +1531,7 @@ gsubst(GEN x, long v, GEN y)
       switch(ty) /* here vx == v */
       {
         case t_SER:
-          vy = varn(y); ey = valp(y);
+          vy = varn(y); ey = valser(y);
           if (ey < 1 || lx == 2) return zeroser(vy, ey*(ex+lx-2));
           if (ey == 1 && serequalXk(y)
                       && (varncmp(vx,vy) >= 0 || varncmp(gvar2(x), vy) >= 0))
@@ -1677,7 +1677,7 @@ ser_unscale(GEN P, GEN h)
   if (l != 2)
   {
     long i = 2;
-    GEN hi = gpowgs(h, valp(P));
+    GEN hi = gpowgs(h, valser(P));
     gel(Q,i) = gmul(gel(P,i), hi);
     for (i++; i<l; i++) { hi = gmul(hi,h); gel(Q,i) = gmul(gel(P,i), hi); }
   }
@@ -1736,7 +1736,7 @@ serreverse(GEN x)
   GEN a, y, u;
 
   if (typ(x)!=t_SER) pari_err_TYPE("serreverse",x);
-  if (valp(x)!=1) pari_err_DOMAIN("serreverse", "valuation", "!=", gen_1,x);
+  if (valser(x)!=1) pari_err_DOMAIN("serreverse", "valuation", "!=", gen_1,x);
   if (lx < 3) pari_err_DOMAIN("serreverse", "x", "=", gen_0,x);
   y = ser_normalize(x);
   if (y == x) a = NULL; else { a = gel(x,2); x = y; }
@@ -1744,7 +1744,7 @@ serreverse(GEN x)
   mi = lx-1; while (mi>=3 && gequal0(gel(x,mi))) mi--;
   u = cgetg(lx,t_SER);
   y = cgetg(lx,t_SER);
-  u[1] = y[1] = evalsigne(1) | _evalvalp(1) | evalvarn(v);
+  u[1] = y[1] = evalsigne(1) | _evalvalser(1) | evalvarn(v);
   gel(u,2) = gel(y,2) = gen_1;
   if (lx > 3)
   {
@@ -1794,22 +1794,22 @@ serreverse(GEN x)
 GEN
 derivser(GEN x)
 {
-  long i, vx = varn(x), e = valp(x), lx = lg(x);
+  long i, vx = varn(x), e = valser(x), lx = lg(x);
   GEN y;
   if (ser_isexactzero(x))
   {
     x = gcopy(x);
-    if (e) setvalp(x,e-1);
+    if (e) setvalser(x,e-1);
     return x;
   }
   if (e)
   {
-    y = cgetg(lx,t_SER); y[1] = evalsigne(1)|evalvalp(e-1) | evalvarn(vx);
+    y = cgetg(lx,t_SER); y[1] = evalsigne(1)|evalvalser(e-1) | evalvarn(vx);
     for (i=2; i<lx; i++) gel(y,i) = gmulsg(i+e-2,gel(x,i));
   } else {
     if (lx == 3) return zeroser(vx, 0);
     lx--;
-    y = cgetg(lx,t_SER); y[1] = evalsigne(1)|_evalvalp(0) | evalvarn(vx);
+    y = cgetg(lx,t_SER); y[1] = evalsigne(1)|_evalvalser(0) | evalvarn(vx);
     for (i=2; i<lx; i++) gel(y,i) = gmulsg(i-1,gel(x,i+1));
   }
   return normalizeser(y);
@@ -1922,25 +1922,25 @@ deriv(GEN x, long v)
 static GEN
 derivnser(GEN x, long n)
 {
-  long i, vx = varn(x), e = valp(x), lx = lg(x);
+  long i, vx = varn(x), e = valser(x), lx = lg(x);
   GEN y;
   if (ser_isexactzero(x))
   {
     x = gcopy(x);
-    if (e) setvalp(x,e-n);
+    if (e) setvalser(x,e-n);
     return x;
   }
   if (e < 0 || e >= n)
   {
     y = cgetg(lx,t_SER);
-    y[1] = evalsigne(1)| evalvalp(e-n) | evalvarn(vx);
+    y[1] = evalsigne(1)| evalvalser(e-n) | evalvarn(vx);
     for (i=0; i<lx-2; i++)
       gel(y,i+2) = gmul(muls_interval(i+e-n+1,i+e), gel(x,i+2));
   } else {
     if (lx <= n+2) return zeroser(vx, 0);
     lx -= n;
     y = cgetg(lx,t_SER);
-    y[1] = evalsigne(1)|_evalvalp(0) | evalvarn(vx);
+    y[1] = evalsigne(1)|_evalvalser(0) | evalvarn(vx);
     for (i=0; i<lx-2; i++)
       gel(y,i+2) = gmul(mulu_interval(i+1,i+n),gel(x,i+2+n-e));
   }
@@ -2199,7 +2199,7 @@ err_intformal(GEN x)
 GEN
 integser(GEN x)
 {
-  long i, lx = lg(x), vx = varn(x), e = valp(x);
+  long i, lx = lg(x), vx = varn(x), e = valser(x);
   GEN y;
   if (lx == 2) return zeroser(vx, e+1);
   y = cgetg(lx, t_SER);
@@ -2216,7 +2216,7 @@ integser(GEN x)
     }
     gel(y,i) = c;
   }
-  y[1] = evalsigne(1) | evalvarn(vx) | evalvalp(e+1); return y;
+  y[1] = evalsigne(1) | evalvarn(vx) | evalvalser(e+1); return y;
 }
 
 GEN
@@ -2256,7 +2256,7 @@ integ(GEN x, long v)
       if (v == vx) return integser(x);
       if (lg(x) == 2) {
         if (varncmp(vx, v) < 0) v = vx;
-        return zeroser(v, valp(x));
+        return zeroser(v, valser(x));
       }
       if (varncmp(vx, v) > 0) return deg1pol(x, gen_0, v);
       pari_APPLY_ser(integ(gel(x,i),v));
@@ -2743,7 +2743,7 @@ floor_safe(GEN x)
 GEN
 ser2rfrac_i(GEN x)
 {
-  long e = valp(x);
+  long e = valser(x);
   GEN a = ser2pol_i(x, lg(x));
   if (e) {
     if (e > 0) a = RgX_shift_shallow(a, e);
@@ -3453,7 +3453,7 @@ _sercoef(GEN x, long n, long v)
   long i, w = varn(x), lx = lg(x), dx = lx-3, N;
   GEN z;
   if (v < 0) v = w;
-  N = v == w? n - valp(x): n;
+  N = v == w? n - valser(x): n;
   if (dx < 0)
   {
     if (N >= 0) pari_err_DOMAIN("polcoef", "t_SER", "=", x, x);
@@ -3463,7 +3463,7 @@ _sercoef(GEN x, long n, long v)
   {
     if (!dx && !signe(x) && !isinexact(gel(x,2))) dx = -1;
     if (N > dx)
-      pari_err_DOMAIN("polcoef", "degree", ">", stoi(dx+valp(x)), stoi(n));
+      pari_err_DOMAIN("polcoef", "degree", ">", stoi(dx+valser(x)), stoi(n));
     return (N < 0)? gen_0: gel(x,N+2);
   }
   if (varncmp(w,v) > 0) return N? gen_0: x;
@@ -3574,7 +3574,7 @@ denompol(GEN x, long v)
   {
     case t_SER:
       if (varn(x) != v) return x;
-      vx = valp(x); return vx < 0? pol_xn(-vx, v): pol_1(v);
+      vx = valser(x); return vx < 0? pol_xn(-vx, v): pol_1(v);
     case t_RFRAC: x = gel(x,2); return varn(x) == v? x: pol_1(v);
     case t_POL: return pol_1(v);
     case t_VEC: case t_COL: case t_MAT: return vecdenompol(x, 1, lg(x)-1, v);
@@ -3697,7 +3697,7 @@ lift0(GEN x, long v)
       {
         if (lg(x) == 2) return gcopy(x);
         y = scalarser(lift0(gel(x,2),v), varn(x), 1);
-        setvalp(y, valp(x)); return y;
+        setvalser(y, valser(x)); return y;
       }
       pari_APPLY_ser(lift0(gel(x,i), v));
     case t_COMPLEX: case t_QUAD: case t_RFRAC:
@@ -3720,7 +3720,7 @@ lift_shallow(GEN x)
       {
         if (lg(x) == 2) return x;
         y = scalarser(lift_shallow(gel(x,2)), varn(x), 1);
-        setvalp(y, valp(x)); return y;
+        setvalser(y, valser(x)); return y;
       }
       pari_APPLY_ser(lift_shallow(gel(x,i)));
     case t_POL:
@@ -3751,7 +3751,7 @@ liftall_shallow(GEN x)
       {
         if (lg(x) == 2) return x;
         y = scalarser(liftall_shallow(gel(x,2)), varn(x), 1);
-        setvalp(y, valp(x)); return y;
+        setvalser(y, valser(x)); return y;
       }
       pari_APPLY_ser(liftall_shallow(gel(x,i)));
     case t_COMPLEX: case t_QUAD: case t_RFRAC:
@@ -3779,7 +3779,7 @@ liftint_shallow(GEN x)
       {
         if (lg(x) == 2) return x;
         y = scalarser(liftint_shallow(gel(x,2)), varn(x), 1);
-        setvalp(y, valp(x)); return y;
+        setvalser(y, valser(x)); return y;
       }
       pari_APPLY_ser(liftint_shallow(gel(x,i)));
     case t_POLMOD: case t_COMPLEX: case t_QUAD: case t_RFRAC:
@@ -3807,7 +3807,7 @@ liftpol_shallow(GEN x)
       {
         if (lg(x) == 2) return x;
         y = scalarser(liftpol(gel(x,2)), varn(x), 1);
-        setvalp(y, valp(x)); return y;
+        setvalser(y, valser(x)); return y;
       }
       pari_APPLY_ser(liftpol_shallow(gel(x,i)));
     case t_RFRAC: case t_VEC: case t_COL: case t_MAT:

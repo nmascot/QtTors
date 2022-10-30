@@ -819,7 +819,7 @@ lindep_Xadic(GEN x)
       case t_POL: deg = maxss(deg, degpol(c)); break;
       case t_RFRAC: pari_err_TYPE("lindep_Xadic", c);
       case t_SER:
-        prec = minss(prec, valp(c)+lg(c)-2);
+        prec = minss(prec, valser(c)+lg(c)-2);
         gel(x,i) = ser2rfrac_i(c);
     }
   }
@@ -920,7 +920,7 @@ sertomat(GEN S, long p, long r, long vy)
       if (m)
       {
         c = shallowcopy(c);
-        setvalp(c, valp(c) + m);
+        setvalser(c, valser(c) + m);
       }
       gel(v, r*n + m + 1) = c;
     }
@@ -941,7 +941,7 @@ seralgdep(GEN s, long p, long r)
   vy = varn(s);
   if (!vy) pari_err_PRIORITY("seralgdep", s, ">", 0);
   r++; p++;
-  prec = valp(s) + lg(s)-2;
+  prec = valser(s) + lg(s)-2;
   if (r > prec) r = prec;
   S = cgetg(p+1, t_VEC); gel(S, 1) = s;
   for (i = 2; i <= p; i++) gel(S,i) = gmul(gel(S,i-1), s);
@@ -968,7 +968,7 @@ serdiffdep(GEN s, long p, long r)
   vy = varn(s);
   if (!vy) pari_err_PRIORITY("serdiffdep", s, ">", 0);
   r++; p++;
-  prec = valp(s) + lg(s)-2;
+  prec = valser(s) + lg(s)-2;
   if (r > prec) r = prec;
   S = cgetg(p+1, t_VEC); gel(S, 1) = s;
   for (i = 2; i <= p; i++) gel(S,i) = derivser(gel(S,i-1));

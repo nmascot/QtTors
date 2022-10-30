@@ -2039,8 +2039,8 @@ dbg(GEN x, long nb, long bl)
   else if (tx == t_POL)
     pari_printf("(%c,varn=%ld):", vsigne(x), varn(x));
   else if (tx == t_SER)
-    pari_printf("(%c,varn=%ld,prec=%ld,valp=%ld):",
-               vsigne(x), varn(x), lg(x)-2, valp(x));
+    pari_printf("(%c,varn=%ld,prec=%ld,valser=%ld):",
+               vsigne(x), varn(x), lg(x)-2, valser(x));
   else if (tx == t_LIST)
   {
     pari_printf("(subtyp=%ld,lmax=%ld):", list_typ(x), list_nmax(x));
@@ -2089,7 +2089,7 @@ dbg(GEN x, long nb, long bl)
       break;
 
     case t_POL: case t_SER:
-      e = (tx==t_SER)? valp(x): 0;
+      e = (tx==t_SER)? valser(x): 0;
       for (i=2; i<lx; i++)
       {
         blancs(bl); pari_printf("coef of degree %ld = ",e);
@@ -2792,11 +2792,11 @@ bruti_intern(GEN g, pariout_t *T, pari_str *S, int addsign)
       break;
 
     case t_SER: v = get_var(varn(g), buf);
-      i = valp(g);
+      i = valser(g);
       l = lg(g)-2;
       if (l)
       {
-        /* See normalizeser(): Mod(0,2)*x^i*(1+O(x)), has valp = i+1 */
+        /* See normalizeser(): Mod(0,2)*x^i*(1+O(x)), has valser = i+1 */
         if (l == 1 && !signe(g) && isexactzero(gel(g,2))) i--;
         /* hack: we want g[i] = coeff of degree i */
         l += i; g -= i-2;
@@ -3079,7 +3079,7 @@ texi_sign(GEN g, pariout_t *T, pari_str *S, int addsign)
       break;
 
     case t_SER: v = get_texvar(varn(g), buf, sizeof(buf));
-      i = valp(g);
+      i = valser(g);
       if (lg(g)-2)
       { /* hack: we want g[i] = coeff of degree i. */
         l = i + lg(g)-2; g -= i-2;

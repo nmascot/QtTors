@@ -309,7 +309,7 @@ serexp0(long v, long n)
 {
   GEN y = cgetg(n+3, t_SER), t;
   long i;
-  y[1] = evalsigne(1) | evalvarn(v) | evalvalp(0);
+  y[1] = evalsigne(1) | evalvarn(v) | evalvalser(0);
   gel(y,2) = gen_1; if (!n) return y;
   gel(y,3) = gen_1; if (n == 1) return y;
   for (i=2, t = gen_2; i < n; i++, t = muliu(t,i)) gel(y,i+2) = mkfrac(gen_1,t);
@@ -349,7 +349,7 @@ serlambertW(GEN y, long branch, long prec)
   GEN t = NULL;
 
   if (!signe(y)) return gcopy(y);
-  v = valp(y);
+  v = valser(y);
   if (v < 0) pari_err_DOMAIN("lambertw","valuation", "<", gen_0, y);
   if (v > 0 && branch)
     pari_err_DOMAIN("lambertw [k != 0]", "x", "~", gen_0, y);
@@ -359,7 +359,7 @@ serlambertW(GEN y, long branch, long prec)
   if (v)
   {
     t = serexp0(vy, n / val);
-    setvalp(t, 1); t = reverse(t); /* rev(x exp(x)) */
+    setvalser(t, 1); t = reverse(t); /* rev(x exp(x)) */
   }
   else
   {

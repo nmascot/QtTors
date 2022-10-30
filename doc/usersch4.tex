@@ -1404,9 +1404,14 @@ The same remark applies to \typ{SER}s.
 encodes a ``\emph{sign}'', i.e.~0 if the power series is 0, and 1 if not, a
 \emph{variable number} as for polynomials, and an \emph{exponent}. This
 information can be handled with the following functions: \teb{signe},
-\teb{setsigne}, \teb{varn}, \teb{setvarn} as for polynomials, and \teb{valp},
-\teb{setvalp} for the exponent as for $p$-adic numbers. Beware: do \emph{not}
-use \teb{expo} and \teb{setexpo} on power series.
+\teb{setsigne}, \teb{varn}, \teb{setvarn} as for polynomials.
+Beware: do \emph{not} use \teb{expo} and \teb{setexpo} on power series.
+
+\fun{long}{valser}{GEN z} returns the valuation of \kbd{z}
+This is defined even if \kbd{z} is equal to~0.
+
+\fun{void}{setvalser}{GEN z, long e} sets the valuation of \kbd{z}
+to \kbd{e}.
 
 The coefficients \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lg(z)-1]} point to
 the coefficients of \kbd{z} in ascending order. As for polynomials

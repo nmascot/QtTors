@@ -2108,7 +2108,7 @@ ratpolemax2(GEN F)
 static GEN
 sercoeff(GEN x, long n)
 {
-  long N = n - valp(x);
+  long N = n - valser(x);
   return (N < 0)? gen_0: gel(x,N+2);
 }
 
@@ -2124,7 +2124,7 @@ intnumainfrat(GEN F, long N, double r, long prec)
   lim = (long)ceil(B/log2(N/r));
   ser = gmul(F, real_1(prec + EXTRAPREC64));
   ser = rfracrecip_to_ser_absolute(ser, lim+2);
-  v = valp(ser);
+  v = valser(ser);
   S = gdivgu(sercoeff(ser,lim+1), lim*N);
   /* goes down to 2, but coeffs are 0 in degree < v */
   for (k = lim; k >= v; k--) /* S <- (S + coeff(ser,k)/(k-1)) / N */
