@@ -1820,6 +1820,11 @@ fill_ser(GEN z, GEN y)
   }
   return normalizeser(z);
 }
+/* assume typ(x) = t_VEC */
+static int
+is_ext_qfr(GEN x)
+{ return lg(x) == 3 && typ(gel(x,1)) == t_QFB && !qfb_is_qfi(gel(x,1))
+                    && typ(gel(x,2)) == t_REAL; }
 
 GEN
 gmul(GEN x, GEN y)
@@ -1889,7 +1894,9 @@ gmul(GEN x, GEN y)
       y = RgXn_mul(x, y, lx-2);
       return gerepilecopy(av, fill_ser(z,y));
     }
-    case t_VEC: /* handle extended t_QFB */
+    case t_VEC:
+      if (!is_ext_qfr(x) || !is_ext_qfr(y)) pari_err_TYPE2("*",x,y);
+    /* fall through, handle extended t_QFB */
     case t_QFB: return qfbcomp(x,y);
     case t_RFRAC: return mul_rfrac(gel(x,1),gel(x,2), gel(y,1),gel(y,2));
     case t_MAT: return RgM_mul(x, y);

@@ -48,6 +48,14 @@ f*f/f
 
 \\ Errors, keep at end of file
 qfbredsl2(q,1.);
+r=Qfb(5,7,1); i=Qfb(5,1,1); R=[r,0.];
+[1,2]*[1,2,4]
+R*[1,2]
+[1,2]*R
+[i,0.]*[1,2]
+[1,2]*[i,0.]
+[i,0.]*[i,0.]
+
 f=Qfb(12,5,3);g=Qfb(5,5,2);
 f*g
 f/g
