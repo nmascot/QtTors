@@ -10,6 +10,7 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
      7- bnfinit(x^3-810693844986180*x-30702939461011257135364,1).fu
         -> wrong result or SEGV [#2420]
      8- [1,2]*[3,4] -> strange error message about qfbcomp
+     9- obscure oo loop in solve when solution ~ 0 [#2412]
 
   Changed
      1- binomial(negative t_INT, t_INT): use Loeb's definition
