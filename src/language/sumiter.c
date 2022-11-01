@@ -1430,14 +1430,24 @@ SOLVE:
   fc = fb; e = d = NULL;
   for (iter = 1; iter <= itmax; ++iter)
   { /* b = current best guess, a and c auxiliary points */
-    long bit2;
+    long bit2, exb;
     GEN m;
     if (gsigne(fb)*gsigne(fc) > 0) { c = a; fc = fa; e = d = subrr(b, a); }
     if (gcmp(gabs(fc, 0), gabs(fb, 0)) < 0)
     { a = b; b = c; c = a; fa = fb; fb = fc; fc = fa; }
-    bit2 = bit-1 + maxss(bit, expo(b));
     m = subrr(c, b); shiftr_inplace(m, -1);
-    if (expo(m) <= expo(b)+bit0 || gequal0(fb)) break; /*SUCCESS*/
+    exb = expo(b);
+    if (bit < exb)
+    {
+      bit2 = bit + exb - 1;
+      if (expo(m) <= exb + bit0) break; /*SUCCESS*/
+    }
+    else
+    { /* b ~ 0 */
+      bit2 = 2*bit - 1;
+      if (expo(m) <= bit2) break; /*SUCCESS*/
+    }
+    if (gequal0(fb)) break; /*SUCCESS*/
 
     if (expo(e) > bit2 && gexpo(fa) > gexpo(fb))
     { /* interpolation, m != 0, |f(c)| >= |f(b)|, f(b)f(c) < 0 */

@@ -7,6 +7,7 @@ solvestep(x=1,100,1,hardy(x))
 exponent(solve(x=-oo,oo,exp(x)-2)-log(2))
 exponent(solve(x=-oo,2,exp(x)-2)-log(2))
 exponent(solve(x=0,oo,exp(x)-2)-log(2))
+exponent(solve(x=-0.001,Pi/2-0.01,sin(x)+cos(x)-1)) \\ #2412
 
 \\ Errors, keep at end
 solvestep(x=1,100,-1,hardy(x))
