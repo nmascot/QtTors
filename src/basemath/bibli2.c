@@ -464,8 +464,7 @@ polcyclo_eval(long n, GEN x)
 {
   pari_sp av= avma;
   GEN P, md, xd, yneg, ypos;
-  long l, s, i, j, q, tx;
-  long root_of_1 = 0;
+  long vpx, l, s, i, j, q, tx, root_of_1 = 0;
 
   if (!x) return polcyclo(n, 0);
   tx = typ(x);
@@ -514,13 +513,22 @@ polcyclo_eval(long n, GEN x)
    * At the end we return ypos/yneg if mu(n)=1 and yneg/ypos if mu(n)=-1 */
   ypos = gsubgs(x,1);
   yneg = gen_1;
+  vpx = (typ(x) == t_PADIC)? valp(x): 0;
   for (i = 1; i <= l; i++)
   {
     long ti = 1L<<(i-1), p = P[i];
     for (j = 1; j <= ti; j++) {
-      GEN X = gpowgs(gel(xd,j), p), t = gsubgs(X,1);
-      gel(xd,ti+j) = X;
+      GEN X = gel(xd,j), t;
+      if (vpx > 0)
+      { /* ypos, X t_PADIC */
+        ulong e = 0, a = umuluu_or_0(p, valp(X)), b = precp(ypos) - 1;
+        if (a && a < b) e = b - a;
+        if (precp(X) > e) X = cvtop(X, gel(ypos,2), e);
+      }
       md[ti+j] = -md[j];
+      gel(xd,ti+j) = X = gpowgs(X, p);
+      /* avoid precp overflow */
+      t = (vpx > 0 && gequal0(X))? gen_m1: gsubgs(X,1);
       if (gequal0(t))
       { /* x^d = 1; root_of_1 := the smallest index ti+j such that X == 1
         * (whose bits code d: bit i-1 is set iff P[i] | d). If no such index
