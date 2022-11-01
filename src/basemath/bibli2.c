@@ -521,9 +521,9 @@ polcyclo_eval(long n, GEN x)
       GEN X = gel(xd,j), t;
       if (vpx > 0)
       { /* ypos, X t_PADIC */
-        ulong e = 0, a = umuluu_or_0(p, valp(X)), b = precp(ypos) - 1;
-        if (a && a < b) e = b - a;
-        if (precp(X) > (long)e) X = cvtop(X, gel(ypos,2), e);
+        ulong a = umuluu_or_0(p, valp(X)), b = precp(ypos) - 1;
+        long e = (a && a < b) ? b - a : 0;
+        if (precp(X) > e) X = cvtop(X, gel(ypos,2), e);
       }
       md[ti+j] = -md[j];
       gel(xd,ti+j) = X = gpowgs(X, p);
