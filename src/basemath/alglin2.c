@@ -818,23 +818,32 @@ minpoly(GEN x, long v)
 static int
 relative0(GEN a, GEN a0, long bit)
 { return gequal0(a) || (bit && gexpo(a)-gexpo(a0) < bit); }
-/* assume x a nonempty square t_MAT */
+/* x0 a nonempty square t_MAT that can be written to */
 static GEN
 RgM_hess(GEN x0, long prec)
 {
-  pari_sp av;
+  pari_sp av = avma;
   long lx = lg(x0), bit = prec? 8 - bit_accuracy(prec): 0, m, i, j;
-  GEN x;
+  GEN x = bit? RgM_shallowcopy(x0): x0;
 
-  if (bit) x0 = RgM_shallowcopy(x0);
-  av = avma; x = RgM_shallowcopy(x0);
   for (m=2; m<lx-1; m++)
   {
     GEN t = NULL;
-    for (i=m+1; i<lx; i++)
-    {
-      t = gcoeff(x,i,m-1);
-      if (!relative0(t, gcoeff(x0,i,m-1), bit)) break;
+    if (!bit)
+    { /* first non-zero pivot */
+      for (i=m+1; i<lx; i++)
+        if (!gequal0(t = gcoeff(x,i,m-1))) break;
+    }
+    else
+    { /* maximal pivot */
+      long E = -(long)HIGHEXPOBIT, k = lx;
+      for (i=m+1; i<lx; i++)
+      {
+        long e = gexpo(gcoeff(x,i,m-1));
+        if (e > E) { E = e; k = i; t = gcoeff(x,i,m-1); }
+      }
+      if (k != lx && relative0(t, gcoeff(x0,k,m-1), bit)) k = lx;
+      i = k;
     }
     if (i == lx) continue;
     for (j=m-1; j<lx; j++) swap(gcoeff(x,i,j), gcoeff(x,m,j));
@@ -881,7 +890,7 @@ hess(GEN x)
     case t_COMPLEX: break;
     default: prec = 0;
   }
-  return gerepilecopy(av, RgM_hess(x,prec));
+  return gerepilecopy(av, RgM_hess(RgM_shallowcopy(x),prec));
 }
 
 GEN
