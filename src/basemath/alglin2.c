@@ -817,7 +817,11 @@ minpoly(GEN x, long v)
 /*******************************************************************/
 static int
 relative0(GEN a, GEN a0, long bit)
-{ return gequal0(a) || (bit && gexpo(a)-gexpo(a0) < bit); }
+{
+  if (gequal0(a)) return 1;
+  if (gequal0(a0)) return gexpo(a) < bit;
+  return (gexpo(a)-gexpo(a0) < bit);
+}
 /* x0 a nonempty square t_MAT that can be written to */
 static GEN
 RgM_hess(GEN x0, long prec)
