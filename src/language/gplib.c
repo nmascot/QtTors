@@ -1729,33 +1729,23 @@ cmp_epname(void *E, GEN e, GEN f)
   return strcmp(((entree*)e)->name, ((entree*)f)->name);
 }
 static void
-print_all_user_fun(long t, int member)
+print_all_user_obj(int fun, int member)
 {
   pari_sp av = avma;
-  long iL = 0, lL = 1024;
+  long i, iL = 0, lL = 1024;
   GEN L = cgetg(lL+1, t_VECSMALL);
   entree *ep;
-  int i;
   for (i = 0; i < functions_tblsz; i++)
     for (ep = functions_hash[i]; ep; ep = ep->next)
-    {
-      const char *f;
-      int is_member;
-      if (EpVALENCE(ep) != EpVAR || t != (typ((GEN)ep->value)==t_CLOSURE))
-        continue;
-      f = ep->name;
-      is_member = (f[0] == '_' && f[1] == '.');
-      if (member != is_member) continue;
-
-      if (iL >= lL)
+      if (EpVALENCE(ep) == EpVAR && fun == (typ((GEN)ep->value) == t_CLOSURE))
       {
-        GEN oL = L;
-        long j;
-        lL *= 2; L = cgetg(lL+1, t_VECSMALL);
-        for (j = 1; j <= iL; j++) gel(L,j) = gel(oL,j);
+        const char *f = ep->name;
+        if (member == (f[0] == '_' && f[1] == '.'))
+        {
+          if (iL >= lL) { lL *= 2; L = vecsmall_lengthen(L, lL); }
+          L[++iL] = (long)ep;
+        }
       }
-      L[++iL] = (long)ep;
-    }
   if (iL)
   {
     setlg(L, iL+1);
@@ -1907,10 +1897,10 @@ escape(const char *tch, int ismain)
     case 's': dbg_pari_heap(); break;
     case 't': gentypes(); break;
     case 'u':
-      if (*s=='v')
-        print_all_user_fun(0,0);
+      if (*s == 'v')
+        print_all_user_obj(0, 0);
       else
-        print_all_user_fun(1,(*s == 'm')? 1: 0);
+        print_all_user_obj(1, *s == 'm');
       break;
     case 'v': pari_print_version(); break;
     case 'y':
