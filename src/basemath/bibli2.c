@@ -524,9 +524,12 @@ polcyclo_eval(long n, GEN x)
         ulong a = umuluu_or_0(p, valp(X)), b = precp(ypos) - 1;
         long e = (a && a < b) ? b - a : 0;
         if (precp(X) > e) X = cvtop(X, gel(ypos,2), e);
+        if (e > 0) X = gpowgs(X, p); /* avoid valp overflow */
       }
+      else
+        X = gpowgs(X, p);
       md[ti+j] = -md[j];
-      gel(xd,ti+j) = X = gpowgs(X, p);
+      gel(xd,ti+j) = X;
       /* avoid precp overflow */
       t = (vpx > 0 && gequal0(X))? gen_m1: gsubgs(X,1);
       if (gequal0(t))
