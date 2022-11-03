@@ -5,7 +5,7 @@ C-Name: sd_nbthreads
 Prototype:
 Help:
 Doc: This default is specific to the \emph{parallel} version of PARI and gp
- (built via \kbd{Configure --mt=prthread} or \kbd{mpi}) and is ignored
+ (built via \kbd{Configure --mt=pthread} or \kbd{mpi}) and is ignored
  otherwise. In parallel mode, it governs the number of threads to use for
  parallel computing. The exact meaning and default value depend on the
  \kbd{mt} engine used:
