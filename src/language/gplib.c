@@ -215,11 +215,20 @@ pari_center(const char *s)
 static void
 community(void)
 {
+  const char *pari_docdir;
+#if defined(_WIN32)
+  /* for some reason, the documentation on windows is not in datadir */
+  if (paricfg_datadir[0]=='@' && paricfg_datadir[1]==0)
+    pari_docdir = win32_basedir();
+  else
+#endif
+    pari_docdir = pari_datadir;
+
   print_text("The PARI/GP distribution includes a reference manual, a \
 tutorial, a reference card and quite a few examples. They have been installed \
 in the directory ");
   pari_puts("  ");
-  pari_puts(pari_datadir);
+  pari_puts(pari_docdir);
   pari_puts("\nYou can also download them from http://pari.math.u-bordeaux.fr/.\
 \n\nThree mailing lists are devoted to PARI:\n\
   - pari-announce (moderated) to announce major version changes.\n\
