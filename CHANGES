@@ -21,3 +21,4 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
      3- t_SER: valser, evalvalser, setvalser need to be used instead of
                valp, evalvalp, setvalp
      4- mathess over R or C: use maximal pivot instead of first non-zero
+     5- default 'parisize' is now 8M on both 32bit and 64bit architectures

@@ -19,4 +19,4 @@ Doc: \kbd{gp}, and in fact any program using the PARI
  If \tet{parisizemax} is unset, this command has a very unintuitive behaviour
  since it must abort pending operations, see \kbd{??allocatemem}.
 
- The default value is 4M, resp.~8M on a 32-bit, resp.~64-bit machine.
+ The default value is 8M.

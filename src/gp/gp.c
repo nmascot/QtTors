@@ -579,7 +579,7 @@ main(int argc, char **argv)
   /* must be defined here in case an error is raised in pari_init_opts, e.g.
    * when parsing function prototypes */
   cb_pari_err_recover = gp_err_recover;
-  pari_init_opts(1000000 * sizeof(long), 0, INIT_SIGm | INIT_noPRIMEm | INIT_noIMTm);
+  pari_init_opts(8000000, 0, INIT_SIGm | INIT_noPRIMEm | INIT_noIMTm);
   cb_pari_pre_recover = gp_pre_recover;
   cb_pari_break_loop = break_loop;
   cb_pari_is_interactive = is_interactive;
