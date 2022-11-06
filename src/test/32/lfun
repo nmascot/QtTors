@@ -1,4 +1,4 @@
-  ***   Warning: new stack size = 32000000 (30.518 Mbytes).
+  ***   Warning: new stack size = 16000000 (15.259 Mbytes).
 [688, 201]
 371
 1:-0.33333333333333333333333333333333333333
@@ -384,4 +384,4 @@ O(x^2)
   ***   at top-level: lfuneuler(x^2+1,Pi)
   ***                 ^-------------------
   *** lfuneuler: incorrect type in lfuneuler (t_REAL).
-Total time spent: 4249
+Total time spent: 5207
