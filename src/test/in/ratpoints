@@ -1,4 +1,3 @@
-default(parisize,"16M");
 affine2proj(P)=
 {
   my([X,Y]=P);
