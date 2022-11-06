@@ -1,4 +1,4 @@
-default(parisize,"64M");
+default(parisize,"54M"); \\ overflows 52M
 default(realprecision,38);
 
 print("precision SEGV");
