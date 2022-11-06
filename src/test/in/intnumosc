@@ -1,4 +1,4 @@
-default(parisize, 20M);
+default(parisize, "16M");
 \p115
 bestappr(intnumosc(x=0,sinc(x),Pi,1)/Pi,10^8)
 vector(10,n,bestappr(intnumosc(x=0,sinc(x)^n,Pi)/Pi,10^8))
