@@ -1,5 +1,4 @@
 default(realprecision,38);
-default(parisize,"16M");
 
 \\examples from docu
 nf = nfinit(y^2+1);
