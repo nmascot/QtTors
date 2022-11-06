@@ -1,5 +1,4 @@
 default(realprecision,38);
-default(parisize,"16M");
 
 \\Tests for lattices, orders and makeintegral in algebras
 

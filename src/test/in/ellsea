@@ -1,4 +1,4 @@
-default(parisize,"16M");
+default(parisize,"12M"); \\ 10M overflows
 do(i,v)=
 {
   E = ellinit([0,0,0,v[2],v[3]]*Mod(1,v[1]));
