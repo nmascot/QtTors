@@ -1,5 +1,5 @@
 default(realprecision,38);
-default(parisize,40000000);
+default(parisize,"40M");
 count = 0;
 
 nfisprobisom(P,Q,n)=
