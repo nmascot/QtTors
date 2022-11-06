@@ -1,6 +1,4 @@
 \\ package: nflistdata
-default(parisize,"80M");
-
 G = "A5";
 nflist(G)
 nflist(G,,-2)
