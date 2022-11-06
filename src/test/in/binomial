@@ -1,4 +1,4 @@
-default(parisize,"20M"); \\ overflows 18M
+default(parisize,"34M"); \\ overflows 32M
 binomial(x,2)
 binomial(6,3)
 binomial(6)
