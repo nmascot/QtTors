@@ -11,30 +11,20 @@ gusuite(name, tests) = print("Suite: ", name); tests();
 
 searchin(hf,pr,h) =
 {
-  my(i,n);
   for(i=1,#hf[1],
-    if(hf[1][i]==pr, return(hf[2][i]==h))
-  );
+    if(hf[1][i]==pr, return(hf[2][i]==h)));
   return(h==0);
-};
+}
 
 samehasse(hf1,hi1,hf2,hi2) =
 {
-  my(i,n);
-  if(hi1 != hi2, return(0));
-
-  n = #hf1[1];
-  for(i=1,n,
-    if(!searchin(hf2,hf1[1][i],hf1[2][i]), return(0));
-  );
-
-  n = #hf2[1];
-  for(i=1,n,
-    if(!searchin(hf1,hf2[1][i],hf2[2][i]), return(0));
-  );
-
+  if (hi1 != hi2, return(0));
+  for (i=1, #hf1[1],
+    if (!searchin(hf2,hf1[1][i],hf1[2][i]), return(0)));
+  for (i=1,#hf2[1],
+    if (!searchin(hf1,hf2[1][i],hf2[2][i]), return(0)));
   return(1);
-};
+}
 
 hassetriv(hf,hi) = samehasse(hf,hi,[[],Vecsmall([])],Vecsmall(vector(#hi,i,0)));
 altriv(al) = hassetriv(alghassef(al),alghassei(al));
@@ -50,7 +40,7 @@ alcheckhasse(al) =
   for(i=1, #alghassei(al),
       h += (n/2)*alghassei(al)[i]);
   return(h == Mod(0,n));
-};
+}
 
 al_cyclotomic(p,b,mo=1) =
 {
@@ -60,7 +50,7 @@ al_cyclotomic(p,b,mo=1) =
   F = rnfinit(Q,pc);
   r = lift(znprimroot(p));
   return(alginit(F, [Mod(Mod(1,y)*x^r,pc), b], 'x, mo));
-};
+}
 
 hasse0() = gusuite("hasse sum to 0", ()->{
   do("cyclo construction", ()->al_cyclotomic(3,-175624635));
@@ -291,6 +281,3 @@ print("inefficiency in backtrackfacto");
 F=nfinit(y^5-y^4-3*y^2+1);
 setrand(5)
 alginit(F, [2, [[], []], [1,1,0]],,0);
-
-
-
