@@ -1,4 +1,3 @@
-default(parisize,"16M");
 gets4(N,CHI,id=1)=
 {
   my(mf = mfinit([N,1,CHI],0));
