@@ -1,4 +1,4 @@
-default(parisize,"48M");
+default(parisize,"14M"); \\ overflows 12M
 X;Y;
 eq(E) = Y^2+E.a1*X*Y+E.a3*Y - (X^3 + E.a2*X^2 + E.a4*X + E.a6);
 checkiso(E1,E2,iso)=

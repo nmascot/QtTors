@@ -1,4 +1,4 @@
-default(parisize,"20M")
+default(parisize,"12M") \\ overflows 10M
 e=ellinit([1,-1,1,-1,-14]);
 E=ellinit([0,0,0,-e.c4/48,-e.c6/864]);
 P=[1,-1/4;0,1];
