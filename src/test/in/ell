@@ -1,4 +1,4 @@
-default(parisize,"20M");
+default(parisize,"12M"); \\ overflows 10M
 default(realprecision,38);
 /* Test generic */
 
