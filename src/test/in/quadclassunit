@@ -1,5 +1,5 @@
 default(realprecision,38);
-default(parisize, "80M");
+default(parisize, "54M"); \\ overflows 52M
 test(D) =
 {
   for (d = D, D+10^3,
