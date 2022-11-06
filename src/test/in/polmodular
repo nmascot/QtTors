@@ -55,7 +55,7 @@ check_modpoly(L, hash, inv = 0) =
        error("Bad modpoly"));
 }
 
-default(parisize, "32M");
+default(parisize, "18M"); \\ overflows 16M
 {
 MAX_LEVEL = 23;  \\ This already gives 89% coverage in 1.2s
 forprime(L = 2, MAX_LEVEL, check_modpoly(L, modpoly_hashes[lvl_idx[L]]));

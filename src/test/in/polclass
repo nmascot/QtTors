@@ -1,4 +1,4 @@
-default(parisize,"20M");
+default(parisize,"10M"); \\ overflows 8M
 hash_base = 2^64;
 init_h = 5381;
 
