@@ -1,5 +1,5 @@
 default(realprecision,38);
-default(parisize,"100M");
+default(parisize,"16M");
 
 \\Tests related to hasse invariants in algebras
 
