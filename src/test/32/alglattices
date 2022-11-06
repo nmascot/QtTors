@@ -1,4 +1,4 @@
-  ***   Warning: new stack size = 100000000 (95.367 Mbytes).
+  ***   Warning: new stack size = 16000000 (15.259 Mbytes).
 1
 1
 1
@@ -165,4 +165,4 @@ bad inputs
   ***   at top-level: alglatmul(al,lat1,[matdiagonal([1,1,0,1,1,1,1,
   ***                 ^----------------------------------------------
   *** alglatmul: incorrect type in checklat [please apply alglathnf()] (t_VEC).
-Total time spent: 1220
+Total time spent: 1149
