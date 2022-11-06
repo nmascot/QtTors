@@ -1,4 +1,4 @@
-  ***   Warning: new stack size = 16000000 (15.259 Mbytes).
+  ***   Warning: new stack size = 12000000 (11.444 Mbytes).
 Suite: all
 Suite: hasse sum to 0
 cyclo construction: [[x^2 + x + 1, [1], [3, -3], 1, [3], [], [[1, x], [1, 1]
@@ -177,4 +177,4 @@ degree bug
 2 2 2 2 2 2 2 2 2 2 
 infinite loop in GW
 inefficiency in backtrackfacto
-Total time spent: 2351
+Total time spent: 2433
