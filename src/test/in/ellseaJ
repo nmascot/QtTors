@@ -1,4 +1,4 @@
-default(parisize, "10M");
+default(parisize, "10M"); \\ 8M overflows
 default(datadir,"nonexistent"); \\ disable cache
 p=72057594037928017;
 ellap(ellinit([2,3],p))
