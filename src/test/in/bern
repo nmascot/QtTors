@@ -1,4 +1,4 @@
-default(parisize,"50M");
+default(parisize,"44M"); \\ overflows 42M
 bernfrac(0);
 bernfrac(1);
 for(k = 1, 20, print(bernfrac(k)));
