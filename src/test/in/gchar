@@ -124,7 +124,6 @@ p5 = idealfactor(bnf,p5)[1,1];
 p101 = idealadd(bnf, 101, x^2-18*x-28);
 p101 = idealfactor(bnf, p101)[1,1];
 gc = gcharinit(bnf,[p5,[0,0,0,0]]);
-default(parisize,"16m");
 gc = gcharinit(bnf,[[p5,1;p101,3],[0,1,0,1]]);
 
 print("gcharidentify");

@@ -1,4 +1,4 @@
-  ***   Warning: new stack size = 16000000 (15.259 Mbytes).
+  ***   Warning: new stack size = 128000000 (122.070 Mbytes).
 Watkins 6.3
 [[5, 0, 1, 2; 0, 5, 3, 2; 0, 0, 1, 0; 0, 0, 0, 1], []]
 [[5, 4, 4, 4; 0, 1, 0, 0; 0, 0, 1, 0; 0, 0, 0, 1], []]
@@ -98,7 +98,6 @@ L function with imaginary shifts
 1
 1
 need to increase prec II
-  ***   Warning: new stack size = 128000000 (122.070 Mbytes).
 293542/945551
 [[10, 0, 7, 4; 0, 10, 9, 3; 0, 0, 1, 0; 0, 0, 0, 1], [0, 0]]
 1
@@ -143,4 +142,4 @@ bad inputs
   ***   at top-level: lfuncreate([gc,[1,0,0,0,I]~])
   ***                 ^-----------------------------
   *** lfuncreate: sorry, lfun for gchar with imaginary norm component is not yet implemented.
-Total time spent: 7798
+Total time spent: 9933

@@ -1,6 +1,6 @@
 OVERFLOW_EXPONENT=if(sizebyte(0)==16, 2^50, 2^20);
 default(realprecision,38);
-default(parisize,20*10^6);
+default(parisize, "16M");
 exp(quadgen(5))
 exp(Mod(x,x^2+1))
 iferr(exp(""),E,E)

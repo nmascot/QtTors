@@ -1,18 +1,13 @@
-default(parisize,"16M");
+default(parisize,"128M");
 default(realprecision,38);
 lfunrobustcheckfeq(ldata) = {
-  my(bitprec,extraprec);
-  bitprec=bitprecision(1.);
-  extraprec=0;
+  my(bit = getlocalbitprec(), extrabit = 0);
   while(1,
-    my(t,lt,t1,t2,e);
-    localbitprec(bitprec + extraprec);
-    t = lfuntheta(ldata, 3/Pi);
-    if( exponent(t)+extraprec >= 0,
-      return( lfuncheckfeq(ldata, 3/Pi) );
-      );
-    extraprec = -exponent(t)+5;
-    );
+    localbitprec(bit + extrabit);
+    my(t = lfuntheta(ldata, 3/Pi));
+    if (exponent(t) + extrabit >= 0,
+      return (lfuncheckfeq(ldata, 3/Pi)));
+    extrabit = -exponent(t)+5);
 }
 
 print("Watkins 6.3");
@@ -244,7 +239,6 @@ lfunrobustcheckfeq([gc,10*chi1-chi2]) < -90 /* FIXME: precision loss */
 
 
 print("need to increase prec II");
-default(parisize,128M);
 pol = x^4 - 2*x^3 + 5*x^2 - 2*x - 1;
 bnf = bnfinit(pol);
 N = (2*5)^2;
