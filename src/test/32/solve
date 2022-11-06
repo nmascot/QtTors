@@ -1,4 +1,3 @@
-  ***   Warning: new stack size = 10000000 (9.537 Mbytes).
 14.134725141734693790457251983562470271
 [14.134725141734693790457251983562470271, 21.0220396387715549926284795938969
 02777, 25.010857580145688763213790992562821819, 30.4248761258595132103118975
@@ -27,10 +26,10 @@
   ***   at top-level: solve(x=-oo,0,exp(x)-2)
   ***                                     ^---
   *** _-_: the PARI stack overflows !
-  current stack size: 10000000 (9.537 Mbytes)
+  current stack size: 8000000 (7.629 Mbytes)
   [hint] set 'parisizemax' to a nonzero value in your GPRC
 
   ***   at top-level: solve(x=2,oo,exp(x)-2)
   ***                              ^---------
   *** exp: overflow in expo().
-Total time spent: 154
+Total time spent: 287
