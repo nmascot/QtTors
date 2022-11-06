@@ -1,5 +1,5 @@
 default(realprecision,38);
-default(parisize,"15M")
+default(parisize,"10M") \\ 8M overflows
 testF(v, D0, D) =
 {
   for(i=1,#v,

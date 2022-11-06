@@ -1,4 +1,3 @@
-  ***   Warning: new stack size = 20000000 (19.073 Mbytes).
    realprecision = 115 significant digits
 -oo
 -oo
@@ -46,4 +45,4 @@
   ***   at top-level: limitnum(n->1,-1)
   ***                 ^-----------------
   *** limitnum: domain error in limitnum: alpha <= 0
-Total time spent: 76
+Total time spent: 159
