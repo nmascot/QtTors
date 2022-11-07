@@ -1,4 +1,4 @@
-default(parisize,"22M"); \\ overflows 20M
+default(parisize,"24M"); \\ overflows 20M [GMP], 22M [portable]
 mwrank(E,e=0) = setrand(1); ellrank(E,e);
 
 {

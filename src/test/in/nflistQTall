@@ -1,6 +1,6 @@
 \\package:galdata nflistdata
 default(new_galois_format,1);
-default(parisize,"42M"); \\ overflows 40M
+default(parisize,"48M"); \\ overflows 40M [GMP], 46M [portable]
 
 tst(n,k)=
 { my(c = 0, V = List(), P = nflist([n,k],'t));
