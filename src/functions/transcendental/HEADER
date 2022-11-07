@@ -56,9 +56,11 @@ Doc:
  instead which allow finer granularity.)
 
  Some accuracies attainable on 32-bit machines cannot be attained
- on 64-bit machines for parity reasons. For example the default \kbd{gp} accuracy
- is 28 decimal digits on 32-bit machines, corresponding to \var{prec} having
- the value 5, but this cannot be attained on 64-bit machines.
+ on 64-bit machines for parity reasons. For example, an accuracy
+ of 28 decimal digits on 32-bit machines corresponds to \var{prec} having
+ the value 5, for a mantissa of $3 \times 32 = 96$ bits. But this cannot be
+ attained on 64-bit machines: we can attain either 64 or 128 bits, but values
+ in between.
 
  \item If the argument is a polmod (representing an algebraic number),
  then the function is evaluated for every possible complex embedding of that

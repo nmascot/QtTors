@@ -804,12 +804,7 @@ pari_init_defaults(void)
   long i;
   initout(1);
 
-#ifdef LONG_IS_64BIT
   precreal = 128;
-#else
-  precreal = 96;
-#endif
-
   precdl = 16;
   DEBUGLEVEL = 0;
   setalldebug(0);

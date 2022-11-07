@@ -94,20 +94,19 @@ the following:
   1./ 7.
   1 / 7 + 0.
 @eprog\noindent
-Immediately a number of decimals of this fraction appear, 38 on most systems,
-28 on the others, and the repeating pattern is $142857$. The reason is that
-you have included in the operations numbers like \kbd{0.}, \kbd{1.} or \kbd{7.}
-which are \emph{imprecise} real numbers, hence \kbd{gp} cannot give you an
-exact result.
+Immediately a number of decimals of this fraction appear (exactly 38), and
+the repeating pattern is $142857$. The reason is that you have included in
+the operations numbers like \kbd{0.}, \kbd{1.} or \kbd{7.} which are
+\emph{imprecise} real numbers, hence \kbd{gp} cannot give you an exact
+result.
 
-Why 28 / 38 decimals by the way? Well, it is the default initial precision.
+Why 38 decimals by the way? Well, it is the default initial precision.
 This has been chosen so that the computations are very fast, and gives
-already 12 decimals more accuracy than conventional double precision floating
-point operations. The precise value depends on a technical reason: if your
-machine supports 64-bit integers (the standard C library can handle integers
-up to $2^{64}$), the default precision is 38 decimals, and 28 otherwise.
-For definiteness, we will assume the former henceforth. Of course, you can
-extend the precision (almost) as much as you like as we will see in a moment.
+already more accuracy than conventional double precision floating
+point operations. The precise value is 128 bits of accuracy by default,
+which translates to $128 \log_{10}2 \approx 38.53$ decimal digits, rounded to
+$38$. Of course, you can extend the precision (almost) as much as you like as
+we will see in a moment.
 
 I'm getting bored, why don't we get on with some more exciting stuff?  Well,
 try \kbd{exp(1)}. Presto, comes out the value of $e$ to 38 digits. Try

@@ -689,13 +689,13 @@ the computation:
 \bprog
 ? A = 1/(y + 0.); B = 1. + O(y);
 ? B * denominator(A)
-%2 = 0.E-28 + O(y)
+%2 = 0.E-38 + O(y)
 ? A/B
-  *** _/_: Warning: normalizing a series with 0 leading term.
-%3 = 1.000000000000000000000000000*y^-1 + O(1)
+  ***   at top-level: A/B
+  ***                  ^--
+  *** _/_: impossible inverse in gdiv: 0.E-38 + O(y).
 ? A*B
-  *** _*_: Warning: normalizing a series with 0 leading term.
-%4 = 1.000000000000000000000000000*y^-1 + O(1)
+%4 = 1.0000000000000000000000000000000000000*y^-1 + O(y^0)
 @eprog
 
 \subsec{Rational functions (\typ{RFRAC})}%
@@ -2511,7 +2511,7 @@ usually exhibit a factor of $N$, enabling you to refine the factorization and
 go on. Or you might run an expensive computation at low precision to guess
 the size of the output, hence the right precision to use. You can then
 encounter errors like ``precision loss in truncation'', e.g when trying to
-convert \kbd{1E1000}, known to $28$ digits of accuracy, to an integer; or
+convert \kbd{1E1000}, known to $38$ digits of accuracy, to an integer; or
 ``division by 0'', e.g inverting \kbd{0E1000} when all accuracy has been
 lost, and no significant digit remains. It would be enough to restart part of
 the computation at a slightly higher precision.
