@@ -3471,14 +3471,18 @@ GEN
 ZXY_disc_1(GEN A, GEN F)
 { /* f(x,y) -> disc f(x,A) */
   pari_sp av = avma;
-  GEN FA;
+  GEN FA,D;
   ulong n,i;
+  //pari_printf("In %Ps\n",A);
   n = lg(F);
   FA = cgetg(n,t_POL);
   gel(FA,1) = gel(F,1);
   for(i=2;i<n;i++)
     gel(FA,i) = poleval(gel(F,i),A);
-  return gerepileupto(av,ZX_disc(FA));
+  FA = normalizepol(FA);
+  D = ZX_disc(FA);
+  //pari_printf("Out %Ps\n",A);
+  return gerepileupto(av,D);
 }
 
 GEN
@@ -3503,6 +3507,7 @@ ZXY_disc(GEN F)
     return ZXY_disc_1(gen_0,F);
   n -= 3; /* deg // x */
   d = (2*n-1)*m+1;
+  if(DEBUGLEVEL>=1) printf("ZXY_disc: n=%lu m=%lu -> d=%lu\n",n,m,d);
   Y = cgetg(d+1,t_VEC);
   vF = cgetg(2,t_VEC);
   gel(vF,1) = F;
