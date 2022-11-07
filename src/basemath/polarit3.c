@@ -3419,3 +3419,101 @@ ffcompomap(GEN m, GEN n)
   }
   return gerepilecopy(av, mkvec2(g,r));
 }
+
+/* Discriminant over Z[y] */
+
+GEN
+ZX_inivals_interpol(GEN Y, long var)
+{ /* Y=[f(0),f(1),...,f(n)] in Z^{n+1} -> f(x) in Z[x] of deg <= n. */
+  pari_sp av = avma;
+  ulong n,i,j;
+  GEN c,F;
+  n = lg(Y);
+  if(n==1) return pol_0(var);
+  if(n==2) return scalarpol(gel(Y,1),var);
+  Y = gcopy(Y);
+  for(i=n-1;i>=2;i--)
+  {
+    /* Apply operator D : f(x) |-> f(x+1)-f(x). Store f(0) separately. */
+    c = gel(Y,1);
+    for(j=1;j<i;j++)
+      gel(Y,j) = subii(gel(Y,j+1),gel(Y,j));
+    gel(Y,i) = c;
+    Y = gerepileupto(av,Y);
+  }
+  /* Now Y contains the D^k(f)(0) for k from n down to 0 */
+  /* Reconstruct f, using that D b_n = b_{n-1} where b_n(x) = binom(x,n) */
+  F = cgetg(n+1,t_POL);
+  F[1] = 0;
+  setvarn(F,var);
+  gel(F,2) = gel(Y,1);
+  for(i=2;i<n;i++)
+  { /* So far, only the coefs of F from F[2] to F[i] have been initialised */
+    gel(F,i+1) = diviuexact(gel(F,i),n-i);
+    for(j=i-1;j>1;j--)
+      gel(F,j+1) = diviuexact(subii(gel(F,j),muliu(gel(F,j+1),n-1-i)),n-i);
+    gel(F,2) = subii(gel(Y,i),muliu(diviuexact(gel(F,2),n-i),n-1-i));
+    // TODO gerepile
+  }
+  F = normalizepol(F);
+  return gerepileupto(av,F);
+}
+
+GEN
+ZXY_disc_1(GEN A, GEN F)
+{ /* f(x,y) -> disc f(x,A) */
+  pari_sp av = avma;
+  GEN FA;
+  ulong n,i;
+  n = lg(F);
+  FA = cgetg(n,t_POL);
+  gel(FA,1) = gel(F,1);
+  for(i=2;i<n;i++)
+    gel(FA,i) = poleval(gel(F,i),A);
+  return gerepileupto(av,ZX_disc(FA));
+}
+
+GEN
+ZXY_disc(GEN F)
+{
+  pari_sp av = avma;
+  GEN Y,vars,D;
+  GEN vF,vi,worker,done;
+  struct pari_mt pt;
+  ulong n,m,d,i;
+  long k,workid,pending;
+  n = lg(F);
+  if(n<=3) return gcopy(gen_0);
+  m = 3;
+  for(i=2;i<n;i++)
+  {
+    d = lg(gel(F,i));
+    if(d>m) m = d;
+  }
+  m -= 3; /* deg // y */
+  if(m==0)
+    return ZXY_disc_1(gen_0,F);
+  n -= 3; /* deg // x */
+  d = (2*n-1)*m+1;
+  Y = cgetg(d+1,t_VEC);
+  vF = cgetg(2,t_VEC);
+  gel(vF,1) = F;
+  vi = cgetg(2,t_VEC);
+  worker = snm_closure(is_entry("_ZXY_disc_worker"),vF);
+  mt_queue_start_lim(&pt,worker,d);
+  for(k=1;k<=d||pending;k++)
+  {
+    if(k<=d)
+    {
+      gel(vi,1) = utoi(k-1);
+      mt_queue_submit(&pt,k,vi);
+    }
+    else mt_queue_submit(&pt,k,NULL);
+    done = mt_queue_get(&pt,&workid,&pending);
+    if(done) gel(Y,workid) = done;
+  }
+  mt_queue_end(&pt);
+  vars = variables_vecsmall(F);
+  D = ZX_inivals_interpol(Y,lg(vars)==3?vars[2]:0);
+  return gerepileupto(av,D);
+}
