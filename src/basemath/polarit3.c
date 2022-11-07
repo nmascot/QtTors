@@ -3425,9 +3425,9 @@ ffcompomap(GEN m, GEN n)
 GEN
 ZX_inivals_interpol(GEN Y, long var)
 { /* Y=[f(0),f(1),...,f(n)] in Z^{n+1} -> f(x) in Z[x] of deg <= n. */
-  pari_sp av = avma;
+  pari_sp av = avma,av1;
   ulong n,i,j;
-  GEN c,F;
+  GEN c,C,D,F;
   n = lg(Y);
   if(n==1) return pol_0(var);
   if(n==2) return scalarpol(gel(Y,1),var);
@@ -3439,24 +3439,32 @@ ZX_inivals_interpol(GEN Y, long var)
     for(j=1;j<i;j++)
       gel(Y,j) = subii(gel(Y,j+1),gel(Y,j));
     gel(Y,i) = c;
-    Y = gerepileupto(av,Y);
+    if(gc_needed(av,1))
+      Y = gerepilecopy(av,Y);
   }
   /* Now Y contains the D^k(f)(0) for k from n down to 0 */
   /* Reconstruct f, using that D b_n = b_{n-1} where b_n(x) = binom(x,n) */
+  av1 = avma;
+  C = cgetg(2,t_VEC);
+  gel(C,1) = gel(Y,1);
+  for(i=2;i<n;i++)
+  {
+    D = cgetg(i+1,t_VEC);
+    gel(D,i) = diviuexact(gel(C,i-1),n-i);
+    for(j=i-1;j>1;j--)
+      gel(D,j) = diviuexact(subii(gel(C,j-1),muliu(gel(C,j),n-1-i)),n-i);
+    gel(D,1) = subii(gel(Y,i),muliu(diviuexact(gel(C,1),n-i),n-1-i));
+    C = D;
+    if(gc_needed(av1,1))
+      C = gerepilecopy(av1,C);
+  }
   F = cgetg(n+1,t_POL);
   F[1] = 0;
   setvarn(F,var);
-  gel(F,2) = gel(Y,1);
-  for(i=2;i<n;i++)
-  { /* So far, only the coefs of F from F[2] to F[i] have been initialised */
-    gel(F,i+1) = diviuexact(gel(F,i),n-i);
-    for(j=i-1;j>1;j--)
-      gel(F,j+1) = diviuexact(subii(gel(F,j),muliu(gel(F,j+1),n-1-i)),n-i);
-    gel(F,2) = subii(gel(Y,i),muliu(diviuexact(gel(F,2),n-i),n-1-i));
-    // TODO gerepile
-  }
+  for(i=1;i<n;i++)
+    gel(F,i+1) = gel(C,i);
   F = normalizepol(F);
-  return gerepileupto(av,F);
+  return gerepilecopy(av,F);
 }
 
 GEN
@@ -3501,16 +3509,16 @@ ZXY_disc(GEN F)
   vi = cgetg(2,t_VEC);
   worker = snm_closure(is_entry("_ZXY_disc_worker"),vF);
   mt_queue_start_lim(&pt,worker,d);
-  for(k=1;k<=d||pending;k++)
+  for(k=d-1;k>=0||pending;k--)
   {
-    if(k<=d)
+    if(k>=0)
     {
-      gel(vi,1) = utoi(k-1);
+      gel(vi,1) = utoi(k);
       mt_queue_submit(&pt,k,vi);
     }
     else mt_queue_submit(&pt,k,NULL);
     done = mt_queue_get(&pt,&workid,&pending);
-    if(done) gel(Y,workid) = done;
+    if(done) gel(Y,workid+1) = done;
   }
   mt_queue_end(&pt);
   vars = variables_vecsmall(F);
