@@ -392,7 +392,7 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
           if (DEBUGLEVEL)
             pari_warn(warner,"large composite in nfmaxord:loop(), %Ps", p);
           if (expi(p) < 100)
-            u = Z_factor(p); /* factor(n < 2^100) should take ~20ms */
+            u = gel(Z_factor(p), 1); /* p < 2^100 should take ~20ms */
           else if (S->certify)
             u = Z_fac(p);
           else
