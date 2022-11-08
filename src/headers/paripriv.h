@@ -922,7 +922,7 @@ GEN     nf_direct_compositum(GEN nf, GEN A, GEN B);
 ulong   ZX_ZXY_ResBound(GEN A, GEN B, GEN dB);
 GEN     ffinit_Artin_Schreier(ulong p, long l);
 GEN     ffinit_rand(GEN p, long n);
-GEN     ZXY_disc_1(GEN a, GEN F);
+GEN     ZXY_disc_1(GEN a, GEN F, ulong var);
 
 /* nflist.c */
 

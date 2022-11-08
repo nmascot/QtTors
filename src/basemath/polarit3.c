@@ -3468,25 +3468,27 @@ ZX_inivals_interpol(GEN Y, long var)
 }
 
 GEN
-ZXY_disc_1(GEN A, GEN F)
-{ /* f(x,y) -> disc f(x,A) */
+ZXY_disc_1(GEN A, GEN F, ulong var)
+{ /* f(x,y) -> disc f(x,A) if var=1, disc f(A,y) if var = 2 */
   pari_sp av = avma;
   GEN FA,D;
   ulong n,i;
-  //pari_printf("In %Ps\n",A);
-  n = lg(F);
-  FA = cgetg(n,t_POL);
-  gel(FA,1) = gel(F,1);
-  for(i=2;i<n;i++)
-    gel(FA,i) = poleval(gel(F,i),A);
+  if(var==1)
+  {
+    n = lg(F);
+    FA = cgetg(n,t_POL);
+    gel(FA,1) = gel(F,1);
+    for(i=2;i<n;i++)
+      gel(FA,i) = poleval(gel(F,i),A);
+  }
+  else FA = poleval(F,A);
   FA = normalizepol(FA);
   D = ZX_disc(FA);
-  //pari_printf("Out %Ps\n",A);
   return gerepileupto(av,D);
 }
 
 GEN
-ZXY_disc(GEN F)
+ZXY_disc(GEN F, ulong var)
 {
   pari_sp av = avma;
   GEN Y,vars,D;
@@ -3494,23 +3496,26 @@ ZXY_disc(GEN F)
   struct pari_mt pt;
   ulong n,m,d,i;
   long k,workid,pending;
+  if(var==0 || var>=3) pari_err(e_MISC,"variable");
   n = lg(F);
-  if(n<=3) return gcopy(gen_0);
+  if(var==1 && n<=3) return gcopy(gen_0);
   m = 3;
   for(i=2;i<n;i++)
   {
     d = lg(gel(F,i));
     if(d>m) m = d;
   }
-  m -= 3; /* deg // y */
-  if(m==0)
-    return ZXY_disc_1(gen_0,F);
+  if(var==2 && m<=3) return gcopy(gen_0);
   n -= 3; /* deg // x */
-  d = (2*n-1)*m+1;
+  m -= 3; /* deg // y */
+  if((var==1 && m==0) || (var==2 && n==0))
+    return ZXY_disc_1(gen_0,F,var);
+  d = 1 + (var == 1 ? (2*n-1)*m : (2*m-1)*n);
   if(DEBUGLEVEL>=1) printf("ZXY_disc: n=%lu m=%lu -> d=%lu\n",n,m,d);
   Y = cgetg(d+1,t_VEC);
-  vF = cgetg(2,t_VEC);
+  vF = cgetg(3,t_VEC);
   gel(vF,1) = F;
+  gel(vF,2) = utoi(var);
   vi = cgetg(2,t_VEC);
   worker = snm_closure(is_entry("_ZXY_disc_worker"),vF);
   mt_queue_start_lim(&pt,worker,d);
@@ -3527,6 +3532,6 @@ ZXY_disc(GEN F)
   }
   mt_queue_end(&pt);
   vars = variables_vecsmall(F);
-  D = ZX_inivals_interpol(Y,lg(vars)==3?vars[2]:0);
+  D = ZX_inivals_interpol(Y,lg(vars)==3?vars[3-var]:0);
   return gerepileupto(av,D);
 }

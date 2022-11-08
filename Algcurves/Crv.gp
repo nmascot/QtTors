@@ -108,15 +108,22 @@ CrvInit(f0,z=z,t=t,a=a)=
 	my(f,F,lf,x,y,z,p,B,SB,D,faD,U,BU,P,g,W1,OC);
 	[f,F]=APeqns(f0,z); \\ Affine and proj eqns
 	[x,y,z] = variables(F);
-	D = poldisc(f,y);
+	p = PlaneEval(f,[0,0]);
+  p = if(type(p)=="t_INTMOD",p.mod,0); \\ Characteristic
+	if(p==0,
+		D = content(f,1);
+		f /= D;
+		F /= D;
+		D = ZXY_disc(f,2)
+	,
+		D = poldisc(f,y)
+	);
   if(D==0,error("Vanishing discriminant. Non-reduced curve?"));
   D = gcd(D,deriv(D)); \\ Only keep repeated factors, TODO legitimate?
 	\\dx = poldegree(f,x);
 	\\dy = poldegree(f,y);
 	t = if(t,t,varlower("t",z));
 	a = if(a,a,varlower("a",t));
-	p = PlaneEval(f,[0,0]);
-  p = if(type(p)=="t_INTMOD",p.mod,0); \\ Characteristic
 	B = List();
 	SB = List();
 	\\ Branches above x=oo
