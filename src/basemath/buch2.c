@@ -31,8 +31,6 @@ static const long MINFAIL = 10;
 /* small_norm */
 static const long BNF_RELPID = 4;
 static const long BMULT = 8;
-static const long maxtry_ELEMENT = 1000*1000;
-static const long maxtry_FACT = 500;
 /* rnd_rel */
 static const long RND_REL_RELPID = 1;
 /* random relations */
@@ -44,6 +42,12 @@ static const long DEPSFBDIV = 10;
 static const ulong mod_p = 27449UL;
 /* be_honest */
 static const long maxtry_HONEST = 50;
+
+struct FP_param
+{
+  long maxtry_ELEMENT, maxtry_FACT;
+};
+
 
 typedef struct FACT {
     long pr, ex;
@@ -2393,7 +2397,7 @@ step(GEN x, double *y, GEN inc, long k)
 INLINE long
 Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M, GEN I,
     GEN NI, FACT *fact, long Nrelid, FP_t *fp, RNDREL_t *rr, long prec,
-    long *Nsmall, long *Nfact)
+    long *Nsmall, long *Nfact, struct FP_param *tp)
 {
   pari_sp av;
   const long N = nf_get_degree(nf), R1 = nf_get_r1(nf);
@@ -2456,7 +2460,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M, GEN I,
       {
         if (!fl)
         {
-          if (++try_elt > maxtry_ELEMENT) return 0;
+          if (++try_elt > tp->maxtry_ELEMENT) return 0;
           p = (double)fp->x[k] + fp->z[k];
           if (fp->y[k] + p*p*fp->v[k] <= BOUND) break;
 
@@ -2474,7 +2478,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M, GEN I,
     if (zv_content(fp->x) !=1) continue; /* not primitive */
     gx = ZM_zc_mul(ideal,fp->x);
     if (ZV_isscalar(gx)) continue;
-    if (++try_factor > maxtry_FACT) return 0;
+    if (++try_factor > tp->maxtry_FACT) return 0;
 
     if (!Nrelid)
     {
@@ -2516,7 +2520,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M, GEN I,
 
 static void
 small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long Nrelid, GEN M,
-           FACT *fact, GEN p0)
+           FACT *fact, GEN p0, struct FP_param *tp)
 {
   const long prec = nf_get_prec(nf);
   FP_t fp;
@@ -2546,7 +2550,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long Nrelid, GEN M,
     else
     { Nid = pr_norm(id); id = pr_hnf(nf, id);}
     if (Fincke_Pohst_ideal(cache, F, nf, M, id, Nid, fact, Nrelid, &fp,
-                           NULL, prec, &Nsmall, &Nfact)) break;
+                           NULL, prec, &Nsmall, &Nfact, tp)) break;
   }
   if (DEBUGLEVEL && Nsmall)
   {
@@ -2577,7 +2581,7 @@ get_random_ideal(FB_t *F, GEN nf, GEN ex)
 }
 
 static void
-rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
+rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact, struct FP_param *tp)
 {
   pari_timer T;
   GEN L_jid = F->L_jid, M = nf_get_M(nf), R, NR;
@@ -2602,7 +2606,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
     if (DEBUGLEVEL>1) err_printf("\n*** Ideal %ld: %Ps\n", j, vecslice(P,1,4));
     rr.jid = j;
     if (Fincke_Pohst_ideal(cache, F, nf, M, idealHNF_mul(nf, R, P), Nid, fact,
-                           RND_REL_RELPID, &fp, &rr, prec, NULL, NULL)) break;
+                           RND_REL_RELPID, &fp, &rr, prec, NULL, NULL, tp)) break;
   }
   if (DEBUGLEVEL)
   {
@@ -2732,7 +2736,7 @@ pr_orbit_fill(GEN orbit, GEN auts, GEN vP, long j)
 }
 /* remark: F->KCZ changes if be_honest() fails */
 static int
-be_honest(FB_t *F, GEN nf, GEN auts, FACT *fact)
+be_honest(FB_t *F, GEN nf, GEN auts, FACT *fact, struct FP_param *tp)
 {
   long i, iz, nbtest;
   long lgsub = lg(F->subFB), KCZ0 = F->KCZ;
@@ -2773,7 +2777,7 @@ be_honest(FB_t *F, GEN nf, GEN auts, FACT *fact)
       for (nbtest=0;;)
       {
         if (Fincke_Pohst_ideal(NULL, F, nf, M, id, Nid, fact, 0, &fp,
-                               NULL, prec, NULL, NULL)) break;
+                               NULL, prec, NULL, NULL, tp)) break;
         if (++nbtest > maxtry_HONEST)
         {
           if (DEBUGLEVEL)
@@ -3679,6 +3683,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long Nrelid, long flag, long p
   FB_t F;
   GRHcheck_t GRHcheck;
   FACT *fact;
+  struct FP_param tp = { 1000*1000, 500};
 
   if (DEBUGLEVEL) timer_start(&T);
   P = get_nfpol(P, &nf);
@@ -3886,7 +3891,7 @@ START:
           }
         }
         if (lg(F.L_jid) > 1)
-          small_norm(&cache, &F, nf, Nrelid, M_sn, fact, p0);
+          small_norm(&cache, &F, nf, Nrelid, M_sn, fact, p0, &tp);
         F.L_jid = F.perm; set_avma(av3);
         if (!A && cache.last != last) small_fail = 0; else small_fail++;
         if (LIE)
@@ -3909,7 +3914,7 @@ START:
         else if (!(nreldep % F.MAXDEPSFB))
           F.sfb_chg = sfb_CHANGE;
         if (F.sfb_chg && !subFB_change(&F)) goto START;
-        rnd_rel(&cache, &F, nf, fact);
+        rnd_rel(&cache, &F, nf, fact, &tp);
         F.L_jid = F.perm;
       }
       if (DEBUGLEVEL) timer_start(&T);
@@ -4084,7 +4089,7 @@ START:
     if (F.KCZ2 > F.KCZ)
     {
       if (F.sfb_chg && !subFB_change(&F)) goto START;
-      if (!be_honest(&F, nf, auts, fact)) goto START;
+      if (!be_honest(&F, nf, auts, fact, &tp)) goto START;
       if (DEBUGLEVEL) timer_printf(&T, "to be honest");
     }
     F.KCZ2 = 0; /* be honest only once */
