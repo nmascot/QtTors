@@ -109,8 +109,40 @@ Doc:
  a reasonable number of terms; tampering with the value of this global
  variable is \emph{deprecated} and strongly discouraged.
 
-
  \item If the argument is a vector or a matrix, the result is the
- componentwise evaluation of the function. In particular, transcendental
- functions on square matrices, which are not implemented in the present
- version \vers, will have a different name if they are implemented some day.
+ \emph{componentwise} evaluation of the function. In particular, transcendental
+ functions on square matrices, are not built-in. For this you can use the
+ following technique, which is neither very efficient nor numerical stable,
+ but is often good enough provided we restrict to diagonalizable matrices:
+ \bprog
+ mateval(f, M) =
+ { my([L, H] = mateigen(M, 1));
+   H * matdiagonal(f(L)) * H^(-1);
+ }
+ ? A = [13,2;10,14];
+ ? a = mateval(sqrt, A) /*@Ccom approximates $\sqrt{A}$ */
+ %2 =
+ [3.5522847498307933... 0.27614237491539669...]
+
+ [1.3807118745769834... 3.69035593728849174...]
+
+ ? exponent(a^2 - A)
+ %3 = -123 \\ OK
+
+ ? b = mateval(exp, A);
+ ? exponent(mateval(log, b) - A)
+ %5 = -115 \\ tolerable
+
+ @eprog The absolute error depends on the condition number of the base
+ change matrix $H$ and on the largest $|f(\lambda)|$, where $\lambda$ runs
+ through the eigenvalues. If $M$ is real symmetric, you may use
+ \kbd{qfjacobi} instead of \kbd{mateigen}.
+
+ Of course when the input is not diagonalizable, this function produces junk:
+ \bprog
+ ? mateval(sqrt, [0,1;0,0])
+ %6 =    \\ oops ...
+ [0.E-57 0]
+
+ [     0 0]
+ @eprog
