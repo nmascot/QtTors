@@ -21,9 +21,9 @@ Doc: defining polynomial $S$ over~$\Q$ for the splitting field of
  embedding of $\Q[x]/(P)$ in its splitting field given by a polynomial
  (implicitly modulo $S$, as in \kbd{nfisincl}).
 
- \item $\fl = 2$: return $[S,C]$ where $C$ is a rational function whose image
- in $\Q[x]/(S)$ yields an embedding; this avoids inverting the denominator,
- which is costly. when the degree of the splitting field is huge.
+ \item $\fl = 2$: return $[S,C]$ where $C$ is vector of rationals functions
+  whose image in $\Q[x]/(S)$ yields the embedding; this avoids inverting the
+  denominator, which is costly. when the degree of the splitting field is huge.
 
  \item $\fl = 3$: return $[S, v, p]$ a data structure allowing to quickly
  compute the Galois group of the splitting field, which is used by
