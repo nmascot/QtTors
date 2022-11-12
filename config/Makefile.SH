@@ -438,7 +438,6 @@ install-doctex:
 	-\$(INSTALL_DATA) $doc/translations \$(DOCDIR)
 	-\$(INSTALL_PROGRAM) $doc/gphelp    \$(BINDIR)
 	-cd $doc; \$(MAKE) usersch3.tex
-	-\$(INSTALL_DATA) $doc/appa.tex     \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/appb.tex     \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/appd.tex     \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/parimacro.tex \$(DOCDIR)
