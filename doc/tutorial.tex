@@ -569,7 +569,7 @@ trial divide by the built-in table of primes. We slightly cheat here and use
 a variant of the function \kbd{factor} which does exactly this. So type
 \kbd{factor(n, 200000)}. The last argument tells \kbd{factor} to trial divide
 up to the given bound and stop at this point. Set it to 0 to trial divide by
-the full set of built-in primes, which goes up to $500000$ by default.
+the full set of built-in primes, which goes up to $10^6$ by default.
 
 As for all factoring functions, the result is a 2 column matrix: the first
 column gives the primes and the second their exponents. Here we get a single
@@ -605,7 +605,7 @@ To find the factors is another story. In this case, the integer $n$ is small
 \bprog
   for (i = 2, ceil(sqrt(n)), if (n%i==0, print(i); break))
 @eprog\noindent
-This should take less than 5 seconds. In general, one must use less naive
+This should take less than 2 seconds. In general, one must use less naive
 techniques than trial division, or be very patient. Type \kbd{fa = factor(n)}
 to let the factoring engine find all prime factors. You may stop the timer by
 typing \kbd{\#} again.
