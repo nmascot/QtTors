@@ -599,12 +599,80 @@ _next_lt(forvec_t *d)
     if (--i <= 0) return NULL;
   }
 }
+
+/* on Z^n /(cyc Z^n) [over integers]
+ * torsion (cyc>0) and free (cyc=0) components may be interleaved */
+static GEN
+_next_mod_cyc(forvec_t *d)
+{ /* keep free components indices t1 < t2 last nonzero < t3 */
+  long t, t1 = 0, t2 = 0, t3 = 0;
+  if (d->first) { d->first = 0; return (GEN)d->a; }
+  for (t = d->n; t > 0; t--)
+  {
+    if (signe(d->M[t]) > 0)
+    { /* torsion component */
+      d->a[t] = incloop(d->a[t]);
+      if (cmpii(d->a[t], d->M[t]) < 0) return (GEN)d->a;
+      d->a[t] = resetloop(d->a[t], gen_0);
+    }
+    else
+    { /* set or update t1,t2,t3 */
+      if (t2 && !t1) t1 = t;
+      if (!t2 && signe(d->a[t])) t2 = t;
+      if (!t2) t3 = t;
+    }
+  }
+  if (!t3 && !t2) return NULL; /* no free component, stop */
+  if (!t2) d->a[t3] = resetloop(d->a[t3], gen_m1);
+  else if (!t3 && signe(d->a[t2]) < 0) togglesign(d->a[t2]);
+  else if (signe(d->a[t2]) < 0)
+  {
+    d->a[t2] = incloop(d->a[t2]);
+    d->a[t3] = resetloop(d->a[t3], gen_m1);
+  }
+  else if (!t1) { d->a[t2] = incloop(d->a[t2]); togglesign(d->a[t2]); }
+  else
+  {
+    if (signe(d->a[t1]) < 0)
+    { d->a[t2] = incloop(d->a[t2]); togglesign(d->a[t2]); }
+    else
+    { togglesign(d->a[t2]); d->a[t2] = incloop(d->a[t2]); }
+    d->a[t1] = incloop(d->a[t1]);
+  }
+  return (GEN)d->a;
+}
 /* for forvec(v=[],) */
 static GEN
 _next_void(forvec_t *d)
 {
   if (d->first) { d->first = 0; return (GEN)d->a; }
   return NULL;
+}
+static int
+RgV_is_ZV_nonneg(GEN x)
+{
+  long i;
+  for (i = lg(x)-1; i > 0; i--)
+    if (typ(gel(x,i)) != t_INT || signe(gel(x, i)) < 0) return 0;
+  return 1;
+}
+/* x assumed to be cyc vector, l>1 */
+static int
+forvec_mod_cyc_init(forvec_t *d, GEN x)
+{
+  long i, tx = typ(x), l = lg(x);
+  d->a = (GEN*)cgetg(l,tx); /* current */
+  d->M = (GEN*)cgetg(l,tx); /* cyc */
+  for (i = 1; i < l; i++)
+  {
+    d->a[i] = setloop(gen_0);
+    d->M[i] = setloop(gel(x, i));
+  }
+  d->first = 1;
+  d->n = l-1;
+  d->m = NULL;
+  d->next = &_next_mod_cyc;
+  return 1;
 }
 
 /* Initialize minima (m) and maxima (M); guarantee M[i] - m[i] integer and
@@ -616,6 +684,8 @@ forvec_init(forvec_t *d, GEN x, long flag)
 {
   long i, tx = typ(x), l = lg(x), t = t_INT;
   if (!is_vec_t(tx)) pari_err_TYPE("forvec [not a vector]", x);
+  if (l > 1 && RgV_is_ZV_nonneg(x))
+      return forvec_mod_cyc_init(d, x);
   d->first = 1;
   d->n = l - 1;
   d->a = (GEN*)cgetg(l,tx);
