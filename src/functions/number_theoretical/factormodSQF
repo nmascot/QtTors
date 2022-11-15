@@ -17,9 +17,8 @@ Doc: squarefree factorization of the polynomial $f$ over the finite field
  \item $D$ omitted: factor over the field of definition of $f$, which
  must be a finite field.
 
- This is somewhat faster than full factorization. The coefficients of $f$
- must be operation-compatible with the corresponding finite field. The result
- is a two-column matrix:
+ The coefficients of $f$ must be operation-compatible with the corresponding
+ finite field. The result is a two-column matrix:
 
  \item the first column contains monic squarefree pairwise coprime polynomials
  dividing $f$;
@@ -27,8 +26,8 @@ Doc: squarefree factorization of the polynomial $f$ over the finite field
  \item the second column contains the power to which the polynomial in column
  $1$ divides $f$;
 
- The factors are ordered by increasing degree and the result is canonical: it
- will not change across multiple calls or sessions.
+ This is somewhat faster than full factorization. The factors are ordered by
+ increasing exponent and the result is obviously canonical.
 
  \bprog
  ? f = (x^2 + 1)^3 * (x^2-1)^2;

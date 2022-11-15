@@ -17,17 +17,19 @@ Doc: distinct-degree factorization of the squarefree polynomial $f$ over the
  \item $D$ omitted: factor over the field of definition of $f$, which
  must be a finite field.
 
- This is somewhat faster than full factorization. The coefficients of $f$
- must be operation-compatible with the corresponding finite field. The result
- is a two-column matrix:
+ If $f$ is not squarefree, the result is undefined.
+ The coefficients of $f$ must be operation-compatible with the corresponding
+ finite field. The result is a two-column matrix:
 
- \item the first column contains monic (squarefree) pairwise coprime polynomials
- dividing $f$, all of whose irreducible factors have degree $d$;
+ \item the first column contains monic (squarefree, pairwise coprime)
+ polynomials dividing $f$, all of whose irreducible factors have
+ the same degree $d$;
 
  \item the second column contains the degrees of the irreducible factors.
 
- The factors are ordered by increasing degree and the result is canonical: it
- will not change across multiple calls or sessions.
+ The factorization is ordered by increasing degree $d$ of irreducible factors,
+ and the result is obviously canonical.
+ This function is somewhat faster than full factorization.
 
  \bprog
  ? f = (x^2 + 1) * (x^2-1);
@@ -43,7 +45,7 @@ Doc: distinct-degree factorization of the squarefree polynomial $f$ over the
 
  ? for(i=1,10^5,factormodDDF(f,3))
  time = 424 ms.
- ? for(i=1,10^5,factormod(f,3))  \\ full factorization is slower
+ ? for(i=1,10^5,factormod(f,3))  \\ full factorization is a little slower
  time = 464 ms.
 
  ? liftall( factormodDDF(x^2 + 1, [3, t^2+1]) ) \\ over F_9
