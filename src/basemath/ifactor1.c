@@ -3652,27 +3652,66 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
       av = avma; affii(shifti(n,-i), n); set_avma(av);
     }
     if (is_pm1(n)) return aux_end(M,n,nb);
-    /* trial division */
     maxp = maxprime();
-    av = avma; u_forprime_init(&T, 3, minss(lim, maxp)); av2 = avma;
-    /* first pass: known to fit in private prime table */
-    while ((p = u_forprime_next_fast(&T)))
+    if (lim >= maxprimelim()>>2)
     {
-      pari_sp av3 = avma;
-      int stop;
-      long k = Z_lvalrem_stop(&n, p, &stop);
-      if (k)
+      GEN nr, NR;
+      /* fast trial division */
+      av = avma;
+      NR = nr = gcdii(prodprimes(),n);
+      u_forprime_init(&T, 3, minss(lim, maxp)); av2 = avma;
+      /* first pass: known to fit in private prime table */
+      while ((p = u_forprime_next_fast(&T)))
       {
-        affii(n, N); n = N; set_avma(av3);
-        STOREu(&nb, p, k);
+        pari_sp av3 = avma;
+        int stop;
+        long k;
+        if (!dvdiu(nr, p)) continue;
+        nr = diviuexact(nr, p);
+        affii(nr, NR); nr = NR; set_avma(av3);
+        k = Z_lvalrem_stop(&n, p, &stop);
+        if (k)
+        {
+          affii(n, N); n = N; set_avma(av3);
+          STOREu(&nb, p, k);
+        }
+        if (is_pm1(n))
+        {
+          stackdummy(av, av2);
+          return aux_end(M,n,nb);
+        }
+        if (is_pm1(nr)) break;
       }
-      if (p == 16381 && bit_accuracy(lgefint(n)) < 2048)
-      { stop = ifac_isprime(n); nb0 = nb; }
-      if (stop)
+      if (ifac_isprime(n))
       {
-        if (!is_pm1(n)) STOREi(&nb, n, 1);
+        STOREi(&nb, n, 1);
         stackdummy(av, av2);
         return aux_end(M,n,nb);
+      }
+    }
+    else
+    {
+      /* trial division */
+      av = avma; u_forprime_init(&T, 3, minss(lim, maxp)); av2 = avma;
+      /* first pass: known to fit in private prime table */
+      while ((p = u_forprime_next_fast(&T)))
+      {
+        pari_sp av3 = avma;
+        int stop;
+        long k = Z_lvalrem_stop(&n, p, &stop);
+        if (k)
+        {
+          affii(n, N); n = N; set_avma(av3);
+          STOREu(&nb, p, k);
+        }
+        if (p == 16381 && bit_accuracy(lgefint(n)) < 2048)
+        { stop = ifac_isprime(n); nb0 = nb; }
+        if (stop)
+        {
+          if (!is_pm1(n)) STOREi(&nb, n, 1);
+          stackdummy(av, av2);
+          return aux_end(M,n,nb);
+        }
       }
     }
     stackdummy(av, av2);

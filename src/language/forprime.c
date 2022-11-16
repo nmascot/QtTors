@@ -22,7 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /**********************************************************************/
 
 static ulong _maxprime = 0;
+static ulong _maxprimelim = 0;
 static ulong diffptrlen;
+static GEN _prodprimes;
 
 /* Building/Rebuilding the diffptr table. The actual work is done by the
  * following two subroutines;  the user entry point is the function
@@ -352,6 +354,18 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong n)
   }
 }
 
+static void
+set_prodprimes(void)
+{
+  pari_sp av = avma;
+  GEN p = zv_prod_Z(primes_zv(diffptrlen-1));
+  long i, l = lgefint(p);
+  _prodprimes = (GEN) pari_malloc(l*sizeof(long));
+  for (i = 0; i < l; i++)
+    _prodprimes[i] = p[i];
+  set_avma(av);
+}
+
 /* assume maxnum <= 436273289 < 2^29 */
 static void
 initprimes0(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
@@ -426,7 +440,11 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
 ulong
 maxprime(void) { return diffptr ? _maxprime : 0; }
 ulong
+maxprimelim(void) { return diffptr ? _maxprimelim : 0; }
+ulong
 maxprimeN(void) { return diffptr ? diffptrlen-1: 0; }
+GEN
+prodprimes(void) { return diffptr ? _prodprimes: NULL; }
 
 void
 maxprime_check(ulong c) { if (_maxprime < c) pari_err_MAXPRIME(c); }
@@ -445,6 +463,7 @@ initprimes(ulong maxnum, long *lenp, ulong *lastp)
     maxnum = 436273289;
   t = (byteptr)pari_malloc((size_t) (1.09 * maxnum/log((double)maxnum)) + 146);
   initprimes0(maxnum, lenp, lastp, t);
+  _maxprimelim = maxnum;
   return (byteptr)pari_realloc(t, *lenp);
 }
 
@@ -457,6 +476,7 @@ initprimetable(ulong maxnum)
   diffptrlen = minss(diffptrlen, len);
   _maxprime  = minss(_maxprime,last); /*Protect against ^C*/
   diffptr = p; diffptrlen = len; _maxprime = last;
+  set_prodprimes();
   if (old) free(old);
 }
 
@@ -770,7 +790,11 @@ pari_init_primes(ulong maxprime)
 void
 pari_close_primes(void)
 {
-  pari_free(diffptr);
+  if (diffptr)
+  {
+    pari_free(diffptr);
+    pari_free(_prodprimes);
+  }
   pari_free(pari_sieve_modular.sieve);
 }
 
