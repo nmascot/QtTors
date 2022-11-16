@@ -51,10 +51,10 @@ $RM -f echotmp
 exec 3>> Bench-$VersionMajor.$VersionMinor.$patch
 
 dotestSUF=${dotestSUF:-"sta dyn"}
-for arg in $dotestSUF; do
-  if test -s $execdir/gp-$arg$exe_suff; then
-    SUF="$SUF $arg"
-    datadir=`echo 'print(default(datadir))' | $RUNTEST $execdir/gp-$arg -q -f`
+for suf in $dotestSUF; do
+  if test -s $execdir/gp-$suf$exe_suff; then
+    SUF="$SUF $suf"
+    datadir=`echo 'print(default(datadir))' | $RUNTEST $execdir/gp-$suf$exe_suff -q -f`
   fi
 done
 file_test=gp.out
