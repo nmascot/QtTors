@@ -52,16 +52,15 @@ Doc:
  @eprog
 
  As a shortcut, a vector of the form $v=[[0,c_1-1],\dots [0,c_n-1]]$
- can be abbreviated as $v=[c_1,\dots c_n]$. More generally, if $v$ is
- a vector of nonnegative integers $c_i$ the loop runs over
- representatives of $Z^n/vZ^n$. The vector $v$ may contain zero entries,
- in which case the loop spans an infinite lattice. The values are ordered
- lexicographically, graded by increasing L1-norm on free ($c_i=0$)
- components.
+ can be abbreviated as $v=[c_1,\dots c_n]$ and $\fl$ is ignored in this case.
+ More generally, if $v$ is a vector of nonnegative integers $c_i$ the loop
+ runs over representatives of $\Z^n/v\Z^n$; and $\fl$ is again ignored.
+ The vector $v$ may contain zero entries, in which case the loop spans an
+ infinite lattice. The values are ordered lexicographically, graded by
+ increasing $L_1$-norm on free ($c_i=0$) components.
 
- This helps iterating over elements of abelian groups using their
+ This allows to iterate over elements of abelian groups using their
  \kbd{.cyc} vector.
-
  \bprog
  ? forvec (X=[2,3], print(X));
  [0, 0]
@@ -70,7 +69,7 @@ Doc:
  [1, 0]
  [1, 1]
  [1, 2]
- ? my(i);forvec(X=[0,0], print(X); if(i++>10,break()));
+ ? my(i);forvec (X=[0,0], print(X); if (i++ > 10, break));
  [0, 0]
  [-1, 0]
  [0, -1]
@@ -83,7 +82,10 @@ Doc:
  [0, 2]
  [1, -1]
  ? zn = znstar(36,1);
- ? forvec(chi = zn.cyc,if(chareval(zn,chi,5)==5/6,print(chi)));
+ ? forvec (chi = zn.cyc, if (chareval(zn,chi,5) == 5/6, print(chi)));
  [1, 0]
  [1, 1]
+ ? bnrchar(zn, [5], [5/6]) \\ much more efficient in general
+ %5 = [[1, 1], [1, 0]]
+
  @eprog
