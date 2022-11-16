@@ -14,6 +14,7 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
     10- polcyclo(huge n, t_PADIC of positive valuation) -> overflow
     11- charpoly over R or C was unstable [#2406]
     12- polredbest: rare error "inconsistent concatenation" [#2423]
+    13- hypergeom([0,0],[1],2) -> SEGV [#2425]
 
   Changed
      1- binomial(negative t_INT, t_INT): use Loeb's definition

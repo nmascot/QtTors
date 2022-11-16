@@ -568,8 +568,8 @@ F21finitetaylor(long m, GEN b, GEN c, GEN z, long prec)
   pari_sp av;
   GEN C, S;
   long j, ct, pradd, mi, bitmin, mb;
-  if (isnegint2(b, &mb) && mb < m) { b = utoineg(m); m = mb; }
-  pradd = precFtaylor(mkvec2(utoineg(m), b), mkvec(c), z, &mi);
+  if (isnegint2(b, &mb) && mb < m) { b = stoi(-m); m = mb; }
+  pradd = precFtaylor(mkvec2(stoi(-m), b), mkvec(c), z, &mi);
   if (pradd > 0)
   {
     prec += pradd;
