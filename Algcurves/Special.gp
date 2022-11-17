@@ -163,14 +163,18 @@ FnsBranchMatRat_conic(u,v,B,e,x,y)=
   S;
 }
 
-FnsBranchMat(F,B,e,x,y)=
+FnsBranchMat(F,B,e0,x,y)=
 {
-  my(t,n,m,M,S);
-  F = substvec(F,[x,y],BranchExpand(B[1],e));
-  t = variable(F);
+  my(t,n,m,M,S,e=e0);
   n = #F;
-	m = valuation(F,t);
-  M = serprec(F,t);
+	while(1,
+  	F = substvec(F,[x,y],BranchExpand(B[1],e));
+  	t = variable(F);
+		m = valuation(F,t);
+  	M = serprec(F,t);
+		if(M-m>=e0,break);
+		e += e0-(M-m)+1;
+	);
   S = matrix((M-m),n);
   for(j=1,n,
     for(i=m,M-1,
@@ -180,25 +184,30 @@ FnsBranchMat(F,B,e,x,y)=
   S;
 }
 
-DiffsBranchMat(W,den,B,e,x,y)=
+DiffsBranchMat(W,den,B,e0,x,y)=
 {
-  my(k=1,b,D,t,n,m,M,S);
+  my(k=1,b,D,t,n,m,M,S,Wb,e=e0);
+	n = #W;
 	while(1,
 		b = BranchExpand(B[1],e);
 		D = substvec(den,[x,y],b);
-		if(D,break);
-		e += k;
-		k += 1;
-	);
-  W = substvec(W,[x,y],b)*deriv(b[1])/D;
-  t = variable(W);
-  n = #W;
-  m = valuation(W,t);
-  M = serprec(W,t);
+		if(D==0,
+			e += k;
+			k += 1;
+			next
+		);
+		Wb = substvec(W,[x,y],b)*deriv(b[1])/D;
+    t = variable(Wb);
+    m = valuation(Wb,t);
+    M = serprec(Wb,t);
+    if(M==+oo,M=e+m);
+    if(M-m>=e0,break);
+    e += e0-(M-m)+1;
+  );
   S = matrix((M-m),n);
   for(j=1,n,
     for(i=m,M-1,
-       S[i-m+1,j] = polcoef(W[j],i)
+       S[i-m+1,j] = polcoef(Wb[j],i)
     )
   );
   S;
