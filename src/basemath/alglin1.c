@@ -5029,18 +5029,21 @@ static GEN
 eigen_err(int exact, GEN x, long flag, long prec)
 {
   pari_sp av = avma;
+  GEN y;
   if (RgM_is_symmetric_cx(x, prec2nbits(prec) - 10))
   { /* approximately symmetric: recover */
     x = jacobi(x, prec); if (flag) return x;
     return gerepilecopy(av, gel(x,2));
   }
+  if (!exact) x = bestappr(x, NULL);
+  y = mateigen(x, flag, precdbl(prec));
   if (exact)
-  {
-    GEN y = mateigen(x, flag, precdbl(prec));
-    return gerepilecopy(av, gprec_wtrunc(y, prec));
-  }
-  pari_err_PREC("mateigen");
-  return NULL; /* LCOV_EXCL_LINE */
+    y = gprec_wtrunc(y, prec);
+  else if (flag)
+    y = mkvec2(RgV_gtofp(gel(y,1), prec), RgM_gtofp(gel(y,2), prec));
+  else
+    y = RgM_gtofp(y, prec);
+  return gerepilecopy(av, y);
 }
 GEN
 mateigen(GEN x, long flag, long prec)

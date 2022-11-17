@@ -212,7 +212,4 @@ x + 3.5251905160916583918731318966948840204 E-9
   ***   at top-level: minpoly(Mod(y,x),'y)
   ***                 ^--------------------
   *** minpoly: incorrect priority in minpoly: variable x < y
-  ***   at top-level: localbitprec(32);mateigen(merror*bitprecision(
-  ***                                  ^-----------------------------
-  *** mateigen: precision too low in mateigen.
-Total time spent: 50
+Total time spent: 58
