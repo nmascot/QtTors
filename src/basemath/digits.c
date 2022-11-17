@@ -201,33 +201,41 @@ fromdigitsu_dac(GEN x, GEN vB, long i, long l)
   GEN a, b;
   long m = l>>1;
   if (l==1) return utoi(uel(x,i));
-  if (l==2) return addumului(uel(x,i), uel(x,i+1), gel(vB, m));
+  if (l==2) return addui(uel(x,i), mului(uel(x,i+1), gel(vB, m)));
   a = fromdigitsu_dac(x, vB, i, m);
   b = fromdigitsu_dac(x, vB, i+m, l-m);
   return addii(a, mulii(b, gel(vB, m)));
 }
 
+static GEN
+fromdigitsu_i(GEN x, GEN B)
+{
+  long n = lg(x)-1;
+  GEN vB;
+  if (n == 0) return gen_0;
+  vB = get_vB(B, n, NULL, &Z_ring);
+  return fromdigitsu_dac(x, vB, 1, n);
+}
 GEN
 fromdigitsu(GEN x, GEN B)
-{
-  pari_sp av = avma;
-  long n = lg(x)-1;
-  GEN vB, z;
-  if (n==0) return gen_0;
-  vB = get_vB(B, n, NULL, &Z_ring);
-  z = fromdigitsu_dac(x, vB, 1, n);
-  return gerepileuptoint(av, z);
-}
+{ pari_sp av = avma; return gerepileuptoint(av, fromdigitsu_i(x, B)); }
 
 static int
 ZV_in_range(GEN v, GEN B)
 {
   long i, l = lg(v);
-  for(i=1; i < l; i++)
+  for (i = 1; i < l; i++)
   {
     GEN vi = gel(v, i);
     if (signe(vi) < 0 || cmpii(vi, B) >= 0) return 0;
   }
+  return 1;
+}
+static int
+zv_nonnegative(GEN v)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++) if (v[i] < 0) return 0;
   return 1;
 }
 
@@ -235,8 +243,19 @@ GEN
 fromdigits(GEN x, GEN B)
 {
   pari_sp av = avma;
-  if (typ(x)!=t_VEC || !RgV_is_ZV(x)) pari_err_TYPE("fromdigits",x);
-  if (lg(x)==1) return gen_0;
+  long tx = typ(x);
+  if (tx == t_VECSMALL)
+  {
+    if (lg(x)==1) return gen_0;
+    if (zv_nonnegative(x))
+    {
+      B = check_basis(B); x = vecsmall_reverse(x);
+      return gerepileuptoint(av, fromdigitsu_i(x, B));
+    }
+    x = zv_to_ZV(x);
+  }
+  else if (!is_vec_t(tx) || !RgV_is_ZV(x)) pari_err_TYPE("fromdigits",x);
+  if (lg(x) == 1) return gen_0;
   B = check_basis(B);
   if (Z_ispow2(B) && ZV_in_range(x, B)) return fromdigits_2k(x, expi(B));
   x = vecreverse(x);

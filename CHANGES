@@ -15,6 +15,7 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
     11- charpoly over R or C was unstable [#2406]
     12- polredbest: rare error "inconsistent concatenation" [#2423]
     13- hypergeom([0,0],[1],2) -> SEGV [#2425]
+    14- fromdigitsu(v, B) actually computed fromdigitsu(v, |B|)
 
   Changed
      1- binomial(negative t_INT, t_INT): use Loeb's definition
@@ -28,6 +29,7 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
      7- default 'realbitprecision' is now 128 on both 32bit and 64bit
         architectures
      8- default 'primelimit' is now 10^6 [instead of 500000]
+     9- allow fromdigits(t_COL or t_VECSMALL, B)
 
   Added
 PMo  1- new syntax for forvec loops
