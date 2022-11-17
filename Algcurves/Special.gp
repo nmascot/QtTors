@@ -109,19 +109,23 @@ CrvRat(C,P,Q)=
 	[X,Y];
 }
 
-FnsBranchMatRat(F,B,e,x,y)=
+FnsBranchMatRat(F,B,e0,x,y)=
 {
-	my(A,a,t,d,n,m,M,S,c);
+	my(A,a,t,d,n,m,M,S,c,e=e0);
 	A = B[3];
 	a = variable(A);
 	d = poldegree(A);
 	\\F = substvec(F,[x,y],BranchExpand(B[1],e));
-	F = BranchEval(F,B[1],e,x,y);
-	t = variable(F);
 	n = #F;
-	m = valuation(F,t);
-	M = serprec(F,t);
-	if(M==+oo,M=e+m);
+	while(1,
+		F = BranchEval(F,B[1],e,x,y);
+		t = variable(F);
+		m = valuation(F,t);
+		M = serprec(F,t);
+		if(M==+oo,M=e+m);
+		if(M-m>=e0,break);
+		e += e0-(M-m)+1;
+	);
 	S = matrix((M-m)*d,n);
 	for(j=1,n,
 		for(i=m,M-1,
@@ -377,6 +381,7 @@ CanProj(C,uvw=0,P=0)=
 			n++;
 		)
 	);
+	d2 = 1000;
 	M = FnsBranchMatRat(M,B,d2+1,x,y);
 	K = matker(M);
 	f = f*K[,1];
