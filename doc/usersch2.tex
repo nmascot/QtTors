@@ -808,9 +808,19 @@ the indexing):
  that $(p, p+2)$ is a twin pair;
  \bprog
  ? [ p^2 | p <- primes(10), p % 4 == 1 ]
- %1 = [25, 169, 289, 841]
+ %3 = [25, 169, 289, 841]
  @eprog\noindent returns the squares of the primes congruent to $1$ modulo $4$,
  where $p$ runs among the first 10 primes.
+
+ To iterate over more than one variable, you may separate clauses with
+ \kbd{;} as in
+ \bprog
+ ? [ x+y | x <- [1..3]; y <- [1..2] ]
+ %4 = [2, 3, 3, 4, 4, 5]
+
+ ? [ [x,y] | x <- [1..4], isprime(x); y <- [2..5], y % 3 == 1 ]
+ %5 = [[2, 4], [3, 4]]
+ @eprog
 
 \subsec{Matrices (\typ{MAT})}%
 \sidx{matrix}\kbdsidx{t_MAT}
