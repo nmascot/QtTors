@@ -750,11 +750,18 @@ represented.
 \fun{long}{_evalprecp}{long x} same as \kbd{evalprecp} \emph{without} the
 overflow check.
 
-\fun{long}{evalvalp}{long x} convert $p$-adic ($X$-adic) valuation~\kbd{x} to
-bitmask (second codeword of \typ{PADIC}, \typ{SER}). Raise overflow error if
+\fun{long}{evalvalp}{long x} convert $p$-adic valuation~\kbd{x} to
+bitmask (second codeword of \typ{PADIC}). Raise overflow error if
 \kbd{x} is so large that the corresponding valuation cannot be represented.
 
 \fun{long}{_evalvalp}{long x} same as \kbd{evalvalp} \emph{without} the
+overflow check.
+
+\fun{long}{evalvalser}{long x} convert $X$-adic valuation~\kbd{x} to
+bitmask (second codeword of \typ{SER}). Raise overflow error if
+\kbd{x} is so large that the corresponding valuation cannot be represented.
+
+\fun{long}{_evalvalser}{long x} same as \kbd{evalvalser} \emph{without} the
 overflow check.
 
 \fun{long}{evalexpo}{long x} convert exponent~\kbd{x} to bitmask (second
