@@ -1336,7 +1336,7 @@ GEN
 gpowers(GEN x, long n)
 {
   if (n < 0) return cgetg(1,t_VEC);
-  return gen_powers(x, n, 1, (void*)x, &_sqr, &_mul, &_one);
+  return gen_powers(x, n, typ(x) != t_INT, (void*)x, &_sqr, &_mul, &_one);
 }
 
 /* return [q^1,q^4,...,q^{n^2}] */
