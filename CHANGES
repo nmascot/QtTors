@@ -17,6 +17,8 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
     13- hypergeom([0,0],[1],2) -> SEGV [#2425]
     14- fromdigitsu(v, B) actually computed fromdigitsu(v, |B|)
     15- powers(t_INT, ...) was very slow
+    16- factor(prod(i=1,20,nextprime(2^i))prime(2^i)), 131) would include 131
+        instead of stopping at 67
 
   Changed
      1- binomial(negative t_INT, t_INT): use Loeb's definition

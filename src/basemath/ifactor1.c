@@ -3148,12 +3148,12 @@ factoru_sign(ulong n, ulong all, long hint, ulong *pU1, ulong *pU2)
   if (n == 1) retmkvec2(cgetg(1,t_VECSMALL), cgetg(1,t_VECSMALL));
 
   f = cgetg(3,t_VEC); av = avma;
-  lim = all; if (!lim) lim = tridiv_boundu(n);
+  lim = all? all-1: tridiv_boundu(n);
   /* enough room to store <= 15 primes and exponents (OK if n < 2^64) */
   (void)new_chunk(16*2);
   P = cgetg(16, t_VECSMALL); i = 1;
   E = cgetg(16, t_VECSMALL);
-  if (lim > 2)
+  if (lim > 1)
   {
     long v = vals(n), oldi;
     if (v)
@@ -3161,7 +3161,7 @@ factoru_sign(ulong n, ulong all, long hint, ulong *pU1, ulong *pU2)
       P[1] = 2; E[1] = v; i = 2;
       n >>= v; if (n == 1) goto END;
     }
-    u_forprime_init(&S, 3, lim-1);
+    u_forprime_init(&S, 3, lim);
     oldi = i;
     while ( (p = u_forprime_next_fast(&S)) )
     {
@@ -3639,9 +3639,9 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
   if (is_pm1(n)) return aux_end(M,NULL,nb);
 
   n = N = gclone(n); setabssign(n);
-  /* trial division bound */
-  lim = all; if (!lim) lim = tridiv_bound(n);
-  if (lim > 2)
+  /* trial division bound; look for primes <= lim */
+  lim = all? all-1: tridiv_bound(n);
+  if (lim > 1)
   {
     ulong maxp, p;
     pari_sp av2;
