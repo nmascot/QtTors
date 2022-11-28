@@ -2910,9 +2910,9 @@ compute_multiple_of_R_pivot(GEN X, GEN x0/*unused*/, long ix, GEN c)
   return (k && ex > -32)? k: lx;
 }
 
-/* Ar = (log |sigma_i(u_j)|) for units (u_j) found so far,
- * RU = R1+R2 = unit rank, N = field degree
- * need = unit rank defect
+/* Ar = (log |sigma_i(u_j)|) for units (u_j) found so far;
+ * RU = R1+R2 = target rank for unit matrix, after adding [1 x r1, 2 x r2];
+ * N = field degree, need = unit rank defect;
  * L = NULL (prec problem) or B^(-1) * A with approximate rational entries
  * (as t_REAL), B a submatrix of A, with (probably) maximal rank RU */
 static GEN
@@ -2936,11 +2936,11 @@ compute_multiple_of_R(GEN Ar, long RU, long N, long *pneed, long *bit, GEN *ptL)
 
   /* could be using indexrank(), but need custom "get_pivot" function */
   d = RgM_pivots(mdet, NULL, &r, &compute_multiple_of_R_pivot);
-  /* # of independent columns == unit rank ? */
+  /* # of independent columns = target rank ? */
   if (lg(mdet)-1 - r != RU)
   {
     if (DEBUGLEVEL)
-      err_printf("Unit group rank = %ld < %ld\n",lg(mdet)-1 - r, RU);
+      err_printf("Units matrix target rank = %ld < %ld\n",lg(mdet)-1 - r, RU);
     *pneed = RU - (lg(mdet)-1-r); return gc_NULL(av);
   }
 
