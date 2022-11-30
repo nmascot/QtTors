@@ -2090,11 +2090,21 @@ nfrootsof1(GEN nf)
   long i, l, nbguessed, nbroots, nfdegree;
   pari_sp av;
 
-  T = get_nfpol(nf, &nf);
+  T = get_nfpol(nf, &nf); nfdegree = degpol(T);
   RgX_check_ZX(T, "nfrootsof1");
-  if (nf && nf_get_r1(nf)) return trivroots();
-  disc = nf ? nf_get_disc(nf): ZX_disc(T);
-  index = nf ? nf_get_index(nf): gen_1;
+  if (nf)
+  {
+    if (nf_get_r1(nf)) return trivroots();
+    disc = nf_get_disc(nf);
+    index = nf_get_index(nf);
+  }
+  else
+  {
+    if (odd(nfdegree) || signe(leading_coeff(T)) != signe(constant_coeff(T)))
+      return trivroots();
+    disc = ZX_disc(T);
+    index = gen_1;
+  }
   /* Step 1 : guess number of roots and discard trivial case 2 */
   if (DEBUGLEVEL>2) timer_start(&ti);
   nbguessed = guess_roots(T, disc, index);
@@ -2102,7 +2112,6 @@ nfrootsof1(GEN nf)
     timer_printf(&ti, "guessing roots of 1 [guess = %ld]", nbguessed);
   if (nbguessed == 2) return trivroots();
 
-  nfdegree = degpol(T);
   fa = factoru(nbguessed);
   LP = gel(fa,1); l = lg(LP);
   LE = gel(fa,2);
