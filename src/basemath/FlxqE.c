@@ -1435,38 +1435,60 @@ Flxq_ellcardj(GEN a4, GEN a6, ulong j, GEN T, GEN q, ulong p, long n)
   } else
   {
     ulong g = Fl_div(j, Fl_sub(1728%p, j, p), p);
-    GEN l = Flxq_div(Flx_triple(a6,p),Flx_double(a4,p),T,p);
     GEN N = Fp_ffellcard(utoi(Fl_triple(g,p)),utoi(Fl_double(g,p)),q,n,utoipos(p));
+    GEN l = Flxq_mul(Flx_triple(a6,p),Flx_double(a4,p),T,p);
     if (Flxq_issquare(l,T,p)) return N;
     return subii(shifti(q1,1),N);
   }
+}
+
+static GEN
+Flxq_ffellcard(GEN a4, GEN a6, GEN M, GEN q, GEN T, ulong p, long n)
+{
+  long m = degpol(M);
+  GEN j = polx_Flx(M[1]);
+  GEN g = Flxq_div(j, mkvecsmall3(M[1],1728%p,p-1), M, p);
+  GEN N = Flxq_ellcard(Flx_triple(g, p), Flx_double(g, p), M, p);
+  GEN qm =  powuu(p, m), q1 = addiu(q, 1), qm1 = addiu(qm, 1);
+  GEN l = Flxq_mul(Flx_triple(a6,p), Flx_double(a4,p), T, p);
+  GEN te = elltrace_extension(subii(qm1, N), n/m, qm);
+  return Flxq_issquare(l,T,p) ? subii(q1, te): addii(q1, te);
+}
+
+static GEN
+Flxq_ellcard_i(GEN a4, GEN a6, GEN T, ulong p)
+{
+  long n = get_Flx_degree(T);
+  GEN J, M, q = powuu(p,  n);
+  if (typ(a4)==t_VEC)
+    return F3xq_ellcard(gel(a4,1), a6, T);
+  if (p==3)
+    return F3xq_ellcardj(a4, a6, T, q, n);
+  if (degpol(a4)<=0 && degpol(a6)<=0)
+    return Fp_ffellcard(utoi(Flx_eval(a4,0,p)),utoi(Flx_eval(a6,0,p)),q,n,utoipos(p));
+  J = Flxq_ellj(a4,a6,T,p);
+  if (degpol(J)<=0)
+    return Flxq_ellcardj(a4,a6,lgpol(J)?J[2]:0,T,q,p,n);
+  M = Flxq_minpoly(J, T, p);
+  if (degpol(M) < n)
+    return Flxq_ffellcard(a4, a6, M, q, T, p, n);
+  if (p <= 7)
+    return Flxq_ellcard_Satoh(a4, a6, J, T, p);
+  if (cmpis(q,100)<0)
+    return utoi(Flxq_ellcard_naive(a4, a6, T, p));
+  if (p == 13 || (7*p <= (ulong)10*n && (BITS_IN_LONG==64 || p <= 103)))
+    return Flxq_ellcard_Satoh(a4, a6, J, T, p);
+  if (p <= (ulong)2*n)
+    return Flxq_ellcard_Kedlaya(a4, a6, T, p);
+  if (expi(q)<=62)
+    return Flxq_ellcard_Shanks(a4, a6, q, T, p);
+  else
+    return Fq_ellcard_SEA(Flx_to_ZX(a4),Flx_to_ZX(a6),q,Flx_to_ZX(T),utoipos(p),0);
 }
 
 GEN
 Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp av = avma;
-  long n = get_Flx_degree(T);
-  GEN J, r, q = powuu(p,  n);
-  if (typ(a4)==t_VEC)
-    r = F3xq_ellcard(gel(a4,1), a6, T);
-  else if (p==3)
-    r = F3xq_ellcardj(a4, a6, T, q, n);
-  else if (degpol(a4)<=0 && degpol(a6)<=0)
-    r = Fp_ffellcard(utoi(Flx_eval(a4,0,p)),utoi(Flx_eval(a6,0,p)),q,n,utoipos(p));
-  else if (degpol(J=Flxq_ellj(a4,a6,T,p))<=0)
-    r = Flxq_ellcardj(a4,a6,lgpol(J)?J[2]:0,T,q,p,n);
-  else if (p <= 7)
-    r = Flxq_ellcard_Satoh(a4, a6, J, T, p);
-  else if (cmpis(q,100)<0)
-    r = utoi(Flxq_ellcard_naive(a4, a6, T, p));
-  else if (p == 13 || (7*p <= (ulong)10*n && (BITS_IN_LONG==64 || p <= 103)))
-    r = Flxq_ellcard_Satoh(a4, a6, J, T, p);
-  else if (p <= (ulong)2*n)
-    r = Flxq_ellcard_Kedlaya(a4, a6, T, p);
-  else if (expi(q)<=62)
-    r = Flxq_ellcard_Shanks(a4, a6, q, T, p);
-  else
-    r = Fq_ellcard_SEA(Flx_to_ZX(a4),Flx_to_ZX(a6),q,Flx_to_ZX(T),utoipos(p),0);
-  return gerepileuptoint(av, r);
+  return gerepileuptoint(av, Flxq_ellcard_i(a4, a6, T, p));
 }

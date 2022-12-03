@@ -2000,24 +2000,48 @@ FpXQ_ellcardj(GEN a4, GEN a6, GEN j, GEN T, GEN q, GEN p, long n)
   }
 }
 
+static GEN
+FpXQ_ffellcard(GEN a4, GEN a6, GEN M, GEN q, GEN T, GEN p, long n)
+{
+  long m = degpol(M);
+  GEN j = pol_x(get_FpX_var(T));
+  GEN g = FpXQ_div(j, Fp_FpX_sub(utoi(1728), j, p), M, p);
+  GEN N = FpXQ_ellcard(FpX_mulu(g,3,p),FpX_mulu(g,2,p),M,p);
+  GEN qm = powiu(p, m), q1 = addiu(q, 1), qm1 = addiu(qm, 1);
+  GEN l = FpXQ_mul(FpX_mulu(a6,3,p),FpX_mulu(a4,2,p),T,p);
+  GEN te = elltrace_extension(subii(qm1, N), n/m, qm);
+  return FpXQ_issquare(l,T,p) ? subii(q1, te): addii(q1, te);
+}
+
+static GEN
+FpXQ_ellcard_i(GEN a4, GEN a6, GEN T, GEN p)
+{
+  long n = get_FpX_degree(T);
+  GEN q = powiu(p, n);
+  if (degpol(a4)<=0 && degpol(a6)<=0)
+    return Fp_ffellcard(constant_coeff(a4),constant_coeff(a6),q,n,p);
+  if (lgefint(p)==3)
+  {
+    ulong pp = p[2];
+    return Flxq_ellcard(ZX_to_Flx(a4,pp),ZX_to_Flx(a6,pp),ZX_to_Flx(T,pp),pp);
+  }
+  else
+  {
+    GEN J = FpXQ_ellj(a4,a6,T,p), M;
+    if (degpol(J) <= 0)
+      return FpXQ_ellcardj(a4,a6,constant_coeff(J),T,q,p,n);
+    M = FpXQ_minpoly(J,T,p);
+    if (degpol(M) < degpol(T))
+      return FpXQ_ffellcard(a4, a6, M, q, T, p, n);
+    return Fq_ellcard_SEA(a4, a6, q, T, p, 0);
+  }
+}
+
 GEN
 FpXQ_ellcard(GEN a4, GEN a6, GEN T, GEN p)
 {
   pari_sp av = avma;
-  long n = get_FpX_degree(T);
-  GEN q = powiu(p, n), r, J;
-  if (degpol(a4)<=0 && degpol(a6)<=0)
-    r = Fp_ffellcard(constant_coeff(a4),constant_coeff(a6),q,n,p);
-  else if (lgefint(p)==3)
-  {
-    ulong pp = p[2];
-    r =  Flxq_ellcard(ZX_to_Flx(a4,pp),ZX_to_Flx(a6,pp),ZX_to_Flx(T,pp),pp);
-  }
-  else if (degpol(J=FpXQ_ellj(a4,a6,T,p))<=0)
-    r = FpXQ_ellcardj(a4,a6,constant_coeff(J),T,q,p,n);
-  else
-    r = Fq_ellcard_SEA(a4, a6, q, T, p, 0);
-  return gerepileuptoint(av, r);
+  return gerepileuptoint(av, FpXQ_ellcard_i(a4, a6, T, p));
 }
 
 static GEN

@@ -176,3 +176,16 @@ checkext(5)
 checkext(3)
 checkext(2)
 
+check2(p,B=10)=
+{
+  my(a=ffgen([p,12],'a));
+  my(E=ellinit([1,(a+1)^(p^9+p^6+p^3+1)],a));
+  if(!E,return());
+  my(N=ellcard(E));
+  for(i=1,B,
+    if(#ellmul(E,random(E),N)>1,error(i,":",b)));
+}
+forprime(p=2,100,check2(p));
+check2(nextprime(2^16));
+check2(nextprime(2^32));
+check2(nextprime(2^64));
