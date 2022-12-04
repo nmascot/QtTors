@@ -1205,7 +1205,7 @@ pari_calloc(size_t size)
   memset(t, 0, size); return t;
 }
 INLINE GEN
-cgetalloc(long t, size_t l)
+cgetalloc(size_t l, long t)
 { /* evallg may raise e_OVERFLOW, which would leak x */
   ulong x0 = evaltyp(t) | evallg(l);
   GEN x = (GEN)pari_malloc(l * sizeof(long));

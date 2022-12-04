@@ -1804,9 +1804,9 @@ gendraw(PARI_plot *T, GEN wxy, long flag)
   l = lg(w);
   /* malloc mandatory in case draw() forks then pari_close(). Done after
    * wxy_init to avoid leak on error */
-  W = cgetalloc(t_VECSMALL, l);
-  X = cgetalloc(t_VECSMALL, l);
-  Y = cgetalloc(t_VECSMALL, l);
+  W = cgetalloc(l, t_VECSMALL);
+  X = cgetalloc(l, t_VECSMALL);
+  Y = cgetalloc(l, t_VECSMALL);
   for (i = 1; i < l; i++) { W[i] = w[i]; X[i] = x[i]; Y[i] = y[i]; }
   Draw(T,W,X,Y);
   pari_free(W); pari_free(X); pari_free(Y);

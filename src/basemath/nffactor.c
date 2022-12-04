@@ -565,7 +565,7 @@ fact_from_sqff(GEN rep, GEN A, GEN B, GEN y, GEN T, GEN bad)
     }
     else
     { /* compute valuations mod a prime of degree 1 (avoid coeff explosion) */
-      GEN quo, p, r, Bp, lb = leading_coeff(B), E = cgetalloc(t_VECSMALL,n+1);
+      GEN quo, p, r, Bp, lb = leading_coeff(B), E = cgetalloc(n+1,t_VECSMALL);
       pari_sp av1 = avma;
       ulong pp;
       long j;

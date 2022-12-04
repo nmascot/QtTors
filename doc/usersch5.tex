@@ -1184,7 +1184,7 @@ to zero.
 \kbd{gerepile}'d, since they are not yet valid \kbd{GEN}s: their codewords
 must be filled first.
 
-\fun{GEN}{cgetalloc}{long t, size_t l}, same as \kbd{cgetg(t, l)}, except
+\fun{GEN}{cgetalloc}{size_t l, long t}, same as \kbd{cgetg(l, t)}, except
 that the result is allocated using \tet{pari_malloc} instead of the PARI
 stack. The resulting \kbd{GEN} is now impervious to garbage collecting
 routines, but should be freed using \tet{pari_free}.

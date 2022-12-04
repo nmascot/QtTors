@@ -6320,7 +6320,7 @@ INLINE int    both_odd(long x, long y);
 INLINE GEN    cbrtr(GEN x);
 INLINE GEN    cbrtr_abs(GEN x);
 INLINE GEN    cgetc(long x);
-INLINE GEN    cgetalloc(long t, size_t l);
+INLINE GEN    cgetalloc(size_t l, long t);
 INLINE void   cgiv(GEN x);
 INLINE GEN    col_ei(long n, long i);
 INLINE GEN    const_col(long n, GEN x);

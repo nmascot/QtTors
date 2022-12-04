@@ -285,12 +285,12 @@ parse_intarray(const char *v, const char *s)
   long i, l;
   GEN w;
   if (*t != '[') err_intarray(t, t, s);
-  if (t[1] == ']') return gc_const(av, cgetalloc(t_VECSMALL, 1));
+  if (t[1] == ']') return gc_const(av, cgetalloc(1, t_VECSMALL));
   for (p = t+1, l=2; *p; p++)
     if (*p == ',') l++;
     else if (*p < '0' || *p > '9') break;
   if (*p != ']') err_intarray(t, p, s);
-  w = cgetalloc(t_VECSMALL, l);
+  w = cgetalloc(l, t_VECSMALL);
   for (p = t+1, i=0; *p; p++)
   {
     long n = 0;
@@ -962,7 +962,7 @@ init_graphs(gp_data *D)
     "white","black","blue","violetred","red","green","grey","gainsboro"
   };
   const long N = 8;
-  GEN c = cgetalloc(t_VECSMALL, 3), s;
+  GEN c = cgetalloc(3, t_VECSMALL), s;
   long i;
   c[1] = 4;
   c[2] = 5;
@@ -1016,7 +1016,7 @@ default_gp_data(void)
   init_path(D->sopath, "");
   init_pp(D);
   init_graphs(D);
-  D->plothsizes = cgetalloc(t_VECSMALL, 1);
+  D->plothsizes = cgetalloc(1, t_VECSMALL);
   D->prompt_comment = (char*)"comment> ";
   D->prompt = pari_strdup("? ");
   D->prompt_cont = pari_strdup("");
