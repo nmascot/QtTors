@@ -3704,7 +3704,7 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
           affii(n, N); n = N; set_avma(av3);
           STOREu(&nb, p, k);
         }
-        if (p == 16381 && bit_accuracy(lgefint(n)) < 2048)
+        if (p == 16381 && bit_accuracy(lgefint(n)) < 256)
         { stop = ifac_isprime(n); nb0 = nb; }
         if (stop)
         {
