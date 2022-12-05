@@ -3661,7 +3661,7 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
       NR = nr = gcdii(prodprimes(),n);
       u_forprime_init(&T, 3, minss(lim, maxp)); av2 = avma;
       /* first pass: known to fit in private prime table */
-      while ((p = u_forprime_next_fast(&T)))
+      while (!is_pm1(nr) && (p = u_forprime_next_fast(&T)))
       {
         pari_sp av3 = avma;
         int stop;
@@ -3680,7 +3680,6 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
           stackdummy(av, av2);
           return aux_end(M,n,nb);
         }
-        if (is_pm1(nr)) break;
       }
       if (ifac_isprime(n))
       {
