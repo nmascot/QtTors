@@ -109,19 +109,19 @@ CrvRat(C,P,Q)=
 	[X,Y];
 }
 
-FnsBranchMatRat(F,B,e0,x,y)=
+FnsBranchMatRat(F0,B,e0,x,y)=
 {
 	my(A,a,t,d,n,m,M,S,c,e=e0);
 	A = B[3];
 	a = variable(A);
 	d = poldegree(A);
-	\\F = substvec(F,[x,y],BranchExpand(B[1],e));
-	n = #F;
+	n = #F0;
 	while(1,
-		F = BranchEval(F,B[1],e,x,y);
+		F = BranchEval(F0,B[1],e,x,y);
 		t = variable(F);
 		m = valuation(F,t);
 		M = serprec(F,t);
+		print([m,M,e0]);
 		if(M==+oo,M=e+m);
 		if(M-m>=e0,break);
 		e += e0-(M-m)+1;
@@ -163,15 +163,16 @@ FnsBranchMatRat_conic(u,v,B,e,x,y)=
   S;
 }
 
-FnsBranchMat(F,B,e0,x,y)=
+FnsBranchMat(F0,B,e0,x,y)=
 {
   my(t,n,m,M,S,e=e0);
-  n = #F;
+  n = #F0;
 	while(1,
-  	F = substvec(F,[x,y],BranchExpand(B[1],e));
+  	F = substvec(F0,[x,y],BranchExpand(B[1],e));
   	t = variable(F);
 		m = valuation(F,t);
   	M = serprec(F,t);
+		if(e>=20,breakpoint());
 		if(M-m>=e0,break);
 		e += e0-(M-m)+1;
 	);
@@ -215,18 +216,22 @@ DiffsBranchMat(W,den,B,e0,x,y)=
 
 CrvEll(C,P)=
 {
-	my(x,y,B,L,LB,X,Y,e,K,E);
+	my(x,y,B,L,LB,L3,L2,LB2,X,Y,e,K,E);
 	[x,y] = C[3][1..2];
 	if(C[6]!=1,
 			error("This curve does not have genus 1")
 	);
 	B = Pt2Branch(C,P);
-	L = RiemannRoch(C,[P,3]);
+	L = RiemannRoch(C,[P,3]); \\ L(3*P)
 	LB = substvec(L,[x,y],BranchExpand(B[1],2));
-	X = L[select(f->valuation(f,t)==-2,LB,1)[1]];
+	L3 = apply(s->polcoef(s,-3,t),LB); \\ Coef of t^-3 in L(3*P)
+	L3 = matker(Mat(L3)); \\ combis that are O(t^-2)
+	L2 = L*L3; \\ L(2*P)
+	LB2 = LB*L3; \\ their t-exps
+	X = L2[select(f->valuation(f,t)==-2,LB2,1)[1]];
 	Y = L[select(f->valuation(f,t)==-3,LB,1)[1]];
 	L = [1,X,Y,X^2,X*Y,X^3,Y^2];
-	e = 5;
+	e = 7;
 	while(1,
 		K = matker(FnsBranchMat(L,B,e,x,y));
 		if(#K==1,break);
