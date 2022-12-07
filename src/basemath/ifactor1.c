@@ -3595,7 +3595,7 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
 {
   GEN M, N;
   pari_sp av;
-  long nb = 0, nb0 = 0, i;
+  long nb = 0, nb0 = -1, i;
   ulong lim;
   forprime_t T;
 
@@ -3639,7 +3639,10 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
   if (is_pm1(n)) return aux_end(M,NULL,nb);
 
   n = N = gclone(n); setabssign(n);
-  /* trial division bound; look for primes <= lim */
+  /* trial division bound; look for primes <= lim; nb is the number of
+   * distinct prime factors so far; if nb0 >= 0, it records the value of nb
+   * for which we made a successful compositeness test: if later nb = nb0,
+   * we know that n is composite */
   lim = all? all-1: tridiv_bound(n);
   if (lim > 1)
   {
@@ -3653,34 +3656,28 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
     }
     if (is_pm1(n)) return aux_end(M,n,nb);
     maxp = maxprime();
-    if (lim >= maxprimelim()>>2)
-    {
+    if (lim >= (1 << 14) && lim >= maxprimelim()>>2)
+    { /* fast trial division */
       GEN nr, NR;
-      /* fast trial division */
-      av = avma;
-      NR = nr = gcdii(prodprimes(),n);
+      av = avma; NR = nr = gcdii(prodprimes(),n);
       u_forprime_init(&T, 3, minss(lim, maxp)); av2 = avma;
       /* first pass: known to fit in private prime table */
       while (!is_pm1(nr) && (p = u_forprime_next_fast(&T)))
       {
         pari_sp av3 = avma;
-        int stop;
         long k;
-        if (!dvdiu(nr, p)) continue;
-        nr = diviuexact(nr, p);
-        affii(nr, NR); nr = NR; set_avma(av3);
-        k = Z_lvalrem_stop(&n, p, &stop);
-        if (k)
-        {
-          affii(n, N); n = N; set_avma(av3);
-          STOREu(&nb, p, k);
-        }
+        if (umodiu(nr, p)) continue;
+        affii(diviuexact(nr, p), NR); nr = NR;
+        k = Z_lvalrem(n, p, &n); /* > 0 */
+        affii(n, N); n = N; set_avma(av3);
+        STOREu(&nb, p, k);
         if (is_pm1(n))
         {
           stackdummy(av, av2);
           return aux_end(M,n,nb);
         }
       }
+      nb0 = nb;
       if (ifac_isprime(n))
       {
         STOREi(&nb, n, 1);
@@ -3689,9 +3686,9 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
       }
     }
     else
-    {
-      /* trial division */
-      av = avma; u_forprime_init(&T, 3, minss(lim, maxp)); av2 = avma;
+    { /* naive trial division */
+      av = avma;
+      u_forprime_init(&T, 3, minss(lim, maxp)); av2 = avma;
       /* first pass: known to fit in private prime table */
       while ((p = u_forprime_next_fast(&T)))
       {
@@ -3705,8 +3702,11 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
         }
         /* prodeuler(p=2,16381,1-1/p) ~ 0.0578; if probability of being prime
          * knowing P^-(n) > 16381 is at least 10%, try BPSW */
-        if (p == 16381 && bit_accuracy(lgefint(n)) < 2048)
-        { stop = ifac_isprime(n); nb0 = nb; }
+        if (!stop && p == 16381)
+        {
+          if (bit_accuracy_mul(lgefint(n), 0.0578 * M_LN2) < 10)
+          { nb0 = nb; stop = ifac_isprime(n); }
+        }
         if (stop)
         {
           if (!is_pm1(n)) STOREi(&nb, n, 1);
@@ -3740,27 +3740,26 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
     }
   }
   if (special_primes(n, lim, &nb, primetab)) return aux_end(M,n, nb);
+  /* if nb > nb0 (includes nb0 = -1) we don't know that n is composite */
   if (all)
   { /* smallfact: look for easy pure powers then stop. Cf Z_isanypower */
     GEN x;
     long k;
     av = avma;
     k = isanypower_nosmalldiv(n, &x);
-    if (k > 1) affii(x, n);
+    if (k > 1) { affii(x, n); nb0 = -1; }
     if (pU)
     {
       GEN F;
       if (abscmpiu(n, lim) <= 0
           || cmpii(n, sqru(lim)) <= 0
-          || ((nb > nb0 || k > 1)
-              && bit_accuracy(lgefint(n)) < 2048 && ifac_isprime(n)))
+          || (nb > nb0 && bit_accuracy(lgefint(n)) < 2048 && ifac_isprime(n)))
       { set_avma(av); STOREi(&nb, n, k); return aux_end(M,n, nb); }
       set_avma(av); F = aux_end(M, NULL, nb); /* don't destroy n */
       *pU = mkvec2(icopy(n), utoipos(k)); /* composite cofactor */
       gunclone(n); return F;
     }
-    else
-    { set_avma(av); STOREi(&nb, n, k); }
+    set_avma(av); STOREi(&nb, n, k);
     if (DEBUGLEVEL >= 2) {
       pari_warn(warner,
         "IFAC: untested %ld-bit integer declared prime", expi(n)+1);
