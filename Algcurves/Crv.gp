@@ -35,7 +35,8 @@ PlaneEval(f,P)=
 
 PtIsOnCrv(f,P)=
 {
-	my(r,v,x,y,z);
+	my(F,r,v,x,y,z);
+	if(type(f)=="t_VEC",[f,F]=f[1]);
 	v = variables(f);
 	if(#P==3,
 		if(#v==3,
@@ -46,7 +47,8 @@ PtIsOnCrv(f,P)=
 			return(r==0)
 		);
 		if(P[3]==0,
-			return(PtIsOnCrv(APeqns(f)[2],P))
+			F=if(F,F,APeqns(f)[2]);
+			return(PtIsOnCrv(F,P))
 		);
 		P = [P[1],P[2]]/P[3]
 	); \\ Now #P=2
@@ -62,14 +64,19 @@ PtIsOnCrv(f,P)=
 
 PtIsSing(f,P)=
 {
-  my(v=variables(f),fx,fy,fz);
+  my(F,v,fx,fy,fz);
+	if(type(f)=="t_VEC",[f,F]=f[1]);
+	v=variables(f);
   if(#P==3,
-		if(#v==2,f=APeqns(f)[2];v=variables(f));
-  	if(substvec(deriv(f,v[1]),v,P),return(0));
-  	if(substvec(deriv(f,v[2]),v,P),return(0));
-  	substvec(deriv(f,v[3]),v,P)==0;
+		if(#v==2,
+			F=if(F,F,APeqns(f)[2]);
+			v=variables(F)
+		);
+  	if(substvec(deriv(F,v[1]),v,P),return(0));
+  	if(substvec(deriv(F,v[2]),v,P),return(0));
+  	substvec(deriv(F,v[3]),v,P)==0;
 	,
-		if(#v==3,f=APeqns(f)[1];v=v[1..2]);
+		if(#v==3,f=subst(f,v[3],1);v=v[1..2]);
     if(substvec(deriv(f,v[1]),v,P),return(0));
     substvec(deriv(f,v[2]),v,P)==0;
 	);
