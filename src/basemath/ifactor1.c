@@ -3643,9 +3643,9 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
    * distinct prime factors so far; if nb0 >= 0, it records the value of nb
    * for which we made a successful compositeness test: if later nb = nb0,
    * we know that n is composite */
-  lim = all? all-1: tridiv_bound(n);
-  if (lim > 1)
-  {
+  lim = 1;
+  if (!all || all > 2)
+  { /* trial divide p < all if all != 0, else p <= tridiv_bound() >= 2^14 */
     ulong maxp, p;
     pari_sp av2;
     i = vali(n);
@@ -3655,34 +3655,33 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
       av = avma; affii(shifti(n,-i), n); set_avma(av);
     }
     if (is_pm1(n)) return aux_end(M,n,nb);
+    lim = all? all-1: tridiv_bound(n);
     maxp = maxprime();
-    if (lim >= (1 << 14) && lim >= maxprimelim()>>2)
+    if (!(hint & 16) && lim >= maxprimelim()>>2)
     { /* fast trial division */
-      GEN nr, NR;
-      av = avma; NR = nr = gcdii(prodprimes(),n);
-      u_forprime_init(&T, 3, minss(lim, maxp)); av2 = avma;
-      /* first pass: known to fit in private prime table */
-      while (!is_pm1(nr) && (p = u_forprime_next_fast(&T)))
+      GEN nr;
+      av = avma; nr = gcdii(prodprimes(), n);
+      if (is_pm1(nr)) { set_avma(av); av2 = av; }
+      else
       {
-        pari_sp av3 = avma;
-        long k;
-        if (umodiu(nr, p)) continue;
-        affii(diviuexact(nr, p), NR); nr = NR;
-        k = Z_lvalrem(n, p, &n); /* > 0 */
-        affii(n, N); n = N; set_avma(av3);
-        STOREu(&nb, p, k);
+        GEN F = ifactor_sign(nr, all, 1 + 2 + 16, sn, NULL), P = gel(F,1);
+        long l = lg(P);
+        av2 = avma;
+        for (i = 1; i < l; i++)
+        {
+          pari_sp av3 = avma;
+          ulong p = gel(P,i)[2];
+          long k;
+          if (all && p >= all) break; /* may occur for last p */
+          k = Z_lvalrem(n, p, &n); /* > 0 */
+          affii(n, N); n = N; set_avma(av3);
+          STOREu(&nb, p, k);
+        }
         if (is_pm1(n))
         {
           stackdummy(av, av2);
           return aux_end(M,n,nb);
         }
-      }
-      nb0 = nb;
-      if (ifac_isprime(n))
-      {
-        STOREi(&nb, n, 1);
-        stackdummy(av, av2);
-        return aux_end(M,n,nb);
       }
     }
     else
