@@ -130,12 +130,7 @@ gmul(gmul(gmul(gmul(gmulsg(1568, a0), a2), gsqr(a3)), a4), a6)), -10));
 
 static GEN
 igusaj8_fromj246(GEN j2, GEN j4, GEN j6)
-{
-  pari_sp av = avma;
-  GEN j42 = gsqr(j4);
-  GEN j2j6 = gmul(j2,j6);
-  return gerepileupto(av, gmul2n(gsub(j2j6,j42), -2));
-}
+{ return gmul2n(gsub(gmul(j2,j6), gsqr(j4)), -2); }
 
 static GEN
 igusaj8(GEN a0, GEN a1, GEN a2, GEN a3, GEN a4, GEN a5, GEN a6)
@@ -144,9 +139,7 @@ igusaj8(GEN a0, GEN a1, GEN a2, GEN a3, GEN a4, GEN a5, GEN a6)
   GEN j2 = igusaj2(a0,a1,a2,a3,a4,a5,a6);
   GEN j4 = igusaj4(a0,a1,a2,a3,a4,a5,a6);
   GEN j6 = igusaj6(a0,a1,a2,a3,a4,a5,a6);
-  GEN j42 = gsqr(j4);
-  GEN j2j6 = gmul(j2,j6);
-  return gerepileupto(av, gmul2n(gsub(j2j6,j42), -2));
+  return gerepileupto(av, igusaj8_fromj246(j2,j4,j6));
 }
 
 static GEN
@@ -162,12 +155,13 @@ igusaj10(GEN a0, GEN a1, GEN a2, GEN a3, GEN a4, GEN a5, GEN a6)
 static GEN
 igusaall(GEN a0, GEN a1, GEN a2, GEN a3, GEN a4, GEN a5, GEN a6)
 {
-  GEN j2, j4, j6;
-  GEN V = cgetg(6,t_VEC);
+  GEN j2, j4, j6, V = cgetg(6,t_VEC);
+  pari_sp av;
   gel(V,1) = j2 = igusaj2(a0,a1,a2,a3,a4,a5,a6);
   gel(V,2) = j4 = igusaj4(a0,a1,a2,a3,a4,a5,a6);
   gel(V,3) = j6 = igusaj6(a0,a1,a2,a3,a4,a5,a6);
-  gel(V,4) = igusaj8_fromj246(j2, j4, j6);
+  av = avma;
+  gel(V,4) = gerepileupto(av, igusaj8_fromj246(j2, j4, j6));
   gel(V,5) = igusaj10(a0,a1,a2,a3,a4,a5,a6);
   return V;
 }
@@ -179,29 +173,16 @@ genus2igusa(GEN P, long n)
   GEN a0, a1, a2, a3, a4, a5, a6, r;
   if (typ(P) == t_VEC && lg(P) == 3)
     P = gadd(gel(P,1), gmul2n(gsqr(gel(P,2)),2));
-  if (typ(P)!=t_POL || degpol(P)> 6)
-    pari_err_TYPE("genus2igusa",P);
+  if (typ(P)!=t_POL || degpol(P)> 6) pari_err_TYPE("genus2igusa",P);
   RgX_to_06(P, &a0,&a1,&a2,&a3,&a4,&a5,&a6);
   switch(n)
   {
-    case 0:
-      r = igusaall(a0,a1,a2,a3,a4,a5,a6);
-      break;
-    case 2:
-      r = igusaj2(a0,a1,a2,a3,a4,a5,a6);
-      break;
-    case 4:
-      r = igusaj4(a0,a1,a2,a3,a4,a5,a6);
-      break;
-    case 6:
-      r = igusaj6(a0,a1,a2,a3,a4,a5,a6);
-      break;
-    case 8:
-      r = igusaj8(a0,a1,a2,a3,a4,a5,a6);
-      break;
-    case 10:
-      r = igusaj10(a0,a1,a2,a3,a4,a5,a6);
-      break;
+    case 0: r = igusaall(a0,a1,a2,a3,a4,a5,a6); break;
+    case 2: r = igusaj2(a0,a1,a2,a3,a4,a5,a6); break;
+    case 4: r = igusaj4(a0,a1,a2,a3,a4,a5,a6); break;
+    case 6: r = igusaj6(a0,a1,a2,a3,a4,a5,a6); break;
+    case 8: r = igusaj8(a0,a1,a2,a3,a4,a5,a6); break;
+    case 10:r = igusaj10(a0,a1,a2,a3,a4,a5,a6); break;
     default:
       pari_err_FLAG("genus2igusa");
       return NULL; /* LCOV_EXCL_LINE */
