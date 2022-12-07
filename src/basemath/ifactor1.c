@@ -3705,7 +3705,7 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
         }
         /* prodeuler(p=2,16381,1-1/p) ~ 0.0578; if probability of being prime
          * knowing P^-(n) > 16381 is at least 10%, try BPSW */
-        if (p == 16381 && bit_accuracy_mul(lgefint(n), 0.0578 * M_LN2) < 10)
+        if (p == 16381 && bit_accuracy(lgefint(n)) < 2048)
         { stop = ifac_isprime(n); nb0 = nb; }
         if (stop)
         {
