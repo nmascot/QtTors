@@ -231,9 +231,9 @@ ellidentify(GEN E)
   GEN V, M, G;
   checkell_Q(E);
   G = ellglobalred(E); n = itos_or_0(gel(G,1));
-  if(n==0) { set_avma(av); return cgetg(1,t_VEC); } /* Conductor>LONG_MAX, so no way it's in the database */
+  if(n==0) { set_avma(ltop); return cgetg(1,t_VEC); } /* Conductor>LONG_MAX, so no way it's in the database */
   V = ellcondlist(n);
-  if(lg(V)==1) { set_avma(av); return cgetg(1,t_VEC); }
+  if(lg(V)==1) { set_avma(ltop); return cgetg(1,t_VEC); }
   M = ellchangecurve(vecslice(E,1,5),gel(G,2));
   for (j=1; j<lg(V); j++)
     if (ZV_equal(gmael(V,j,2), M))
