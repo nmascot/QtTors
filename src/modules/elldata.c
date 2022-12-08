@@ -123,8 +123,8 @@ ellcondfile(long n)
     GEN V;
     char *s = stack_sprintf("%s/elldata/ell%ld", pari_datadir, n);
     F = pari_fopengz(s);
-    if (!F) pari_err_FILE("elldata file",s);
     set_avma(av);
+    if (!F) return NULL;
     V = gp_read_stream(F->file);
     if (!V || typ(V)!=t_VEC ) pari_err_FILE("elldata file [read]",s);
     ellcondfile_cache_cond = -1; /* disable cache until update */
@@ -142,11 +142,14 @@ ellcondlist(long f)
 {
   pari_sp av = avma;
   GEN V = ellcondfile(f/1000);
-  long i = tablesearch(V, utoipos(f), &cmpi1);
-  if (i)
+  if(V)
   {
-    GEN v = gel(V,i);
-    return vecslice(v,2, lg(v)-1);
+    long i = tablesearch(V, utoipos(f), &cmpi1);
+    if (i)
+    {
+      GEN v = gel(V,i);
+      return vecslice(v,2, lg(v)-1);
+    }
   }
   set_avma(av); return cgetg(1,t_VEC);
 }
@@ -224,11 +227,13 @@ GEN
 ellidentify(GEN E)
 {
   pari_sp ltop=avma;
-  long j;
-  GEN V, M, G, N;
+  long j,n;
+  GEN V, M, G;
   checkell_Q(E);
-  G = ellglobalred(E); N = gel(G,1);
-  V = ellcondlist(itos(N));
+  G = ellglobalred(E); n = itos_or_0(gel(G,1));
+  if(n==0) { set_avma(av); return cgetg(1,t_VEC); } /* Conductor>LONG_MAX, so no way it's in the database */
+  V = ellcondlist(n);
+  if(lg(V)==1) { set_avma(av); return cgetg(1,t_VEC); }
   M = ellchangecurve(vecslice(E,1,5),gel(G,2));
   for (j=1; j<lg(V); j++)
     if (ZV_equal(gmael(V,j,2), M))
@@ -258,6 +263,7 @@ forell(void *E, long call(void*, GEN), long a, long b, long flag)
   {
     pari_sp ltop=avma;
     GEN V = ellcondfile(i);
+    if(V==NULL) break;
     for (j=1; j<lg(V); j++)
     {
       GEN ells = gel(V,j);
