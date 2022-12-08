@@ -280,11 +280,11 @@ CrvIsHyperell(C)=
 }
 
 CrvHyperell_sub(b,u,v,n,vars,p)=
-{
+{ \\ deg u = 2; not guaranteed that K(u,v) = K(C)
 	\\ TODO char 2
-	my(x,y,z,t,a,d,e,nd,uB,vB,m,o,M,ui,uv,K,A,B,C,D,R,S,c);
+	my(x,y,z,t,a,d,e,nd,uB,vB,m,o,M,ui,uv,K,A,B,C,D,R,S,c,num,g1,U,M1,H);
 	[x,y,z,t,a] = vars;
-	d = poldegree(b[3],a);
+	d = poldegree(b[3],a); \\ Degree of branch
 	b = b[1];
 	e = ceil(3*(n+1)/d)+1;
 	uB = BranchEval(u,b,2,x,y);
@@ -314,29 +314,62 @@ CrvHyperell_sub(b,u,v,n,vars,p)=
 	K = matker(M)[,1];
 	C = Polrev(K[1..n+1],x);
 	B = Polrev(K[n+2..2*n+2],x);
-	A = Polrev(K[2*n+3..3*n+3],x);
+	A = Polrev(K[2*n+3..3*n+3],x); \\ A(u)*v^2+B(u)*v+C(u)=0
 	if(p==2,error("Characteristic 2 not implemented"));
-	if(A==0,return(0));
+	if(A==0,return(0)); \\ v in K(u)
 	D = B^2-4*A*C;
-	if(D==0,return(0));
-	S = factor(D); \\ TODO sqfree
+	if(D==0,return(0)); \\ v in K(u)
+	\\ Now v not in K(u), so K(u,v) = K(C) and it's going to work
+	S = factor(D); \\ TODO make sqfree
 	S[,2] = apply(x->x\2,S[,2]);
 	S = factorback(S);
 	R = D/S^2;
 	A = subst(A,x,u);
 	B = subst(B,x,u);
 	S = subst(S,x,u);
-	v = (2*A*v+B)/S;
-	if(p==0,
+	v = (2*A*v+B)/S; \\ Now v^2=R(u)
+	if(p==0, \\ Minimise model
+		\\ First, make integral, and get rid of some content
 		c = content(R);
-		n = numerator(c);
-		n /= core(n);
-		R /= n;
-		v /= sqrtint(n);
+		num = numerator(c);
 		d = denominator(c);
-		d /= core(d);
+		\\ v^2 = R(u), R = n/d*R1, n=n1*n2^2, d=d1*d2^2
+		num /= core(num); \\ n2^2
+		R /= num; \\ n1/d*R1
+		v /= sqrtint(num); \\ (v/n2)^2 = n1/d*R1(u)
+		d *= core(d); \\ (d1*d2)^2
 		R *= d;
-    v *= sqrtint(d)
+    v *= sqrtint(d); \\ (d1*d2*v/n2)^2 = n1*d1*R1(u)
+		\\ Now, let PARI take over :)
+		g1 = (poldegree(R)+1)\2; \\ g+1
+		R = hyperellminimalmodel(R,&U);
+	print(U);
+		[e,M,H] = U;
+		M1 = M^(-1);
+		u = (M1[1,1]*u+M1[1,2])/(M1[2,1]*u+M1[2,2]);
+		v = ((M[2,1]*u+M[2,2])^g1*v-subst(H,x,u))/e;
+	);
+	if(R[2]==0,
+		R=R[1]; \\ R=[P,Q]; if Q==0, drop Q
+		d = poldegree(R);
+		if(d%2==0, \\ Look for integral roots
+			fa = factor(R)[,1];
+			fa = select(f->poldegree(f)==1 && polcoef(f,1)==1,fa);
+			if(#fa,
+				c = -polcoef(fa[1],0);
+				print(c);
+				R = subst(R,x,x+c);
+				u -= c;
+				R = polrecip(R);
+				u = 1/u;
+				v *= u^(d/2);
+				d--;
+			)
+		);
+		if(d%2 && polcoef(R,d)<0,
+			R = subst(R,x,-x);
+			u = -u
+		)
 	);
 	[R,[u,v]];
 }
@@ -345,44 +378,45 @@ CrvHyperell(C,P=0)=
 {
 	my(g=C[6],F=C[1][1],B,W=C[7],u,res,e,M,m,K2,K1);
 	if(g<=1,error("Genus too low:",g));
-	if(CrvIsHyperell(C)==0,return(0));
+	if(CrvIsHyperell(C)==0,return(0)); \\ Check if hyperell
 	F = C[1][1];
-	B = if(P,Pt2Branch(C,P),C[4][1][2][1]);
-	if(g==2,
-		u = W[1][2]/W[1][1];
+	B = if(P,Pt2Branch(C,P),C[4][1][2][1]); \\ Make sure B is in branch form
+	if(g==2, \\ Find u with deg u = 2
+		u = W[1][2]/W[1][1]; \\ If g==2, easy
 	,
 	  if(poldegree(B[3])>1,
 		  error("Please supply a rational point")
 		);
 		e = 2*g;
-		while(1,
+		while(1, \\ TODO while loop no longer necessary?
 			M = DiffsBranchMat(W[1],W[2],B,e,x,y);
 			m = #M~;
 			if(m>2*g-2,break);
 			e += 2*g-m;
 		);
 		e = g-2;
-		while(1,
+		while(1, \\ Find pair of diffs which vanish at highest order
 			K2 = matker(M[1..e,]);
 			m = #K2;
 			if(m==2,break);
 			e += m-2;
 		);
 		e++;
-		while(1,
+		while(1, \\ Find diff which vanishes at highest order
       K1 = matker(M[1..e,]);
       m = #K1;
       if(m==1,break);
       e += m-1;
     );
 		W = W[1];
-		K1 = K1[,1];
+		K1 = K1[,1]; \\ Take u = highest ord / 2nd highest ord
 		K = matconcat([K1,K2[,1]]);
 		u = if(matrank(K)==1,(W*K1)/(W*K2[,2]),(W*K1)/(W*K2[,1]));
 	);
+	\\ K(C) is at least one of K(u,x) or K(u,y); try both
 	res = CrvHyperell_sub(B,u,x,poldegree(F,y),C[3],C[2]);
 	if(res,return(res));
-	CrvHyperell_sub(B,u,y,poldegree(F,x),C[3]);
+	CrvHyperell_sub(B,u,y,poldegree(F,x),C[3],C[2]);
 }
 
 CanProj(C,uvw=0,P=0)=
