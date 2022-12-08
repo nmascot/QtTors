@@ -215,7 +215,7 @@ DiffsBranchMat(W,den,B,e0,x,y)=
 
 CrvEll(C,P)=
 {
-	my(x,y,B,L,LB,L3,L2,LB2,X,Y,e,K,E);
+	my(ID=[],p=C[2],x,y,B,L,LB,L3,L2,LB2,X,Y,XY,e,K,E,U);
 	[x,y] = C[3][1..2];
 	if(C[6]!=1,
 			error("This curve does not have genus 1")
@@ -229,6 +229,7 @@ CrvEll(C,P)=
 	LB2 = LB*L3; \\ their t-exps
 	X = L2[select(f->valuation(f,t)==-2,LB2,1)[1]];
 	Y = L[select(f->valuation(f,t)==-3,LB,1)[1]];
+	XY = [X,Y];
 	L = [1,X,Y,X^2,X*Y,X^3,Y^2];
 	e = 7;
 	while(1,
@@ -237,8 +238,15 @@ CrvEll(C,P)=
 		e *=2
 	);
 	K = K[,1];
+	XY *= -K[6]/K[7];
 	E = ellinit([K[5]/K[7],-K[4]/K[7],-K[3]*K[6]/K[7]^2,K[2]*K[6]/K[7]^2,-K[1]*K[6]^2/K[7]^3]);
-	[E,-K[6]/K[7]*[X,Y]];
+	if(p==0,
+		E = ellminimalmodel(E,&U);
+		XY = ellchangepoint(XY,U);
+		ID = ellidentify(E);
+		if(#ID,ID=ID[1];ID=[ID[1],ID[3]]);
+	);
+	[E,ID,XY];
 }
 
 FnsRel(L,F,B,vars)=
