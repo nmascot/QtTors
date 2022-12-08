@@ -121,7 +121,6 @@ FnsBranchMatRat(F0,B,e0,x,y)=
 		t = variable(F);
 		m = valuation(F,t);
 		M = serprec(F,t);
-		print([m,M,e0]);
 		if(M==+oo,M=e+m);
 		if(M-m>=e0,break);
 		e += e0-(M-m)+1;
@@ -395,8 +394,7 @@ CanProj(C,uvw=0,P=0)=
 			n++;
 		)
 	);
-	d2 = 1000;
-	M = FnsBranchMatRat(M,B,d2+1,x,y);
+	M = FnsBranchMatRat(M,B,d^2+1,x,y);
 	K = matker(M);
 	f = f*K[,1];
 	[f,[u/w,v/w]];
@@ -549,10 +547,10 @@ ConicRat(C)=
 }*/
 
 SqrtMod(x,n)=
-{ \\ n sqfree
+{ \\ Assumes n sqfree. Relies on CRT.
 	my(fa,l,p,r);
 	if(x^2==x,return(x));
-	fa = factor(n)[,1];
+	fa = factor(n)[,1]; \\ TODO lazy facto
 	l = #fa;
 	r = vector(l);
 	for(i=1,l,
@@ -565,6 +563,7 @@ SqrtMod(x,n)=
 
 ConicLegendre(a,b)=
 { \\ ax^2+by^2=z^2, a,b integers not both negative
+	\\ Look for rational point
 	my(r,b1,P);
 	if(issquare(a,&r),return([1,0,r]));
 	[b,b1] = Zsqfree(b);
@@ -586,7 +585,7 @@ ConicLegendre(a,b)=
 	if(r==[],return([]));
 	r = centerlift(r);
 	b1 = (r^2-a)/b;
-	P = ConicLegendre(a,b1); \\ Think in temrs of b and bb1 being norms in Q(sqrta)
+	P = ConicLegendre(a,b1); \\ Think in terms of b and bb1 being norms in Q(sqrta)
 	if(P==[],return([]));
 	P=[P[3]-r*P[1],b1*P[2],r*P[3]-a*P[1]];
 	apply(abs,P)/content(P);
