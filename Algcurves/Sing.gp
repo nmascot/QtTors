@@ -253,15 +253,19 @@ BranchValuation(f,b,x,y)=
 
 BranchEval(f,b,e,x,y)=
 {
-  my(n=numerator(f),d=denominator(f),be,de,k=1);
-	while(1,
-    be = BranchExpand(b,e);
-		de = substvec(d,[x,y],be);
-		if(de,break);
-		e += k;
-		k += 1;
+  my(n,d,be,de,k=1);
+  if(type(f)=="t_VEC",
+		return(apply(u->BranchEval(u,b,e,x,y),f))
 	);
-	substvec(n,[x,y],be)/de;
+	n = numerator(f); d = denominator(f);
+  while(1,
+    be = BranchExpand(b,e);
+    de = substvec(d,[x,y],be);
+    if(de,break);
+    e += k;
+    k += 1;
+  );
+  substvec(n,[x,y],be)/de;
 }
 
 
