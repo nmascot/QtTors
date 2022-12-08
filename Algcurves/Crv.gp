@@ -68,10 +68,8 @@ PtIsSing(f,P)=
 	if(type(f)=="t_VEC",[f,F]=f[1]);
 	v=variables(f);
   if(#P==3,
-		if(#v==2,
-			F=if(F,F,APeqns(f)[2]);
-			v=variables(F)
-		);
+		F=if(F,F,APeqns(f)[2]);
+		if(#v==2,v=variables(F));
   	if(substvec(deriv(F,v[1]),v,P),return(0));
   	if(substvec(deriv(F,v[2]),v,P),return(0));
   	substvec(deriv(F,v[3]),v,P)==0;

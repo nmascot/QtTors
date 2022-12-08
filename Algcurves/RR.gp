@@ -371,24 +371,24 @@ FnDiv(C,f,Print)=
   fa = Vec(Set(concat(factor(R)[,1],factor(Df)[,1]))); \\ Interesting finite places
   D = List();
   for(i=1,#fa+1,
-    U = if(i>#fa,0,fa[i]);
+    U = if(i>#fa,0,fa[i]); \\ Try all these values of x, and then x=oo
     BU = 0;
-    for(i=1,nSB,
+    for(i=1,nSB, \\ Do we already know the branches for this value of x?
       if(SB[i][1]==U,
-        BU = SB[i][2];
+        BU = SB[i][2]; \\ Found
         break
       )
     );
-    if(BU==0,
+    if(BU==0, \\ Not found, calculate them
       BU = BranchesAbove(C[1][1],subst(U,x,a),p,x,t,a);
       if(BU==0,error("Unable to handle this characterisitic"));
     );
-    for(j=1,#BU,
+    for(j=1,#BU, \\ Check valuation at all these branches
       b = BU[j];
       v = BranchValuation(f,b[1],x,y);
       if(v,
         P = BranchOrigin(b[1]);
-        if(PtIsSing(C[1][2],P),
+        if(PtIsSing(C[1][2],P), \\ If P is singular, store it as a branch
           listput(D,[b[1..3],v])
         ,
           listput(D,[P,v])
@@ -396,7 +396,7 @@ FnDiv(C,f,Print)=
       )
     )
   );
-  D = matconcat(vecsort(Vec(D),2,4)~);
+  D = matconcat(vecsort(Vec(D),2,4)~); \\ Sort by multiplicities
   if(Print,
     DivPrint(D)
   ,
