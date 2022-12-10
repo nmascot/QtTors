@@ -232,9 +232,9 @@ mknfabs(GEN rnf, long prec)
 }
 
 static GEN
-mkupdown(GEN rnf)
+mkupdown(GEN NF, GEN rnf)
 {
-  GEN NF = obj_check(rnf, rnf_NFABS), M, zknf, dzknf;
+  GEN M, zknf, dzknf;
   long i, l;
   zknf = rnf_get_nfzk(rnf);
   dzknf = gel(zknf,1); if (gequal1(dzknf)) dzknf = NULL;
@@ -252,7 +252,9 @@ GEN
 rnf_build_nfabs(GEN rnf, long prec)
 {
   GEN NF = obj_checkbuild_prec(rnf, rnf_NFABS, &mknfabs, &nf_get_prec, prec);
-  (void)obj_checkbuild(rnf, rnf_MAPS, &mkupdown);
+  GEN O = obj_check(rnf, rnf_MAPS);
+  if (!O)
+  { pari_sp av = avma; O = obj_insert(rnf, rnf_MAPS, mkupdown(NF, rnf)); set_avma(av); }
   return NF;
 }
 
