@@ -359,7 +359,7 @@ set_prodprimes(void)
 {
   pari_sp ltop = avma, av;
   long m = expu(_maxprime) + 1 - 7;
-  GEN W, w, v = primes_zv(diffptrlen-1);
+  GEN W, w, v = primes_interval_zv(3, _maxprime);
   long s, j, lv = lg(v), u = 1, b = 1UL << 8;
 
   W = cgetg(m+1, t_VEC); gel(W, m) = zv_prod_Z(v);
