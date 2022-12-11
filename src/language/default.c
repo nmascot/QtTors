@@ -989,7 +989,7 @@ default_gp_data(void)
   static pari_timer __T, __Tw;
 
   D->flags       = 0;
-  D->primelimit  = 1000000;
+  D->primelimit  = 1UL << 20;
 
   /* GP-specific */
   D->breakloop   = 1;

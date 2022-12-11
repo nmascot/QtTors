@@ -1041,7 +1041,7 @@ After \kbd{pari\_init(size, maxprime)}, a ``prime table'' is
 initialized with the successive \emph{differences} of primes up to (possibly
 just a little beyond) \kbd{maxprime}. The prime table occupies roughly
 $\kbd{maxprime}/\log(\kbd{maxprime})$ bytes in memory, so be sensible when
-choosing \kbd{maxprime}; it is $10^6$ by default under \kbd{gp} and there
+choosing \kbd{maxprime}; it is $2^{20}$ by default under \kbd{gp} and there
 is no real benefit in choosing a much larger value: the high-level
 iterator provide \emph{fast} access to primes up to the \emph{square}
 of \kbd{maxprime}. In any case, the implementation requires that

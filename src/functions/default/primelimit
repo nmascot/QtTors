@@ -33,4 +33,4 @@ Doc: \kbd{gp} precomputes a list of
  Don't use this, supply an explicit bound: \kbd{factor(N, bound)},
  which avoids relying on an unpredictable global variable.
 
- The default value is \kbd{1M}.
+ The default value is $2^{20} = 1048576.

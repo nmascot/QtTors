@@ -358,11 +358,11 @@ static void
 set_prodprimes(void)
 {
   pari_sp ltop = avma, av;
-  long m = expu(_maxprimelim)+1-7;
-  GEN w, v = primes_zv(diffptrlen-1);
-  long s, j, lv = lg(v), u = 1, b = (1UL<<8);
-  GEN W = cgetg(m+1, t_VEC);
-  gel(W, m) = zv_prod_Z(v);
+  long m = expu(_maxprime) + 1 - 7;
+  GEN W, w, v = primes_zv(diffptrlen-1);
+  long s, j, lv = lg(v), u = 1, b = 1UL << 8;
+
+  W = cgetg(m+1, t_VEC); gel(W, m) = zv_prod_Z(v);
   for (j = 1; j < lv; j++)
     if (v[j] > b)
     {
