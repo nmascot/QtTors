@@ -3130,6 +3130,12 @@ u_forprime_next_fast(forprime_t *T)
   return u_forprime_next(T);
 }
 
+/* uisprime(n) knowing no prime < all divides n (and tridiv_boundu(n) if all=0)*/
+static int
+uisprime_nosmall(ulong n, ulong all)
+{
+  return (!all || all > 661) ? uisprime_661(n): uisprime(n);
+}
 /* Factor n and output [p,e] where
  * p, e are vecsmall with n = prod{p[i]^e[i]}. If all != 0:
  * if pU1 is not NULL, set *pU1 and *pU2 so that unfactored composite is
@@ -3140,7 +3146,7 @@ factoru_sign(ulong n, ulong all, long hint, ulong *pU1, ulong *pU2)
   GEN f, E, E2, P, P2;
   pari_sp av;
   ulong p;
-  long i;
+  long i, oldi = -1;
   forprime_t S;
 
   if (pU1) *pU1 = *pU2 = 1;
@@ -3155,16 +3161,18 @@ factoru_sign(ulong n, ulong all, long hint, ulong *pU1, ulong *pU2)
   if (!all || all > 2)
   {
     ulong lim;
-    long v = vals(n), oldi;
+    long v = vals(n);
     if (v)
     {
       P[1] = 2; E[1] = v; i = 2;
       n >>= v; if (n == 1) goto END;
     }
     lim = all? all-1: tridiv_boundu(n);
-    if (!(hint & 16) && lim >= maxprimelim()>>2)
+    if (!(hint & 16) && lim >= 128) /* expu(lim) >= 7 */
     { /* fast trial division */
-      ulong nr = ugcd(n, umodiu(prodprimes(), n));
+      GEN PR = prodprimes();
+      long nPR = lg(PR)-1, b = minss(nPR, expu(lim)-6);
+      ulong nr = ugcd(n, umodiu(gel(PR,b), n));
       if (nr != 1)
       {
         GEN F = factoru_sign(nr, all, 1 + 2 + 16, NULL, NULL), Q = gel(F,1);
@@ -3182,15 +3190,14 @@ factoru_sign(ulong n, ulong all, long hint, ulong *pU1, ulong *pU2)
     else
     {
       u_forprime_init(&S, 3, lim);
-      oldi = i;
       while ( (p = u_forprime_next_fast(&S)) )
       {
         int stop;
         /* tiny integers without small factors are often primes */
         if (p == 673)
         {
-          oldi = i;
           if (uisprime_661(n)) { P[i] = n; E[i] = 1; i++; goto END; }
+          oldi = i;
         }
         v = u_lvalrem_stop(&n, p, &stop);
         if (v) {
@@ -3202,10 +3209,9 @@ factoru_sign(ulong n, ulong all, long hint, ulong *pU1, ulong *pU2)
           goto END;
         }
       }
-      if (oldi != i && !all && uisprime_661(n))
-      { P[i] = n; E[i] = 1; i++; goto END; }
     }
   }
+  /* if i > oldi (includes oldi = -1) we don't know that n is composite */
   if (all)
   { /* smallfact: look for easy pure powers then stop */
 #ifdef LONG_IS_64BIT
@@ -3216,12 +3222,15 @@ factoru_sign(ulong n, ulong all, long hint, ulong *pU1, ulong *pU2)
     long k = 1, ex;
     while (uissquareall(n, &n)) k <<= 1;
     while ( (ex = uis_357_power(n, &n, &mask)) ) k *= ex;
-    if (pU1 && !uisprime(n))
+    if (pU1 && (i == oldi || !uisprime(n)))
     { *pU1 = n; *pU2 = (ulong)k; }
     else
     { P[i] = n; E[i] = k; i++; }
     goto END;
   }
+  /* we don't known that n is composite ? */
+  if (oldi != i && uisprime_nosmall(n,all)) { P[i]=n; E[i]=1; i++; goto END; }
+
   {
     GEN perm;
     ifac_factoru(utoipos(n), hint, P, E, &i);
@@ -3678,10 +3687,11 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
     if (is_pm1(n)) return aux_end(M,n,nb);
     lim = all? all-1: tridiv_bound(n);
     maxp = maxprime();
-    if (!(hint & 16) && lim >= maxprimelim()>>2)
+    if (!(hint & 16) && lim >= 128) /* expu(lim) >= 7 */
     { /* fast trial division */
-      GEN nr;
-      av = avma; nr = gcdii(prodprimes(), n);
+      GEN nr, PR = prodprimes();
+      long nPR = lg(PR)-1, b = minss(nPR, expu(lim)-6);
+      av = avma; nr = gcdii(gel(PR,b), n);
       if (is_pm1(nr)) { set_avma(av); av2 = av; }
       else
       {

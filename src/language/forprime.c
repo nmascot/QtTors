@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 static ulong _maxprime = 0;
 static ulong _maxprimelim = 0;
 static ulong diffptrlen;
-static GEN _prodprimes;
+static GEN _prodprimes,_prodprimes_addr;
 
 /* Building/Rebuilding the diffptr table. The actual work is done by the
  * following two subroutines;  the user entry point is the function
@@ -357,13 +357,25 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong n)
 static void
 set_prodprimes(void)
 {
-  pari_sp av = avma;
-  GEN p = zv_prod_Z(primes_zv(diffptrlen-1));
-  long i, l = lgefint(p);
-  _prodprimes = (GEN) pari_malloc(l*sizeof(long));
-  for (i = 0; i < l; i++)
-    _prodprimes[i] = p[i];
-  set_avma(av);
+  pari_sp ltop = avma, av;
+  long m = expu(_maxprimelim)+1-7;
+  GEN w, v = primes_zv(diffptrlen-1);
+  long s, j, lv = lg(v), u = 1, b = (1UL<<8);
+  GEN W = cgetg(m+1, t_VEC);
+  gel(W, m) = zv_prod_Z(v);
+  for (j = 1; j < lv; j++)
+    if (v[j] > b)
+    {
+      setlg(v, j);
+      gel(W,u++) = zv_prod_Z(v);
+      b *= 2; if (u == m) break;
+    }
+  s = gsizeword(W);
+  w = (GEN)pari_malloc(s*sizeof(long));
+  av = (pari_sp)(w + s);
+  _prodprimes_addr = w;
+  _prodprimes = gcopy_avma(W, &av);
+  set_avma(ltop);
 }
 
 /* assume maxnum <= 436273289 < 2^29 */
@@ -793,7 +805,7 @@ pari_close_primes(void)
   if (diffptr)
   {
     pari_free(diffptr);
-    pari_free(_prodprimes);
+    pari_free(_prodprimes_addr);
   }
   pari_free(pari_sieve_modular.sieve);
 }
