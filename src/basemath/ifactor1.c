@@ -3132,14 +3132,14 @@ u_forprime_next_fast(forprime_t *T)
 
 /* Factor n and output [p,e] where
  * p, e are vecsmall with n = prod{p[i]^e[i]}. If all != 0:
- * if pU is not NULL, set it to unfactored composite; else include it
- * in factorization */
+ * if pU1 is not NULL, set *pU1 and *pU2 so that unfactored composite is
+ * U1^U2 with U1 not a pure power; else include it in factorization */
 static GEN
 factoru_sign(ulong n, ulong all, long hint, ulong *pU1, ulong *pU2)
 {
   GEN f, E, E2, P, P2;
   pari_sp av;
-  ulong p, lim;
+  ulong p;
   long i;
   forprime_t S;
 
@@ -3148,42 +3148,63 @@ factoru_sign(ulong n, ulong all, long hint, ulong *pU1, ulong *pU2)
   if (n == 1) retmkvec2(cgetg(1,t_VECSMALL), cgetg(1,t_VECSMALL));
 
   f = cgetg(3,t_VEC); av = avma;
-  lim = all? all-1: tridiv_boundu(n);
   /* enough room to store <= 15 primes and exponents (OK if n < 2^64) */
   (void)new_chunk(16*2);
   P = cgetg(16, t_VECSMALL); i = 1;
   E = cgetg(16, t_VECSMALL);
-  if (lim > 1)
+  if (!all || all > 2)
   {
+    ulong lim;
     long v = vals(n), oldi;
     if (v)
     {
       P[1] = 2; E[1] = v; i = 2;
       n >>= v; if (n == 1) goto END;
     }
-    u_forprime_init(&S, 3, lim);
-    oldi = i;
-    while ( (p = u_forprime_next_fast(&S)) )
-    {
-      int stop;
-      /* tiny integers without small factors are often primes */
-      if (p == 673)
+    lim = all? all-1: tridiv_boundu(n);
+    if (!(hint & 16) && lim >= maxprimelim()>>2)
+    { /* fast trial division */
+      ulong nr = ugcd(n, umodiu(prodprimes(), n));
+      if (nr != 1)
       {
-        oldi = i;
-        if (uisprime_661(n)) { P[i] = n; E[i] = 1; i++; goto END; }
-      }
-      v = u_lvalrem_stop(&n, p, &stop);
-      if (v) {
-        P[i] = p;
-        E[i] = v; i++;
-      }
-      if (stop) {
-        if (n != 1) { P[i] = n; E[i] = 1; i++; }
-        goto END;
+        GEN F = factoru_sign(nr, all, 1 + 2 + 16, NULL, NULL), Q = gel(F,1);
+        long j, l = lg(Q);
+        for (j = 1; j < l; j++)
+        {
+          ulong p = uel(Q,j);
+          if (all && p >= all) break; /* may occur for last p */
+          E[i] = u_lvalrem(n, p, &n); /* > 0 */
+          P[i] = p; i++;
+        }
+        if (n == 1) goto END;
       }
     }
-    if (oldi != i && !all && uisprime_661(n))
-    { P[i] = n; E[i] = 1; i++; goto END; }
+    else
+    {
+      u_forprime_init(&S, 3, lim);
+      oldi = i;
+      while ( (p = u_forprime_next_fast(&S)) )
+      {
+        int stop;
+        /* tiny integers without small factors are often primes */
+        if (p == 673)
+        {
+          oldi = i;
+          if (uisprime_661(n)) { P[i] = n; E[i] = 1; i++; goto END; }
+        }
+        v = u_lvalrem_stop(&n, p, &stop);
+        if (v) {
+          P[i] = p;
+          E[i] = v; i++;
+        }
+        if (stop) {
+          if (n != 1) { P[i] = n; E[i] = 1; i++; }
+          goto END;
+        }
+      }
+      if (oldi != i && !all && uisprime_661(n))
+      { P[i] = n; E[i] = 1; i++; goto END; }
+    }
   }
   if (all)
   { /* smallfact: look for easy pure powers then stop */
@@ -3664,7 +3685,7 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
       if (is_pm1(nr)) { set_avma(av); av2 = av; }
       else
       {
-        GEN F = ifactor_sign(nr, all, 1 + 2 + 16, sn, NULL), P = gel(F,1);
+        GEN F = ifactor_sign(nr, all, 1 + 2 + 16, 1, NULL), P = gel(F,1);
         long l = lg(P);
         av2 = avma;
         for (i = 1; i < l; i++)
