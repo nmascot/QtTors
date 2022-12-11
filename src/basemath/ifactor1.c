@@ -3130,7 +3130,9 @@ u_forprime_next_fast(forprime_t *T)
   return u_forprime_next(T);
 }
 
-/* uisprime(n) knowing no prime < all divides n (and tridiv_boundu(n) if all=0)*/
+/* uisprime(n) knowing n has no prime divisor
+ *    < all if all != 0,
+ *    < tridiv_boundu(n) >= 2^14 if all = 0 */
 static int
 uisprime_nosmall(ulong n, ulong all)
 {
