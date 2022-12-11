@@ -1272,7 +1272,7 @@ primes(long n)
   if (n <= 0) return cgetg(1, t_VEC);
   y = cgetg(n+1, t_VEC);
   (void)new_chunk(3*n); /*HACK*/
-  u_forprime_init(&S, 2, ULONG_MAX);
+  u_forprime_init(&S, 2, n > maxprimeN()? ULONG_MAX: maxprime());
   set_avma((pari_sp)y);
   for (i = 1; i <= n; i++) gel(y, i) = utoipos( u_forprime_next(&S) );
   return y;
@@ -1285,7 +1285,7 @@ primes_zv(long n)
   GEN y;
   if (n <= 0) return cgetg(1, t_VECSMALL);
   y = cgetg(n+1,t_VECSMALL);
-  u_forprime_init(&S, 2, ULONG_MAX);
+  u_forprime_init(&S, 2, n > maxprimeN()? ULONG_MAX: maxprime());
   for (i = 1; i <= n; i++) y[i] =  u_forprime_next(&S);
   set_avma((pari_sp)y); return y;
 }
