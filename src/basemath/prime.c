@@ -1362,7 +1362,7 @@ GEN
 primes_interval_zv(ulong a, ulong b)
 {
   ulong d;
-  if (!a) return primes_upto_zv(b);
+  if (a < 3) return primes_upto_zv(b);
   if (b < a) return cgetg(1, t_VECSMALL);
   d = b - a;
   if (d > 100000UL)
