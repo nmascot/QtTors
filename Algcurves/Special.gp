@@ -106,12 +106,12 @@ CrvRat(C,P,Q)=
 	N = numerator(T);
 	X = CrvRatAux(f,N,D,y,x,t);
 	Y = CrvRatAux(f,N,D,x,y,t);
-	[X,Y];
+	[[X,Y],T];
 }
 
 FnsBranchMatRat(F0,B,e0,x,y)=
 {
-	my(A,a,t,d,n,m,M,S,c,e=e0);
+	my(A,a,t,d,n,F,m,M,S,c,e=e0);
 	A = B[3];
 	a = variable(A);
 	d = poldegree(A);
@@ -139,7 +139,7 @@ FnsBranchMatRat(F0,B,e0,x,y)=
 
 FnsBranchMatRat_conic(u,v,B,e,x,y)=
 {
-  my(A,a,t,d,m,M,S,c);
+  my(A,a,t,d,F,m,M,S,c);
   A = B[3];
   a = variable(A);
   d = poldegree(A);
@@ -164,7 +164,7 @@ FnsBranchMatRat_conic(u,v,B,e,x,y)=
 
 FnsBranchMat(F0,B,e0,x,y)=
 {
-  my(t,n,m,M,S,e=e0);
+  my(t,n,F,m,M,S,e=e0);
   n = #F0;
 	while(1,
   	F = substvec(F0,[x,y],BranchExpand(B[1],e));
@@ -215,8 +215,8 @@ DiffsBranchMat(W,den,B,e0,x,y)=
 
 CrvEll(C,P)=
 {
-	my(ID=[],p=C[2],x,y,B,L,LB,L3,L2,LB2,X,Y,XY,e,K,E,U);
-	[x,y] = C[3][1..2];
+	my(ID=[],f=C[1][1],p=C[2],x,y,z,B,L,LB,L3,L2,LB2,X,Y,XY,e,K,E,U);
+	[x,y,z] = C[3][1..3];
 	if(C[6]!=1,
 			error("This curve does not have genus 1")
 	);
@@ -246,6 +246,7 @@ CrvEll(C,P)=
 		ID = ellidentify(E);
 		if(#ID,ID=ID[1];ID=[ID[1],ID[3]]);
 	);
+	XY = apply(s->FnNormalise(s,f,x,z),XY);
 	[E,ID,XY];
 }
 
@@ -343,7 +344,6 @@ CrvHyperell_sub(b,u,v,n,vars,p)=
 		\\ Now, let PARI take over :)
 		g1 = (poldegree(R)+1)\2; \\ g+1
 		R = hyperellminimalmodel(R,&U);
-	print(U);
 		[e,M,H] = U;
 		M1 = M^(-1);
 		u = (M1[1,1]*u+M1[1,2])/(M1[2,1]*u+M1[2,2]);
@@ -376,10 +376,9 @@ CrvHyperell_sub(b,u,v,n,vars,p)=
 
 CrvHyperell(C,P=0)=
 {
-	my(g=C[6],F=C[1][1],B,W=C[7],u,res,e,M,m,K2,K1);
+	my(g=C[6],F=C[1][1],W=C[7],x=C[3][1],z=C[3][3],B,u,e,M,m,K2,K1,H);
 	if(g<=1,error("Genus too low:",g));
 	if(CrvIsHyperell(C)==0,return(0)); \\ Check if hyperell
-	F = C[1][1];
 	B = if(P,Pt2Branch(C,P),C[4][1][2][1]); \\ Make sure B is in branch form
 	if(g==2, \\ Find u with deg u = 2
 		u = W[1][2]/W[1][1]; \\ If g==2, easy
@@ -414,9 +413,10 @@ CrvHyperell(C,P=0)=
 		u = if(matrank(K)==1,(W*K1)/(W*K2[,2]),(W*K1)/(W*K2[,1]));
 	);
 	\\ K(C) is at least one of K(u,x) or K(u,y); try both
-	res = CrvHyperell_sub(B,u,x,poldegree(F,y),C[3],C[2]);
-	if(res,return(res));
-	CrvHyperell_sub(B,u,y,poldegree(F,x),C[3],C[2]);
+	H = CrvHyperell_sub(B,u,x,poldegree(F,y),C[3],C[2]);
+	if(H==0,H=CrvHyperell_sub(B,u,y,poldegree(F,x),C[3],C[2]));
+	H[2] = apply(u->FnNormalise(u,F,x,z),H[2]);
+	H;
 }
 
 CanProj(C,uvw=0,P=0)=
