@@ -82,3 +82,17 @@ default(format,"f.5")
 -0.00000000000000000000000000000000000000293873587705572
 
 printf("%d",factor(2*3*5*7))
+
+printf("%5d\n", -1+I);
+printf("%5d\n", -1-I);
+printf("%5d\n",  1-I);
+printf("%5d\n",  1+I);
+printf("%05d\n", -1+I);
+printf("%05d\n", -1-I);
+printf("%05d\n",  1-I);
+printf("%05d\n",  1+I);
+printf("%.5g\n", -1+I);
+printf("%.5g\n", -1-I);
+printf("%.5g\n",  1-I);
+printf("%.5g\n",  1+I);
+printf("%.5g\n", [1+I, 1-I]);

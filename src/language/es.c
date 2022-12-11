@@ -1014,6 +1014,13 @@ fmtnum(pari_str *S, long lvalue, GEN gvalue, int base, int signvalue,
       l = lg(gvalue);
       switch(typ(gvalue))
       {
+        case t_COMPLEX:
+          fmtnum(S, 0, gel(gvalue,1), base, signvalue, ljust,len,zpad);
+          if (gsigne(gel(gvalue,2)) >= 0) str_putc(S, '+');
+          fmtnum(S, 0, gel(gvalue,2), base, signvalue, ljust,len,zpad);
+          str_putc(S, '*');
+          str_putc(S, 'I');
+          return;
         case t_VEC:
           str_putc(S, '[');
           for (i = 1; i < l; i++)
@@ -1215,6 +1222,15 @@ fmtreal(pari_str *S, GEN gvalue, int space, int signvalue, int FORMAT,
     long i, j, h, l = lg(gvalue);
     switch(typ(gvalue))
     {
+      case t_COMPLEX:
+        fmtreal(S, gel(gvalue,1), space, signvalue, FORMAT, maxwidth,
+                ljust,len,zpad);
+        if (gsigne(gel(gvalue,2)) >= 0) str_putc(S, '+');
+        fmtreal(S, gel(gvalue,2), space, signvalue, FORMAT, maxwidth,
+                ljust,len,zpad);
+        str_putc(S, 'I');
+        return;
+
       case t_VEC:
         str_putc(S, '[');
         for (i = 1; i < l; i++)
