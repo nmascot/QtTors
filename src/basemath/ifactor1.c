@@ -3703,9 +3703,10 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
         for (i = 1; i < l; i++)
         {
           pari_sp av3 = avma;
-          ulong p = gel(P,i)[2];
+          GEN gp = gel(P,i);
+          ulong p = gp[2];
           long k;
-          if (all && p >= all) break; /* may occur for last p */
+          if (lgefint(gp)>3 || (all && p>=all)) break; /* may occur for last p */
           k = Z_lvalrem(n, p, &n); /* > 0 */
           affii(n, N); n = N; set_avma(av3);
           STOREu(&nb, p, k);
