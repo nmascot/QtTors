@@ -133,13 +133,17 @@ Branches0(f,t,A,caract,flag)=
 			u-=q; v += p;
 		);
 		print([[p,q],[u,v]]);*/
-		/*[u,v,] = gcdext(-p,q);
-		u = -u;
-		print([[p,q],[u,v]]);*/
+		\\[u,v,] = gcdext(-p,q);
+		\\u = -u;
+		\\[u,v,] = gcdext(-p,-q);
+		\\u = -u;
+		\\v = -v;
+		\\print([[p,q],[u,v]]);
 		[u,v,] = gcdext(p,q); \\ pu+qv=1
-    while(p>0 && (u>0 || v<0),
+    /*while(p>0 && (u>0 || v<0),
       u-=q; v += p;
-    ); \\ Try to arrange u<0, v>0
+    );*/ \\ Try to arrange u<0, v>0
+		\\print("Bezout for ",[p,q],": ",[u,v]);
 		i0 = if(p,lift(Mod(r/p,q)),0); \\ Smallest i on pi+qj=r
 		j0 = (r-p*i0)/q;
 		m = floor((dy-i0)/q); \\ pi+qj=r, i0<=i<=dy <-> 0<=k<=m
@@ -165,9 +169,11 @@ Branches0(f,t,A,caract,flag)=
 		);
 		for(ig=1,#fag~, \\ Loop over factors
 			G = fag[ig,1];
+			\\print(G);
 			[B,b,aB] = AlgExtend(A,G); \\ Now work mod B(t), b(t) root of G, a=aB(t)
 			\\print("Branches0: algext ",[A,G]," -> ",[B,b,aB]);
 			fB = subst(liftpol(f),a,aB);
+			\\print("b=",b);
 			c = b^-u;
 			d = b^v;
 			\\ Change x=c*x^q, y=d*x^p*(1+y)
@@ -189,6 +195,45 @@ Branches0(f,t,A,caract,flag)=
 		)
 	);
   Vec(branches);
+}
+
+AlgContent(a)=
+{
+	my(X,c,n,v,fa,p);
+	if(type(a)!="t_POLMOD",return(factor(a)));
+	X = charpoly(a);
+	v = variable(X);
+	n = poldegree(X);
+	c = denominator(content(X));
+	X = subst(X,v,v/c)*c^n;
+	fa = factor(content(x^n-X));
+	for(i=1,#fa~,
+		p = fa[i,1];
+		v = valuation(polcoef(X,0),p)\n;
+		for(j=1,n-1,
+			Xj = polcoef(X,j);
+			if(Xj==0,next);
+			v = min(v,valuation(Xj,p)\(n-j));
+		);
+		fa[i,2] = v;
+	);
+	factor(factorback(fa)/c); \\ TODO avoid all these factos
+}
+
+BranchSimplify(B)=
+{
+	my(t,c,n,fac,v,B1);
+	c = B[1][1]; \\ c*t^n;
+	t = variable(c);
+	n = poldegree(c);
+	c = polcoef(c,n);
+	fac = AlgContent(c);
+	fac[,2] = round(fac[,2]/n);
+	c = factorback(fac);
+	B1 = subst(B[1],t,t/c);
+	c = B1[3];
+	B1[3] /= content(c,1);
+	[B1,B[2],B[3]];
 }
 
 BranchesAbove(f,U,p,x,t,a)= \\ U(a), unless U=0
@@ -213,6 +258,9 @@ BranchesAbove(f,U,p,x,t,a)= \\ U(a), unless U=0
 			if(poldegree(AB)>1, xB=Mod(xB,AB));
 			BU[i][1][1] = xB;
 		)
+	);
+	if(p==0,
+		BU = apply(BranchSimplify,BU);
 	);
 	BU;
 }

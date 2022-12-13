@@ -357,7 +357,6 @@ CrvHyperell_sub(b,u,v,n,vars,p)=
 			fa = select(f->poldegree(f)==1 && polcoef(f,1)==1,fa);
 			if(#fa,
 				c = -polcoef(fa[1],0);
-				print(c);
 				R = subst(R,x,x+c);
 				u -= c;
 				R = polrecip(R);
