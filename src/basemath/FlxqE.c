@@ -966,6 +966,7 @@ get_trace_Robert(GEN J, GEN phi, GEN Xm, GEN T, GEN q, ulong p, long e)
   return FpX_neg(FpXQ_mul(Dx, C, T, q), q);
 }
 
+/* in p^2, so p is tiny */
 static GEN
 Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
 {
@@ -975,7 +976,7 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
   GEN pp = utoipos(p), q = powuu(p, N);
   GEN T2, j, t, phi, J1, sqx, Xm, c2, tc2, c2p, Nc2, Np;
   long ispcyc = zx_is_pcyc(get_Flx_mod(T));
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p); /* = 0 here */
   timer_start(&ti);
   if (!ispcyc)
   {
