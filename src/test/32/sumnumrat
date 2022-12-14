@@ -57,4 +57,7 @@
   ***   at top-level: prodeulerrat(1+1/p)
   ***                 ^-------------------
   *** prodeulerrat: product diverges in prodeulerrat.
-Total time spent: 1380
+  ***   at top-level: sumeulerrat(x^2/(1+x),2)
+  ***                 ^------------------------
+  *** sumeulerrat: sum diverges in sumeulerrat.
+Total time spent: 1596

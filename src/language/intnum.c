@@ -2427,10 +2427,11 @@ sumeulerrat(GEN F, GEN s, long a, long prec)
   }
   /* F t_RFRAC */
   if (a < 2) a = 2;
-  vF = -poldegree(F, -1);
   rs = gtodouble(real_i(s));
+  vF = -poldegree(F, -1);
+  if (vF <= 0) pari_err(e_MISC, "sum diverges in sumeulerrat");
   r = polmax(gel(F,2));
-  N = maxss(30, a); lN = log2((double)N);
+  N = maxss(DEBUGVAR, a); lN = log2((double)N);
   RS = maxdd(1./vF, log2(r) / lN);
   if (rs <= RS)
     pari_err_DOMAIN("sumeulerrat", "real(s)", "<=",  dbltor(RS), dbltor(rs));
