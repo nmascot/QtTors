@@ -32,6 +32,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  * the school-book method used in FpE_mulu().
  */
 
+static GEN
+ellinf_FpJ(void)
+{ return mkvec3(gen_1, gen_1, gen_0); }
+
 /*
  * Cost: 1M + 8S + 1*a + 10add + 1*8 + 2*2 + 1*3.
  * Source: http://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian.html#doubling-dbl-2007-bl
@@ -43,8 +47,7 @@ FpJ_dbl(GEN P, GEN a4, GEN p)
   GEN X1, Y1, Z1;
   GEN XX, YY, YYYY, ZZ, S, M, T, Q;
 
-  if (signe(gel(P,3)) == 0)
-    return gcopy(P);
+  if (signe(gel(P,3)) == 0) return ellinf_FpJ();
 
   X1 = gel(P,1); Y1 = gel(P,2); Z1 = gel(P,3);
 
@@ -97,7 +100,7 @@ FpJ_add(GEN P, GEN Q, GEN a4, GEN p)
       /* Points are equal so double. */
       return FpJ_dbl(P, a4, p);
     else
-      return mkvec3(gen_1, gen_1, gen_0);
+      return ellinf_FpJ();
   }
   I = Fp_sqr(Fp_mulu(H, 2, p), p);
   J = Fp_mul(H, I, p);
@@ -120,8 +123,9 @@ FpJ_neg(GEN Q, GEN p)
 
 GEN
 FpE_to_FpJ(GEN P)
-{ return ell_is_inf(P) ? mkvec3(gen_1, gen_1, gen_0):
-                         mkvec3(icopy(gel(P,1)),icopy(gel(P,2)), gen_1);
+{
+  return ell_is_inf(P) ? ellinf_FpJ()
+       : mkvec3(icopy(gel(P,1)),icopy(gel(P,2)), gen_1);
 }
 
 GEN
@@ -155,8 +159,8 @@ _FpJ_mul(void *E, GEN P, GEN n)
   pari_sp av = avma;
   struct _FpE *e=(struct _FpE *) E;
   long s = signe(n);
-  if (!s || signe(gel(P,3))==0) return mkvec3(gen_1, gen_1, gen_0);
-  if (s<0) P = FpJ_neg(P, e->p);
+  if (!s || signe(gel(P,3))==0) return ellinf_FpJ();
+  if (s < 0) P = FpJ_neg(P, e->p);
   if (is_pm1(n)) return s > 0 ? gcopy(P): P;
   return gerepilecopy(av, gen_pow_i(P, n, e, &_FpJ_dbl, &_FpJ_add));
 }
