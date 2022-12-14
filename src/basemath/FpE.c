@@ -155,9 +155,9 @@ _FpJ_mul(void *E, GEN P, GEN n)
   pari_sp av = avma;
   struct _FpE *e=(struct _FpE *) E;
   long s = signe(n);
-  if (!s || ell_is_inf(P)) return ellinf();
+  if (!s || signe(gel(P,3))==0) return mkvec3(gen_1, gen_1, gen_0);
   if (s<0) P = FpJ_neg(P, e->p);
-  if (is_pm1(n)) return s>0? gcopy(P): P;
+  if (is_pm1(n)) return s > 0 ? gcopy(P): P;
   return gerepilecopy(av, gen_pow_i(P, n, e, &_FpJ_dbl, &_FpJ_add));
 }
 
