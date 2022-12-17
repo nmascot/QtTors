@@ -38,7 +38,7 @@ AlgExtend(A,G,maxdeg=40,maxdeg2=8)=
 
   print("polred degree ",d);
 	\\print(z);
-  [z,T] = if(d<=maxdeg2,polredabs,polredbest)(z,1);
+  [z,T] = if(d<=maxdeg2,polredabs(z,17),polredbest(z,1));
   z = subst(z,x,a);
   T = Mod(subst(liftpol(T),x,a),z);
   al = subst(liftpol(al),x,T);
@@ -60,7 +60,7 @@ RootRed(A,maxdeg=40,maxdeg2=8)=
 	,
 		if(type(c) != "t_INTMOD" && d<=maxdeg,
       print("polred degree ",d);
-      [B,z] = if(d<=maxdeg2,polredabs,polredbest)(A,1); 
+      [B,z] = if(d<=maxdeg2,polredabs(A,17),polredbest(A,1)); 
     ,
       z = Mod(a,A); B = A;
     )
