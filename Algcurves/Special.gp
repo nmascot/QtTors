@@ -32,6 +32,39 @@ Pt2Branch(C,P)=
   );
 }
 
+Branch2Pt(C,B)=
+{
+	my(S=C[5]);
+	if(type(B[1])!="t_VEC",return(B)); \\ Already a pt
+	for(i=1,#S, \\ Look for B in sing branches
+		if(S[i][3]==B,return(i))
+	); \\ If not found, then pt is reg
+	BranchOrigin(B[1]);
+}
+
+CrvFindRatPt(C,M=10)=
+{
+	my(C4=C[4],U,B,P);
+	for(i=1,#C4,
+    [U,B] = C4[i];
+    if(poldegree(U)>1,next);
+    for(j=1,#B,
+      if(poldegree(B[j][3])==1,return(Branch2Pt(C,B[j])))
+    )
+  );
+	for(z=0,M,
+		for(x=-M,M,
+			for(y=-M,M,
+				P=[x,y,z];
+				if(content(P)!=1,next);
+				if(!PtIsOnCrv(C,P),next);
+				if(!PtIsSing(C,P),return(P));
+			)
+		)
+	);
+	[];
+}
+
 CrvRatAux(f,N,D,x,y,t)=
 {
 	my(n,g,L,u,m,R,L1,u1,R1,L2,u2,R2,L3,u3,R3,A,B,e,a,b);
@@ -220,6 +253,10 @@ CrvEll(C,P)=
 	if(C[6]!=1,
 			error("This curve does not have genus 1")
 	);
+	if(P===0,
+		P = CrvFindRatPt(C);
+		if(P==[],error("Please specify a rational point (could not find any)"));
+	);
 	B = Pt2Branch(C,P);
 	L = RiemannRoch(C,[P,3]); \\ L(3*P)
 	LB = substvec(L,[x,y],BranchExpand(B[1],2));
@@ -244,7 +281,7 @@ CrvEll(C,P)=
 		E = ellminimalmodel(E,&U);
 		XY = ellchangepoint(XY,U);
 		ID = ellidentify(E);
-		if(#ID,ID=ID[1];ID=[ID[1],ID[3]]);
+		if(#ID,ID=ID[1];ID=[ID[1],apply(P->PtPullback(C,XY,P),ID[3])]);
 	);
 	XY = apply(s->FnNormalise(s,f,x,z),XY);
 	[E,ID,XY];
@@ -632,11 +669,12 @@ ConicLegendre(a,b)=
 	apply(abs,P)/content(P);
 }
 
-Crv0Rat(C)=
+Crv0RatPt(C,E,uv)=
 {
-	my(E,uv,P,D);
-	\\ TODO try simpler stuff first
-	[E,uv] = Crv0Conic(C);
+	my(P,D);
+	P = CrvFindRatPt(C);
+	if(P!=[],return(P));
+	if(E==0,[E,uv] = Crv0Conic(C));
 	P = ConicRat(E);
 	if(P==[],return([]));
 	if(P[3],
@@ -646,7 +684,34 @@ Crv0Rat(C)=
 	);
 	for(i=1,#D~,
 		P = D[i,1];
-		if(PtDeg(P)==1,return(P))
+		if(PtDeg(P)==1,return(Branch2Pt(C,P)))
 	);
 	error("Bug in Crv0Rat");
+}
+
+CrvConic(C,P,Q)=
+{
+	my(E,P1);
+	if(C[6]!=0,error("Nonzero genus"));
+	if(P==0,
+		[E,uv] = Crv0Conic(C);
+		P1 = Crv0RatPt(C,E,uv);
+		if(P1==[],return([E,uv]));
+		P = P1;
+	);
+	CrvRat(C,P,Q);
+}
+
+PtPullback(C,uv,P)=
+{
+	Du = FnDiv(C,uv[1]-P[1]);
+	Dv = FnDiv(C,uv[2]-P[2]);
+	for(i=1,#Du,
+		for(j=1,#Dv,
+			if(Du[i,1]==Dv[j,1],
+				return(Branch2Pt(C,Du[i,1]))
+			)
+		)
+	);
+	error("Bug in PtPullback");
 }
