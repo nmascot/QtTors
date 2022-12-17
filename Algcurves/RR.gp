@@ -265,8 +265,9 @@ RiemannRoch(C,D)=
   dx = poldegree(f,x);
   dy = poldegree(f,y);
   lf = polcoef(f,dy,y);
-  mOO = vector(nOO);
-  D0 = [];
+	\\ Begin parse D
+  mOO = vector(nOO); \\ Multiplicities of D at brnaches at OO
+  D0 = []; \\ Finite part of D
   for(i=1,#D~,
     [P,nP] = D[i,];
     [U,BP,iOO] = PtUB(P,F,B,B0,BOO,SB,lf); \\ Analyse P
@@ -276,7 +277,8 @@ RiemannRoch(C,D)=
 			mOO[iOO] = nP;
 		)
 	);
-  \\ D parsed. Compute den, adjust mOO and adjust and convert D0 into m0.
+  \\ D parsed. Compute den(x) so that den*L contained in OC; 
+	\\ then adjust mOO and adjust and convert D0 into m0.
   den = 1;
   m0 = List();
   for(i=1,#D0,
@@ -293,7 +295,7 @@ RiemannRoch(C,D)=
     mOO[i] += BOO[i][2] * dden;
     dOO += mOO[i] * poldegree(BOO[i][3]);
   );
-  \\ Now inflate mOO so dOO > 2g-2
+  \\ Now inflate mOO by adding l*(x)_oo to D_oo (l=0,1,2,...) so dOO > 2g-2 -> dim RR predictable
   mOO2 = mOO;
   l = 0;
   if(dOO <= 2*g-2,
@@ -301,18 +303,22 @@ RiemannRoch(C,D)=
     mOO2 = vector(nOO,i,mOO[i]+l*BOO[i][2])
   );
   V = matrix(nOO,dy,i,j,ceil((BranchValuation(OC[j],BOO[i][1],x,y)+mOO2[i])/BOO[i][2])+dOC);
-  N = vector(dy,j,vecmax(V[,j])); \\ Guess bounds on required powers of x
+	\\ L in OC = sum_j K[x]*OC[j]
+  N = vector(dy,j,vecmax(V[,j])); \\ Guess bounds on required powers of x for each j
   while(1, \\ Loop until powers of x are enough to recover full space
-    L = List();
+		\\print("Loop");
+		\\print(N);
+    L = List(); \\ List the x^i*OC[j]; hopefully they span a space containing L
     for(j=1,dy,
       for(i=0,N[j],
         listput(L,x^i*OC[j])
       )
     );
     L = Vec(L);
-    M = vector(nOO,i,PolarBranchMat(L,OCden,BOO[i],-mOO2[i],x,y,t,a));
+		\\ Get those with poles at x=oo no worse than mOO2
+    M = vector(nOO,i,PolarBranchMat(L,OCden,BOO[i],-mOO2[i],x,y,t,a)); 
     K = matker(matconcat(M~));
-    \\print("Got ",#K," expexted ",dOO+l*dy+1-g);
+    \\print("Got ",#K," expected ",dOO+l*dy+1-g);
     if(#K==dOO+l*dy+1-g,break);
     N = apply(n->n+dOO+l*dy+1-g-#K,N);
   );

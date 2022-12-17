@@ -37,6 +37,7 @@ AlgExtend(A,G,maxdeg=40,maxdeg2=8)=
   );
 
   print("polred degree ",d);
+	\\print(z);
   [z,T] = if(d<=maxdeg2,polredabs,polredbest)(z,1);
   z = subst(z,x,a);
   T = Mod(subst(liftpol(T),x,a),z);

@@ -1,0 +1,7 @@
+Solved:
+2*x^3 - 2*y^3*x^2 + 5*y^2*x + (y^5 - y): pb RR
+
+Solved:
+y^2*x^6 - 3*y^5*x^4 + (3*y^8 - 1)*x^2 - y^11 -> bad choice of t
+y*x^7 - x^2 + 2*y^4*x - y^8 same
+y^3-x^7*(x-1)^19*(x+1)^13

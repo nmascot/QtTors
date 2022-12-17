@@ -29,24 +29,28 @@ IntClosure1(y1,n,U,BU,x,y,t,a)=
   my(den=1,den1=1,d=poldegree(U),L=vector(n),Lr,M,K);
   \\print("Int closure above ",U);
   L[1] = 1;
-  for(r=2,n, \\ Rank r-1->r
-    L[r] = y1*L[r-1];
+  for(r=1,n-1, \\ Rank r->r+1
+    L[r+1] = y1*L[r];
+		\\print(L);
     while(1,
-      Lr = vector(r*d);
-      for(j=1,r,
-        for(i=0,d-1,
+      Lr = vector(r*d+1);
+      for(i=0,d-1,
+        for(j=1,r,
           Lr[i*r+j] = L[j]*x^i;
         )
       );
+			Lr[r*d+1] = L[r+1];
       den1 = den * U;
       \\print("Trying ",Lr," with den ",den1);
       M = apply(b->PolarBranchMat(Lr,den1,b,0,x,y,t,a),BU);
       M = matconcat(M~);
       \\printp(M);
       K = matker(M);
+			\\print("#K=",#K);
+			if(#K>1,breakpoint());
       if(#K==0,break);
-      L[r] = Lr * K[,1];
-      for(i=1,r-1,L[i]*=U);
+      L[r+1] = Lr*K[,1];
+      for(i=1,r,L[i]*=U);
       den = den1;
     )
   );
@@ -65,7 +69,9 @@ IntClosure(f,B,x,y,t,a)=
   y1 = if(poldegree(lf),lf*y,y);
   B = vecsort(B,b->poldegree(b[1]),4);
 	print("Local integral closures");
+	IntClosure1(y1,dy,B[1][1],B[1][2],x,y,t,a);
   OCU = parapply(bu->IntClosure1(y1,dy,bu[1],bu[2],x,y,t,a),B);
+	\\breakpoint();
   OCU = select(o->o[2]!=1,OCU);
   if(#OCU==0,return([powers(y1,dy-1),1]));
   if(#OCU==1,return(OCU[1]));
@@ -73,6 +79,7 @@ IntClosure(f,B,x,y,t,a)=
   print1("Joining... ");
   OCU = apply(lu->matrix(dy,dy,i,j,polcoef(lu[1][j],i-1,y)),OCU);
   for(i=1,#OCU,OCU[i]*=prod(j=1,#OCU,if(i==j,1,dens[j])));
+	\\OCU = concat(OCU,[matid(dy)*vecprod(dens)]);
   OCU = matconcat(OCU);
   OCU = mathnf(OCU);
   print("done");
