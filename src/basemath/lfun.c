@@ -1427,7 +1427,7 @@ lfuncost0(GEN L, GEN dom, long der, long bitprec)
 GEN
 lfuninit(GEN lmisc, GEN dom, long der, long bitprec)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   GEN poqk, AB, R, h, theta, ldata, eno, r, domain, tech, k;
   struct lfunp S;
 
@@ -1445,7 +1445,7 @@ lfuninit(GEN lmisc, GEN dom, long der, long bitprec)
   if (ldata_get_type(ldata)==t_LFUN_NF)
   {
     GEN T = gel(ldata_get_an(ldata), 2);
-    return lfunzetakinit(T, dom, der, bitprec);
+    return gerepilecopy(av, lfunzetakinit(T, dom, der, bitprec));
   }
   k = ldata_get_k(ldata);
   parse_dom(gtodouble(k), dom, &S);
@@ -1492,7 +1492,7 @@ lfuninit(GEN lmisc, GEN dom, long der, long bitprec)
     AB = lfuninit_pol(AB, poqk, S.precmax);
   tech = mkvec3(h, AB, R);
   domain = mkvec2(dom, mkvecsmall2(der, bitprec));
-  return gerepilecopy(ltop, lfuninit_make(t_LDESC_INIT, ldata, tech, domain));
+  return gerepilecopy(av, lfuninit_make(t_LDESC_INIT, ldata, tech, domain));
 }
 
 GEN

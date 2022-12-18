@@ -1315,9 +1315,7 @@ lfunproduct(GEN ldata, GEN linit1, GEN linit2, GEN domain)
                   vecsmall_concat(gel(M1, 3), gel(M2, 3)));
   return lfuninit_make(t_LDESC_PRODUCT, ldata, M3, domain);
 }
-static GEN lfunzetakinit_i(GEN nf, GEN dom, long der, long bit);
 static GEN lfunzetakinit_artin(GEN nf, GEN gal, GEN dom, long der, long bit);
-
 /* true nf */
 static GEN
 lfunzetakinit_quotient(GEN nf, GEN polk, GEN dom, long der, long bitprec)
@@ -1327,7 +1325,7 @@ lfunzetakinit_quotient(GEN nf, GEN polk, GEN dom, long der, long bitprec)
 
   nf_get_sign(nf,&r1,&r2);
   nfk = nfinit(polk, nbits2prec(bitprec));
-  Lk = lfunzetakinit_i(nfk, dom, der, bitprec); /* zeta_k */
+  Lk = lfunzetakinit(nfk, dom, der, bitprec); /* zeta_k */
   nf_get_sign(nfk,&r1k,&r2k);
   Vga = vec01((r1+r2) - (r1k+r2k), r2-r2k);
   N = absi_shallow(diviiexact(nf_get_disc(nf), nf_get_disc(nfk)));
@@ -1339,8 +1337,8 @@ lfunzetakinit_quotient(GEN nf, GEN polk, GEN dom, long der, long bitprec)
   return lfunproduct(lfunzetak_i(nf), Lk, LKk, domain);
 }
 /* true nf */
-static GEN
-lfunzetakinit_i(GEN nf, GEN dom, long der, long bitprec)
+GEN
+lfunzetakinit(GEN nf, GEN dom, long der, long bitprec)
 {
   long n, d = nf_get_degree(nf);
   GEN L, Q, G;
@@ -1356,12 +1354,6 @@ lfunzetakinit_i(GEN nf, GEN dom, long der, long bitprec)
   Q = Buchall(pol_x(fetch_var()), 0, nbits2prec(bitprec));
   L = lfunabelianrelinit_i(nf, Q, gal_get_pol(G), dom, der, bitprec);
   delete_var(); return L;
-}
-GEN
-lfunzetakinit(GEN nf, GEN dom, long der, long bit)
-{
-  pari_sp av = avma;
-  return gerepilecopy(av, lfunzetakinit_i(nf, dom, der, bit));
 }
 
 /***************************************************************/
