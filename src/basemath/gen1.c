@@ -2235,7 +2235,8 @@ gsqr(GEN x)
       gel(z,2) = gsqr(gel(x,2)); return z;
 
     case t_MAT: return RgM_sqr(x);
-    case t_VEC: /* handle extended t_QFB */
+    case t_VEC: if (!is_ext_qfr(x)) pari_err_TYPE2("*",x,x);
+    /* fall through handle extended t_QFB */
     case t_QFB: return qfbsqr(x);
     case t_VECSMALL:
       z = cgetg_copy(x, &lx);

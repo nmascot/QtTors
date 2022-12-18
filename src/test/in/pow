@@ -6,9 +6,15 @@ default(realprecision,38);
 Mat(2)^0
 Mod(0,1)^0
 Mod(2,3)^0
-Qfb(2,0,-1)^0
-Qfb(2,0,-1)^1
-Vecsmall([3,2,1])^0
+q=Qfb(2,0,-1);
+q^0
+q^1
+[q,1.]^0
+[q,1.]^1
+[q,1.]^2
+v=Vecsmall([3,2,1]);
+v^0
+v^1
 O(2)^1
 O(2)^-2
 (1/2)^-2
@@ -58,3 +64,9 @@ powers(Pi,7)
 powers(3, 5, 2)
 powers(3,-1)
 powers(3,0)
+
+\\ERRORS
+[1]^2
+[1]^1
+[1]^0
+List()^1

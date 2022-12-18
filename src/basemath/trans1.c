@@ -423,6 +423,12 @@ static GEN
 powr0(GEN x)
 { return signe(x)? real_1(realprec(x)): mpexp0(x); }
 
+/* assume typ(x) = t_VEC */
+static int
+is_ext_qfr(GEN x)
+{ return lg(x) == 3 && typ(gel(x,1)) == t_QFB && !qfb_is_qfi(gel(x,1))
+                    && typ(gel(x,2)) == t_REAL; }
+
 /* x t_POL or t_SER, return scalarpol(Rg_get_1(x)) */
 static GEN
 scalarpol_get_1(GEN x)
@@ -474,7 +480,8 @@ gpowg0(GEN x)
       y = matid(lx-1);
       for (i=1; i<lx; i++) gcoeff(y,i,i) = gpowg0(gcoeff(x,i,i));
       return y;
-    case t_VEC: /* handle extended t_QFB */
+    case t_VEC: if (!is_ext_qfr(x)) break;
+    /* fall through handle extended t_QFB */
     case t_QFB: return qfbpow(x, gen_0);
     case t_VECSMALL: return identity_perm(lg(x) - 1);
   }
@@ -930,11 +937,19 @@ gpowgs(GEN x, long n)
 
   if (n == 0) return gpowg0(x);
   if (n == 1)
-    switch (typ(x)) {
-      case t_VEC: /* handle extended t_QFB */
+  {
+    long t = typ(x);
+    if (is_scalar_t(t)) return gcopy(x);
+    switch(t)
+    {
+      case t_POL: case t_SER: case t_RFRAC: case t_MAT: case t_VECSMALL:
+        return gcopy(x);
+      case t_VEC: if (!is_ext_qfr(x)) break;
+      /* fall through handle extended t_QFB */
       case t_QFB: return qfbred(x);
-      default: return gcopy(x);
     }
+    pari_err_TYPE("gpow", x);
+  }
   if (n ==-1) return ginv(x);
   switch(typ(x))
   {
@@ -971,7 +986,8 @@ gpowgs(GEN x, long n)
       long N[] = {evaltyp(t_INT) | _evallg(3),0,0};
       affsi(n,N); return pow_polmod(x, N);
     }
-    case t_VEC: /* handle extended t_QFB */
+    case t_VEC: if (!is_ext_qfr(x)) pari_err_TYPE("gpow", x);
+    /* fall through handle extended t_QFB */
     case t_QFB: return qfbpows(x, n);
     case t_POL:
       if (RgX_is_monomial(x)) return pow_monome(x, n);
@@ -1009,7 +1025,8 @@ powgi(GEN x, GEN n)
     case t_FRAC:
       pari_err_OVERFLOW("lg()");
 
-    case t_VEC: /* handle extended t_QFB */
+    case t_VEC: if (!is_ext_qfr(x)) pari_err_TYPE("gpow",x);
+    /* fall through handle extended t_QFB */
     case t_QFB: return qfbpow(x, n);
     case t_POLMOD: return pow_polmod(x, n);
     default: {
