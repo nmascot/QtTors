@@ -320,6 +320,9 @@ T=rnfequation(K.pol, rel);
 L=lfunabelianrelinit(T,K,rel,[2,0,0]);
 lfun(L,2)
 lfuncost(L)
+\\ #2434
+bnfK=bnfinit(polcyclo(3,a));bnf=bnfinit(rnfequation(bnfK,x^3-2));
+M=lfunabelianrelinit(bnf,bnfK,x^3-2,[1.,3.,2]);
 
 L=lfuninit(polcyclo(3), [1/2,0,0]);
 lfuncheckfeq(L)

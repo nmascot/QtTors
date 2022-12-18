@@ -731,9 +731,6 @@ lfunzeta(void)
   gel(zet,3) = mkvec(gen_0);
   return zet;
 }
-static GEN
-lfunzetainit(GEN dom, long der, long bitprec)
-{ return lfuninit(lfunzeta(), dom, der, bitprec); }
 
 static GEN
 vecan_Kronecker(GEN D, long n)
@@ -1019,6 +1016,7 @@ lfunzetak_i(GEN T)
   N = absi_shallow(nf_get_disc(T));
   return mkvecn(7, tag(T,t_LFUN_NF), gen_0, Vga, gen_1, N, gen_1, gen_0);
 }
+/* truen nf or t_POL */
 static GEN
 lfunzetak(GEN T)
 { pari_sp av = avma; return gerepilecopy(av, lfunzetak_i(T)); }
@@ -1184,35 +1182,32 @@ chigenkerfind(GEN bnr, GEN H, GEN *pcnj)
   setlg(res, k); return res;
 }
 
-/* bnf = NULL: base field = Q */
-GEN
-lfunabelianrelinit(GEN nfabs, GEN bnf, GEN polrel, GEN dom, long der, long bitprec)
+/* true bnf */
+static GEN
+lfunabelianrelinit_i(GEN nfabs, GEN bnf, GEN polrel, GEN dom, long der, long bitprec)
 {
-  pari_sp ltop = avma;
-  GEN cond, chi, cnj, res, bnr, M, domain;
+  GEN X, cnj, bnr, M, D, cond = rnfconductor0(bnf, polrel, 1);
   long l, i;
-  long v = -1;
 
-  if (bnf) bnf = checkbnf(bnf);
-  else
-  {
-    v = fetch_var();
-    bnf = Buchall(pol_x(v), 0, nbits2prec(bitprec));
-  }
-  if (typ(polrel) != t_POL) pari_err_TYPE("lfunabelianrelinit", polrel);
-  cond = rnfconductor0(bnf, polrel, 1);
   bnr = gel(cond,2);
-  chi = chigenkerfind(bnr, gel(cond,3), &cnj);
-  l = lg(chi); res = cgetg(l, t_VEC);
+  X = chigenkerfind(bnr, gel(cond,3), &cnj); l = lg(X);
   for (i = 1; i < l; ++i)
   {
-    GEN L = lfunchigen(bnr, gel(chi,i));
-    gel(res, i) = lfuninit(L, dom, der, bitprec);
+    GEN L = lfunchigen(bnr, gel(X,i));
+    gel(X,i) = lfuninit(L, dom, der, bitprec);
   }
-  if (v >= 0) delete_var();
-  M = mkvec3(res, const_vecsmall(l-1, 1), cnj);
-  domain = mkvec2(dom, mkvecsmall2(der, bitprec));
-  return gerepilecopy(ltop, lfuninit_make(t_LDESC_PRODUCT, lfunzetak_i(nfabs), M, domain));
+  M = mkvec3(X, const_vecsmall(l-1, 1), cnj);
+  D = mkvec2(dom, mkvecsmall2(der, bitprec));
+  if (typ(nfabs) != t_POL) nfabs = checknf(nfabs);
+  return lfuninit_make(t_LDESC_PRODUCT, lfunzetak_i(nfabs), M, D);
+}
+GEN
+lfunabelianrelinit(GEN K, GEN bnf, GEN polrel, GEN dom, long der, long bit)
+{
+  pari_sp av = avma;
+  bnf = checkbnf(bnf);
+  if (typ(polrel) != t_POL) pari_err_TYPE("lfunabelianrelinit", polrel);
+  return gerepilecopy(av, lfunabelianrelinit_i(K, bnf, polrel, dom, der, bit));
 }
 
 /*****************************************************************/
@@ -1320,17 +1315,19 @@ lfunproduct(GEN ldata, GEN linit1, GEN linit2, GEN domain)
                   vecsmall_concat(gel(M1, 3), gel(M2, 3)));
   return lfuninit_make(t_LDESC_PRODUCT, ldata, M3, domain);
 }
+static GEN lfunzetakinit_i(GEN nf, GEN dom, long der, long bit);
+static GEN lfunzetakinit_artin(GEN nf, GEN gal, GEN dom, long der, long bit);
 
+/* true nf */
 static GEN
 lfunzetakinit_quotient(GEN nf, GEN polk, GEN dom, long der, long bitprec)
 {
-  pari_sp av = avma;
   GEN ak, an, nfk, Vga, ldata, N, Lk, LKk, domain;
   long r1k, r2k, r1, r2;
 
   nf_get_sign(nf,&r1,&r2);
   nfk = nfinit(polk, nbits2prec(bitprec));
-  Lk = lfunzetakinit(nfk, dom, der, bitprec); /* zeta_k */
+  Lk = lfunzetakinit_i(nfk, dom, der, bitprec); /* zeta_k */
   nf_get_sign(nfk,&r1k,&r2k);
   Vga = vec01((r1+r2) - (r1k+r2k), r2-r2k);
   N = absi_shallow(diviiexact(nf_get_disc(nf), nf_get_disc(nfk)));
@@ -1339,34 +1336,32 @@ lfunzetakinit_quotient(GEN nf, GEN polk, GEN dom, long der, long bitprec)
   ldata = mkvecn(6, an, gen_0, Vga, gen_1, N, gen_1);
   LKk = lfuninit(ldata, dom, der, bitprec); /* zeta_K/zeta_k */
   domain = mkvec2(dom, mkvecsmall2(der, bitprec));
-  return gerepilecopy(av, lfunproduct(lfunzetak_i(nf), Lk, LKk, domain));
+  return lfunproduct(lfunzetak_i(nf), Lk, LKk, domain);
 }
-
-static GEN
-lfunzetakinit_artin(GEN nf, GEN gal, GEN dom, long der, long bitprec);
-
-static GEN
-lfunzetakinit_Galois(GEN nf, GEN gal, GEN dom, long der, long bitprec)
-{
-  GEN grp = galois_group(gal);
-  if (group_isabelian(grp))
-    return lfunabelianrelinit(nf, NULL, gal_get_pol(gal), dom, der, bitprec);
-  else return lfunzetakinit_artin(nf, gal, dom, der, bitprec);
-}
-
 /* true nf */
-GEN
-lfunzetakinit(GEN nf, GEN dom, long der, long bitprec)
+static GEN
+lfunzetakinit_i(GEN nf, GEN dom, long der, long bitprec)
 {
-  GEN G, nfs, sbg;
-  long lf, d = nf_get_degree(nf);
-  if (d == 1) return lfunzetainit(dom, der, bitprec);
+  long n, d = nf_get_degree(nf);
+  GEN L, Q, G;
+  if (d == 1) return lfuninit(lfunzeta(), dom, der, bitprec);
   G = galoisinit(nf, NULL);
-  if (!isintzero(G))
-    return lfunzetakinit_Galois(nf, G, dom, der, bitprec);
-  nfs = nfsubfields(nf, 0); lf = lg(nfs)-1;
-  sbg = gmael(nfs,lf-1,1);
-  return lfunzetakinit_quotient(nf, sbg, dom, der, bitprec);
+  if (isintzero(G))
+  {
+    GEN S = nfsubfields(nf, 0); n = lg(S)-1;
+    return lfunzetakinit_quotient(nf, gmael(S,n-1,1), dom, der, bitprec);
+  }
+  if (!group_isabelian(galois_group(G)))
+    return lfunzetakinit_artin(nf, G, dom, der, bitprec);
+  Q = Buchall(pol_x(fetch_var()), 0, nbits2prec(bitprec));
+  L = lfunabelianrelinit_i(nf, Q, gal_get_pol(G), dom, der, bitprec);
+  delete_var(); return L;
+}
+GEN
+lfunzetakinit(GEN nf, GEN dom, long der, long bit)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, lfunzetakinit_i(nf, dom, der, bit));
 }
 
 /***************************************************************/
@@ -2897,14 +2892,12 @@ lfunartin(GEN nf, GEN gal, GEN ch, long o, long bitprec)
   return gerepilecopy(av, Ldata);
 }
 
+/* true nf */
 static GEN
 lfunzetakinit_artin(GEN nf, GEN gal, GEN dom, long der, long bitprec)
 {
-  pari_sp ltop = avma;
-  GEN To = galoischartable(gal), T = gel(To, 1);
-  long o = itos(gel(To, 2));
-  GEN F, E, M, domain;
-  long i, l = lg(T);
+  GEN F, E, M, domain, To = galoischartable(gal), T = gel(To, 1);
+  long i, o = itos(gel(To, 2)), l = lg(T);
   F = cgetg(l, t_VEC);
   E = cgetg(l, t_VECSMALL);
   for (i = 1; i < l; ++i)
@@ -2915,8 +2908,7 @@ lfunzetakinit_artin(GEN nf, GEN gal, GEN dom, long der, long bitprec)
   }
   domain = mkvec2(dom, mkvecsmall2(der, bitprec));
   M = mkvec3(F, E, zero_zv(l-1));
-  return gerepilecopy(ltop, lfuninit_make(t_LDESC_PRODUCT, lfunzetak_i(nf),
-                                          M, domain));
+  return lfuninit_make(t_LDESC_PRODUCT, lfunzetak_i(nf), M, domain);
 }
 
 /********************************************************************/
