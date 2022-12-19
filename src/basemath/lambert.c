@@ -133,11 +133,19 @@ dbllambertW_1init(double a)
   return dblL1L2(log(-a));
 }
 
-/* uniform approximation to more than 46 bits, 50 bits away from -1/e. */
+/* uniform approximation to more than 46 bits, 50 bits away from -1/e;
+ * branch = -1 or 0 */
 static double
-dbllambertWfritsch(double a, int branch)
+dbllambertWfritsch(GEN ga, int branch)
 {
-  double z, w1, q, w = branch? dbllambertW_1init(a): dbllambertW0init(a);
+  double a, z, w1, q, w;
+  if (expo(ga) >= 0x3fe)
+  { /* branch = 0 */
+    double w = dbllog2(ga) * M_LN2; /* ~ log(1+a) ~ log a */
+    return w * (1.+w-log(w)) / (1.+w);
+  }
+  a = rtodbl(ga);
+  w = branch? dbllambertW_1init(a): dbllambertW0init(a);
   if (w == -1.|| w == 0.) return w;
   z = log(a / w) - w; w1 = 1. + w;
   q = 2. * w1 * (w1 + (2./3.) * z);
@@ -170,10 +178,10 @@ lambertW(GEN z, long k, long prec)
     long e = expo(z);
     if (signe(z) >= 0) pari_err_DOMAIN("lambertw", "z", ">", gen_0, z);
     wd = e < -512? dbllambertWhalleyspec(dbllog2(z) * M_LN2)
-                 : dbllambertWfritsch(rtodbl(z), -1);
+                 : dbllambertWfritsch(z, -1);
   }
   else
-    wd = dbllambertWfritsch(rtodbl(z), 0);
+    wd = dbllambertWfritsch(z, 0);
   if (fabs(wd + 1) < 1e-5)
   {
     long prec2 = prec + EXTRAPRECWORD;

@@ -40,6 +40,7 @@ lambertw(-10^(-100),0)
 lambertw(-10^(-100),-1)
 do(lambertw(precision(-0.1,38),-1))
 \p38
+lambertw(10^1000) \\ #2429
 vector(10,mul,round(10^4*abs(lambertw(mie,mul))))
 vector(10,mul,round(10^4*abs(lambertw(mie,10*mul))))
 bra(y,k)=if(k!=-1||imag(y)||y>0||y<mie, k, 0);
