@@ -10,9 +10,9 @@ K=nfinit(y^3-y-1); T=x^3-x-1;
 rnfpolredabs(K,T)
 rnfpolredabs(K,T,2)
 [P,a]=rnfpolredbest(K,T,1);
-subst(K.pol,y,a)
+liftall(subst(K.pol,y,a))
 [P,a,b]=rnfpolredbest(K,T,3);
-subst(K.pol,y,a)
+liftall(subst(K.pol,y,a))
 substvec(T,[x,y],[a,b])
 rnfpolred(nfinit(quadpoly(1129,y)),quadray(1129,1));
 
