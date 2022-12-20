@@ -1161,28 +1161,39 @@ lfunchigen(GEN bnr, GEN CHI)
 }
 
 /* Find all characters of clgp whose kernel contain group given by HNF H.
- * Set *pcnj[i] if chi[i] is not real */
+ * Set *pcnj[i] to the conductor */
 static GEN
 chigenkerfind(GEN bnr, GEN H, GEN *pcnj)
 {
-  GEN res, cnj, L = bnrchar(bnr, H, NULL), cyc = bnr_get_cyc(bnr);
+  GEN res, cnj, L = bnrchar(bnr, H, NULL);
   long i, k, l = lg(L);
 
   res = cgetg(l, t_VEC);
-  *pcnj = cnj = cgetg(l, t_VECSMALL);
+  *pcnj = cnj = cgetg(l, t_VEC);
   for (i = k = 1; i < l; i++)
   {
-    GEN chi = gel(L,i), c = charconj(cyc, chi);
-    long fl = ZV_cmp(c, chi);
-    if (fl < 0) continue; /* keep one char in pair of conjugates */
+    GEN chi = gel(L,i);
     gel(res, k) = chi;
-    cnj[k] = fl; k++;
+    gel(cnj, k) = ZV_equal0(chi)? gen_0: bnrconductorofchar(bnr, chi);
+    k++;
   }
   setlg(cnj, k);
   setlg(res, k); return res;
 }
 
-/* true bnf; nfabs: true nf or t_POL */
+static GEN
+vec_classes(GEN A, GEN F)
+{
+  pari_sp av = avma;
+  GEN w = vec_equiv(F);
+  long i, l = lg(w);
+  GEN V = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
+    gel(V,i) = vecpermute(A,gel(w,i));
+  return gerepilecopy(av,mkvec2(V, perm_inv(shallowconcat1(w))));
+}
+
+/* true bnf */
 static GEN
 lfunabelianrelinit_i(GEN nfabs, GEN bnf, GEN polrel, GEN dom, long der, long bitprec)
 {
@@ -1190,13 +1201,15 @@ lfunabelianrelinit_i(GEN nfabs, GEN bnf, GEN polrel, GEN dom, long der, long bit
   long l, i;
   if (typ(cond) != t_VEC) pari_err_TYPE("lfunabelianrelinit",polrel);
   bnr = gel(cond,2);
-  X = chigenkerfind(bnr, gel(cond,3), &cnj); l = lg(X);
+  X = chigenkerfind(bnr, gel(cond,3), &cnj);
+  X = gel(vec_classes (X, cnj), 1); l = lg(X);
   for (i = 1; i < l; ++i)
   {
-    GEN L = lfunchigen(bnr, gel(X,i));
+    GEN chi = gel(X,i);
+    GEN L = lfunchigen(bnr, lg(chi)==2 ? gel(chi,1): chi);
     gel(X,i) = lfuninit(L, dom, der, bitprec);
   }
-  M = mkvec3(X, const_vecsmall(l-1, 1), cnj);
+  M = mkvec3(X, const_vecsmall(l-1, 1), const_vecsmall(l-1, 0));
   D = mkvec2(dom, mkvecsmall2(der, bitprec));
   return lfuninit_make(t_LDESC_PRODUCT, lfunzetak_i(nfabs), M, D);
 }

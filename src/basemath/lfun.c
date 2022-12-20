@@ -1573,6 +1573,9 @@ lfunlambda_product(GEN L, GEN s, GEN sdom, long bitprec)
   for (i = 1; i < l; ++i)
   {
     GEN f = lfunlambda_OK(gel(F, i), s, sdom, bitprec);
+    if( DEBUGLEVEL>=2) err_printf("lfunlambda(%ld): %Ps\n",i,f);
+    if (typ(f)==t_VEC)
+      f = RgV_prod(f);
     if (E[i])
       r = gmul(r, gpowgs(f, E[i]));
     if (C[i])
