@@ -158,12 +158,12 @@ nf=nfinit(x^6+108); a=Mod(x,x^6+108);
 { for(k=2,5,
     u=nfalgtobasis(nf,(2*a^2+a+3)*random(2^100*x^6)^k);
     b=idealredmodpower(nf,u,k);
-    v=nfeltmul(nf,u,nfeltpow(nf,b,k)); print(v)); }
+    v=nfeltmul(nf,u,nfeltpow(nf,b,k)); if(exponent(v) > 8, error())); }
 idealredmodpower(nf,0,2)
 idealredmodpower(nf,1,2)
 idealredmodpower(nf,x^5-3*x^4-3*x^3+18*x^2-18*x-54,2)
-idealredmodpower(nf,x/2,2)
-idealredmodpower(nf,x/12,2)
+normlp(idealredmodpower(nf,x/2,2))==1
+normlp(idealredmodpower(nf,x/12,2))==2
 
 \\ #2181
 K=nfinit(x^8-x^7+853*x^6-1705*x^5+728461*x^4+1452660*x^3+619196112*x^2+618470208*x+526936617216);
