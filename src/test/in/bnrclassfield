@@ -1,5 +1,5 @@
 default(realprecision,38);
-default(parisize,"28M"); \\ overflows 26M
+default(parisize,"30M"); \\ overflows 28M
 count = 0;
 
 nfisprobisom(P,Q,n)=
