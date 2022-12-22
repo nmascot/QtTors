@@ -1188,7 +1188,7 @@ lfunabelianrelinit_i(GEN nfabs, GEN bnf, GEN polrel, GEN dom, long der, long bit
 {
   GEN X, cnj, bnr, M, D, cond = rnfconductor0(bnf, polrel, 1);
   long l, i;
-
+  if (typ(cond) != t_VEC) pari_err_TYPE("lfunabelianrelinit",polrel);
   bnr = gel(cond,2);
   X = chigenkerfind(bnr, gel(cond,3), &cnj); l = lg(X);
   for (i = 1; i < l; ++i)
