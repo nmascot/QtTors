@@ -2251,7 +2251,8 @@ static GEN
 lfunhardyzeros(void *E, GEN t)
 {
   struct lhardyz_t *S = (struct lhardyz_t*)E;
-  return gprec_wensure(lfunhardy(S->linit, t, S->bitprec), S->prec);
+  GEN z = gprec_wensure(lfunhardy(S->linit, t, S->bitprec), S->prec);
+  return typ(z) == t_VEC ? RgV_prod(z): z;
 }
 
 /* initialize for computation on critical line up to height h, zero
@@ -2288,13 +2289,33 @@ lfunorderzero(GEN lmisc, long m, long bitprec)
   linit = lfuncenterinit(lmisc, 0, m, bitprec);
   ldata = linit_get_ldata(linit);
   eno = ldata_get_rootno(ldata);
-  if (typ(eno) == t_VEC) pari_err_TYPE("lfunorderzero [vector-valued]", lmisc);
   k2 = gmul2n(ldata_get_k(ldata), -1);
   G = -bitprec/2;
   c0 = 0; st = 1;
-  if (ldata_isreal(ldata)) { st = 2; if (!gequal1(eno)) c0 = 1; }
-  for (c = c0;; c += st)
-    if (gexpo(lfun0(linit, k2, c, bitprec)) > G) return gc_long(ltop, c);
+  if (typ(eno) == t_VEC)
+  {
+    long i, l = lg(eno), cnt = l-1, s = 0;
+    GEN v = zero_zv(l-1);
+    if (ldata_isreal(ldata)) st = 2;
+    for (c = c0; cnt; c += st)
+    {
+      GEN L = lfun0(linit, k2, c, bitprec);
+      for (i = 1; i < l; i++)
+      {
+        if (v[i]==0 && gexpo(gel(L,i)) > G)
+        {
+          v[i] = c; cnt--; s += c;
+        }
+      }
+    }
+    return gc_long(ltop,s);
+  }
+  else
+  {
+    if (ldata_isreal(ldata)) { st = 2; if (!gequal1(eno)) c0 = 1; }
+    for (c = c0;; c += st)
+      if (gexpo(lfun0(linit, k2, c, bitprec)) > G) return gc_long(ltop, c);
+  }
 }
 
 /* assume T1 * T2 > 0, T1 <= T2 */

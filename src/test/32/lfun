@@ -354,9 +354,6 @@ O(x^2)
   ***   at top-level: lfuncreate([errG,[[1,8]~,[0,1]~]])
   ***                 ^----------------------------------
   *** lfuncreate: incorrect type in lfuncreate [different conductors] (t_VEC).
-  ***   at top-level: lfunorderzero([errG,[[1,8]~,[1,2]~]])
-  ***                 ^-------------------------------------
-  *** lfunorderzero: incorrect type in lfunorderzero [vector-valued] (t_VEC).
   ***   at top-level: ...z)->1,1],0,[0],1,1,1,1]);lfunan(L,5)
   ***                                             ^-----------
   *** lfunan: incorrect type in vecan_closure (t_VEC).
@@ -387,4 +384,4 @@ O(x^2)
   ***   at top-level: ...=bnfinit(polcyclo(3,'a));lfunabelianrelinit(bn
   ***                                             ^---------------------
   *** lfunabelianrelinit: incorrect type in lfunabelianrelinit (t_POL).
-Total time spent: 4119
+Total time spent: 3894
