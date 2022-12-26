@@ -384,7 +384,7 @@ O(x^2)
   ***   at top-level: lfuneuler(x^2+1,Pi)
   ***                 ^-------------------
   *** lfuneuler: incorrect type in lfuneuler (t_REAL).
-  ***   at top-level: M=lfunabelianrelinit(bnf,bnfK,x^3-x-1,[1.,3.,2
-  ***                   ^--------------------------------------------
+  ***   at top-level: ...=bnfinit(polcyclo(3,'a));lfunabelianrelinit(bn
+  ***                                             ^---------------------
   *** lfunabelianrelinit: incorrect type in lfunabelianrelinit (t_POL).
-Total time spent: 5716
+Total time spent: 4119

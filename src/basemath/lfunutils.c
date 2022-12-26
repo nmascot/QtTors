@@ -1182,7 +1182,7 @@ chigenkerfind(GEN bnr, GEN H, GEN *pcnj)
   setlg(res, k); return res;
 }
 
-/* true bnf */
+/* true bnf; nfabs: true nf or t_POL */
 static GEN
 lfunabelianrelinit_i(GEN nfabs, GEN bnf, GEN polrel, GEN dom, long der, long bitprec)
 {
@@ -1198,15 +1198,27 @@ lfunabelianrelinit_i(GEN nfabs, GEN bnf, GEN polrel, GEN dom, long der, long bit
   }
   M = mkvec3(X, const_vecsmall(l-1, 1), cnj);
   D = mkvec2(dom, mkvecsmall2(der, bitprec));
-  if (typ(nfabs) != t_POL) nfabs = checknf(nfabs);
   return lfuninit_make(t_LDESC_PRODUCT, lfunzetak_i(nfabs), M, D);
 }
 GEN
-lfunabelianrelinit(GEN K, GEN bnf, GEN polrel, GEN dom, long der, long bit)
+lfunabelianrelinit(GEN bnf, GEN polrel, GEN dom, long der, long bit)
 {
   pari_sp av = avma;
+  GEN K = NULL;
   bnf = checkbnf(bnf);
-  if (typ(polrel) != t_POL) pari_err_TYPE("lfunabelianrelinit", polrel);
+  switch(typ(polrel))
+  {
+    case t_POL: break;
+    case t_VEC:
+      if (lg(polrel) == 3 && typ(gel(polrel,1)) == t_POL)
+      {
+        K = gel(polrel,2);
+        if (typ(K) != t_POL) K = checknf_i(K);
+        if (K) { polrel = gel(polrel,1); break; }
+      }
+    default: pari_err_TYPE("lfunabelianrelinit", polrel);
+  }
+  if (!K) K = rnfequation(nf_get_pol(bnf_get_nf(bnf)), polrel);
   return gerepilecopy(av, lfunabelianrelinit_i(K, bnf, polrel, dom, der, bit));
 }
 

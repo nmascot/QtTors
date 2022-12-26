@@ -36,6 +36,7 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
      8- default 'primelimit' is now 2^20 [instead of 500000]
      9- allow fromdigits(t_COL or t_VECSMALL, B)
     10- [libpari] cgetalloc arguments swapped to mirror cgetg's definition
+    11- simplified lfunabelianrelinit (absolute equation is now optional)
 
   Added
 PMo  1- new syntax for forvec loops

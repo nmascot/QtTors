@@ -4461,7 +4461,7 @@ long    etaquotype(GEN *eta, GEN *pN, GEN *pk, GEN *CHI, long *pv, long *sd, lon
 GEN     galois_get_conj(GEN G); /* TODO move somewhere else? */
 GEN     ldata_vecan(GEN ldata, long L, long prec);
 GEN     ldata_newprec(GEN ldata, long prec);
-GEN     lfunabelianrelinit(GEN bnfabs, GEN bnf, GEN polrel, GEN dom, long der, long bitprec);
+GEN     lfunabelianrelinit(GEN bnf, GEN polrel, GEN dom, long der, long bit);
 GEN     lfunartin(GEN N, GEN G, GEN M, long o, long bitprec);
 GEN     lfundiv(GEN ldata1, GEN ldata2, long bitprec);
 GEN     lfunellmfpeters(GEN E, long bitprec);
