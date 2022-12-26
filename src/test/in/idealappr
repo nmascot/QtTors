@@ -6,3 +6,5 @@ idealtwoelt(K, A, x)
 idealtwoelt(K, [;])
 idealtwoelt(K, [;], 1)
 idealtwoelt(K, [;], 0)
+nf=nfinit(t^3-t^2-383270*t+54978000);
+idealtwoelt(nf, [2748900,0,1086775;0,2,1;0,0,5]) \\ #2437

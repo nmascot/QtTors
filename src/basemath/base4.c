@@ -370,7 +370,7 @@ get_random_a(GEN nf, GEN x, GEN xZ)
   {
     for (a=NULL,i=1; i<lm; i++)
     {
-      long t = random_bits(4) - 7; /* in [-7,8] */
+      long t = random_bits(6) - 31; /* in [-31,32] */
       z[i] = t;
       a = addmul_mat(a, t, gel(mul,i));
     }
