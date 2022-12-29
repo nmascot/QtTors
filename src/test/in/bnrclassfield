@@ -186,14 +186,15 @@ M=matconcat([idealfactor(bnf,p),idealfactor(bnf,q)]~);
 bnr=bnrinit(bnf,M,,7); bnrclassfield(bnr)
 
 print("vector of subgroups"); \\ avoid 32-bit differences
-deg(a)=poldegree(if (type(a)=="t_POL", a, a[1]));
-filter(v)=[if (cmp(a,b=(-1)^deg(a)*subst(a,x,-x)) < 0,b,a)| a<-v];
+RED(red, a)=if (type(a)=="t_POL", red(a), apply(x->RED(red,x),a));
 setrand(1);bnr=bnrinit(bnfinit(y^2+3299), 3,, 3);
 L=subgrouplist(bnr, [3], 1);
-setrand(1);filter(bnrclassfield(bnr, L, 0))
-setrand(1);filter(bnrclassfield(bnr, L, 1))
-setrand(1);filter(bnrclassfield(bnr, L, 2))
+setrand(1);RED(x->rnfpolredabs(bnr,x), bnrclassfield(bnr, L, 0))
+setrand(1);RED(x->rnfpolredabs(bnr,x), bnrclassfield(bnr, L, 1))
+setrand(1);RED(polredabs, bnrclassfield(bnr, L, 2))
 bnrclassfield(bnr,[])
+deg(a)=poldegree(if (type(a)=="t_POL", a, a[1]));
+filter(v)=[if (cmp(a,b=(-1)^deg(a)*subst(a,x,-x)) < 0,b,a)| a<-v];
 filter(bnrclassfield(bnfinit(y^2+31),[Mat(3)]))
 
 \\ bnf.Ge contains t_FRAC
