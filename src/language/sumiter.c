@@ -1731,7 +1731,7 @@ chk_ord(long m)
   if (m < 0)
     pari_err_DOMAIN("derivnumk", "derivation order", "<", gen_0, stoi(m));
 }
-/* m! / N! for m in ind; vecmax(ind) <= N */
+/* m! / N! for m in ind; vecmax(ind) <= N. Result not a GEN if ind contains 0. */
 static GEN
 vfact(GEN ind, long N, long prec)
 {
