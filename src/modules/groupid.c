@@ -78,17 +78,12 @@ indexgroupcentre(GEN G, GEN Z, const long *good, const long *bad)
 static GEN
 vecgroup_idxlist(GEN L, long order)
 {
-  pari_sp ltop=avma;
-  GEN V;
-  long i,j,n;
-  for (n=0,i=1; i<lg(L); i++)
-    if (group_order(gel(L,i))==order)
-      n++;
-  V=cgetg(n+1,t_VECSMALL);
-  for(i=1,j=1; j<=n; i++)
-    if (group_order(gel(L,i))==order)
-      V[j++]=group_ident(gel(L,i),NULL);
-  return gerepileupto(ltop,vecsmall_uniq(V));
+  pari_sp av = avma;
+  long i, j, l = lg(L);
+  GEN V = cgetg(l, t_VECSMALL);
+  for (i = j = 1; i < l; i++)
+    if (group_order(gel(L,i)) == order) V[j++] = group_ident(gel(L,i),NULL);
+  setlg(V, j); return gerepileuptoleaf(av, vecsmall_uniq(V));
 }
 
 /* Group identification code.
