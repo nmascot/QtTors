@@ -1871,6 +1871,7 @@ suitef36_3:
   set_avma(ltop2); return res;
 }
 
+/* return a vecvecsmall */
 static GEN
 galoisfindgroups(GEN lo, GEN sg, long f)
 {
@@ -2004,7 +2005,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
       if (galoisfrobeniustest(gel(gt.pauto,el+1),&gl,frob))
       {
         psi = const_vecsmall(g,1);
-        dgf = dg; fres = gcopy(frob); continue;
+        dgf = dg; fres = leafcopy(frob); continue;
       }
       lo = listznstarelts(dg, n / gf->fp);
       if (e!=1) lo = galoisfindgroups(lo, sg, dgf);
@@ -2012,9 +2013,9 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
       for (l = 1; l < lg(lo); l++)
         if (lg(gel(lo,l))>2 && frobeniusliftall(gel(lo,l), el, &pf,&gl,&gt, frob))
         {
-          sg  = gcopy(gel(lo,l));
+          sg  = leafcopy(gel(lo,l));
           psi = galoismakepsi(g,sg,pf);
-          dgf = dg; fres = gcopy(frob); break;
+          dgf = dg; fres = leafcopy(frob); break;
         }
       if (l == lg(lo)) break;
     }
