@@ -15425,9 +15425,10 @@ to \kbd{n} components.
 
 \fun{GEN}{vecsmall_indexsort}{GEN x} performs an indirect sort of the
 components of the \typ{VECSMALL} \kbd{x} and return a permutation stored in a
-\typ{VECSMALL}.
+\typ{VECSMALL} (merge sort).
 
-\fun{void}{vecsmall_sort}{GEN v} sorts the \typ{VECSMALL} \kbd{v} in place.
+\fun{void}{vecsmall_sort}{GEN v} sorts the \typ{VECSMALL} \kbd{v} in place
+(merge sort).
 
 \fun{GEN}{vecsmall_reverse}{GEN v} as \kbd{vecreverse} for a \typ{VECSMALL}
 \kbd{v}.
@@ -15491,6 +15492,19 @@ this number modulo \kbd{mod}. This can be used as an hash function.
 
 \fun{GEN}{vecsmall_prod}{GEN v} given a \typ{VECSMALL} \kbd{v}, return
 the product of its entries.
+
+The following sorting functions assume all entries of the \typ{VECSMALL}
+$v$ satisfy $0 \leq v[i] \leq M$ and use a counting sort, in linear time
+$O(\#v + M)$:
+
+\fun{void}{vecsmall_counting_sort}{GEN v, long M} sorts the \typ{VECSMALL}
+\kbd{v} in place.
+
+\fun{GEN}{vecsmall_counting_indexsort}{GEN v, long M} as
+\kbd{vecsmall\_indexsort} using a counting sort.
+
+\fun{GEN}{vecsmall_counting_uniq}{GEN v, long M} as
+\kbd{vecsmall\_uniq} using a counting sort.
 
 \subsec{Vectors of \typ{VECSMALL}}
 These functions manipulate vectors of \typ{VECSMALL} (vecvecsmall).

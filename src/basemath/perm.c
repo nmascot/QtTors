@@ -108,13 +108,72 @@ vecsmall_sortspec(GEN v, long n, GEN w)
   set_avma(ltop);
 }
 
-/*in place sort.*/
-void
-vecsmall_sort(GEN V)
+static long
+vecsmall_sort_max(GEN v)
 {
-  long l = lg(V)-1;
-  if (l<=1) return;
-  vecsmall_sortspec(V+1,l,V+1);
+  long i, l = lg(v), max = -1;
+  for (i = 1; i < l; i++)
+    if (v[i] > max) { max = v[i]; if (max >= l) return -1; }
+    else if (v[i] < 0) return -1;
+  return max;
+}
+/* assume 0 <= v[i] <= M. In place. */
+void
+vecsmall_counting_sort(GEN v, long M)
+{
+  pari_sp av;
+  long i, j, k, l;
+  GEN T;
+  if (M == 0) return;
+  av = avma; T = new_chunk(M + 1); l = lg(v);
+  for (i = 0; i <= M; i++) T[i] = 0;
+  for (i = 1; i < l; i++) T[v[i]]++; /* T[j] is # keys = j */
+  for (j = 0, k = 1; j <= M; j++)
+    for (i = 1; i <= T[j]; i++) v[k++] = j;
+  set_avma(av);
+}
+/* not GC-clean, suitable for gerepileupto */
+GEN
+vecsmall_counting_uniq(GEN v, long M)
+{
+  long i, k, l = lg(v);
+  GEN T, U;
+  if (l == 1) return cgetg(1, t_VECSMALL);
+  if (M == 0) return mkvecsmall(0);
+  if (l == 2) return leafcopy(v);
+  U = new_chunk(M + 2);
+  T = U+1; /* allows to rewrite result over T also if T[0] = 1 */
+  for (i = 0; i <= M; i++) T[i] = 0;
+  for (i = 1; i < l; i++) T[v[i]] = 1;
+  for (i = 0, k = 1; i <= M; i++)
+    if (T[i]) U[k++] = i;
+  U[0] = evaltyp(t_VECSMALL) | _evallg(k); return U;
+}
+GEN
+vecsmall_counting_indexsort(GEN v, long M)
+{
+  pari_sp av;
+  long i, l = lg(v);
+  GEN T, p;
+  if (M == 0 || l <= 2) return identity_zv(l - 1);
+  p = cgetg(l, t_VECSMALL); av = avma; T = new_chunk(M + 1);
+  for (i = 0; i <= M; i++) T[i] = 0;
+  for (i = 1; i < l; i++) T[v[i]]++; /* T[j] is # keys = j */
+  for (i = 1; i <= M; i++) T[i] += T[i-1]; /* T[j] is # keys <= j */
+  for (i = l-1; i > 0; i--) { p[T[v[i]]] = i; T[v[i]]--; }
+  return gc_const(av, p);
+}
+
+/* in place sort */
+void
+vecsmall_sort(GEN v)
+{
+  long n = lg(v) - 1, max;
+  if (n <= 1) return;
+  if ((max = vecsmall_sort_max(v)) >= 0)
+    vecsmall_counting_sort(v, max);
+  else
+    vecsmall_sortspec(v+1, n, v+1);
 }
 
 /* cf gen_sortspec */
@@ -154,34 +213,40 @@ vecsmall_indexsortspec(GEN v, long n)
 
 /*indirect sort.*/
 GEN
-vecsmall_indexsort(GEN V)
+vecsmall_indexsort(GEN v)
 {
-  long l=lg(V)-1;
-  if (l==0) return cgetg(1, t_VECSMALL);
-  return vecsmall_indexsortspec(V,l);
+  long n = lg(v) - 1, max;
+  if (n==0) return cgetg(1, t_VECSMALL);
+  if ((max = vecsmall_sort_max(v)) >= 0)
+    return vecsmall_counting_indexsort(v, max);
+  else
+    return vecsmall_indexsortspec(v,n);
 }
 
 /* assume V sorted */
 GEN
-vecsmall_uniq_sorted(GEN V)
+vecsmall_uniq_sorted(GEN v)
 {
-  GEN W;
-  long i,j, l = lg(V);
-  if (l == 1) return vecsmall_copy(V);
-  W = cgetg(l,t_VECSMALL);
-  W[1] = V[1];
-  for(i=j=2; i<l; i++)
-    if (V[i] != W[j-1]) W[j++] = V[i];
-  stackdummy((pari_sp)(W + l), (pari_sp)(W + j));
-  setlg(W, j); return W;
+  long i, j, l;
+  GEN w = cgetg_copy(v, &l);
+  if (l == 1) return w;
+  w[1] = v[1];
+  for(i = j = 2; i < l; i++)
+    if (v[i] != w[j-1]) w[j++] = v[i];
+  stackdummy((pari_sp)(w + l), (pari_sp)(w + j));
+  setlg(w, j); return w;
 }
 
 GEN
-vecsmall_uniq(GEN V)
+vecsmall_uniq(GEN v)
 {
   pari_sp av = avma;
-  V = zv_copy(V); vecsmall_sort(V);
-  return gerepileuptoleaf(av, vecsmall_uniq_sorted(V));
+  long max;
+  if ((max = vecsmall_sort_max(v)) >= 0)
+    v = vecsmall_counting_uniq(v, max);
+  else
+  { v = zv_copy(v); vecsmall_sort(v); v = vecsmall_uniq_sorted(v); }
+  return gerepileuptoleaf(av, v);
 }
 
 /* assume x sorted */
