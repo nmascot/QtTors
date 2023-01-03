@@ -46,17 +46,6 @@ vecRCpol(long r, long d)
   }
   return v;
 }
-/* D a t_INT */
-static GEN
-RgXV_rescale(GEN v, GEN D)
-{
-  long j, l;
-  GEN w;
-  if (equali1(D)) return v;
-  w = cgetg_copy(v, &l);
-  for (j = 1; j < l; j++) gel(w,j) = RgX_rescale(gel(v,j), D);
-  return w;
-}
 static GEN
 euler_sumdiv(GEN q, long v)
 {

@@ -1391,6 +1391,7 @@ GEN     RgXQX_sqr(GEN x, GEN T);
 GEN     RgXQX_translate(GEN P, GEN c, GEN T);
 GEN     RgXV_RgV_eval(GEN Q, GEN x);
 GEN     RgXV_prod(GEN V);
+GEN     RgXV_rescale(GEN v, GEN h);
 GEN     RgXV_to_RgM(GEN v, long n);
 GEN     RgXV_unscale(GEN v, GEN h);
 GEN     RgXX_to_RgM(GEN v, long n);

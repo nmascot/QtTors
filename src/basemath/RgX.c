@@ -413,7 +413,7 @@ ZX_unscale_divpow(GEN P, GEN h, long k)
 GEN
 RgXV_unscale(GEN x, GEN h)
 {
-  if (!h || isint1(h)) return x;
+  if (isint1(h)) return RgX_copy(x);
   pari_APPLY_same(RgX_unscale(gel(x,i), h));
 }
 
@@ -431,6 +431,13 @@ RgX_rescale(GEN P, GEN h)
     hi = gmul(hi,h);
   }
   Q[1] = P[1]; return Q;
+}
+
+GEN
+RgXV_rescale(GEN x, GEN h)
+{
+  if (isint1(h)) return RgX_copy(x);
+  pari_APPLY_same(RgX_rescale(gel(x,i), h));
 }
 
 /* A(X^d) --> A(X) */
