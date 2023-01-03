@@ -26,7 +26,7 @@ case "$arch" in
            esac;;
   riscv|riscv64) case "$sizeof_long" in
            4) asmarch=none;             prettya='Risc-V/32';;
-           8) asmarch=none;             prettya='Risc-V/64';;
+           8) asmarch=riscv64;          prettya='Risc-V/64';;
            esac;;
    mips|mips64) case "$sizeof_long" in
            4) asmarch=mips;             prettya='MIPS';;

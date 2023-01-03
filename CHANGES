@@ -47,3 +47,4 @@ BA   2- [GP] genus2igusa
      3- printf numerical conversions: support complex numbers [#2431]
      4- libpari vecsmall_counting_indexsort, vecsmall_counting_sort
         vecsmall_counting_uniq
+BA   5- [riscv64] add riscv64 assembly kernel
