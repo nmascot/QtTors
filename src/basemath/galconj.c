@@ -3112,17 +3112,15 @@ galoisconj4(GEN nf, GEN d)
 }
 
 /* d multiplicative bound for the automorphism's denominators */
-GEN
-galoisconj(GEN nf, GEN d)
+static GEN
+galoisconj_monic(GEN nf, GEN d)
 {
   pari_sp av = avma;
   GEN G, NF, T = get_nfpol(nf,&NF);
   if (degpol(T) == 2)
   { /* fast shortcut */
-    GEN a = gel(T,4), b = gel(T,3);
+    GEN b = gel(T,3);
     long v = varn(T);
-    RgX_check_ZX(T, "galoisconj");
-    if (!gequal1(a)) pari_err_IMPL("galoisconj(nonmonic)");
     G = cgetg(3, t_COL);
     gel(G,1) = deg1pol_shallow(gen_m1, negi(b), v);
     gel(G,2) = pol_x(v);
@@ -3131,6 +3129,20 @@ galoisconj(GEN nf, GEN d)
   G = galoisconj4_main(nf, d, 0);
   if (G) return G; /* Success */
   set_avma(av); return galoisconj1(nf);
+}
+
+GEN
+galoisconj(GEN nf, GEN d)
+{
+  pari_sp av;
+  GEN NF, S, L, T = get_nfpol(nf,&NF);
+  if (NF) return galoisconj_monic(NF, d);
+  RgX_check_QX(T, "galoisconj");
+  av = avma;
+  T = Q_primpart(T);
+  if (ZX_is_monic(T)) return galoisconj_monic(T, d);
+  S = galoisconj_monic(poltomonic(T,&L), NULL);
+  return gerepileupto(av, gdiv(RgXV_unscale(S, L),L));
 }
 
 /* FIXME: obsolete, use galoisconj(nf, d) directly */
