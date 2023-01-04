@@ -22,7 +22,8 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
     17- sumeulerrat(x^2/(1+x),2) -> FPE [#2433]
     18- lambertw(10^1000) -> overflow [#2429]
     19- rare infinite loop in idealtwoelt [#2437]
-    20- nfisisom(16*x^4+1,16*x^4+1) -> error [#2432]
+BA  20- nfisisom(16*x^4+1,16*x^4+1) -> error [#2432]
+    21- forprimestep(p=a,b,q,) overflow when a > primelimit and q large [#2439]
 
   Changed
      1- binomial(negative t_INT, t_INT): use Loeb's definition

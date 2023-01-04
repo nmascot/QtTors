@@ -595,7 +595,8 @@ arith_set(forprime_t *T)
   if (T->c > r) d = subiu(d, T->q);
   /* d = c mod q,  d = c > r? p-r+c-q: p-r+c, so that
    *  d <= p  and  d+q = c>r? p-r+c  : p-r+c+q > p */
-  T->p = itou_or_0(d); set_avma(av); /* d = 0 is impossible */
+  if (signe(d) <= 0) d = addiu(d, T->q); /* and now d > 0 */
+  T->p = itou_or_0(d); set_avma(av);
 }
 
 /* run through primes in arithmetic progression = c (mod q) */

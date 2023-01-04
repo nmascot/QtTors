@@ -24,6 +24,7 @@ forprimestep(n=2^100,,Mod(2,3),if(n>2^100+400,break);print(n))
 forprimestep(n=2^100,oo,Mod(2,3),if(n>2^100+400,break);print(n))
 p=18446744073709551533;
 forprimestep(i=p,p+400,10,print(i))
+q=10^8+7; forprimestep(p=q-1,21*q,q, print1(p" ")) \\ #2439
 
 for(a=0.5,3,print(a))
 for(a=1,10, print(a+=2))
