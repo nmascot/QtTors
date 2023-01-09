@@ -310,7 +310,7 @@ IsGoodSubgroup(GEN H, GEN bnr, GEN map)
     GEN pr = gel(P, j), e;
     /* if pr divides modH, it is ramified, so it's good */
     if (tablesearch(PH, pr, cmp_prime_ideal)) continue;
-    /* inertia degree of pr in bnr(modH)/H is charorder(e, cycH) */
+    /* inertia degree of pr in bnr(modH)/H is charorder(cycH, e) */
     e = ZM_ZC_mul(gel(qH,3), isprincipalray(bnrH, pr));
     e = ZV_ZV_mod(e, gel(qH,2));
     if (ZV_equal0(e)) return gc_long(av,0); /* f = 1 */
