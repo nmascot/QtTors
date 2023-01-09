@@ -1,3 +1,4 @@
+default(parisize,"32M");
 default(realprecision,38);
 zet=1;
 Z(a)=lfuncreate([(p,n)->1/(1-p^a*x),0,[-a],2*a+1,1,1,[[a+1,1/x+O(1)]]]);
@@ -60,7 +61,9 @@ lfunshift(x^2+1,-1/2),
 lfunshift(x^2+1,1,1),
 lfunhgm(hgminit([5]),1),
 if(1,my(bnf=bnfinit(x^2-x+2), gc=gcharinit(bnf,idealprimedec(bnf,11)[1]),chi=[1,-1,-1/2]~);
-  lfuncreate([gc,chi]))
+  lfuncreate([gc,chi])),
+if(1,my(bnf=bnfinit(a^2-a-9), bnr=bnrinit(bnf,[2,[0,0]]));
+  lfuncreate([bnr,matdiagonal(bnr.cyc)]))
 ];
 }
 

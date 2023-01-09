@@ -222,8 +222,19 @@ Doc:
 
  The Dedekind zeta function of a number field $K = \Q[X]/(T)$ is encoded
  either by the defining polynomial $T$, or any absolute number fields
- structure (preferably at least a \var{bnf}).
+ structure (preferably at least a \var{nf}).
 
+ The Dedekind zeta function of an Abelian extension of a number field
+ given by class-field theory parameters is encoded by $[bnr, subg]$, see
+ \kbd{bnrinit}.
+
+ \bprog
+ ? bnf=bnfinit(a^2-a-9);
+ ? bnr=bnrinit(bnf,[2,[0,0]]); subg = Mat(3);
+ ? L = lfuncreate([bnr, subg]);
+ @eprog
+
+ Let $K$ be a number field given as a \kbd{bnfinit}.
  Given a finite order Hecke character $\chi: Cl_f(K)\to \C$, we let
  $$L(\chi, s) = \sum_{A \subset O_K} \chi(A)\, \left(N_{K/\Q}A\right)^{-s}.$$
 

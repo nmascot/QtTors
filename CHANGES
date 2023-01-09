@@ -50,3 +50,8 @@ BA   2- [GP] genus2igusa
      4- libpari vecsmall_counting_indexsort, vecsmall_counting_sort
         vecsmall_counting_uniq
 BA   5- [riscv64] add riscv64 assembly kernel
+BA   6- lfuncreate([bnr, subg]): Dedekind zeta for the corresponding Abelian
+        extension.
+
+  Removed
+BA   1- [GP] lfunabelianrelinit. Use lfunfinit([bnr, subgroup]) instead.

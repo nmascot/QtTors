@@ -383,10 +383,7 @@ O(x^2)
   ***   at top-level: lfuneuler(x^2+1,Pi)
   ***                 ^-------------------
   *** lfuneuler: incorrect type in lfuneuler (t_REAL).
-  ***   at top-level: ...=bnfinit(polcyclo(3,'a));lfunabelianrelinit(bn
-  ***                                             ^---------------------
-  *** lfunabelianrelinit: incorrect type in lfunabelianrelinit (t_POL).
   ***   at top-level: lfunthetacost(polcyclo(43))
   ***                 ^---------------------------
   *** lfunthetacost: overflow in lfunthetacost.
-Total time spent: 5361
+Total time spent: 3947

@@ -1445,10 +1445,18 @@ lfuninit(GEN lmisc, GEN dom, long der, long bitprec)
   }
   ldata = lfunmisc_to_ldata_shallow(lmisc);
 
-  if (ldata_get_type(ldata)==t_LFUN_NF)
+  switch (ldata_get_type(ldata))
   {
-    GEN T = gel(ldata_get_an(ldata), 2);
-    return gerepilecopy(av, lfunzetakinit(T, dom, der, bitprec));
+  case t_LFUN_NF:
+    {
+      GEN T = gel(ldata_get_an(ldata), 2);
+      return gerepilecopy(av, lfunzetakinit(T, dom, der, bitprec));
+    }
+  case t_LFUN_ABELREL:
+    {
+      GEN T = gel(ldata_get_an(ldata), 2);
+      return gerepilecopy(av, lfunabelianrelinit(gel(T,1), gel(T,2), dom, der, bitprec));
+    }
   }
   k = ldata_get_k(ldata);
   parse_dom(gtodouble(k), dom, &S);
@@ -1978,11 +1986,12 @@ lfuncheckfeq_i(GEN theta, GEN thetad, GEN t0, GEN t0i, long bitprec)
     if (gequal0(R))
     {
       GEN v, r;
-      if (ldata_get_type(ldata) == t_LFUN_NF)
+      long t = ldata_get_type(ldata);
+      if (t == t_LFUN_NF || t == t_LFUN_ABELREL)
       { /* inefficient since theta not needed; no need to optimize for this
            (artificial) query [e.g. lfuncheckfeq(t_POL)] */
         GEN T = gel(ldata_get_an(ldata), 2);
-        GEN L = lfunzetakinit(T,zerovec(3),0,bitprec);
+        GEN L = lfuninit(T,zerovec(3),0,bitprec);
         return lfuncheckfeq(L,t0,bitprec);
       }
       v = lfunrootres(theta, bitprec);

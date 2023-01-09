@@ -1184,55 +1184,110 @@ chigenkerfind(GEN bnr, GEN H, GEN *pcnj)
 static GEN
 vec_classes(GEN A, GEN F)
 {
-  pari_sp av = avma;
   GEN w = vec_equiv(F);
   long i, l = lg(w);
   GEN V = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
     gel(V,i) = vecpermute(A,gel(w,i));
-  return gerepilecopy(av,mkvec2(V, perm_inv(shallowconcat1(w))));
+  return V;
+}
+
+static GEN
+abelrel_pfactor(GEN bnr, GEN pr, GEN U, GEN D, GEN h)
+{
+  GEN v = bnrisprincipalmod(bnr, pr, h, 0);
+  GEN E = ZV_ZV_mod(ZM_ZC_mul(U, v), D);
+  ulong o = itou(charorder(D, E)), f = pr_get_f(pr);
+  return gpowgs(gsub(gen_1, monomial(gen_1, f * o, 0)), itou(h) / o);
+}
+
+static GEN
+abelrel_factor(GEN bnr, GEN C, GEN p, GEN mod, GEN U, GEN D, GEN h)
+{
+  GEN nf = bnr_get_nf(bnr);
+  GEN F = pol_1(0);
+  GEN prid = idealprimedec(nf,p);
+  long i, l = lg(prid);
+  for (i = 1; i < l; i++)
+  {
+    GEN pr = gel(prid, i), Fpr;
+    long v = idealval(nf,mod,pr);
+    if (v > 0)
+    {
+      GEN bnr2 = bnrinitmod(bnr,idealdiv(nf, mod, idealpows(nf, pr, v)), 0, h);
+      GEN C2 = bnrmap(bnrmap(bnr, bnr2), C);
+      GEN U2, D2 = ZM_snfall_i(C2, &U2, NULL, 1), h2 = ZV_prod(D2);
+      Fpr = abelrel_pfactor(bnr2, pr, U2, D2, h2);
+    }
+    else
+      Fpr = abelrel_pfactor(bnr, pr, U, D, h);
+    F = gmul(F,Fpr);
+  }
+  return gcopy(mkrfrac(gen_1, F));
+}
+
+static GEN
+eulerf_abelrel(GEN an, GEN p)
+{
+  GEN bnr = gel(an,1), C = gel(an,2);
+  GEN mod = bnrconductor(bnr, C, 0);
+  GEN U, D = ZM_snfall_i(C, &U, NULL, 1), h = ZV_prod(D);
+  return abelrel_factor(bnr, C, p, mod, U, D, h);
+}
+
+struct direuler_abelrel
+{
+  GEN bnr, C, mod, U, D, h;
+};
+
+static GEN
+_direuler_abelrel(void *E, GEN p)
+{
+  struct direuler_abelrel *s = (struct direuler_abelrel*) E;
+  return abelrel_factor(s->bnr, s->C, p, s->mod, s->U, s->D, s->h);
+}
+
+static GEN
+vecan_abelrel(GEN an, long N)
+{
+  struct direuler_abelrel s;
+  s.bnr = gel(an,1);
+  s.C = gel(an,2);
+  s.mod = bnrconductor(s.bnr, s.C, 0);
+  s.D = ZM_snfall_i(s.C, &s.U, NULL, 1);
+  s.h = ZV_prod(s.D);
+  return direuler((void*)&s, _direuler_abelrel, gen_1, stoi(N), NULL);
 }
 
 /* true bnf */
 static GEN
-lfunabelianrelinit_i(GEN nfabs, GEN bnf, GEN polrel, GEN dom, long der, long bitprec)
+lfunabelrel(GEN bnr, GEN subg)
 {
-  GEN X, cnj, bnr, M, D, cond = rnfconductor0(bnf, polrel, 1);
+  pari_sp av = avma;
+  GEN NrD = bnrdisc(bnr, subg, 0), N = absi_shallow(gel(NrD,3));
+  long n = itos(gel(NrD,1)), r1 = itos(gel(NrD,2)), r2 = (n-r1)>>1;
+  GEN Vga = vec01(r1+r2,r2);
+  GEN L = mkvecn(7, tag(mkvec2(bnr,subg),t_LFUN_ABELREL), gen_0, Vga, gen_1, N, gen_1, gen_0);
+  return gerepilecopy(av, L);
+}
+
+GEN
+lfunabelianrelinit(GEN bnr, GEN H, GEN dom, long der, long bitprec)
+{
+  GEN X, cnj, M, D,C ;
   long l, i;
-  if (typ(cond) != t_VEC) pari_err_TYPE("lfunabelianrelinit",polrel);
-  bnr = gel(cond,2);
-  X = chigenkerfind(bnr, gel(cond,3), &cnj);
-  X = gel(vec_classes (X, cnj), 1); l = lg(X);
+  C = chigenkerfind(bnr, H, &cnj);
+  C = vec_classes (C, cnj);
+  X = cgetg_copy(C,&l);
   for (i = 1; i < l; ++i)
   {
-    GEN chi = gel(X,i);
+    GEN chi = gel(C,i);
     GEN L = lfunchigen(bnr, lg(chi)==2 ? gel(chi,1): chi);
     gel(X,i) = lfuninit(L, dom, der, bitprec);
   }
   M = mkvec3(X, const_vecsmall(l-1, 1), const_vecsmall(l-1, 0));
   D = mkvec2(dom, mkvecsmall2(der, bitprec));
-  return lfuninit_make(t_LDESC_PRODUCT, lfunzetak_i(nfabs), M, D);
-}
-GEN
-lfunabelianrelinit(GEN bnf, GEN polrel, GEN dom, long der, long bit)
-{
-  pari_sp av = avma;
-  GEN K = NULL;
-  bnf = checkbnf(bnf);
-  switch(typ(polrel))
-  {
-    case t_POL: break;
-    case t_VEC:
-      if (lg(polrel) == 3 && typ(gel(polrel,1)) == t_POL)
-      {
-        K = gel(polrel,2);
-        if (typ(K) != t_POL) K = checknf_i(K);
-        if (K) { polrel = gel(polrel,1); break; }
-      }
-    default: pari_err_TYPE("lfunabelianrelinit", polrel);
-  }
-  if (!K) K = rnfequation(nf_get_pol(bnf_get_nf(bnf)), polrel);
-  return gerepilecopy(av, lfunabelianrelinit_i(K, bnf, polrel, dom, der, bit));
+  return lfuninit_make(t_LDESC_PRODUCT, lfunabelrel(bnr, H), M, D);
 }
 
 /*****************************************************************/
@@ -1366,7 +1421,7 @@ GEN
 lfunzetakinit(GEN nf, GEN dom, long der, long bitprec)
 {
   long n, d = nf_get_degree(nf);
-  GEN L, Q, G;
+  GEN L, Q, R, G, T = nf_get_pol(nf);
   if (d == 1) return lfuninit(lfunzeta(), dom, der, bitprec);
   G = galoisinit(nf, NULL);
   if (isintzero(G))
@@ -1376,8 +1431,10 @@ lfunzetakinit(GEN nf, GEN dom, long der, long bitprec)
   }
   if (!group_isabelian(galois_group(G)))
     return lfunzetakinit_artin(nf, G, dom, der, bitprec);
-  Q = Buchall(pol_x(fetch_var()), 0, nbits2prec(bitprec));
-  L = lfunabelianrelinit_i(nf, Q, gal_get_pol(G), dom, der, bitprec);
+  Q = Buchall(pol_x(1), 0, nbits2prec(bitprec));
+  T = shallowcopy(T); setvarn(T,0);
+  R = rnfconductor0(Q, T, 1);
+  L = lfunabelianrelinit(gel(R,2), gel(R,3), dom, der, bitprec);
   delete_var(); return L;
 }
 
@@ -2933,7 +2990,7 @@ lfunzetakinit_artin(GEN nf, GEN gal, GEN dom, long der, long bitprec)
 /********************************************************************/
 enum { t_LFUNMISC_POL, t_LFUNMISC_CHIQUAD, t_LFUNMISC_CHICONREY,
        t_LFUNMISC_CHIGEN, t_LFUNMISC_ELLINIT, t_LFUNMISC_ETAQUO,
-       t_LFUNMISC_GCHAR };
+       t_LFUNMISC_GCHAR, t_LFUNMISC_ABELREL };
 static long
 lfundatatype(GEN data)
 {
@@ -2948,8 +3005,9 @@ lfundatatype(GEN data)
       if (checknf_i(data)) return t_LFUNMISC_POL;
       if (l == 17) return t_LFUNMISC_ELLINIT;
       if (l == 3 && typ(gel(data,1)) == t_VEC)
-        return is_gchar_group(gel(data,1))? t_LFUNMISC_GCHAR
-                                          : t_LFUNMISC_CHIGEN;
+        return is_gchar_group(gel(data,1))  ? t_LFUNMISC_GCHAR
+                  : typ(gel(data,2))==t_MAT ? t_LFUNMISC_ABELREL
+                                            : t_LFUNMISC_CHIGEN;
       break;
     }
   }
@@ -2986,6 +3044,7 @@ lfunmisc_to_ldata_i(GEN ldata, long shallow)
     }
     break;
     case t_LFUNMISC_GCHAR: return lfungchar(gel(ldata,1), gel(ldata,2));
+    case t_LFUNMISC_ABELREL: return lfunabelrel(gel(ldata,1), gel(ldata,2));
     case t_LFUNMISC_ELLINIT: return lfunell(ldata);
   }
   if (shallow != 2) pari_err_TYPE("lfunmisc_to_ldata",ldata);
@@ -3037,6 +3096,7 @@ ldata_vecan(GEN van, long L, long prec)
       an = (ell_get_type(an) == t_ELL_Q) ? ellanQ_zv(an, L): ellan(an, L);
       break;
     case t_LFUN_KRONECKER: an = vecan_Kronecker(an, L); break;
+    case t_LFUN_ABELREL: an = vecan_abelrel(an, L); break;
     case t_LFUN_CHIZ: an = vecan_chiZ(an, L, prec); break;
     case t_LFUN_CHIGEN: an = vecan_chigen(an, L, prec); break;
     case t_LFUN_HECKE: an = vecan_gchar(an, L, prec); break;
@@ -3108,6 +3168,7 @@ ldata_eulerf(GEN van, GEN p, long prec)
     case t_LFUN_ELL: f = elleulerf(an, p); break;
     case t_LFUN_KRONECKER:
       f = mkrfrac(gen_1, deg1pol_shallow(stoi(-kronecker(an, p)), gen_1, 0)); break;
+    case t_LFUN_ABELREL: f = eulerf_abelrel(an, p); break;
     case t_LFUN_CHIZ: f = eulerf_chiZ(an, p, prec); break;
     case t_LFUN_CHIGEN: f = eulerf_chigen(an, p, prec); break;
     case t_LFUN_HECKE: f = eulerf_gchar(an, p, prec); break;
