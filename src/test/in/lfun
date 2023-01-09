@@ -450,6 +450,9 @@ lfun([R,[[1],[3]]],0,1)
 lfun([R,[2]],1)
 lfun([R,[[2]]],1)
 
+bnf=bnfinit(y^2+1); bnr=bnrinit(bnf,12);
+L=lfun([bnr,[[2,0],[6,0]]],2)
+
 L=lfunshift(1,-100);
 lfun(L,-100+50*I); \\ SEGV at low accuracy
 

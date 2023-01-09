@@ -315,6 +315,8 @@ O(x^2)
 183815*I
 [1.3957117832136846124125242709765990227 + 0.1984137509071797181521714962368
 9183815*I]
+[0.98840426632758622164719972283433390539, 0.9884042663275862216471997228343
+3390539]
   ***   at top-level: lfuntheta(1,0)
   ***                 ^--------------
   *** lfuntheta: domain error in lfunthetainit: t = 0
@@ -384,4 +386,4 @@ O(x^2)
   ***   at top-level: ...=bnfinit(polcyclo(3,'a));lfunabelianrelinit(bn
   ***                                             ^---------------------
   *** lfunabelianrelinit: incorrect type in lfunabelianrelinit (t_POL).
-Total time spent: 3852
+Total time spent: 3868
