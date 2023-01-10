@@ -1009,7 +1009,7 @@ lfunzetak_i(GEN T)
   long r1, r2;
   if (typ(T) == t_POL)
   {
-    T = nfinit(T, DEFAULTPREC);
+    T = nfinit0(T, nf_NOLLL, DEFAULTPREC);
     if (lg(T) == 3) T = gel(T,1); /* [nf,change of var] */
   }
   nf_get_sign(T,&r1,&r2); Vga = vec01(r1+r2,r2);
