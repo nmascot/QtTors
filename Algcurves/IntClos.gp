@@ -69,9 +69,7 @@ IntClosure(f,B,x,y,t,a)=
   y1 = if(poldegree(lf),lf*y,y);
   B = vecsort(B,b->poldegree(b[1]),4);
 	print("Local integral closures");
-	IntClosure1(y1,dy,B[1][1],B[1][2],x,y,t,a);
   OCU = parapply(bu->IntClosure1(y1,dy,bu[1],bu[2],x,y,t,a),B);
-	\\breakpoint();
   OCU = select(o->o[2]!=1,OCU);
   if(#OCU==0,return([powers(y1,dy-1),1]));
   if(#OCU==1,return(OCU[1]));
