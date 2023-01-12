@@ -1187,8 +1187,7 @@ vec_classes(GEN A, GEN F)
   GEN w = vec_equiv(F);
   long i, l = lg(w);
   GEN V = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++)
-    gel(V,i) = vecpermute(A,gel(w,i));
+  for (i = 1; i < l; i++) gel(V,i) = vecpermute(A,gel(w,i));
   return V;
 }
 
