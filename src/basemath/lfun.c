@@ -1990,8 +1990,7 @@ lfuncheckfeq_i(GEN theta, GEN thetad, GEN t0, GEN t0i, long bitprec)
       if (t == t_LFUN_NF || t == t_LFUN_ABELREL)
       { /* inefficient since theta not needed; no need to optimize for this
            (artificial) query [e.g. lfuncheckfeq(t_POL)] */
-        GEN T = gel(ldata_get_an(ldata), 2);
-        GEN L = lfuninit(T,zerovec(3),0,bitprec);
+        GEN L = lfuninit(ldata,zerovec(3),0,bitprec);
         return lfuncheckfeq(L,t0,bitprec);
       }
       v = lfunrootres(theta, bitprec);

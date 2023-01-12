@@ -1204,9 +1204,8 @@ abelrel_pfactor(GEN bnr, GEN pr, GEN U, GEN D, GEN h)
 static GEN
 abelrel_factor(GEN bnr, GEN C, GEN p, GEN mod, GEN U, GEN D, GEN h)
 {
-  GEN nf = bnr_get_nf(bnr);
-  GEN F = pol_1(0);
-  GEN prid = idealprimedec(nf,p);
+  GEN nf = bnr_get_nf(bnr), F = pol_1(0), prid = idealprimedec(nf,p);
+  GEN mod2 = shallowcopy(mod);
   long i, l = lg(prid);
   for (i = 1; i < l; i++)
   {
@@ -1214,14 +1213,17 @@ abelrel_factor(GEN bnr, GEN C, GEN p, GEN mod, GEN U, GEN D, GEN h)
     long v = idealval(nf,mod,pr);
     if (v > 0)
     {
-      GEN bnr2 = bnrinitmod(bnr,idealdiv(nf, mod, idealpows(nf, pr, v)), 0, h);
-      GEN C2 = bnrmap(bnrmap(bnr, bnr2), C);
-      GEN U2, D2 = ZM_snfall_i(C2, &U2, NULL, 1), h2 = ZV_prod(D2);
+      GEN bnr2, C2, U2, D2, h2;
+      gel(mod2, 1) = idealdivpowprime(nf, gel(mod, 1), pr, utoi(v));
+      bnr2 = bnrinitmod(bnr, mod2, 0, h);
+      C2 = bnrmap(bnrmap(bnr, bnr2), C);
+      D2 = ZM_snfall_i(C2, &U2, NULL, 1);
+      h2 = ZV_prod(D2);
       Fpr = abelrel_pfactor(bnr2, pr, U2, D2, h2);
     }
     else
       Fpr = abelrel_pfactor(bnr, pr, U, D, h);
-    F = gmul(F,Fpr);
+    F = ZX_mul(F, Fpr);
   }
   return gcopy(mkrfrac(gen_1, F));
 }
@@ -1229,8 +1231,7 @@ abelrel_factor(GEN bnr, GEN C, GEN p, GEN mod, GEN U, GEN D, GEN h)
 static GEN
 eulerf_abelrel(GEN an, GEN p)
 {
-  GEN bnr = gel(an,1), C = gel(an,2);
-  GEN mod = bnrconductor(bnr, C, 0);
+  GEN bnr = gel(an,1), C = gel(an,2), mod = gel(an,3);
   GEN U, D = ZM_snfall_i(C, &U, NULL, 1), h = ZV_prod(D);
   return abelrel_factor(bnr, C, p, mod, U, D, h);
 }
@@ -1252,24 +1253,25 @@ vecan_abelrel(GEN an, long N)
 {
   struct direuler_abelrel s;
   s.bnr = gel(an,1);
-  s.C = gel(an,2);
-  s.mod = bnrconductor(s.bnr, s.C, 0);
+  s.C   = gel(an,2);
+  s.mod = gel(an,3);
   s.D = ZM_snfall_i(s.C, &s.U, NULL, 1);
   s.h = ZV_prod(s.D);
   return direuler((void*)&s, _direuler_abelrel, gen_1, stoi(N), NULL);
 }
 
-/* true bnf */
 static GEN
-lfunabelrel(GEN bnr, GEN subg)
+lfunabelrel_i(GEN bnr, GEN H, GEN mod)
 {
-  pari_sp av = avma;
-  GEN NrD = bnrdisc(bnr, subg, 0), N = absi_shallow(gel(NrD,3));
+  GEN NrD = bnrdisc(bnr, H, 0), N = absi_shallow(gel(NrD,3));
   long n = itos(gel(NrD,1)), r1 = itos(gel(NrD,2)), r2 = (n-r1)>>1;
-  GEN Vga = vec01(r1+r2,r2);
-  GEN L = mkvecn(7, tag(mkvec2(bnr,subg),t_LFUN_ABELREL), gen_0, Vga, gen_1, N, gen_1, gen_0);
-  return gerepilecopy(av, L);
+  if (!mod) mod = bnrconductor(bnr, H, 0);
+  return mkvecn(7, tag(mkvec3(bnr,H,mod),t_LFUN_ABELREL),
+                   gen_0, vec01(r1+r2, r2), gen_1, N, gen_1, gen_0);
 }
+static GEN
+lfunabelrel(GEN bnr, GEN H, GEN mod)
+{ pari_sp av = avma; return gerepilecopy(av, lfunabelrel_i(bnr, H, mod)); }
 
 GEN
 lfunabelianrelinit(GEN bnr, GEN H, GEN dom, long der, long bitprec)
@@ -1287,7 +1289,7 @@ lfunabelianrelinit(GEN bnr, GEN H, GEN dom, long der, long bitprec)
   }
   M = mkvec3(X, const_vecsmall(l-1, 1), const_vecsmall(l-1, 0));
   D = mkvec2(dom, mkvecsmall2(der, bitprec));
-  return lfuninit_make(t_LDESC_PRODUCT, lfunabelrel(bnr, H), M, D);
+  return lfuninit_make(t_LDESC_PRODUCT, lfunabelrel_i(bnr, H, NULL), M, D);
 }
 
 /*****************************************************************/
@@ -3000,16 +3002,17 @@ lfundatatype(GEN data)
     case t_INTMOD: return t_LFUNMISC_CHICONREY;
     case t_POL: return t_LFUNMISC_POL;
     case t_VEC:
-    {
-      long l = lg(data);
-      if (checknf_i(data)) return t_LFUNMISC_POL;
-      if (l == 17) return t_LFUNMISC_ELLINIT;
-      if (l == 3 && typ(gel(data,1)) == t_VEC)
-        return is_gchar_group(gel(data,1))  ? t_LFUNMISC_GCHAR
-                  : typ(gel(data,2))==t_MAT ? t_LFUNMISC_ABELREL
-                                            : t_LFUNMISC_CHIGEN;
+      switch(lg(data))
+      {
+        case 17: return t_LFUNMISC_ELLINIT;
+        case 10: return t_LFUNMISC_POL;
+        case 3:
+          if (typ(gel(data,1)) != t_VEC) break;
+          return is_gchar_group(gel(data,1))  ? t_LFUNMISC_GCHAR
+                    : typ(gel(data,2))==t_MAT ? t_LFUNMISC_ABELREL
+                                              : t_LFUNMISC_CHIGEN;
+      }
       break;
-    }
   }
   return -1;
 }
@@ -3044,7 +3047,9 @@ lfunmisc_to_ldata_i(GEN ldata, long shallow)
     }
     break;
     case t_LFUNMISC_GCHAR: return lfungchar(gel(ldata,1), gel(ldata,2));
-    case t_LFUNMISC_ABELREL: return lfunabelrel(gel(ldata,1), gel(ldata,2));
+    case t_LFUNMISC_ABELREL:
+      return lfunabelrel(gel(ldata,1), gel(ldata,2),
+                         lg(ldata)==3? NULL: gel(ldata,3));
     case t_LFUNMISC_ELLINIT: return lfunell(ldata);
   }
   if (shallow != 2) pari_err_TYPE("lfunmisc_to_ldata",ldata);
