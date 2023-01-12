@@ -25,6 +25,7 @@ BA   4- seralgdep(Ser([0,1,0,u]*Mod(1,(u^2+u+1)*Mod(1,2)),y),2,2) -> SEGV
 BA  20- nfisisom(16*x^4+1,16*x^4+1) -> error [#2432]
     21- forprimestep(p=a,b,q,) overflow when a > primelimit and q large [#2439]
 BA  22- lfun([bnrinit(bnfinit(y^2+1),12),[[2,0],[6,0]]],2) -> error
+    23- lfunthetacost(polcyclo(43)): silent overflow
 
   Changed
      1- binomial(negative t_INT, t_INT): use Loeb's definition

@@ -386,4 +386,7 @@ O(x^2)
   ***   at top-level: ...=bnfinit(polcyclo(3,'a));lfunabelianrelinit(bn
   ***                                             ^---------------------
   *** lfunabelianrelinit: incorrect type in lfunabelianrelinit (t_POL).
-Total time spent: 3868
+  ***   at top-level: lfunthetacost(polcyclo(43))
+  ***                 ^---------------------------
+  *** lfunthetacost: overflow in lfunthetacost.
+Total time spent: 5361
