@@ -3375,7 +3375,7 @@ ginv(GEN x)
       return z;
     }
 
-    case t_VEC: /* handle extended t_QFB */
+    case t_VEC: if (!is_ext_qfr(x)) break;
     case t_QFB:
       return qfbpow(x, gen_m1);
     case t_MAT:
