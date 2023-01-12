@@ -1577,14 +1577,12 @@ lfunlambda_product(GEN L, GEN s, GEN sdom, long bitprec)
   {
     GEN f = lfunlambda_OK(gel(F, i), s, sdom, bitprec);
     if( DEBUGLEVEL>=2) err_printf("lfunlambda(%ld): %Ps\n",i,f);
-    if (typ(f)==t_VEC)
-      f = RgV_prod(f);
-    if (E[i])
-      r = gmul(r, gpowgs(f, E[i]));
+    if (typ(f)==t_VEC) f = RgV_prod(f);
+    if (E[i]) r = gmul(r, gpowgs(f, E[i]));
     if (C[i])
     {
-      GEN fc = isreal? f: lfunlambda_OK(gel(F, i), cs, sdom, bitprec);
-      r = gmul(r, gpowgs(conj_i(fc), C[i]));
+      GEN fc = isreal? f: conj_i(lfunlambda_OK(gel(F, i), cs, sdom, bitprec));
+      r = gmul(r, gpowgs(fc, C[i]));
     }
   }
   return (ldata_isreal(ldata) && gequal0(imag_i(s)))? real_i(r): r;
