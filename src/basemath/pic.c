@@ -5236,7 +5236,7 @@ GEN
 PicTorsBasis(GEN J, GEN l, GEN Chi)
 {
   /* Computes a basis B of the subspace T of J[l] on which Frob acts with charpoly Chi
-     If Chi==NULL, then we take T=J[l]
+     If Chi==NULL or Chi==0, then we take T=J[l]
      Also computes the matrix M of Frob and list of matrices MA of Auts w.r.t B, and returns the vector [B,M,MA] */
   /* TODO use auts that are not known to be scalars */
   pari_sp av = avma;
@@ -5251,6 +5251,7 @@ PicTorsBasis(GEN J, GEN l, GEN Chi)
   if(gequal0(Lp))
     pari_err(e_MISC,"This Jacobian does not contain its local L factor, which is required for point counting");
   a = degree(JgetT(J)); /* Residual degree */
+	if(gequal0(Chi)) Chi = NULL;
   if(Chi)
   {
     d = degree(Chi); /* dim T */
