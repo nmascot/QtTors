@@ -174,16 +174,17 @@ FindInBOO(BOO,b)=
 PtUB(P,F,B,B0,BOO,SB,lf)=
 { \\ P -> U,b,iOO. P can be coded in many different ways.
   my(tyP,U,b,BU,BP,lP,k1,k2);
+	print("PtUB ",P);
   tyP = type(P);
   if(tyP=="t_INT",
 		[U,b] = SB[P][2..3]; \\ # of sing branch
-		return([U,b,if(U,0,FindInBOO(BOO,b))]);
+		return([U,b,if(U,0,k2)]);
 	);
   if(tyP=="t_VEC",
     lP = #P;
     if(lP==1,
-      [k1,k2] = P[1]; \\ Sing branch TODO deprecated syntax?
-			U = B[k1];
+      [k1,k2] = P[1]; \\ Branch in Crv structure. Meant to be used by auto Mak init only.
+			U = B[k1][1];
 			b = B[k1][2][k2];
 		  return([U,b,if(U,0,FindInBOO(BOO,b))]);
     );
