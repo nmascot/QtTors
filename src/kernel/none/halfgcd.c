@@ -198,26 +198,85 @@ magic_threshold(GEN a)
 { return (3+uexpi(a))>>1; }
 
 static GEN
-HGCD_basecase(GEN a, GEN b)
+HGCD_basecase(GEN y, GEN x)
 {
-  pari_sp av=avma;
-  long m = magic_threshold(a);
-  GEN u,u1,v,v1;
-  u1 = v = gen_0;
-  u = v1 = gen_1;
-  while (expi(b) >= m)
+  pari_sp av = avma;
+  GEN d, d1, q, r;
+  GEN u, u1, v, v1;
+  ulong xu, xu1, xv, xv1; /* Lehmer stage recurrence matrix */
+  int lhmres;             /* Lehmer stage return value */
+
+  long m = magic_threshold(y);
+
+  /* There is no special case for single-word numbers since this is
+   * mainly meant to be used with large moduli. */
+  if (cmpii(y,x) <= 0)
   {
-    GEN r, q = dvmdii(a,b, &r);
-    a = b; b = r; swap(u,u1); swap(v,v1);
-    u = addii(mulii(u1, q), u);
-    v = addii(mulii(v1, q), v);
-   if (gc_needed(av,2))
+    d = x; d1 = y;
+    u = gen_1; u1 = gen_0;
+    v = gen_0; v1 = gen_1;
+  } else
+  {
+    d = y; d1 = x;
+    u = gen_0; u1 = gen_1;
+    v = gen_1; v1 = gen_0;
+  }
+  while (lgefint(d) > 3 &&  expi(d1) >= m + BITS_IN_LONG + 1)
+  {
+    /* do a Lehmer-Jebelean round */
+    lhmres = lgcdii((ulong *)d, (ulong *)d1, &xu, &xu1, &xv, &xv1, 0);
+
+    if (lhmres)
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"halfgcd (d = %ld)",lgefint(b));
-      gerepileall(av,6, &a,&b,&u1,&v1,&u,&v);
+      if (lhmres == 1 || lhmres == -1)
+      {
+        if (xv1 == 1)
+        {
+          r = subii(d,d1); d = d1; d1 = r;
+          r = addii(u,u1); u = u1; u1 = r;
+          r = addii(v,v1); v = v1; v1 = r;
+        }
+        else
+        {
+          r = subii(d, mului(xv1,d1)); d = d1; d1 = r;
+          r = addii(u, mului(xv1,u1)); u = u1; u1 = r;
+          r = addii(v, mului(xv1,v1)); v = v1; v1 = r;
+        }
+      }
+      else
+      {
+        r  = subii(muliu(d,xu),  muliu(d1,xv));
+        d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
+        r  = addii(muliu(u,xu),  muliu(u1,xv));
+        u1 = addii(muliu(u,xu1), muliu(u1,xv1)); u = r;
+        r  = addii(muliu(v,xu),  muliu(v1,xv));
+        v1 = addii(muliu(v,xu1), muliu(v1,xv1)); v = r;
+        if (lhmres&1) togglesign(d); else togglesign(d1);
+      }
+    } /* lhmres != 0 */
+    if (expi(d1) < m) break;
+
+    if (lhmres <= 0 && signe(d1))
+    {
+      q = dvmdii(d,d1,&r);
+      d = d1; d1 = r;
+      r = addii(u, mulii(q,u1)); u = u1; u1 = r;
+      r = addii(v, mulii(q,v1)); v = v1; v1 = r;
+    }
+    if (gc_needed(av,1))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"ratlift");
+      gerepileall(av, 6, &d, &d1, &u, &u1, &v, &v1);
     }
   }
-  return gerepilecopy(av, mkvec3(mkmat22(u,u1,v,v1), a, b));
+  while (expi(d1) >= m)
+  {
+    GEN r, q = dvmdii(d,d1, &r);
+    d = d1; d1 = r; swap(u,u1); swap(v,v1);
+    u1 = addii(mulii(u, q), u1);
+    v1 = addii(mulii(v, q), v1);
+  }
+  return gerepilecopy(av, mkvec3(mkmat22(u1,u,v1,v), d, d1));
 }
 
 static GEN HGCD(GEN x, GEN y);
