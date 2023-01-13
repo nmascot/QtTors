@@ -704,12 +704,15 @@ CrvConic(C,P,Q)=
 
 PtPullback(C,uv,P)=
 {
+	my(Du,Dv,Q);
 	Du = FnDiv(C,uv[1]-P[1]);
 	Dv = FnDiv(C,uv[2]-P[2]);
 	for(i=1,#Du,
 		for(j=1,#Dv,
 			if(Du[i,1]==Dv[j,1],
-				return(Branch2Pt(C,Du[i,1]))
+				Q=Branch2Pt(C,Du[i,1]);
+				if(Q[3],Q=Q[1..2]/Q[3]);
+				return(Q);
 			)
 		)
 	);

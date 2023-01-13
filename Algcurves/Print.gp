@@ -78,9 +78,13 @@ CrvPrint(C,e=2)=
 		print("Plane curve of equation ",f," = 0")
 	);
 	print("Genus ",g);
-	print("Singular branches:");
-	for(i=1,#S,
-		print1(i,": ");
-		BranchPrint(S[i][3],e);
+	if(#S,
+		print("Singular branches:");
+		for(i=1,#S,
+			print1(i,": ");
+			BranchPrint(S[i][3],e);
+		);
+	,
+		print("No singularities")
 	);
 }

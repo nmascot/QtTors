@@ -194,7 +194,7 @@ CrvGalRep(f,l,P,D)=
   		a = rootorder(Lp,l)[2];
 			print("Requires residual degree ",a);
 			if(best==0 || a<best[2],
-				print("I like it");
+				print("Best prime so far");
 				best = [p,a,Lp];
 			)
 		);
