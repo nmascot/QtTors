@@ -373,6 +373,7 @@ set_prodprimes(void)
       jold = j; b *= 2;
       if (b > _maxprime) b = _maxprime; /* truncate last run */
     }
+  m = u - 1; setlg(W, u);
   for (j = 2; j <= m; j++) gel(W,j) = mulii(gel(W,j-1), gel(W,j));
   s = gsizeword(W);
   w = (GEN)pari_malloc(s*sizeof(long));
