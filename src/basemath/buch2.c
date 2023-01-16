@@ -3100,18 +3100,24 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN *pclg2)
 static GEN
 makecycgen(GEN bnf)
 {
-  GEN cyc, gen, h, nf, y, GD;
-  long e,i,l;
+  GEN cyc = bnf_get_cyc(bnf), gen = bnf_get_gen(bnf), nf = bnf_get_nf(bnf);
+  GEN h, y, GD = bnf_get_GD(bnf), W = bnf_get_W(bnf); /* HNF */
+  GEN Sunits = bnf_get_sunits(bnf);
+  GEN X = Sunits? gel(Sunits,1): NULL, C = Sunits? gel(Sunits,3): NULL;
+  long e, i, l;
 
   if (DEBUGLEVEL) pari_warn(warner,"completing bnf (building cycgen)");
-  nf = bnf_get_nf(bnf);
-  cyc = bnf_get_cyc(bnf);
-  gen = bnf_get_gen(bnf);
-  GD = bnf_get_GD(bnf);
   h = cgetg_copy(gen, &l);
   for (i = 1; i < l; i++)
   {
     GEN gi = gel(gen,i), ci = gel(cyc,i);
+    if (X && equalii(ci, gcoeff(W,i,i)))
+    {
+      long j;
+      for (j = i+1; j < l; j++)
+        if (signe(gcoeff(W,i,j))) break;
+      if (j == i) { gel(h,i) = mkmat2(X, gel(C,i)); continue; }
+    }
     if (abscmpiu(ci, 5) < 0)
     {
       GEN N = ZM_det_triangular(gi);
