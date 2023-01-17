@@ -385,6 +385,13 @@ extern char *current_psfile, *pari_datadir;
   (y)=(_t>=pari_mainstack->bot &&_t<pari_mainstack->top)? \
       icopy((GEN)_t): (GEN)_t;} STMT_END
 
+#define DEBUG_TUNE_SYSTEM(var,s) \
+{\
+  static long _once, _lastt;\
+  if(_lastt!=var) { _lastt=var; _once=0; }\
+  if (_once==0) {_once=1; err_printf("t=%ld s=%ld\n",var,s); }\
+}
+
 /* Define this to thoroughly check "random" garbage collecting */
 #ifdef DEBUG_LOWSTACK
 #  define low_stack(x,l) 1
