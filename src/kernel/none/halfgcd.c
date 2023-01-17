@@ -93,7 +93,7 @@ isint2n(GEN n)
   long lx = lgefint(n), i;
   if (lx == 2) return 0;
   x = int_MSW(n);
-  if (*x != 1UL<<expu(*x) ) return 0;
+  if (*(ulong*)x != 1UL<<expu(*(ulong*)x) ) return 0;
   for (i = 3; i < lx; i++)
   {
     x = int_precW(x); if (*x) return 0;
