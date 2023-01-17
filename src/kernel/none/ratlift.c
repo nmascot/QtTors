@@ -136,7 +136,7 @@ Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
     /* determine vmax for lgcdii so as to ensure v won't overshoot.
      * If v+v1 > bmax, the next step would take v1 beyond the limit, so
      * since [+-d1,v1] is not a solution, we give up.  Otherwise if v+v1
-     * is way shorter than bmax, use vmax=MAXULUNG.  Otherwise, set vmax
+     * is way shorter than bmax, use vmax=ULONG_MAX.  Otherwise, set vmax
      * to a crude lower approximation of bmax/(v+v1), or to 1, which will
      * allow the inner loop to do one step */
     r = addii(v,v1);
