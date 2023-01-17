@@ -101,7 +101,7 @@ isint2n(GEN n)
   return 1;
 }
 
-long
+static long
 uexpi(GEN a)
 { return expi(a)+!isint2n(a); }
 
