@@ -502,6 +502,11 @@ static double speed_FpXQX_extgcd(speed_param *s)
 static double speed_FpXQX_gcd(speed_param *s)
 { TIME_FUN(FpXQX_gcd(s->x, s->y, s->T, s->p)); }
 
+static double speed_ZM2_mul(speed_param *s)
+{ TIME_FUN(ZM2_mul(mkmat22(s->x,s->y,s->y,s->x),
+                   mkmat22(s->x,s->x,s->y,s->x)));
+}
+
 /* small coeffs: earlier thresholds for more complicated rings */
 static double speed_RgX_sqr(speed_param *s)
 { TIME_FUN(RgX_sqr_i(s->x)); }
@@ -523,6 +528,7 @@ static tune_param param[] = {
 {PARI,var(SQRI_KARATSUBA_LIMIT),   t_INT, 4,0, speed_sqri,0,0,&SQRI_FFT_LIMIT},
 {PARI,var(MULII_FFT_LIMIT),        t_INT, 500,0, speed_mulii,0.02},
 {PARI,var(SQRI_FFT_LIMIT),         t_INT, 500,0, speed_sqri,0.02},
+{0,   var(ZM2_MUL_LIMIT),          t_INT, 6,0, speed_ZM2_mul,0.02},
 {0,   var(HALFGCD_LIMIT),          t_INT, 6,0, speed_halfgcdii,0.02},
 {PARI,var(EXTGCD_HALFGCD_LIMIT),   t_INT, 5,0, speed_extgcdii,0.02},
 {PARI,var(GCD_HALFGCD_LIMIT),      t_INT, 5,0, speed_gcdii,0.02},

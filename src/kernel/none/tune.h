@@ -71,6 +71,7 @@
 #define __SQRI_FFT_LIMIT                 1651
 #define __SQRI_KARATSUBA_LIMIT           36
 #define __SQRR_SQRI_LIMIT                54
+#define __ZM2_MUL_LIMIT                  13
 #else
 #define __AGM_ATAN_LIMIT                 159
 #define __DIVRR_GMP_LIMIT                -1
@@ -144,4 +145,5 @@
 #define __SQRI_FFT_LIMIT                 1469
 #define __SQRI_KARATSUBA_LIMIT           27
 #define __SQRR_SQRI_LIMIT                20
+#define __ZM2_MUL_LIMIT                  13
 #endif
