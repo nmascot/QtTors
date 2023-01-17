@@ -3473,6 +3473,7 @@ ZXY_disc_1(GEN A, GEN F, ulong var)
   pari_sp av = avma;
   GEN FA,D;
   ulong n,i;
+  //pari_printf("%Ps %lu %Ps\n",F,var,A);
   if(var==1)
   {
     n = lg(F);
@@ -3488,14 +3489,14 @@ ZXY_disc_1(GEN A, GEN F, ulong var)
 }
 
 GEN
-ZXY_disc(GEN F, ulong var)
+ZXY_disc(GEN F, ulong var) /* var should be 1 or 2, indicates which var we consider for disc */
 {
   pari_sp av = avma;
-  GEN Y,vars,D;
+  GEN Y,vars,D,Fi,lc;
   GEN vF,vi,worker,done;
   struct pari_mt pt;
   ulong n,m,d,i;
-  long k,workid,pending;
+  long s,k,workid,pending;
   if(var==0 || var>=3) pari_err(e_MISC,"variable");
   n = lg(F);
   if(var==1 && n<=3) return gcopy(gen_0);
@@ -3512,6 +3513,32 @@ ZXY_disc(GEN F, ulong var)
     return ZXY_disc_1(gen_0,F,var);
   d = 1 + (var == 1 ? (2*n-1)*m : (2*m-1)*n);
   if(DEBUGLEVEL>=1) printf("ZXY_disc: n=%lu m=%lu -> d=%lu\n",n,m,d);
+  // Get lead coef
+  if(var==1)
+  {
+    lc = gel(F,n+2);
+  }
+  else
+  {
+    lc = cgetg(n+3,t_POL);
+    lc[1] = 0;
+    setvarn(lc,varn(F));
+    for(i=0;i<=n;i++)
+    {
+      Fi = gel(F,i+2);
+      gel(lc,i+2) = lg(Fi)==(m+3)?gel(Fi,m+2):gen_0;
+    }
+    lc = normalizepol(lc);
+  }
+  //pari_printf("lc=%Ps\n",lc);
+  // Find s such that lc does not vanish on [s,oo)
+  if(lg(lc)>3)
+  {
+    s = 1<<(long)(ceil(fujiwara_bound_real(lc,1)));
+    s++;
+  }
+  else s = 0;
+  //printf("s=%ld\n",s);
   Y = cgetg(d+1,t_VEC);
   vF = cgetg(3,t_VEC);
   gel(vF,1) = F;
@@ -3523,7 +3550,7 @@ ZXY_disc(GEN F, ulong var)
   {
     if(k>=0)
     {
-      gel(vi,1) = utoi(k);
+      gel(vi,1) = stoi(k+s);
       mt_queue_submit(&pt,k,vi);
     }
     else mt_queue_submit(&pt,k,NULL);
@@ -3533,5 +3560,6 @@ ZXY_disc(GEN F, ulong var)
   mt_queue_end(&pt);
   vars = variables_vecsmall(F);
   D = ZX_inivals_interpol(Y,lg(vars)==3?vars[3-var]:0);
+  if(s) D = ZX_translate(D,stoi(-s));
   return gerepileupto(av,D);
 }
