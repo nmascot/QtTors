@@ -85,9 +85,25 @@ mulqi(GEN M, GEN q, GEN *ap, GEN *bp)
   return res;
 }
 
+/* test whether n is a power of 2 */
 static long
+isint2n(GEN n)
+{
+  GEN x;
+  long lx = lgefint(n), i;
+  if (lx == 2) return 0;
+  x = int_MSW(n);
+  if (*x != 1UL<<expu(*x) ) return 0;
+  for (i = 3; i < lx; i++)
+  {
+    x = int_precW(x); if (*x) return 0;
+  }
+  return 1;
+}
+
+long
 uexpi(GEN a)
-{ return expi(subiu(shifti(a,1),1)); }
+{ return expi(a)+!isint2n(a); }
 
 static GEN
 FIXUP0(GEN M, GEN *a, GEN *b, long m)
