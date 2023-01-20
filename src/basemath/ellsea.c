@@ -351,11 +351,32 @@ Flxq_elldivpolmod_init(struct divpolmod_red *d, GEN a4, GEN a6, long n, GEN h, G
 
 /*Computes the n-division polynomial modulo the polynomial h \in Fq[x] */
 GEN
+Flxq_elldivpolmod(GEN a4, GEN a6, long n, GEN h, GEN T, ulong p)
+{
+  struct divpolmod_red d;
+  pari_sp ltop = avma;
+  GEN res;
+  Flxq_elldivpolmod_init(&d, a4, a6, n, h, T, p);
+  res = gcopy(divpol(d.t,d.r2,n,d.E,d.ff));
+  divpol_free(d.t);
+  return gerepileupto(ltop, res);
+}
+
+/*Computes the n-division polynomial modulo the polynomial h \in Fq[x] */
+GEN
 Fq_elldivpolmod(GEN a4, GEN a6, long n, GEN h, GEN T, GEN p)
 {
   struct divpolmod_red d;
   pari_sp ltop = avma;
   GEN res;
+  if (lgefint(p)==3 && T)
+  {
+    ulong pp = p[2];
+    GEN a4p = ZX_to_Flx(a4,pp), a6p = ZX_to_Flx(a6,pp);
+    GEN hp = ZXX_to_FlxX(h, pp, get_FpX_var(T)), Tp = ZXT_to_FlxT(T , pp);
+    res = Flxq_elldivpolmod(a4p, a6p, n, hp, Tp, pp);
+    return gerepileupto(ltop, FlxX_to_ZXX(res));
+  }
   Fq_elldivpolmod_init(&d, a4, a6, n, h, T, p);
   res = gcopy(divpol(d.t,d.r2,n,d.E,d.ff));
   divpol_free(d.t);

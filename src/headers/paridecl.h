@@ -753,7 +753,6 @@ GEN     FpXQE_order(GEN z, GEN o, GEN a4, GEN T, GEN p);
 GEN     FpXQE_sub(GEN P, GEN Q, GEN a4, GEN T, GEN p);
 GEN     FpXQE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN T, GEN p);
 GEN     FpXQE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN T, GEN p);
-GEN     Fq_elldivpolmod(GEN a4, GEN a6, long n, GEN h, GEN T, GEN p);
 GEN     RgE_to_FpE(GEN x, GEN p);
 GEN     RgE_to_FpXQE(GEN x, GEN T, GEN p);
 const struct bb_group * get_FpE_group(void **E, GEN a4, GEN a6, GEN p);
@@ -3368,8 +3367,10 @@ GEN     ellweilcurve(GEN E, GEN *pm);
 
 /* ellsea.c */
 
+GEN     Flxq_elldivpolmod(GEN a4, GEN a6, long n, GEN h, GEN T, ulong p);
 GEN     Fp_ellcard_SEA(GEN a4, GEN a6, GEN p, long smallfact);
 GEN     Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact);
+GEN     Fq_elldivpolmod(GEN a4, GEN a6, long n, GEN h, GEN T, GEN p);
 GEN     ellmodulareqn(long l, long vx, long vy);
 
 /* es.c */

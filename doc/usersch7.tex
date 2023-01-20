@@ -826,6 +826,10 @@ assume \kbd{SMALL\_ULONG}$(p)$.
 \fun{GEN}{RgE_to_FlxqE}{GEN P, GEN T, ulong p} returns the \kbd{FlxqE}
 obtained by applying \kbd{Rg\_to\_Flxq} coefficientwise.
 
+\fun{GEN}{FlxqE_elldivpolmod}{GEN a4,GEN a6, long n, GEN h, GEN T, ulong p}
+returns the $n$-division polynomial of the elliptic curve $E$ modulo the
+polynomial $h$.
+
 \subsec{Elliptic curves over $\F_q$, large characteristic }
 
 Let $p > 3$ be a prime number, $T$ an irreducible polynomial mod $p$, and $E$
