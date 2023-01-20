@@ -46,6 +46,7 @@ test(1013,7);
 test(1009,11,'x);
 test(17);
 test(41);
+test(41,13);
 test(1073741827);
 test(nextprime(2^65),2);
 
@@ -189,3 +190,5 @@ forprime(p=2,100,check2(p));
 check2(nextprime(2^16));
 check2(nextprime(2^32));
 check2(nextprime(2^64));
+
+z = ffgen(41^16); E=ellinit([z,z]); ellcard(E)

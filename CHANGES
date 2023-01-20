@@ -26,6 +26,7 @@ BA  20- nfisisom(16*x^4+1,16*x^4+1) -> error [#2432]
     21- forprimestep(p=a,b,q,) overflow when a > primelimit and q large [#2439]
 BA  22- lfun([bnrinit(bnfinit(y^2+1),12),[[2,0],[6,0]]],2) -> error
     23- lfunthetacost(polcyclo(43)): silent overflow
+BA  24- ellcard(ellinit([1,1]*ffgen([41,16])))-> impossible inverse [#2441]
 
   Changed
      1- binomial(negative t_INT, t_INT): use Loeb's definition
