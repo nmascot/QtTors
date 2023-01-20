@@ -74,6 +74,7 @@ typedef struct FB_t {
   GEN iLP; /* iLP[p] = i such that LV[p] = [LP[i],...] */
   GEN L_jid; /* indexes of "useful" prime ideals for rnd_rel */
   long KC, KCZ, KCZ2;
+  GEN prodZ; /* product of the primes in KCZ*/
   GEN subFB; /* LP o subFB =  part of FB used to build random relations */
   int sfb_chg; /* need to change subFB ? */
   GEN perm; /* permutation of LP used to represent relations [updated by
@@ -705,6 +706,7 @@ FBgen(FB_t *F, GEN nf, long N, ulong C1, ulong C2, GRHcheck_t *S)
   if (!F->KC) { F->KCZ = i; F->KC = ip; }
   /* Note F->KC > 0 otherwise GRHchk is false */
   setlg(F->FB, F->KCZ+1); F->KCZ2 = i;
+  F->prodZ = zv_prod_Z(F->FB);
   if (DEBUGLEVEL>1)
   {
     err_printf("\n");
@@ -818,33 +820,18 @@ divide_p_quo(GEN LP, long ip, long k, GEN nf, GEN I, GEN m, FACT *fact)
 }
 
 /* |*N| != 0 is the norm of a primitive ideal, in particular not divisible by
- * any inert prime. Is |*N| a smooth rational integer wrt F ? (put the
- * exponents in *ex) */
+ * any inert prime. Is |*N| a smooth rational integer wrt F ?
+ */
 static int
-smooth_norm(FB_t *F, GEN *N, GEN *ex)
+Z_issmooth_prod(GEN N, GEN P)
 {
-  GEN FB = F->FB;
-  const long KCZ = F->KCZ;
-  const ulong limp = uel(FB,KCZ); /* last p in FB */
-  long i;
-
-  *ex = new_chunk(KCZ+1);
-  for (i=1; ; i++)
+  P = gcdii(P,N);
+  while (!is_pm1(P))
   {
-    int stop;
-    ulong p = uel(FB,i);
-    long v = Z_lvalrem_stop(N, p, &stop);
-    (*ex)[i] = v;
-    if (v)
-    {
-      GEN LP = gel(F->LV,p);
-      if (lg(LP) == 1) return 0;
-      if (stop) break;
-    }
-    if (i == KCZ) return 0;
+    N = diviiexact(N, P);
+    P = gcdii(N, P);
   }
-  (*ex)[0] = i;
-  return (abscmpiu(*N,limp) <= 0);
+  return is_pm1(N);
 }
 
 static int
@@ -864,17 +851,19 @@ divide_p(FB_t *F, long p, long k, GEN nf, GEN I, GEN m, FACT *fact)
 static long
 can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
 {
-  GEN ex;
-  long i, res = 0;
+  GEN f, p, e;
+  long i, l;
   fact[0].pr = 0;
   if (is_pm1(N)) return 1;
-  if (!smooth_norm(F, &N, &ex)) goto END;
-  for (i=1; i<=ex[0]; i++)
-    if (ex[i] && !divide_p(F, F->FB[i], ex[i], nf, I, m, fact)) goto END;
-  res = is_pm1(N) || divide_p(F, itou(N), 1, nf, I, m, fact);
-END:
-  if (!res && DEBUGLEVEL > 1) err_printf(".");
-  return res;
+  if (!Z_issmooth_prod(N, F->prodZ)) return 0;
+  f = absZ_factor(N); p = gel(f,1); e = gel(f,2); l = lg(p);
+  for (i = 1; i < l; i++)
+    if (!divide_p(F, itou(gel(p,i)), itou(gel(e,i)), nf, I, m, fact))
+    {
+      if (DEBUGLEVEL > 1) err_printf(".");
+      return 0;
+    }
+  return 1;
 }
 
 /* can we factor m/I ? [m in I from idealpseudomin_nonscalar], NI = norm I */
@@ -1324,6 +1313,7 @@ recover_partFB(FB_t *F, GEN Vbase, long N)
   F->KCZ = i;
   F->KC = ip;
   F->FB = FB; setlg(FB, i+1);
+  F->prodZ = zv_prod_Z(F->FB);
   F->LV = LV;
   F->iLP= iLP; return L;
 }
