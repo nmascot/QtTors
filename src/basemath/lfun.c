@@ -507,7 +507,7 @@ lfunthetacost(GEN ldata, GEN tdom, long m, long bitprec)
     T = rho;
   if (B <= 0) return 0;
   A = floor(0.9 + dblcoro526(a,c,B) / T * sqrt(N));
-  if (A >= LONG_MAX) pari_err_OVERFLOW("lfunthetacost");
+  if (dblexpo(A) >= BITS_IN_LONG-1) pari_err_OVERFLOW("lfunthetacost");
   return (long)A;
 }
 long
