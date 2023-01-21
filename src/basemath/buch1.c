@@ -43,7 +43,7 @@ struct buch_quad
   ulong limhash;
   long KC, KC2, PRECREG;
   long *primfact, *exprimfact, **hashtab;
-  GEN FB, numFB;
+  GEN FB, numFB, prodFB;
   GEN powsubFB, vperm, subFB, badprim;
   struct qfr_data *q;
 };
@@ -197,13 +197,26 @@ isless_iu(GEN q, ulong p) {
   return l==2 || (l == 3 && uel(q,2) <= p);
 }
 
+static GEN
+Z_isquasismooth_prod(GEN N, GEN P)
+{
+  P = gcdii(P,N);
+  while (!is_pm1(P))
+  {
+    N = diviiexact(N, P);
+    P = gcdii(N, P);
+  }
+  return N;
+}
+
 static long
 factorquad(struct buch_quad *B, GEN f, long nFB, ulong limp)
 {
   ulong X;
   long i, lo = 0;
   GEN x = gel(f,1), FB = B->FB, P = B->primfact, E = B->exprimfact;
-
+  GEN F =  Z_isquasismooth_prod(x, B->prodFB);
+  if (cmpiu(F, B->limhash) > 0) return 0;
   for (i=1; lgefint(x) > 3; i++)
   {
     ulong p = uel(FB,i), r;
@@ -455,6 +468,7 @@ FBquad(struct buch_quad *B, ulong C2, ulong C1, GRHcheck_t *S)
   {
     B->badprim = NULL; set_avma(av);
   }
+  B->prodFB = zv_prod_Z(B->FB);
 }
 
 /* create B->vperm, return B->subFB */
