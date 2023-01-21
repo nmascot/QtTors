@@ -65,6 +65,9 @@ pr = idealprimedec(K,31)[2];
 idealismaximal(K,idealhnf(K,pr)) == pr
 idealismaximal(K, x^2+1)
 
+K=nfinit(x^4+26);
+idealred(K,[[1,0,0,1/7;0,1,0,4/7;0,0,1,2/7;0,0,0,1/7]*7,1])
+
 k=nfinit(polcyclo(5));
 idealfactor(k,101,100)
 idealfactor(k,2*101,100)
@@ -202,3 +205,4 @@ idealstar(K,[4,Vecsmall([1,1,1])])
 idealstar(K,[4,Vecsmall([1,4,2])])
 idealstar(K,[4,Vecsmall([-1,2,3])])
 idealstar(K,[4,Vecsmall([1,1])])
+idealred(K, [4,3,2,1;0,3,2,1;0,0,2,1;0,0,0,1])
