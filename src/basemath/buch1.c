@@ -214,8 +214,9 @@ factorquad(struct buch_quad *B, GEN f, long nFB, ulong limp)
 {
   ulong X;
   long i, lo = 0;
-  GEN x = gel(f,1), FB = B->FB, P = B->primfact, E = B->exprimfact;
-  GEN F =  Z_isquasismooth_prod(x, B->prodFB);
+  GEN F, x = gel(f,1), FB = B->FB, P = B->primfact, E = B->exprimfact;
+  if (B->badprim && !is_pm1(gcdii(x, B->badprim))) return 0;
+  F =  Z_isquasismooth_prod(x, B->prodFB);
   if (cmpiu(F, B->limhash) > 0) return 0;
   for (i=1; lgefint(x) > 3; i++)
   {
@@ -250,12 +251,7 @@ factorquad(struct buch_quad *B, GEN f, long nFB, ulong limp)
   }
 END:
   if (X > B->limhash) return 0;
-  if (X != 1 && X <= limp)
-  {
-    if (B->badprim && ugcdui(X, B->badprim) > 1) return 0;
-    lo++; P[lo] = X; E[lo] = 1;
-    X = 1;
-  }
+  if (X != 1 && X <= limp) { lo++; P[lo] = X; E[lo] = 1; X = 1; }
   P[0] = lo; return X;
 }
 
