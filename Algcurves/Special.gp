@@ -704,14 +704,24 @@ CrvConic(C,P,Q)=
 
 PtPullback(C,uv,P)=
 {
-	my(Du,Dv,Q);
-	Du = FnDiv(C,uv[1]-P[1]);
-	Dv = FnDiv(C,uv[2]-P[2]);
+	my(u,v,Du,Dv,Q);
+	[u,v] = uv;
+	if(#P==3 && P[3]==0, \\ P=[a:b:0] at infty
+		if(P[1], \\ a<>0 -> dehom wrt x: [u:v:1] = [1:v/u:1/u]
+			[u,v] = [v,1]/u;
+			P = [P[2]/P[1],0]
+		, \\ P = [0:1:0] -> dehom wrt y: [u:v:1] = [u/v:1:1/v]
+		  [u,v] = [u,1]/v;
+			P = [0,0]
+		);
+	);
+	Du = FnDiv(C,u-P[1]);
+	Dv = FnDiv(C,v-P[2]);
 	for(i=1,#Du,
 		for(j=1,#Dv,
 			if(Du[i,1]==Dv[j,1],
-				Q=Branch2Pt(C,Du[i,1]);
-				if(Q[3],Q=Q[1..2]/Q[3]);
+				Q = Branch2Pt(C,Du[i,1]);
+				if(type(Q)=="t_VEC" && Q[3],Q=Q[1..2]/Q[3]);
 				return(Q);
 			)
 		)
