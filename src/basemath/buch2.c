@@ -2499,6 +2499,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M, GEN I,
     if (add_rel(cache, F, R, nz, gx, rr ? 1 : 0) <= 0)
     { /* probably Q-dependent from previous ones: forget it */
       if (DEBUGLEVEL>1) err_printf("*");
+      if (DEBUGLEVEL && Nfact && rr) (*Nfact)++;
       continue;
     }
     if (DEBUGLEVEL && Nfact) (*Nfact)++;
@@ -2575,14 +2576,14 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact, struct FP_param *tp)
 {
   pari_timer T;
   GEN L_jid = F->L_jid, M = nf_get_M(nf), R, NR;
-  long i, l = lg(L_jid), prec = nf_get_prec(nf);
+  long i, l = lg(L_jid), prec = nf_get_prec(nf), Nfact = 0;
   RNDREL_t rr;
   FP_t fp;
   pari_sp av;
 
   if (DEBUGLEVEL) {
     timer_start(&T);
-    err_printf("\n#### Look for %ld relations in %ld ideals (rnd_rel)\n",
+    err_printf("#### Look for %ld relations in %ld ideals (rnd_rel)\n",
                cache->end - cache->last, l-1);
   }
   rr.ex = cgetg(lg(F->subFB), t_VECSMALL);
@@ -2596,12 +2597,12 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact, struct FP_param *tp)
     if (DEBUGLEVEL>1) err_printf("\n*** Ideal %ld: %Ps\n", j, vecslice(P,1,4));
     rr.jid = j;
     if (Fincke_Pohst_ideal(cache, F, nf, M, idealHNF_mul(nf, R, P), Nid, fact,
-                           RND_REL_RELPID, &fp, &rr, prec, NULL, NULL, tp)) break;
+                           RND_REL_RELPID, &fp, &rr, prec, NULL, &Nfact, tp)) break;
   }
   if (DEBUGLEVEL)
   {
-    err_printf("\n");
-    if (timer_get(&T) > 1) timer_printf(&T,"for remaining ideals");
+    if (Nfact) err_printf("\n");
+    if (timer_get(&T)>=0) timer_printf(&T,"rnd_rel");
   }
 }
 
