@@ -738,19 +738,24 @@ pick_prime(GEN a, long fl, pari_timer *T)
     z = ZX_to_Flx(a, p);
     if (!Flx_is_squarefree(z, p)) continue;
 
-    if (fl)
+    if (fl==1)
     {
       nfacp = Flx_nbroots(z, p);
       if (!nfacp) { chosenp = 0; break; } /* no root */
     }
-    else
+    else if(fl==0)
     {
       nfacp = Flx_nbfact(z, p);
       if (nfacp == 1) { chosenp = 0; break; } /* irreducible */
+    } else
+    {
+      GEN f = gel(Flx_degfact(z, p),1);
+      nfacp = lg(f)-1;
+      if (f[1] > fl) { chosenp = 0; break; } /* no small factors */
     }
     if (DEBUGLEVEL>4)
       err_printf("...tried prime %3lu (%-3ld %s). Time = %ld\n",
-                  p, nfacp, fl? "roots": "factors", timer_delay(T));
+                  p, nfacp, fl==1? "roots": "factors", timer_delay(T));
     if (nfacp < nmax)
     {
       nmax = nfacp; chosenp = p;
@@ -816,9 +821,10 @@ DDF_roots(GEN A)
 }
 
 /* Assume a squarefree ZX, deg(a) > 0, return rational factors.
- * In fact, a(0) != 0 but we don't use this */
-static GEN
-DDF(GEN a)
+ * In fact, a(0) != 0 but we don't use this
+ * if dmax>0, Only look for factor of degree at most dmax */
+GEN
+ZX_DDF_max(GEN a, long dmax)
 {
   GEN ap, prime, famod, z;
   long ti = 0;
@@ -827,7 +833,7 @@ DDF(GEN a)
   pari_timer T, T2;
 
   if (DEBUGLEVEL>2) { timer_start(&T); timer_start(&T2); }
-  p = pick_prime(a, 0, &T2);
+  p = pick_prime(a, dmax, &T2);
   if (!p) return mkvec(a);
   prime = utoipos(p);
   ap = Flx_normalize(ZX_to_Flx(a, p), p);
@@ -852,7 +858,7 @@ ZX_DDF(GEN x)
   GEN L;
   long m;
   x = ZX_deflate_max(x, &m);
-  L = DDF(x);
+  L = ZX_DDF_max(x,0);
   if (m > 1)
   {
     GEN e, v, fa = factoru(m);
@@ -868,7 +874,7 @@ ZX_DDF(GEN x)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-              L2 = shallowconcat(L2, DDF(RgX_inflate(gel(L,i), v[k])));
+              L2 = shallowconcat(L2, ZX_DDF_max(RgX_inflate(gel(L,i), v[k]),0));
       L = L2;
     }
   }

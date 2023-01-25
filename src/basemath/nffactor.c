@@ -1788,7 +1788,7 @@ nf_pick_prime(GEN nf, GEN pol, long fl, GEN *lt, GEN *Tp, ulong *pp)
 
 /* Assume lt(T) is a t_INT and T square free. Return t_VEC of irred. factors */
 static GEN
-nfsqff_trager(GEN u, GEN T, GEN dent)
+nfsqff_trager(GEN u, GEN T, GEN dent, long fl)
 {
   long k = 0, i, lx;
   GEN U, P, x0, mx0, fa, n = ZX_ZXY_rnfequation(T, u, &k);
@@ -1796,7 +1796,7 @@ nfsqff_trager(GEN u, GEN T, GEN dent)
   if (DEBUGLEVEL>4) err_printf("nfsqff_trager: choosing k = %ld\n",k);
 
   /* n guaranteed to be squarefree */
-  fa = ZX_DDF(Q_primpart(n)); lx = lg(fa);
+  fa = ZX_DDF_max(Q_primpart(n),fl==ROOTS || fl==ROOTS_SPLIT ? degpol(T): 0); lx = lg(fa);
   if (lx == 2) return mkvec(u);
 
   tmonic = is_pm1(leading_coeff(T));
@@ -1843,7 +1843,7 @@ polfnf(GEN a, GEN T)
   (void)nfgcd_all(A,RgX_deriv(A), T, dent, &B);
   if (degpol(B) != dA) B = Q_primpart( QXQX_normalize(B, T) );
   ensure_lt_INT(B);
-  y = nfsqff_trager(B, T, dent);
+  y = nfsqff_trager(B, T, dent, FACTORS);
   fact_from_sqff(rep, A, B, y, T, bad);
   return sort_factor_pol(rep, cmp_RgX);
 }
@@ -1885,7 +1885,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
     GEN z;
     if (DEBUGLEVEL>2) err_printf("Using Trager's method\n");
     if (typ(nf) != t_POL) den =  mulii(den, nf_get_index(nf));
-    z = nfsqff_trager(Q_primpart(pol), nfpol, den);
+    z = nfsqff_trager(Q_primpart(pol), nfpol, den, fl);
     if (fl != FACTORS) {
       long i, l = lg(z);
       for (i = 1; i < l; i++)
