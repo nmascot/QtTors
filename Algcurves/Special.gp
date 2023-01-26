@@ -717,8 +717,8 @@ PtPullback(C,uv,P)=
 	);
 	Du = FnDiv(C,u-P[1]);
 	Dv = FnDiv(C,v-P[2]);
-	for(i=1,#Du,
-		for(j=1,#Dv,
+	for(i=1,#Du~,
+		for(j=1,#Dv~,
 			if(Du[i,1]==Dv[j,1],
 				Q = Branch2Pt(C,Du[i,1]);
 				if(type(Q)=="t_VEC" && Q[3],Q=Q[1..2]/Q[3]);
