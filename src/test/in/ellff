@@ -192,3 +192,4 @@ check2(nextprime(2^32));
 check2(nextprime(2^64));
 
 z = ffgen(41^16); E=ellinit([z,z]); ellcard(E)
+z = ffgen([41,13]); E = ellinit([z^28]);ellcard(E)
