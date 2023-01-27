@@ -28,6 +28,7 @@ BA  22- lfun([bnrinit(bnfinit(y^2+1),12),[[2,0],[6,0]]],2) -> error
     23- lfunthetacost(polcyclo(43)): silent overflow
 BA  24- ellcard(ellinit([1,1]*ffgen([41,16])))-> impossible inverse [#2441]
     25- wrong result (missing content) in idealred(nf, [id, elt])
+    26- det(integer matrix) -> inconsistent exact division [#2445]
 
   Changed
      1- binomial(negative t_INT, t_INT): use Loeb's definition

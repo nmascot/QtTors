@@ -5539,10 +5539,11 @@ ZM_det(GEN M)
     timer_printf(&ti,"ZM_det: Dixon %ld/%ld bits",expi(D),expi(h));
   /* determinant is a multiple of D */
   if (is_pm1(D)) D = NULL;
-  if (D) h = diviiexact(h, D);
+  if (D) h = divii(h, D); /* not an exact division, just a bound */
   worker = snm_closure(is_entry("_ZM_det_worker"), mkvec(M));
   H = gen_crt("ZM_det", worker, &S, D, expi(h)+1, 0, &mod,
               ZV_chinese, NULL);
+  /* H = det(M) modulo mod, (mod,D) = 1; |det(M) / D| <= h */
   if (D) H = Fp_div(H, D, mod);
   H = Fp_center(H, mod, shifti(mod,-1));
   if (D) H = mulii(H, D);
