@@ -186,7 +186,10 @@ C = vector(matsize(fa)[1], i, C);
 idealchinese(K, fa, C)
 idealchinese(K, CH, C)
 
+ideallist(nfinit(x^3+x+1),-100)
+
 \\ Errors, keep at end of file
+ideallist(x,-300)
 idealaddtoone(Q,2,[;])
 idealaddtoone(Q,[;],[;])
 idealaddtoone(Q,[1,[;],Mat(1/2)])
