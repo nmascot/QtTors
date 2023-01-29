@@ -1283,9 +1283,10 @@ static void
 check_hyperell_Rg(const char *fun, GEN *pW, GEN *pF)
 {
   GEN W = *pW, F = check_hyperell(W);
-  long v = varn(F);
+  long v;
   if (!F || signe(F)==0)
     pari_err_TYPE(fun, W);
+  v = varn(F);
   if (typ(W)==t_POL) W = mkvec2(W, pol_0(v));
   else
   {

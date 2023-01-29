@@ -31,4 +31,7 @@
   ***   at top-level: hyperellchangecurve(x^3+1,[1,Mat(1),0])
   ***                 ^---------------------------------------
   *** hyperellchangecurve: incorrect type in hyperellchangecurve (t_VEC).
-Total time spent: 377
+  ***   at top-level: hyperellchangecurve([],[1,Mat(1),0])
+  ***                 ^------------------------------------
+  *** hyperellchangecurve: incorrect type in hyperellchangecurve (t_VEC).
+Total time spent: 342
