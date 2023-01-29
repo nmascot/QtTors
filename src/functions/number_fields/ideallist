@@ -58,9 +58,10 @@ Doc: computes the list of all ideals of norm less or equal to \var{bound} in
  $25$ and trivial Archimedean part, as the last 3 commands show. See
  \tet{ideallistarch} to treat general moduli.
 
- Finally, on can input a negative \kbd{bound}. The function
+ Finally, one can input a negative \kbd{bound}. The function
  then returns the ideals of norm $|\kbd{bound}|$, given by their
- factorization matrix. If needed, one can obtain their HNF using
+ factorization matrix. The only valid value of \fl\ is then the default.
+ If needed, one can obtain their HNF using
  \kbd{idealfactorback}, and the corresponding \var{bid} structures using
  \kbd{idealstar} (which accepts ideals in factored form).
 Variant: Also available is
