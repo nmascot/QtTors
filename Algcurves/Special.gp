@@ -385,6 +385,8 @@ CrvHyperell_sub(b,u,v,n,vars,p)=
 		M1 = M^(-1);
 		u = (M1[1,1]*u+M1[1,2])/(M1[2,1]*u+M1[2,2]);
 		v = ((M[2,1]*u+M[2,2])^g1*v-subst(H,x,u))/e;
+	,
+		R=[R,0]; \\ Mod p case; need long format for below
 	);
 	if(R[2]==0,
 		R=R[1]; \\ R=[P,Q]; if Q==0, drop Q
@@ -402,7 +404,7 @@ CrvHyperell_sub(b,u,v,n,vars,p)=
 				d--;
 			)
 		);
-		if(d%2 && polcoef(R,d)<0,
+		if(p==0 && d%2 && polcoef(R,d)<0,
 			R = subst(R,x,-x);
 			u = -u
 		)
