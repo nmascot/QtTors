@@ -2092,6 +2092,7 @@ nfrootsof1(GEN nf)
 
   T = get_nfpol(nf, &nf); nfdegree = degpol(T);
   RgX_check_ZX(T, "nfrootsof1");
+  if (nfdegree <= 0) pari_err_CONSTPOL("nfrootsof1");
   if (nf)
   {
     if (nf_get_r1(nf)) return trivroots();

@@ -12,3 +12,6 @@ do(polcyclo(68))
 do(polcyclo(85))
 nfrootsof1(x^2023+x+1)
 nfrootsof1(x^2024+x-1)
+
+\\ errors
+nfrootsof1(x^0)
