@@ -446,7 +446,7 @@ CrvHyperell(C,P=0)=
 		W = W[1];
 		K1 = K1[,1]; \\ Take u = highest ord / 2nd highest ord
 		K = matconcat([K1,K2[,1]]);
-		u = if(matrank(K)==1,(W*K1)/(W*K2[,2]),(W*K1)/(W*K2[,1]));
+		u = if(matrank(K)==1,(W*K2[,2])/(W*K1),(W*K2[,1])/(W*K1));
 	);
 	\\ K(C) is at least one of K(u,x) or K(u,y); try both
 	H = CrvHyperell_sub(B,u,x,poldegree(F,y),C[3],C[2]);
@@ -717,6 +717,8 @@ PtPullback(C,uv,P)=
 	);
 	Du = FnDiv(C,u-P[1]);
 	Dv = FnDiv(C,v-P[2]);
+	Du = select(p->p[2]>0,Du~)~;
+	Dv = select(p->p[2]>0,Dv~)~;
 	for(i=1,#Du~,
 		for(j=1,#Dv~,
 			if(Du[i,1]==Dv[j,1],
