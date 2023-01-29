@@ -1470,7 +1470,9 @@ hgminit(GEN val, GEN vbe)
 GEN
 hgmalpha(GEN hgm)
 {
-  GEN al = hgm_get_VAL(hgm), be = hgm_get_VBE(hgm);
+  GEN al, be;
+  if (!checkhgm(hgm)) pari_err_TYPE("hgmalpha", hgm);
+  al = hgm_get_VAL(hgm); be = hgm_get_VBE(hgm);
   if (hgm_get_SWAP(hgm)) swap(al, be);
   retmkvec2(gcopy(al), gcopy(be));
 }

@@ -209,4 +209,10 @@ x^2 + 3*x - 1), 1/(117649*x^4 + 5488*x^3 + 238*x^2 + 16*x + 1), 1/(1771561*x
   ***   at top-level: hgmeulerfactor(HCAN,1,p)
   ***                 ^------------------------
   *** hgmeulerfactor: overflow in hgmCallmodp2.
-Total time spent: 3567
+  ***   at top-level: hgmalpha(Pi)
+  ***                 ^------------
+  *** hgmalpha: incorrect type in hgmalpha (t_REAL).
+  ***   at top-level: hgmgamma(Pi)
+  ***                 ^------------
+  *** hgmgamma: incorrect type in hgmgamma (t_REAL).
+Total time spent: 2121
