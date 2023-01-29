@@ -34,4 +34,7 @@
   ***   at top-level: hyperellchangecurve([],[1,Mat(1),0])
   ***                 ^------------------------------------
   *** hyperellchangecurve: incorrect type in hyperellchangecurve (t_VEC).
-Total time spent: 342
+  ***   at top-level: hyperellchangecurve(x^0,[1,matid(2),0])
+  ***                 ^---------------------------------------
+  *** hyperellchangecurve: constant polynomial in hyperellchangecurve.
+Total time spent: 346

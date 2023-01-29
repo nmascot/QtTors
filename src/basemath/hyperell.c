@@ -1284,8 +1284,9 @@ check_hyperell_Rg(const char *fun, GEN *pW, GEN *pF)
 {
   GEN W = *pW, F = check_hyperell(W);
   long v;
-  if (!F || signe(F)==0)
+  if (!F)
     pari_err_TYPE(fun, W);
+  if (degpol(F) <= 0) pari_err_CONSTPOL(fun);
   v = varn(F);
   if (typ(W)==t_POL) W = mkvec2(W, pol_0(v));
   else
@@ -1311,7 +1312,7 @@ check_hyperell_vc(const char *fun, GEN C, long v, GEN *e, GEN *M, GEN *H)
   if (typ(C) != t_VEC || lg(C) != 4) pari_err_TYPE(fun,C);
   *e = gel(C,1); *M = gel(C,2); *H = gel(C,3);
   if (typ(*M) != t_MAT || lg(*M) != 3 || lgcols(*M) != 3) pari_err_TYPE(fun,C);
-  if (typ(*H)!=t_POL || varn(*H)!=v) *H = scalarpol_shallow(*H,v);
+  if (typ(*H)!=t_POL || varncmp(varn(*H),v) > 0) *H = scalarpol_shallow(*H,v);
 }
 
 GEN
@@ -1324,6 +1325,8 @@ hyperellchangecurve(GEN W, GEN C)
   P = gel(W,1); Q = gel(W,2);
   d = degpol(F); g = ((d+1)>>1)-1; v = varn(F);
   check_hyperell_vc("hyperellchangecurve", C, v, &e, &M, &H);
+  if (varncmp(gvar(M),v) <= 0)
+    pari_err_PRIORITY("hyperellchangecurve",M,"<=",v);
   A = deg1pol_shallow(gcoeff(M,1,1), gcoeff(M,1,2), v);
   B = deg1pol_shallow(gcoeff(M,2,1), gcoeff(M,2,2), v);
   Bp = gpowers(B, 2*g+2);
