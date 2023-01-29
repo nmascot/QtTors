@@ -716,6 +716,7 @@ zetamult_interpolate(GEN s, GEN t, long prec)
   long i, k, l, la, bit;
   GEN avec, v, V;
 
+  if (lg(s) == 1) return gen_1;
   if (!t) return zetamult(s, prec);
   avec = zetamultconvert_i(s, 1); k = zv_sum(avec);
   bit = prec2nbits(prec);
@@ -980,6 +981,7 @@ zetamultall(long k, long flag, long prec)
 
   if (flag < 0 || flag > 15) pari_err_FLAG("zetamultall");
   if (k < 1) pari_err_DOMAIN("zetamultall", "k", "<", gen_1, stoi(k));
+  if (k == 1) return cgetg(1, t_VEC);
   if (k >= 64) pari_err_OVERFLOW("zetamultall");
   if (!(flag & 1L))
   { /* not star */
