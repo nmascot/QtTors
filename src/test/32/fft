@@ -10,10 +10,18 @@
 -97
 1
 1
+[2]
+[x]
   ***   at top-level: fft(rootsof1(3),x^2+x+1)
   ***                 ^------------------------
   *** fft: inconsistent dimensions in fft.
   ***   at top-level: fftinv(rootsof1(3),x^2+x+1)
   ***                 ^---------------------------
   *** fftinv: inconsistent dimensions in fft.
-Total time spent: 52
+  ***   at top-level: fft([],[])
+  ***                 ^----------
+  *** fft: inconsistent dimensions in fft.
+  ***   at top-level: fftinv([],[])
+  ***                 ^-------------
+  *** fftinv: inconsistent dimensions in fft.
+Total time spent: 33

@@ -719,18 +719,18 @@ FFT_i(GEN W, GEN x)
 {
   long i, l = lg(W), n = lg(x), tx = typ(x), tw, pa;
   GEN y, z, p, pol;
-  if ((l-1) & (l-2)) pari_err_DIM("fft");
+  if (l==1 || ((l-1) & (l-2))) pari_err_DIM("fft");
   tw = RgV_type(W, &p, &pol, &pa);
   if (tx == t_POL) { x++; n--; }
   else if (!is_vec_t(tx)) pari_err_TYPE("fft",x);
   if (n > l) pari_err_DIM("fft");
-
   if (n < l) {
     z = cgetg(l, t_VECSMALL); /* cf stackdummy */
     for (i = 1; i < n; i++) gel(z,i) = gel(x,i);
     for (     ; i < l; i++) gel(z,i) = gen_0;
   }
   else z = x;
+  if (l == 2) return mkveccopy(gel(z,1));
   y = cgetg(l, t_VEC);
   if (tw==code(t_COMPLEX,t_INT) || tw==code(t_COMPLEX,t_REAL))
   {
@@ -756,6 +756,7 @@ FFTinv(GEN W, GEN x)
   long l = lg(W), i;
   GEN w;
   if (!is_vec_t(typ(W))) pari_err_TYPE("fft",W);
+  if (l==1 || ((l-1) & (l-2))) pari_err_DIM("fft");
   w = cgetg(l, t_VECSMALL); /* cf stackdummy */
   gel(w,1) = gel(W,1); /* w = gconj(W), faster */
   for (i = 2; i < l; i++) gel(w, i) = gel(W, l-i+1);

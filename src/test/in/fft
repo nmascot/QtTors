@@ -23,7 +23,12 @@ U=fft(w,g);
 V=fftinv(w,U)/#w;
 V==Vecrev(g)
 
+fft([1]~,[2]~)
+fftinv([1],[x])
+
 \\ Errors
 
 fft(rootsof1(3), x^2+x+1)
 fftinv(rootsof1(3), x^2+x+1)
+fft([],[])
+fftinv([],[])
