@@ -735,12 +735,12 @@ zetamult_interpolate(GEN s, GEN t, long prec)
   return gerepileupto(av, poleval(vecreverse(V),t));
 }
 
-
 GEN
-polylogmult(GEN a, GEN z, long prec)
+polylogmult_interpolate(GEN a, GEN z, GEN t, long prec)
 {
   pari_sp av = avma;
-  if (!z) return zetamult(a, prec);
+  GEN V, avec, A, AZ, Z;
+  long i, la, l;
   switch(typ(a))
   {
     case t_VEC:
@@ -749,6 +749,7 @@ polylogmult(GEN a, GEN z, long prec)
     default: pari_err_TYPE("polylogmult", a);
              return NULL;/*LCOV_EXCL_LINE*/
   }
+  if (!z) return zetamult_interpolate(a, t, prec);
   switch (typ(z))
   {
     case t_INT: case t_FRAC: case t_REAL: case t_COMPLEX:
@@ -759,30 +760,25 @@ polylogmult(GEN a, GEN z, long prec)
   }
   if (lg(z) != lg(a))
     pari_err_TYPE("polylogmult [#s != #z]", mkvec2(a,z));
-  return gerepilecopy(av, zetamultevec(aztoe(a,z,prec), prec));
-}
-
-GEN
-polylogmult_interpolate(GEN s, GEN zvec, GEN t, long prec)
-{
-  pari_sp av = avma;
-  GEN V, avec, A, AZ, Z;
-  long i, la, l;
-
-  if (!t) return polylogmult(s, zvec, prec);
-  if (!zvec) return zetamult_interpolate(s, t, prec);
-  avec = zetamultconvert_i(s, 1); la = lg(avec);
-  AZ = allstar2(avec, zvec);
+  if (!t) return gerepilecopy(av, zetamultevec(aztoe(a,z,prec), prec));
+  avec = zetamultconvert_i(a, 1); la = lg(avec);
+  AZ = allstar2(avec, z);
   A = gel(AZ, 1); l = lg(A);
   Z = gel(AZ, 2); V = zerovec(la-1);
   for (i = 1; i < l; i++)
   {
     pari_sp av2 = avma;
-    GEN a = gel(A,i), e = aztoe(a, gel(Z,i), prec);
-    long n = lg(a)-1; /* > 0 */
+    GEN ai = gel(A,i), e = aztoe(ai, gel(Z,i), prec);
+    long n = lg(ai)-1; /* > 0 */
     gel(V,n) = gerepileupto(av2, gadd(gel(V,n), zetamultevec(e, prec)));
   }
   return gerepileupto(av, poleval(vecreverse(V),t));
+}
+
+GEN
+polylogmult(GEN a, GEN z, long prec)
+{
+  return polylogmult_interpolate(a, z, NULL, prec);
 }
 
 /**************************************************************/
