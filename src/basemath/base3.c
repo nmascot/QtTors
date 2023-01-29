@@ -276,8 +276,9 @@ rnfeltnorm(GEN rnf, GEN x)
 {
   pari_sp av = avma;
   GEN nf, pol;
-  long v = rnf_get_varn(rnf);
+  long v;
   checkrnf(rnf);
+  v = rnf_get_varn(rnf);
   x = liftpol_shallow(rnfeltabstorel(rnf, x));
   nf = rnf_get_nf(rnf); pol = rnf_get_pol(rnf);
   x = (typ(x) == t_POL)

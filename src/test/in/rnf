@@ -248,6 +248,9 @@ rnfpseudobasis(nf, x^2/2 + 1);
 rnfpseudobasis(nf, x^2 + 1/2);
 rnfpseudobasis(nf, x^2);
 
+rnfeltnorm(x,x)
+rnfelttrace(x,x)
+
 rnfislocalcyclo(rnfinit(K, x^6-y+1))
 \\#1530
 L=rnfinit(nfinit(y^2-3),x^2+23);
