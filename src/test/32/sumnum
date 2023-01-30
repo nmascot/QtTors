@@ -104,6 +104,9 @@
   ***   at top-level: sumnumlagrangeinit(x)
   ***                 ^---------------------
   *** sumnumlagrangeinit: incorrect type in sumnumlagrangeinit (t_POL).
+  ***   at top-level: sumnumlagrangeinit(x,-2)
+  ***                 ^------------------------
+  *** sumnumlagrangeinit: domain error in sumnumlagrangeinit: c1 <= 0
   ***   at top-level: prodinf(n=0,1+2^-n,2)
   ***                 ^---------------------
   *** prodinf: invalid flag in prodinf.
@@ -113,4 +116,4 @@
   ***   at top-level: sumpos(n=0,1,2)
   ***                 ^---------------
   *** sumpos: invalid flag in sumpos.
-Total time spent: 1795
+Total time spent: 2529

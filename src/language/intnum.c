@@ -2509,6 +2509,8 @@ sumnumlagrange1init(GEN c1, long flag, long prec)
   long B = prec2nbits(prec), prec2;
   ulong n, N;
   c1d = c1 ? gtodouble(c1) : 0.332;
+  if (c1d <= 0)
+    pari_err_DOMAIN("sumnumlagrangeinit", "c1", "<=", gen_0, c1);
   N = (ulong)ceil(c1d*B); if ((N&1L) == 0) N++;
   prec2 = nbits2prec(B+(long)ceil(1.8444*N) + 16);
   W = vecbinomial(N);
