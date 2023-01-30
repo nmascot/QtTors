@@ -578,6 +578,8 @@ gammamellininvinit(GEN Vga, long m, long bitprec)
   long nlimmax, status, d, prec = nbits2prec((4*bitprec)/3);
   double E = M_LN2*bitprec, tmax = get_tmax(bitprec); /* = E/C2 */
 
+  if (m < 0)
+    pari_err_DOMAIN("gammamellininvinit", "derivation order", "<", gen_0, stoi(m));
   Vga = get_Vga(Vga, &ldata); d = lg(Vga)-1;
   if (!is_vec_t(typ(Vga)) || !d) pari_err_TYPE("gammamellininvinit",Vga);
   nlimmax = ceil(E * log2(1+M_PI*tmax) * C2 / get_D(d));

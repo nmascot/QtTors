@@ -75,3 +75,4 @@ localprec(100); gammamellininvinit([1/3*I,-1/3*I]); \\#2283
 \\ERRORS
 gammamellininvasymp([])
 gammamellininvinit([])
+gammamellininvinit(x,-2)
