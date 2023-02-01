@@ -1,5 +1,5 @@
 \\ Deprecated
-Sings(f0,a)=
+Sings(f0,a,p)=
 {
 	my(f,F,x,y,z,fx,fy,fz,D,faD,yD,A,DA,faDA,new,old,S=List(),P);
 	[f,F] = if(type(f0)=="t_VEC",f0,APeqns(f0));
@@ -27,7 +27,7 @@ Sings(f0,a)=
 			if(poldegree(DA),
 				faDA = factor(DA);
 				for(j=1,#faDA~,
-					[A,new,old] = AlgExtend(D,faDA[j,1]);
+					[A,new,old] = AlgExtend(D,faDA[j,1],p);
 					P = [new,subst(liftpol(yD),a,old),1]; \\ x,y guaranteeed to have same A
 					if(poldegree(A)==1,P=liftpol(P));
 					listput(S,P);
@@ -170,7 +170,7 @@ Branches0(f,t,A,caract,flag)=
 		for(ig=1,#fag~, \\ Loop over factors
 			G = fag[ig,1];
 			\\print(G);
-			[B,b,aB] = AlgExtend(A,G); \\ Now work mod B(t), b(t) root of G, a=aB(t)
+			[B,b,aB] = AlgExtend(A,G,caract); \\ Now work mod B(t), b(t) root of G, a=aB(t)
 			\\print("Branches0: algext ",[A,G]," -> ",[B,b,aB]);
 			fB = subst(liftpol(f),a,aB);
 			\\print("b=",b);

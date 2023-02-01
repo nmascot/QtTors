@@ -4,10 +4,10 @@ install("ZXY_disc","GL");
 
 PolRoot1(f)=-polcoef(f,0)/polcoef(f,1);
 
-AlgExtend(A,G,maxdeg=40,maxdeg2=8)=
+AlgExtend(A,G,p,maxdeg=40,maxdeg2=8)=
 { \\A(a), G(x,a) irr over Prim(a)
   \\ -> T(t), g(t) root of G(x,a(t)), a(t)
-  my(x,a,d,c,p,T,z,al,k);
+  my(x,a,d,c,T,z,al,k);
   \\print("Algextend ",A," ",G);
   x = variable(G);
   a = variable(A);
@@ -20,8 +20,7 @@ AlgExtend(A,G,maxdeg=40,maxdeg2=8)=
 	);
   d = poldegree(A);
   c = polcoef(A,d);
-  if(type(c)=="t_INTMOD",
-    p = c.mod;
+  if(p,
     T = ffinit(p,d*poldegree(G),a);
     al = polrootsmod(subst(A,a,x),[T,p])[1];
     G = subst(liftpol(G),a,al);
