@@ -438,16 +438,15 @@ lfundiv(GEN ldata1, GEN ldata2, long bitprec)
   k = ldata_get_k(ldata1);
   if (!gequal(ldata_get_k(ldata2),k))
     pari_err_OP("lfundiv [weight]",ldata1, ldata2);
-  r = lfundivpoles(ldata1, ldata2, bitprec);
   N = gdiv(ldata_get_conductor(ldata1), ldata_get_conductor(ldata2));
   if (typ(N) != t_INT) pari_err_OP("lfundiv [conductor]",ldata1, ldata2);
+  r = lfundivpoles(ldata1, ldata2, bitprec);
   a1a2 = lfunconvolinv(ldata_get_an(ldata1), ldata_get_an(ldata2));
   b1b2 = lfuncombdual(lfunconvolinv, ldata1, ldata2);
   eno2 = ldata_get_rootno(ldata2);
   eno = isintzero(eno2)? gen_0: gdiv(ldata_get_rootno(ldata1), eno2);
   v = lfunvgasub(ldata_get_gammavec(ldata1), ldata_get_gammavec(ldata2));
-  LD = mkvecn(7, a1a2, b1b2, v, k, N, eno, r);
-  if (!r) setlg(LD,7);
+  LD = mkvecn(r ? 7: 6, a1a2, b1b2, v, k, N, eno, r);
   return gerepilecopy(ltop, LD);
 }
 
