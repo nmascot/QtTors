@@ -431,7 +431,7 @@ GEN
 lfundiv(GEN ldata1, GEN ldata2, long bitprec)
 {
   pari_sp ltop = avma;
-  GEN k, r, N, v, eno, a1a2, b1b2, LD, eno2;
+  GEN k, r, N, v, eno, a1a2, b1b2, eno2;
   long prec = nbits2prec(bitprec);
   ldata1 = ldata_newprec(lfunmisc_to_ldata_shallow(ldata1), prec);
   ldata2 = ldata_newprec(lfunmisc_to_ldata_shallow(ldata2), prec);
@@ -446,8 +446,7 @@ lfundiv(GEN ldata1, GEN ldata2, long bitprec)
   eno2 = ldata_get_rootno(ldata2);
   eno = isintzero(eno2)? gen_0: gdiv(ldata_get_rootno(ldata1), eno2);
   v = lfunvgasub(ldata_get_gammavec(ldata1), ldata_get_gammavec(ldata2));
-  LD = mkvecn(r ? 7: 6, a1a2, b1b2, v, k, N, eno, r);
-  return gerepilecopy(ltop, LD);
+  return gerepilecopy(ltop,  mkvecn(r? 7: 6, a1a2, b1b2, v, k, N, eno, r));
 }
 
 static GEN
