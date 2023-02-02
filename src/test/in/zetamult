@@ -36,6 +36,11 @@ polylogmult([2,1,1], exp(2*I*Pi/7) * [1,1,1])
 polylogmult([2,1,1,1], exp(2*I*Pi/7) * [1,1,1,1])
 polylogmult([1],[-1])
 polylogmult([1],[1/2])
+f(t)=polylogmult([2,1],[-1,-1],t);
+g(t)=polylogmult([2,3,4],,t);
+exponent(f(0.2)-(0.8*f(0)+0.2*f(1)))
+P=polinterpolate([g(1),g(2),g(3)]);
+exponent(g(0.2)-subst(P,x,0.2))
 
 default(realprecision,366);
 a=(1+sqrt(5))/2;w=(1+sqrt(-3))/2; real(polylogmult([1,1,1,1],[1/a,a,1,w]))
@@ -64,6 +69,9 @@ zetamultdual([4])
 zetamultdual([2,1,1])
 zetamultdual(4)
 zetamultdual([0,0,1,1,0,0,1,1])
+
+zetamult([],1)
+zetamultall(1,1)
 
 \\ Errors, keep at end of file
 zetamult([1,2])
