@@ -70,7 +70,7 @@ EqnLineEval(D,P)=D[1]*P[1]+D[2]*P[2]-D[3];
 
 NewtonPolygon(f)=
 {
-	my(x,y,dx,dy,V,c,P,D,istart,iend);
+	my(x,y,d,n,V,c,P,D,istart,iend);
 	\\print("NewtonPoly ",f);
 	[x,y] = variables(f);
 	d = poldegree(f,y);
@@ -319,7 +319,7 @@ BranchEval(f,b,e,x,y)=
 
 BranchOrigin(B)=
 {
-	my(e=1,t,b,X,Y,Z);
+	my(e=1,t,b,m,X,Y,Z);
 	t = variables(B[3])[2];
 	while(1,
 		e*=2;

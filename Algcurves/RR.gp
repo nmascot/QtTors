@@ -173,7 +173,7 @@ FindInBOO(BOO,b)=
 
 PtUB(P,F,B,B0,BOO,SB,lf)=
 { \\ P -> U,b,iOO. P can be coded in many different ways.
-  my(tyP,U,b,BU,BP,lP,k1,k2);
+  my(tyP,U,b,BU,BP,lP,k1,k2,nOO=#BOO);
   tyP = type(P);
   if(tyP=="t_INT",
 		[U,b] = SB[P][2..3]; \\ # of sing branch
@@ -245,7 +245,7 @@ PtUB(P,F,B,B0,BOO,SB,lf)=
 
 RiemannRoch(C,D)=
 {
-  my(f,F,p,x,y,z,t,a,B,BOO,B0,SB,g,OC,OCden,dx,dy,mOO,D0,k,nP,P,U,BP,iOO,den,m0,aU,BU,mU,dden,dOO,mOO2,l,V,N,L,M,K);
+  my(f,F,p,x,y,z,t,a,B,BOO,B0,SB,g,OC,OCden,dx,dy,mOO,D0,k,nP,P,U,BP,iOO,den,m0,aU,BU,mU,dden,dOO,mOO2,l,V,N,L,M,K,nOO,dOC,lf);
   if(type(D)=="t_VEC",
     D = Mat(D)
   );
@@ -360,7 +360,7 @@ FnNormalise(f,F,x,t)=subst(lift(Mod(subst(f,x,t),subst(F,x,t))),t,x); \\ put in 
 
 FnDiv(C,f,Print)=
 {
-  my(p,x,y,z,t,a,SB,Of,Df,Nf,R,fa,D,U,BU,b,v,P,DNf);
+  my(p,x,y,z,t,a,SB,nSB,Of,Df,Nf,R,fa,D,U,BU,b,v,P,DNf);
   p = C[2];
   [x,y,z,t,a] = C[3];
   SB = C[4];
