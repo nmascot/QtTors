@@ -293,9 +293,12 @@ znsubgroupgenerators(GEN H, long flag)
   pari_sp av = avma;
   ulong f, g, o;
   GEN H1, H2, z = const_vecsmall(0,0), D;
-  if (typ(H)==t_VEC) H = ZV_to_F2v(H);
-  else if (typ(H)==t_VECSMALL) H = Flv_to_F2v(H);
-  else pari_err_TYPE("znsubgroupgenerators", H);
+  switch(typ(H))
+  {
+    case t_VECSMALL: H = Flv_to_F2v(H); break;
+    case t_VEC: if (RgV_is_ZV(H)) { H = ZV_to_F2v(H); break; }
+    default: pari_err_TYPE("znsubgroupgenerators", H);
+  }
   f = H[1]; z = cgetg(1, t_VECSMALL);
   D = divisorsu(F2v_hamming(H));
   H1 = zero_F2v(f); F2v_set(H1, 1);
