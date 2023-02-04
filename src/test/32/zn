@@ -269,4 +269,7 @@ x^2
   ***   at top-level: znconreyexp(znstar(192,1),[2,8,1,1]~)
   ***                 ^-------------------------------------
   *** znconreyexp: incorrect type in znconreyexp (t_COL).
-Total time spent: 1333
+  ***   at top-level: znsubgroupgenerators([I])
+  ***                 ^-------------------------
+  *** znsubgroupgenerators: incorrect type in znsubgroupgenerators (t_VEC).
+Total time spent: 986
