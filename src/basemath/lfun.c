@@ -496,9 +496,9 @@ lfunthetacost(GEN ldata, GEN tdom, long m, long bitprec)
   if (al)
   { /* t = rho e^(i*al), T^(1/c) = Re(t^(1/c)) > 0, T = rho cos^c(al/c) */
     double z = cos(al/c);
-    T = (d == 2 && typ(tdom) != t_VEC)? gtodouble(real_i(tdom)): rho*pow(z,c);
     if (z <= 0)
       pari_err_DOMAIN("lfunthetaneed", "arg t", ">", dbltor(c*M_PI/2), tdom);
+    T = (d == 2 && typ(tdom) != t_VEC)? gtodouble(real_i(tdom)): rho*pow(z,c);
     B -= log(z) * (c * (k1+A+1) + m);
   }
   else

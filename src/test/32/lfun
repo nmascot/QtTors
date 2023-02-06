@@ -386,4 +386,7 @@ O(x^2)
   ***   at top-level: lfunthetacost(polcyclo(43))
   ***                 ^---------------------------
   *** lfunthetacost: overflow in lfunthetacost.
-Total time spent: 3947
+  ***   at top-level: lfuncheckfeq(1,I)
+  ***                 ^-----------------
+  *** lfuncheckfeq: domain error in lfunthetaneed: arg t > 0.7853981633974482790
+Total time spent: 6390
