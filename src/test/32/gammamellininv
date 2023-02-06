@@ -1,4 +1,5 @@
 2.9297691204814688720898602967358431836 E-19976
+2.0000000000000000000000000000000000000
 -115
 -131
 -192
@@ -22,4 +23,4 @@
   ***   at top-level: gammamellininvinit(x,-2)
   ***                 ^------------------------
   *** gammamellininvinit: domain error in gammamellininvinit: derivation order < 0
-Total time spent: 2784
+Total time spent: 1898

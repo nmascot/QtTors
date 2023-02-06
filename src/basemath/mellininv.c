@@ -309,13 +309,15 @@ static double
 get_D(long d) { return d <= 2 ? 157. : 180.; }
 /* if (abs), absolute error rather than relative */
 static void
-Kderivlarge_optim(GEN K, long abs, GEN t2d,GEN gcd, long *pbitprec, long *pnlim)
+Kderivlarge_optim(GEN K, int abs, GEN t2d, double cd, long *pbitprec, long *pnlim)
 {
   GEN VL = GMi_get_VL(K), A2 = gel(VL,3);
   long bitprec = *pbitprec, d = GMi_get_degree(K);
-  const double D = get_D(d), td = dblmodulus(t2d), cd = gtodouble(gcd);
+  const double D = get_D(d), td = dblmodulus(t2d);
   double a, rtd, E = M_LN2*bitprec;
 
+  /* t = 0 can happen with finite continued fraction or easyvga */
+  if (!td) { *pnlim = 0; return; }
   rtd = (typ(t2d) == t_COMPLEX)? gtodouble(gel(t2d,1)): td;
   /* A2/2 = A, log(td) = (2/d)*log t */
   a = d*gtodouble(A2)*log2(td)/2 - (M_PI/M_LN2)*d*rtd + log2(cd);/*log2 K(t)~a*/
@@ -340,9 +342,9 @@ Kderivlarge(GEN K, GEN t, GEN t2d, long bitprec0)
   GEN tdA, P, S, pi, z;
   const long d = GMi_get_degree(K);
   GEN M, VL = GMi_get_VL(K), Ms = gel(VL,1), cd = gel(VL,2), A2 = gel(VL,3);
-  long status, prec, nlim, m = GMi_get_m(K), bitprec = bitprec0;
+  long prec, nlim, status = itos(gel(Ms,2)), m = GMi_get_m(K), bitprec = bitprec0;
 
-  Kderivlarge_optim(K, !t, t2d, cd, &bitprec, &nlim);
+  Kderivlarge_optim(K, !t, t2d, gtodouble(cd), &bitprec, &nlim);
   if (bitprec <= 0) return gen_0;
   prec = nbits2prec(bitprec);
   t2d = gtofp(t2d, prec);
@@ -350,13 +352,10 @@ Kderivlarge(GEN K, GEN t, GEN t2d, long bitprec0)
     tdA = gpow(t, gdivgu(A2,d), prec);
   else
     tdA = gpow(t2d, gdivgu(A2,2), prec);
-  tdA = gmul(cd, tdA);
-
-  pi = mppi(prec);
-  z = gmul(pi, t2d);
-  P = gmul(tdA, gexp(gmulsg(-d, z), prec));
+  pi = mppi(prec); z = gmul(pi, t2d);
+  P = gmul(gmul(cd, tdA), gexp(gmulsg(-d, z), prec));
   if (m) P = gmul(P, gpowgs(mulsr(-2, pi), m));
-  M = gel(Ms,1); status = itos(gel(Ms,2));
+  M = gel(Ms,1);
   if (status == 2)
     S = (lg(M) == 2)? gel(M,1) /* constant continued fraction */
                     : poleval(RgV_to_RgX(M, 0), ginv(z));

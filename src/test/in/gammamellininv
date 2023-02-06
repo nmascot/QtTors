@@ -49,6 +49,7 @@ chkd(v,w,t)=exponent(derivnum(s=t,gammamellininv(v,s))-gammamellininv(w,t));
 }
 
 gammamellininv([0],121.)
+gammamellininv(1,0)
 
 G = gammamellininvinit([1], 2);
 a(z) = 4*Pi*z*exp(-Pi*z^2)*(2*Pi*z^2-3);
