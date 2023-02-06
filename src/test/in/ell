@@ -468,6 +468,7 @@ P = [911071793,1086747416]; Q = ellmul(E,P,2);
 elllog(E,Q,P)
 
 ellheight(ellinit([1,0,1,4,-6]))
+ellheight(ellinit([0,-1/5])) \\ #448
 
 E=ellinit([0,1,1,20,-890]);
 P=ellmul(E,[16,61],45*23);

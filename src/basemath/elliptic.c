@@ -6407,7 +6407,7 @@ ellheightfaltings(GEN e, long prec)
   switch(ell_get_type(e))
   {
     case t_ELL_Q:
-      d = 1;
+      d = 1; e = ellintegralmodel_i(e,NULL);
       h = gmul(gsqr(ellQ_minimalu(e,NULL)), ellR_area(e, prec));
       break;
     case t_ELL_NF:
