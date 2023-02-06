@@ -149,11 +149,9 @@ sumVgaimpos(GEN v)
 static long
 vgaell(GEN Vga)
 {
-  long d = lg(Vga)-1;
-  GEN c;
-  if (d != 2) return 0;
-  c = gsub(gel(Vga,1), gel(Vga,2));
-  return gequal1(c) || gequalm1(c);
+  if (lg(Vga) == 3)
+  { GEN c = gsub(gel(Vga,1), gel(Vga,2)); return gequal1(c) || gequalm1(c); }
+  return 0;
 }
 int
 Vgaeasytheta(GEN Vga) { return lg(Vga)-1 == 1 || vgaell(Vga); }
