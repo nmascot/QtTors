@@ -2599,7 +2599,7 @@ R_tomatrix(GEN x)
   return mkmat(mkcol(x));
 }
 static GEN
-C_tomatrix(GEN al, GEN z, long abs)
+C_tomatrix(GEN z, long abs)
 {
   GEN x,y;
   long t = H_model(z), nrows, ncols;
@@ -2699,7 +2699,7 @@ algtomatrix(GEN al, GEN x, long abs)
   {
     switch(alg_get_absdim(al)) {
       case 1: res = R_tomatrix(x); break;
-      case 2: res = C_tomatrix(al,x,abs); break;
+      case 2: res = C_tomatrix(x,abs); break;
       case 4: res = H_tomatrix(x,abs); break;
       default: pari_err_TYPE("algtomatrix [apply alginit]", al);
     }
@@ -3561,6 +3561,7 @@ H_random(GEN b)
 GEN
 algrandom(GEN al, GEN b)
 {
+  pari_sp av = avma;
   GEN res = NULL, p, N;
   long i, n;
   checkalg(al);
@@ -3568,7 +3569,6 @@ algrandom(GEN al, GEN b)
   {
     if (typ(b)!=t_REAL) pari_err_TYPE("algrandom",b);
     if (gsigne(b)<0) pari_err_DOMAIN("algrandom", "b", "<", gen_0, b);
-    pari_sp av = avma;
     switch(alg_get_absdim(al))
     {
       case 1: res = R_random(b); break;
