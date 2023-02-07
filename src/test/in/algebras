@@ -2834,7 +2834,7 @@ algpow(C,z,0) == 1.
 algpow(C,mc22,5) == mc22^5
 exponent(algpow(C,mc22,-3) - mc22^(-3)) < -100
 algpow(C,mc22,0) == matid(2)
-algpoleval(C,x^3-x+1,z) == z^3-z+1
+exponent(algpoleval(C,x^3-x+1,z) - (z^3-z+1)) < -100
 
 
 
