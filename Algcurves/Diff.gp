@@ -132,3 +132,25 @@ HolomorphicDifferentials(f,B,a,t)=
   [n,[W,fy]];
 }
 
+WeiPts(C,disp=0)=
+{
+	my(f=C[1][1],g=C[6],W=C[7][1],x,y,fx,fy,fxy,fyy,E,M,dx);
+	if(g<=1,if(disp,return(),Mat()));
+	[x,y] = C[3][1..2];
+	fx = deriv(f,x);
+	fy = deriv(f,y);
+	fxy = deriv(fy,x);
+	ffy = deriv(fy,y);
+	E = fxy*fy-fyy*fx;
+	M = matrix(g,g);
+	for(i=1,g,M[i,1]=W[i]);
+	for(j=2,g,M[,j] = apply(w->fy*(deriv(w,x)*fy-deriv(w,y)*fx)-(2*j-1)*w*E,M[,j-1]));
+	W = FnDiv(C,matdet(M));
+	dx = dxDiv(C);
+	dx[,2] *= g*(g+1)/2;
+	fy = FnDiv(C,fy);
+	fy[,2] *= g^2;
+	dx = BDivSub(dx,fy);
+	W = BDivAdd(W,dx);
+	if(disp,DivPrint(W),W);
+}
