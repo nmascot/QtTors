@@ -2021,6 +2021,18 @@ H0 = H; H0[9] = concat(H0[9],[matid(4)]);
 algtrace(H0,1);
 algnorm(H0,1);
 algcharpoly(H0,1);
+algtomatrix(H0,1);
+alginv(H0,1);
+algdim(H0);
+algrandom(H0,1.);
+al = alginit(nfinit(y),[-1,-1]);
+al[2][1] = O(x);
+algdim(al);
+algdim(al,1);
+al = alginit(nfinit(y^2+1), algmultable(al));
+algsqr(al,[1..20]~);
+al = alginit(nfinit(y),1);
+algsqr(al,[O(x)]~);
 \\end bad inputs
 
 
@@ -2029,15 +2041,19 @@ print("new algsimpledec");
 mt = [matid(3),[0,0,0;1,1,0;0,0,0],[0,0,0;0,0,0;1,0,1]];
 al = algtableinit(mt);
 algissimple(al)
+setrand(1);
 algsimpledec(al,1)
 al2 = algtableinit(mt,5);
 algissimple(al2)
+setrand(2);
 algsimpledec(al2,1)
 \\ upper-tri in M2(K)
 mt = [matid(3),[0,0,0;1,1,0;0,0,1],[0,0,0;0,0,0;1,0,0]];
 al = algtableinit(mt);
+setrand(1);
 algsimpledec(al,1)
 al2 = algtableinit(mt,5);
+setrand(1);
 algsimpledec(al2,1)
 
 print("norm(,1)");
@@ -2775,6 +2791,7 @@ algmul(C,mc32,mc22) == mc32*mc22
 algsqr(C,u) == u^2
 algsqr(C,mc22) == mc22^2
 algtomatrix(R,z) == Mat(z)
+algtomatrix(C,z) == Mat(z)
 algtomatrix(C,u,1) == [real(u),-imag(u);imag(u),real(u)]
 algtomatrix(C,mc22) == mc22
 matsize(algtomatrix(C,mc22,1)) == [4,4]

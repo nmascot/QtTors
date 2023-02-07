@@ -118,8 +118,6 @@ alg_type(GEN al)
     case t_FRAC:
     case t_POL:
     case t_POLMOD: return al_CYCLIC;
-    case t_REAL:
-    case t_COMPLEX: return al_REAL;
     default: return al_NULL;
   }
   return -1; /*LCOV_EXCL_LINE*/
@@ -2431,18 +2429,7 @@ algalgmultable(GEN al, GEN x)
 static GEN
 algZmultable(GEN al, GEN x) {
   pari_sp av = avma;
-  GEN res = NULL, x0;
-  long tx = alg_model(al,x);
-  switch(tx) {
-    case al_TRIVIAL:
-      x0 = gel(x,1);
-      if (typ(x0)==t_POLMOD) x0 = gel(x0,2);
-      if (typ(x0)==t_POL) x0 = constant_coeff(x0);
-      res = mkmatcopy(mkcol(x0));
-      break;
-    case al_ALGEBRAIC: res = algmtK2Z(al,algalgmultable(al,x)); break;
-  }
-  return gerepileupto(av,res);
+  return gerepileupto(av, algmtK2Z(al,algalgmultable(al,x)));
 }
 
 /* x integral */
@@ -2731,8 +2718,7 @@ algtomatrix(GEN al, GEN x, long abs)
       if (tx==al_ALGEBRAIC) x = algalgtobasis(al,x);
       res = algbasissplittingmatrix_csa(al,x);
       break;
-    default:
-      pari_err_DOMAIN("algtomatrix", "alg_type(al)", "=", stoi(alg_type(al)), stoi(alg_type(al)));
+    default: return NULL; /*LCOV_EXCL_LINE*/
   }
   return gerepilecopy(av,res);
 }
@@ -2753,9 +2739,8 @@ C_divl_i(GEN x, GEN y)
       if (lg(x) != lg(y)) pari_err_DIM("C_divl");
       if (lg(y) == 1) return cgetg(1, t_MAT);
       return RgM_invimage(x, y);
-    default: pari_err_TYPE("C_divl", x);
+    default: pari_err_TYPE("C_divl", x); return NULL;
   }
-  return NULL;
 }
 /* H^k -> C^2k */
 static GEN

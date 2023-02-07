@@ -2374,6 +2374,30 @@ testing simplify: quatalg csa over Q
   ***   at top-level: algcharpoly(H0,1)
   ***                 ^-----------------
   *** algcharpoly: incorrect type in algcharpoly [apply alginit] (t_VEC).
+  ***   at top-level: algtomatrix(H0,1)
+  ***                 ^-----------------
+  *** algtomatrix: incorrect type in algtomatrix [apply alginit] (t_VEC).
+  ***   at top-level: alginv(H0,1)
+  ***                 ^------------
+  *** alginv: incorrect type in alginv_i [apply alginit] (t_VEC).
+  ***   at top-level: algdim(H0)
+  ***                 ^----------
+  *** algdim: incorrect type in algreal_dim (t_VEC).
+  ***   at top-level: algrandom(H0,1.)
+  ***                 ^----------------
+  *** algrandom: incorrect type in algrandom [apply alginit] (t_VEC).
+  ***   at top-level: algdim(al)
+  ***                 ^----------
+  *** algdim: incorrect type in alg_get_dim (t_VEC).
+  ***   at top-level: algdim(al,1)
+  ***                 ^------------
+  *** algdim: incorrect type in alg_get_absdim (t_VEC).
+  ***   at top-level: algsqr(al,[1..20]~)
+  ***                 ^-------------------
+  *** algsqr: incorrect type in alg_model (t_COL).
+  ***   at top-level: algsqr(al,[O(x)]~)
+  ***                 ^------------------
+  *** algsqr: incorrect type in alg_model (t_COL).
 new algsimpledec
 0
 [0, [[[0, 0, 0, 0, 0, 0, Mat(1), Mat(1), [Mat(1)], 0, [1]], Mat([1, 1, 0]), 
@@ -3024,6 +3048,7 @@ I
 1
 1
 1
+1
 ["t_REAL"]
 1
 1
@@ -3097,4 +3122,4 @@ GW modified arguments
   ***   at top-level: al2=algtensor(al,al)
   ***                     ^----------------
   *** algtensor: sorry, tensor of noncyclic algebras is not yet implemented.
-Total time spent: 1560
+Total time spent: 1456
