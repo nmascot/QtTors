@@ -149,7 +149,7 @@ PicStruct(C)=
 			listput(G,DivSimplify(S,U1[,i]));
 			if(d,
 				N *= d;
-				U[i,]*=Mod(1,d)
+				\\U[i,]*=Mod(1,d)
 			);
 		);
 		if(N==NJ,break());
@@ -164,11 +164,15 @@ PicStruct(C)=
 
 PicWord(C,J,X)=
 {
-	my(r,[D,G,S,U]=J);
+	my(r,d,[D,G,S,U]=J);
 	parfor(i=1,+oo,
 		GetSunit(C,S,X,5,8,random()),
 		r,if(r,
-			return(U*r[1]~)
+			r = U*r[1]~;
+			for(i=1,#D,
+				if(D[i],r[i]=Mod(r[i],D[i]))
+			);
+			return(r)
 		)
 	);
 }
