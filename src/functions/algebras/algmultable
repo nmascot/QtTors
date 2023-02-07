@@ -37,7 +37,7 @@ Doc:
  [0  0 -2 -1]
  ? H = alginit(1.,1/2); \\ Hamilton quaternions
  ? algmultable(H)[3] \\ multiplication by j
- %7 = 
+ %7 =
  [0  0 -1 0]
 
  [0  0  0 1]

@@ -39,12 +39,12 @@ Doc: Given an element \var{x} in \var{al} (Hamilton quaternions if omitted),
 
  [ 2  0 0  1]
  ? algtomatrix(,[1,2,3,4]~) \\Hamilton quaternions
- %4 = 
+ %4 =
  [1 + 2*I -3 - 4*I]
 
  [3 - 4*I  1 - 2*I]
  ? algtomatrix(,I,1)
- %5 = 
+ %5 =
  [0 -1 0  0]
 
  [1  0 0  0]
