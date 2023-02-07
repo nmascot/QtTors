@@ -3541,34 +3541,34 @@ algbasistoalg(GEN al, GEN x)
 static GEN
 R_random(GEN b)
 {
+  pari_sp av = avma;
   long prec = realprec(b);
-  return mulrr(b,addsr(-1,shiftr(randomr(prec),1)));
+  GEN z = randomr(prec); shiftr_inplace(z, 1);
+  return gerepileuptoleaf(av, mulrr(b,addsr(-1, z)));
 }
 static GEN
 C_random(GEN b)
 {
-  return mkcomplex(R_random(b), R_random(b));
+  retmkcomplex(R_random(b), R_random(b));
 }
 static GEN
 H_random(GEN b)
 {
-  GEN res;
+  GEN res = cgetg(5, t_COL);
   long i;
-  res = cgetg(5, t_COL);
   for (i=1; i<=4; i++) gel(res,i) = R_random(b);
   return res;
 }
 GEN
 algrandom(GEN al, GEN b)
 {
-  pari_sp av = avma;
   GEN res = NULL, p, N;
   long i, n;
   checkalg(al);
   if (alg_type(al)==al_REAL)
   {
-    if (typ(b)!=t_REAL) pari_err_TYPE("algrandom",b);
-    if (gsigne(b)<0) pari_err_DOMAIN("algrandom", "b", "<", gen_0, b);
+    if (typ(b) != t_REAL) pari_err_TYPE("algrandom",b);
+    if (signe(b) < 0) pari_err_DOMAIN("algrandom", "b", "<", gen_0, b);
     switch(alg_get_absdim(al))
     {
       case 1: res = R_random(b); break;
@@ -3576,15 +3576,15 @@ algrandom(GEN al, GEN b)
       case 4: res = H_random(b); break;
       default: pari_err_TYPE("algrandom [apply alginit]", al);
     }
-    return gerepilecopy(av, res);
+    return res;
   }
   if (typ(b) != t_INT) pari_err_TYPE("algrandom",b);
-  if (signe(b)<0) pari_err_DOMAIN("algrandom", "b", "<", gen_0, b);
+  if (signe(b) < 0) pari_err_DOMAIN("algrandom", "b", "<", gen_0, b);
   n = alg_get_absdim(al);
   N = addiu(shifti(b,1), 1); /* left on stack */
   p = alg_get_char(al); if (!signe(p)) p = NULL;
   res = cgetg(n+1,t_COL);
-  for (i=1; i<= n; i++)
+  for (i = 1; i <= n; i++)
   {
     pari_sp av = avma;
     GEN t = subii(randomi(N),b);
