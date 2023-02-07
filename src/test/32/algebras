@@ -2883,7 +2883,7 @@ nonsquare matrices
 4
 -I
 -1
-1.0000000000000000000
+"t_REAL"
 0
 2
 4
@@ -2911,7 +2911,7 @@ Vecsmall([1])
 1
 0
 1
-I
+"t_COMPLEX"
 1
 1
 1
@@ -2932,9 +2932,9 @@ I
 1
 1
 4
-1.0000000000000000000
+"t_REAL"
 1
-1.0000000000000000000
+"t_REAL"
 0
 1
 1
@@ -2955,7 +2955,7 @@ Vecsmall([0])
 1
 0
 1
-1.0000000000000000000
+"t_REAL"
 1
 1
 "t_REAL"
@@ -3031,7 +3031,7 @@ Vecsmall([])
 1
 0
 1
-I
+"t_COMPLEX"
 1
 1
 "t_COMPLEX"
@@ -3122,4 +3122,4 @@ GW modified arguments
   ***   at top-level: al2=algtensor(al,al)
   ***                     ^----------------
   *** algtensor: sorry, tensor of noncyclic algebras is not yet implemented.
-Total time spent: 1456
+Total time spent: 1432

@@ -2613,7 +2613,7 @@ H = alginit(1.,1/2);
 algtype(H)
 algaut(H)
 algb(H)
-algcenter(H)
+type(algcenter(H))
 algchar(H)
 algdegree(H)
 algdim(H)
@@ -2639,7 +2639,7 @@ mt[3]*mt[2] == -mt[4]
 Mat([m[,1] | m <- mt]) == matid(4)
 algradical(H)
 algsimpledec(H) == [0,[H]]
-algsplittingfield(H)
+type(algsplittingfield(H))
 algadd(H,a,b) == algadd(,a,b)
 algcharpoly(H,a) == algcharpoly(,a)
 algdivl(H,a,b) == algdivl(,a,b)
@@ -2662,9 +2662,9 @@ algtrace(H,a) == algtrace(,a)
 
 R = alginit(1.,0);
 algtype(R)
-algaut(R)
+type(algaut(R))
 algb(R)
-algcenter(R)
+type(algcenter(R))
 algchar(R)
 algdegree(R)
 algdim(R)
@@ -2685,7 +2685,7 @@ apply(matsize,mt)
 mt[1] == 1
 algradical(R)
 algsimpledec(R) == [0,[R]]
-algsplittingfield(R)
+type(algsplittingfield(R))
 algbasis(R) == matid(1)
 alginvbasis(R) == matid(1)
 a = algrandom(R,1.);
@@ -2771,7 +2771,7 @@ mt[2]^2 == -1
 Mat([m[,1] | m <- mt]) == matid(2)
 algradical(C)
 algsimpledec(C) == [0,[C]]
-algsplittingfield(C)
+type(algsplittingfield(C))
 algbasis(C) == matid(2)
 alginvbasis(C) == matid(2)
 z = algrandom(C,1.);
