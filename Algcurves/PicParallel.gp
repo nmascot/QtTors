@@ -88,7 +88,7 @@ BDivSub(A,B)= \\ DivSub on branches
 	C = List();
 	for(i=1,#B~,
 		for(j=1,#A~,
-			if(B[i,1]==A[j,1],
+			if(PtEq(B[i,1],A[j,1]),
 				A[j,2] -= B[i,2];
 				next(2)
 			)

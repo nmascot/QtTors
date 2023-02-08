@@ -12,7 +12,7 @@ Pol2Support(f)=
   Vec(S);
 }
 
-APeqns(f,z=z)=
+APeqns(f,z='z)=
 { \\ Affine + Proj eqns
   my(v,d);
   v=variables(f);

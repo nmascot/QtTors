@@ -1,35 +1,8 @@
-Deg1Pts(C)=
-{
-	my(P=List(),S,b,p=C[2],f=C[1][1],[x,y]=C[3][1..2],fi,q);
-	\\ Get sing branches of deg 1
-	S = C[5];
-	for(i=1,#S,
-		b = S[i][3];
-		if(poldegree(b[3])==1,listput(P,b))
-	);
-	\\ TODO add pts at OO
-	for(i=0,p-1,
-		fi = subst(f,x,Mod(i,p));
-		fi = polrootsmod(fi);
-		for(j=1,#fi,
-			q = [i,fi[j]];
-			if(PtIsSing(f,q)==0,listput(P,q))
-		)
-	);
-	Vec(P);
-}
-
 PtIsInS(P,S)=
 {
 	my(n=#S);
-	if(type(P[1])=="t_VEC",
-		for(i=1,n,
-			if(S[i]==P,return(i))
-		)
-	,	
-		for(i=1,n,
-			if(PtEq(S[i],P),return(i))
-		)
+	for(i=1,n,
+		if(PtEq(S[i],P),return(i))
 	);
 	0;
 }
@@ -54,51 +27,45 @@ ChooseSubset(S,m,Without)=
 	);
 }
 
-GetSunit(C,S,Dforce=0,t=5,s=8,rs=random())=
+GetSunit(C,S,dS,Dforce=0,t=5,s=8,rs=random())=
 {
-	my(g,n,m,D,d,L,f,Df,j,Sf,S1,n1,tgdeg);
+	my(g,n,m,D,d,L,f,Df,j,Sf,S1,n1,tgdeg,r,P);
 	setrand(rs);
 	n=#S;
 	g = C[6];
 	tgdeg = g-if(Dforce,DivDeg(Dforce),0);
-	m = ceil(tgdeg/s);
 	S1 = ChooseSubset(S,s,if(Dforce,Dforce[,1],0));
 	n1 = #S1;
 	D = matrix(n1,2);
 	D[,1] = S1~;
-	m = ceil((#S1)/g);
+	m = ceil(tgdeg/n1);
 	for(i=1,#S1,
-		D[i,2] = random(2*t+1)-t+m
+		D[i,2] = round((random(2*t+1)-t+m)/PtDeg(D[i,1]));
 	);
-	d = vecsum(D[,2]);
-	D[1+random(n1),2] -= d-tgdeg; \\ Make degree exactly tgdeg
-	if(Dforce,
-		D = matconcat([D,Dforce]~)
-	);
+	d = DivDeg(D);
+	/*r = -floor((d-tgdeg)/PtDeg(D[1,1]));
+	D[1,2] += r;
+	print([tgdeg,d,PtDeg(D[1,1]),r,DivDeg(D)]);*/
+	r = 1+random(n1);
+	D[r,2] -= floor((d-tgdeg)/PtDeg(D[r,1])); \\ Make degree close >= tgdeg
+	if(Dforce,D = BDivAdd(D,Dforce));
 	L = RiemannRoch(C,D);
-	while(#L>1,
+	/*while(#L>1,
 		\\print("Extra dim ",#L);
 		D[1+random(n1),2] -= #L-1;
 		L = RiemannRoch(C,D)
-	);
+	);*/
 	f = L[1];
 	Df = FnDiv(C,f);
+	if(Dforce,Df=BDivAdd(Df,Dforce));
 	Sf = vector(n);
 	for(i=1,#Df~,
-		if(Dforce,
-			if(PtIsInS(Df[i,1],Dforce[,1]),next);
-		);
+		P = Df[i,1];
+		if(Mod(dS,PtDeg(P)),return(0));
 		j = PtIsInS(Df[i,1],S);
-		if(j==0,return(0));
 		Sf[j] = Df[i,2];
 	);
-	if(Dforce,
-		for(i=1,#Dforce~,
-			j = PtIsInS(Dforce[i,1],Df[,1]);
-			if(j==0,return(0));
-			if(Df[j,2] != -Dforce[i,2],return(0))
-		)
-	);
+	if(sum(i=1,n,Sf[i]*PtDeg(S[i]))!=if(Dforce,DivDeg(Dforce),0),error("Bug in GetSunit")); \\ TODO
 	return([Sf,f]);
 }
 
@@ -115,20 +82,22 @@ DivSimplify(P,V)=
 
 PicStruct(C)=
 {
-	my(p=C[2],Lp,NJ,N,S,n,m,l,r,R,U,V,D,U1,G,D1,d);
+	my(p=C[2],g=C[6],extra=1,h1,S,dS,dh,N,n,m,l,r,R,U,V,D,U1,G,D1,d);
 	if(p==0,error("Only implemented over finite fields"));
-	S = Deg1Pts(C); \\ TODO dep on g
+	[S,NC] = PicGenPlaces(C);
+	dS = #NC;
+	print("Pic gen in deg ",dS);
+	dh = ceil(2*log(6*g/(sqrt(p)-1))/log(p));
+	if(dh>dS, NC=concat([NC,CrvPtCount(C,[dS+1,dh])]); print(""));
+	h1 = p^g * exp(sum(d=1,dh,(NC[d]-p^d-1)/(d*p^d)));
+	print("Approx h by counting up to deg ",dh,": ",h1);
 	n = #S;
-	m = ceil(1.1*n); \\ TODO
+	m = n; \\ TODO
 	l = 0;
 	R = matrix(n,m);
-	Lp = CrvCharpoly(C);
-	print("");
-	NJ = subst(Lp,x,1);
 	while(1,
-		N = 1;
-		parfor(i=1,+oo,
-			GetSunit(C,S,0,5,8,i), \\ TODO params
+		parfor(i=random(),+oo,
+			GetSunit(C,S,dS,0,5,8,random()+i), \\ TODO params
 			r,if(l<m && r,
 				l++;
 				print1(round(100*l/m),"% ");
@@ -136,6 +105,15 @@ PicStruct(C)=
 				if(l==m,break)
 			)
 		);
+		\\ Non-parallel version for debugging
+		/*for(i=1,+oo,
+			r = GetSunit(C,S,dS,0,5,8,i);
+			if(r==0,next);
+			l++;
+			R[,l] = r[1]~;
+				print1(round(100*l/m),"% ");
+			if(l==m,break)
+		);*/
 		print("");
 		[U,V,D] = matsnf(R,1);
 		U1 = U^-1;
@@ -147,26 +125,31 @@ PicStruct(C)=
 			if(d==1,break);
 			listput(D1,d);
 			listput(G,DivSimplify(S,U1[,i]));
-			if(d,
-				N *= d;
-				\\U[i,]*=Mod(1,d)
-			);
 		);
-		if(N==NJ,break());
-		print("Got ",N," vs ",NJ);
-		m = #R + 10;
-		R = matconcat([R,matrix(n,10)]);
+		D1 = Vec(D1);
+		N = prod(i=2,#D1,D1[i]);
+		print("SNF: ",D1," => Tentative h: ",N);
+		if(N && abs(log(N/h1))<log(2)/2,break());
+		for(i=2,#D1,
+			if(D1[i],break);
+			extra++
+		);
+		m = #R + extra;
+		R = matconcat([R,matrix(n,extra)]);
+		extra++;
 	);
-	D1 = Vec(D1);
 	G = Vec(G);
-	[D1,G,S,U[1..#G,]];
+	[D1,G,S,dS,U[1..#G,]];
 }
 
 PicWord(C,J,X)=
 {
-	my(r,d,[D,G,S,U]=J);
+	my(r,d,[D,G,S,dS,U]=J);
+	if(type(X)!="t_MAT",
+		X = if(type(X[1])=="t_VEC",Mat(X),Mat([X,1]))
+	);
 	parfor(i=1,+oo,
-		GetSunit(C,S,X,5,8,random()),
+		GetSunit(C,S,dS,X,5,8,random()+i),
 		r,if(r,
 			r = U*r[1]~;
 			for(i=1,#D,

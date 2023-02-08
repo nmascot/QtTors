@@ -28,6 +28,7 @@ AlgLagrange(a,d,b)= \\ a,b in K[t]/T, [K(x):K]=d | deg T
 PtEq(P,Q)=
 {
   my(k,m,L);
+	if(type(P[1])=="t_VEC" || type(Q[1])=="t_VEC",return(P==Q));
   if(#P==3,
     \\ P homog
     if(P[3],
@@ -490,6 +491,18 @@ PtDeg(P)=
   );
 }
     
-  
+PtSimplify(P,T,p,k)=
+{ \\ P on Fp[t]/T actually def in deg k
+	my(S,u,v);
+	if(k==1,return(subst(liftpol(P),variable(T),0)));
+	if(k==poldegree(T),return(P));
+	S = ffinit(p,k,variable(T));
+	u = polrootsmod(minpoly(P[1]),[S,p])[1];
+	v = polrootsmod(minpoly(P[2]),[S,p]);
+	for(i=1,#v,
+		if(PtEq(P,[u,v[i]]),return([u,v[i]]))
+	);
+	error("Bug in PtSimplify");
+}
 
 DivDeg(D)=sum(i=1,#D~,D[i,2]*PtDeg(D[i,1]));

@@ -288,16 +288,16 @@ BranchExpand(B,e)=
 
 BranchCheck(f,B,e)=PlaneEval(f,BranchExpand(B[1],e));
 
-BranchValuation(f,b,x,y)=
+/*BranchValuation(f,b,x,y)=
 {
 	my(e=2,be,fe);
 	while(1,
 		be = BranchExpand(b,e);
-		fe = subst(subst(f,x,be[1]),y,be[2]);
+		fe = substvec(f,[x,y],be);
 		if(fe,return(valuation(fe,variable(be[1]))));
 		e *= 2;
 	);
-}
+}*/
 
 BranchEval(f,b,e,x,y)=
 {
@@ -316,6 +316,15 @@ BranchEval(f,b,e,x,y)=
   substvec(n,[x,y],be)/de;
 }
 
+BranchValuation(f,b,x,y)=
+{
+  my(e=2,be,fe);
+  while(1,
+    fe = BranchEval(f,b,e,x,y);
+    if(fe,return(valuation(fe,variable(b[1]))));
+    e *= 2;
+  );
+}
 
 BranchOrigin(B)=
 {

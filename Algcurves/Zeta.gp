@@ -106,6 +106,7 @@ CrvPtCount(C,deg)=
 		)
 	);
 	DB = Vec(DB);
+	\\ Treat x=0 specially if BadU(0)<>0
 	f0 = 0;
 	if(polcoef(BadU,0),	f0=factormod(subst(f,x,0),p,1)[,1]);
 	f = liftint(f);
@@ -146,7 +147,7 @@ CrvCharpoly(C)=ZetaFromPointCount(Vecsmall(CrvPtCount(C)),C[2],C[6]);
 
 PicGenPlaces(C)=
 {
-  my(f,p,x,y,z,t,a,gC,T,g,B,BadU,N,BU,S,f0,x0,y0,b,Pb,db,nd);
+  my(f,p,x,y,z,t,a,gC,T,g,B,BadU,N,BU,S,f0,x0,x0done,y0,y0done,b,P,Q,db,nd);
 	\\ Find smallest d such that Nd > (2g-2)p^(d/2). Return places of deg | d.
   p = C[2];
   f = C[1][1];
@@ -155,9 +156,10 @@ PicGenPlaces(C)=
   gC = C[6];
   BadU = x/x; \\ Locus of branches
   for(i=2,#B,BadU *= B[i][1]);
-  /*f0 = 0;
-  if(polcoef(BadU,0), f0=factormod(subst(f,x,0),p,1)[,1]);
-  f = liftint(f);
+	\\ Treat x=0 specially if BadU(0)<>0
+  f0 = 0;
+  if(polcoef(BadU,0), f0=factormod(substvec(f,[x,y],[0,a]),p)[,1]);
+  /* f = liftint(f);
   f = subst(f,x,z);
   f = subst(f,y,x);
   f = subst(f,z,y);
@@ -165,20 +167,47 @@ PicGenPlaces(C)=
   BadU = ZX_to_Flx(liftint(BadU),p);*/
 	N = List();
 	for(d=1,+oo,
-		print("Degree ",d);
+		\\print("Degree ",d);
     T = ffinit(p,d,a);
     g = ffprimroot(ffgen(T));
 		g = Mod(g.pol,T);
 		x0 = 1;
 		S = List();
+		M = List();
 		nd = 0;
+		x0done = vector(p^d-1);
 		\\ TODO optimise like Zeta
-		for(j=0,p^d-1,
-			if(subst(BadU,x,x0),
-				f0 = subst(f,x,x0);
-				y0 = polrootsmod(f0,[T,p]);
-				for(i=1,#y0,listput(S,[x0,y0[i]]));
-				nd += #y0;
+		for(j=0,p^d-2,
+			if(x0done[j+1]==0,
+				Q = j;
+				\\ Mark Frob orbit
+				while(x0done[Q+1]==0,
+					x0done[Q+1] = 1;
+					Q = (p*Q) % (p^d-1)
+				);
+				if(subst(BadU,x,x0),
+					y0 = polrootsmod(subst(f,x,x0),[T,p]);
+					y0done = vector(#y0);
+					for(i=1,#y0,
+						if(y0done[i],next);
+						P = [x0,y0[i]];
+						\\ Run through Frob orbit
+						Q = P;
+						for(k=1,+oo,
+							nd++;
+							P = apply(x->x^p,P);
+							if(P==Q,listput(S,PtSimplify(P,T,p,k));break);
+							if(P[1]==Q[1], \\ Prevent from catching Gal-conjs with same x but conj y twice
+								for(j=1,#y0,
+									if(y0[j]==P[2],
+										y0done[j]=1;
+										break
+									)
+								)
+							)
+						)
+					)
+				)
 			);
 			x0 *= g;
 		);
@@ -196,21 +225,23 @@ PicGenPlaces(C)=
 				b = BU[j];
 				db = poldegree(b[3]);
 				if(Mod(d,db),next); \\ branch b not def in deg d
-				Pb = BranchOrigin(b[1]);
-				if(PtIsSing(C,Pb),
-					listput(S,b)
-				,
-					for(k=1,db,
-						listput(S,Pb);
-						Pb = apply(u->u^p,Pb)
-					)
-				);
+				P = BranchOrigin(b[1]);
+				listput(S,if(PtIsSing(C,P),b,P));
 				nd += db;
 			);
     );
+		\\ Take x=0 into account
+    if(f0,
+      for(i=1,#f0,
+        if(Mod(d,poldegree(f0[i]))==0,
+					listput(S,[0,RootRed(f0[i])[1]]);
+					nd += poldegree(f0[i])
+				)
+      )
+    );
 		S = Vec(S);
 		listput(N,nd);
-		if(nd^2 > (2*(gC-1))^2 * p^d && d>=5,
+		if(nd^2 > (2*(gC-1))^2 * p^d,
 			return([S,Vec(N)])
 		);
   );
