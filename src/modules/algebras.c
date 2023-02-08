@@ -4541,7 +4541,7 @@ alg_hasse(GEN nf, long n, GEN hf, GEN hi, long var, long maxord)
       dbg_printf(2)("alg_hasse: calling alg_complete\n");
       al2 = alg_complete0(rnf,aut,hfl,hil,maxord);
     }
-    else al2 = alg_matrix(nf, lk, var, cgetg(1,t_VEC), maxord);
+    else al2 = alg_matrix(nf, lk, var, maxord);
 
     if (i==1) al = al2;
     else      al = algtensor(al,al2,maxord);
@@ -4552,21 +4552,8 @@ alg_hasse(GEN nf, long n, GEN hf, GEN hi, long var, long maxord)
 /** CYCLIC ALGEBRA WITH GIVEN HASSE INVARIANTS **/
 
 /* no garbage collection */
-static int
-linindep(GEN pol, GEN L)
-{
-  long i;
-  GEN fa;
-  for (i=1; i<lg(L); i++) {
-    fa = nffactor(gel(L,i),pol);
-    if (lgcols(fa)>2) return 0;
-  }
-  return 1;
-}
-
-/* no garbage collection */
 static GEN
-subcycloindep(GEN nf, long n, long v, GEN L, GEN *pr)
+subcycloindep(GEN nf, long n, long v, GEN *pr)
 {
   pari_sp av;
   forprime_t S;
@@ -4578,7 +4565,7 @@ subcycloindep(GEN nf, long n, long v, GEN L, GEN *pr)
     ulong r = pgener_Fl(p);
     GEN pol = galoissubcyclo(utoipos(p), utoipos(Fl_powu(r,n,p)), 0, v);
     GEN fa = nffactor(nf, pol);
-    if (lgcols(fa) == 2 && linindep(pol,L)) { *pr = utoipos(r); return pol; }
+    if (lgcols(fa) == 2) { *pr = utoipos(r); return pol; }
     set_avma(av);
   }
   pari_err_BUG("subcycloindep (no suitable prime = 1(mod n))"); /*LCOV_EXCL_LINE*/
@@ -4586,13 +4573,13 @@ subcycloindep(GEN nf, long n, long v, GEN L, GEN *pr)
 }
 
 GEN
-alg_matrix(GEN nf, long n, long v, GEN L, long maxord)
+alg_matrix(GEN nf, long n, long v, long maxord)
 {
   pari_sp av = avma;
   GEN pol, gal, rnf, cyclo, g, r, aut;
   dbg_printf(1)("alg_matrix\n");
   if (n<=0) pari_err_DOMAIN("alg_matrix", "n", "<=", gen_0, stoi(n));
-  pol = subcycloindep(nf, n, v, L, &r);
+  pol = subcycloindep(nf, n, v, &r);
   rnf = rnfinit(nf, pol);
   cyclo = nfinit(pol, nf_get_prec(nf));
   gal = galoisinit(cyclo, NULL);
@@ -4694,7 +4681,7 @@ alginit(GEN A, GEN B, long v, long maxord)
       switch(typ(B))
       {
         long nB;
-        case t_INT: return alg_matrix(A, itos(B), v, cgetg(1,t_VEC), maxord);
+        case t_INT: return alg_matrix(A, itos(B), v, maxord);
         case t_VEC:
           nB = lg(B)-1;
           if (nB && typ(gel(B,1)) == t_MAT) return alg_csa_table(A,B,v,maxord);

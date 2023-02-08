@@ -1682,7 +1682,7 @@ GEN     algsplittingdata(GEN al);
 GEN     alg_get_tracebasis(GEN al);
 GEN     alg_hasse(GEN nf, long n, GEN hi, GEN hf, long var, long maxord);
 GEN     alg_hilbert(GEN nf, GEN a, GEN b, long v, long maxord);
-GEN     alg_matrix(GEN nf, long n, long v, GEN L, long maxord);
+GEN     alg_matrix(GEN nf, long n, long v, long maxord);
 long    alg_model(GEN al, GEN x);
 GEN     alg_quotient(GEN al, GEN I, long maps);
 GEN     algradical(GEN al);
