@@ -5230,8 +5230,7 @@ algfromcenter(GEN al, GEN x)
     case al_CSA:
       n = alg_get_dim(al);
       break;
-    default:
-      return NULL; /*LCOV_EXCL_LINE*/
+    default: return NULL; /*LCOV_EXCL_LINE*/
   }
   return algalgtobasis(al, scalarcol(basistoalg(nf, x), n));
 }
