@@ -3312,7 +3312,7 @@ Low-level routines underlying \kbd{alginit}; argument \kbd{rnf} (resp.~\kbd{nf})
 must be true \var{rnf} (resp.~\var{nf}) structure.
 
 \fun{GEN}{alg_csa_table}{GEN nf, GEN mt, long v, long maxord}
-algebra defined by a multiplication table.
+central simple algebra defined by a multiplication table over \kbd{nf}.
 
 \fun{GEN}{alg_cyclic}{GEN rnf, GEN aut, GEN b, long maxord}
 cyclic algebra~$(L/K,\sigma,b)$.
@@ -3323,16 +3323,11 @@ algebra defined by local Hasse invariants.
 \fun{GEN}{alg_hilbert}{GEN nf, GEN a, GEN b, long v, long maxord}
 quaternion algebra.
 
-\fun{GEN}{alg_matrix}{GEN nf, long n, long v, GEN L, long maxord}
-matrix algebra.
+\fun{GEN}{alg_matrix}{GEN nf, long n, long v, long maxord}
+matrix algebra of degree \kbd{n} over \kbd{nf}.
 
 \fun{GEN}{alg_complete}{GEN rnf, GEN aut, GEN hf, GEN hi, long maxord}
 cyclic algebra~$(L/K,\sigma,b)$ with~$b$ computed from the Hasse invariants.
-
-\fun{GEN}{alg_changeorder}{GEN alg, GEN ord}
-return the algebra with the integral basis replaced by~\kbd{ord} (a \typ{MAT}
-expressing the basis of the new order in terms of the integral basis of \kbd{alg}).
-No checks are performed.
 
 \subsec{Type checks}
 
