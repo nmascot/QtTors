@@ -288,18 +288,7 @@ BranchExpand(B,e)=
 
 BranchCheck(f,B,e)=PlaneEval(f,BranchExpand(B[1],e));
 
-/*BranchValuation(f,b,x,y)=
-{
-	my(e=2,be,fe);
-	while(1,
-		be = BranchExpand(b,e);
-		fe = substvec(f,[x,y],be);
-		if(fe,return(valuation(fe,variable(be[1]))));
-		e *= 2;
-	);
-}*/
-
-BranchEval(f,b,e,x,y)=
+BranchEval0(f,b,e,x,y)=
 {
   my(n,d,be,de,k=1);
   if(type(f)=="t_VEC",
@@ -318,12 +307,62 @@ BranchEval(f,b,e,x,y)=
 
 BranchValuation(f,b,x,y)=
 {
-  my(e=2,be,fe);
+  my(e=2,xe,ye,p,t,f1,n1,d1,c,ne,de,vb,vn,vd);
+	[xe,ye] = BranchExpand(b,e);
+	t = variable(xe);
+	vb = valuation(ye,t); \\ v(y)
+	ye *= t^-vb;
+	f1 = subst(f,x,xe);
+	f1 = subst(f1,y,t^vb*y); \\ y = t^vb*y1
+	\\ f1 in K(t)(y)
+	n1 = numerator(f1);
+	d1 = denominator(f1);
+	c = content(n1,y);
+	vn = valuation(c,t);
+	n1 /= c;
+	c = content(d1,y);
+	vd = valuation(c,t);
+	d1 /= c;
+	\\ Now f(xt,t^vb*y1) = t^(vn-vd)*n(y1)/d(y1), where n,d in K[t][y]
   while(1,
-    fe = BranchEval(f,b,e,x,y);
-    if(fe,return(valuation(fe,variable(b[1]))));
+		p = serprec(ye,t);
+    ne = subst(n1,y,ye)+O(t^p);
+    de = subst(d1,y,ye)+O(t^p);
+    if(ne && de,return(valuation(ne,t)-valuation(de,t)+vn-vd));
     e *= 2;
+		ye = t^-vb*(BranchExpand(b,e)[2]);
   );
+}
+
+BranchEval(f,b,e,x,y)=
+{
+	my(xe,ye,t,vb,f1,n1,d1,cn,cd,p,ne,de,k=1);
+	if(type(f)=="t_VEC",
+    return(apply(u->BranchEval(u,b,e,x,y),f))
+  );
+	[xe,ye] = BranchExpand(b,e);
+  t = variable(xe);
+  vb = valuation(ye,t); \\ v(y)
+  ye *= t^-vb;
+  f1 = subst(f,x,xe);
+  f1 = subst(f1,y,t^vb*y); \\ y = t^vb*y1
+  \\ f1 in K(t)(y)
+  n1 = numerator(f1);
+  d1 = denominator(f1);
+  cn = content(n1,y);
+  cd = content(d1,y);
+	n1 /= cn; d1 /= cd;
+  \\ Now f(xt,t^vb*y1) = (cn/cd)(t) * n(y1)/d(y1), where n,d in K[t][y]
+  while(1,
+    p = serprec(ye,t);
+    de = subst(d1,y,ye)+O(t^p);
+		if(de,break);
+		e += k;
+		k += 1;
+		ye = t^-vb*BranchExpand(b,e)[2];
+	);
+	ne = subst(n1,y,ye)+O(t^p);
+	(cn*ne)/(cd*de);
 }
 
 BranchOrigin(B)=
