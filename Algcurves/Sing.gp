@@ -309,8 +309,8 @@ BranchValuation(f,b,x,y)=
 	\\ Now f(xt,t^vb*y1) = t^(vn-vd)*n(y1)/d(y1), where n,d in K[t][y]
   while(1,
 		p = serprec(ye,t);
-    ne = subst(n1,y,ye)+O(t^p);
-    de = subst(d1,y,ye)+O(t^p);
+    ne = subst(n1,y,ye);
+    de = subst(d1,y,ye);
     if(ne && de,return(valuation(ne,t)-valuation(de,t)+vn-vd));
     e *= 2;
 		ye = t^-vb*(BranchExpand(b,e)[2]);
@@ -364,7 +364,7 @@ BranchOrigin(B)=
 
 BranchesAt(f,F,p,P,a,t)=
 {
-  my(B=[],x,y,z,S,x1,y1,z1,A,f1,B1,n1,bi,G,aG,xA,yA);
+  my(B=[],x,y,z,S,x1,y1,z1,A,f1,B1,n1,bi,ei,G,aG,xA,yA);
   [x,y,z] = variables(F);
   [x1,y1,z1] = P;
   if(type(x1)=="t_POLMOD",
@@ -379,7 +379,7 @@ BranchesAt(f,F,p,P,a,t)=
     B = Branches0(f1,t,A,p,1);
 		if(B==0,return(0));
     for(i=1,#B,
-      [bi,G,aG] = B[i]; \\ bi=[P,Q,Phi]
+      [bi,ei,G,aG] = B[i]; \\ bi=[P,Q,Phi]
       \\ Must change alg model
       xA = if(A,subst(liftpol(x1),a,aG),x1);
       yA = if(A,subst(liftpol(y1),a,aG),y1);
@@ -395,7 +395,7 @@ BranchesAt(f,F,p,P,a,t)=
     B = Branches0(f1,t,A,p,1);
 		if(B==0,return(0));
     for(i=1,#B,
-      [bi,G,aG] = B[i]; \\ bi=[u=P,v=Q,Phi]
+      [bi,ei,G,aG] = B[i]; \\ bi=[u=P,v=Q,Phi]
       \\ Must change alg model
       yA = if(A,subst(liftpol(y1),a,aG),y1);
       bi[1] = 1/bi[1]; \\ x=1/u
@@ -409,7 +409,7 @@ BranchesAt(f,F,p,P,a,t)=
   B = Branches0(f1,t,A,p,1);
 	if(B==0,return(0));
   for(i=1,#B,
-    [bi,G,aG] = B[i]; \\ bi=[u=P,v=Q,Phi]
+    [bi,ei,G,aG] = B[i]; \\ bi=[u=P,v=Q,Phi]
     bi[2] = 1/bi[2]; \\ y=1/v
     bi[1] *= bi[2]; \\ x = u*y
     B[i] = [bi,G,[0,1,0]]; \\ Branch, base field, Org
