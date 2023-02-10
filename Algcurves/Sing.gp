@@ -288,23 +288,6 @@ BranchExpand(B,e)=
 
 BranchCheck(f,B,e)=PlaneEval(f,BranchExpand(B[1],e));
 
-BranchEval0(f,b,e,x,y)=
-{
-  my(n,d,be,de,k=1);
-  if(type(f)=="t_VEC",
-		return(apply(u->BranchEval(u,b,e,x,y),f))
-	);
-	n = numerator(f); d = denominator(f);
-  while(1,
-    be = BranchExpand(b,e);
-    de = substvec(d,[x,y],be);
-    if(de,break);
-    e += k;
-    k += 1;
-  );
-  substvec(n,[x,y],be)/de;
-}
-
 BranchValuation(f,b,x,y)=
 {
   my(e=2,xe,ye,p,t,f1,n1,d1,c,ne,de,vb,vn,vd);

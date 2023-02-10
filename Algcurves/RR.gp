@@ -1,6 +1,6 @@
 install("RgXY_RgX_div","GGL");
 
-AlgLagrange(a,d,b)= \\ a,b in K[t]/T, [K(x):K]=d | deg T
+AlgLagrange(a,d,b)= \\ a,b in K[t]/T, [K(a):K]=d | deg T
 { \\ Attempts to express b as a poly in a
   my(T,n,v,M,aj=1);
   T = a.mod;
@@ -89,7 +89,7 @@ PtEq(P,Q)=
           while(1,
             m = minpoly(P[1]+k*P[2],'x);
             L = AlgLagrange(P[1]+k*P[2],poldegree(m),P[2]); \\ attempt to express yP as poly in xP + k yP
-            if(L==[],k++;next);
+            if(L===[],k++;next);
             return(subst(m,'x,Q[1]+k*Q[2])==0 && subst(L,'x,Q[1]+k*Q[2])==Q[2])
           )
         ,
