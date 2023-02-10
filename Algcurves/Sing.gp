@@ -309,8 +309,8 @@ BranchValuation(f,b,x,y)=
 	\\ Now f(xt,t^vb*y1) = t^(vn-vd)*n(y1)/d(y1), where n,d in K[t][y]
   while(1,
 		p = serprec(ye,t);
-    ne = subst(n1,y,ye);
-    de = subst(d1,y,ye);
+    ne = subst(n1,y,ye)+O(t^p);
+    de = subst(d1,y,ye)+O(t^p);
     if(ne && de,return(valuation(ne,t)-valuation(de,t)+vn-vd));
     e *= 2;
 		ye = t^-vb*(BranchExpand(b,e)[2]);
