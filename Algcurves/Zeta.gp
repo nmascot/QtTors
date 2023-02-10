@@ -234,7 +234,11 @@ PicGenPlaces(C)=
     if(f0,
       for(i=1,#f0,
         if(Mod(d,poldegree(f0[i]))==0,
-					listput(S,[0,RootRed(f0[i])[1]]);
+					listput(S,if(poldegree(f0[i])>1,
+						Mod(Mod([0,a],p),f0[i])
+					,
+						Mod([0,PolRoot1(f0[i])],p)
+					));
 					nd += poldegree(f0[i])
 				)
       )
