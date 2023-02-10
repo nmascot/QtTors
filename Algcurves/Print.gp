@@ -4,7 +4,7 @@ BranchPrint(B,e=2)=
 	[x,y] = liftall(BranchExpand(B[1],e));
 	A = B[3];
 	if(poldegree(A)>1,
-		print("Branch x = ",x,", y = ",y,", where ",A," = 0")
+		print("Branch x = ",x,", y = ",y,", where ",liftall(A)," = 0")
 	,
 		print("Branch x = ",x,", y = ",y)
 	);
@@ -26,7 +26,7 @@ PointPrint(P)=
 					y = liftall(y);
 				);
 				if(poldegree(A)>1,
-					print([1,y,0],", where ",A," = 0")
+					print([1,y,0],", where ",liftall(A)," = 0")
 				,
 					print([1,y,0])
 				)
@@ -44,7 +44,7 @@ PointPrint(P)=
     y = liftall(y);
   );
 	if(poldegree(A)>1,
-    print([x,y],", where ",A," = 0")
+    print([x,y],", where ",liftall(A)," = 0")
   ,
     print([liftint(x),liftint(y)])
   );
