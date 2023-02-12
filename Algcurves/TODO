@@ -1,3 +1,5 @@
+Get rid of BranchesAt: (0:1:0) introduces branches with irrational x(t). Use BranchesAbove instead
+
 Solved:
 2*x^3 - 2*y^3*x^2 + 5*y^2*x + (y^5 - y): pb RR
 
