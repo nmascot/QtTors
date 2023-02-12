@@ -1165,7 +1165,7 @@ forqfvec_i(void *E, long (*fun)(void *, GEN, GEN, double), struct qfvec *qv, GEN
   GEN x, a = qv->a, r = qv->r, u = qv->u;
   long n = lg(a), i, j, k;
   double p,BOUND,*v,*y,*z,**q;
-  const double eps = 0.0001;
+  const double eps = 1e-10;
   if (!BORNE) BORNE = gen_0;
   else
   {
@@ -1192,7 +1192,7 @@ forqfvec_i(void *E, long (*fun)(void *, GEN, GEN, double), struct qfvec *qv, GEN
   else
     p = gtodouble(BORNE);
   BOUND = p * (1 + eps);
-  if (BOUND == p) pari_err_PREC("minim0");
+  if ((ulong)BOUND != (ulong)p) pari_err_PREC("forqfvec");
 
   k = n; y[n] = z[n] = 0;
   x[n] = (long)sqrt(BOUND/v[n]);
