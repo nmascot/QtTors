@@ -308,9 +308,13 @@ BranchValuation(f,b,x,y)=
 	d1 /= c;
 	\\ Now f(xt,t^vb*y1) = t^(vn-vd)*n(y1)/d(y1), where n,d in K[t][y]
   while(1,
-		p = serprec(ye,t);
     ne = subst(n1,y,ye)+O(t^p);
     de = subst(d1,y,ye)+O(t^p);
+		p = serprec(ye,t);
+		if(p!=oo,
+    	ne += O(t^p);
+    	de += O(t^p);
+		);
     if(ne && de,return(valuation(ne,t)-valuation(de,t)+vn-vd));
     e *= 2;
 		ye = t^-vb*(BranchExpand(b,e)[2]);
@@ -338,13 +342,16 @@ BranchEval(f,b,e,x,y)=
   \\ Now f(xt,t^vb*y1) = (cn/cd)(t) * n(y1)/d(y1), where n,d in K[t][y]
   while(1,
     p = serprec(ye,t);
-    de = subst(d1,y,ye)+O(t^p);
+    de = subst(d1,y,ye);
+		if(p!=oo,de+=O(t^p));
 		if(de,break);
 		e += k;
 		k += 1;
 		ye = t^-vb*BranchExpand(b,e)[2];
 	);
-	ne = subst(n1,y,ye)+O(t^p);
+	ne = subst(n1,y,ye);
+	if(p!=oo,ne+=O(t^p));
+	breakpoint();
 	(cn*ne)/(cd*de);
 }
 
