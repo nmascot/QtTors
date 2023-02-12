@@ -14,3 +14,5 @@ test(x->content(x,'y));
 
 numerator(1/x+1/y,'x)
 numerator(1/x+1/y,'y)
+variables(content(1,y))
+variables(content(x*y*z+1,y))

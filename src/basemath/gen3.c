@@ -3637,7 +3637,12 @@ content0(GEN x, GEN D)
   }
   if (!gequalX(D)) pari_err_TYPE("content", D);
   v = varn(D);
-  v0 = gvar(x); if (v0 == NO_VARIABLE || varncmp(v0,v) > 0) return pol_1(v);
+  v0 = gvar(x); if (v0 == NO_VARIABLE) return gen_1;
+  if (varncmp(v0,v) > 0)
+  {
+    v0 = gvar2(x);
+    return v0 == NO_VARIABLE? gen_1: pol_1(v0);
+  }
   if (v0 != v) { v0 = fetch_var_higher(); x = gsubst(x, v, pol_x(v0)); }
   d = content(x);
   /* gsubst is needed because of content([x]) = x */
