@@ -1627,13 +1627,7 @@ gsubst(GEN x, long v, GEN y)
           {
             z = RgXn_eval(x, ser2rfrac_i(y), n);
             if (varn(z) == vy) z = RgX_to_ser(z, n+2);
-          }
-          switch(typ(z))
-          {
-            case t_SER:
-            case t_POL:
-              if (varncmp(varn(z),vy) <= 0) break;
-            default: z = scalarser(z, vy, n);
+            else z = scalarser(z, vy, n);
           }
           if (!ex) return gerepilecopy(av, z);
           return gerepileupto(av,  gmul(z, gpowgs(y,ex)));
