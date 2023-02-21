@@ -65,7 +65,7 @@ GetSunit(C,S,dS,Dforce=0,t=5,s=8,rs=random())=
 		j = PtIsInS(Df[i,1],S);
 		Sf[j] = Df[i,2];
 	);
-	if(sum(i=1,n,Sf[i]*PtDeg(S[i]))!=if(Dforce,DivDeg(Dforce),0),error("Bug in GetSunit")); \\ TODO
+	\\if(sum(i=1,n,Sf[i]*PtDeg(S[i]))!=if(Dforce,DivDeg(Dforce),0),error("Bug in GetSunit")); \\ TODO
 	return([Sf,f]);
 }
 
