@@ -83,6 +83,7 @@ DivSimplify(P,V)=
 PicStruct(C)=
 {
 	my(p=C[2],g=C[6],extra=1,h1,S,dS,dh,N,n,m,l,r,R,U,V,D,U1,G,D1,d);
+	if(g==0,return([]));
 	if(p==0,error("Only implemented over finite fields"));
 	[S,NC] = PicGenPlaces(C);
 	dS = #NC;
@@ -145,6 +146,7 @@ PicStruct(C)=
 PicWord(C,J,X)=
 {
 	my(r,d,[D,G,S,dS,U]=J);
+	if(C[6]==0,return([]));
 	if(type(X)!="t_MAT",
 		X = if(type(X[1])=="t_VEC",Mat(X),Mat([X,1]))
 	);

@@ -67,7 +67,7 @@ CrvFindRatPt(C,M=10)=
 
 CrvRatAux(f,N,D,x,y,t)=
 {
-	my(n,g,L,u,m,R,L1,u1,R1,L2,u2,R2,L3,u3,R3,A,B,e,a,b);
+	my(n,g,L,u,m,R,L1,u1,R1,L2,u2,R2,L3,u3,R3,A,B,e,a,b,c,d,M);
 	n = poldegree(f,x);
 	g = t*D-N;
 	L = vector(3);
@@ -86,21 +86,29 @@ CrvRatAux(f,N,D,x,y,t)=
 	[u2,R2] = L2;
 	[u3,R3] = L3;
 	A = (-u1*R2+u3*R2);
-	B = (u2*R1-u3*R1);
-	e = 1;
-	while(1,
-		e *= 2;
-		a = R3+O(t^e);
-		if(a==0,next);
-		a = 1/a;
-		b = B*a;
-		a = A*a;
-		for(i=1,e-1,
-			if(polcoef(a,i),
-				x = -polcoef(b,i)/polcoef(a,i);
-				return((-u1*x*R2+u2*R1)/(R1-x*R2));
+  B = (u2*R1-u3*R1);
+	\\ Want c s.t. A*c+B = R3*cst -> Compare 2 coefs of A,B,R3.
+	v = min(valuation(A,t),valuation(R3,t));
+	e2 = v+1;
+	e = v+2;
+	for(j=1,+oo,
+		a = A + O(t^e);
+		b = B + O(t^e);
+		c = R3 + O(t^e);
+		M = matrix(2,2);
+		M[1,1] = polcoef(a,v);
+		M[1,2] = polcoef(c,v);
+		for(i=e2,e-1,
+			M[2,1] = polcoef(a,i);
+			M[2,2] = polcoef(c,i);
+			d = matdet(M);
+			if(d,
+				c = (polcoef(c,v)*polcoef(b,i) - polcoef(c,i)*polcoef(b,v))/d;
+				return((-u1*c*R2+u2*R1)/(R1-c*R2));
 			)
-		)
+		);
+		e2 = e;
+		e += j;
 	);
 }
 

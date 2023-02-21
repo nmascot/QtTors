@@ -351,7 +351,6 @@ BranchEval(f,b,e,x,y)=
 	);
 	ne = subst(n1,y,ye);
 	if(p!=oo,ne+=O(t^p));
-	breakpoint();
 	(cn*ne)/(cd*de);
 }
 
