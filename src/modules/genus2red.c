@@ -172,7 +172,9 @@ genus2igusa(GEN P, long n)
   pari_sp av = avma;
   GEN a0, a1, a2, a3, a4, a5, a6, r;
   if (typ(P) == t_VEC && lg(P) == 3)
-    P = gadd(gel(P,1), gmul2n(gsqr(gel(P,2)),2));
+    P = gadd(gmul2n(gel(P,1), 2), gsqr(gel(P,2)));
+  else
+    P = gmul2n(P, 2);
   if (typ(P)!=t_POL || degpol(P)> 6) pari_err_TYPE("genus2igusa",P);
   RgX_to_06(P, &a0,&a1,&a2,&a3,&a4,&a5,&a6);
   switch(n)
