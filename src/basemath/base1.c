@@ -1853,7 +1853,8 @@ nfmaxord_to_nf(nfmaxord_t *S, GEN ro, long prec)
   gel(mat,3) = RM_round_maxrank(F.G);
   gel(mat,4) = Tr;
   gel(mat,5) = D;
-  gel(mat,8) = shallowtrans(S->dKP? S->dKP: gel(absZ_factor(S->dK), 1));
+  gel(mat,8) = S->dKP? S->dKP: gel(absZ_factor(S->dK), 1);
+  if (typ(gel(mat,8)) == t_COL) gel(mat,8) = shallowtrans(gel(mat,8));
   return nf;
 }
 
