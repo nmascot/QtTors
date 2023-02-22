@@ -1853,9 +1853,8 @@ nfmaxord_to_nf(nfmaxord_t *S, GEN ro, long prec)
   gel(mat,3) = RM_round_maxrank(F.G);
   gel(mat,4) = Tr;
   gel(mat,5) = D;
-  gel(mat,8) = S->dKP? S->dKP: gel(absZ_factor(S->dK), 1);
-  if (typ(gel(mat,8)) == t_COL) gel(mat,8) = shallowtrans(gel(mat,8));
-  return nf;
+  w = S->dKP; if (!w) { w = gel(absZ_factor(S->dK), 1); settyp(w, t_VEC); }
+  gel(mat,8) = w; return nf;
 }
 
 static GEN
@@ -2104,7 +2103,12 @@ nfinit_basic(nfmaxord_t *S, GEN T)
       S->basden = NULL;
       S->index = NULL;
       S->dK = NULL;
-      S->dKP = lg(T) == 4? gel(T,3): NULL;
+      S->dKP = NULL;
+      if (lg(T) == 4)
+      {
+        GEN v = gel(T,3); if (typ(v) == t_COL) v = shallowtrans(v);
+        S->dKP = v;
+      }
       S->dT = NULL;
       S->r1 = -1; break;
     default: /* -1 */

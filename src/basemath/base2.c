@@ -448,7 +448,7 @@ setPE(GEN D, GEN P, GEN *pP, GEN *pE)
 {
   long k, j, l = lg(P);
   GEN P2, E2;
-  *pP = P2 = cgetg(l, t_COL);
+  *pP = P2 = cgetg(l, t_VEC);
   *pE = E2 = cgetg(l, t_VECSMALL);
   for (k = j = 1; j < l; j++)
   {
@@ -3593,7 +3593,7 @@ rnfallbase(GEN nf, GEN pol, GEN lim, GEN rnf, GEN *pD, GEN *pf, GEN *pDKP)
       if (pf) *pf = idealinv(nf, fi);
     }
     if (RgM_isscalar(D,NULL)) D = gcoeff(D,1,1);
-    if (pDKP) { settyp(S.dKP, t_VEC); *pDKP = S.dKP; }
+    if (pDKP) *pDKP = S.dKP;
     *pD = mkvec2(D, get_d(nf, disc)); return z;
   }
   fa = idealfactor(nf, disc);
