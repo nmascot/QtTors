@@ -39,6 +39,7 @@ BA  33- polylogmult(1,[],-1) -> SEGV
     34- ellheight(non-integral E) -> crash [#2448]
     35- content(1,y) -> pol_1(y) instead of t_INT 1
     36- s=taylor(1/((x-1)*(y-1)),x); taylor(s,y) -> invalid object [#2452]
+    37- avoid crashing when sumnumsidi diverges (0 bits of accuracy) [#2454]
 
   Changed
      1- binomial(negative t_INT, t_INT): use Loeb's definition

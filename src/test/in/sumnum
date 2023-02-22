@@ -140,3 +140,4 @@ sumnumlagrangeinit(x,-2)
 prodinf(n=0,1+2^-n,2)
 sumalt(n=0,1,2)
 sumpos(n=0,1,2)
+intnumosc(x = 0, besselj(0,x)^2,Pi);

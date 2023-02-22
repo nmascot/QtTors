@@ -2766,6 +2766,7 @@ sumnumsidi(void *E, GEN (*f)(void*, GEN, long), GEN a, double mu, long prec)
     }
     Wp = W;
   }
+  if (bit <= 0) pari_err(e_MISC,"sumnumsidi diverges");
   return gprec_w(W, nbits2prec(bit));
 }
 

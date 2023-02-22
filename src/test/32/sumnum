@@ -116,4 +116,7 @@
   ***   at top-level: sumpos(n=0,1,2)
   ***                 ^---------------
   *** sumpos: invalid flag in sumpos.
-Total time spent: 2529
+  ***   at top-level: intnumosc(x=0,besselj(0,x)^2,Pi)
+  ***                                       ^----------
+  ***   sumnumsidi diverges.
+Total time spent: 3527
