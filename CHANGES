@@ -1,4 +1,7 @@
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
+Done for version 2.16.1 (released ??/??/2023):
+  Fixed
+
 Done for version 2.16.0 (released 25/02/2023):
   Fixed
 BA   1- ploth long help was misformatted
