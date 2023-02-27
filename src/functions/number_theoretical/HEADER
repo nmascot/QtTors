@@ -71,7 +71,7 @@ Doc:
  \kbd{[$N$, fa]}.
 
  When the group is fixed and many orders or discrete logarithms will be
- computed, it is much more efficient to initialize this data once and for all
+ computed, it is much more efficient to initialize this data once
  and pass it to the relevant functions, as in
  \bprog
  ? p = nextprime(10^30);

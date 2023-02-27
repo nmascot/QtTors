@@ -20,7 +20,7 @@ Doc: \idx{binomial coefficient} $\binom{n}{k}$.
  we use Daniel Loeb's extension,
  $$ \lim_{t\to 1} \Gamma(n+t) / \Gamma(k+t) / \Gamma(n-k+t), $$
  (Sets with a negative number of elements, \emph{Adv. Math.} {\bf 91} (1992),
- no. 1, 64--74. See also~\kbd{https://arxiv.org/abs/1105.3689})
+ no. 1, 64--74. See also~\kbd{https://arxiv.org/abs/1105.3689}.)
  This way the symmetry relation $\binom{n}{k} = \binom{n}{n - k}$
  becomes valid for all integers $n$ and $k$, and
  the binomial theorem

@@ -12,7 +12,7 @@ Doc: for positive integer $N$ and complex number $x$, return the sum
  Unlike variants using \kbd{dirpowers(N,x)}, this function uses $O(\sqrt{N})$
  memory instead of $O(N)$. And it is faster for large $N$. The return value
  is usually a floating point number, but it will be exact if the result
- is an integer. On the other hand, rational numbers, are converted to
+ is an integer. On the other hand, rational numbers are converted to
  floating point approximations, since they are likely to blow up for large $N$.
  \bprog
  ? dirpowers(5, 2)

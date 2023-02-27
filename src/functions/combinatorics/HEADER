@@ -19,5 +19,5 @@ Doc:
 
  Permutations can be multiplied via \kbd{*}, raised to some power using
  \kbd{\pow}, inverted using \kbd{\pow(-1)}, conjugated as
- \kbd{p * q * p\pow(-1)}. Their order and signature is available via
+ \kbd{p * q * p\pow(-1)}. Their order and signature are available via
  \kbd{permorder} and \kbd{permsign}.
