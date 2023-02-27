@@ -22,7 +22,8 @@ minimal sanity checks. When a precondition is not satisfied, any of the
 following may occur: a regular exception is raised, the PARI stack overflows, a
 \kbd{SIGSEGV} or \kbd{SIGBUS} signal is generated, or we enter an infinite
 loop. The function can also quietly return a mathematically meaningless
-result: junk in, junk out.
+result: junk in, junk out. In the following, we document the results
+as \emph{undefined} in this case.
 
 In this chapter, we will describe the functions according to a rough
 classification. The general entry looks something like:
