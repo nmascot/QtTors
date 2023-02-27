@@ -16,7 +16,7 @@ Description:
  (gen, &small):gen      grndtoi($1, &$2)
  (gen, &int):gen        round0($1, &$2)
 Doc: If $x$ is in $\R$, rounds $x$ to the nearest integer (rounding to
- $+\infty$ in case of ties), then and sets $e$ to the number of error bits,
+ $+\infty$ in case of ties), then sets $e$ to the number of error bits,
  that is the binary exponent of the difference between the original and the
  rounded value (the ``fractional part''). If the exponent of $x$ is too large
  compared to its precision (i.e.~$e>0$), the result is undefined and an error

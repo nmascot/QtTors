@@ -5,8 +5,8 @@ Prototype: iGGD&
 Help: mapisdefined(M,x,{&z}): true (1) if x has an image by the map M,
  false (0) otherwise.
  If z is present, set it to the image of x, if it exists.
-Doc: Returns true ($1$) if \kbd{x} has an image by the map $M$, false ($0$)
- otherwise. If \kbd{z} is present, set \kbd{z} to the image of $x$, if it exists.
+Doc: Returns true ($1$) if $x$ has an image by the map $M$, false ($0$)
+ otherwise. If $z$ is present, set $z$ to the image of $x$, if it exists.
  \bprog
  ? M1 = Map([1, 10; 2, 20]);
  ? mapisdefined(M1,3)
