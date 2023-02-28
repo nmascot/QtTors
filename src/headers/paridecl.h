@@ -2451,6 +2451,7 @@ GEN     nfdiveuc(GEN nf, GEN a, GEN b);
 GEN     nfdivrem(GEN nf, GEN a, GEN b);
 GEN     nfembed(GEN nf, GEN x, long k);
 GEN     nfeltembed(GEN nf, GEN x, GEN ind0, long prec);
+GEN     nfeltembed_i(GEN *pnf, GEN x, GEN ind0, long prec);
 GEN     nfeltsign(GEN nf, GEN x, GEN ind0);
 GEN     nffactorback(GEN nf, GEN L, GEN e);
 GEN     nfinv(GEN nf, GEN x);

@@ -2297,20 +2297,20 @@ nfeltsign(GEN nf, GEN x, GEN ind0)
   return gerepileupto(av, v);
 }
 
+/* true nf */
 GEN
-nfeltembed(GEN nf, GEN x, GEN ind0, long prec0)
+nfeltembed_i(GEN *pnf, GEN x, GEN ind0, long prec0)
 {
-  pari_sp av = avma;
   long i, e, l, r1, r2, prec, prec1;
-  GEN v, ind, cx;
-  nf = checknf(nf); nf_get_sign(nf,&r1,&r2);
+  GEN v, ind, cx, nf = *pnf;
+  nf_get_sign(nf,&r1,&r2);
   x = nf_to_scalar_or_basis(nf, x);
   ind = parse_embed(ind0, r1+r2, "nfeltembed");
   l = lg(ind);
   if (typ(x) != t_COL)
   {
     if (!(ind0 && typ(ind0) == t_INT)) x = const_vec(l-1, x);
-    return gerepilecopy(av, x);
+    return x;
   }
   x = Q_primitive_part(x, &cx);
   prec1 = prec0; e = gexpo(x);
@@ -2333,10 +2333,16 @@ nfeltembed(GEN nf, GEN x, GEN ind0, long prec0)
     if (i == l) break;
     prec = precdbl(prec);
     if (DEBUGLEVEL>1) pari_warn(warnprec,"eltnfembed", prec);
-    nf = nfnewprec_shallow(nf, prec);
+    *pnf = nf = nfnewprec_shallow(nf, prec);
   }
   if (ind0 && typ(ind0) == t_INT) v = gel(v,1);
-  return gerepilecopy(av, v);
+  return v;
+}
+GEN
+nfeltembed(GEN nf, GEN x, GEN ind0, long prec0)
+{
+  pari_sp av = avma; nf = checknf(nf);
+  return gerepilecopy(av, nfeltembed_i(&nf, x, ind0, prec0));
 }
 
 /* number of distinct roots of sigma(f) */

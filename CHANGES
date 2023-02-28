@@ -69,6 +69,7 @@ BA   2- [GP] genus2igusa
 BA   5- [riscv64] add riscv64 assembly kernel
 BA   6- lfuncreate([bnr, subg]): Dedekind zeta for the corresponding Abelian
         extension.
+     7- new libpari function nfeltembed_i
 
   Removed
 BA   1- [GP] lfunabelianrelinit. Use lfunfinit([bnr, subgroup]) instead.

@@ -1529,7 +1529,17 @@ avoids (useless) work in the multiplicative group of the residue field.
 
 \fun{GEN}{nfembed}{GEN nf, GEN x, long k} returns a floating point
 approximation of the $k$-th embedding of $x$ (attached to the $k$-th
-complex root in \kbd{nf.roots}).
+complex root in \kbd{nf.roots}). Note that the semantic is different from
+\kbd{nfeltembed} (which increases the precision of \var{nf} until the
+embeddings have the requested precision): \kbd{nfembed} provides the
+embedding with the precision that is achievable given \var{nf}.
+
+\fun{GEN}{nfeltembed_i}{GEN *pnf, GEN x, GEN ind, long prec}
+as \kbd{nfeltembed}, except that no garbage collecting is performed and
+\kbd{*pnf} must be initially set to a (true) \var{nf} structure and,
+if the routine needs to increase the accuracy of \var{nf} to achieve the
+requested accuracy \kbd{prec}, then the functions sets it to the new more
+precise \var{nf}.
 
 \fun{GEN}{nf_cxlog}{GEN nf, GEN x, long prec} return the vector of complex
 logarithmic embeddings $(e_i \text{Log}(\sigma_i X))$ where $e_i = 1$ if $i \leq
