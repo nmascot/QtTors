@@ -137,9 +137,9 @@ dim=8
 [-18   2  0]
 
 [[1, -1, 2; -1, 2, -3; 2, -3, 6], [0, -2/13, -1/13; 2/17, 1/17, -1/17; 1/17,
- -19/221, 36/221], -13/17]
+ -19/221, 36/221], 1]
 [[-1, 0, 0; 0, -1, 0; 0, 0, 1], [0, 0, 1/5; 5/323, -1/323, 0; -1/323, -5/323
-, 0], -5/323]
+, 0], 1/26]
   ***   at top-level: qfsolve([1,0,0;0,1,1;0,0,1])
   ***                 ^----------------------------
   *** qfsolve: incorrect type in qfsolve [not symmetric] (t_MAT).
@@ -147,4 +147,4 @@ dim=8
   ***   at top-level: qfsolve(Q)
   ***                 ^----------
   *** qfsolve: sorry, qfsolve, dim >= 10 is not yet implemented.
-Total time spent: 2207
+Total time spent: 1440
