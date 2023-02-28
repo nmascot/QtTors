@@ -507,6 +507,9 @@ gphelp_keyword_list(void)
   "sums",
   "products",
   "integrals",
+  "gchar",
+  "grossencharacter",
+  "Grossencharacter",
   NULL};
   return L;
 }

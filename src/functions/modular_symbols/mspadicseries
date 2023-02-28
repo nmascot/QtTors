@@ -13,8 +13,8 @@ Doc: Let $\Phi$ be the $p$-adic distribution-valued overconvergent symbol
  $$\hat{L}_p(\mu,\tau^{i})(x)
    = \int_{\Z_p^*} \tau^i(t) (1+x)^{\log_p(t)/\log_p(u)}d\mu(t)$$
  Here, $\tau$ is the Teichm\"uller character and $u$ is a specific
- multiplicative generator of $1+2p\Z_p$. (Namely $1+p$ if $p>2$ or $5$
- if $p=2$.) To explain
+ multiplicative generator of $1+2p\Z_p$, namely $1+p$ if $p>2$ or $5$
+ if $p=2$. To explain
  the formula, let $G_\infty := \text{Gal}(\Q(\mu_{p^{\infty}})/ \Q)$,
  let $\chi:G_\infty\to \Z_p^*$ be the cyclotomic character (isomorphism)
  and $\gamma$ the element of $G_\infty$ such that $\chi(\gamma)=u$;
