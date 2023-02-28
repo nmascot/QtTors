@@ -4160,6 +4160,85 @@ computecnd(GEN rnf, GEN Lpr)
   return mkvec2(fa, clean_factor(fa));
 }
 
+/* h >= 0 */
+static void
+nextgen(GEN gene, long h, GEN* gens, GEN* hgens, long* ngens, long* curgcd) {
+  long nextgcd = ugcd(h,*curgcd);
+  if (nextgcd == *curgcd) return;
+  (*ngens)++;
+  gel(*gens,*ngens) = gene;
+  gel(*hgens,*ngens) = utoi(h);
+  *curgcd = nextgcd;
+  return;
+}
+
+static int
+dividesmod(long d, long h, long n) { return !(h%cgcd(d,n)); }
+
+/* ramified prime with nontrivial Hasse invariant */
+static GEN
+localcomplete(GEN rnf, GEN pl, GEN cnd, GEN auts, long j, long n, long h, long* v)
+{
+  GEN nf, gens, hgens, pr, modpr, T, p, sol, U, b, gene, randg, pu;
+  long ngens, i, d, np, d1, d2, hg, dnf, vcnd, curgcd;
+  nf = rnf_get_nf(rnf);
+  pr = gcoeff(cnd,j,1);
+  np = umodiu(pr_norm(pr), n);
+  dnf = nf_get_degree(nf);
+  vcnd = itos(gcoeff(cnd,j,2));
+  ngens = 13+dnf;
+  gens = zerovec(ngens);
+  hgens = zerovec(ngens);
+  *v = 0;
+  curgcd = 0;
+  ngens = 0;
+
+  if (!uisprime(n)) {
+    gene =  pr_get_gen(pr);
+    hg = localhasse(rnf, cnd, pl, auts, gene, j);
+    nextgen(gene, hg, &gens, &hgens, &ngens, &curgcd);
+  }
+
+  if (ugcd(np,n) != 1) { /* GCD(Np,n) != 1 */
+    pu = idealprincipalunits(nf,pr,vcnd);
+    pu = abgrp_get_gen(pu);
+    for (i=1; i<lg(pu) && !dividesmod(curgcd,h,n); i++) {
+      gene = gel(pu,i);
+      hg = localhasse(rnf, cnd, pl, auts, gene, j);
+      nextgen(gene, hg, &gens, &hgens, &ngens, &curgcd);
+    }
+  }
+
+  d = ugcd(np-1,n);
+  if (d != 1) { /* GCD(Np-1,n) != 1 */
+    modpr = nf_to_Fq_init(nf, &pr, &T, &p);
+    while (!dividesmod(curgcd,h,n)) { /* TODO gener_FpXQ_local */
+      if (T==NULL) randg = randomi(p);
+      else randg = random_FpX(degpol(T), varn(T),p);
+
+      if (!gequal0(randg) && !gequal1(randg)) {
+        gene = Fq_to_nf(randg, modpr);
+        hg = localhasse(rnf, cnd, pl, auts, gene, j);
+        nextgen(gene, hg, &gens, &hgens, &ngens, &curgcd);
+      }
+    }
+  }
+
+  setlg(gens,ngens+1);
+  setlg(hgens,ngens+1);
+
+  sol = ZV_extgcd(hgens);
+  U = ZV_to_Flv(gmael(sol,2,ngens), n);
+  d = itou(gel(sol,1));
+  d1 = ugcd(d, n);
+  d2 = d / d1;
+  d = Fl_mul(h / d1, Fl_inv(d2,n), n);
+  if (d != 1) U = Flv_Fl_mul(U, d, n);
+  for (i = 1, b = gen_1; i <= ngens; i++)
+    if (U[i]) b = nfmul(nf, b, nfpow_u(nf, gel(gens,i), U[i]));
+  *v = U[1]; return b;
+}
+
 static int
 testsplits(GEN data, GEN fa)
 {
@@ -4204,12 +4283,11 @@ hassereduce(GEN hf)
 }
 
 /* rnf complete */
-/* assume that rnf/nf is unramified at all primes where h!=0 */
 static GEN
 alg_complete0(GEN rnf, GEN aut, GEN hf, GEN hi, long maxord)
 {
   pari_sp av = avma;
-  GEN nf, pl, prcnd, cnds, y, Lpr, auts, b, fa, data, hfe;
+  GEN nf, pl, pl2, cnd, prcnd, cnds, y, Lpr, auts, b, fa, data, hfe;
   GEN forbid, al, ind;
   long D, n, d, i, j, l;
   nf = rnf_get_nf(rnf);
@@ -4224,28 +4302,32 @@ alg_complete0(GEN rnf, GEN aut, GEN hf, GEN hi, long maxord)
   auts = allauts(rnf,aut);
 
   pl = leafcopy(hi); /* conditions on the final b */
+  pl2 = leafcopy(hi); /* conditions for computing local Hasse invariants */
   l = lg(pl); ind = cgetg(l, t_VECSMALL);
   for (i = j = 1; i < l; i++)
-    if (hi[i]) pl[i] = -1; else ind[j++] = i;
+    if (hi[i]) { pl[i] = -1; pl2[i] = 1; } else ind[j++] = i;
   setlg(ind, j);
   y = nfpolsturm(nf, rnf_get_pol(rnf), ind);
   for (i = 1; i < j; i++)
-    if (!signe(gel(y,i))) pl[ind[i]] = 1;
+    if (!signe(gel(y,i))) { pl[ind[i]] = 1; pl2[ind[i]] = 1; }
 
   cnds = computecnd(rnf,Lpr);
   prcnd = gel(cnds,1);
+  cnd = gel(cnds,2);
   y = cgetg(lgcols(prcnd),t_VEC);
   forbid = vectrunc_init(lg(Lpr));
   for (i=j=1; i<lg(Lpr); i++)
   {
     GEN pr = gcoeff(prcnd,i,1), yi;
-    long v, e = itou( gcoeff(prcnd,i,2) ), frob, f1;
-    if (e) pari_err_IMPL("alg_complete: nontrivial Hasse inv. at ramified primes");
-    frob = cyclicrelfrob(rnf,auts,pr);
-    f1 = ugcd(frob,n);
-    vectrunc_append(forbid, pr);
-    yi = gen_0;
-    v = ((hfe[i]/f1) * Fl_inv(frob/f1,n)) % n;
+    long v, e = itou( gcoeff(prcnd,i,2) );
+    if (!e) {
+      long frob = cyclicrelfrob(rnf,auts,pr), f1 = ugcd(frob,n);
+      vectrunc_append(forbid, pr);
+      yi = gen_0;
+      v = ((hfe[i]/f1) * Fl_inv(frob/f1,n)) % n;
+    }
+    else
+      yi = localcomplete(rnf, pl2, cnd, auts, j++, n, hfe[i], &v);
     gel(y,i) = yi;
     gcoeff(prcnd,i,2) = stoi(e + v);
   }

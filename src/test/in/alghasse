@@ -281,3 +281,20 @@ print("inefficiency in backtrackfacto");
 F=nfinit(y^5-y^4-3*y^2+1);
 setrand(5)
 alginit(F, [2, [[], []], [1,1,0]],,0);
+
+print("bug: alg_complete at ramified primes");
+\\James Rickards's example
+setrand(1);
+F=nfinit(y^3 - y^2 - 10*y + 8);
+setrand(1);
+pr1 = idealprimedec(F, 2)[1];
+pr2 = idealprimedec(F, 13)[1];
+A=alginit(F, [2, [[pr1, pr2], [1, 1]], [0, 1, 1]]);
+\\more examples
+nf = nfinit(y^2-17);
+[pr1,pr2] = idealprimedec(nf,2);
+al = alginit(nf,[2,[[pr1],[1/2]],[0,1]],,0);
+nf = nfinit(y^4 + 7*y^2 + 49);
+pr1 = idealprimedec(nf,3)[1];
+pr2 = idealprimedec(nf,5)[1];
+al = alginit(nf,[3,[[pr1,pr2],[1/3,2/3]],[]],,0);

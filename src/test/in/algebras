@@ -2884,5 +2884,3 @@ al = algtableinit([Mat(1)]);
 al2 = algtensor(al,al);
 al = algtableinit([Mat(1)],2);
 al2 = algtensor(al,al);
-
-

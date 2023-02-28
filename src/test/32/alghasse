@@ -177,4 +177,5 @@ degree bug
 2 2 2 2 2 2 2 2 2 2 
 infinite loop in GW
 inefficiency in backtrackfacto
-Total time spent: 2558
+bug: alg_complete at ramified primes
+Total time spent: 4925
