@@ -570,22 +570,36 @@ check_symmetric(GEN G)
       if (!equalii(gcoeff(G,i,j), gcoeff(G,j,i)))
         pari_err_TYPE("qfsolve [not symmetric]",G);
 }
+/* assume G symmetric and integral */
+static void
+symmetric_non0_coeff(GEN G, long *pi, long *pj)
+{
+  long i, j, l = lg(G);
+  *pi = *pj = 0;
+  for (i = 1; i < l; i++)
+    for (j = 1; j <= i; j++)
+      if (signe(gcoeff(G,i,j))) { *pi = i; *pj = j; return; }
+}
 
 GEN
 qfminimize(GEN G)
 {
   pari_sp av = avma;
-  GEN d, F, H;
-  long n = lg(G)-1;
+  GEN c, d, F, H, U;
+  long i, j, n = lg(G)-1;
   if (typ(G) != t_MAT) pari_err_TYPE("qfminimize", G);
   if (n == 0) pari_err_DOMAIN("qfminimize", "dimension" , "=", gen_0, G);
   if (n != nbrows(G)) pari_err_DIM("qfminimize");
   G = Q_primpart(G); RgM_check_ZM(G, "qfminimize");
   check_symmetric(G);
   d = ZM_det(G);
+  if (!signe(d)) pari_err_DOMAIN("qfminimize", "det" , "=", gen_0, gen_0);
   F = absZ_factor(d);
   H = qfminimize_fact(G, gel(F,1),  ZV_to_zv(gel(F,2)), 0);
-  return gerepilecopy(av, mkvec2(gel(H,1), gel(H,2)));
+  symmetric_non0_coeff(G, &i, &j);
+  U = gel(H,2); H = gel(H,1);
+  c = gdiv(gcoeff(H,i,j), RgV_dotproduct(gel(U,i), RgM_RgC_mul(G, gel(U,j))));
+  return gerepilecopy(av, mkvec3(H, U, c));
 }
 
 /* CLASS GROUP COMPUTATIONS */
