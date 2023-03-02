@@ -1695,6 +1695,13 @@ vecmul(GEN x, GEN y)
 }
 
 GEN
+vecsqr(GEN x)
+{
+  if (is_scalar_t(typ(x))) return gsqr(x);
+  pari_APPLY_same(vecsqr(gel(x,i)))
+}
+
+GEN
 vecinv(GEN x)
 {
   if (is_scalar_t(typ(x))) return ginv(x);

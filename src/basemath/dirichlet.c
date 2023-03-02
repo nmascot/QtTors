@@ -400,6 +400,17 @@ dirpowers(long n, GEN x, long prec)
   return gerepilecopy(av, v);
 }
 
+static GEN
+vecmulsqlv(GEN Q, GEN V)
+{
+  long lq, i;
+  GEN W;
+  if (typ(V) != t_VEC) return RgV_Rg_mul(Q, V);
+  lq = lg(Q); W = cgetg(lq, t_VEC);
+  for (i = 1; i < lq; i++) gel(W, i) = vecmul(gel(Q, i), V);
+  return W;
+}
+
 /* P = prime divisors of (squarefree) n, V[i] = i^s for i <= sq.
  * Return NULL if n is not sq-smooth, else f(n)n^s */
 static GEN
@@ -412,12 +423,24 @@ smallfact(ulong n, GEN P, ulong sq, GEN V)
   l = lg(P); m = p = uel(P, l-1); if (p > sq) return NULL;
   for (i = l-2; i > 1; i--, m = o) { p = uel(P,i); o = m*p; if (o > sq) break; }
   c = gel(V,m); n /= m; /* m <= sq, o = m * p > sq */
-  if (n > sq) { c = gmul(c, gel(V,p)); n /= p; }
-  return gmul(c, gel(V,n));
+  if (n > sq) { c = vecmul(c, gel(V,p)); n /= p; }
+  return vecmul(c, gel(V,n));
 }
+
 static GEN
 Qtor(GEN x, long prec)
-{ return typ(x) == t_FRAC? fractor(x, prec): x; }
+{
+  long tx = typ(x);
+  if (tx == t_VEC || tx == t_COL)
+  {
+    long lx = lg(x), i;
+    GEN V = cgetg(lx, tx);
+    for (i = 1; i < lx; i++) gel(V, i) = Qtor(gel(x, i), prec);
+    return V;
+  }
+  return tx == t_FRAC? fractor(x, prec): x;
+}
+
 /* sum_{n <= N} f(n)n^s. */
 GEN
 dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
@@ -425,19 +448,20 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
 {
   const ulong step = 2048;
   pari_sp av = avma, av2;
-  GEN P, V, W, Q, c2, Q2, Q3, Q6, S, Z, logp;
+  GEN P, V, W, Q, c2, Q2, Q3, Q6, S, Z, logp, onef;
   forprime_t T;
   long gp[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
   ulong a, b, c, e, q, x1, n, sq, p, precp;
   long prec0, prec1, needlog;
 
   if (!N) return gen_0;
+  onef = f ? f(E, 1, prec) : gen_1;
   if (f)
   {
     if (N < 49)
     {
       V = vecpowug(N, s, prec);
-      S = gen_1;
+      S = onef;
       for (n = 2; n <= N; n++)
         S = gadd(S, gmul(gel(V,n), f(E, n, prec)));
       return gerepileupto(av, Qtor(S, prec));
@@ -453,12 +477,12 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
   s = gprec_w(s, prec0);
   needlog = get_needlog(s);
   if (needlog == 1) prec1 = powcx_prec(log2((double)N), s, prec);
-  gel(V,1) = gel(W,1) = gel(Q,1) = gen_1;
+  gel(V,1) = gel(W,1) = gel(Q,1) = onef;
   c2 = gpow(gen_2, s, prec0);
   if (f) c2 = gmul(c2, f(E, 2, prec));
   gel(V,2) = c2; /* f(2) 2^s */
-  gel(W,2) = Qtor(gaddgs(c2, 1), prec0);
-  gel(Q,2) = Qtor(gaddgs(gsqr(c2), 1), prec0);
+  gel(W,2) = Qtor(gadd(c2, onef), prec0);
+  gel(Q,2) = Qtor(gadd(vecsqr(c2), onef), prec0);
   logp = NULL;
   for (n = 3; n <= sq; n++)
   {
@@ -484,14 +508,14 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
       if (f) u = gmul(u, f(E, n, prec0)); /* f(n) n^s */
     }
     else
-      u = gmul(c2, gel(V, n>> 1));
+      u = vecmul(c2, gel(V, n >> 1));
     gel(V,n) = u; /* f(n) n^s */
     gel(W,n) = gadd(gel(W,n-1), gel(V,n));       /* = sum_{i<=n} f(i)i^s */
-    gel(Q,n) = gadd(gel(Q,n-1), gsqr(gel(V,n))); /* = sum_{i<=n} f(i^2)i^2s */
+    gel(Q,n) = gadd(gel(Q,n-1), vecsqr(gel(V,n))); /* = sum_{i<=n} f(i^2)i^2s */
   }
-  Q2 = RgV_Rg_mul(Q, gel(V,2));
-  Q3 = RgV_Rg_mul(Q, gel(V,3));
-  Q6 = RgV_Rg_mul(Q, gel(V,6));
+  Q2 = vecmulsqlv(Q, gel(V,2));
+  Q3 = vecmulsqlv(Q, gel(V,3));
+  Q6 = vecmulsqlv(Q, gel(V,6));
   precp = 0; logp = NULL; S = gen_0;
   u_forprime_init(&T, sq + 1, N);
   av2 = avma;
@@ -515,7 +539,7 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
     else
       u = gpow(gp, s, prec0);
     if (f) u = gmul(u, f(E, p, prec0)); /* f(p) p^s */
-    S = gadd(S, gmul(gel(W, N / p), u));
+    S = gadd(S, vecmul(gel(W, N / p), u));
     precp = p;
     if ((p & 0x1ff) == 1)
     {
@@ -527,7 +551,7 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
   Z = cgetg(sq+1, t_VEC);
   /* a,b,c,e = sqrt(q), sqrt(q/2), sqrt(q/3), sqrt(q/6)
    * Z[q] = Q[a] + 2^s Q[b] + 3^s Q[c] + 6^s Q[e], with Q[0] = 0 */
-  gel(Z, 1) = gen_1;
+  gel(Z, 1) = onef;
   gel(Z, 2) = gel(W, 2);
   gel(Z, 3) = gel(W, 3);
   gel(Z, 4) = gel(Z, 5) = gel(W,4);
@@ -567,7 +591,7 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
         a = usqrt(q); b = usqrt(q / 2); c = usqrt(q / 3); e = usqrt(q / 6);
         u = gadd(gadd(gel(Q,a), gel(Q2,b)), gadd(gel(Q3,c), gel(Q6,e)));
       }
-      S = gadd(S, gmul(t, u));
+      S = gadd(S, vecmul(t, u));
     }
     if (x2 == N) break;
     S = gerepileupto(av2, S);

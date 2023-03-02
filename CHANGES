@@ -59,6 +59,7 @@ BA  33- polylogmult(1,[],-1) -> SEGV
      9- allow fromdigits(t_COL or t_VECSMALL, B)
     10- [libpari] cgetalloc arguments swapped to mirror cgetg's definition
     11- simplified lfunabelianrelinit (absolute equation is now optional)
+HC  12- dirpowerssum: allow functions with t_VEC output
 
   Added
 PMo  1- new syntax for forvec loops

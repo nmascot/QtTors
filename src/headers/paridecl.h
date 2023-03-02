@@ -2636,6 +2636,7 @@ GEN     vecdiv(GEN x, GEN y);
 GEN     vecinv(GEN x);
 GEN     vecmul(GEN x, GEN y);
 GEN     vecpow(GEN x, GEN n);
+GEN     vecsqr(GEN x);
 GEN     zkC_multable_mul(GEN v, GEN x);
 
 /* base5.c */
