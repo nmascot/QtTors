@@ -464,7 +464,7 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
       S = onef;
       for (n = 2; n <= N; n++)
         S = gadd(S, gmul(gel(V,n), f(E, n, prec)));
-      return gerepileupto(av, Qtor(S, prec));
+      return gerepilecopy(av, Qtor(S, prec));
     }
   }
   else if (N < 1000UL)
