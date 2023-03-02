@@ -2,21 +2,21 @@ Function: nflist
 Section: number_fields
 C-Name: nflist
 Prototype: GDGD-1,L,DG
-Help: nflist(G, {N}, {s = -1}, {F}): find number fields (up to isomorphism)
+Help: nflist(G, {N}, {s = -1}, {F}): finds number fields (up to isomorphism)
  with Galois group of Galois closure isomorphic to G, and s complex places.
 
  If s = -1 (default) all signatures, s = -2 is identical to s = -1 except
- signatures are separated by increasing number of complex places. If field F is
- specified (by a polynomial), give only number fields having F as a subfield
+ fields are separated by increasing number of complex places. If field F is
+ specified (by a polynomial), gives only number fields having F as a subfield
  (or a resolvent field in the case of S3, Dl, A4, S4, F5, M21 and M42).
 
  The parameter N can be the following: a positive integer (absolute
- value of discriminant is N); a vector [a,b] (find fields with absolute
+ value of discriminant is N); a vector [a,b] (finds fields with absolute
  discriminant between a and b); a polynomial, in variable t say (regular
- extension of Q(t) with specified Galois group). Finally, N can be omitted
- (default), in which case a few fields are given and F is ignored.
-Doc: find number fields (up to isomorphism) with Galois group of Galois
- closure isomorphic to $G$ with $s$ complex places. This function supports
+ extension of Q(t) with specified Galois group). If omitted
+ (default), returns a few fields and F is ignored.
+Doc: finds number fields (up to isomorphism) with Galois group of Galois
+ closure isomorphic to $G$ with $s$ complex places. The number fields are given by polynomials. This function supports
  the following groups:
 
  \item degree $2$: $C_2=2T1$;
@@ -38,7 +38,7 @@ Doc: find number fields (up to isomorphism) with Galois group of Galois
 
  \item degree $\ell$ with $\ell$ prime: $C_\ell=\ell T1$ and $D_\ell=\ell T2$.
 
- The groups $A_5$ and $A5(6)$ require the optional package \kbd{nflistdata}.
+ The groups $A_5$ and $A_5(6)$ require the optional package \kbd{nflistdata}.
 
  In addition, if $N$ is a polynomial, all transitive subgroups of $S_n$
  with $n\le 15$, as well as alternating groups $A_n$ and the full symmetric group
@@ -77,18 +77,18 @@ Doc: find number fields (up to isomorphism) with Galois group of Galois
  places; in degree $n$, this means a vector with $1 + \text{floor}(n/2)$
  components: the $i$-th entry corresponds to $s = i - 1$.
 
- If the irreducible monic polynomial $F\in \Z[X]$ is specified, give only
+ If the irreducible monic polynomial $F\in \Z[X]$ is specified, gives only
  number fields having $\Q[X]/(F)$ as a subfield, or in the case of
  $S_3$, $D_\ell$, $A_4$, $S_4$, $F_5$, $M_{21}$ and $M_{42}$, as a resolvent
  field (see also the function \kbd{nfresolvent} for these cases).
 
  The parameter $N$ can be the following:
 
- \item a positive integer: find all fields with absolute discriminant $N$
+ \item a positive integer: finds all fields with absolute discriminant $N$
  (recall that the discriminant over $\Q$ is $(-1)^s N$).
 
  \item a pair of non-negative real numbers $[a,b]$ specifying a real interval:
- find all fields with absolute value of discriminant between $a$ and $b$.
+ finds all fields with absolute value of discriminant between $a$ and $b$.
  For most Galois groups, this is faster than iterating on individual $N$.
 
  \item omitted (default): a few fields of small discriminant (not always
@@ -158,7 +158,7 @@ Doc: find number fields (up to isomorphism) with Galois group of Galois
  ? nflist([3,1], 3969) \\ C3 fields, using nTt label
  %10 = [x^3 - 21*x + 28, x^3 - 21*x - 35]
  ? P = nflist([8,12],t) \\ geometric 8T12 polynomial
- %11 = x^8 - 22*t*x^6 + 135*t^2*x^4 - 150*t^3*x^2 + t^4
+ %11 = x^8 + (-t^2 - 803)*x^6 + (264*t^2 + 165528)*x^4 + (-2064*t^2 - 1724976)*x^2 + 4096*t^2
  ? polgalois(subst(P, t, 11))
  %12 = [24, 1, 12, "2A_4(8)=[2]A(4)=SL(2,3)"]
  ? nflist("S11")
