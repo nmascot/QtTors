@@ -2,10 +2,10 @@ Function: nfeltissquare
 Section: number_fields
 C-Name: nfissquare
 Prototype: lGGD&
-Help: nfeltissquare(nf,x,{&y}): return 1 if x is a square (and set y to a
- square root if present), else return 0.
-Doc: return $1$ if $x$ is a square (and set $y$ to a square root if the
- argument is present), else return 0.
+Help: nfeltissquare(nf,x,{&y}): returns 1 if x is a square in nf (and sets y to a
+ square root if present), else returns 0.
+Doc: returns $1$ if $x$ is a square in \kbd{nf} (and sets $y$ to a square root if the
+ argument is present), else returns 0.
 
  \bprog
  ? nf = nfinit(1+x^2);
