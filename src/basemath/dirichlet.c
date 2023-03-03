@@ -616,8 +616,8 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
     precp = p;
     if ((p & 0x1ff) == 1)
     {
-      if (!logp) gerepileall(av2, 2, &S, &SB);
-      else gerepileall(av2, 3, &S, &SB, &logp);
+      if (!logp) gerepileall(av2, SB? 2: 1, &S, &SB);
+      else gerepileall(av2, SB? 3: 2, &S, &logp, &SB);
     }
   }
   P = mkvecsmall2(2, 3);
@@ -687,7 +687,7 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
       S = gadd(S, vecmul(t, u)); if (VB) SB = gadd(SB, vecmul(tB, uB));
     }
     if (x2 == N) break;
-    gerepileall(av2, 2, &S, &SB);
+    gerepileall(av2, SB? 2: 1, &S, &SB);
   }
   if (both == 0) return gerepileupto(av, S);
   return gerepilecopy(av, mkvec2(S, gconj(VB? SB: S)));
