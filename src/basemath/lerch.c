@@ -272,7 +272,7 @@ zetahurwitz(GEN s, GEN x, long der, long bitprec)
   Nx = gmul(real_1(prec), gaddsg(N - 1, x));
   S1 = S3 = gpow(Nx, a, prec);
   av2 = avma;
-  if (gequal1(x)) S1 = dirpowerssum(N, a, prec);
+  if (gequal1(x)) S1 = dirpowerssum(N, a, 0, prec);
   else
     for (m = N - 2; m >= 0; m--)
     {

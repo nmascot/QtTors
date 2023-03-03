@@ -1815,7 +1815,7 @@ czeta(GEN s0, long prec)
   }
   else
   {
-    Ns = dirpowerssum(nn, ms, prec);
+    Ns = dirpowerssum(nn, ms, 0, prec);
     incrprec(prec); /* one extra word of precision */
     ns = gpow(utor(nn, prec), ms, prec);
     y = gsub(Ns, gmul2n(ns, -1));

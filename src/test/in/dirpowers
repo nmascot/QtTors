@@ -18,6 +18,18 @@ dirpowerssum(10^4,-1,n->kronecker(-23,n))
 dirpowerssum(10^3,-1,n->[kronecker(-23,n), kronecker(5,n)])
 dirpowerssum(10,1,n->[1, 1])
 
+dirpowerssum(10,I,,1)
+dirpowerssum(100,I,,1)
+dirpowerssum(1000,I,,1)
+dirpowerssum(10,-1/2+I,,2)
+dirpowerssum(100,-1/2+I,,2)
+dirpowerssum(1000,-1/2+I,,2)
+dirpowerssum(10,-1/2+I,n->n^I,2)
+dirpowerssum(10,-1/2+I,n->n^I,1)
+dirpowerssum(100,-1/2+I,n->n^I,2)
+dirpowerssum(100,-1/2+I,n->n^I,1)
+dirpowerssum(1000,-1/2+I,n->n^I,2)
+dirpowerssum(1000,-1/2+I,n->n^I,1)
 
 \\ ERRORS
 dirpowerssum('x,1)
