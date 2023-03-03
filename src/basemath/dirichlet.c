@@ -443,8 +443,8 @@ Qtor(GEN x, long prec)
 
 /* Here N > 0 is small */
 static GEN
-naivedirpowerssum(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
-                     long prec)
+naivedirpowerssum(long N, GEN s, void *E, GEN (*f)(void *, ulong, long),
+                  long prec)
 {
   GEN V = vecpowug(N, s, prec), S;
   if (!f) S = RgV_sum(V);
@@ -459,7 +459,7 @@ naivedirpowerssum(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
 
 static GEN
 smalldirpowerssum(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
-                     long both, long prec)
+                  long both, long prec)
 {
   GEN S = naivedirpowerssum(N, s, E, f, prec), SB, sb;
   if (!both) return S;
