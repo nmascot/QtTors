@@ -19,7 +19,7 @@ Doc: if $E$ is an elliptic curve over $\Q$, attempts to compute the Mordell-Weil
  points before giving up. If \kbd{effort} is not $0$, the search is
  randomized, so rerunning the function might yield different or even
  a different number of rational points. Values up to $10$ or so are reasonable
- but the parameter can be increased futher, with running times increasing 
+ but the parameter can be increased futher, with running times increasing
  roughly like the \emph{cube} of the \kbd{effort} value.
 
  \bprog
@@ -31,8 +31,8 @@ Doc: if $E$ is an elliptic curve over $\Q$, attempts to compute the Mordell-Weil
       680061120400889506109527474197680/5329525731816164537079693913473]]]
  @eprog
 
- In addition to the previous calls, the first argument $E$ can be a pair 
- $[e,f]$, where $e$ is an elliptic curve given by \kbd{ellrankinit} and 
+ In addition to the previous calls, the first argument $E$ can be a pair
+ $[e,f]$, where $e$ is an elliptic curve given by \kbd{ellrankinit} and
  $f$ is a quadratic twist of $e$. We then look for points on $f$.
  Note that the \kbd{ellrankinit} initialization is independent of $f$, so
  this can speed up computations significantly!
