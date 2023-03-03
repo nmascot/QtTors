@@ -561,18 +561,24 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
       gel(V,n) = u; /* f(n) n^s */
       gel(W,n) = gadd(gel(W, n-1), gel(V,n));     /* = sum_{i<=n} f(i)i^s */
       gel(Q,n) = gadd(gel(Q, n-1), vecsqr(gel(V,n))); /* = sum_{i<=n} f(i^2)i^2s */
+      if (VB)
+      {
+        gel(VB,n) = uB;
+        gel(WB,n) = gadd(gel(WB,n-1), gel(VB,n));
+        gel(QB,n) = gadd(gel(QB,n-1), vecsqr(gel(VB,n)));
+      }
     }
     else
     {
       gel(V,n) = zervec;
       gel(W,n) = gel(W, n-1);
       gel(Q,n) = gel(Q, n-1);
-    }
-    if (VB)
-    {
-      gel(VB,n) = uB;
-      gel(WB,n) = gadd(gel(WB,n-1), gel(VB,n));
-      gel(QB,n) = gadd(gel(QB,n-1), vecsqr(gel(VB,n)));
+      if (VB)
+      {
+        gel(VB,n) = zervec;
+        gel(WB,n) = gel(WB, n-1);
+        gel(QB,n) = gel(QB, n-1);
+      }
     }
   }
   Q2 = vecmulsqlv(Q, gel(V,2));
