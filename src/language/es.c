@@ -4423,6 +4423,23 @@ readbin(const char *name, FILE *f, int *vector)
 /*******************************************************************/
 /* print a vector of GENs, in output context 'out', using 'sep' as a
  * separator between sucessive entries [ NULL = no separator ]*/
+
+static void
+str_print0(pari_str *S, const char *sep, GEN g, long flag)
+{
+  pari_sp av = avma;
+  OUT_FUN f = get_fun(flag);
+  long i, l = lg(g);
+  for (i = 1; i < l; i++)
+  {
+    GEN x = gel(g,i);
+    if (typ(x) == t_STR) str_puts(S, GSTR(x)); else f(x, GP_DATA->fmt, S);
+    if (sep && i+1 < l) str_puts(S, sep);
+    if (!S->use_stack) set_avma(av);
+  }
+  *(S->cur) = 0;
+}
+
 void
 out_print0(PariOUT *out, const char *sep, GEN g, long flag)
 {
@@ -4435,27 +4452,12 @@ out_print0(PariOUT *out, const char *sep, GEN g, long flag)
     if (sep && i+1 < l) out_puts(out, sep);
   }
 }
-static void
-str_print0(pari_str *S, GEN g, long flag)
-{
-  pari_sp av = avma;
-  OUT_FUN f = get_fun(flag);
-  long i, l = lg(g);
-  for (i = 1; i < l; i++)
-  {
-    GEN x = gel(g,i);
-    if (typ(x) == t_STR) str_puts(S, GSTR(x)); else f(x, GP_DATA->fmt, S);
-    if (!S->use_stack) set_avma(av);
-  }
-  *(S->cur) = 0;
-}
-
 /* see print0(). Returns pari_malloc()ed string */
 char *
 RgV_to_str(GEN g, long flag)
 {
   pari_str S; str_init(&S,0);
-  str_print0(&S, g, flag);
+  str_print0(&S, NULL, g, flag);
   return S.string;
 }
 
@@ -4480,7 +4482,7 @@ pari_sprint0(const char *s, GEN g, long flag)
 {
   pari_str S; str_init(&S, 0);
   str_puts(&S, s);
-  str_print0(&S, g, flag);
+  str_print0(&S, NULL, g, flag);
   return S.string;
 }
 
@@ -4489,7 +4491,7 @@ print0_file(FILE *out, GEN g, long flag)
 {
   pari_sp av = avma;
   pari_str S; str_init(&S, 1);
-  str_print0(&S, g, flag);
+  str_print0(&S, NULL, g, flag);
   fputs(S.string, out);
   set_avma(av);
 }
