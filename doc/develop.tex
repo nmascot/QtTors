@@ -348,15 +348,16 @@ generating \kbd{listinit} calls at appropriate places.
 
 \subsec{Output}
 
-\fun{void}{print0}{GEN g, long flag} internal function underlying the
+\fun{void}{out_print1}{PariOUT *out, const char *sep, GEN g, long flag}
+internal function underlying the
 \kbd{print} GP function. Prints the entries of the \typ{VEC} $g$, one by one,
 without any separator; entries of type \typ{STR} are printed without enclosing
 quotes. \fl is one of \tet{f_RAW}, \tet{f_PRETTYMAT} or \tet{f_TEX}, using the
-current default output context.
+output context \kbd{out} and separator \kbd{sep} between
+successive entries (no separator if \kbd{NULL}).
 
 \fun{void}{out_print0}{PariOUT *out, const char *sep, GEN g, long flag} as
-\tet{print0}, using output context \kbd{out} and separator \kbd{sep} between
-successive entries (no separator if \kbd{NULL}).
+\tet{out_print1}, but also output a terminating newline.
 
 \fun{char*}{pari_sprint0}{const char *s, GEN g, long flag} displays $s$,
 then \kbd{print0(g, flag)}.

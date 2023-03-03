@@ -4444,14 +4444,25 @@ void
 out_print0(PariOUT *out, const char *sep, GEN g, long flag)
 {
   pari_sp av = avma;
-  OUT_FUN f = get_fun(flag);
-  long i, l = lg(g);
-  for (i = 1; i < l; i++, set_avma(av))
-  {
-    out_puts(out, stack_GENtostr_fun_unquoted(gel(g,i), GP_DATA->fmt, f));
-    if (sep && i+1 < l) out_puts(out, sep);
-  }
+  pari_str S;
+  str_init(&S,1);
+  str_print0(&S, sep, g, flag);
+  str_putc(&S,'\n'); *(S.cur) = 0;
+  out_puts(out, S.string);
+  set_avma(av);
 }
+
+void
+out_print1(PariOUT *out, const char *sep, GEN g, long flag)
+{
+  pari_sp av = avma;
+  pari_str S;
+  str_init(&S,1);
+  str_print0(&S, sep, g, flag);
+  out_puts(out, S.string);
+  set_avma(av);
+}
+
 /* see print0(). Returns pari_malloc()ed string */
 char *
 RgV_to_str(GEN g, long flag)
@@ -4496,14 +4507,16 @@ print0_file(FILE *out, GEN g, long flag)
   set_avma(av);
 }
 
-void
-print0(GEN g, long flag) { out_print0(pariOut, NULL, g, flag); }
+static void
+printfl_0(GEN g, long flag) { out_print0(pariOut, NULL, g, flag); }
+static void
+printfl_1(GEN g, long flag) { out_print1(pariOut, NULL, g, flag); }
 void
 printsep(const char *s, GEN g)
-{ out_print0(pariOut, s, g, f_RAW); pari_putc('\n'); pari_flush(); }
+{ out_print0(pariOut, s, g, f_RAW); pari_flush(); }
 void
 printsep1(const char *s, GEN g)
-{ out_print0(pariOut, s, g, f_RAW); pari_flush(); }
+{ out_print1(pariOut, s, g, f_RAW); pari_flush(); }
 
 static char *
 sm_dopr(const char *fmt, GEN arg_vector, va_list args)
@@ -4629,10 +4642,10 @@ pari_fprintf(FILE *file, const char *fmt, ...)
   pari_vfprintf(file, fmt, ap); va_end(ap);
 }
 
-void print   (GEN g) { print0(g, f_RAW);       pari_putc('\n'); pari_flush(); }
-void printp  (GEN g) { print0(g, f_PRETTYMAT); pari_putc('\n'); pari_flush(); }
-void printtex(GEN g) { print0(g, f_TEX);       pari_putc('\n'); pari_flush(); }
-void print1  (GEN g) { print0(g, f_RAW);       pari_flush(); }
+void print   (GEN g) { printfl_0(g, f_RAW); pari_flush(); }
+void printp  (GEN g) { printfl_0(g, f_PRETTYMAT); pari_flush(); }
+void printtex(GEN g) { printfl_0(g, f_TEX); pari_flush(); }
+void print1  (GEN g) { printfl_1(g, f_RAW); pari_flush(); }
 
 void
 error0(GEN g)

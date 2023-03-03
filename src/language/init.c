@@ -1458,7 +1458,7 @@ pari_warn(int numerr, ...)
   {
     case warnuser:
       out_puts(pariErr, "user warning: ");
-      out_print0(pariErr, NULL, va_arg(ap, GEN), f_RAW);
+      out_print1(pariErr, NULL, va_arg(ap, GEN), f_RAW);
       break;
 
     case warnmem:
