@@ -441,39 +441,31 @@ Qtor(GEN x, long prec)
   return tx == t_FRAC? fractor(x, prec): x;
 }
 
-/* Here N < 49 */
+/* Here N > 0 is small */
 static GEN
-smalldirpowerssumfun_i(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
+naivedirpowerssum(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
                      long prec)
 {
-  GEN V = vecpowug(N, s, prec), S = f ? f(E, 1, prec) : gen_1;
-  long n;
-  for (n = 2; n <= N; n++)
-    S = gadd(S, gmul(gel(V, n), f(E, n, prec)));
+  GEN V = vecpowug(N, s, prec), S;
+  if (!f) S = RgV_sum(V);
+  else
+  {
+    long n;
+    S = f(E, 1, prec);
+    for (n = 2; n <= N; n++) S = gadd(S, gmul(gel(V, n), f(E, n, prec)));
+  }
   return Qtor(S, prec);
 }
 
 static GEN
-smalldirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
+smalldirpowerssum(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
                      long both, long prec)
 {
-  pari_sp av = avma;
-  GEN S = smalldirpowerssumfun_i(N, s, E, f, prec), SB, sb;
-  if (!both) return gerepilecopy(av, S);
+  GEN S = naivedirpowerssum(N, s, E, f, prec), SB, sb;
+  if (!both) return S;
   sb = gconj(gsubsg(-1, s));
-  SB = both == 2 && gequal(s, sb) ? S : gconj(smalldirpowerssumfun_i(N, sb, E, f, prec));
-  return gerepilecopy(av, mkvec2(S, SB));
-}
-
-static GEN
-smalldirpowerssumtriv(ulong N, GEN s, long both, long prec)
-{
-  pari_sp av = avma;
-  GEN S = Qtor(RgV_sum(vecpowug(N, s, prec)), prec), SB, sb;
-  if (!both) return gerepileupto(av, S);
-  sb = gconj(gsubsg(-1, s));
-  SB = both == 2 && gequal(s, sb) ? S : gconj(Qtor(RgV_sum(vecpowug(N, sb, prec)), prec));
-  return gerepilecopy(av, mkvec2(S, SB));
+  SB = both==2 && gequal(s,sb)? S: gconj(naivedirpowerssum(N,sb,E,f,prec));
+  return mkvec2(S, SB);
 }
 
 /* both =
@@ -494,11 +486,15 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
   ulong a, b, c, e, q, x1, n, sq, p, precp;
   long prec0, prec1, needlog;
 
+  if (!N)
+  {
+    if (!f) return gen_0;
+    return gerepileupto(av, gmul(f(E, 1, prec), gen_0));
+  }
+  if ((f && N < 49) || (!f && N < 1000))
+    return gerepilecopy(av, smalldirpowerssum(N, s, E, f, both, prec));
   onef = f ? f(E, 1, prec) : gen_1;
   zervec = gmul(gen_0, onef);
-  if (!N) return gerepileupto(av, zervec);
-  if (f && N < 49) return smalldirpowerssumfun(N, s, E, f, both, prec);
-  if (!f && N < 1000UL) return smalldirpowerssumtriv(N, s, both, prec);
   sq = usqrt(N);
   V = cgetg(sq+1, t_VEC); W = cgetg(sq+1, t_VEC); Q = cgetg(sq+1, t_VEC);
   if (both == 1 || (both == 2 && !gequal(real_i(s), gneg(ghalf))))
@@ -712,7 +708,7 @@ GEN
 dirpowerssum0(GEN N, GEN s, GEN f, long both, long prec)
 {
   if (typ(N) != t_INT) pari_err_TYPE("dirpowerssum", N);
-  if (signe(N) <= 0) N = gen_0; /* fall through */
+  if (signe(N) <= 0) N = gen_0;
   if (!f) return dirpowerssum(itou(N), s, both, prec);
   if (typ(f) != t_CLOSURE) pari_err_TYPE("dirpowerssum", f);
   return dirpowerssumfun(itou(N), s, (void*)f, gp_callUp, both, prec);
