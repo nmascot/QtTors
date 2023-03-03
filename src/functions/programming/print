@@ -19,4 +19,3 @@ Doc: outputs its arguments in raw format ending with a newline.
 
  [0 1]
  @eprog
- %\syn{NO}

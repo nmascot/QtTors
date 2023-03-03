@@ -11,4 +11,3 @@ Doc: outputs its arguments in raw format, ending with a newline.
  ? printsep(":", 1,2,3,4)
  1:2:3:4
  @eprog
- %\syn{NO}

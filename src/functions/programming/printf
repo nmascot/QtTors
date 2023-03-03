@@ -184,4 +184,5 @@ Doc: This function is based on the C library command of the same name.
  \item in conversion \kbd{g} and \kbd{G}, we do not remove trailing zeros
   from the fractional part of the result; nor a trailing decimal point;
   0 is printed in a special way, always as \kbd{0.E\var{exp}}.
- %\syn{NO}
+Variant:
+ The variadic version \fun{void}{pari_printf}{const char *fmt, ...} is usually preferable.

@@ -11,4 +11,3 @@ Doc: outputs its arguments in raw
  within your strings, using the \b{n} notation~!
  The arguments are converted to strings following the rules in
  \secref{se:strings}.
- %\syn{NO}

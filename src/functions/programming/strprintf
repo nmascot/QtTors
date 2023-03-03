@@ -12,7 +12,8 @@ Doc: returns a string built from the remaining arguments according to the
  ? strprintf("%s/%s%ld.tex", dir, file, n)
  %2 = "/home/pari/aprcl10.tex"
  @eprog
- %\syn{NO}
+Variant:
+ The variadic version \fun{char *}{pari_sprintf}{const char *fmt, ...} is usually preferable.
 
 Function: Strprintf
 Section: programming/specific

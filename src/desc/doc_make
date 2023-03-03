@@ -112,6 +112,12 @@ sub library_syntax { my ($fun, $args) = @_;
     if ($c eq 'L') {$args .= ", long " . shift(@ARGS); next;}
     if ($c eq 'n') {my ($v) = shift(@ARGS); push @vars,"\\kbd{$v}";
                     $args .= ", long " . $v; next;}
+    if ($c =~ /^[rs]$/ and $i == $#proto && $proto[$i] eq '*')
+    {
+      my ($v) = shift(@ARGS);
+      $v =~ s/\*$//;
+      $args .= ", GEN vec_" . $v; next;
+    }
     if ($c =~ /^[rs]$/) {$args .= ", const char *" . shift(@ARGS); next;}
 
     if ($c eq 'p') {$args .= ", long prec"; next;}

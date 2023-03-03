@@ -7,4 +7,3 @@ Help: writetex(filename,{str}*): appends the remaining arguments (same format as
 Doc: as \kbd{write}, in \TeX\ format. See \tet{strtex} for details:
  this function is essentially equivalent to calling \kbd{strtex} on remaining
  arguments and writing them to file.
- %\syn{NO}

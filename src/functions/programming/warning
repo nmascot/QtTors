@@ -12,4 +12,3 @@ Doc: outputs the message ``user warning''
  \bprog
  warning(n, " is very large, this might take a while.")
  @eprog
- % \syn{NO}

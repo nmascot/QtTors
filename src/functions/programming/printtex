@@ -18,4 +18,3 @@ Doc: outputs its arguments in \TeX\ format. This output can then be
  default(log, 1);
  printtex(result);
  @eprog
- %\syn{NO}

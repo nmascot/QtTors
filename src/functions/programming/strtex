@@ -37,8 +37,6 @@ Doc:
  obsoleted in favor of the \kbd{pmatrix} environment; see
  \kbd{examples/parigp.sty} for how to re-enable the deprecated construct.
 
- %\syn{NO}
-
 Function: Strtex
 Section: programming/specific
 C-Name: strtex
