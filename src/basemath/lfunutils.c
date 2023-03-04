@@ -1349,16 +1349,15 @@ dirzetak0(GEN nf, ulong N)
 static GEN
 eulerf_zetak(GEN nf, GEN p)
 {
-  GEN vect, T = nf_get_pol(nf), index = nf_get_index(nf), f = pol_1(0);
+  GEN v, f = pol_1(0);
   long i, l;
-  if (dvdii(index, p)) /* p does not divide index */
-    vect = idealprimedec_degrees(nf,p);
+  if (dvdii(nf_get_index(nf), p)) /* p does not divide index */
+    v = idealprimedec_degrees(nf,p);
   else
-    vect = gel(FpX_degfact(T,p),1);
-  l = lg(vect);
-  for (i = 1; i < l; i++)
-    f = gmul(f, gsub(gen_1, monomial(gen_1, vect[i], 0)));
-  return gcopy(mkrfrac(gen_1, f));
+    v = gel(FpX_degfact(nf_get_pol(nf), p), 1);
+  l = lg(v);
+  for (i = 1; i < l; i++) f = ZX_sub(f, RgX_shift_shallow(f, v[i]));
+  retmkrfrac(gen_1, ZX_copy(f));
 }
 
 GEN
