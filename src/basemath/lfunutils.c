@@ -2458,7 +2458,9 @@ static GEN
 vecan_eta(GEN an, long L)
 {
   long v = itos(gel(an, 3));
-  GEN t = eta_product_ZXn(an, L - v);
+  GEN t;
+  if (v > L) return zerovec(L);
+  t = eta_product_ZXn(an, L - v);
   if (v) t = RgX_shift_shallow(t, v);
   return RgX_to_RgV(t, L);
 }

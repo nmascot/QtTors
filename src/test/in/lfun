@@ -268,6 +268,8 @@ lfun(lfunetaquo(Mat([1,24])),2)
 lfun(lfunetaquo([5,2;7,2]),2)
 lfun(ellinit([1,1,1,-10,-10]),2)  \\ 15a1
 
+lfunan(lfunetaquo([12,1;13*12,1]),1) \\ #2457
+
 L=lfunqf(Mat(1));
 lfuncheckfeq(L)
 lfuncheckfeq(lfunshift(L,1))
