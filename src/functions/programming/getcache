@@ -1,5 +1,5 @@
 Function: getcache
-Section: modular_forms
+Section: programming/specific
 C-Name: getcache
 Prototype:
 Help: getcache(): returns information about various auto-growing caches. For
