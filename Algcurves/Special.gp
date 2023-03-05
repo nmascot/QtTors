@@ -330,7 +330,7 @@ CrvHyperell_sub(b,u,v,n,vars,p)=
 	\\ TODO char 2
 	my(x,y,z,t,a,d,e,nd,uB,vB,m,o,M,ui,uv,K,A,B,C,D,R,S,c,num,g1,U,M1,H);
 	[x,y,z,t,a] = vars;
-	d = poldegree(b[3],a); \\ Degree of branch
+	d = poldegree(b[2],a); \\ Degree of branch
 	b = b[1];
 	e = ceil(3*(n+1)/d)+1;
 	uB = BranchEval(u,b,2,x,y);
@@ -429,7 +429,7 @@ CrvHyperell(C,P=0)=
 	if(g==2, \\ Find u with deg u = 2
 		u = W[1][2]/W[1][1]; \\ If g==2, easy
 	,
-	  if(poldegree(B[3])>1,
+	  if(poldegree(B[2])>1,
 		  error("Please supply a rational point")
 		);
 		e = 2*g;
