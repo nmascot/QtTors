@@ -443,7 +443,7 @@ Qtor(GEN x, long prec)
 
 /* Here N > 0 is small */
 static GEN
-naivedirpowerssum(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
+naivedirpowerssum(long N, GEN s, void *E, GEN (*f)(void *, ulong, long),
                   long prec)
 {
   GEN V = vecpowug(N, s, prec), S;
@@ -458,7 +458,7 @@ naivedirpowerssum(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
 }
 
 static GEN
-smalldirpowerssum(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
+smalldirpowerssum(long N, GEN s, void *E, GEN (*f)(void *, ulong, long),
                   long both, long prec)
 {
   GEN S = naivedirpowerssum(N, s, E, f, prec), SB, sb;
@@ -660,10 +660,10 @@ dirpowsumsqfloop(long N, long x1, long x2, long sq, GEN P, GEN allvecs, GEN S,
 }
 
 static GEN
-dirpowsummakez(GEN V, GEN W, GEN VB, GEN WB, GEN onef, long sq)
+dirpowsummakez(GEN V, GEN W, GEN VB, GEN WB, GEN onef, ulong sq)
 {
   GEN Z = cgetg(sq+1, t_VEC), ZB = NULL;
-  long a, b, c, e, q;
+  ulong a, b, c, e, q;
   /* a,b,c,e = sqrt(q), sqrt(q/2), sqrt(q/3), sqrt(q/6)
    * Z[q] = Q[a] + 2^s Q[b] + 3^s Q[c] + 6^s Q[e], with Q[0] = 0 */
   gel(Z, 1) = onef;
