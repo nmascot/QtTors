@@ -2211,7 +2211,7 @@ FpM_intersect(GEN x, GEN y, GEN p)
   if (lgefint(p) == 3)
   {
     ulong pp = p[2];
-    z = Flm_image(Flm_intersect_i(ZM_to_Flm(x,pp), ZM_to_Flm(y,pp), pp), pp);
+    z = Flm_to_ZM(Flm_image(Flm_intersect_i(ZM_to_Flm(x,pp), ZM_to_Flm(y,pp), pp), pp));
   }
   else
     z = FpM_image(FpM_intersect_i(x,y,p), p);

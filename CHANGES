@@ -2,6 +2,7 @@ Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 Done for version 2.16.1 (released ??/??/2023):
   Fixed
 BA   1- lfunan(lfunetaquo([12,1;13*12,1]),1) -> stack overflow [#2457]
+BA   2- FpM_intersect could return a Flm [#2459]
 
   Changed
 HC   1- dirpowerssum: allow functions with t_VEC output
