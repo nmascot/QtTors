@@ -1,6 +1,14 @@
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 Done for version 2.16.1 (released ??/??/2023):
   Fixed
+BA   1- lfunan(lfunetaquo([12,1;13*12,1]),1) -> stack overflow [#2457]
+
+  Changed
+HC   1- dirpowerssum: allow functions with t_VEC output
+HC   2- dirpowerssum: add optional flag 'both' [also in library mode]
+
+  Added
+     1- new libpari function nfeltembed_i
 
 Done for version 2.16.0 (released 25/02/2023):
   Fixed
@@ -43,7 +51,6 @@ BA  33- polylogmult(1,[],-1) -> SEGV
     35- content(1,y) -> pol_1(y) instead of t_INT 1
     36- s=taylor(1/((x-1)*(y-1)),x); taylor(s,y) -> invalid object [#2452]
     37- avoid crashing when sumnumsidi diverges (0 bits of accuracy) [#2454]
-BA  38- lfunan(lfunetaquo([12,1;13*12,1]),1) -> stack overflow [#2457]
 
   Changed
      1- binomial(negative t_INT, t_INT): use Loeb's definition
@@ -60,8 +67,6 @@ BA  38- lfunan(lfunetaquo([12,1;13*12,1]),1) -> stack overflow [#2457]
      9- allow fromdigits(t_COL or t_VECSMALL, B)
     10- [libpari] cgetalloc arguments swapped to mirror cgetg's definition
     11- simplified lfunabelianrelinit (absolute equation is now optional)
-HC  12- dirpowerssum: allow functions with t_VEC output
-HC  13- dirpowerssum: add optional flag 'both' [also in library mode]
 
   Added
 PMo  1- new syntax for forvec loops
@@ -72,7 +77,6 @@ BA   2- [GP] genus2igusa
 BA   5- [riscv64] add riscv64 assembly kernel
 BA   6- lfuncreate([bnr, subg]): Dedekind zeta for the corresponding Abelian
         extension.
-     7- new libpari function nfeltembed_i
 
   Removed
 BA   1- [GP] lfunabelianrelinit. Use lfunfinit([bnr, subgroup]) instead.
