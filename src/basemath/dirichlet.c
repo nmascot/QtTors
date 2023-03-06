@@ -469,7 +469,7 @@ smalldirpowerssum(long N, GEN s, void *E, GEN (*f)(void *, ulong, long),
 }
 
 static GEN
-dirpowsuminit(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long), GEN data,
+dirpowsuminit(GEN s, void *E, GEN (*f)(void *, ulong, long), GEN data,
               long both, long prec)
 {
   GEN onef = gel(data, 1), zervec = gel(data, 2), sqlpp = gel(data, 3);
@@ -568,7 +568,7 @@ dirpowsuminit(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long), GEN data,
 
 static GEN
 dirpowsumprimeloop(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
-                   GEN data, GEN W, GEN WB, long prec)
+                   GEN data, GEN W, GEN WB)
 {
   pari_sp av2;
   GEN zervec = gel(data, 2), S = zervec, SB = zervec, logp = NULL;
@@ -735,7 +735,7 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
   needlog = get_needlog(s);
   if (needlog == 1) prec1 = powcx_prec(log2((double)N), s, prec);
   data = mkvec3(onef, zervec, mkvecsmall4(sq, needlog, prec0, prec1));
-  RS = dirpowsuminit(N, s, E, f, data, both, prec);
+  RS = dirpowsuminit(s, E, f, data, both, prec);
   R = gel(RS, 1); V = gel(R, 1); W = gel(R, 2); Q = gel(R, 3);
   Q2 = gel(R, 4); Q3 = gel(R, 5); Q6 = gel(R, 6);
   if (lg(RS) > 2)
@@ -744,7 +744,7 @@ dirpowerssumfun(ulong N, GEN s, void *E, GEN (*f)(void *, ulong, long),
     VB = gel(RB, 1); WB = gel(RB, 2); QB = gel(RB, 3);
     Q2B = gel(RB, 4); Q3B = gel(RB, 5); Q6B = gel(RB, 6);
   }
-  RS = dirpowsumprimeloop(N, s, E, f, data, W, WB, prec);
+  RS = dirpowsumprimeloop(N, s, E, f, data, W, WB);
   S = gel(RS, 1); if (VB) SB = gel(RS, 2);
   RS = dirpowsummakez(V, W, VB, WB, onef, sq);
   Z = gel(RS, 1); if (VB) ZB = gel(RS, 2);
