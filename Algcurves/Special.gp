@@ -28,7 +28,8 @@ Pt2Branch(C,P)=
 		if(B==0,error("Unable to compute branch in this characteristic"));
 		B;
   ,
-    C[5][P][3]
+    B = C[5][P][3];
+		[B[1],B[3],BranchOrigin(B[1])]
   );
 }
 
@@ -425,13 +426,18 @@ CrvHyperell(C,P=0)=
 	my(g=C[6],F=C[1][1],W=C[7],x=C[3][1],z=C[3][3],B,u,e,M,m,K2,K1,H);
 	if(g<=1,error("Genus too low:",g));
 	if(CrvIsHyperell(C)==0,return(0)); \\ Check if hyperell
-	B = if(P,Pt2Branch(C,P),C[4][1][2][1]); \\ Make sure B is in branch form
+	if(P===0,P=CrvFindRatPt(C));
+	if(P===[],
+		if(g>2,
+		  error("Please supply a rational point")
+		,
+			P=1
+		)
+	);
+	B = Pt2Branch(C,P); \\ Make sure B is in branch form
 	if(g==2, \\ Find u with deg u = 2
 		u = W[1][2]/W[1][1]; \\ If g==2, easy
 	,
-	  if(poldegree(B[2])>1,
-		  error("Please supply a rational point")
-		);
 		e = 2*g;
 		while(1, \\ TODO while loop no longer necessary?
 			M = DiffsBranchMat(W[1],W[2],B,e,x,y);

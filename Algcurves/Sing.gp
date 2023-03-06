@@ -411,6 +411,7 @@ BranchesAt(f,F,p,P,a,t)=
 	  return(B);
   );
   \\ Case [0:1:0] TODO that's the one forcing P(t,z) in branches
+	print("Bad case in BranchesAt, TODO fix this");
   f1 = subst(subst(F,y,1),z,y); \\ Dehomogenise, vars x,z meaning u=x/y, v=1/y. Work at origin
   B = Branches0(f1,t,A,p,1);
 	if(B==0,return(0));
