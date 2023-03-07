@@ -480,8 +480,8 @@ BPSW_psp(GEN N)
   return gc_long(av, is2psp(N) && islucaspsp(N));
 }
 
-/* can we write n = x^k ? Assume N has no prime divisor <= 2^14.
- * Not memory clean */
+/* can we write n = x^k ? Assume N has no prime divisor <= 2^14, else may
+ * miss som powers. Not memory clean */
 long
 isanypower_nosmalldiv(GEN N, GEN *px)
 {

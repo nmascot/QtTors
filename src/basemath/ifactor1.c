@@ -3779,14 +3779,15 @@ ifactor_sign(GEN n, ulong all, long hint, long sn, GEN *pU)
     GEN x;
     long k;
     av = avma;
-    k = isanypower_nosmalldiv(n, &x);
+    k = isanypower_nosmalldiv(n, &x); /* may miss a power if all < 2^14 */
     if (k > 1) { affii(x, n); nb0 = -1; }
     if (pU)
     {
       GEN F;
       if (abscmpiu(n, lim) <= 0
           || cmpii(n, sqru(lim)) <= 0
-          || (nb > nb0 && bit_accuracy(lgefint(n)) < 2048 && ifac_isprime(n)))
+          || (all >= (1<<14)
+              && (nb>nb0 && bit_accuracy(lgefint(n))<2048 && ifac_isprime(n))))
       { set_avma(av); STOREi(&nb, n, k); return aux_end(M,n, nb); }
       set_avma(av); F = aux_end(M, NULL, nb); /* don't destroy n */
       *pU = mkvec2(icopy(n), utoipos(k)); /* composite cofactor */
