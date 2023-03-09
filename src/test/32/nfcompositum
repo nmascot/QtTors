@@ -75,6 +75,14 @@ x^10 + 5*x^9 + 15*x^8 + 30*x^7 + 45*x^6 + Mod(2*y + 51, y^2 - 5)*x^5 + Mod(5
 [x^2 + x + 1, Mod(0, x^2 + x + 1), Mod(x, x^2 + x + 1), -1]
 [x^3 - 3*x^2 + 3*x + 1, x^6 + 3*x^5 + 6*x^4 + 11*x^3 + 12*x^2 - 3*x + 1]
 [x^3 - 3*x^2 + 3*x + 1, x^6 + 3*x^5 + 6*x^4 + 11*x^3 + 12*x^2 - 3*x + 1]
+0:[1, 1]
+2:1
+0:[1]
+2:1
+0:[1]
+2:1
+0:[1, 1]
+2:1
   ***   at top-level: nfcompositum(nfinit(x),w^2+1,w^2+1)
   ***                 ^-----------------------------------
   *** nfcompositum: incorrect priority in polcompositum: variable x >= w
@@ -93,4 +101,4 @@ x^10 + 5*x^9 + 15*x^8 + 30*x^7 + 45*x^6 + Mod(2*y + 51, y^2 - 5)*x^5 + Mod(5
   ***   at top-level: nfcompositum(bnfinit(x),x^3-2,x^3-1)
   ***                 ^------------------------------------
   *** nfcompositum: incorrect priority in polcompositum: variable x >= x
-Total time spent: 836
+Total time spent: 602

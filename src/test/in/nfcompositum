@@ -46,6 +46,19 @@ nfcompositum(nfinit(y-1),x^3-2,x^3-1)
 \\#1796
 nfcompositum(bnfinit(y),x^3-2,x^3-1)
 
+\\#2461
+nf = nfinit(y^3-41*y^2+426*y-184);
+P = 4*x^3+4*x+(-6/23*y^2+146/23*y-16);
+Q = x^2+(-17280/23*y^2+314496/23*y+70144);
+
+{
+  foreach([P,Q],p,
+    foreach([P,Q],q,
+      foreach([0,2],k,
+        my(C=nfcompositum(nf,p,q,k),L=if(k==0,apply(pollead,C),pollead(C)));
+        print(k,":",L))))
+}
+
 \\bad input
 nfcompositum(nfinit(x),w^2+1,w^2+1)
 nfcompositum(x,w^2+1,w^2+1)

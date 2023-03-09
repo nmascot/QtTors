@@ -4019,6 +4019,7 @@ nfcompositum(GEN nf, GEN A, GEN B, long flag)
       C = nf_direct_compositum(nf, RgX_rescale(A,stoi(-k)), B);
       setvarn(C, v); C = QXQX_to_mod_shallow(C, T);
     }
+    C = RgX_normalize(C);
   }
   else
   {
@@ -4035,7 +4036,7 @@ nfcompositum(GEN nf, GEN A, GEN B, long flag)
     if (same)
     {
       D = RgX_rescale(A, stoi(1 - k));
-      if (nf) D = QXQX_to_mod_shallow(D, nf_get_pol(nf));
+      if (nf) D = RgX_normalize(QXQX_to_mod_shallow(D, nf_get_pol(nf)));
       C = RgX_div(C, D);
       if (degpol(C) <= 0)
         C = mkvec(D);

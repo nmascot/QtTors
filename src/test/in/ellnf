@@ -196,6 +196,12 @@ ellrootno(E)
 
 E = ellinit([-22032-15552*a,0],nf2);
 ellheight(E,[-72*a-108,0])
+ellrootno(E)
+
+\\#2461
+nf3 = nfinit(a^3-41*a^2+426*a-184);
+E = ellinit([1,-3/46*a^2+73/46*a-4],nf3);
+ellrootno(E)
 
 \\#2001
 E=ellinit([0,-1,0,-49,141]);
