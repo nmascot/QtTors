@@ -560,6 +560,19 @@ ishankelspec(GEN Vga, GEN M)
       if (!gequal(gel(Vga,i), v1)) break;
     if (i > d) return 1;
   }
+  else if (d==10)
+  { /* [ a x 5 , (a+1) x 5 ] */
+    long s0 = 1, s1 = 0, sm1 = 0;
+    GEN v1 = gel(Vga, 1);
+    for (i = 2; i <= d; i++)
+    {
+      GEN s = gsub(gel(Vga,i),v1);
+      if (gequal0(s)) s0++;
+      else if(gequal1(s)) s1++;
+      else if(gequalm1(s)) sm1++;
+    }
+    if (s0==5 && (s1==5 || sm1==5)) return 1;
+  }
   status = 0;
   /* Heuristic: if 6 first terms in contfracinit don't fail, assume it's OK */
   pari_CATCH(e_INV) { status = 1; }
