@@ -527,9 +527,23 @@ gammamellininvasymp_i(GEN Vga, long nlimmax, long m, long *status, long prec)
                          gmul(gel(M, n), gsub(A, uutoQ(n-1, d))));
   stripzeros(M); return M;
 }
+
+INLINE int
+RgV_is_CV(GEN x)
+{
+  long i;
+  for (i = lg(x)-1; i > 0; i--)
+  {
+    long t = typ(gel(x,i));
+    if (!is_real_t(t) && t!= t_COMPLEX) return 0;
+  }
+  return 1;
+}
+
 static GEN
 get_Vga(GEN x, GEN *ldata)
 {
+  if (typ(x)==t_VEC && RgV_is_CV(x)) { *ldata = NULL; return x; }
   *ldata = lfunmisc_to_ldata_shallow_i(x);
   if (*ldata) x = ldata_get_gammavec(*ldata);
   return x;
