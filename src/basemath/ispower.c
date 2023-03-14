@@ -155,7 +155,7 @@ logint0(GEN B, GEN y, GEN *ptq)
     if (typ(B) == t_REAL)
     {
       long e, p;
-      if (signe(B) <= 0) pari_err_DOMAIN(f, "x", "<=", gen_0, B);
+      if (cmprs(B, 1) < 1) pari_err_DOMAIN(f, "x", "<", gen_1, B);
       e = expo(B); if (e < 0) return 0;
       if (equaliu(y, 2)) return e;
       if (expu(e) < 50)
@@ -179,7 +179,7 @@ logint0(GEN B, GEN y, GEN *ptq)
     {
       GEN b = gfloor(B);
       if (typ(b) != t_INT) pari_err_TYPE(f,B);
-      if (signe(b) <= 0) pari_err_DOMAIN(f, "x", "<=", gen_0, B);
+      if (signe(b) <= 0) pari_err_DOMAIN(f, "x", "<", gen_1, B);
       a = logintall(b, y, ptq);
     }
     if (!ptq) return gc_long(av, a);
