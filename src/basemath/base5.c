@@ -413,14 +413,13 @@ fail(const char *f, GEN x)
 static GEN
 eltdown(GEN rnf, GEN x, long flag)
 {
-  GEN z,y, d, proj = obj_check(rnf,rnf_MAPS);
-  GEN M= gel(proj,1), iM=gel(proj,2), diM=gel(proj,3), perm=gel(proj,4);
+  GEN y, d, proj = obj_check(rnf,rnf_MAPS);
+  GEN M = gel(proj,1), iM = gel(proj,2), diM = gel(proj,3), perm = gel(proj,4);
   x = Q_remove_denom(x,&d);
   if (!RgV_is_ZV(x)) pari_err_TYPE("rnfeltdown", x);
   y = ZM_ZC_mul(iM, vecpermute(x, perm));
-  z = ZM_ZC_mul(M,y);
-  if (!isint1(diM)) z = ZC_Z_mul(z,diM);
-  if (!ZV_equal(z,x)) fail("rnfeltdown",x);
+  if (!ZV_equal(ZM_ZC_mul(M,y),
+                isint1(diM)? x: ZC_Z_mul(x,diM))) fail("rnfeltdown",x);
 
   d = mul_denom(d, diM);
   if (d) y = gdiv(y,d);
