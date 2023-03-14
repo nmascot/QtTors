@@ -364,7 +364,7 @@ Kderivlarge(GEN K, GEN t, GEN t2d, long bitprec0)
     S = contfraceval_inv(M, z, nlim/2);
     if (DEBUGLEVEL>3)
     {
-      GEN S0 = contfraceval_inv(M, z, nlim/2 + 1);
+      GEN S0 = contfraceval_inv(M, z, minss(nlim/2 + 1, minss(lg(gel(M, 1)) - 1, lg(gel(M, 2)))));
       long e = gexpo(gmul(P, gsub(S,S0)));
       if (-e < bitprec0)
         err_printf("Kderivlarge: e = %ld, bit = %ld\n",e,bitprec0);
