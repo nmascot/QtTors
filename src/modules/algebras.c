@@ -4076,6 +4076,8 @@ allauts(GEN rnf, GEN aut)
   if (n==1) n=2;
   vaut = cgetg(n,t_VEC);
   aut = lift_shallow(rnfbasistoalg(rnf,aut));
+  if (typ(aut) != t_POL || varn(pol) != varn(aut))
+    pari_err_TYPE("alg_cyclic", aut);
   gel(vaut,1) = aut;
   for (i=1; i<n-1; i++)
     gel(vaut,i+1) = RgX_rem(poleval(gel(vaut,i), aut), pol);
@@ -4820,11 +4822,11 @@ alg_cyclic(GEN rnf, GEN aut, GEN b, long maxord)
   GEN al, nf;
   long D, n, d;
   dbg_printf(1)("alg_cyclic\n");
-  checkrnf(rnf);
-  if (!isint1(Q_denom(b)))
+  checkrnf(rnf); nf = rnf_get_nf(rnf);
+  b = nf_to_scalar_or_basis(nf, b);
+  if (typ(b) == t_FRAC || (typ(b) == t_COL && !RgV_is_ZV(b)))
     pari_err_DOMAIN("alg_cyclic", "denominator(b)", "!=", gen_1,b);
 
-  nf = rnf_get_nf(rnf);
   n = rnf_get_degree(rnf);
   d = nf_get_degree(nf);
   D = d*n*n;

@@ -2836,16 +2836,13 @@ exponent(algpow(C,mc22,-3) - mc22^(-3)) < -100
 algpow(C,mc22,0) == matid(2)
 exponent(algpoleval(C,x^3-x+1,z) - (z^3-z+1)) < -100
 
-
-
-
-
-
-
-
 print("nfgrunwaldwang SEGV #1669");
 nfgrunwaldwang(nfinit(y),[2,3],[1,2],Vecsmall(1))
 nfgrunwaldwang(nfinit(x),[2,3],[1,2],Vecsmall(1))
+
+print("alginit SEGV #2465");
+Q=nfinit(y); F=rnfinit(Q,x^3+x^2-2*x-1); alginit(F,[2,x^2-2])
+alginit(F,[2,y])
 
 \\alg_model bug for 1-dim al_CSA
 al = alginit(nfinit(y),[matid(1)]);

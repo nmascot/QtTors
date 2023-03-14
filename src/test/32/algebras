@@ -3090,6 +3090,13 @@ x^2 + Mod(-17, y)
   ***   at top-level: nfgrunwaldwang(nfinit(x),[2,3],[1,2],Vecsmall(
   ***                 ^----------------------------------------------
   *** nfgrunwaldwang: incorrect priority in nfgrunwaldwang: variable x >= x
+alginit SEGV #2465
+  ***   at top-level: ...rnfinit(Q,x^3+x^2-2*x-1);alginit(F,[2,x^2-2])
+  ***                                             ^--------------------
+  *** alginit: inconsistent variables in nf_to_scalar_or_basis, x != y.
+  ***   at top-level: alginit(F,[2,y])
+  ***                 ^----------------
+  *** alginit: incorrect type in alginit (t_POL).
 
 [1]
 
@@ -3122,4 +3129,4 @@ GW modified arguments
   ***   at top-level: al2=algtensor(al,al)
   ***                     ^----------------
   *** algtensor: sorry, tensor of noncyclic algebras is not yet implemented.
-Total time spent: 1447
+Total time spent: 1456
