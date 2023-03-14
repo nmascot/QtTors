@@ -163,7 +163,7 @@ Kderivsmallinit(GEN ldata, GEN Vga, long m, long bit)
   L = cgetg(N+1, t_VECSMALL);
   M = cgetg(N+1, t_VEC);
   mat = cgetg(N+1, t_VEC);
-  limn = ceil(2*M_LN2*bit / (d * dbllambertW0(C2/(M_PI*M_E))));
+  limn = ceil(2*M_LN2*bit / (d * dbllambertW0(C2/(M_PI*M_E*d))));
   l = limn + 2;
   for (j = 1; j <= N; j++)
   {
