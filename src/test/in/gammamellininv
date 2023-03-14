@@ -57,7 +57,7 @@ f(z) = exponent(a(z) - gammamellininv(G,z));
 f(I)
 f(2+I)
 
-chk(f)= my(a = f()); localbitprec(getlocalbitprec()+32); exponent(a - f());
+chk(f)= my(a = f()); localbitprec(getlocalbitprec()+64); exponent(a - f());
 chk(()->gammamellininv([0,10^-38],3/10))
 chk(()->gammamellininv([0,1+10^-38],3/10))
 chk(()->gammamellininv([1/2,1/2+10^-38],3/10))
