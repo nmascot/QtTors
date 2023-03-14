@@ -1752,6 +1752,8 @@ dim_selmer(GEN p, GEN pol, GEN K, GEN vnf, GEN LS2, GEN helpLS2,
   *selmer = gerepileupto(av, Flm_image(*selmer, 2));
   dim = lg(*selmer)-1; return (dim == Flm_rank(helpimage,2))? dim: -1;
 }
+
+/* Assume there are 3 real roots, if K>0 return the smallest, otherwise the largest */
 static long
 get_row(GEN vnf, GEN K)
 {
@@ -1760,10 +1762,17 @@ get_row(GEN vnf, GEN K)
   if (n == 1) return sK > 0? 1: 3;
   if (n == 2)
   {
-    GEN a = gel(nf_get_roots(gel(vnf,1)), 1);
-    GEN b = gel(nf_get_roots(gel(vnf,2)), sK > 0? 1: 2);
-    if (cmprr(a, b) < 0) return sK > 0? 1: 3;
-    return sK > 0? 2: 1;
+    GEN P = nf_get_pol(gel(vnf,2));
+    GEN z = negi(constant_coeff(nf_get_pol(gel(vnf,1))));
+    GEN y = poleval(P,z);
+    GEN b = gel(P,3), a = gel(P,4);
+    if (signe(y) != signe(a))
+      /* 1 is between 2 and 3 */
+      return sK > 0? 2: 3;
+    else if (cmpii(mulii(z,mulis(a,-2)), b) == signe(a))
+      return sK > 0? 1: 3;
+    else
+      return sK > 0? 2: 1;
   }
   R = cgetg(4, t_VEC);
   for (k = 1; k <= 3; k++) gel(R, k) = gel(nf_get_roots(gel(vnf,k)), 1);
