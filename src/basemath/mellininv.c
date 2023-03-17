@@ -356,9 +356,8 @@ Kderivlarge(GEN K, GEN t, GEN t2d, long bitprec0)
   P = gmul(gmul(cd, tdA), gexp(gmulsg(-d, z), prec));
   if (m) P = gmul(P, gpowgs(mulsr(-2, pi), m));
   M = gel(Ms,1);
-  if (status == 2)
-    S = (lg(M) == 2)? gel(M,1) /* constant continued fraction */
-                    : poleval(RgV_to_RgX(M, 0), ginv(z));
+  if (status == 2) /* finite continued fraction */
+    S = (lg(M) == 2)? gel(M,1): poleval(M, ginv(z));
   else
   {
     S = contfraceval_inv(M, z, nlim/2);
