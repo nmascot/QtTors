@@ -247,8 +247,16 @@ static long
 GMi_get_m(GEN K) { return itos( gel(K,3) ); }
 static GEN /* [lj,mj,mat,prec2], Kderivsmall only */
 GMi_get_VS(GEN K) { return gel(K,4); }
-static GEN /* [Ms,cd,A2], Kderivlarge only */
-GMi_get_VL(GEN K) { return gel(K,5); }
+/* K[5] = [Ms,cd,A2], Kderivlarge only */
+static long/*Kderivlarge*/
+GMi_get_status(GEN K) { return itos(gmael3(K,5,1,2)); }
+static GEN/*Kderivlarge*/
+GMi_get_M(GEN K) { return gmael3(K,5,1,1); }
+static GEN/*Kderivlarge*/
+GMi_get_cd(GEN K) { return gmael(K,5,2); }
+static GEN/*Kderivlarge*/
+GMi_get_A2(GEN K) { return gmael(K,5,3); }
+
 static double
 GMi_get_tmax(GEN K, long bitprec)
 { return (typ(GMi_get_VS(K)) == t_INT)? -1.0 : get_tmax(bitprec); }
@@ -261,8 +269,7 @@ Kderivsmall(GEN K, GEN x, GEN x2d, long bitprec)
 {
   GEN VS = GMi_get_VS(K), L = gel(VS,1), M = gel(VS,2), mat = gel(VS,3);
   GEN d2, Lx, x2, S, pi, piA = gel(VS,5);
-  long prec = gel(VS,4)[1], d = GMi_get_degree(K);
-  long j, k, limn, N = lg(L)-1;
+  long j, k, prec = gel(VS,4)[1], d = GMi_get_degree(K), limn, N = lg(L)-1;
   double xd, Wd, Ed = M_LN2*bitprec / d;
 
   xd = maxdd(M_PI*dblmodulus(x2d), 1E-13); /* pi |x|^2/d unless x tiny */
@@ -311,7 +318,7 @@ get_D(long d) { return d <= 2 ? 157. : 180.; }
 static void
 Kderivlarge_optim(GEN K, int abs, GEN t2d, double cd, long *pbitprec, long *pnlim)
 {
-  GEN VL = GMi_get_VL(K), A2 = gel(VL,3);
+  GEN A2 = GMi_get_A2(K);
   long bitprec = *pbitprec, d = GMi_get_degree(K);
   const double D = get_D(d), td = dblmodulus(t2d);
   double a, rtd, E = M_LN2*bitprec;
@@ -341,8 +348,8 @@ Kderivlarge(GEN K, GEN t, GEN t2d, long bitprec0)
 {
   GEN tdA, P, S, pi, z;
   const long d = GMi_get_degree(K);
-  GEN M, VL = GMi_get_VL(K), Ms = gel(VL,1), cd = gel(VL,2), A2 = gel(VL,3);
-  long prec, nlim, status = itos(gel(Ms,2)), m = GMi_get_m(K), bitprec = bitprec0;
+  GEN M = GMi_get_M(K), cd = GMi_get_cd(K), A2 = GMi_get_A2(K);
+  long prec, nlim, status = GMi_get_status(K), m = GMi_get_m(K), bitprec = bitprec0;
 
   Kderivlarge_optim(K, !t, t2d, gtodouble(cd), &bitprec, &nlim);
   if (bitprec <= 0) return gen_0;
@@ -355,7 +362,6 @@ Kderivlarge(GEN K, GEN t, GEN t2d, long bitprec0)
   pi = mppi(prec); z = gmul(pi, t2d);
   P = gmul(gmul(cd, tdA), gexp(gmulsg(-d, z), prec));
   if (m) P = gmul(P, gpowgs(mulsr(-2, pi), m));
-  M = gel(Ms,1);
   if (status == 2) /* finite continued fraction */
     S = (lg(M) == 2)? gel(M,1): poleval(M, ginv(z));
   else
