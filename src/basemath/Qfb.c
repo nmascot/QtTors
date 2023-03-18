@@ -153,10 +153,11 @@ Qfb0(GEN a, GEN b, GEN c)
   if (!b)
   {
     if (c) pari_err_TYPE("Qfb",c);
-    if (typ(a) != t_VEC || lg(a) != 4) pari_err_TYPE("Qfb",a);
-    b = gel(a,2);
-    c = gel(a,3);
-    a = gel(a,1);
+    if (typ(a) == t_VEC && lg(a) == 4)
+    { b = gel(a,2); c = gel(a,3); a = gel(a,1); }
+    else if (typ(a) == t_POL && degpol(a) == 2)
+    { b = gel(a,3); c = gel(a,2); a = gel(a,4); }
+    else pari_err_TYPE("Qfb",a);
   }
   else if (!c)
     pari_err_TYPE("Qfb",b);
