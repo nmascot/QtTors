@@ -167,7 +167,6 @@ void mt_thread_init(void);
 
 GEN  eisker_worker(GEN Ei, GEN M, GEN D, GEN co, GEN CD);
 GEN  pareval_worker(GEN code);
-GEN  parselect_worker(GEN d, GEN code);
 void parfor0(GEN a, GEN b, GEN code, GEN code2);
 GEN  parfor_worker(GEN i, GEN C);
 void parforeach0(GEN x, GEN code, GEN code2);

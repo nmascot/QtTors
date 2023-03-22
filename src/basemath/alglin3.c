@@ -624,27 +624,30 @@ select0(GEN f, GEN x, long flag)
 }
 
 GEN
-parselect_worker(GEN d, GEN C)
-{
-  return gequal0(closure_callgen1(C, d))? gen_0: gen_1;
-}
-
-GEN
 parselect(GEN C, GEN D, long flag)
 {
-  pari_sp av;
-  long lv, l = lg(D), i;
-  GEN V, W, worker;
+  pari_sp av, av2;
+  long lv, l = lg(D), i, pending = 0, workid;
+  GEN V, done;
+  struct pari_mt pt;
   check_callgen1(C, "parselect");
   if (!is_vec_t(typ(D))) pari_err_TYPE("parselect",D);
-  W = cgetg(l, t_VECSMALL); av = avma;
-  worker = snm_closure(is_entry("_parselect_worker"), mkvec(C));
-  V = gen_parapply(worker, D);
-  for (lv=1, i=1; i<l; i++)
-    if (signe(gel(V,i))) W[lv++] = i;
-  fixlg(W, lv);
+  V = cgetg(l, t_VECSMALL); av = avma;
+  mt_queue_start_lim(&pt, C, l-1);
+  av2 = avma;
+  for (i=1; i<l || pending; i++)
+  {
+    mt_queue_submit(&pt, i, i<l? mkvec(gel(D,i)): NULL);
+    done = mt_queue_get(&pt, &workid, &pending);
+    if (done) V[workid] = !gequal0(done);
+    set_avma(av2);
+  }
+  mt_queue_end(&pt);
   set_avma(av);
-  return flag? W: extract_copy(D, W);
+  for (lv=1, i=1; i<l; i++)
+    if (V[i]) V[lv++]=i;
+  fixlg(V, lv);
+  return flag? V: extract_copy(D, V);
 }
 
 GEN
