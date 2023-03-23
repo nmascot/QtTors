@@ -7521,9 +7521,9 @@ FljV_vecsat(GEN E, GEN P, ulong o, ulong l, ulong a4, ulong a6, ulong p,
 /* P a vector of points in E(Q), return a linear map M from the abelian group
  * they generate to Z/lZ; sum x[i] P[i] is l-divisible => x M = 0 */
 static GEN
-ellsatp_mat(hashtable *h, GEN E, long CM, GEN P, ulong l)
+ellsatp_mat(hashtable *h, GEN E, long CM, GEN P, ulong l, long nb)
 {
-  long m = 1, nb = lg(P)-1 + 25 / log2(l) - 1; /* error ~ 2^{-25} */
+  long m = 1;
   GEN D = ell_get_disc(E), M = cgetg(nb+1, t_MAT);
   forprime_t S;
 
@@ -7557,10 +7557,10 @@ Flv_firstnonzero(GEN v)
 /* update M in place */
 static GEN
 ellsatp(hashtable *hh, GEN E, long CM, GEN T, GEN H, GEN M, ulong l, GEN *xl,
-        long vxl, long prec)
+        long vxl, long nb, long prec)
 {
   GEN P = T ? shallowconcat(H, T): H;
-  GEN S = ellsatp_mat(hh, E, CM, P, l); /* fill hh */
+  GEN S = ellsatp_mat(hh, E, CM, P, l, nb); /* fill hh */
   pari_sp av = avma;
   GEN K = Flm_ker(Flm_transpose(S), l);
   long i, lK = lg(K), nH = lg(H)-1;
@@ -7620,12 +7620,14 @@ ellQ_saturation(GEN E, GEN P, long B, long prec)
   P = leafcopy(P); /* modified in place by ellsatp */
   while((p = u_forprime_next(&S)))
   {
+    long nb = lg(P)-1 + 25 / log2(p) - 1; /* error ~ 2^{-25} */
     GEN xp = NULL, T = gel(elltors_psylow(E, p), 3);
     if (lg(T)==1) T = NULL;
     while (1)
     {
-      GEN Q = ellsatp(&h, E, CM, T, P, M, p, &xp, w, prec);
+      GEN Q = ellsatp(&h, E, CM, T, P, M, p, &xp, w, nb, prec);
       if (!Q) break;
+      nb += lg(P)-1;
       P = Q;
     }
   }
