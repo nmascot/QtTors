@@ -15,4 +15,6 @@ Doc:
  %3 = [6, 4, 6]
  ? vecprod(%)  \\ since e.disc > 0 the factor at infinity is 2
  %4 = 144
+ ? ellglobalred(e)[4] \\ product without the factor at infinity
+ %5 = 144
  @eprog
