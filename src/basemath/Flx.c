@@ -2164,7 +2164,7 @@ Flx_resultant_pre(GEN a, GEN b, ulong p, ulong pi)
     if (both_odd(da,db)) res = p-res;
   }
   else if (!da) return 1; /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
-  cnt = 0; av = avma; pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  cnt = 0; av = avma;
   while (db)
   {
     lb = b[db+2];
