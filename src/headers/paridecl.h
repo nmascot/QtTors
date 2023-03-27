@@ -397,6 +397,7 @@ ulong   Flx_eval_pre(GEN x, ulong y, ulong p, ulong pi);
 GEN     Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv);
 GEN     Flx_extgcd_pre(GEN x, GEN y, ulong p, ulong pi, GEN *ptu, GEN *ptv);
 ulong   Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV);
+ulong   Flx_extresultant_pre(GEN a, GEN b, ulong p, ulong pi, GEN *ptU, GEN *ptV);
 GEN     Flx_fromNewton(GEN P, ulong p);
 GEN     Flx_gcd(GEN a, GEN b, ulong p);
 GEN     Flx_gcd_pre(GEN x, GEN y, ulong p, ulong pi);

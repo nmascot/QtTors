@@ -16,7 +16,8 @@ HC   1- dirpowerssum: allow functions with t_VEC output
 HC   2- dirpowerssum: add optional flag 'both' [also in library mode]
 
   Added
-     1- new libpari function nfeltembed_i
+     1- [libpari] nfeltembed_i
+BA   2- [libpari] Flx_extresultant_pre
 
 Done for version 2.16.0 (released 25/02/2023):
   Fixed

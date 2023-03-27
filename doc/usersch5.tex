@@ -6269,6 +6269,8 @@ given two \kbd{Flx} \kbd{a} and \kbd{b},
 returns their resultant and sets Bezout coefficients (if the resultant is 0,
 the latter are not set). Assumes that $p$ is prime.
 
+\fun{ulong}{Flx_extresultant_pre}{GEN a, GEN b, ulong p, ulong pi, GEN *ptU, GEN *ptV}
+
 \fun{GEN}{Flx_invBarrett}{GEN T, ulong p}, returns the Barrett inverse
 $M$ of $T$ defined by $M(x)\*x^n\*T(1/x)\equiv 1\pmod{x^{n-1}}$ where $n$ is
 the degree of $T$. Assumes that $p$ is prime.

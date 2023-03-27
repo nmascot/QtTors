@@ -2377,9 +2377,8 @@ Flx_resultant(GEN a, GEN b, ulong p)
 
 /* If resultant is 0, *ptU and *ptV are not set */
 ulong
-Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
+Flx_extresultant_pre(GEN a, GEN b, ulong p, ulong pi, GEN *ptU, GEN *ptV)
 {
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   GEN z,q,u,v, x = a, y = b;
   ulong lb, res = 1UL;
   pari_sp av = avma;
@@ -2422,6 +2421,10 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
   *ptU = u;
   *ptV = v; return res;
 }
+
+ulong
+Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
+{ return Flx_extresultant_pre(a, b, p, SMALL_ULONG(p)? 0: get_Fl_red(p), ptU, ptV); }
 
 /* allow pi = 0 (SMALL_ULONG) */
 ulong
