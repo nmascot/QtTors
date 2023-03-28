@@ -1916,16 +1916,36 @@ Flx_halfres_update_pre(long da, long db, long dr, ulong p, ulong pi, struct Flx_
 {
   if (dr >= 0)
   {
-    res->lc  = Fl_powu_pre(res->lc, da - dr, p, pi);
-    res->res = Fl_mul(res->res, res->lc, p);
+    if (res->lc != 1)
+    {
+      if (pi)
+      {
+        res->lc  = Fl_powu_pre(res->lc, da - dr, p, pi);
+        res->res = Fl_mul_pre(res->res, res->lc, p, pi);
+      } else
+      {
+        res->lc  = Fl_powu(res->lc, da - dr, p);
+        res->res = Fl_mul(res->res, res->lc, p);
+      }
+    }
     if (both_odd(da + res->off, db + res->off))
       res->res = Fl_neg(res->res, p);
   } else
   {
     if (db == 0)
     {
-      res->lc  = Fl_powu_pre(res->lc, da, p, pi);
-      res->res = Fl_mul(res->res, res->lc, p);
+      if (res->lc != 1)
+      {
+        if (pi)
+        {
+          res->lc  = Fl_powu_pre(res->lc, da, p, pi);
+          res->res = Fl_mul_pre(res->res, res->lc, p, pi);
+        } else
+        {
+          res->lc  = Fl_powu(res->lc, da, p);
+          res->res = Fl_mul(res->res, res->lc, p);
+        }
+      }
     } else
       res->res = 0;
   }
