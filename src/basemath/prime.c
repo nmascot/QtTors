@@ -1188,7 +1188,7 @@ primepi(GEN x)
   long i;
   if (typ(N) != t_INT) pari_err_TYPE("primepi",N);
   if (signe(N) <= 0) return gen_0;
-  if (lgefint(N) == 3) { n = N[2]; set_avma(av); return utoi(uprimepi(n)); }
+  if (lgefint(N) == 3) return gc_utoi(av, uprimepi(N[2]));
   i = prime_table_len-1;
   p = prime_table[i].p;
   n = prime_table[i].n;

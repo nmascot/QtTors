@@ -1604,7 +1604,7 @@ qfperfection(GEN a)
     }
     s = ZM_rank(M);
   }
- set_avma(av); return utoipos(s);
+  return gc_utoipos(av, s);
 }
 
 static GEN

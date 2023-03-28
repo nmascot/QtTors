@@ -122,12 +122,12 @@ pgener_Fp_local(GEN p, GEN L0)
     if (p[2] == 2) return gen_1;
     if (L0) L0 = ZV_to_nv(L0);
     z = pgener_Fl_local(uel(p,2), L0);
-    set_avma(av0); return utoipos(z);
+    return gc_utoipos(av0, z);
   }
   p_1 = subiu(p,1); L = is_gener_expo(p, L0);
   x = utoipos(2);
   for (;; x[2]++) { if (is_gener_Fp(x, p, p_1, L)) break; }
-  set_avma(av0); return utoipos(uel(x,2));
+  return gc_utoipos(av0, uel(x,2));
 }
 
 GEN
@@ -168,7 +168,7 @@ pgener_Zp(GEN p)
     GEN x = utoipos(2);
     for (;; x[2]++)
       if (is_gener_Fp(x,p,p_1,L) && !equali1(Fp_pow(x,p_1,p2))) break;
-    set_avma(av); return utoipos(uel(x,2));
+    return gc_utoipos(av, uel(x,2));
   }
 }
 
@@ -3068,7 +3068,7 @@ znlog(GEN h, GEN g, GEN o)
         if (k % v) return cgetg(1,t_VEC);
         k /= v;
         if (!gequal(h, gpowgs(g,k))) { set_avma(av); return cgetg(1,t_VEC); }
-        set_avma(av); return stoi(k);
+        return gc_stoi(av, k);
       }
       N = gel(g,3);
       g = Rg_to_Fp(g, N);

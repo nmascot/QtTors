@@ -829,7 +829,7 @@ ZpX_reduced_resultant(GEN x, GEN y, GEN p, GEN pm)
     if (lg(z) > 1)
     {
       ulong c = ucoeff(z,1,1);
-      if (c) { set_avma(av); return utoipos(c); }
+      if (c) return gc_utoipos(av, c);
     }
   }
   else

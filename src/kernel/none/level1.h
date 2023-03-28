@@ -903,7 +903,7 @@ remis(GEN x, long y)
 {
   pari_sp av = avma;
   long r;
-  (void)divis_rem(x,y, &r); set_avma(av); return stoi(r);
+  (void)divis_rem(x,y, &r); return gc_stoi(av, r);
 }
 
 INLINE GEN

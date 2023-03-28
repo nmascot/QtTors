@@ -2084,7 +2084,7 @@ isprincipalfact_or_fail(GEN bnf, GEN C, GEN P, GEN e)
   }
   prec = prec_arch(bnf);
   y = isprincipalall(bnf, C, &prec, flag);
-  if (!y) { set_avma(av); return utoipos(prec); }
+  if (!y) return gc_utoipos(av, prec);
   u = gel(y,2);
   if (lg(u) != 1) gel(y,2) = add_principal_part(nf, u, Cext, flag);
   return gerepilecopy(av, y);

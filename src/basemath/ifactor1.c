@@ -181,8 +181,7 @@ precprime(GEN n)
   if (lgefint(n) <= 3)
   {
     ulong k = uel(n,2);
-    set_avma(av);
-    return utoi(uprecprime(k));
+    return gc_utoi(av, uprecprime(k));
   }
   if (!mod2(n)) n = subiu(n,1);
   rc = rc0 = umodiu(n, 210);
@@ -1612,7 +1611,7 @@ squfof(GEN n)
           /* chase the inverse root form back along the ambiguous cycle */
           q = squfof_ambig(a, b1, dd1, D1);
           if (nm4 == 3 && q % 3 == 0) q /= 3;
-          if (q > 1) { set_avma(av); return utoipos(q); } /* SUCCESS! */
+          if (q > 1) return gc_utoipos(av, q); /* SUCCESS! */
         }
         else if (DEBUGLEVEL >= 4) /* blacklisted */
           err_printf("SQUFOF: ...but the root form seems to be on the "
@@ -1654,7 +1653,7 @@ squfof(GEN n)
           /* chase the inverse root form along the ambiguous cycle */
           q = squfof_ambig(a, b2, dd2, D2);
           if (nm4 == 1 && q % 5 == 0) q /= 5;
-          if (q > 1) { set_avma(av); return utoipos(q); } /* SUCCESS! */
+          if (q > 1) return gc_utoipos(av, q); /* SUCCESS! */
         }
         else if (DEBUGLEVEL >= 4)        /* blacklisted */
           err_printf("SQUFOF: ...but the root form seems to be on the "

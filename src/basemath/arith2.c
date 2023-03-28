@@ -812,7 +812,7 @@ eulerphi(GEN n)
       ulong e;
       F = mkmat2(ZV_to_nv(gel(F,1)), ZV_to_nv(gel(F,2)));
       e = eulerphiu_fact(F);
-      set_avma(av); return utoipos(e);
+      return gc_utoipos(av, e);
     }
   }
   else if (lgefint(n) == 3) return utoipos(eulerphiu(uel(n,2)));

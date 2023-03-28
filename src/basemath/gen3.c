@@ -715,7 +715,7 @@ modsr(long x, GEN y)
 {
   pari_sp av = avma;
   GEN q = _quotsr(x,y);
-  if (!signe(q)) { set_avma(av); return stoi(x); }
+  if (!signe(q)) return gc_stoi(av, x);
   return gerepileuptoleaf(av, subsr(x, mulir(q,y)));
 }
 static GEN

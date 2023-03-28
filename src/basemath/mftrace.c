@@ -6163,7 +6163,7 @@ mfgaloistype0(long N, GEN CHI, GEN F, GEN DIH, long lim)
   pari_sp av = avma;
   GEN vF = mftocol(F, lim, 1);
   long t = mfisdihedral(vF, DIH), bound;
-  if (t) { set_avma(av); return stoi(t); }
+  if (t) return gc_stoi(av,t);
   bound = maxss(200, 5*expu(N)*expu(N));
   for(;;)
   {
@@ -8640,7 +8640,7 @@ mfdim(GEN NK, long space)
       {
         d = mf1dimsum(N, space);
         if (space0 == mf_FULL) d += mfkdimsum(N,k,dk,mf_EISEN);/*add it back*/
-        set_avma(av); return utoi(d);
+        return gc_utoi(av, d);
       }
       /* must initialize explicitly: trivial spaces for E_k/S_k differ */
       if (space0 == mf_FULL)
@@ -8657,7 +8657,7 @@ mfdim(GEN NK, long space)
     }
     else
     {
-      if (joker==2) { d = mfkdimsum(N,k,dk,space); set_avma(av); return utoi(d); }
+      if (joker==2) { d = mfkdimsum(N,k,dk,space); return gc_utoi(av,d); }
       D = mfkdims(N, k, dk, CHI, space);
     }
     if (!CHI) return gerepileupto(av, vecsort(D, mkvecsmall(1)));
@@ -10513,7 +10513,7 @@ mfisCM(GEN F)
         if (kross(D[i], p) == -1) { D = vecsplice(D, i); lD--; }
   }
   if (lD == 1) return gc_const(av, gen_0);
-  if (lD == 2) { set_avma(av); return stoi(D[1]); }
+  if (lD == 2) return gc_stoi(av, D[1]);
   if (k > 1) pari_err_BUG("mfisCM");
   return gerepileupto(av, zv_to_ZV(D));
 }

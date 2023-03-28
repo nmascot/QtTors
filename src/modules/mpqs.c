@@ -1534,7 +1534,7 @@ mpqs(GEN N)
   H.index_j = 0;
   H.index2_moved = 0;
   p = mpqs_find_k(&H);
-  if (p) { set_avma(av); return utoipos(p); }
+  if (p) return gc_utoipos(av,p);
   if (DEBUGLEVEL >= 5)
     err_printf("MPQS: found multiplier %ld for N\n", H._k->k);
   H.kN = muliu(N, H._k->k);
@@ -1543,7 +1543,7 @@ mpqs(GEN N)
   if (DEBUGLEVEL >= 5)
     err_printf("MPQS: creating factor base and allocating arrays...\n");
   FB = mpqs_create_FB(&H, &p);
-  if (p) { set_avma(av); return utoipos(p); }
+  if (p) return gc_utoipos(av, p);
   mpqs_sieve_array_ctor(&H);
   mpqs_poly_ctor(&H);
 

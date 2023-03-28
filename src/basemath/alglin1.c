@@ -1586,7 +1586,7 @@ FpM_det(GEN a, GEN p)
   case 2: d = F2m_det_sp(a); break;
   default:d = Flm_det_sp(a,pp); break;
   }
-  set_avma(av); return utoi(d);
+  return gc_utoi(av, d);
 }
 
 GEN

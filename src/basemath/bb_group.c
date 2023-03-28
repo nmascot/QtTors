@@ -506,7 +506,7 @@ gen_Shanks_log(GEN x, GEN g, GEN q, void *E, const struct bb_group *grp)
   av1 = avma;
   for (p1=x, i=1;;i++)
   {
-    if (grp->equal1(p1)) { set_avma(av); return stoi(i-1); }
+    if (grp->equal1(p1)) return gc_stoi(av, i-1);
     table[i] = grp->hash(p1); if (i==lbaby) break;
     p1 = grp->mul(E,p1,ginv);
     if (gc_needed(av1,2))

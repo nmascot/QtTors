@@ -1275,6 +1275,15 @@ destroys everything from the reference point on, including $z$.
 stack (clone, universal constant such as \kbd{gen\_0}) or was defined
 before \kbd{av}.
 
+\fun{GEN}{gc_stoi}{pari_sp av, long x} reset \kbd{avma} to \kbd{av} and return
+\kbd{stoi(x)}.
+
+\fun{GEN}{gc_utoi}{pari_sp av, long x} reset \kbd{avma} to \kbd{av} and return
+\kbd{utoi(x)}.
+
+\fun{GEN}{gc_utoipos}{pari_sp av, long x} reset \kbd{avma} to \kbd{av} and return
+\kbd{utoipos(x)}.
+
 \fun{GEN}{gc_all}{pari_sp av, int n, ...}. Assumes that $1 \leq n \leq
 10$; This is similar to \kbd{gerepileall}, expecting $n$ further \kbd{GEN*}
 arguments: the stack is cleaned and the corresponding \kbd{GEN} are

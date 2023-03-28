@@ -604,7 +604,7 @@ FpE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN p)
     ulong pp = p[2];
     GEN Pp = ZV_to_Flv(P, pp), Qp = ZV_to_Flv(Q, pp);
     ulong w = Fle_weilpairing(Pp, Qp, itou(m), umodiu(a4, pp), pp);
-    set_avma(av); return utoi(w);
+    return gc_utoi(av, w);
   }
   N = FpE_Miller(P, Q, m, a4, p);
   D = FpE_Miller(Q, P, m, a4, p);
@@ -623,7 +623,7 @@ FpE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN p)
     ulong pp = p[2];
     GEN Pp = ZV_to_Flv(P, pp), Qp = ZV_to_Flv(Q, pp);
     ulong w = Fle_tatepairing(Pp, Qp, itou(m), umodiu(a4, pp), pp);
-    set_avma(av); return utoi(w);
+    return gc_utoi(av,w);
   }
   return FpE_Miller(P, Q, m, a4, p);
 }

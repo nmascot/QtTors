@@ -2390,7 +2390,7 @@ nfpolsturm(GEN nf, GEN f, GEN ind0)
     if (!dr) break;
     u = v; v = r;
   }
-  if (single) { set_avma(av); return stoi(vr1[1]); }
+  if (single) return gc_stoi(av,vr1[1]);
   return gerepileupto(av, zv_to_ZV(vr1));
 }
 

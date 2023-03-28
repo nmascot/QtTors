@@ -338,7 +338,7 @@ sumdigits(GEN n)
   if (l < L)
   {
     ulong s = sumdigits_block(res, l);
-    set_avma(av); return utoipos(s);
+    return gc_utoipos(av, s);
   }
   else /* Huge. Overflows ulong */
   {
@@ -367,13 +367,13 @@ sumdigits0(GEN x, GEN B)
   if (Z_ispow2(B))
   {
     long k = expi(B);
-    if (k == 1) { set_avma(av); return utoi(hammingweight(x)); }
+    if (k == 1) return gc_utoi(av,hammingweight(x));
     if (k < BITS_IN_LONG)
     {
       GEN z = binary_2k_nv(x, k);
       if (lg(z)-1 > 1L<<(BITS_IN_LONG-k)) /* may overflow */
         return gerepileuptoint(av, ZV_sum(Flv_to_ZV(z)));
-      set_avma(av); return utoi(zv_sum(z));
+      return gc_utoi(av,zv_sum(z));
     }
     return gerepileuptoint(av, ZV_sum(binary_2k(x, k)));
   }

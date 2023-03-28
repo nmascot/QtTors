@@ -1073,7 +1073,7 @@ FpX_resultant(GEN x, GEN y, GEN p)
     pari_sp av = avma;
     ulong pp = to_Flx(&x, &y, p);
     ulong res = Flx_resultant(x, y, pp);
-    set_avma(av); return utoi(res);
+    return gc_utoi(av, res);
   }
   dx = degpol(x); dy = degpol(y);
   if (dx < dy)

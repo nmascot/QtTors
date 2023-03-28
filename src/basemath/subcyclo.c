@@ -787,7 +787,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   if (DEBUGLEVEL >= 1) timer_start(&ti);
   cnd = znstar_conductor(H);
   if (DEBUGLEVEL >= 1) timer_printf(&ti, "znstar_conductor");
-  if (flag == 1)  { set_avma(ltop); return stoi(cnd); }
+  if (flag == 1)  return gc_stoi(ltop, cnd);
   if (cnd == 1)
   {
     set_avma(ltop); if (flag == 1) return gen_1;
