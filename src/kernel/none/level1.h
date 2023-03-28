@@ -125,6 +125,12 @@ INLINE GEN
 gc_NULL(pari_sp av) { set_avma(av); return NULL; }
 INLINE GEN
 gc_const(pari_sp av, GEN x) { set_avma(av); return x; }
+INLINE GEN
+gc_stoi(pari_sp av, long x) { set_avma(av); return stoi(x); }
+INLINE GEN
+gc_utoi(pari_sp av, ulong x) { set_avma(av); return utoi(x); }
+INLINE GEN
+gc_utoipos(pari_sp av, ulong x) { set_avma(av); return utoipos(x); }
 
 INLINE GEN
 new_chunk(size_t x) /* x is a number of longs */
