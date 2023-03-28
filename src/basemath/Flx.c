@@ -2266,6 +2266,7 @@ Flx_halfres_pre(GEN a, GEN b, ulong p, ulong pi, ulong *r)
 {
   struct Flx_res res;
   GEN M, V, A, B;
+  long dB;
 
   res.res  = *r;
   res.lc   = Flx_lead(b);
@@ -2274,13 +2275,13 @@ Flx_halfres_pre(GEN a, GEN b, ulong p, ulong pi, ulong *r)
   res.off = 0;
   M = Flx_halfres_i(a, b, p, pi, &res);
   V = FlxM_Flx_mul2(M, a, b, p, pi);
-  A = gel(V,1); B = gel(V,2);
+  A = gel(V,1); B = gel(V,2); dB = degpol(B);
 
-  if (degpol(B) < degpol(b))
+  if (dB < degpol(b))
   {
-    if (degpol(B )>= 0)
+    if (dB >= 0)
     {
-      res.lc  = Fl_powu_pre(res.lc, res.deg0 - degpol(B), p, pi);
+      res.lc  = Fl_powu_pre(res.lc, res.deg0 - dB, p, pi);
       res.res = Fl_mul(res.res, res.lc, p);
       if (both_odd(res.deg0,res.deg1))
         res.res = Fl_neg(res.res, p);

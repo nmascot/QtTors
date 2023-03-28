@@ -992,6 +992,7 @@ FpX_halfres(GEN a, GEN b, GEN p, GEN *r)
 {
   struct FpX_res res;
   GEN M, V, A, B;
+  long dB;
 
   res.res  = *r;
   res.lc   = leading_coeff(b);
@@ -1000,13 +1001,13 @@ FpX_halfres(GEN a, GEN b, GEN p, GEN *r)
   res.off = 0;
   M = FpX_halfres_i(a, b, p, &res);
   V = FpXM_FpX_mul2(M, a, b, p);
-  A = gel(V,1); B = gel(V,2);
+  A = gel(V,1); B = gel(V,2); dB = degpol(B);
 
-  if (degpol(B) < degpol(b))
+  if (dB < degpol(b))
   {
-    if (degpol(B )>= 0)
+    if (dB >= 0)
     {
-      res.lc  = Fp_powu(res.lc, res.deg0 - degpol(B), p);
+      res.lc  = Fp_powu(res.lc, res.deg0 - dB, p);
       res.res = Fp_mul(res.res, res.lc, p);
       if (both_odd(res.deg0,res.deg1))
         res.res = Fp_neg(res.res, p);
