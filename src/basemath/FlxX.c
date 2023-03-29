@@ -1472,7 +1472,7 @@ FlxqX_saferesultant(GEN a, GEN b, GEN T, ulong p)
     if (dc < 0) { set_avma(av); return pol0_Flx(vT); }
 
     if (both_odd(da,db)) res = Flx_neg(res, p);
-    if (!equali1(lb))
+    if (!Flx_equal1(lb))
       res = Flxq_mul_pre(res, Flxq_powu_pre(lb, da - dc, T, p, pi), T, p, pi);
     if (gc_needed(av,2))
     {
@@ -1514,7 +1514,7 @@ FlxqX_resultant(GEN a, GEN b, GEN T, ulong p)
     if (dc < 0) { set_avma(av); return pol0_Flx(vT); }
 
     if (both_odd(da,db)) res = Flx_neg(res, p);
-    if (!equali1(lb))
+    if (!Flx_equal1(lb))
       res = Flxq_mul_pre(res, Flxq_powu_pre(lb, da - dc, T,p,pi), T,p,pi);
     if (gc_needed(av,2))
     {
