@@ -649,6 +649,32 @@ struct FpX_res
    long deg0, deg1, off;
 };
 
+INLINE void
+FpX_halfres_update(long da, long db, long dr, GEN p, struct FpX_res *res)
+{
+  if (dr >= 0)
+  {
+    if (!equali1(res->lc))
+    {
+      res->lc  = Fp_powu(res->lc, da - dr, p);
+      res->res = Fp_mul(res->res, res->lc, p);
+    }
+    if (both_odd(da + res->off, db + res->off))
+      res->res = Fp_neg(res->res, p);
+  } else
+  {
+    if (db == 0)
+    {
+      if (!equali1(res->lc))
+      {
+          res->lc  = Fp_powu(res->lc, da, p);
+          res->res = Fp_mul(res->res, res->lc, p);
+      }
+    } else
+      res->res = gen_0;
+  }
+}
+
 static GEN
 FpX_halfres_basecase(GEN a, GEN b, GEN p, struct FpX_res *res)
 {
@@ -667,24 +693,8 @@ FpX_halfres_basecase(GEN a, GEN b, GEN p, struct FpX_res *res)
       long da = degpol(a), db=degpol(b), dr = degpol(r);
       res->lc = leading_coeff(b);
       if (dr >= n)
-      {
-        if (dr >= 0)
-        {
-          res->lc  = Fp_powu(res->lc, da - dr, p);
-          res->res = Fp_mul(res->res, res->lc, p);
-
-          if (both_odd(da + res->off, db + res->off))
-            res->res = Fp_neg(res->res, p);
-        } else
-        {
-          if (db == 0)
-          {
-            res->lc  = Fp_powu(res->lc, da, p);
-            res->res = Fp_mul(res->res, res->lc, p);
-          } else
-            res->res = gen_0;
-        }
-      } else
+         FpX_halfres_update(da,db,dr,p,res);
+      else
       {
         res->deg0 = da;
         res->deg1 = db;
@@ -737,49 +747,12 @@ FpX_halfres_split(GEN x, GEN y, GEN p, struct FpX_res *res)
   {
     long dx1 = degpol(x1), dy1 = degpol(y1), dr = degpol(r);
     if (dy1 < degpol(y))
-    {
-      if (dy1 >= 0)
-      {
-        res->lc  = Fp_powu(res->lc, res->deg0 - dy1, p);
-        res->res = Fp_mul(res->res, res->lc, p);
-
-        if (both_odd(res->deg0 + res->off, res->deg1 + res->off))
-          res->res = Fp_neg(res->res, p);
-      } else
-      {
-        if (res->deg1 == 0)
-        {
-          res->lc  = Fp_powu(res->lc, res->deg0, p);
-          res->res = Fp_mul(res->res, res->lc, p);
-        } else
-          res->res = gen_0;
-      }
-    }
+      FpX_halfres_update(res->deg0, res->deg1, dy1, p,res);
     res->lc = leading_coeff(y1);
     res->deg0 = dx1;
     res->deg1 = dy1;
     if (dr >= n)
-    {
-      if (dr >= 0)
-      {
-        res->lc  = Fp_powu(res->lc, dx1 - dr, p);
-        res->res = Fp_mul(res->res, res->lc, p);
-
-        if (both_odd(dx1 + res->off, dy1 + res->off))
-          res->res = Fp_neg(res->res, p);
-      } else
-      {
-        if (degpol(y1) == 0)
-        {
-          res->lc  = Fp_powu(res->lc, dx1, p);
-          res->res = Fp_mul(res->res, res->lc, p);
-        } else
-          res->res = gen_0;
-      }
-
-      res->deg0 = dy1;
-      res->deg1 = dr;
-    }
+      FpX_halfres_update(dx1, dy1, dr, p,res);
     res->deg0 -= k;
     res->deg1 -= k;
     res->off += k;
@@ -1002,25 +975,8 @@ FpX_halfres(GEN a, GEN b, GEN p, GEN *r)
   M = FpX_halfres_i(a, b, p, &res);
   V = FpXM_FpX_mul2(M, a, b, p);
   A = gel(V,1); B = gel(V,2); dB = degpol(B);
-
   if (dB < degpol(b))
-  {
-    if (dB >= 0)
-    {
-      res.lc  = Fp_powu(res.lc, res.deg0 - dB, p);
-      res.res = Fp_mul(res.res, res.lc, p);
-      if (both_odd(res.deg0,res.deg1))
-        res.res = Fp_neg(res.res, p);
-    } else
-    {
-      if (res.deg1 == 0)
-      {
-        res.lc  = Fp_powu(res.lc, res.deg0, p);
-        res.res = Fp_mul(res.res, res.lc, p);
-      } else
-        res.res = gen_0;
-    }
-  }
+    FpX_halfres_update(res.deg0, res.deg1, dB, p, &res);
   *r = res.res;
   return mkvec3(M,A,B);
 }
