@@ -796,6 +796,28 @@ GEN
 FlxqX_normalize(GEN z, GEN T, ulong p)
 { return FlxqX_normalize_pre(z, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
+struct _FlxqX {ulong p, pi; GEN T;};
+static GEN _FlxqX_mul(void *data,GEN a,GEN b)
+{
+  struct _FlxqX *d=(struct _FlxqX*)data;
+  return FlxqX_mul_pre(a,b,d->T,d->p,d->pi);
+}
+static GEN _FlxqX_sqr(void *data,GEN a)
+{
+  struct _FlxqX *d=(struct _FlxqX*)data;
+  return FlxqX_sqr_pre(a,d->T,d->p,d->pi);
+}
+
+GEN
+FlxqX_powu_pre(GEN V, ulong n, GEN T, ulong p, ulong pi)
+{
+  struct _FlxqX d; d.p = p; d.pi = pi; d.T = T;
+  return gen_powu(V, n, (void*)&d, &_FlxqX_sqr, &_FlxqX_mul);
+}
+GEN
+FlxqX_powu(GEN V, ulong n, GEN T, ulong p)
+{ return FlxqX_powu_pre(V, n, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
+
 /* x and y in Z[Y][X]. Assume T irreducible mod p */
 static GEN
 FlxqX_divrem_basecase(GEN x, GEN y, GEN T, ulong p, ulong pi, GEN *pr)
@@ -1514,28 +1536,6 @@ FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
   Q = FlxqX_Flxq_mul_to_monic_pre(Q,U,T,p,pi);
   return gerepileupto(av, Q);
 }
-
-struct _FlxqX {ulong p, pi; GEN T;};
-static GEN _FlxqX_mul(void *data,GEN a,GEN b)
-{
-  struct _FlxqX *d=(struct _FlxqX*)data;
-  return FlxqX_mul_pre(a,b,d->T,d->p,d->pi);
-}
-static GEN _FlxqX_sqr(void *data,GEN a)
-{
-  struct _FlxqX *d=(struct _FlxqX*)data;
-  return FlxqX_sqr_pre(a,d->T,d->p,d->pi);
-}
-
-GEN
-FlxqX_powu_pre(GEN V, ulong n, GEN T, ulong p, ulong pi)
-{
-  struct _FlxqX d; d.p = p; d.pi = pi; d.T = T;
-  return gen_powu(V, n, (void*)&d, &_FlxqX_sqr, &_FlxqX_mul);
-}
-GEN
-FlxqX_powu(GEN V, ulong n, GEN T, ulong p)
-{ return FlxqX_powu_pre(V, n, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 /* Res(A,B) = Res(B,R) * lc(B)^(a-r) * (-1)^(ab), with R=A%B, a=deg(A) ...*/
 GEN
