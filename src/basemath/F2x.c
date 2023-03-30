@@ -2535,29 +2535,6 @@ F2xqX_rem(GEN x, GEN S, GEN T)
 }
 
 static GEN
-F2xqX_halfgcd_basecase(GEN a, GEN b, GEN T)
-{
-  pari_sp av=avma;
-  GEN u,u1,v,v1;
-  long vx = varn(a);
-  long n = lgpol(a)>>1;
-  u1 = v = pol_0(vx);
-  u = v1 = pol1_F2xX(vx, get_F2x_var(T));
-  while (lgpol(b)>n)
-  {
-    GEN r, q = F2xqX_divrem(a,b, T, &r);
-    a = b; b = r; swap(u,u1); swap(v,v1);
-    u1 = F2xX_add(u1, F2xqX_mul(u, q, T));
-    v1 = F2xX_add(v1, F2xqX_mul(v, q ,T));
-    if (gc_needed(av,2))
-    {
-      if (DEBUGMEM>1) pari_warn(warnmem,"F2xqX_halfgcd (d = %ld)",degpol(b));
-      gerepileall(av,6, &a,&b,&u1,&v1,&u,&v);
-    }
-  }
-  return gerepilecopy(av, mkmat2(mkcol2(u,u1), mkcol2(v,v1)));
-}
-static GEN
 F2xqX_addmulmul(GEN u, GEN v, GEN x, GEN y, GEN T)
 {
   return F2xX_add(F2xqX_mul(u, x, T),F2xqX_mul(v, y, T));
@@ -2609,33 +2586,145 @@ matid2_F2xXM(long v, long sv)
             mkcol2(pol_0(v),pol1_F2xX(v, sv)));
 }
 
-static GEN
-F2xqX_halfgcd_split(GEN x, GEN y, GEN T)
+struct F2xqX_res
 {
-  pari_sp av=avma;
-  GEN R, S, V;
-  GEN y1, r, q;
-  long l = lgpol(x), n = l>>1, k;
-  if (lgpol(y)<=n) return matid2_F2xXM(varn(x),get_F2x_var(T));
-  R = F2xqX_halfgcd(RgX_shift_shallow(x,-n),RgX_shift_shallow(y,-n), T);
-  V = F2xqXM_F2xqX_mul2(R,x,y, T); y1 = gel(V,2);
-  if (lgpol(y1)<=n) return gerepilecopy(av, R);
-  q = F2xqX_divrem(gel(V,1), y1, T, &r);
-  k = 2*n-degpol(y1);
-  S = F2xqX_halfgcd(RgX_shift_shallow(y1,-k), RgX_shift_shallow(r,-k), T);
-  return gerepileupto(av, F2xqXM_mul2(S,F2xqX_F2xqXM_qmul(q,R, T), T));
+   GEN res, lc;
+   long deg0, deg1;
+};
+
+INLINE void
+F2xqX_halfres_update(long da, long db, long dr, GEN T, struct F2xqX_res *res)
+{
+  if (dr >= 0)
+  {
+    if (!F2x_equal1(res->lc))
+    {
+      res->lc  = F2xq_powu(res->lc, da - dr, T);
+      res->res = F2xq_mul(res->res, res->lc, T);
+    }
+  } else
+  {
+    if (db == 0)
+    {
+      if (!F2x_equal1(res->lc))
+      {
+          res->lc  = F2xq_powu(res->lc, da, T);
+          res->res = F2xq_mul(res->res, res->lc, T);
+      }
+    } else
+      res->res = pol0_F2x(get_F2x_var(T));
+  }
 }
 
-/* Return M in GL_2(Fp[X]) such that:
-if [a',b']~=M*[a,b]~ then degpol(a')>= (lgpol(a)>>1) >degpol(b')
-*/
+static GEN
+F2xqX_halfres_basecase(GEN a, GEN b, GEN T, struct F2xqX_res *res)
+{
+  pari_sp av=avma;
+  GEN u,u1,v,v1, M;
+  long vx = varn(a), vT = get_F2x_var(T);
+  long n = lgpol(a)>>1;
+  u1 = v = pol_0(vx);
+  u = v1 = pol1_F2xX(vx, vT);
+  while (lgpol(b)>n)
+  {
+    GEN r, q;
+    q = F2xqX_divrem(a,b, T, &r);
+    if (res)
+    {
+      long da = degpol(a), db = degpol(b), dr = degpol(r);
+      res->lc = gel(b,db+2);
+      if (dr >= n)
+        F2xqX_halfres_update(da, db, dr, T, res);
+      else
+      {
+        res->deg0 = da;
+        res->deg1 = db;
+      }
+    }
+    a = b; b = r; swap(u,u1); swap(v,v1);
+    u1 = F2xX_add(u1, F2xqX_mul(u, q, T));
+    v1 = F2xX_add(v1, F2xqX_mul(v, q, T));
+    if (gc_needed(av,2))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"F2xqX_halfgcd (d = %ld)",degpol(b));
+      gerepileall(av,res ? 8: 6, &a,&b,&u1,&v1,&u,&v,&res->res,&res->lc);
+    }
+  }
+  M = mkmat2(mkcol2(u,u1), mkcol2(v,v1));
+  return res ? gc_all(av, 3, &M, &res->res, &res->lc)
+             : gerepilecopy(av, M);
+}
+
+static GEN F2xqX_halfres_i(GEN x, GEN y, GEN T, struct F2xqX_res *res);
+
+static GEN
+F2xqX_halfres_split(GEN x, GEN y, GEN T, struct F2xqX_res *res)
+{
+  pari_sp av = avma;
+  GEN R, S, V;
+  GEN x1, y1, r, q;
+  long l = lgpol(x), n = l>>1, k, vT = get_F2x_var(T);
+  if (lgpol(y) <= n) return matid2_F2xXM(varn(x), vT);
+  if (res)
+  {
+     res->lc = leading_coeff(y);
+     res->deg0 -= n;
+     res->deg1 -= n;
+  }
+  R = F2xqX_halfres_i(F2xX_shift(x,-n, vT),F2xX_shift(y,-n, vT), T, res);
+  if (res)
+  {
+    res->deg0 += n;
+    res->deg1 += n;
+  }
+  V = F2xqXM_F2xqX_mul2(R,x,y, T); x1 = gel(V,1); y1 = gel(V,2);
+  if (lgpol(y1) <= n) return res ? gc_all(av, 3, &R, &res->res, &res->lc)
+                                 : gerepilecopy(av, R);
+  k = 2*n-degpol(y1);
+  q = F2xqX_divrem(x1, y1, T, &r);
+  if (res)
+  {
+    long dx1 = degpol(x1), dy1 = degpol(y1), dr = degpol(r);
+    if (dy1 < degpol(y))
+      F2xqX_halfres_update(res->deg0, res->deg1, dy1, T, res);
+    res->lc = leading_coeff(y1);
+    res->deg0 = dx1;
+    res->deg1 = dy1;
+    if (dr >= n)
+    {
+      F2xqX_halfres_update(dx1, dy1, dr, T, res);
+      res->deg0 = dy1;
+      res->deg1 = dr;
+    }
+    res->deg0 -= k;
+    res->deg1 -= k;
+  }
+  S = F2xqX_halfres_i(F2xX_shift(y1,-k, vT), F2xX_shift(r,-k, vT), T, res);
+  if (res)
+  {
+    res->deg0 += k;
+    res->deg1 += k;
+  }
+  S = F2xqXM_mul2(S,F2xqX_F2xqXM_qmul(q, R, T), T);
+  return res ? gc_all(av, 3, &S, &res->res, &res->lc)
+             : gerepilecopy(av, S);
+}
+
+static GEN
+F2xqX_halfres_i(GEN x, GEN y, GEN T, struct F2xqX_res *res)
+{
+  if (lgpol(x) < F2xqX_HALFGCD_LIMIT)
+    return F2xqX_halfres_basecase(x, y, T, res);
+  return F2xqX_halfres_split(x, y, T, res);
+}
 
 static GEN
 F2xqX_halfgcd_i(GEN x, GEN y, GEN T)
-{
-  if (lg(x)<=F2xqX_HALFGCD_LIMIT) return F2xqX_halfgcd_basecase(x, y, T);
-  return F2xqX_halfgcd_split(x, y, T);
-}
+{ return F2xqX_halfres_i(x, y, T, NULL); }
+
+/* Return M in GL_2(F_2[X]/(T)[Y]) such that:
+if [a',b']~=M*[a,b]~ then degpol(a')>= (lgpol(a)>>1) >degpol(b')
+*/
 
 GEN
 F2xqX_halfgcd(GEN x, GEN y, GEN T)
@@ -2769,9 +2858,29 @@ GEN
 F2xqX_powu(GEN x, ulong n, GEN T)
 { return gen_powu(x, n, (void*)T, &_F2xqX_sqr, &_F2xqX_mul); }
 
+static GEN
+F2xqX_halfres(GEN a, GEN b, GEN T, GEN *r)
+{
+  struct F2xqX_res res;
+  GEN M, V, A, B;
+  long dB;
+  res.res  = *r;
+  res.lc   = leading_coeff(b);
+  res.deg0 = degpol(a);
+  res.deg1 = degpol(b);
+  M = F2xqX_halfres_i(a, b, T, &res);
+  V = F2xqXM_F2xqX_mul2(M, a, b, T);
+  A = gel(V,1); B = gel(V,2); dB = degpol(B);
+
+  if (dB < degpol(b))
+    F2xqX_halfres_update(res.deg0, res.deg1, dB, T, &res);
+  *r = res.res;
+  return mkvec3(M,A,B);
+}
+
 /* Res(A,B) = Res(B,R) * lc(B)^(a-r) * (-1)^(ab), with R=A%B, a=deg(A) ...*/
-GEN
-F2xqX_resultant(GEN a, GEN b, GEN T)
+static GEN
+F2xqX_resultant_basecase(GEN a, GEN b, GEN T)
 {
   long vT = get_F2x_var(T);
   long da,db,dc;
@@ -2803,6 +2912,41 @@ F2xqX_resultant(GEN a, GEN b, GEN T)
     db = dc; /* = degpol(b) */
   }
   res = F2xq_mul(res, F2xq_powu(gel(b,2), da, T), T);
+  return gerepileupto(av, res);
+}
+
+/* Res(A,B) = Res(B,R) * lc(B)^(a-r) * (-1)^(ab), with R=A%B, a=deg(A) ...*/
+GEN
+F2xqX_resultant(GEN x, GEN y, GEN T)
+{
+  pari_sp av = avma;
+  long dx, dy, vT = get_F2x_var(T);
+  GEN res = pol1_F2x(vT);
+  if (!signe(x) || !signe(y)) return pol0_F2x(vT);
+  dx = degpol(x); dy = degpol(y);
+  if (dx < dy)
+    swap(x,y);
+  while (lgpol(y) >= F2xqX_GCD_LIMIT)
+  {
+    GEN c;
+    if (lgpol(y)<=(lgpol(x)>>1))
+    {
+      GEN r = F2xqX_rem(x, y, T);
+      long dx = degpol(x), dy = degpol(y), dr = degpol(r);
+      GEN ly = gel(y,dy+2);
+      if (!F2x_equal1(ly))
+        res = F2xq_mul(res, F2xq_powu(ly, dx - dr, T), T);
+      x = y; y = r;
+    }
+    c = F2xqX_halfres(x, y, T, &res);
+    x = gel(c,2); y = gel(c,3);
+    if (gc_needed(av,2))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"F2xqX_resultant (y = %ld)",degpol(y));
+      gerepileall(av,3,&x,&y,&res);
+    }
+  }
+  res = F2xq_mul(res, F2xqX_resultant_basecase(x, y, T), T);
   return gerepileupto(av, res);
 }
 
