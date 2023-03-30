@@ -2262,6 +2262,10 @@ INLINE GEN
 FpXQX_renormalize(GEN x, long lx) { return ZXX_renormalize(x,lx); }
 INLINE GEN
 F2x_renormalize(GEN x, long lx)   { return Flx_renormalize(x,lx); }
+
+INLINE GEN
+F2xX_shift(GEN a, long n, long vs) { return FlxX_shift(a, n, vs); }
+
 INLINE GEN
 F2v_to_F2x(GEN x, long sv) {
   GEN y = leafcopy(x);

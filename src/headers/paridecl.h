@@ -6234,6 +6234,7 @@ INLINE GEN    F2m_copy(GEN x);
 INLINE GEN    F2v_copy(GEN x);
 INLINE GEN    F2x_copy(GEN x);
 INLINE GEN    F2v_ei(long n, long i);
+INLINE GEN    F2xX_shift(GEN a, long n, long vs);
 INLINE ulong  F3m_coeff(GEN x, long a, long b);
 INLINE void   F3m_set(GEN x, long a, long b, ulong c);
 INLINE GEN    F3m_copy(GEN x);
