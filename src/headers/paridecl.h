@@ -644,6 +644,7 @@ GEN     FlxqX_halfgcd(GEN x, GEN y, GEN T, ulong p);
 GEN     FlxqX_mul(GEN x, GEN y, GEN T, ulong p);
 GEN     FlxqX_rem(GEN x, GEN y, GEN T, ulong p);
 GEN     FlxqX_resultant(GEN x, GEN y, GEN T, ulong p);
+GEN     FlxqX_resultant_pre(GEN x, GEN y, GEN T, ulong p, ulong pi);
 GEN     FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr);
 GEN     FlxqX_halfgcd_pre(GEN x, GEN y, GEN T, ulong p, ulong pi);
 GEN     FlxqX_mul_pre(GEN x, GEN y, GEN T, ulong p, ulong pi);

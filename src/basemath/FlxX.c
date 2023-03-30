@@ -1643,10 +1643,9 @@ FlxqX_resultant_basecase(GEN a, GEN b, GEN T, ulong p, ulong pi)
 
 /* Res(A,B) = Res(B,R) * lc(B)^(a-r) * (-1)^(ab), with R=A%B, a=deg(A) ...*/
 GEN
-FlxqX_resultant(GEN x, GEN y, GEN T, ulong p)
+FlxqX_resultant_pre(GEN x, GEN y, GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   long dx, dy, vT = get_Flx_var(T);
   GEN res = pol1_Flx(vT);
   if (!signe(x) || !signe(y)) return pol0_Flx(vT);
@@ -1679,8 +1678,12 @@ FlxqX_resultant(GEN x, GEN y, GEN T, ulong p)
       gerepileall(av,3,&x,&y,&res);
     }
   }
-  return gerepileupto(av, Flxq_mul_pre(res, FlxqX_resultant_basecase(x, y, T, p, pi), T, p, pi));
+  res = Flxq_mul_pre(res, FlxqX_resultant_basecase(x, y, T, p, pi), T, p, pi);
+  return gerepileupto(av, res);
 }
+GEN
+FlxqX_resultant(GEN x, GEN y, GEN T, ulong p)
+{ return FlxqX_resultant_pre(x, y, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 /* disc P = (-1)^(n(n-1)/2) lc(P)^(n - deg P' - 2) Res(P,P'), n = deg P */
 GEN
