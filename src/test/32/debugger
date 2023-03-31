@@ -105,7 +105,7 @@ break> M=6;1/0
   ***   in anonymous function: M=6;1/0
   ***                               ^--
   *** _/_: impossible inverse in gdiv: 0.
-  ***   Break loop: type 'break' to go back to GP prompt
+  ***   Break loop: type 'break' to go back to break>
 break[2]> break
 
   ***   at top-level: for(i=1,10,if(i==2,1/0))

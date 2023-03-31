@@ -427,8 +427,7 @@ read_main(const char *s)
 static const char *
 break_loop_prompt(long n)
 {
-  const char *s = (n==1)? "break> ": stack_sprintf("break[%ld]> ", n);
-  return gp_format_prompt(s);
+  return n==0 ? "GP prompt" : n==1? "break> ": stack_sprintf("break[%ld]> ", n);
 }
 
 static long frame_level=0, dbg_level = 0;
@@ -450,16 +449,17 @@ break_loop(int numerr)
 
   b = filtered_buffer(&F);
   nenv=pari_stack_new(&s_env);
-  prompt = break_loop_prompt(s_env.n-1);
+  prompt = gp_format_prompt(break_loop_prompt(nenv));
   iferr_env = NULL;
   dbg_level = 0;
   frame_level = closure_context(oldframe_level, dbg_level);
   pari_infile = newfile(stdin, "stdin", mf_IN)->file;
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
-    msg = "Break loop: <Return> to continue; 'break' to go back to GP prompt";
+    msg = "Break loop: <Return> to continue; 'break' to go back to %s";
   else
-    msg = "Break loop: type 'break' to go back to GP prompt";
+    msg = "Break loop: type 'break' to go back to %s";
+  msg = stack_sprintf(msg, break_loop_prompt(nenv-1));
   print_errcontext(pariOut, msg, NULL, NULL);
   term_color(c_NONE);
   av = avma;
