@@ -3258,6 +3258,31 @@ polresultant0(GEN x, GEN y, long v, long flag)
   if (v >= 0) (void)delete_var();
   return gerepileupto(av,x);
 }
+
+static GEN
+RgX_extresultant_FpX(GEN x, GEN y, GEN p, GEN *u, GEN *v)
+{
+  pari_sp av = avma;
+  GEN r = FpX_extresultant(RgX_to_FpX(x, p), RgX_to_FpX(y, p), p, u, v);
+  if (signe(r) == 0) { *u = gen_0; *v = gen_0; return gc_const(av, gen_0); }
+  if (u) *u = FpX_to_mod(*u, p);
+  if (v) *v = FpX_to_mod(*v, p);
+  return gc_gcdext(av, Fp_to_mod(r, p), u, v);
+}
+
+static GEN
+RgX_extresultant_fast(GEN x, GEN y, GEN *U, GEN *V)
+{
+  GEN p, pol;
+  long pa;
+  long t = RgX_type(x, &p,&pol,&pa);
+  switch(t)
+  {
+    case t_INTMOD: return RgX_extresultant_FpX(x, y, p, U, V);
+    default:       return NULL;
+  }
+}
+
 GEN
 polresultantext0(GEN x, GEN y, long v)
 {
@@ -3270,7 +3295,9 @@ polresultantext0(GEN x, GEN y, long v)
     x = fix_pol(x,v, v0);
     y = fix_pol(y,v, v0);
   }
-  R = subresext_i(x,y, &U,&V);
+  R = RgX_extresultant_fast(x, y, &U, &V);
+  if (!R)
+    R = subresext_i(x,y, &U,&V);
   if (v >= 0)
   {
     (void)delete_var();
