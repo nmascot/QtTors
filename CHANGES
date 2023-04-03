@@ -10,6 +10,7 @@ BA   5- gammamellininvinit(vector(9,i,1)) -> SEGV
 HC   7- precision loss in gammamellininv [#2462]
 BA   8- [pthread] parselect could crash
 BA   9- rare infinite loop in ellsaturation
+BA  10- quadunitindex(8461,2)->1 instead of 3 [#2466]
 
   Changed
 HC   1- dirpowerssum: allow functions with t_VEC output

@@ -359,7 +359,7 @@ quadunit_mod(GEN D, GEN N)
     GEN M = shifti(mulii(q, N), 1);
     quadunit_uvmod(D, d, M, &u, &v);
     u = diviiexact(u, q);
-    v = diviiexact(v, q); u = shifti(u,-1);
+    v = modii(diviiexact(v, q), N); u = shifti(u,-1);
   }
   return deg1pol_shallow(v, u, 0);
 }
