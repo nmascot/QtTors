@@ -3286,7 +3286,7 @@ RgX_extresultant_fast(GEN x, GEN y, GEN *U, GEN *V)
 GEN
 polresultantext0(GEN x, GEN y, long v)
 {
-  GEN R, U, V;
+  GEN R = NULL, U, V;
   pari_sp av = avma;
 
   if (v >= 0)
@@ -3295,7 +3295,8 @@ polresultantext0(GEN x, GEN y, long v)
     x = fix_pol(x,v, v0);
     y = fix_pol(y,v, v0);
   }
-  R = RgX_extresultant_fast(x, y, &U, &V);
+  if (typ(x)==t_POL && typ(y)==t_POL)
+    R = RgX_extresultant_fast(x, y, &U, &V);
   if (!R)
     R = subresext_i(x,y, &U,&V);
   if (v >= 0)
