@@ -5195,6 +5195,11 @@ whose coefficients are either \typ{POL}s in $\Z[Y]$ or \typ{INT}s.
 Returns $\text{Res}_X(a, b)$ in $\F_p[Y]$ as an \kbd{FpY}. The function
 assumes that $X$ has lower priority than $Y$.
 
+\fun{ulong}{FpX_extresultant}{GEN a, GEN b, GEN p, GEN *ptU, GEN *ptV}
+given two \kbd{FpX} \kbd{a} and \kbd{b},
+returns their resultant and sets Bezout coefficients (if the resultant is $0$,
+the latter are not set). Assumes that $p$ is prime.
+
 \fun{GEN}{FpX_Newton}{GEN x, long n, GEN p} return
 $\sum{i=0}^{n-1} \pi_i\*X^i$ where $\pi_i$ is the sum of the $i$th-power
 of the roots of $x$ in an algebraic closure.
@@ -6277,7 +6282,7 @@ of \kbd{a} and \kbd{b}. Assumes that $p$ is prime.
 
 \fun{ulong}{Flx_extresultant}{GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV}
 given two \kbd{Flx} \kbd{a} and \kbd{b},
-returns their resultant and sets Bezout coefficients (if the resultant is 0,
+returns their resultant and sets Bezout coefficients (if the resultant is $0$,
 the latter are not set). Assumes that $p$ is prime.
 
 \fun{ulong}{Flx_extresultant_pre}{GEN a, GEN b, ulong p, ulong pi, GEN *ptU, GEN *ptV}

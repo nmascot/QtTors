@@ -1063,6 +1063,97 @@ FpX_resultant(GEN x, GEN y, GEN p)
   return gerepileuptoint(av, Fp_mul(res, FpX_resultant_basecase(x, y, p), p));
 }
 
+/* If resultant is 0, *ptU and *ptV are not set */
+static GEN
+FpX_extresultant_basecase(GEN a, GEN b, GEN p, GEN *ptU, GEN *ptV)
+{
+  GEN z,q,u,v, x = a, y = b;
+  GEN lb, res = gen_1;
+  pari_sp av = avma;
+  long dx, dy, dz;
+  long vs = varn(a);
+  if (lgefint(p) == 3)
+  {
+    pari_sp av = avma;
+    ulong pp = to_Flx(&x, &y, p);
+    ulong resp = Flx_extresultant(x, y, pp, &u, &v);
+    if (!resp) return gc_const(av, gen_0);
+    res = utoi(resp);
+    *ptU = Flx_to_ZX(u); *ptV = Flx_to_ZX(v);
+    return gc_all(av, 3, &res, ptU, ptV);
+  }
+
+  dx = degpol(x);
+  dy = degpol(y);
+  if (dy > dx)
+  {
+    swap(x,y); lswap(dx,dy); pswap(ptU, ptV);
+    a = x; b = y;
+    if (both_odd(dx,dy)) res = Fp_neg(res,p);
+  }
+  /* dy <= dx */
+  if (dy < 0) return 0;
+
+  u = pol_0(vs);
+  v = pol_1(vs); /* v = 1 */
+  while (dy)
+  { /* b u = x (a), b v = y (a) */
+    lb = gel(y,dy+2);
+    q = FpX_divrem(x,y, p, &z);
+    x = y; y = z; /* (x,y) = (y, x - q y) */
+    dz = degpol(z); if (dz < 0) return gc_const(av,gen_0);
+    z = FpX_sub(u, FpX_mul(q,v, p), p);
+    u = v; v = z; /* (u,v) = (v, u - q v) */
+
+    if (both_odd(dx,dy)) res = Fp_neg(res, p);
+    if (!equali1(lb)) res = Fp_mul(res, Fp_powu(lb, dx-dz, p), p);
+    dx = dy; /* = degpol(x) */
+    dy = dz; /* = degpol(y) */
+  }
+  res = Fp_mul(res, Fp_powu(gel(y,2), dx, p), p);
+  lb = Fp_mul(res, Fp_inv(gel(y,2),p), p);
+  v = gerepileupto(av, FpX_Fp_mul(v, lb, p));
+  av = avma;
+  u = Fp_FpX_sub(res, FpX_mul(b,v,p), p);
+  u = gerepileupto(av, FpX_div(u,a,p)); /* = (res - b v) / a */
+  *ptU = u;
+  *ptV = v;
+  return res;
+}
+
+GEN
+FpX_extresultant(GEN x, GEN y, GEN p, GEN *ptU, GEN *ptV)
+{
+  pari_sp av=avma;
+  GEN u,v,R = matid2_FpXM(x[1]);
+  GEN res = gen_1, res1;
+  while (lgpol(y) >= FpX_EXTGCD_LIMIT)
+  {
+    GEN M, V;
+    if (lgpol(y)<=(lgpol(x)>>1))
+    {
+      GEN r = FpX_rem(x, y, p);
+      long dx = degpol(x), dy = degpol(y), dr = degpol(r);
+      GEN ly = gel(y,dy+2);
+      if (!equali1(ly)) res = Fp_mul(res, Fp_powu(ly, dx - dr, p), p);
+      if (both_odd(dx, dy))
+        res = Fp_neg(res, p);
+      x = y; y = r;
+    }
+    V = FpX_halfres(x, y, p, &res);
+    if (!signe(res)) return gc_const(av, gen_0);
+    M = gel(V,1); x = gel(V,2); y = gel(V,3);
+    R = FpXM_mul2(M, R, p);
+    gerepileall(av,3,&x,&y,&R);
+  }
+  res1 = FpX_extresultant_basecase(x,y,p,&u,&v);
+  if (!signe(res1)) return gc_const(av, gen_0);
+  *ptU = FpX_Fp_mul(FpX_addmulmul(u, v, gcoeff(R,1,1), gcoeff(R,2,1), p), res, p);
+  *ptV = FpX_Fp_mul(FpX_addmulmul(u, v, gcoeff(R,1,2), gcoeff(R,2,2), p), res, p);
+  res = Fp_mul(res1,res,p);
+  return gc_all(av, 3, &res, ptU, ptV);
+}
+
 GEN
 FpX_rescale(GEN P, GEN h, GEN p)
 {

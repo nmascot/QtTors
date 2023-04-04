@@ -802,6 +802,7 @@ GEN     FpX_divu(GEN x, ulong y, GEN p);
 GEN     FpX_dotproduct(GEN x, GEN y, GEN p);
 GEN     FpX_eval(GEN x,GEN y,GEN p);
 GEN     FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv);
+GEN     FpX_extresultant(GEN a, GEN b, GEN p, GEN *ptU, GEN *ptV);
 GEN     FpX_fromNewton(GEN P, GEN p);
 GEN     FpX_gcd(GEN x, GEN y, GEN p);
 GEN     FpX_gcd_check(GEN x, GEN y, GEN p);
