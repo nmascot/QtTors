@@ -368,6 +368,7 @@ GEN     Flv_roots_to_pol(GEN a, ulong p, long vs);
 GEN     Flv_to_Flx(GEN x, long vs);
 GEN     Flx_Fl_add(GEN y, ulong x, ulong p);
 GEN     Flx_Fl_mul(GEN y, ulong x, ulong p);
+GEN     Flx_Fl_mul_pre(GEN y, ulong x, ulong p, ulong pi);
 GEN     Flx_Fl_mul_to_monic(GEN y, ulong x, ulong p);
 GEN     Flx_Fl_sub(GEN y, ulong x, ulong p);
 GEN     Flx_Fl2_eval_pre(GEN x, GEN y, ulong D, ulong p, ulong pi);

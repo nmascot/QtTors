@@ -476,19 +476,29 @@ Flx_triple(GEN y, ulong p)
   for(i=2; i<l; i++) z[i] = Fl_triple(y[i], p);
   return Flx_renormalize(z, l);
 }
+
 GEN
-Flx_Fl_mul(GEN y, ulong x, ulong p)
+Flx_Fl_mul_pre(GEN y, ulong x, ulong p, ulong pi)
 {
   GEN z;
   long i, l;
   if (!x) return pol0_Flx(y[1]);
   z = cgetg_copy(y, &l); z[1] = y[1];
-  if (HIGHWORD(x | p))
-    for(i=2; i<l; i++) z[i] = Fl_mul(y[i], x, p);
-  else
-    for(i=2; i<l; i++) z[i] = (y[i] * x) % p;
+  if (pi==0)
+  {
+    if (HIGHWORD(x | p))
+      for(i=2; i<l; i++) z[i] = Fl_mul(uel(y,i), x, p);
+    else
+      for(i=2; i<l; i++) z[i] = (uel(y,i) * x) % p;
+  } else
+      for(i=2; i<l; i++) z[i] = Fl_mul_pre(uel(y,i), x, p, pi);
   return Flx_renormalize(z, l);
 }
+
+GEN
+Flx_Fl_mul(GEN x, ulong y, ulong p)
+{ return Flx_Fl_mul_pre(x, y, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
+
 GEN
 Flx_Fl_mul_to_monic(GEN y, ulong x, ulong p)
 {
@@ -1298,9 +1308,9 @@ Flx_invBarrett_pre(GEN T, ulong p, ulong pi)
     if (c != 1)
     {
       ulong ci = Fl_inv(c,p);
-      T = Flx_Fl_mul(T, ci, p);
+      T = Flx_Fl_mul_pre(T, ci, p, pi);
       r = Flx_invBarrett_basecase(T, p, pi);
-      r = Flx_Fl_mul(r, ci, p);
+      r = Flx_Fl_mul_pre(r, ci, p, pi);
     }
     else
       r = Flx_invBarrett_basecase(T, p, pi);
@@ -1418,7 +1428,7 @@ Flx_divrem_basecase(GEN x, GEN y, ulong p, ulong pi, GEN *pr)
   {
     if (pr && pr != ONLY_DIVIDES) *pr = pol0_Flx(sv);
     if (y[2] == 1UL) return Flx_copy(x);
-    return Flx_Fl_mul(x, Fl_inv(y[2], p), p);
+    return Flx_Fl_mul_pre(x, Fl_inv(y[2], p), p, pi);
   }
   dx = degpol(x);
   dz = dx-dy;
@@ -2390,7 +2400,7 @@ Flx_extresultant_pre(GEN a, GEN b, ulong p, ulong pi, GEN *ptU, GEN *ptV)
   }
   res = Fl_mul(res, Fl_powu_pre(y[2], dx, p, pi), p);
   lb = Fl_mul(res, Fl_inv(y[2],p), p);
-  v = gerepileuptoleaf(av, Flx_Fl_mul(v, lb, p));
+  v = gerepileuptoleaf(av, Flx_Fl_mul_pre(v, lb, p, pi));
   av = avma;
   u = Flx_sub(Fl_to_Flx(res,vs), Flx_mul_pre(b,v,p,pi), p);
   u = gerepileuptoleaf(av, Flx_div_pre(u,a,p,pi)); /* = (res - b v) / a */
@@ -2895,7 +2905,7 @@ Flxq_invsafe_pre(GEN x, GEN T, ulong p, ulong pi)
   ulong iz;
   if (degpol(z)) return NULL;
   iz = Fl_inv(uel(z,2), p);
-  return Flx_Fl_mul(V, iz, p);
+  return Flx_Fl_mul_pre(V, iz, p, pi);
 }
 GEN
 Flxq_invsafe(GEN x, GEN T, ulong p)

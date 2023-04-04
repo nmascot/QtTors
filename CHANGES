@@ -21,6 +21,7 @@ HC   2- dirpowerssum: add optional flag 'both' [also in library mode]
 BA   2- [libpari] Flx_extresultant_pre, FlxqX_resultant_pre
 BA   3- [libpari] gc_stoi, gc_utoi, gc_utoipos
 BA   4- [libpari] F2xX_shift
+BA   5- [libpari] Flx_Fl_mul_pre
 
 Done for version 2.16.0 (released 25/02/2023):
   Fixed
