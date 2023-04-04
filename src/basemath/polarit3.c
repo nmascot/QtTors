@@ -1542,10 +1542,9 @@ FpX_FpXY_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la, long db, long vX)
 /* assume dres := deg(Res_X(a,b), Y) <= deg(a,X) * deg(b,Y) < p */
 /* Return a Fly */
 static GEN
-Flx_FlxY_resultant_polint(GEN a, GEN b, ulong p, long dres, long sx)
+Flx_FlxY_resultant_polint(GEN a, GEN b, ulong p, ulong pi, long dres, long sx)
 {
   long i;
-  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
   ulong n, la = Flx_lead(a);
   GEN  x = cgetg(dres+2, t_VECSMALL);
   GEN  y = cgetg(dres+2, t_VECSMALL);
@@ -1669,17 +1668,20 @@ FlxY_to_FlyX(GEN b, long sv)
 
 /* Return a Fly*/
 GEN
-Flx_FlxY_resultant(GEN a, GEN b, ulong pp)
+Flx_FlxY_resultant(GEN a, GEN b, ulong p)
 {
   pari_sp ltop=avma;
   long dres = degpol(a)*degpol(b);
   long sx=a[1], sy=b[1]&VARNBITS;
   GEN z;
   b = FlxY_to_FlyX(b,sx);
-  if ((ulong)dres >= pp)
-    z = FlxX_resultant(Fly_to_FlxY(a, sy), b, pp, sx);
+  if ((ulong)dres >= p)
+    z = FlxX_resultant(Fly_to_FlxY(a, sy), b, p, sx);
   else
-    z = Flx_FlxY_resultant_polint(a, b, pp, (ulong)dres, sy);
+  {
+    ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+    z = Flx_FlxY_resultant_polint(a, b, p, pi, (ulong)dres, sy);
+  }
   return gerepileupto(ltop,z);
 }
 
@@ -2656,7 +2658,8 @@ ZX_ZXY_resultant_prime(GEN a, GEN b, ulong dp, ulong p,
                        long degA, long degB, long dres, long sX)
 {
   long dropa = degA - degpol(a), dropb = degB - degpol(b);
-  GEN Hp = Flx_FlxY_resultant_polint(a, b, p, dres, sX);
+  ulong pi = SMALL_ULONG(p)? 0: get_Fl_red(p);
+  GEN Hp = Flx_FlxY_resultant_polint(a, b, p, pi, dres, sX);
   if (dropa && dropb)
     Hp = zero_Flx(sX);
   else {
@@ -2665,18 +2668,18 @@ ZX_ZXY_resultant_prime(GEN a, GEN b, ulong dp, ulong p,
       GEN c = gel(b,degB+2); /* lc(B) */
       if (odd(degB)) c = Flx_neg(c, p);
       if (!Flx_equal1(c)) {
-        c = Flx_powu(c, dropa, p);
-        if (!Flx_equal1(c)) Hp = Flx_mul(Hp, c, p);
+        c = Flx_powu_pre(c, dropa, p, pi);
+        if (!Flx_equal1(c)) Hp = Flx_mul_pre(Hp, c, p, pi);
       }
     }
     else if (dropb)
     { /* multiply by lc(A)^(deg B - deg b) */
       ulong c = uel(a, degA+2); /* lc(A) */
       c = Fl_powu(c, dropb, p);
-      if (c != 1) Hp = Flx_Fl_mul(Hp, c, p);
+      if (c != 1) Hp = Flx_Fl_mul_pre(Hp, c, p, pi);
     }
   }
-  if (dp != 1) Hp = Flx_Fl_mul(Hp, Fl_powu(Fl_inv(dp,p), degA, p), p);
+  if (dp != 1) Hp = Flx_Fl_mul_pre(Hp, Fl_powu_pre(Fl_inv(dp,p), degA, p, pi), p, pi);
   return Hp;
 }
 
