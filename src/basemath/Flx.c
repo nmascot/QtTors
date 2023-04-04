@@ -2362,14 +2362,14 @@ Flx_resultant(GEN a, GEN b, ulong p)
 { return Flx_resultant_pre(a, b, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 /* If resultant is 0, *ptU and *ptV are not set */
-ulong
-Flx_extresultant_pre(GEN a, GEN b, ulong p, ulong pi, GEN *ptU, GEN *ptV)
+static ulong
+Flx_extresultant_basecase(GEN a, GEN b, ulong p, ulong pi, GEN *ptU, GEN *ptV)
 {
   GEN z,q,u,v, x = a, y = b;
   ulong lb, res = 1UL;
   pari_sp av = avma;
   long dx, dy, dz;
-  long vs=a[1];
+  long vs = a[1];
 
   dx = degpol(x);
   dy = degpol(y);
@@ -2406,6 +2406,40 @@ Flx_extresultant_pre(GEN a, GEN b, ulong p, ulong pi, GEN *ptU, GEN *ptV)
   u = gerepileuptoleaf(av, Flx_div_pre(u,a,p,pi)); /* = (res - b v) / a */
   *ptU = u;
   *ptV = v; return res;
+}
+
+ulong
+Flx_extresultant_pre(GEN x, GEN y, ulong p, ulong pi, GEN *ptU, GEN *ptV)
+{
+  pari_sp av=avma;
+  GEN u,v,R = matid2_FlxM(x[1]);
+  long lim = get_Fl_threshold(p, Flx_EXTGCD_LIMIT, Flx_EXTGCD2_LIMIT);
+  ulong res = 1, res1;
+  while (lgpol(y) >= lim)
+  {
+    GEN M, V;
+    if (lgpol(y)<=(lgpol(x)>>1))
+    {
+      GEN r = Flx_rem_pre(x, y, p, pi);
+      long dx = degpol(x), dy = degpol(y), dr = degpol(r);
+      ulong ly = y[dy+2];
+      if (ly != 1) res = Fl_mul(res, Fl_powu_pre(ly, dx - dr, p, pi), p);
+      if (both_odd(dx, dy))
+        res = Fl_neg(res, p);
+      x = y; y = r;
+    }
+    V = Flx_halfres_pre(x, y, p, pi, &res);
+    if (!res) return gc_ulong(av, 0);
+    M = gel(V,1); x = gel(V,2); y = gel(V,3);
+    R = FlxM_mul2(M, R, p, pi);
+    gerepileall(av,3,&x,&y,&R);
+  }
+  res1 = Flx_extresultant_basecase(x,y,p,pi,&u,&v);
+  if (!res1) return gc_ulong(av, 0);
+  *ptU = Flx_Fl_mul_pre(Flx_addmulmul(u, v, gcoeff(R,1,1), gcoeff(R,2,1), p, pi), res, p, pi);
+  *ptV = Flx_Fl_mul_pre(Flx_addmulmul(u, v, gcoeff(R,1,2), gcoeff(R,2,2), p, pi), res, p, pi);
+  gerepileall(av, 2, ptU, ptV);
+  return Fl_mul(res1,res,p);
 }
 
 ulong
