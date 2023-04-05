@@ -325,6 +325,13 @@ mt_err_recover(long er)
   if (pari_MPI_rank) longjmp(child_env,er);
   else mtsingle_err_recover(er);
 }
+
+void
+mt_break_recover(void)
+{
+  if (!pari_MPI_rank) mtsingle_err_recover(0);
+}
+
 void mt_sigint_block(void) { }
 void mt_sigint_unblock(void) { }
 void mt_sigint(void) {}

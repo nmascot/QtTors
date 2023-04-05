@@ -1505,6 +1505,7 @@ pari_sigint(const char *time_s)
   int recover=0;
   BLOCK_SIGALRM_START
   err_init();
+  mt_break_recover();
   closure_err(0);
   err_init_msg(0);
   out_puts(pariErr, "user interrupt after ");

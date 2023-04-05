@@ -69,7 +69,6 @@ mt_sigint_unblock(void)
 void
 mt_err_recover(long er)
 {
-  (void) er;
   if (mt_thread_no>=0)
   {
     struct mt_pstate *mt = pari_mt;
@@ -84,6 +83,12 @@ mt_err_recover(long er)
     pthread_exit((void*)1);
   }
   else mtsingle_err_recover(er);
+}
+
+void
+mt_break_recover(void)
+{
+  if (mt_thread_no<0) mtsingle_err_recover(0);
 }
 
 void

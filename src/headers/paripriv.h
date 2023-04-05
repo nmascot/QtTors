@@ -159,6 +159,7 @@ GEN  listcreate_gp(long n);
 /* mt */
 void mt_sigint(void);
 void mt_err_recover(long er);
+void mt_break_recover(void);
 void mt_export_add(const char *str, GEN val);
 void mt_export_del(const char *str);
 void mt_init_stack(size_t s);
