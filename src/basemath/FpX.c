@@ -1112,10 +1112,9 @@ FpX_extresultant_basecase(GEN a, GEN b, GEN p, GEN *ptU, GEN *ptV)
   }
   res = Fp_mul(res, Fp_powu(gel(y,2), dx, p), p);
   lb = Fp_mul(res, Fp_inv(gel(y,2),p), p);
-  v = gerepileupto(av, FpX_Fp_mul(v, lb, p));
-  av = avma;
+  v = FpX_Fp_mul(v, lb, p);
   u = Fp_FpX_sub(res, FpX_mul(b,v,p), p);
-  u = gerepileupto(av, FpX_div(u,a,p)); /* = (res - b v) / a */
+  u = FpX_div(u,a,p); /* = (res - b v) / a */
   *ptU = u;
   *ptV = v;
   return res;
@@ -1144,7 +1143,7 @@ FpX_extresultant(GEN x, GEN y, GEN p, GEN *ptU, GEN *ptV)
     if (!signe(res)) return gc_const(av, gen_0);
     M = gel(V,1); x = gel(V,2); y = gel(V,3);
     R = FpXM_mul2(M, R, p);
-    gerepileall(av,3,&x,&y,&R);
+    gerepileall(av,4,&x,&y,&R,&res);
   }
   res1 = FpX_extresultant_basecase(x,y,p,&u,&v);
   if (!signe(res1)) return gc_const(av, gen_0);
