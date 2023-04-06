@@ -805,6 +805,7 @@ lindep_Xadic(GEN x)
 
   if (lx == 1) return cgetg(1,t_COL);
   vx = gvar(x);
+  if (gequal0(x)) return col_ei(lx-1,1);
   v = gvaluation(x, pol_x(vx));
   if (!v)         x = shallowcopy(x);
   else if (v > 0) x = gdiv(x, pol_xn(v, vx));
