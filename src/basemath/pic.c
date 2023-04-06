@@ -5251,7 +5251,7 @@ PicTorsBasis(GEN J, GEN l, GEN Chi)
   if(gequal0(Lp))
     pari_err(e_MISC,"This Jacobian does not contain its local L factor, which is required for point counting");
   a = degree(JgetT(J)); /* Residual degree */
-	if(gequal0(Chi)) Chi = NULL;
+	if(Chi && gequal0(Chi)) Chi = NULL;
   if(Chi)
   {
     d = degree(Chi); /* dim T */
