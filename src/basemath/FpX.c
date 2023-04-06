@@ -1072,16 +1072,6 @@ FpX_extresultant_basecase(GEN a, GEN b, GEN p, GEN *ptU, GEN *ptV)
   pari_sp av = avma;
   long dx, dy, dz;
   long vs = varn(a);
-  if (lgefint(p) == 3)
-  {
-    pari_sp av = avma;
-    ulong pp = to_Flx(&x, &y, p);
-    ulong resp = Flx_extresultant(x, y, pp, &u, &v);
-    if (!resp) return gc_const(av, gen_0);
-    res = utoi(resp);
-    *ptU = Flx_to_ZX(u); *ptV = Flx_to_ZX(v);
-    return gc_all(av, 3, &res, ptU, ptV);
-  }
 
   dx = degpol(x);
   dy = degpol(y);
@@ -1124,8 +1114,19 @@ GEN
 FpX_extresultant(GEN x, GEN y, GEN p, GEN *ptU, GEN *ptV)
 {
   pari_sp av=avma;
-  GEN u,v,R = matid2_FpXM(x[1]);
-  GEN res = gen_1, res1;
+  GEN u, v, R;
+  GEN res, res1;
+  if (lgefint(p) == 3)
+  {
+    pari_sp av = avma;
+    ulong pp = to_Flx(&x, &y, p);
+    ulong resp = Flx_extresultant(x, y, pp, &u, &v);
+    if (!resp) return gc_const(av, gen_0);
+    res = utoi(resp);
+    *ptU = Flx_to_ZX(u); *ptV = Flx_to_ZX(v);
+    return gc_all(av, 3, &res, ptU, ptV);
+  }
+  R = matid2_FpXM(x[1]); res = gen_1;
   while (lgpol(y) >= FpX_EXTGCD_LIMIT)
   {
     GEN M, V;
