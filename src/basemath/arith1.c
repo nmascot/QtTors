@@ -1289,10 +1289,13 @@ chinese(GEN x, GEN y)
       if (lx < ly) { swap(x,y); lswap(lx,ly); }
       z = cgetg(lx, t_POL); z[1] = x[1];
       for (i=2; i<ly; i++) gel(z,i) = chinese(gel(x,i),gel(y,i));
-      for (   ; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
+      if (i < lx)
+      {
+        GEN _0 = Rg_get_0(y);
+        for (   ; i<lx; i++) gel(z,i) = chinese(gel(x,i),_0);
+      }
       return z;
     }
-
     case t_VEC: case t_COL: case t_MAT:
     {
       long i, lx;

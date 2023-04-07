@@ -11,6 +11,7 @@ HC   7- precision loss in gammamellininv [#2462]
 BA   8- [pthread] parselect could crash
 BA   9- rare infinite loop in ellsaturation
 BA  10- quadunitindex(8461,2)->1 instead of 3 [#2466]
+BA  11- chinese(Mod(1,3)*(x^2+x+2),Mod(1,5)*(x-1)) -> incorrect leading term
 
   Changed
 HC   1- dirpowerssum: allow functions with t_VEC output

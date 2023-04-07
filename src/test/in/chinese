@@ -7,4 +7,4 @@ chinese([])
 chinese(Mod(1+x,x^2),Mod(0,1))
 chinese(Mod(1+x,x^2),Mod(1,2))
 chinese(Mod(0,1),Mod(1+x,x^2))
-
+chinese(Mod(1,3)*(x^2+x+2),Mod(1,5)*(x-1))
