@@ -2799,23 +2799,15 @@ RgX_halfgcd_FpX(GEN x, GEN y, GEN p)
   GEN M, V, a, b;
   if (lgefint(p) == 3)
   {
-    ulong pp = uel(p, 2), pi = SMALL_ULONG(pp)? 0: get_Fl_red(pp);
+    ulong pp = uel(p, 2);
     GEN xp = RgX_to_Flx(x, pp), yp = RgX_to_Flx(y, pp);
-    M = Flx_halfgcd_pre(xp, yp, pp, pi);
-    a = Flx_add(Flx_mul_pre(gcoeff(M,1,1), xp, pp, pi),
-                Flx_mul_pre(gcoeff(M,1,2), yp, pp, pi), pp);
-    b = Flx_add(Flx_mul_pre(gcoeff(M,2,1), xp, pp, pi),
-                Flx_mul_pre(gcoeff(M,2,2), yp, pp, pi), pp);
+    M = Flx_halfgcd_all(xp, yp, pp, &a, &b);
     M = FlxM_to_ZXM(M); a = Flx_to_ZX(a); b = Flx_to_ZX(b);
   }
   else
   {
     x = RgX_to_FpX(x, p); y = RgX_to_FpX(y, p);
-    M = FpX_halfgcd(x, y, p);
-    a = FpX_add(FpX_mul(gcoeff(M,1,1), x, p),
-                FpX_mul(gcoeff(M,1,2), y, p), p);
-    b = FpX_add(FpX_mul(gcoeff(M,2,1), x, p),
-                FpX_mul(gcoeff(M,2,2), y, p), p);
+    M = FpX_halfgcd_all(x, y, p, &a, &b);
   }
   V = mkcol2(a, b);
   return gerepilecopy(av, mkvec2(FpXM_to_mod(M, p), FpXC_to_mod(V, p)));

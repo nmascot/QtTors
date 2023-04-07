@@ -203,21 +203,17 @@ Flxq_log_find_rel(GEN b, long r, GEN T, ulong p, ulong pi, GEN *g, long *e)
   pari_sp av = avma;
   while (1)
   {
-    GEN M;
+    GEN M, z;
     *g = Flxq_mul_pre(*g, b, T, p, pi); (*e)++;
-    M = Flx_halfgcd_pre(*g,T,p,pi);
-    if (Flx_is_smooth_pre(gcoeff(M,1,1), r, p, pi))
+    M = Flx_halfgcd_all_pre(*g,T,p,pi,&z,NULL);
+    if (Flx_is_smooth_pre(gcoeff(M,1,1), r, p, pi)
+     && Flx_is_smooth_pre(z, r, p, pi))
     {
-      GEN z = Flx_add(Flx_mul_pre(gcoeff(M,1,1),*g,p,pi),
-                      Flx_mul_pre(gcoeff(M,1,2),T,p,pi),p);
-      if (Flx_is_smooth_pre(z, r, p, pi))
-      {
-        GEN F = factorel(z, p);
-        GEN G = factorel(gcoeff(M,1,1), p);
-        GEN rel = mkmat2(vecsmall_concat(gel(F, 1),gel(G, 1)),
-                         vecsmall_concat(gel(F, 2),zv_neg(gel(G, 2))));
-        return gc_all(av,2,&rel,g);
-      }
+      GEN F = factorel(z, p);
+      GEN G = factorel(gcoeff(M,1,1), p);
+      GEN rel = mkmat2(vecsmall_concat(gel(F, 1),gel(G, 1)),
+          vecsmall_concat(gel(F, 2),zv_neg(gel(G, 2))));
+      return gc_all(av,2,&rel,g);
     }
     if (gc_needed(av,2))
     {

@@ -4970,10 +4970,15 @@ greatest common divisor of $x$  and $y$.
 $M$ with determinant $\pm 1$ such that the image $(a,b)$ of $(x,y)$ by $M$
 has the property that $\deg a \geq {\deg x \over 2} > \deg b$.
 
+\fun{GEN}{FpX_halfgcd_all}{GEN x, GEN y, GEN p, GEN *pt_a, GEN *pt_b}
+as \kbd{FpX\_halfgcd}, in addition, if \kbd{pt\_a} (resp. \kbd{pt\_b}) is not
+\kbd{NULL}, \kbd{*pt\_a} (resp. \kbd{*pt\_b})
+is set to \kbd{a} (resp. \kbd{b}).
+
 \fun{GEN}{FpX_extgcd}{GEN x, GEN y, GEN p, GEN *u, GEN *v} returns
 $d = \text{GCD}(\kbd{x},\kbd{y})$ (not necessarily monic), and sets \kbd{*u},
 \kbd{*v} to the Bezout coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
-If \kbd{*u} is set to \kbd{NULL}, it is not computed which is a bit faster.
+If \kbd{u} is \kbd{NULL}, \kbd{*u} is not computed which is a bit faster.
 This is useful when computing the inverse of $y$ modulo $x$.
 
 \fun{GEN}{FpX_center}{GEN z, GEN p, GEN pov2} returns the polynomial whose
@@ -6184,6 +6189,10 @@ has the property that $\deg a \geq {\deg x \over 2} > \deg b$.
 Assumes that $p$ is prime.
 
 \fun{GEN}{Flx_halfgcd_pre}{GEN a, GEN b, ulong p}
+
+\fun{GEN}{Flx_halfgcd_all}{GEN x, GEN y, ulong p, GEN *pt_a, GEN *pt_b}
+
+\fun{GEN}{Flx_halfgcd_all_pre}{GEN x, GEN y, ulong p, GEN *pt_a, GEN *pt_b}
 
 \fun{GEN}{Flx_extgcd}{GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv},
 here $p$ must be prime.

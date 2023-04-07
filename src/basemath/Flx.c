@@ -1961,12 +1961,11 @@ Flx_halfres_update_pre(long da, long db, long dr, ulong p, ulong pi, struct Flx_
 }
 
 static GEN
-Flx_halfres_basecase(GEN a, GEN b, ulong p, ulong pi, struct Flx_res *res)
+Flx_halfres_basecase(GEN a, GEN b, ulong p, ulong pi, GEN *pa, GEN *pb, struct Flx_res *res)
 {
-  pari_sp av=avma;
-  GEN u,u1,v,v1;
-  long vx = a[1];
-  long n = lgpol(a)>>1;
+  pari_sp av = avma;
+  GEN u, u1, v, v1, M;
+  long vx = a[1], n = lgpol(a)>>1;
   u1 = v = pol0_Flx(vx);
   u = v1 = pol1_Flx(vx);
   while (lgpol(b)>n)
@@ -1994,19 +1993,21 @@ Flx_halfres_basecase(GEN a, GEN b, ulong p, ulong pi, struct Flx_res *res)
       gerepileall(av,6, &a,&b,&u1,&v1,&u,&v);
     }
   }
-  return gerepilecopy(av, mkmat22(u,v,u1,v1));
+  M = mkmat22(u,v,u1,v1); *pa = a; *pb = b;
+  return gc_all(av,3, &M, pa, pb);
 }
 
-static GEN Flx_halfres_i(GEN x, GEN y, ulong p, ulong pi, struct Flx_res *res);
+static GEN Flx_halfres_i(GEN x, GEN y, ulong p, ulong pi, GEN *a, GEN *b, struct Flx_res *res);
 
 static GEN
-Flx_halfres_split(GEN x, GEN y, ulong p, ulong pi, struct Flx_res *res)
+Flx_halfres_split(GEN x, GEN y, ulong p, ulong pi, GEN *a, GEN *b, struct Flx_res *res)
 {
   pari_sp av = avma;
-  GEN R, S, V;
+  GEN R, S, T, V1, V2;
   GEN x1, y1, r, q;
   long l = lgpol(x), n = l>>1, k;
-  if (lgpol(y) <= n) return matid2_FlxM(x[1]);
+  if (lgpol(y) <= n)
+    { *a = Flx_copy(x); *b = Flx_copy(y); return matid2_FlxM(x[1]); }
   if (res)
   {
      res->lc = Flx_lead(y);
@@ -2014,15 +2015,18 @@ Flx_halfres_split(GEN x, GEN y, ulong p, ulong pi, struct Flx_res *res)
      res->deg1 -= n;
      res->off += n;
   }
-  R = Flx_halfres_i(Flx_shift(x,-n),Flx_shift(y,-n),p,pi,res);
+  R = Flx_halfres_i(Flx_shift(x,-n),Flx_shift(y,-n),p,pi,a,b,res);
   if (res)
   {
     res->off -= n;
     res->deg0 += n;
     res->deg1 += n;
   }
-  V = FlxM_Flx_mul2(R,x,y,p,pi); x1 = gel(V,1); y1 = gel(V,2);
-  if (lgpol(y1) <= n) return gerepilecopy(av, R);
+  V1 = FlxM_Flx_mul2(R, Flxn_red(x,n), Flxn_red(y,n), p, pi);
+  x1 = Flx_add(Flx_shift(*a,n), gel(V1,1), p);
+  y1 = Flx_add(Flx_shift(*b,n), gel(V1,2), p);
+  if (lgpol(y1) <= n)
+    { *a = x1; *b = y1; return gc_all(av, 3, &R, a, b); }
   k = 2*n-degpol(y1);
   q = Flx_divrem_pre(x1, y1, p, pi, &r);
   if (res)
@@ -2030,7 +2034,7 @@ Flx_halfres_split(GEN x, GEN y, ulong p, ulong pi, struct Flx_res *res)
     long dx1 = degpol(x1), dy1 = degpol(y1), dr = degpol(r);
     if (dy1 < degpol(y))
       Flx_halfres_update_pre(res->deg0, res->deg1, dy1, p, pi, res);
-    res->lc = Flx_lead(y1);
+    res->lc = uel(y1, dy1+2);
     res->deg0 = dx1;
     res->deg1 = dy1;
     if (dr >= n)
@@ -2043,47 +2047,70 @@ Flx_halfres_split(GEN x, GEN y, ulong p, ulong pi, struct Flx_res *res)
     res->deg1 -= k;
     res->off += k;
   }
-  S = Flx_halfres_i(Flx_shift(y1,-k), Flx_shift(r,-k),p,pi,res);
+  S = Flx_halfres_i(Flx_shift(y1,-k), Flx_shift(r,-k), p, pi, a, b, res);
   if (res)
   {
     res->deg0 += k;
     res->deg1 += k;
     res->off -= k;
   }
-  return gerepileupto(av, FlxM_mul2(S,Flx_FlxM_qmul(q,R,p,pi),p,pi));
+  T = FlxM_mul2(S, Flx_FlxM_qmul(q, R, p,pi), p, pi);
+  V2 = FlxM_Flx_mul2(S, Flxn_red(y1,k), Flxn_red(r,k), p, pi);
+  *a = Flx_add(Flx_shift(*a,k), gel(V2,1), p);
+  *b = Flx_add(Flx_shift(*b,k), gel(V2,2), p);
+  return gc_all(av, 3, &T, a, b);
 }
 
 static GEN
-Flx_halfres_i(GEN x, GEN y, ulong p, ulong pi,struct Flx_res *res)
+Flx_halfres_i(GEN x, GEN y, ulong p, ulong pi, GEN *a, GEN *b, struct Flx_res *res)
 {
   if (lgpol(x) < get_Fl_threshold(p, Flx_HALFGCD_LIMIT, Flx_HALFGCD2_LIMIT))
-    return Flx_halfres_basecase(x, y, p, pi, res);
-  return Flx_halfres_split(x, y, p, pi, res);
+    return Flx_halfres_basecase(x, y, p, pi, a, b, res);
+  return Flx_halfres_split(x, y, p, pi, a, b, res);
 }
 
 static GEN
-Flx_halfgcd_i(GEN x, GEN y, ulong p, ulong pi)
-{ return Flx_halfres_i(x, y, p, pi, NULL); }
+Flx_halfgcd_all_i(GEN x, GEN y, ulong p, ulong pi, GEN *pa, GEN *pb)
+{
+  GEN a, b, R;
+  R = Flx_halfres_i(x, y, p, pi, &a, &b, NULL);
+  if (pa) *pa = a;
+  if (pb) *pb = b;
+  return R;
+}
 
 /* Return M in GL_2(Fl[X]) such that:
 if [a',b']~=M*[a,b]~ then degpol(a')>= (lgpol(a)>>1) >degpol(b')
 */
 
 GEN
-Flx_halfgcd_pre(GEN x, GEN y, ulong p, ulong pi)
+Flx_halfgcd_all_pre(GEN x, GEN y, ulong p, ulong pi, GEN *a, GEN *b)
 {
   pari_sp av;
-  GEN M,q,r;
-  long lx=lgpol(x), ly=lgpol(y);
-  if (!lx) return matJ2_FlxM(x[1]);
-  if (ly < lx) return Flx_halfgcd_i(x,y,p,pi);
+  GEN R, q ,r;
+  long lx = lgpol(x), ly = lgpol(y);
+  if (!lx)
+  {
+    if (a) *a = Flx_copy(y);
+    if (b) *b = Flx_copy(x);
+    return matJ2_FlxM(x[1]);
+  }
+  if (ly < lx) return Flx_halfgcd_all_i(x, y, p, pi, a, b);
   av = avma;
   q = Flx_divrem(y,x,p,&r);
-  M = Flx_halfgcd_i(x,r,p,pi);
-  gcoeff(M,1,1) = Flx_sub(gcoeff(M,1,1), Flx_mul_pre(q,gcoeff(M,1,2), p,pi), p);
-  gcoeff(M,2,1) = Flx_sub(gcoeff(M,2,1), Flx_mul_pre(q,gcoeff(M,2,2), p,pi), p);
-  return gerepilecopy(av, M);
+  R = Flx_halfgcd_all_i(x, r, p, pi, a, b);
+  gcoeff(R,1,1) = Flx_sub(gcoeff(R,1,1), Flx_mul_pre(q,gcoeff(R,1,2), p,pi), p);
+  gcoeff(R,2,1) = Flx_sub(gcoeff(R,2,1), Flx_mul_pre(q,gcoeff(R,2,2), p,pi), p);
+  return !a && b ? gc_all(av, 2, &R, b): gc_all(av, 1+!!a+!!b, &R, a, b);
 }
+
+GEN
+Flx_halfgcd_all(GEN x, GEN y, ulong p, GEN *a, GEN *b)
+{ return Flx_halfgcd_all_pre(x, y, p, SMALL_ULONG(p)? 0: get_Fl_red(p), a, b); }
+
+GEN
+Flx_halfgcd_pre(GEN x, GEN y, ulong p, ulong pi)
+{ return Flx_halfgcd_all_pre(x, y, p, pi, NULL, NULL); }
 
 GEN
 Flx_halfgcd(GEN x, GEN y, ulong p)
@@ -2118,14 +2145,12 @@ Flx_gcd_pre(GEN x, GEN y, ulong p, ulong pi)
   lim = get_Fl_threshold(p, Flx_GCD_LIMIT, Flx_GCD2_LIMIT);
   while (lgpol(y) >= lim)
   {
-    GEN c;
     if (lgpol(y)<=(lgpol(x)>>1))
     {
       GEN r = Flx_rem_pre(x, y, p, pi);
       x = y; y = r;
     }
-    c = FlxM_Flx_mul2(Flx_halfgcd_pre(x, y, p, pi), x, y, p, pi);
-    x = gel(c,1); y = gel(c,2);
+    (void) Flx_halfgcd_all_pre(x, y, p, pi, &x, &y);
     if (gc_needed(av,2))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"Flx_gcd (y = %ld)",degpol(y));
@@ -2215,21 +2240,18 @@ static GEN
 Flx_extgcd_halfgcd(GEN x, GEN y, ulong p, ulong pi, GEN *ptu, GEN *ptv)
 {
   pari_sp av=avma;
-  GEN u,v,R = matid2_FlxM(x[1]);
+  GEN u, v, R = matid2_FlxM(x[1]), S;
   long lim = get_Fl_threshold(p, Flx_EXTGCD_LIMIT, Flx_EXTGCD2_LIMIT);
   while (lgpol(y) >= lim)
   {
-    GEN M, c;
     if (lgpol(y)<=(lgpol(x)>>1))
     {
       GEN r, q = Flx_divrem_pre(x, y, p, pi, &r);
       x = y; y = r;
       R = Flx_FlxM_qmul(q, R, p, pi);
     }
-    M = Flx_halfgcd_pre(x,y, p, pi);
-    c = FlxM_Flx_mul2(M, x,y, p, pi);
-    R = FlxM_mul2(M, R, p, pi);
-    x = gel(c,1); y = gel(c,2);
+    S = Flx_halfgcd_all_pre(x, y, p, pi, &x, &y);
+    R = FlxM_mul2(S, R, p, pi);
     gerepileall(av,3,&x,&y,&R);
   }
   y = Flx_extgcd_basecase(x,y,p,pi,&u,&v);
@@ -2257,36 +2279,33 @@ Flx_extgcd(GEN x, GEN y, ulong p, GEN *ptu, GEN *ptv)
 { return Flx_extgcd_pre(x, y, p, SMALL_ULONG(p)? 0: get_Fl_red(p), ptu, ptv); }
 
 static GEN
-Flx_halfres_pre(GEN a, GEN b, ulong p, ulong pi, ulong *r)
+Flx_halfres_pre(GEN x, GEN y, ulong p, ulong pi, GEN *a, GEN *b, ulong *r)
 {
   struct Flx_res res;
-  GEN M, V, A, B;
+  GEN R;
   long dB;
 
   res.res  = *r;
-  res.lc   = Flx_lead(b);
-  res.deg0 = degpol(a);
-  res.deg1 = degpol(b);
+  res.lc   = Flx_lead(y);
+  res.deg0 = degpol(x);
+  res.deg1 = degpol(y);
   res.off = 0;
-  M = Flx_halfres_i(a, b, p, pi, &res);
-  V = FlxM_Flx_mul2(M, a, b, p, pi);
-  A = gel(V,1); B = gel(V,2); dB = degpol(B);
-
-  if (dB < degpol(b))
+  R = Flx_halfres_i(x, y, p, pi, a, b, &res);
+  dB = degpol(*b);
+  if (dB < degpol(y))
     Flx_halfres_update_pre(res.deg0, res.deg1, dB, p, pi, &res);
   *r = res.res;
-  return mkvec3(M,A,B);
+  return R;
 }
 
 static ulong
 Flx_resultant_basecase_pre(GEN a, GEN b, ulong p, ulong pi)
 {
-  long da,db,dc,cnt;
-  ulong lb, res = 1UL;
   pari_sp av;
+  long da,db,dc;
+  ulong lb, res = 1UL;
   GEN c;
 
-  if (lgpol(a)==0 || lgpol(b)==0) return 0;
   da = degpol(a);
   db = degpol(b);
   if (db > da)
@@ -2295,7 +2314,7 @@ Flx_resultant_basecase_pre(GEN a, GEN b, ulong p, ulong pi)
     if (both_odd(da,db)) res = p-res;
   }
   else if (!da) return 1; /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
-  cnt = 0; av = avma;
+  av = avma;
   while (db)
   {
     lb = b[db+2];
@@ -2305,7 +2324,11 @@ Flx_resultant_basecase_pre(GEN a, GEN b, ulong p, ulong pi)
 
     if (both_odd(da,db)) res = p - res;
     if (lb != 1) res = Fl_mul(res, Fl_powu_pre(lb, da - dc, p, pi), p);
-    if (++cnt == 100) { cnt = 0; gerepileall(av, 2, &a, &b); }
+    if (gc_needed(av,2))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"Flx_resultant (da = %ld)",da);
+      gerepileall(av,2, &a,&b);
+    }
     da = db; /* = degpol(a) */
     db = dc; /* = degpol(b) */
   }
@@ -2329,7 +2352,6 @@ Flx_resultant_pre(GEN x, GEN y, ulong p, ulong pi)
   lim = get_Fl_threshold(p, Flx_GCD_LIMIT, Flx_GCD2_LIMIT);
   while (lgpol(y) >= lim)
   {
-    GEN c;
     if (lgpol(y)<=(lgpol(x)>>1))
     {
       GEN r = Flx_rem_pre(x, y, p, pi);
@@ -2340,8 +2362,7 @@ Flx_resultant_pre(GEN x, GEN y, ulong p, ulong pi)
         res = Fl_neg(res, p);
       x = y; y = r;
     }
-    c = Flx_halfres_pre(x, y, p, pi, &res);
-    x = gel(c,2); y = gel(c,3);
+    (void) Flx_halfres_pre(x, y, p, pi, &x, &y, &res);
     if (gc_needed(av,2))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"Flx_res (y = %ld)",degpol(y));
@@ -2406,12 +2427,12 @@ ulong
 Flx_extresultant_pre(GEN x, GEN y, ulong p, ulong pi, GEN *ptU, GEN *ptV)
 {
   pari_sp av=avma;
-  GEN u,v,R = matid2_FlxM(x[1]);
+  GEN u, v, R = matid2_FlxM(x[1]);
   long lim = get_Fl_threshold(p, Flx_EXTGCD_LIMIT, Flx_EXTGCD2_LIMIT);
   ulong res = 1, res1;
   while (lgpol(y) >= lim)
   {
-    GEN M, V;
+    GEN M;
     if (lgpol(y)<=(lgpol(x)>>1))
     {
       GEN r = Flx_rem_pre(x, y, p, pi);
@@ -2422,9 +2443,8 @@ Flx_extresultant_pre(GEN x, GEN y, ulong p, ulong pi, GEN *ptU, GEN *ptV)
         res = Fl_neg(res, p);
       x = y; y = r;
     }
-    V = Flx_halfres_pre(x, y, p, pi, &res);
+    M = Flx_halfres_pre(x, y, p, pi, &x, &y, &res);
     if (!res) return gc_ulong(av, 0);
-    M = gel(V,1); x = gel(V,2); y = gel(V,3);
     R = FlxM_mul2(M, R, p, pi);
     gerepileall(av,3,&x,&y,&R);
   }
