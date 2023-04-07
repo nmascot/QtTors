@@ -2,7 +2,7 @@ Function: algdep
 Section: linear_algebra
 C-Name: algdep0
 Prototype: GLD0,L,
-Help: algdep(z,k,{flag=0}): algebraic relations up to degree n of z, using
+Help: algdep(z,k,{flag=0}): algebraic relations up to degree k of z, using
  lindep([1,z,...,z^(k-1)], flag).
 Doc: \sidx{algebraic dependence}
  $z$ being real/complex, or $p$-adic, finds a polynomial (in the variable
