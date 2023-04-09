@@ -2571,12 +2571,10 @@ F2xqXM_mul2(GEN A, GEN B, GEN T)
 static GEN
 F2xqX_F2xqXM_qmul(GEN q, GEN M, GEN T)
 {
-  GEN u, v, res = cgetg(3, t_MAT);
-  u = F2xX_add(gcoeff(M,1,1), F2xqX_mul(gcoeff(M,2,1), q, T));
-  gel(res,1) = mkcol2(gcoeff(M,2,1), u);
-  v = F2xX_add(gcoeff(M,1,2), F2xqX_mul(gcoeff(M,2,2), q, T));
-  gel(res,2) = mkcol2(gcoeff(M,2,2), v);
-  return res;
+  GEN u = F2xqX_mul(gcoeff(M,2,1), q, T);
+  GEN v = F2xqX_mul(gcoeff(M,2,2), q, T);
+  retmkmat22(gcoeff(M,2,1), gcoeff(M,2,2),
+    F2xX_add(gcoeff(M,1,1), u), F2xX_add(gcoeff(M,1,2), v));
 }
 
 static GEN

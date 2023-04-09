@@ -1200,12 +1200,10 @@ FlxqXM_mul2(GEN A, GEN B, GEN T, ulong p, ulong pi)
 static GEN
 FlxqX_FlxqXM_qmul(GEN q, GEN M, GEN T, ulong p, ulong pi)
 {
-  GEN u, v, res = cgetg(3, t_MAT);
-  u = FlxX_sub(gcoeff(M,1,1), FlxqX_mul_pre(gcoeff(M,2,1), q, T,p,pi), p);
-  gel(res,1) = mkcol2(gcoeff(M,2,1), u);
-  v = FlxX_sub(gcoeff(M,1,2), FlxqX_mul_pre(gcoeff(M,2,2), q, T,p,pi), p);
-  gel(res,2) = mkcol2(gcoeff(M,2,2), v);
-  return res;
+  GEN u = FlxqX_mul_pre(gcoeff(M,2,1), q, T,p,pi);
+  GEN v = FlxqX_mul_pre(gcoeff(M,2,2), q, T,p,pi);
+  retmkmat22(gcoeff(M,2,1), gcoeff(M,2,2),
+    FlxX_sub(gcoeff(M,1,1), u, p), FlxX_sub(gcoeff(M,1,2), v, p));
 }
 
 static GEN
