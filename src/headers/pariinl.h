@@ -158,7 +158,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
        gel(_v,3) = (z);\
        gel(_v,4) = (t);\
        gel(_v,5) = (u); return _v; } while(0)
-
+#define retmkmat22(a,b,c,d)\
+  do { GEN _v = cgetg(3, t_MAT);\
+       gel(_v,1) = mkcol2(a,c);\
+       gel(_v,2) = mkcol2(b,d); return _v; } while(0)
 INLINE GEN
 mkintmod(GEN x, GEN y) { retmkintmod(x,y); }
 INLINE GEN

@@ -98,14 +98,14 @@ static GEN
 qfbmat(GEN q)
 {
   GEN a = gel(q,1), b = shifti(gel(q,2), -1), c = gel(q,3);
-  return mkmat22(a, b, b, c);
+  retmkmat22(a, b, b, c);
 }
 /* 2*qfbmat(q) */
 static GEN
 qfbmat2(GEN q)
 {
   GEN a = shifti(gel(q,1), 1), b = gel(q,2), c = shifti(gel(q,3), 1);
-  return mkmat22(a, b, b, c);
+  retmkmat22(a, b, b, c);
 }
 /* Given a symmetric matrix G over Z, compute the Witt invariant of G at p
  * v = det_minors(G) [G diagonalized]; assume that none of the v[i] is 0. */
@@ -658,7 +658,7 @@ qfb_factorback(GEN gen, GEN e, GEN isqrtD)
 /* unit form discriminant 4d */
 static GEN
 id(GEN d)
-{ return mkmat22(gen_1, gen_0, gen_0, negi(d)); }
+{ retmkmat22(gen_1, gen_0, gen_0, negi(d)); }
 
 /* Shanks/Bosma-Stevenhagen algorithm to compute the 2-Sylow of the class
  * group of discriminant D. Only works for D = fundamental discriminant.

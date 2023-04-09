@@ -221,7 +221,7 @@ SL2_inv_shallow(GEN M)
 {
   GEN a = gcoeff(M,1,1), b = gcoeff(M,1,2);
   GEN c = gcoeff(M,2,1), d = gcoeff(M,2,2);
-  return mkmat22(d,negi(b), negi(c),a);
+  retmkmat22(d,negi(b), negi(c),a);
 }
 /* SL2_inv(M)[2] */
 static GEN
@@ -256,7 +256,7 @@ path_to_ZM(GEN a)
   GEN v = gel(a,1), w = gel(a,2);
   long r = v[1], s = v[2], x = w[1], y = w[2];
   if (cmpii(mulss(r,y), mulss(x,s)) < 0) { r = -r; s = -s; }
-  return mkmat22(stoi(r),stoi(x),stoi(s),stoi(y));
+  return mkmat22s(r,x,s,y);
 }
 static GEN
 path_to_zm(GEN a)
@@ -1407,11 +1407,11 @@ indices_backward(GEN W, GEN C)
 /*[0,-1;1,-1]*/
 static GEN
 mkTAU()
-{ return mkmat22(gen_0,gen_m1, gen_1,gen_m1); }
+{ retmkmat22(gen_0,gen_m1, gen_1,gen_m1); }
 /* S */
 static GEN
 mkS()
-{ return mkmat22(gen_0,gen_1, gen_m1,gen_0); }
+{ retmkmat22(gen_0,gen_1, gen_m1,gen_0); }
 /* N = integer > 1. Returns data describing Delta_0 = Z[P^1(Q)]_0 seen as
  * a Gamma_0(N) - module. */
 static GEN
@@ -4435,7 +4435,7 @@ ZM2_div(GEN T, GEN U, GEN DU, long N)
   if (r != gen_0) return NULL;
   D = dvmdii(subii(mulii(a,h), mulii(g,b)), DU, &r);
   if (r != gen_0) return NULL;
-  return mkmat22(A,B,C,D);
+  retmkmat22(A,B,C,D);
 }
 
 static GEN
@@ -4900,7 +4900,7 @@ mslattice(GEN M, GEN F)
 /* oo -> g^(-1) oo */
 static GEN
 cocycle(GEN g)
-{ return mkmat22(gen_1, gcoeff(g,2,2), gen_0, negi(gcoeff(g,2,1))); }
+{ retmkmat22(gen_1, gcoeff(g,2,2), gen_0, negi(gcoeff(g,2,1))); }
 
 /* CD = binomial_init(k-2); return <P,Q> * D (integral) */
 static GEN

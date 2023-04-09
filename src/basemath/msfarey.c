@@ -108,7 +108,7 @@ mulS(GEN g)
 {
   GEN a = gcoeff(g,1,1), b = gcoeff(g,1,2);
   GEN c = gcoeff(g,2,1), d = gcoeff(g,2,2);
-  return mkmat22(negi(b), a, negi(d), c);
+  retmkmat22(negi(b), a, negi(d), c);
 }
 /* remove extra scales and reduce ast to involution */
 static GEN
