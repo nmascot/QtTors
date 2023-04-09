@@ -1912,6 +1912,10 @@ static GEN
 matid2_FlxM(long v)
 { retmkmat22(pol1_Flx(v),pol0_Flx(v),pol0_Flx(v),pol1_Flx(v)); }
 
+static GEN
+matJ2_FlxM(long v)
+{ retmkmat22(pol0_Flx(v),pol1_Flx(v),pol1_Flx(v),pol0_Flx(v)); }
+
 struct Flx_res
 {
    ulong res, lc;
@@ -2073,12 +2077,7 @@ Flx_halfgcd_pre(GEN x, GEN y, ulong p, ulong pi)
   pari_sp av;
   GEN M,q,r;
   long lx=lgpol(x), ly=lgpol(y);
-  if (!lx)
-  {
-    long v = x[1];
-    retmkmat2(mkcol2(pol0_Flx(v),pol1_Flx(v)),
-              mkcol2(pol1_Flx(v),pol0_Flx(v)));
-  }
+  if (!lx) return matJ2_FlxM(x[1]);
   if (ly < lx) return Flx_halfgcd_i(x,y,p,pi);
   av = avma;
   q = Flx_divrem(y,x,p,&r);

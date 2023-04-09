@@ -636,6 +636,10 @@ matid2_FpXM(long v)
 { retmkmat22(pol_1(v), pol_0(v), pol_0(v), pol_1(v)); }
 
 static GEN
+matJ2_FpXM(long v)
+{ retmkmat22(pol_0(v), pol_1(v), pol_1(v), pol_0(v)); }
+
+static GEN
 FpX_shift(GEN a, long n) { return RgX_shift_shallow(a, n); }
 
 /* Fast resultant formula from William Hart in Flint <http://flintlib.org/> */
@@ -794,12 +798,7 @@ FpX_halfgcd(GEN x, GEN y, GEN p)
   }
   else
   {
-    if (!signe(x))
-    {
-      long v = varn(x);
-      retmkmat2(mkcol2(pol_0(v),pol_1(v)),
-                mkcol2(pol_1(v),pol_0(v)));
-    }
+    if (!signe(x)) return matJ2_FpXM(varn(x));
     if (degpol(y)<degpol(x)) return FpX_halfgcd_i(x,y,p);
     q = FpX_divrem(y,x,p,&r);
     M = FpX_halfgcd_i(x,r,p);

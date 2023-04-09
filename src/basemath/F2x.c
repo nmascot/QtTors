@@ -2583,6 +2583,10 @@ static GEN
 matid2_F2xXM(long v, long sv)
 { retmkmat22(pol1_F2xX(v, sv),pol_0(v),pol_0(v),pol1_F2xX(v, sv)); }
 
+static GEN
+matJ2_F2xXM(long v, long sv)
+{ retmkmat22(pol_0(v),pol1_F2xX(v, sv),pol1_F2xX(v, sv),pol_0(v)); }
+
 struct F2xqX_res
 {
    GEN res, lc;
@@ -2728,12 +2732,7 @@ F2xqX_halfgcd(GEN x, GEN y, GEN T)
 {
   pari_sp av = avma;
   GEN M,q,r;
-  if (!signe(x))
-  {
-    long v = varn(x), vT = get_F2x_var(T);
-    retmkmat2(mkcol2(pol_0(v),pol1_F2xX(v,vT)),
-        mkcol2(pol1_F2xX(v,vT),pol_0(v)));
-  }
+  if (!signe(x)) return matJ2_F2xXM(varn(x), get_F2x_var(T));
   if (degpol(y)<degpol(x)) return F2xqX_halfgcd_i(x, y, T);
   q = F2xqX_divrem(y, x, T, &r);
   M = F2xqX_halfgcd_i(x, r, T);

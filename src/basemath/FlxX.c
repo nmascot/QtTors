@@ -1212,6 +1212,10 @@ static GEN
 matid2_FlxXM(long v, long sv)
 { retmkmat22(pol1_FlxX(v, sv),pol_0(v),pol_0(v),pol1_FlxX(v, sv)); }
 
+static GEN
+matJ2_FlxXM(long v, long sv)
+{ retmkmat22(pol_0(v),pol1_FlxX(v, sv),pol1_FlxX(v, sv),pol_0(v)); }
+
 struct FlxqX_res
 {
    GEN res, lc;
@@ -1363,12 +1367,7 @@ FlxqX_halfgcd_pre(GEN x, GEN y, GEN T, ulong p, ulong pi)
 {
   pari_sp av = avma;
   GEN M,q,r;
-  if (!signe(x))
-  {
-    long v = varn(x), vT = get_Flx_var(T);
-    retmkmat2(mkcol2(pol_0(v),pol1_FlxX(v,vT)),
-              mkcol2(pol1_FlxX(v,vT),pol_0(v)));
-  }
+  if (!signe(x)) return matJ2_FlxXM(varn(x),get_Flx_var(T));
   if (degpol(y)<degpol(x)) return FlxqX_halfgcd_i(x, y, T, p, pi);
   q = FlxqX_divrem_pre(y, x, T, p, pi, &r);
   M = FlxqX_halfgcd_i(x, r, T, p, pi);
