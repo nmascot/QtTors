@@ -1032,7 +1032,7 @@ F2x_halfgcd_i(GEN a, GEN b)
       gerepileall(av,6, &a,&b,&u1,&v1,&u,&v);
     }
   }
-  return gerepilecopy(av, mkmat2(mkcol2(u,u1), mkcol2(v,v1)));
+  return gerepilecopy(av, mkmat22(u,v,u1,v1));
 }
 
 GEN
@@ -2563,8 +2563,8 @@ F2xqXM_mul2(GEN A, GEN B, GEN T)
   GEN M7 = F2xqX_mul(F2xX_add(A12,A22), F2xX_add(B21,B22), T);
   GEN T1 = F2xX_add(M1,M4), T2 = F2xX_add(M7,M5);
   GEN T3 = F2xX_add(M1,M2), T4 = F2xX_add(M3,M6);
-  retmkmat2(mkcol2(F2xX_add(T1,T2), F2xX_add(M2,M4)),
-            mkcol2(F2xX_add(M3,M5), F2xX_add(T3,T4)));
+  retmkmat22(F2xX_add(T1,T2), F2xX_add(M3,M5),
+             F2xX_add(M2,M4), F2xX_add(T3,T4));
 }
 
 /* Return [0,1;1,-q]*M */
@@ -2581,10 +2581,7 @@ F2xqX_F2xqXM_qmul(GEN q, GEN M, GEN T)
 
 static GEN
 matid2_F2xXM(long v, long sv)
-{
-  retmkmat2(mkcol2(pol1_F2xX(v, sv),pol_0(v)),
-            mkcol2(pol_0(v),pol1_F2xX(v, sv)));
-}
+{ retmkmat22(pol1_F2xX(v, sv),pol_0(v),pol_0(v),pol1_F2xX(v, sv)); }
 
 struct F2xqX_res
 {
@@ -2650,7 +2647,7 @@ F2xqX_halfres_basecase(GEN a, GEN b, GEN T, struct F2xqX_res *res)
       gerepileall(av,res ? 8: 6, &a,&b,&u1,&v1,&u,&v,&res->res,&res->lc);
     }
   }
-  M = mkmat2(mkcol2(u,u1), mkcol2(v,v1));
+  M = mkmat22(u,v,u1,v1);
   return res ? gc_all(av, 3, &M, &res->res, &res->lc)
              : gerepilecopy(av, M);
 }

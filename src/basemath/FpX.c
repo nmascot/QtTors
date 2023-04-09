@@ -615,8 +615,8 @@ FpXM_mul2(GEN A, GEN B, GEN p)
   GEN M7 = FpX_mul(FpX_sub(A12,A22, p), FpX_add(B21,B22, p), p);
   GEN T1 = FpX_add(M1,M4, p), T2 = FpX_sub(M7,M5, p);
   GEN T3 = FpX_sub(M1,M2, p), T4 = FpX_add(M3,M6, p);
-  retmkmat2(mkcol2(FpX_add(T1,T2, p), FpX_add(M2,M4, p)),
-            mkcol2(FpX_add(M3,M5, p), FpX_add(T3,T4, p)));
+  retmkmat22(FpX_add(T1,T2, p), FpX_add(M3,M5, p),
+             FpX_add(M2,M4, p), FpX_add(T3,T4, p));
 }
 
 /* Return [0,1;1,-q]*M */
@@ -706,7 +706,7 @@ FpX_halfres_basecase(GEN a, GEN b, GEN p, struct FpX_res *res)
       gerepileall(av,res ? 8: 6, &a,&b,&u1,&v1,&u,&v,&res->res,&res->lc);
     }
   }
-  M = mkmat2(mkcol2(u,u1), mkcol2(v,v1));
+  M = mkmat22(u,v,u1,v1);
   return res ? gc_all(av, 3, &M, &res->res, &res->lc)
              : gerepilecopy(av, M);
 }

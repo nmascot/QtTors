@@ -1192,8 +1192,8 @@ FlxqXM_mul2(GEN A, GEN B, GEN T, ulong p, ulong pi)
   GEN M7 = FlxqX_mul_pre(FlxX_sub(A12,A22, p), FlxX_add(B21,B22, p), T, p, pi);
   GEN T1 = FlxX_add(M1,M4, p), T2 = FlxX_sub(M7,M5, p);
   GEN T3 = FlxX_sub(M1,M2, p), T4 = FlxX_add(M3,M6, p);
-  retmkmat2(mkcol2(FlxX_add(T1,T2, p), FlxX_add(M2,M4, p)),
-            mkcol2(FlxX_add(M3,M5, p), FlxX_add(T3,T4, p)));
+  retmkmat22(FlxX_add(T1,T2, p), FlxX_add(M3,M5, p),
+             FlxX_add(M2,M4, p), FlxX_add(T3,T4, p));
 }
 
 /* Return [0,1;1,-q]*M */
@@ -1278,7 +1278,7 @@ FlxqX_halfres_basecase(GEN a, GEN b, GEN T, ulong p, ulong pi, struct FlxqX_res 
       gerepileall(av,res ? 8: 6, &a,&b,&u1,&v1,&u,&v,&res->res,&res->lc);
     }
   }
-  M = mkmat2(mkcol2(u,u1), mkcol2(v,v1));
+  M = mkmat22(u,v,u1,v1);
   return res ? gc_all(av, 3, &M, &res->res, &res->lc)
              : gerepilecopy(av, M);
 }
