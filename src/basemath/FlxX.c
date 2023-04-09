@@ -1210,10 +1210,7 @@ FlxqX_FlxqXM_qmul(GEN q, GEN M, GEN T, ulong p, ulong pi)
 
 static GEN
 matid2_FlxXM(long v, long sv)
-{
-  retmkmat2(mkcol2(pol1_FlxX(v, sv),pol_0(v)),
-            mkcol2(pol_0(v),pol1_FlxX(v, sv)));
-}
+{ retmkmat22(pol1_FlxX(v, sv),pol_0(v),pol_0(v),pol1_FlxX(v, sv)); }
 
 struct FlxqX_res
 {

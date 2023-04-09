@@ -633,10 +633,7 @@ FpX_FpXM_qmul(GEN q, GEN M, GEN p)
 
 static GEN
 matid2_FpXM(long v)
-{
-  retmkmat2(mkcol2(pol_1(v),pol_0(v)),
-            mkcol2(pol_0(v),pol_1(v)));
-}
+{ retmkmat22(pol_1(v), pol_0(v), pol_0(v), pol_1(v)); }
 
 static GEN
 FpX_shift(GEN a, long n) { return RgX_shift_shallow(a, n); }
