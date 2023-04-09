@@ -98,14 +98,14 @@ static GEN
 qfbmat(GEN q)
 {
   GEN a = gel(q,1), b = shifti(gel(q,2), -1), c = gel(q,3);
-  return mkmat2(mkcol2(a, b), mkcol2(b, c));
+  return mkmat22(a, b, b, c);
 }
 /* 2*qfbmat(q) */
 static GEN
 qfbmat2(GEN q)
 {
   GEN a = shifti(gel(q,1), 1), b = gel(q,2), c = shifti(gel(q,3), 1);
-  return mkmat2(mkcol2(a, b), mkcol2(b, c));
+  return mkmat22(a, b, b, c);
 }
 /* Given a symmetric matrix G over Z, compute the Witt invariant of G at p
  * v = det_minors(G) [G diagonalized]; assume that none of the v[i] is 0. */
@@ -228,8 +228,7 @@ qflllgram_indefgoon(GEN G)
   /* G3[n,n] reduced mod 2g */
   if (n == 2) return mkvec2(G3,U);
   V = rowpermute(vecslice(G3, 2,n-1), mkvecsmall2(1,n));
-  A = mkmat2(mkcol2(gcoeff(G3,1,1),gcoeff(G3,1,n)),
-             mkcol2(gcoeff(G3,1,n),gcoeff(G3,2,2)));
+  A = mkmat22(gcoeff(G3,1,1),gcoeff(G3,1,n),gcoeff(G3,1,n),gcoeff(G3,2,2));
   B = ground(RgM_neg(QM_mul(QM_inv(A), V)));
   U3 = matid(n);
   for (j = 2; j < n; j++)
@@ -295,7 +294,7 @@ qflllgram_indefgoon2(GEN G)
   /* for U2 = [-u,-b,0;-v,a,0;0,0,1]
    * G3 = qf_apply_ZM(G2,U2) has known last row (-d, 0, 0),
    * so apply to principal_minor(G3,2), instead */
-  U2 = mkmat2(mkcol2(negi(u),negi(v)), mkcol2(negi(b),a));
+  U2 = mkmat22(negi(u),negi(b),negi(v),a);
   G3 = qf_apply_ZM(principal_minor(G2,2),U2);
   r3 = gel(r,3);
   r = ZV_ZM_mul(mkvec2(gel(r,1),gel(r,2)),U2);
@@ -455,7 +454,7 @@ qfminimize_fact(GEN G, GEN P, GEN E, long loc)
           A = qf_apply_ZM(A,K2); ZsymM_Z_divexact_partial(A, dimKer2, p);
           B = ZM_transmul(B,K2);
           for (j = 1; j <= dimKer2; j++) gel(B,j) = ZC_Z_divexact(gel(B,j), p);
-          G = shallowmatconcat(mkmat2(mkcol2(A,B), mkcol2(shallowtrans(B), C)));
+          G = shallowmatconcat(mkmat22(A,shallowtrans(B),B,C));
           /* Ker *= [K2,0;0,Id] */
           B = ZM_mul(vecslice(Ker,1,dimKer),K2);
           for (j = 1; j <= dimKer2; j++) gel(B,j) = RgC_Rg_div(gel(B,j), p);
@@ -659,7 +658,7 @@ qfb_factorback(GEN gen, GEN e, GEN isqrtD)
 /* unit form discriminant 4d */
 static GEN
 id(GEN d)
-{ return mkmat2(mkcol2(gen_1,gen_0),mkcol2(gen_0,negi(d))); }
+{ return mkmat22(gen_1, gen_0, gen_0, negi(d)); }
 
 /* Shanks/Bosma-Stevenhagen algorithm to compute the 2-Sylow of the class
  * group of discriminant D. Only works for D = fundamental discriminant.
@@ -1081,7 +1080,7 @@ qfparam(GEN G, GEN sol, long fl)
     a = gel(v,1);
     b = gmul2n(gel(v,2),-1);
     c = gel(v,3);
-    U = qflllgram_indef(mkmat2(mkcol2(a,b),mkcol2(b,c)), 1, &fail);
+    U = qflllgram_indef(mkmat22(a, b, b, c), 1, &fail);
     U = gel(U,2);
     a = gcoeff(U,1,1); b = gcoeff(U,1,2);
     c = gcoeff(U,2,1); d = gcoeff(U,2,2);
