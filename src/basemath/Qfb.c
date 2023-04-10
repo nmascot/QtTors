@@ -1527,8 +1527,7 @@ redrealsl2step(GEN A, GEN rd)
 {
   GEN N, V = gel(A,1), M = gel(A,2);
   GEN a = gel(V,1), b = gel(V,2), c = gel(V,3), d = qfb_disc(V);
-  GEN C = absi_shallow(c);
-  GEN t = addii(b, gmax_shallow(rd, C));
+  GEN C = absi_shallow(c), t = addii(b, gmax_shallow(rd, C));
   GEN r, q = truedvmdii(t, shifti(C,1), &r);
   b = subii(t, addii(r,b));
   a = c;
@@ -1537,7 +1536,7 @@ redrealsl2step(GEN A, GEN rd)
   N = mkmat2(gel(M,2),
              mkcol2(subii(mulii(q, gcoeff(M, 1, 2)), gcoeff(M, 1, 1)),
                     subii(mulii(q, gcoeff(M, 2, 2)), gcoeff(M, 2, 1))));
-  return mkvec2(mkqfb(a,b,c,gel(V,4)), N);
+  return mkvec2(mkqfb(a,b,c,d), N);
 }
 
 static GEN
@@ -1565,8 +1564,8 @@ redrealsl2(GEN V, GEN rd)
     }
   }
   M = mkmat2(mkcol2(u1,u2), mkcol2(v1,v2));
-  return gerepilecopy(ltop, mkvec2(lg(V)==5?mkqfb(a,b,c,gel(V,4))
-                                           :mkvec3(a,b,c), M));
+  return gerepilecopy(ltop, mkvec2(lg(V)==5? mkqfb(a,b,c,d)
+                                           : mkvec3(a,b,c), M));
 }
 
 GEN
