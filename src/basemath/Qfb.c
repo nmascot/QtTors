@@ -1470,50 +1470,52 @@ qfisolve_normform(GEN Q, GEN P)
 }
 
 static GEN
-qfbsolve_cornacchia(GEN c, GEN p, int swap)
+qfbsolve_cornacchia(GEN c, GEN p)
 {
-  pari_sp av = avma;
   GEN M, N;
-  if (kronecker(negi(c), p) < 0 || !cornacchia(c, p, &M,&N))
-  { set_avma(av); return gen_0; }
-  return gerepilecopy(av, swap? mkvec2(N,M): mkvec2(M,N));
+  if (kronecker(negi(c), p) < 0 || !cornacchia(c, p, &M,&N)) return NULL;
+  return mkvec2(M, N);
 }
 
 GEN
 qfisolvep(GEN Q, GEN p)
 {
-  GEN M, N, x,y, a,b,c, d;
+  GEN M, N, x, y, a, c, d, q;
   pari_sp av = avma;
   if (!signe(gel(Q,2)))
   {
     a = gel(Q,1);
     c = gel(Q,3); /* if principal form, use faster cornacchia */
-    if (equali1(a)) return qfbsolve_cornacchia(c, p, 0);
-    if (equali1(c)) return qfbsolve_cornacchia(a, p, 1);
+    if (equali1(a))
+    {
+      if (!(x = qfbsolve_cornacchia(c, p))) return gc_const(av, gen_0);
+      return gerepilecopy(av, x);
+    }
+    if (equali1(c))
+    {
+      if (!(x = qfbsolve_cornacchia(a, p))) return gc_const(av, gen_0);
+      swap(gel(x,1), gel(x,2)); return gerepilecopy(av, x);
+    }
   }
   d = qfb_disc(Q); if (kronecker(d,p) < 0) return gen_0;
-  a = redimagsl2(Q, &N);
-  if (equali1(gel(a,1))) /* principal form */
+  Q = redimagsl2(Q, &N);
+  if (equali1(gel(Q,1))) /* principal form */
   {
-    long r;
-    if (!signe(gel(a,2)))
-    {
-      a = qfbsolve_cornacchia(gel(a,3), p, 0);
-      if (a == gen_0) { set_avma(av); return gen_0; }
-      a = ZM_ZC_mul(N, a);
-      a[0] = evaltyp(t_VEC) | _evallg(3); /* transpose */
-      return gerepileupto(av, a);
+    if (!signe(gel(Q,2)))
+    { if (!(x = qfbsolve_cornacchia(gel(Q,3), p))) return gc_const(av, gen_0); }
+    else
+    { /* x^2 + xy + ((1-d)/4)y^2 = p <==> (2x + y)^2 - d y^2 = 4p */
+      if (!cornacchia2(negi(d), p, &x, &y)) return gc_const(av, gen_0);
+      x = subii(x,y); if (mpodd(x)) return gc_const(av, gen_0);
+      x = mkvec2(shifti(x,-1), y);
     }
-    /* x^2 + xy + ((1-d)/4)y^2 = p <==> (2x + y)^2 - d y^2 = 4p */
-    if (!cornacchia2(negi(d), p, &x, &y)) { set_avma(av); return gen_0; }
-    x = divis_rem(subii(x,y), 2, &r); if (r) { set_avma(av); return gen_0; }
-    a = ZM_ZC_mul(N, mkvec2(x,y));
-    a[0] = evaltyp(t_VEC) | _evallg(3); /* transpose */
-    return gerepileupto(av, a);
+    x = ZM_ZC_mul(N, x);
+    x[0] = evaltyp(t_VEC) | _evallg(3); /* transpose */
+    return gerepileupto(av, x);
   }
-  b = redimagsl2(primeform(d, p), &M);
-  if (!GL2_qfb_equal(a,b)) { set_avma(av); return gen_0; }
-  if (signe(gel(a,2))==signe(gel(b,2)))
+  q = redimagsl2(primeform(d, p), &M);
+  if (!GL2_qfb_equal(Q,q)) return gc_const(av, gen_0);
+  if (signe(gel(Q,2))==signe(gel(q,2)))
     x = SL2_div_mul_e1(N,M);
   else
     x = SL2_swap_div_mul_e1(N,M);
