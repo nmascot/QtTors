@@ -1522,50 +1522,47 @@ qfisolvep(GEN Q, GEN p)
   return gerepilecopy(av, x);
 }
 
-static GEN
-redrealsl2step(GEN A, GEN rd)
+static void
+_rhorealsl2(GEN *pa, GEN *pb, GEN *pc, GEN *pu1, GEN *pu2, GEN *pv1,
+            GEN *pv2, GEN d, GEN rd)
 {
-  GEN N, V = gel(A,1), M = gel(A,2);
-  GEN a = gel(V,1), b = gel(V,2), c = gel(V,3), d = qfb_disc(V);
-  GEN C = absi_shallow(c), t = addii(b, gmax_shallow(rd, C));
+  GEN C = mpabs_shallow(*pc), t = addii(*pb, gmax_shallow(rd,C));
   GEN r, q = truedvmdii(t, shifti(C,1), &r);
-  b = subii(t, addii(r,b));
-  a = c;
-  c = truedivii(subii(sqri(b), d), shifti(c,2));
-  if (signe(a) < 0) togglesign(q);
-  N = mkmat2(gel(M,2),
-             mkcol2(subii(mulii(q, gcoeff(M, 1, 2)), gcoeff(M, 1, 1)),
-                    subii(mulii(q, gcoeff(M, 2, 2)), gcoeff(M, 2, 1))));
-  return mkvec2(mkqfb(a,b,c,d), N);
+  *pb = subii(t, addii(r, *pb));
+  *pa = *pc;
+  *pc = diviiexact(subii(sqri(*pb), d), shifti(*pa, 2));
+  if (signe(*pa) < 0) togglesign(q);
+  r = *pu1; *pu1 = *pv1; *pv1 = subii(mulii(q, *pv1), r);
+  r = *pu2; *pu2 = *pv2; *pv2 = subii(mulii(q, *pv2), r);
+}
+
+static GEN
+rhorealsl2(GEN A, GEN rd)
+{
+  GEN V = gel(A,1), M = gel(A,2);
+  GEN a = gel(V,1), b = gel(V,2), c = gel(V,3), d = qfb_disc(V);
+  GEN u1 = gcoeff(M,1,1), v1 = gcoeff(M,1,2);
+  GEN u2 = gcoeff(M,2,1), v2 = gcoeff(M,2,2);
+  _rhorealsl2(&a,&b,&c, &u1,&u2,&v1,&v2, d, rd);
+  return mkvec2(mkqfb(a,b,c,d), mkmat22(u1,v1,u2,v2));
 }
 
 static GEN
 redrealsl2(GEN V, GEN rd)
 {
-  pari_sp ltop = avma;
-  GEN M, u1, u2, v1, v2;
+  pari_sp av = avma;
+  GEN u1 = gen_1, u2 = gen_0, v1 = gen_0, v2 = gen_1;
   GEN a = gel(V,1), b = gel(V,2), c = gel(V,3), d = qfb_disc(V);
-  u1 = v2 = gen_1; v1 = u2 = gen_0;
   while (!ab_isreduced(a,b,rd))
   {
-    GEN C = mpabs_shallow(c);
-    GEN t = addii(b, gmax_shallow(rd,C));
-    GEN r, q = truedvmdii(t, shifti(C,1), &r);
-    b = subii(t, addii(r,b));
-    a = c;
-    c = truedivii(subii(sqri(b), d), shifti(c,2));
-    if (signe(a) < 0) togglesign(q);
-    r = u1; u1 = v1; v1 = subii(mulii(q, v1), r);
-    r = u2; u2 = v2; v2 = subii(mulii(q, v2), r);
-    if (gc_needed(ltop, 1))
+    _rhorealsl2(&a,&b,&c, &u1,&u2,&v1,&v2, d, rd);
+    if (gc_needed(av, 1))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"redrealsl2");
-      gerepileall(ltop, 7, &a,&b,&c,&u1,&u2,&v1,&v2);
+      gerepileall(av, 7, &a,&b,&c,&u1,&u2,&v1,&v2);
     }
   }
-  M = mkmat2(mkcol2(u1,u2), mkcol2(v1,v2));
-  return gerepilecopy(ltop, mkvec2(lg(V)==5? mkqfb(a,b,c,d)
-                                           : mkvec3(a,b,c), M));
+  return gerepilecopy(av, mkvec2(mkqfb(a,b,c,d), mkmat22(u1,v1,u2,v2)));
 }
 
 GEN
@@ -1598,9 +1595,9 @@ qfrsolve_normform(GEN N, GEN Ps, GEN rd)
       return gerepilecopy(av, SL2_div_mul_e1(gel(M,2),gel(P,2)));
     if (qfb_equal(gel(N,1), gel(Q,1)))
       return gerepilecopy(av, SL2_div_mul_e1(gel(N,2),gel(Q,2)));
-    M = redrealsl2step(M, rd);
+    M = rhorealsl2(M, rd);
     if (qfb_equal(gel(M,1), gel(N,1))) return gc_NULL(av);
-    Q = redrealsl2step(Q, rd);
+    Q = rhorealsl2(Q, rd);
     if (qfb_equal(gel(P,1), gel(Q,1))) return gc_NULL(av);
     if (gc_needed(btop, 1)) gerepileall(btop, 2, &M, &Q);
   }
