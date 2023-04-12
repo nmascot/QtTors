@@ -1975,7 +1975,7 @@ Flx_halfres_basecase(GEN a, GEN b, ulong p, ulong pi, GEN *pa, GEN *pb, struct F
     if (res)
     {
       long da = degpol(a), db=degpol(b), dr = degpol(r);
-      res->lc = Flx_lead(b);
+      res->lc = b[db+2];
       if (dr >= n)
         Flx_halfres_update_pre(da, db, dr, p, pi, res);
       else
@@ -2216,24 +2216,30 @@ static GEN
 Flx_extgcd_basecase(GEN a, GEN b, ulong p, ulong pi, GEN *ptu, GEN *ptv)
 {
   pari_sp av=avma;
-  GEN u,v,d,d1,v1;
+  GEN u,v,u1,v1;
   long vx = a[1];
-  d = a; d1 = b;
   v = pol0_Flx(vx); v1 = pol1_Flx(vx);
-  while (lgpol(d1))
+  if (ptu) { u = pol1_Flx(vx); u1 = pol0_Flx(vx); }
+  while (lgpol(b))
   {
-    GEN r, q = Flx_divrem_pre(d,d1,p,pi, &r);
-    v = Flx_sub(v,Flx_mul_pre(q,v1,p,pi),p);
-    u=v; v=v1; v1=u;
-    u=r; d=d1; d1=u;
+    GEN r, q = Flx_divrem_pre(a,b,p,pi, &r);
+    a = b; b = r;
+    if (ptu)
+    {
+      swap(u,u1);
+      u1 = Flx_sub(u1, Flx_mul_pre(u, q, p, pi), p);
+    }
+    swap(v,v1);
+    v1 = Flx_sub(v1, Flx_mul_pre(v, q, p, pi), p);
     if (gc_needed(av,2))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"Flx_extgcd (d = %ld)",degpol(d));
-      gerepileall(av,5, &d,&d1,&u,&v,&v1);
+      if (DEBUGMEM>1) pari_warn(warnmem,"Flx_extgcd (d = %ld)",degpol(a));
+      gerepileall(av,ptu ? 6: 4, &a,&b,&v,&v1,&u,&u1);
     }
   }
-  if (ptu) *ptu = Flx_div_pre(Flx_sub(d, Flx_mul_pre(b,v,p,pi), p), a, p, pi);
-  *ptv = v; return d;
+  if (ptu) *ptu = u;
+  *ptv = v;
+  return a;
 }
 
 static GEN
@@ -2252,7 +2258,11 @@ Flx_extgcd_halfgcd(GEN x, GEN y, ulong p, ulong pi, GEN *ptu, GEN *ptv)
     }
     S = Flx_halfgcd_all_pre(x, y, p, pi, &x, &y);
     R = FlxM_mul2(S, R, p, pi);
-    gerepileall(av,3,&x,&y,&R);
+    if (gc_needed(av,2))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"Flx_extgcd (x = %ld)",degpol(x));
+      gerepileall(av,3,&x,&y,&R);
+    }
   }
   y = Flx_extgcd_basecase(x,y,p,pi,&u,&v);
   if (ptu) *ptu = Flx_addmulmul(u, v, gcoeff(R,1,1), gcoeff(R,2,1), p, pi);
