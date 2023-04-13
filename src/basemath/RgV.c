@@ -126,16 +126,19 @@ RgM_ZC_mul_i(GEN x, GEN y, long lx, long l)
   return z;
 }
 
+GEN
+RgM_ZM_mul_worker(GEN y, GEN x)
+{ return RgM_ZC_mul_i(x, y, lg(x), lgcols(x)); }
+
 /* mostly useful when y is sparse */
 GEN
 RgM_ZM_mul(GEN x, GEN y)
 {
-  long j, c, l = lg(x), ly = lg(y);
-  GEN z = cgetg(ly, t_MAT);
-  if (l == 1) return z;
-  c = lgcols(x);
-  for (j = 1; j < ly; j++) gel(z,j) = RgM_ZC_mul_i(x, gel(y,j), l,c);
-  return z;
+  pari_sp av = avma;
+  GEN worker;
+  if (lg(x) == 1) return cgetg(lg(y), t_MAT);
+  worker = snm_closure(is_entry("_RgM_ZM_mul_worker"),mkvec(x));
+  return gerepileupto(av, gen_parapply(worker, y));
 }
 
 static GEN

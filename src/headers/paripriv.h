@@ -190,6 +190,7 @@ GEN  Fp_log_sieve_worker(long a, long prmax, GEN C, GEN c, GEN Ci, GEN ci, GEN p
 GEN  QM_charpoly_ZX_worker(GEN P, GEN M, GEN dM);
 GEN  QXQ_div_worker(GEN P, GEN A, GEN B, GEN C);
 GEN  QXQ_inv_worker(GEN P, GEN A, GEN B);
+GEN  RgM_ZM_mul_worker(GEN y, GEN x);
 GEN  ZX_resultant_worker(GEN P, GEN A, GEN B, GEN dB);
 GEN  ZXQX_resultant_worker(GEN P, GEN A, GEN B, GEN T, GEN dB);
 GEN  ZX_ZXY_resultant_worker(GEN P, GEN A, GEN B, GEN dB, GEN v);
