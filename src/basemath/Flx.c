@@ -2245,28 +2245,34 @@ Flx_extgcd_basecase(GEN a, GEN b, ulong p, ulong pi, GEN *ptu, GEN *ptv)
 static GEN
 Flx_extgcd_halfgcd(GEN x, GEN y, ulong p, ulong pi, GEN *ptu, GEN *ptv)
 {
-  pari_sp av=avma;
-  GEN u, v, R = matid2_FlxM(x[1]), S;
+  GEN u, v;
   long lim = get_Fl_threshold(p, Flx_EXTGCD_LIMIT, Flx_EXTGCD2_LIMIT);
+  GEN V = cgetg(expu(lgpol(y))+2,t_VEC);
+  long i, n = 0, vs = x[1];
   while (lgpol(y) >= lim)
   {
     if (lgpol(y)<=(lgpol(x)>>1))
     {
       GEN r, q = Flx_divrem_pre(x, y, p, pi, &r);
       x = y; y = r;
-      R = Flx_FlxM_qmul(q, R, p, pi);
-    }
-    S = Flx_halfgcd_all_pre(x, y, p, pi, &x, &y);
-    R = FlxM_mul2(S, R, p, pi);
-    if (gc_needed(av,2))
-    {
-      if (DEBUGMEM>1) pari_warn(warnmem,"Flx_extgcd (x = %ld)",degpol(x));
-      gerepileall(av,3,&x,&y,&R);
-    }
+      gel(V,++n) = mkmat22(pol0_Flx(vs),pol1_Flx(vs),pol1_Flx(vs),Flx_neg(q,p));
+    } else
+      gel(V,++n) = Flx_halfgcd_all_pre(x, y, p, pi, &x, &y);
   }
   y = Flx_extgcd_basecase(x,y,p,pi,&u,&v);
-  if (ptu) *ptu = Flx_addmulmul(u, v, gcoeff(R,1,1), gcoeff(R,2,1), p, pi);
-  *ptv = Flx_addmulmul(u, v, gcoeff(R,1,2), gcoeff(R,2,2), p, pi);
+  for (i = n; i>1; i--)
+  {
+    GEN R = gel(V,i);
+    GEN u1 = Flx_addmulmul(u, v, gcoeff(R,1,1), gcoeff(R,2,1), p, pi);
+    GEN v1 = Flx_addmulmul(u, v, gcoeff(R,1,2), gcoeff(R,2,2), p, pi);
+    u = u1; v = v1;
+  }
+  {
+    GEN R = gel(V,1);
+    if (ptu)
+      *ptu = Flx_addmulmul(u, v, gcoeff(R,1,1), gcoeff(R,2,1), p, pi);
+    *ptv   = Flx_addmulmul(u, v, gcoeff(R,1,2), gcoeff(R,2,2), p, pi);
+  }
   return y;
 }
 
