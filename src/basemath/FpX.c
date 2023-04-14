@@ -911,12 +911,19 @@ FpX_extgcd_basecase(GEN a, GEN b, GEN p, GEN *ptu, GEN *ptv)
   pari_sp av=avma;
   GEN u,v,u1,v1, A = a, B = b;
   long vx = varn(a);
+  if (!lgpol(b))
+  {
+    if (ptu) *ptu = pol_1(vx);
+    *ptv = pol_0(vx);
+    return Flx_copy(a);
+  }
   v = pol_0(vx); v1 = pol_1(vx);
-  while (lgpol(b))
+  while (1)
   {
     GEN r, q = FpX_divrem(a,b,p, &r);
     a = b; b = r;
     swap(v,v1);
+    if (!lgpol(b)) break;
     v1 = FpX_sub(v1, FpX_mul(v, q, p), p);
     if (gc_needed(av,2))
     {
