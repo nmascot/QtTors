@@ -915,7 +915,7 @@ FpX_extgcd_basecase(GEN a, GEN b, GEN p, GEN *ptu, GEN *ptv)
   {
     if (ptu) *ptu = pol_1(vx);
     *ptv = pol_0(vx);
-    return Flx_copy(a);
+    return RgX_copy(a);
   }
   v = pol_0(vx); v1 = pol_1(vx);
   while (1)
