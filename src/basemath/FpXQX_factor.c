@@ -875,7 +875,7 @@ FpXQX_split_part(GEN f, GEN T, GEN p)
   {
     ulong pp=p[2];
     GEN Tp = ZXT_to_FlxT(T, pp);
-    GEN z = FlxqX_split_part(ZXX_to_FlxX(f, pp, get_Flx_var(T)), Tp, pp);
+    GEN z = FlxqX_split_part(ZXX_to_FlxX(f, pp, get_FpX_var(T)), Tp, pp);
     return FlxX_to_ZXX(z);
   } else
   {
