@@ -909,7 +909,7 @@ static GEN
 FpX_extgcd_basecase(GEN a, GEN b, GEN p, GEN *ptu, GEN *ptv)
 {
   pari_sp av=avma;
-  GEN u,v,u1,v1, A = a, B = b;
+  GEN v,v1, A = a, B = b;
   long vx = varn(a);
   if (!lgpol(b))
   {
@@ -928,7 +928,7 @@ FpX_extgcd_basecase(GEN a, GEN b, GEN p, GEN *ptu, GEN *ptv)
     if (gc_needed(av,2))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"FpX_extgcd (d = %ld)",degpol(a));
-      gerepileall(av,ptu ? 6: 4, &a,&b,&v,&v1,&u,&u1);
+      gerepileall(av,4,&a,&b,&v,&v1);
     }
   }
   if (ptu) *ptu = FpX_div(FpX_sub(a,FpX_mul(B,v,p),p),A,p);
@@ -941,7 +941,7 @@ FpX_extgcd_halfgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
 {
   GEN u, v;
   GEN V = cgetg(expu(lgpol(y))+2,t_VEC);
-  long i, n = 0, vs = x[1];
+  long i, n = 0, vs = varn(x);
   while (lgpol(y) >= FpX_EXTGCD_LIMIT)
   {
     if (lgpol(y)<=(lgpol(x)>>1))
