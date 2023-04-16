@@ -36,9 +36,9 @@ Flx_SQR_KARATSUBA_LIMIT            109     112      94      93
 Flx_SQR_SQRI_LIMIT                 469     183      77      37
 FlxqX_BARRETT_LIMIT                 17      17      17      17
 FlxqX_DIVREM_BARRETT_LIMIT          46      46      46      46
-FlxqX_EXTGCD_LIMIT                  44      44      44      44
-FlxqX_GCD_LIMIT                   2544    1289     796     470
-FlxqX_HALFGCD_LIMIT                427      89     191      60
+FlxqX_EXTGCD_LIMIT                  44      19      10      21
+FlxqX_GCD_LIMIT                    898     245     407     116
+FlxqX_HALFGCD_LIMIT                174      53      57      30
 FlxqX_INVBARRETT_LIMIT              22      22      22      22
 FlxqX_REM_BARRETT_LIMIT             48      48      48      48
 FpXQX_BARRETT_LIMIT                 12      12      12      12

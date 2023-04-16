@@ -36,9 +36,9 @@
 #define __Flx_SQR_SQRI_LIMIT             37
 #define __FlxqX_BARRETT_LIMIT            17
 #define __FlxqX_DIVREM_BARRETT_LIMIT     46
-#define __FlxqX_EXTGCD_LIMIT             44
-#define __FlxqX_GCD_LIMIT                470
-#define __FlxqX_HALFGCD_LIMIT            60
+#define __FlxqX_EXTGCD_LIMIT             21
+#define __FlxqX_GCD_LIMIT                116
+#define __FlxqX_HALFGCD_LIMIT            30
 #define __FlxqX_INVBARRETT_LIMIT         22
 #define __FlxqX_REM_BARRETT_LIMIT        48
 #define __FpXQX_BARRETT_LIMIT            12
@@ -110,9 +110,9 @@
 #define __Flx_SQR_SQRI_LIMIT             183
 #define __FlxqX_BARRETT_LIMIT            17
 #define __FlxqX_DIVREM_BARRETT_LIMIT     46
-#define __FlxqX_EXTGCD_LIMIT             44
-#define __FlxqX_GCD_LIMIT                1289
-#define __FlxqX_HALFGCD_LIMIT            89
+#define __FlxqX_EXTGCD_LIMIT             19
+#define __FlxqX_GCD_LIMIT                245
+#define __FlxqX_HALFGCD_LIMIT            53
 #define __FlxqX_INVBARRETT_LIMIT         22
 #define __FlxqX_REM_BARRETT_LIMIT        48
 #define __FpXQX_BARRETT_LIMIT            12
