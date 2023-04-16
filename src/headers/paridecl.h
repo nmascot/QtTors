@@ -641,6 +641,8 @@ GEN     FlxqX_gcd_pre(GEN x, GEN y, GEN T, ulong p, ulong pi);
 GEN     FlxqX_get_red(GEN S, GEN T, ulong p);
 GEN     FlxqX_get_red_pre(GEN S, GEN T, ulong p, ulong pi);
 GEN     FlxqX_halfgcd(GEN x, GEN y, GEN T, ulong p);
+GEN     FlxqX_halfgcd_all(GEN x, GEN y, GEN T, ulong p, GEN *a, GEN *b);
+GEN     FlxqX_halfgcd_all_pre(GEN x, GEN y, GEN T, ulong p, ulong pi, GEN *a, GEN *b);
 GEN     FlxqX_halfgcd_pre(GEN x, GEN y, GEN T, ulong p, ulong pi);
 GEN     FlxqX_invBarrett(GEN T, GEN Q, ulong p);
 GEN     FlxqX_invBarrett_pre(GEN T, GEN Q, ulong p, ulong pi);
