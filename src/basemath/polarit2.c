@@ -2820,9 +2820,7 @@ RgX_halfgcd_FpXQX(GEN x, GEN y, GEN pol, GEN p)
   GEN M, V, a, b, T = RgX_to_FpX(pol, p);
   if (signe(T)==0) pari_err_OP("halfgcd", x, y);
   x = RgX_to_FpXQX(x, T, p); y = RgX_to_FpXQX(y, T, p);
-  M = FpXQX_halfgcd(x, y, T, p);
-  a = FpXX_add(FpXQX_mul(gcoeff(M,1,1), x, T, p), FpXQX_mul(gcoeff(M,1,2), y, T, p), p);
-  b = FpXX_add(FpXQX_mul(gcoeff(M,2,1), x, T, p), FpXQX_mul(gcoeff(M,2,2), y, T, p), p);
+  M = FpXQX_halfgcd_all(x, y, T, p, &a, &b);
   V = mkcol2(a, b);
   return gerepilecopy(av, mkvec2(FqXM_to_mod(M, T, p), FqXC_to_mod(V, T, p)));
 }
