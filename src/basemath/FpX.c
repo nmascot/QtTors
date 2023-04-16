@@ -743,7 +743,10 @@ FpX_halfres_split(GEN x, GEN y, GEN p, GEN *a, GEN *b, struct FpX_res *res)
   x1 = FpX_add(FpX_shift(*a,n), gel(V1,1), p);
   y1 = FpX_add(FpX_shift(*b,n), gel(V1,2), p);
   if (lgpol(y1) <= n)
-    { *a = x1; *b = y1; return gc_all(av, res ? 5: 3, &R, a, b, &res->res, &res->lc); }
+  {
+    *a = x1; *b = y1;
+    return gc_all(av, res ? 5: 3, &R, a, b, &res->res, &res->lc);
+  }
   k = 2*n-degpol(y1);
   q = FpX_divrem(x1, y1, p, &r);
   if (res)
@@ -1019,9 +1022,11 @@ FpX_halfres(GEN x, GEN y, GEN p, GEN *a, GEN *b, GEN *r)
 static GEN
 FpX_resultant_basecase(GEN a, GEN b, GEN p)
 {
-  pari_sp av;
+  pari_sp av = avma;
   long da,db,dc;
   GEN c, lb, res = gen_1;
+
+  if (!signe(a) || !signe(b)) return pol_0(varn(a));
 
   da = degpol(a);
   db = degpol(b);
@@ -1030,8 +1035,7 @@ FpX_resultant_basecase(GEN a, GEN b, GEN p)
     swapspec(a,b, da,db);
     if (both_odd(da,db)) res = subii(p, res);
   }
-  if (!da) return gen_1; /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
-  av = avma;
+  if (!da) return gc_const(av, gen_1); /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
   while (db)
   {
     lb = gel(b,db+2);
