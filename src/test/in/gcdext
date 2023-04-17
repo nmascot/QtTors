@@ -103,7 +103,7 @@ chkhalfgcd(a,b)=
 {
   my([M,V]=halfgcd(a,b));
   if (M*[a,b]~!=V, error([a,b]));
-  [M,V];
+  M*[a,b]~-V;
 }
 
 chkhalfgcd(858824,528747)
@@ -112,9 +112,15 @@ chkhalfgcd(-858824,528747)
 chkhalfgcd(-858824,-528747)
 chkhalfgcd(4*x^5+4*x^4+4*x^3+4*x^2+2*x+3,3*x^4+x^3+2)
 chkhalfgcd((4*x^5+4*x^4+4*x^3+4*x^2+2*x+3)*Mod(1,5),(3*x^4+x^3+2)*Mod(1,5))
+chkhalfgcd(random(Mod(1,5)*x^1000),random(Mod(1,5)*x^1000))
 a=ffgen([5,5],'a);
+chkhalfgcd(4*x^5+4*a*x^4+4*x^3+4*(a+1)*x^2+2*x+3,3*a*x^4+x^3+2*(a+1))
+a=ffgen([2,100],'a);
+chkhalfgcd(4*x^5+4*a*x^4+4*x^3+4*(a+1)*x^2+2*x+3,3*a*x^4+x^3+2*(a+1))
+a=ffgen([nextprime(2^128),3],'a);
 chkhalfgcd(4*x^5+4*a*x^4+4*x^3+4*(a+1)*x^2+2*x+3,3*a*x^4+x^3+2*(a+1))
 b=Mod(a.pol,a.mod);
 chkhalfgcd(4*x^5+4*b*x^4+4*x^3+4*(b+1)*x^2+2*x+3,3*b*x^4+x^3+2*(b+1))
 p=nextprime(2^128);
 chkhalfgcd((4*x^5+4*x^4+4*x^3+4*x^2+2*x+2^64+1)*Mod(1,p),(3*x^4+x^3+2^96)*Mod(1,p))
+chkhalfgcd(random(Mod(1,p)*x^1000),random(Mod(1,p)*x^1000))
