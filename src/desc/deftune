@@ -43,9 +43,9 @@ FlxqX_INVBARRETT_LIMIT              22      22      22      22
 FlxqX_REM_BARRETT_LIMIT             48      48      48      48
 FpXQX_BARRETT_LIMIT                 12      12      12      12
 FpXQX_DIVREM_BARRETT_LIMIT          30      30      30      30
-FpXQX_EXTGCD_LIMIT                  28      28      34      28
-FpXQX_GCD_LIMIT                    254     182     254     191
-FpXQX_HALFGCD_LIMIT                 48      35      56      35
+FpXQX_EXTGCD_LIMIT                  10      10      10      10
+FpXQX_GCD_LIMIT                    177     116     152     101
+FpXQX_HALFGCD_LIMIT                 47      30      43      29
 FpXQX_INVBARRETT_LIMIT              40      40      40      40
 FpXQX_REM_BARRETT_LIMIT             30      30      30      30
 FpX_BARRETT_LIMIT                  144      44      85      38
