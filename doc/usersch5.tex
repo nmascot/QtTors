@@ -13651,8 +13651,12 @@ the Bezout coefficients such that $\kbd{*UP} + \kbd{*VQ} = d$.  If \kbd{*U} is
 set to \kbd{NULL}, it is not computed which is a bit faster.
 
 \fun{GEN}{FFX_halfgcd}{GEN x, GEN y, GEN a} returns a two-by-two matrix
-$M$ with determinant $\pm 1$ such that the image $(a,b)$ of $(x,y)$ by $M$
-has the property that $\deg a \geq {\deg x \over 2} > \deg b$.
+$M$ with determinant $\pm 1$ such that the image $(A,B)$ of $(x,y)$ by $M$
+has the property that $\deg A \geq {\deg x \over 2} > \deg B$.
+
+\fun{GEN}{FFX_halfgcd_all}{GEN x, GEN y, GEN a, GEN *ptA, GEN *ptB}
+as \kbd{FFX\_halfgcd}, in addition, if \kbd{ptA} (resp. \kbd{ptB}) is not
+\kbd{NULL}, \kbd{*ptA} (resp. \kbd{*ptB}) is set to \kbd{A} (resp. \kbd{B}).
 
 \fun{GEN}{FFX_resultant}{GEN P, GEN Q, GEN a} returns the resultant of the polynomials
 \kbd{P} and \kbd{Q} where \kbd{P} and \kbd{Q} are defined over the definition

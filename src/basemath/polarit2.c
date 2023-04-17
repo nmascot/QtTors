@@ -2784,11 +2784,7 @@ static GEN
 RgX_halfgcd_FFX(GEN x, GEN y, GEN fa)
 {
   pari_sp av = avma;
-  GEN M = FFX_halfgcd(x, y, fa);
-  GEN a = FFX_add(FFX_mul(gcoeff(M,1,1), x, fa),
-                  FFX_mul(gcoeff(M,1,2), y, fa), fa);
-  GEN b = FFX_add(FFX_mul(gcoeff(M,2,1), x, fa),
-                  FFX_mul(gcoeff(M,2,2), y, fa), fa);
+  GEN a, b, M = FFX_halfgcd_all(x, y, fa, &a, &b);
   return gerepilecopy(av, mkvec2(M, mkcol2(a, b)));
 }
 

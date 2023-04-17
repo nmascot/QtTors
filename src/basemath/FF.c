@@ -1846,6 +1846,32 @@ FFX_halfgcd(GEN Pf, GEN Qf, GEN ff)
 }
 
 GEN
+FFX_halfgcd_all(GEN Pf, GEN Qf, GEN ff, GEN *a, GEN *b)
+{
+  pari_sp av = avma;
+  GEN r,T,p,R;
+  ulong pp;
+  GEN P = FFX_to_raw(Pf, ff);
+  GEN Q = FFX_to_raw(Qf, ff);
+  _getFF(ff,&T,&p,&pp);
+  switch(ff[1])
+  {
+  case t_FF_FpXQ:
+    r = FpXQX_halfgcd_all(P, Q, T, p, a, b);
+    break;
+  case t_FF_F2xq:
+    r = F2xqX_halfgcd_all(P, Q, T, a, b);
+    break;
+  default:
+    r = FlxqX_halfgcd_all(P, Q, T, pp, a, b);
+  }
+  if (*a) *a = raw_to_FFX(*a, ff);
+  if (*b) *b = raw_to_FFX(*b, ff);
+  R = raw_to_FFXM(r, ff);
+  return !a && b ? gc_all(av, 2, &R, b): gc_all(av, 1+!!a+!!b, &R, a, b);
+}
+
+GEN
 FFXQ_sqr(GEN Pf, GEN Qf, GEN ff)
 { return FFX_wrap2(Pf, Qf, ff, FpXQXQ_sqr, F2xqXQ_sqr, FlxqXQ_sqr); }
 

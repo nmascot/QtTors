@@ -3667,6 +3667,7 @@ GEN     FFX_factor(GEN f, GEN x);
 GEN     FFX_factor_squarefree(GEN f, GEN x);
 GEN     FFX_gcd(GEN Pf, GEN Qf, GEN ff);
 GEN     FFX_halfgcd(GEN Pf, GEN Qf, GEN ff);
+GEN     FFX_halfgcd_all(GEN Pf, GEN Qf, GEN ff, GEN *a, GEN *b);
 long    FFX_ispower(GEN Pf, long k, GEN ff, GEN *pt_r);
 GEN     FFX_mul(GEN Pf, GEN Qf, GEN ff);
 GEN     FFX_preimage(GEN x, GEN F, GEN y);
