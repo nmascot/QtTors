@@ -10839,10 +10839,14 @@ slower than \tet{RgX_extgcd}.
 
 \fun{GEN}{RgX_halfgcd}{GEN x, GEN y}
 assuming \kbd{x} and \kbd{y} are \typ{POL}s in the same variable,
-returns a $2$-components \typ{VEC} $[M,V]$ where $M$ is a $2\times 2$
-\typ{MAT} and $V$ a $2$-component \typ{COL}, both with \typ{POL} entries,
-such that $M*[x,y]~==V$ and such that  f $V=[a,b]~$, then
+returns a $2\times 2$ \typ{MAT} $M$ with \typ{POL} entries,
+such that $M*[x,y]~==[a,b]~$ such that
 $\deg a \geq \ceil{\max(\deg x,\deg y))/2} > \deg b$.
+
+\fun{GEN}{RgX_halfgcd_all}{GEN x, GEN y, GEN *pt_a, GEN *pt_b}
+as \kbd{RgX\_halfgcd}, in addition, if \kbd{pt\_a} (resp. \kbd{pt\_b}) is not
+\kbd{NULL}, \kbd{*pt\_a} (resp. \kbd{*pt\_b})
+is set to \kbd{a} (resp. \kbd{b}).
 
 \fun{GEN}{RgX_chinese_coprime}{GEN x, GEN y, GEN Tx, GEN Ty, GEN Tz}
 returns an \kbd{RgX}, congruent to \kbd{x} mod \kbd{Tx} and to \kbd{y} mod

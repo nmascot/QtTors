@@ -5070,6 +5070,7 @@ GEN     RgX_extgcd_simple(GEN a, GEN b, GEN *pu, GEN *pv);
 GEN     RgX_gcd(GEN x, GEN y);
 GEN     RgX_gcd_simple(GEN x, GEN y);
 GEN     RgX_halfgcd(GEN x, GEN y);
+GEN     RgX_halfgcd_all(GEN x, GEN y, GEN *a, GEN *b);
 GEN     RgX_rescale_to_int(GEN x);
 GEN     RgX_resultant_all(GEN P, GEN Q, GEN *sol);
 long    RgX_sturmpart(GEN x, GEN ab);
