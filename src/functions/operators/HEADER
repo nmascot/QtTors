@@ -54,14 +54,14 @@ Doc:
  ? Pol(0,'x) === Pol(0,'y)  \\ not identical
  %5 = 0
 
- ? 0 == Pol(0) \\ equal
+ ? 0 == Pol(0) \\ equal (not identical)
  %6 = 1
- ? [0] == 0     \\ equal
+ ? [0] == 0     \\ equal (not identical)
  %7 = 1
- ? [0, 0] == 0  \\ equal
+ ? [0, 0] == 0  \\ equal (not identical)
  %8 = 1
  ? [0] == [0,0] \\ not equal
- %9 = 1
+ %9 = 0
  @eprog\noindent In particular \kbd{==} is not transitive in general; it is
  transitive when used to compare objects known to have the same type. The
  operator \kbd{===} is transitive. The \kbd{==} operator allows two
