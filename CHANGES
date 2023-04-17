@@ -25,7 +25,8 @@ BA   3- [libpari] gc_stoi, gc_utoi, gc_utoipos
 BA   4- [libpari] F2xX_shift
 BA   5- [libpari] Flx_Fl_mul_pre
 BA   6- [libpari] Flx_halfgcd_all, Flx_halfgcd_all_pre, FpX_halfgcd_all,
-        FlxqX_halfgcd_all, FlxqX_halfgcd_all_pre, FpXQX_halfgcd_all
+        FlxqX_halfgcd_all, FlxqX_halfgcd_all_pre, FpXQX_halfgcd_all,
+        F2xqX_halfgcd_all
 
 Done for version 2.16.0 (released 25/02/2023):
   Fixed
