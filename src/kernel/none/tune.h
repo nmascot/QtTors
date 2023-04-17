@@ -7,9 +7,9 @@
 #define __F2x_MUL_MULII_LIMIT            662
 #define __F2xqX_BARRETT_LIMIT            56
 #define __F2xqX_DIVREM_BARRETT_LIMIT     127
-#define __F2xqX_EXTGCD_LIMIT             127
-#define __F2xqX_GCD_LIMIT                1292
-#define __F2xqX_HALFGCD_LIMIT            127
+#define __F2xqX_EXTGCD_LIMIT             10
+#define __F2xqX_GCD_LIMIT                468
+#define __F2xqX_HALFGCD_LIMIT            64
 #define __F2xqX_INVBARRETT_LIMIT         50
 #define __F2xqX_REM_BARRETT_LIMIT        127
 #define __Flx_BARRETT2_LIMIT             63
@@ -81,9 +81,9 @@
 #define __F2x_MUL_MULII_LIMIT            6265
 #define __F2xqX_BARRETT_LIMIT            58
 #define __F2xqX_DIVREM_BARRETT_LIMIT     127
-#define __F2xqX_EXTGCD_LIMIT             127
-#define __F2xqX_GCD_LIMIT                1292
-#define __F2xqX_HALFGCD_LIMIT            78
+#define __F2xqX_EXTGCD_LIMIT             10
+#define __F2xqX_GCD_LIMIT                257
+#define __F2xqX_HALFGCD_LIMIT            43
 #define __F2xqX_INVBARRETT_LIMIT         38
 #define __F2xqX_REM_BARRETT_LIMIT        127
 #define __Flx_BARRETT2_LIMIT             102
