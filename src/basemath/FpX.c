@@ -1168,13 +1168,14 @@ FpX_extresultant(GEN x, GEN y, GEN p, GEN *ptU, GEN *ptV)
     GEN M;
     if (lgpol(y)<=(lgpol(x)>>1))
     {
-      GEN r = FpX_rem(x, y, p);
+      GEN r, q = FpX_divrem(x, y, p, &r);
       long dx = degpol(x), dy = degpol(y), dr = degpol(r);
       GEN ly = gel(y,dy+2);
       if (!equali1(ly)) res = Fp_mul(res, Fp_powu(ly, dx - dr, p), p);
       if (both_odd(dx, dy))
         res = Fp_neg(res, p);
       x = y; y = r;
+      R = FpX_FpXM_qmul(q, R, p);
     }
     M = FpX_halfres(x, y, p, &x, &y, &res);
     if (!signe(res)) return gc_const(av, gen_0);

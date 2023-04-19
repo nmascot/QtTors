@@ -2451,13 +2451,14 @@ Flx_extresultant_pre(GEN x, GEN y, ulong p, ulong pi, GEN *ptU, GEN *ptV)
     GEN M;
     if (lgpol(y)<=(lgpol(x)>>1))
     {
-      GEN r = Flx_rem_pre(x, y, p, pi);
+      GEN r, q = Flx_divrem_pre(x, y, p, pi, &r);
       long dx = degpol(x), dy = degpol(y), dr = degpol(r);
       ulong ly = y[dy+2];
       if (ly != 1) res = Fl_mul(res, Fl_powu_pre(ly, dx - dr, p, pi), p);
       if (both_odd(dx, dy))
         res = Fl_neg(res, p);
       x = y; y = r;
+      R = Flx_FlxM_qmul(q, R, p,pi);
     }
     M = Flx_halfres_pre(x, y, p, pi, &x, &y, &res);
     if (!res) return gc_ulong(av, 0);

@@ -88,6 +88,8 @@ chkgcdext(a,b,p)=
   my(P=random(Mod(1,p)*x^a),Q=random(Mod(1,p)*x^b));
   my([u,v,d]=gcdext(P,Q));
   if(u*P+v*Q!=d,error([P,Q,p]));
+  my([u,v,d]=polresultantext(P,Q));
+  if(u*P+v*Q!=d,error([P,Q,p]));
 }
 
 chkgcdext(200,200,17)
