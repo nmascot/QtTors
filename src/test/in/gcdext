@@ -100,6 +100,9 @@ chkgcdext(300,100,17)
 chkgcdext(300,100,nextprime(2^31))
 chkgcdext(300,100,nextprime(2^63))
 chkgcdext(300,100,nextprime(2^95))
+chkgcdext(200,300,nextprime(2^31))
+chkgcdext(200,300,nextprime(2^63))
+chkgcdext(200,300,nextprime(2^95))
 
 chkhalfgcd(a,b)=
 {

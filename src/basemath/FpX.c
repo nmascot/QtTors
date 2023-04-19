@@ -1103,25 +1103,16 @@ FpX_resultant(GEN x, GEN y, GEN p)
 static GEN
 FpX_extresultant_basecase(GEN a, GEN b, GEN p, GEN *ptU, GEN *ptV)
 {
+  pari_sp av = avma;
   GEN z,q,u,v, x = a, y = b;
   GEN lb, res = gen_1;
-  pari_sp av = avma;
   long dx, dy, dz;
   long vs = varn(a);
 
-  dx = degpol(x);
-  dy = degpol(y);
-  if (dy > dx)
-  {
-    swap(x,y); lswap(dx,dy); pswap(ptU, ptV);
-    a = x; b = y;
-    if (both_odd(dx,dy)) res = Fp_neg(res,p);
-  }
-  /* dy <= dx */
-  if (dy < 0) return 0;
-
   u = pol_0(vs);
   v = pol_1(vs); /* v = 1 */
+  dx = degpol(x);
+  dy = degpol(y);
   while (dy)
   { /* b u = x (a), b v = y (a) */
     lb = gel(y,dy+2);
@@ -1151,7 +1142,8 @@ FpX_extresultant(GEN x, GEN y, GEN p, GEN *ptU, GEN *ptV)
 {
   pari_sp av=avma;
   GEN u, v, R;
-  GEN res, res1;
+  GEN res = gen_1, res1;
+  long dx = degpol(x), dy = degpol(y);
   if (lgefint(p) == 3)
   {
     pari_sp av = avma;
@@ -1162,7 +1154,13 @@ FpX_extresultant(GEN x, GEN y, GEN p, GEN *ptU, GEN *ptV)
     *ptU = Flx_to_ZX(u); *ptV = Flx_to_ZX(v);
     return gc_all(av, 3, &res, ptU, ptV);
   }
-  R = matid2_FpXM(x[1]); res = gen_1;
+  if (dy > dx)
+  {
+    swap(x,y); lswap(dx,dy);
+    if (both_odd(dx,dy)) res = Fp_neg(res,p);
+    R = matJ2_FpXM(x[1]);
+  } else R = matid2_FpXM(x[1]);
+  if (dy < 0) return gen_0;
   while (lgpol(y) >= FpX_EXTGCD_LIMIT)
   {
     GEN M;

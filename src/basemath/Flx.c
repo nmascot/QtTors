@@ -2402,19 +2402,10 @@ Flx_extresultant_basecase(GEN a, GEN b, ulong p, ulong pi, GEN *ptU, GEN *ptV)
   long dx, dy, dz;
   long vs = a[1];
 
-  dx = degpol(x);
-  dy = degpol(y);
-  if (dy > dx)
-  {
-    swap(x,y); lswap(dx,dy); pswap(ptU, ptV);
-    a = x; b = y;
-    if (both_odd(dx,dy)) res = p-res;
-  }
-  /* dy <= dx */
-  if (dy < 0) return 0;
-
   u = pol0_Flx(vs);
   v = pol1_Flx(vs); /* v = 1 */
+  dx = degpol(x);
+  dy = degpol(y);
   while (dy)
   { /* b u = x (a), b v = y (a) */
     lb = y[dy+2];
@@ -2443,9 +2434,17 @@ ulong
 Flx_extresultant_pre(GEN x, GEN y, ulong p, ulong pi, GEN *ptU, GEN *ptV)
 {
   pari_sp av=avma;
-  GEN u, v, R = matid2_FlxM(x[1]);
+  GEN u, v, R;
   long lim = get_Fl_threshold(p, Flx_EXTGCD_LIMIT, Flx_EXTGCD2_LIMIT);
   ulong res = 1, res1;
+  long dx = degpol(x), dy = degpol(y);
+  if (dy > dx)
+  {
+    swap(x,y); lswap(dx,dy);
+    if (both_odd(dx,dy)) res = p-res;
+    R = matJ2_FlxM(x[1]);
+  } else R = matid2_FlxM(x[1]);
+  if (dy < 0) return 0;
   while (lgpol(y) >= lim)
   {
     GEN M;
