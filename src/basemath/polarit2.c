@@ -3266,7 +3266,7 @@ RgX_extresultant_fast(GEN x, GEN y, GEN *U, GEN *V)
 {
   GEN p, pol;
   long pa;
-  long t = RgX_type(x, &p,&pol,&pa);
+  long t = RgX_type2(x, y, &p,&pol,&pa);
   switch(t)
   {
     case t_INTMOD: return RgX_extresultant_FpX(x, y, p, U, V);
