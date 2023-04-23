@@ -880,14 +880,14 @@ factorgen(FB_t *F, GEN nf, GEN I, GEN NI, GEN m, FACT *fact)
 
 /*  FUNDAMENTAL UNITS */
 
-/* a, m real. Return  (Re(x) + a) + I * (Im(x) % m) */
+/* a, y real. Return  (Re(x) + a) + I * (Im(x) % y) */
 static GEN
-addRe_modIm(GEN x, GEN a, GEN m)
+addRe_modIm(GEN x, GEN a, GEN y, GEN iy)
 {
   GEN z;
   if (typ(x) == t_COMPLEX)
   {
-    GEN re, im = modRr_safe(gel(x,2), m);
+    GEN re, im = modRr_i(gel(x,2), y, iy);
     if (!im) return NULL;
     re = gadd(gel(x,1), a);
     z = gequal0(im)? re: mkcomplex(re, im);
@@ -897,28 +897,30 @@ addRe_modIm(GEN x, GEN a, GEN m)
   return z;
 }
 static GEN
-modIm(GEN x, GEN m)
+modIm(GEN x, GEN y, GEN iy)
 {
   if (typ(x) == t_COMPLEX)
   {
-    GEN im = modRr_safe(gel(x,2), m);
+    GEN im = modRr_i(gel(x,2), y, iy);
     if (!im) return NULL;
     x = gequal0(im)? gel(x,1): mkcomplex(gel(x,1), im);
   }
   return x;
 }
 
-/* clean archimedean components */
+/* clean archimedean components. ipi = 2^n / pi (n arbitrary); its
+ * exponent may be modified */
 static GEN
-cleanarch(GEN x, long N, long prec)
+cleanarch(GEN x, long N, GEN ipi, long prec)
 {
   long i, l, R1, RU;
   GEN s, y = cgetg_copy(x, &l);
 
+  if (!ipi) ipi = invr(mppi(prec));
   if (typ(x) == t_MAT)
   {
     for (i = 1; i < l; i++)
-      if (!(gel(y,i) = cleanarch(gel(x,i), N, prec))) return NULL;
+      if (!(gel(y,i) = cleanarch(gel(x,i), N, ipi, prec))) return NULL;
     return y;
   }
   RU = l-1; R1 = (RU<<1) - N;
@@ -927,14 +929,16 @@ cleanarch(GEN x, long N, long prec)
   if (R1)
   {
     GEN pi2 = Pi2n(1, prec);
+    setexpo(ipi, -3); /* 1/(2pi) */
     for (; i <= R1; i++)
-      if (!(gel(y,i) = addRe_modIm(gel(x,i), s, pi2))) return NULL;
+      if (!(gel(y,i) = addRe_modIm(gel(x,i), s, pi2, ipi))) return NULL;
   }
   if (i <= RU)
   {
     GEN pi4 = Pi2n(2, prec), s2 = gmul2n(s, 1);
+    setexpo(ipi, -4); /* 1/(4pi) */
     for (; i <= RU; i++)
-      if (!(gel(y,i) = addRe_modIm(gel(x,i), s2, pi4))) return NULL;
+      if (!(gel(y,i) = addRe_modIm(gel(x,i), s2, pi4, ipi))) return NULL;
   }
   return y;
 }
@@ -942,20 +946,22 @@ GEN
 nf_cxlog_normalize(GEN nf, GEN x, long prec)
 {
   long N = nf_get_degree(nf);
-  return cleanarch(x, N, prec);
+  return cleanarch(x, N, NULL, prec);
 }
 
-/* clean unit archimedean components */
+/* clean unit archimedean components. ipi = 2^n / pi (n arbitrary); its
+ * exponent may be modified */
 static GEN
-cleanarchunit(GEN x, long N, long prec)
+cleanarchunit(GEN x, long N, GEN ipi, long prec)
 {
   long i, l, R1, RU;
   GEN y = cgetg_copy(x, &l);
 
+  if (!ipi) ipi = invr(mppi(prec));
   if (typ(x) == t_MAT)
   {
     for (i = 1; i < l; i++)
-      if (!(gel(y,i) = cleanarchunit(gel(x,i), N, prec))) return NULL;
+      if (!(gel(y,i) = cleanarchunit(gel(x,i), N, ipi, prec))) return NULL;
     return y;
   }
   if (gexpo(RgV_sum(real_i(x))) > -10) return NULL;
@@ -964,14 +970,16 @@ cleanarchunit(GEN x, long N, long prec)
   if (R1)
   {
     GEN pi2 = Pi2n(1, prec);
+    setexpo(ipi, -3); /* 1/(2pi) */
     for (; i <= R1; i++)
-      if (!(gel(y,i) = modIm(gel(x,i), pi2))) return NULL;
+      if (!(gel(y,i) = modIm(gel(x,i), pi2, ipi))) return NULL;
   }
   if (i <= RU)
   {
     GEN pi4 = Pi2n(2, prec);
+    setexpo(ipi, -4); /* 1/(4pi) */
     for (; i <= RU; i++)
-      if (!(gel(y,i) = modIm(gel(x,i), pi4))) return NULL;
+      if (!(gel(y,i) = modIm(gel(x,i), pi4, ipi))) return NULL;
   }
   return y;
 }
@@ -1704,13 +1712,13 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   *pe = 128;
   logfu = bnf_get_logfu(bnf);
   N = nf_get_degree(nf);
-  if (!(col = cleanarch(col,N,prec))) return NULL;
+  if (!(col = cleanarch(col,N,NULL,prec))) return NULL;
   if (lg(col) > 2)
   { /* reduce mod units */
     GEN u, z = init_red_mod_units(bnf,prec);
     if (!(u = red_mod_units(col,z))) return NULL;
     col = RgC_add(col, RgM_RgC_mul(logfu, u));
-    if (!(col = cleanarch(col,N,prec))) return NULL;
+    if (!(col = cleanarch(col,N,NULL,prec))) return NULL;
   }
   s = divru(mulir(e, glog(kNx,prec)), N);
   col = fixarch(col, s, nf_get_r1(nf));
@@ -3321,7 +3329,7 @@ get_archclean(GEN nf, GEN x, long prec, int units)
   {
     pari_sp av = avma;
     GEN c = nf_cxlog(nf, gel(x,k), prec);
-    if (!c || (!units && !(c = cleanarch(c, N, prec)))) return NULL;
+    if (!c || (!units && !(c = cleanarch(c, N, NULL,prec)))) return NULL;
     gel(M,k) = gerepilecopy(av, c);
   }
   return M;
@@ -3329,14 +3337,15 @@ get_archclean(GEN nf, GEN x, long prec, int units)
 static void
 Sunits_archclean(GEN nf, GEN Sunits, GEN *pmun, GEN *pC, long prec)
 {
-  GEN M, X = gel(Sunits,1), U = gel(Sunits,2), G = gel(Sunits,3);
+  GEN ipi, M, X = gel(Sunits,1), U = gel(Sunits,2), G = gel(Sunits,3);
   long k, N = nf_get_degree(nf), l = lg(X);
 
   M = cgetg(l, t_MAT);
   for (k = 1; k < l; k++)
     if (!(gel(M,k) = nf_cxlog(nf, gel(X,k), prec))) return;
-  *pmun = cleanarch(RgM_ZM_mul(M, U), N, prec); /* not cleanarchunit ! */
-  if (*pmun) *pC = cleanarch(RgM_ZM_mul(M, G), N, prec);
+  ipi = invr(mppi(prec));
+  *pmun = cleanarch(RgM_ZM_mul(M, U), N, ipi, prec); /* not cleanarchunit ! */
+  if (*pmun) *pC = cleanarch(RgM_ZM_mul(M, G), N, ipi, prec);
 }
 
 GEN
@@ -4143,7 +4152,7 @@ START:
       U = ZM_mul(U, lll(RgM_ZM_mul(real_i(A), U)));
       if (DEBUGLEVEL) timer_printf(&T, "units LLL");
       AU = RgM_ZM_mul(A, U);
-      A = cleanarchunit(AU, N, PREC);
+      A = cleanarchunit(AU, N, NULL, PREC);
       if (!A || lg(A) < RU || expo(gsub(get_regulator(A), R)) > -1)
       {
         long add = nbits2extraprec( gexpo(AU) + 64 ) - gprecision(AU);
@@ -4174,7 +4183,7 @@ START:
     }
     /* class group generators */
     if (flag) Ce = rowslice(Ce, 1, RU);
-    C0 = Ce; Ce = cleanarch(Ce, N, PREC);
+    C0 = Ce; Ce = cleanarch(Ce, N, NULL, PREC);
     if (!Ce) {
       long add = nbits2extraprec( gexpo(C0) + 64 ) - gprecision(C0);
       precpb = "cleanarch"; PREC += maxss(add, 1);

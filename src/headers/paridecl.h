@@ -4026,6 +4026,7 @@ GEN     mkpoln(long n, ...);
 GEN     mkvecn(long n, ...);
 GEN     mkvecsmalln(long n, ...);
 GEN     modRr_safe(GEN x, GEN y);
+GEN     modRr_i(GEN x, GEN y, GEN iy);
 GEN     mulreal(GEN x, GEN y);
 GEN     numer(GEN x);
 GEN     numer_i(GEN x);

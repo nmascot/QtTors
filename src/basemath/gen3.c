@@ -741,6 +741,20 @@ modRr_safe(GEN x, GEN y)
   if (signe(y) < 0 && signe(subri(q,f))) f = addiu(f, 1);
   return signe(f)? gsub(x, mulir(f,y)): x;
 }
+GEN
+modRr_i(GEN x, GEN y, GEN iy)
+{
+  GEN q, f;
+  long e;
+  if (isintzero(x)) return gen_0;
+  q = gmul(x, iy); /* t_REAL */
+
+  e = expo(q);
+  if (e >= 0 && nbits2prec(e+1) > realprec(q)) return NULL;
+  f = floorr(q);
+  if (signe(y) < 0 && signe(subri(q,f))) f = addiu(f, 1);
+  return signe(f)? gsub(x, mulir(f,y)): x;
+}
 
 GEN
 gmod(GEN x, GEN y)
