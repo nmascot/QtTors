@@ -37,7 +37,7 @@ Doc: Solve the equation $x^2 + dy^2 = n$ in integers $x$ and $y$, where
  ? for (i=1, 10^5, qfbcornacchia(24,p)) \\ faster
  time = 423 ms.
  @eprog\noindent We used \kbd{Mat([p,1])} to indicate that $p^1$
- whas the integer factorization of $p$, i.e., that $p$ is prime. Without it,
+ was the integer factorization of $p$, i.e., that $p$ is prime. Without it,
  \kbd{qfbsolve} will further attempt to factor $p$ and waste a little time:
  \bprog
  ? for (i=1, 10^5, qfbsolve(Q, p))
