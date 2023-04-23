@@ -13257,6 +13257,12 @@ when $x \geq 0$, and \kbd{gneg($x$)} otherwise.
 accuracy is unsufficient to compute the floor or $x/y$ in which case we
 return \kbd{NULL}.
 
+\fun{GEN}{modRr_i}{GEN x, GEN y, GEN iy} let $x$ be a \typ{INT}, a \typ{REAL} or
+\typ{FRAC} and let $y$ be a \typ{REAL} and $\var{iy} = \kbd{invr}(y)$. Return
+$x\% y$ unless the input
+accuracy is unsufficient to compute the floor or $x/y$ in which case we
+return \kbd{NULL}.
+
 \section{Complex numbers}
 
 \fun{GEN}{gimag}{GEN x} returns a copy of the imaginary part of \kbd{x}.
