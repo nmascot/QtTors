@@ -1430,24 +1430,26 @@ normforms(GEN D, GEN fa)
   return L;
 }
 
+static void
+SL2_div_init(GEN N, GEN M, GEN *A, GEN *B, GEN *C, GEN *D)
+{
+  GEN b = gcoeff(M,2,1), d = gcoeff(M,2,2);
+  *A = mulii(gcoeff(N,1,1), d); *B = mulii(gcoeff(N,1,2), b);
+  *C = mulii(gcoeff(N,2,1), d); *D = mulii(gcoeff(N,2,2), b);
+}
 /* Let M and N in SL2(Z), return (N*M^-1)[,1] */
 static GEN
 SL2_div_mul_e1(GEN N, GEN M)
 {
-  GEN b = gcoeff(M,2,1), d = gcoeff(M,2,2);
-  GEN p = subii(mulii(gcoeff(N,1,1), d), mulii(gcoeff(N,1,2), b));
-  GEN q = subii(mulii(gcoeff(N,2,1), d), mulii(gcoeff(N,2,2), b));
-  return mkvec2(p,q);
+  GEN A, B, C, D; SL2_div_init(N, M, &A, &B, &C, &D);
+  retmkvec2(subii(A,B), subii(C,D));
 }
-
 /* Let M and N in SL2(Z), return (N*[1,0;0,-1]*M^-1)[,1] */
 static GEN
 SL2_swap_div_mul_e1(GEN N, GEN M)
 {
-  GEN b = gcoeff(M,2,1), d = gcoeff(M,2,2);
-  GEN p = addii(mulii(gcoeff(N,1,1), d), mulii(gcoeff(N,1,2), b));
-  GEN q = addii(mulii(gcoeff(N,2,1), d), mulii(gcoeff(N,2,2), b));
-  return mkvec2(p,q);
+  GEN A, B, C, D; SL2_div_init(N, M, &A, &B, &C, &D);
+  retmkvec2(addii(A,B), addii(C,D));
 }
 
 /* Test equality modulo GL2 of two reduced forms */
@@ -1464,8 +1466,7 @@ qfisolve_normform(GEN Q, GEN P)
 {
   GEN a = gel(Q,1), N = gel(Q,2);
   GEN M, b = redimagsl2(P, &M);
-  if (!GL2_qfb_equal(a,b) || signe(gel(a,2))!=signe(gel(b,2)))
-    return NULL;
+  if (!qfb_equal(a,b)) return NULL;
   return SL2_div_mul_e1(N,M);
 }
 
@@ -1519,7 +1520,7 @@ qfisolvep(GEN Q, GEN p)
     x = SL2_div_mul_e1(N,M);
   else
     x = SL2_swap_div_mul_e1(N,M);
-  return gerepilecopy(av, x);
+  return gerepileupto(av, x);
 }
 
 static void
@@ -1592,9 +1593,9 @@ qfrsolve_normform(GEN N, GEN Ps, GEN rd)
   for(;;)
   {
     if (qfb_equal(gel(M,1), gel(P,1)))
-      return gerepilecopy(av, SL2_div_mul_e1(gel(M,2),gel(P,2)));
+      return gerepileupto(av, SL2_div_mul_e1(gel(M,2),gel(P,2)));
     if (qfb_equal(gel(N,1), gel(Q,1)))
-      return gerepilecopy(av, SL2_div_mul_e1(gel(N,2),gel(Q,2)));
+      return gerepileupto(av, SL2_div_mul_e1(gel(N,2),gel(Q,2)));
     M = rhorealsl2(M, rd);
     if (qfb_equal(gel(M,1), gel(N,1))) return gc_NULL(av);
     Q = rhorealsl2(Q, rd);
