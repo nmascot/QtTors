@@ -5530,6 +5530,12 @@ PicTorsGalRep(GEN J, GEN l, GEN chi)
   }
   J1 = PicSetPrec(J,1);
   B = PicTorsBasis(J1,l,chi);
+	if(B==NULL) /* Got stuck with pairings? */
+  {
+    av = avma;
+    pari_err(e_MISC,"Unable to find suitable pairings");
+    return gen_0;
+  }
   if(gequal0(B)) /* Got stuck and want to give up ? */
   {
     av = avma;
@@ -5657,6 +5663,7 @@ HyperGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
   ulong a;
   RRdata = HyperRRdata(f,P);
   Lp = hyperellcharpoly(gmodulo(f,p));
+	if(chi == NULL || gequal0(chi)) chi = Lp;
   a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
   av1 = avma;
   do
@@ -5686,6 +5693,7 @@ SuperGalRep(GEN f, ulong m, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a
   ulong a;
   RRdata = SuperRRdata(f,m,P);
   Lp = SuperZeta(f,m,itou(p));
+	if(chi == NULL || gequal0(chi)) chi = Lp;
   a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
   Get_ff_aT(utoi(a),p,NULL,&T);
   Auts = SuperAut(m,T,p,e);
@@ -5719,6 +5727,7 @@ SmoothGalRep(GEN f, GEN l, GEN p, ulong e, GEN P, GEN chi, ulong force_a)
   ulong a;
   RRdata = SmoothRRdata(f,p,P);
   Lp = PlaneZeta(gel(RRdata,1),itou(p));
+	if(chi == NULL || gequal0(chi)) chi = Lp;
   a = force_a ? force_a : itou(gel(FpX_root_order_bound(chi ? chi : Lp,l),2));
   av1 = avma;
   do
