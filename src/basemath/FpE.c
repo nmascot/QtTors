@@ -738,24 +738,20 @@ jissupersingular(GEN j, GEN S, GEN p)
   GEN Phi2_j = FqXY_evalx(Phi2, j, S, p);
   GEN roots = FpXQX_roots(Phi2_j, S, p);
   long nbroots = lg(roots)-1;
-  int res = 1;
 
   /* Every node in a supersingular L-volcano has L + 1 neighbours. */
   /* Note: a multiple root only occur when j has CM by sqrt(-15). */
   if (nbroots==0 || (nbroots==1 && FqX_is_squarefree(Phi2_j, S, p)))
-    res = 0;
+    return 0;
   else {
     long i, l = lg(roots);
-    for (i = 1; i < l; ++i) {
-      if (path_extends_to_floor(j, gel(roots, i), S, p, Phi2, max_path_len)) {
-        res = 0;
-        break;
-      }
-    }
+    for (i = 1; i < l; ++i)
+      if (path_extends_to_floor(j, gel(roots, i), S, p, Phi2, max_path_len))
+        return 0;
   }
   /* If none of the paths reached the floor, then the j-invariant is
    * supersingular. */
-  return res;
+  return 1;
 }
 
 int
