@@ -2863,6 +2863,12 @@ Q = nfinit('z);
 gw = nfgrunwaldwang(Q,L,[2 | p <- L],[1],'y);
 print(L==[2,3]);
 
+print("rnf/gchar confusion (#2473)");
+F=nfinit(y^10 - y^9 - 11*y^8 + 13*y^7 + 35*y^6 - 43*y^5 - 36*y^4 + 41*y^3 + 10*y^2 - 7*y - 1);
+id=idealprimedec(F, 5)[1];
+A=alginit(F, [2, [[id], [1]], [1, 1, 1, 1, 0, 1, 1, 1, 1, 1]],,0);
+type(algsplittingfield(A).pol)
+
 \\algpoleval type check
 setrand(1);
 nf = nfinit(y^2-5);
