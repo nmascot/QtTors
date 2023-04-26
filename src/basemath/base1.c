@@ -35,7 +35,7 @@ rawchecknf(GEN v) { return typ(v)==t_VEC && lg(v)==10; }
 /* v a t_VEC, lg(v) = 11, sanity check for true bnf */
 static int
 v11checkbnf(GEN v) { return rawchecknf(bnf_get_nf(v)); }
-/* v a t_VEC, lg(v) = 12, sanity check for true nf and true bnf */
+/* v a t_VEC, lg(v) = 13, sanity check for true nf and true bnf */
 static int
 v13checkgchar(GEN v) { return rawchecknf(gchar_get_nf(v)) && rawcheckbnf(gchar_get_bnf(v)); }
 /* v a t_VEC, lg(v) = 10, sanity check for true nf */
