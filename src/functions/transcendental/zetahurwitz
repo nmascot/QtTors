@@ -34,3 +34,14 @@ Doc: Hurwitz zeta function $\zeta(s,x)=\sum_{n\ge0}(n+x)^{-s}$ and
  ? zetahurwitz(2,1,2) \\ zeta''(2)
  %8 = 1.9892802342989010234208586874215163815
  @eprog
+
+ The derivative can be used to compute Barnes' multiple gamma functions.
+ For instance:
+ \bprog
+ ? mygamma(z)=exp(zetahurwitz(0,z,1)-zeta'(0));
+ /* Alternate way to compute the gamma function */
+ ? BarnesG(z)=exp(-zetahurwitz(-1,z,1)+(z-1)*lngamma(z)+zeta'(-1));
+ /* Barnes G function, satisfying G(z+1)=gamma(z)*G(z): */
+ ? BarnesG(6)/BarnesG(5)
+ % = 24.000000000000000000000000000000000002
+ @eprog
