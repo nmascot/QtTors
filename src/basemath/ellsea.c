@@ -168,6 +168,76 @@ get_FqE_group(void ** pt_E, GEN a4, GEN a6, GEN T, GEN p)
 
 /***********************************************************************/
 /**                                                                   **/
+/**   Handle curves with CM by small order                            **/
+/**                                                                   **/
+/***********************************************************************/
+
+/* Return the list of discriminants D such that
+   polclass(D) divides poldisc(polmodular(l))
+*/
+
+static GEN
+list_singular_discs(long l)
+{
+  const long _4l2 = 4*l*l;
+  long v;
+  GEN V = zero_F2v(4*l*l);
+  for (v = 0; v < 2*l; v++)
+  {
+    GEN F = factoru(_4l2-v*v), P, E, c;
+    ulong d = coredisc2u_fact(F, -1, &P, &E);
+    long i, lP = lg(P), lc;
+    for (i = 1; i < lP; i++)
+      if (uel(P,i)==l) uel(E,i) = 0;
+    c = divisorsu_fact(mkvec2(P,E));
+    lc = lg(c);
+    for (i = 1; i < lc; i++)
+      F2v_set(V,d*uel(c,i)*uel(c,i));
+  }
+  return V;
+}
+
+/* Find D such that j has CM by D, assuming subst(polmodular(l),x,j) has a double root */
+static long
+find_CM(long l, GEN j, GEN T, GEN p)
+{
+  const long inv = 0;
+  GEN v = list_singular_discs(l);
+  long i, n = v[1];
+  GEN db = polmodular_db_init(inv);
+  for (i = 1; i < n; i++)
+    if (F2v_coeff(v,i))
+    {
+      GEN C = polclass0(-i, inv, 0, &db);
+      GEN F = FqX_eval(C, j, T, p);
+      if (signe(F)==0) break;
+    }
+  gunclone_deep(db); return i < n ? -i: 0;
+}
+
+static GEN
+vecpoints_to_vecx(GEN x, GEN q1)
+{
+  pari_APPLY_type(t_COL, gadd(q1, signe(gmael(x,i,2)) > 0 ? gmael(x,i,1)
+                                                          : negi(gmael(x,i,1))));
+}
+
+static GEN
+Fq_ellcard_CM(long disc, GEN a4, GEN a6, GEN T, GEN p)
+{
+  const struct bb_group *grp;
+  void *E;
+  long d = T ? degpol(T): 1;
+  GEN q = powiu(p, d), q1 = addiu(q, 1), Q, S;
+  Q = qfbsolve(Qfb0(gen_1,gen_0,stoi(-disc)), mkmat22(gen_2, gen_2, p, utoi(d)), 3);
+  if (lg(Q)==1) return q1;
+  S = vecpoints_to_vecx(Q, q1);
+  grp = get_FqE_group(&E, a4, a6, T, p);
+  return gen_select_order(S, E, grp);
+}
+
+/***********************************************************************/
+/**                                                                   **/
 /**                      n-division polynomial                        **/
 /**                                                                   **/
 /***********************************************************************/
@@ -1247,7 +1317,7 @@ find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, struct meqn
 /****************************************************************************/
 /*                                  TRACE                                   */
 /****************************************************************************/
-enum mod_type {MTpathological, MTAtkin, MTElkies, MTone_root, MTroots};
+enum mod_type {MTcm, MTpathological, MTAtkin, MTElkies, MTone_root, MTroots};
 
 static GEN
 Flxq_study_eqn(GEN mpoly, GEN T, ulong p, long *pt_dG, long *pt_r)
@@ -1300,7 +1370,7 @@ study_modular_eqn(long ell, GEN mpoly, GEN T, GEN p, enum mod_type *mt, long *pt
   pari_sp ltop = avma;
   GEN g = gen_0;
   *ptr_r = 0; /*gcc -Wall*/
-  if (!FqX_is_squarefree(mpoly, T, p)) *mt = MTpathological;
+  if (!FqX_is_squarefree(mpoly, T, p)) *mt = MTcm;
   else
   {
     long dG;
@@ -1320,6 +1390,7 @@ study_modular_eqn(long ell, GEN mpoly, GEN T, GEN p, enum mod_type *mt, long *pt
     case MTroots: err_printf("l+1 roots\t"); break;
     case MTAtkin: err_printf("Atkin\t"); break;
     case MTpathological: err_printf("Pathological\n"); break;
+    case MTcm: err_printf("CM\t"); break;
   }
   return g ? gerepilecopy(ltop, g): NULL;
 }
@@ -1479,6 +1550,13 @@ find_trace(GEN a4, GEN a6, GEN j, ulong ell, GEN q, GEN T, GEN p, long *ptr_kt,
     if (lg(tr)==1) pari_err_PRIME("ellap",p);
     kt = 1;
     break;
+  case MTcm:
+    {
+      long D = find_CM(ell, j, T, p);
+      GEN C = Fq_ellcard_CM(D, a4, a6, T, p);
+      if (DEBUGLEVEL>1) err_printf(" D=%ld [%ld ms]\n", D, timer_delay(&ti));
+      return gc_const(ltop, C);
+    }
   default: /* case MTpathological: */
     return gc_NULL(ltop);
   }
@@ -1956,7 +2034,8 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
     if (absequalui(ell, p)) continue;
     trace_mod = find_trace(a4, a6, j, ell, q, T, p, &kt, smallfact, vx,vy);
     if (!trace_mod) continue;
-
+    if (typ(trace_mod)==t_INT)
+      return gerepileuptoint(ltop, trace_mod);
     nbtrace = lg(trace_mod) - 1;
     ellkt = (long)upowuu(ell, kt);
     if (nbtrace == 1)
