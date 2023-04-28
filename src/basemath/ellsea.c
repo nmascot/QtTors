@@ -143,6 +143,31 @@ ellmodulareqn(long ell, long vx, long vy)
 
 /***********************************************************************/
 /**                                                                   **/
+/**                           FqE_group                               **/
+/**                                                                   **/
+/***********************************************************************/
+
+static GEN
+Fq_to_Flx(GEN a4, GEN T, ulong p)
+{ return typ(a4)==t_INT ? Z_to_Flx(a4, p, get_Flx_var(T)): ZX_to_Flx(a4, p); }
+
+/*FIXME: the name of the function does not quite match what it does*/
+static const struct bb_group *
+get_FqE_group(void ** pt_E, GEN a4, GEN a6, GEN T, GEN p)
+{
+  if (!T) return get_FpE_group(pt_E,a4,a6,p);
+  else if (lgefint(p)==3)
+  {
+    ulong pp = uel(p,2);
+    GEN Tp = ZXT_to_FlxT(T,pp);
+    return get_FlxqE_group(pt_E, Fq_to_Flx(a4, Tp, pp), Fq_to_Flx(a6, Tp, pp),
+                           Tp, pp);
+  }
+  return get_FpXQE_group(pt_E,a4,a6,T,p);
+}
+
+/***********************************************************************/
+/**                                                                   **/
 /**                      n-division polynomial                        **/
 /**                                                                   **/
 /***********************************************************************/
@@ -637,10 +662,6 @@ Zq_ellj(GEN a4, GEN a6, GEN T, GEN p, GEN pp, long e)
 /****************************************************************************/
 /*                              EIGENVALUE                                  */
 /****************************************************************************/
-
-static GEN
-Fq_to_Flx(GEN a4, GEN T, ulong p)
-{ return typ(a4)==t_INT ? Z_to_Flx(a4, p, get_Flx_var(T)): ZX_to_Flx(a4, p); }
 
 static GEN
 Flxq_find_eigen_Frobenius(GEN a4, GEN a6, GEN h, GEN T, ulong p)
@@ -1874,21 +1895,6 @@ get_bound_bsgs(long lp)
   else
     B = mulrr(powru(dbltor(1.035), minss(lp,307)), dbltor(1.35));
   return mulru(B, 1000000);
-}
-
-/*FIXME: the name of the function does not quite match what it does*/
-static const struct bb_group *
-get_FqE_group(void ** pt_E, GEN a4, GEN a6, GEN T, GEN p)
-{
-  if (!T) return get_FpE_group(pt_E,a4,a6,p);
-  else if (lgefint(p)==3)
-  {
-    ulong pp = uel(p,2);
-    GEN Tp = ZXT_to_FlxT(T,pp);
-    return get_FlxqE_group(pt_E, Fq_to_Flx(a4, Tp, pp), Fq_to_Flx(a6, Tp, pp),
-                           Tp, pp);
-  }
-  return get_FpXQE_group(pt_E,a4,a6,T,p);
 }
 
 /* E is an elliptic curve defined over Z or over Fp in ellinit format, defined
