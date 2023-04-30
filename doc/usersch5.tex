@@ -1046,10 +1046,12 @@ is no real benefit in choosing a much larger value: the high-level
 iterator provide \emph{fast} access to primes up to the \emph{square}
 of \kbd{maxprime}. In any case, the implementation requires that
 $\tet{maxprime} < 2^{\B} - 2048$, whatever memory is available.
+In fact, \kbd{maxprime} is automatically replaced by
+$$\min\big(\max(\kbd{maxprime}, 65557), 436273289\big).$$
 
-PARI currently guarantees that the first 6547 primes, up to and including
-65557, are present in the table, even if you set \kbd{maxprime} to zero.
-in the \kbd{pari\_init} call.
+In particular, PARI guarantees that the first 6547 primes, up to and
+including 65557, are present in the table, even if you set \kbd{maxprime} to
+zero in the \kbd{pari\_init} call.
 
 \noindent Some convenience functions:
 
@@ -1057,6 +1059,10 @@ in the \kbd{pari\_init} call.
 
 \fun{ulong}{maxprimeN}{} the index $N$ of the largest prime computable using
 the prime table. I.e., $p_N = \kbd{maxprime()}$.
+
+\fun{ulong}{maxprimelim}{} the argument used for the last \kbd{initprimes}
+call. This belongs to $[65537, 436273289]$ and the largest prime
+less than or equal to this number is \kbd{maxprime}$()$.
 
 \fun{void}{maxprime_check}{ulong B} raise an error if \kbd{maxprime()} is $< B$.
 
@@ -1109,7 +1115,7 @@ prime in the table.
 
 \fun{void}{initprimetable}{ulong maxprime} computes a prime table (of all prime
 differences for $p < \kbd{maxprime}$) and assign it to the global variable
-\kbd{diffptr}. Don't change \kbd{diffptr} directly, call this function
+\kbd{diffptr}. Never change \kbd{diffptr} directly, call this function
 instead. This calls \kbd{initprimes} and updates internal data recording the
 table size.
 
