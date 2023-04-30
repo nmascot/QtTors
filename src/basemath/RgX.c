@@ -1691,7 +1691,7 @@ RgX_div_by_X_x(GEN a, GEN x, GEN *r)
   if (l <= 3)
   {
     if (r) *r = l == 2? gen_0: gcopy(gel(a,2));
-    return pol_0(0);
+    return pol_0(varn(a));
   }
   z = cgetg(l-1, t_POL);
   z[1] = a[1];

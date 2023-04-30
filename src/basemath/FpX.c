@@ -528,9 +528,9 @@ FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r)
   if (l <= 3)
   {
     if (r) *r = l == 2? gen_0: icopy(gel(a,2));
-    return pol_0(0);
+    return pol_0(varn(a));
   }
-  l--; z = cgetg(l, t_POL); z[1] = evalsigne(1) | evalvarn(0);
+  l--; z = cgetg(l, t_POL); z[1] = a[1];
   gel(z, l-1) = gel(a,l);
   for (i = l-2; i > 1; i--) /* z[i] = a[i+1] + x*z[i+1] */
     gel(z,i) = Fp_addmul(gel(a,i+1), x, gel(z,i+1), p);

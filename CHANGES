@@ -13,6 +13,7 @@ BA   9- rare infinite loop in ellsaturation
 BA  10- quadunitindex(8461,2)->1 instead of 3 [#2466]
 BA  11- chinese(Mod(1,3)*(x^2+x+2),Mod(1,5)*(x-1)) -> incorrect leading term
 BA  12- lindep([0,x]) -> SEGV
+BA  13- [libpari] RgX_div_by_X_x: wrong variable number
 
   Changed
 HC   1- dirpowerssum: allow functions with t_VEC output
