@@ -32,6 +32,7 @@ BA   6- [libpari] Flx_halfgcd_all, Flx_halfgcd_all_pre, FpX_halfgcd_all,
      7- [libpari] modRr_i
 BA   8- [libpari] random_Fq
      9- [libpari] maxprimelim
+BA  10- [libpari] FlxqX_div_by_X_x, FlxqX_div_by_X_x_pre
 
 Done for version 2.16.0 (released 25/02/2023):
   Fixed

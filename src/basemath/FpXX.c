@@ -1333,6 +1333,17 @@ FpXQX_div_by_X_x(GEN a, GEN x, GEN T, GEN p, GEN *r)
 {
   long l = lg(a), i;
   GEN z;
+  if (lgefint(p)==3)
+  {
+    pari_sp av = avma;
+    GEN ap, xp, t, z;
+    ulong pp = to_FlxqX(a, NULL, T, p, &ap, NULL, &t);
+    xp = ZX_to_Flx(to_ZX(x, get_FpX_var(T)), pp);
+    z = FlxX_to_ZXX(FlxqX_div_by_X_x(ap, xp, t, pp, r));
+    if (!r) return gerepileupto(av, z);
+    *r = Flx_to_ZX(*r);
+    return gc_all(av, 2, &z, r);
+  }
   if (l <= 3)
   {
     if (r) *r = l == 2? gen_0: gcopy(gel(a,2));

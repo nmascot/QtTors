@@ -1162,6 +1162,39 @@ GEN
 FlxqX_rem(GEN x, GEN S, GEN T, ulong p)
 { return FlxqX_rem_pre(x, S, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
+/* x + y*z mod p */
+INLINE GEN
+Flxq_addmul_pre(GEN x, GEN y, GEN z, GEN T, ulong p, ulong pi)
+{
+  pari_sp av;
+  if (!lgpol(y) || !lgpol(z)) return Flx_rem_pre(x, T, p, pi);
+  if (!lgpol(x)) return Flxq_mul_pre(z, y, T, p, pi);
+  av = avma;
+  return gerepileupto(av, Flx_add(x, Flxq_mul_pre(y, z, T, p, pi), p));
+}
+
+GEN
+FlxqX_div_by_X_x_pre(GEN a, GEN x, GEN T, ulong p, ulong pi, GEN *r)
+{
+  long l = lg(a), i;
+  GEN z;
+  if (l <= 3)
+  {
+    if (r) *r = l == 2? pol0_Flx(get_Flx_var(T)): Flx_copy(gel(a,2));
+    return pol_0(varn(a));
+  }
+  l--; z = cgetg(l, t_POL); z[1] = a[1];
+  gel(z, l-1) = gel(a,l);
+  for (i=l-2; i>1; i--) /* z[i] = a[i+1] + x*z[i+1] */
+    gel(z, i) = Flxq_addmul_pre(gel(a,i+1), x, gel(z,i+1), T, p, pi);
+  if (r) *r = Flxq_addmul_pre(gel(a,2), x, gel(z,2), T, p, pi);
+  return z;
+}
+
+GEN
+FlxqX_div_by_X_x(GEN a, GEN x, GEN T, ulong p, GEN *r)
+{ return FlxqX_div_by_X_x_pre(a, x, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p), r); }
+
 static GEN
 FlxqX_addmulmul(GEN u, GEN v, GEN x, GEN y, GEN T, ulong p, ulong pi)
 {

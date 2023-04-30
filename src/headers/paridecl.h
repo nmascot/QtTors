@@ -630,6 +630,8 @@ GEN     FlxqX_Flxq_mul_to_monic_pre(GEN P, GEN U, GEN T, ulong p, ulong pi);
 GEN     FlxqX_Newton(GEN P, long n, GEN T, ulong p);
 GEN     FlxqX_Newton_pre(GEN P, long n, GEN T, ulong p, ulong pi);
 GEN     FlxqX_disc(GEN x, GEN T, ulong p);
+GEN     FlxqX_div_by_X_x(GEN a, GEN x, GEN T, ulong p, GEN *r);
+GEN     FlxqX_div_by_X_x_pre(GEN a, GEN x, GEN T, ulong p, ulong pi, GEN *r);
 GEN     FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr);
 GEN     FlxqX_divrem_pre(GEN x, GEN S, GEN T, ulong p, long pi, GEN *pr);
 GEN     FlxqX_dotproduct(GEN x, GEN y, GEN T, ulong p);
