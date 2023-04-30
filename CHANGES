@@ -30,6 +30,7 @@ BA   6- [libpari] Flx_halfgcd_all, Flx_halfgcd_all_pre, FpX_halfgcd_all,
         FlxqX_halfgcd_all, FlxqX_halfgcd_all_pre, FpXQX_halfgcd_all,
         F2xqX_halfgcd_all, FFX_halfgcd_all, RgX_halfgcd_all
      7- [libpari] modRr_i
+BA   8- [libpari] random_Fq
 
 Done for version 2.16.0 (released 25/02/2023):
   Fixed

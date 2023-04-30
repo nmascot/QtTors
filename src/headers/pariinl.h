@@ -2397,6 +2397,10 @@ gener_Fq_local(GEN T, GEN p, GEN L)
 { return T? gener_FpXQ_local(T,p, L)
           : pgener_Fp_local(p, L); }
 
+INLINE GEN
+random_Fq(GEN T, GEN p)
+{ return T ? random_FpX(get_FpX_degree(T), get_FpX_var(T), p): randomi(p); }
+
 /* FpXQX */
 INLINE GEN
 FpXQX_div(GEN x, GEN y, GEN T, GEN p) { return FpXQX_divrem(x, y, T, p, NULL); }
