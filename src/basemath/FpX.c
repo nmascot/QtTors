@@ -2694,10 +2694,70 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
   return gc_all(av, 2, &z,zeta);
 }
 
-GEN
-FpXQ_sqrt(GEN a, GEN T, GEN p)
+static GEN
+Fp2_norm(GEN x, GEN D, GEN p)
 {
-  return FpXQ_sqrtn(a, gen_2, T, p, NULL);
+  GEN a = gel(x,1), b = gel(x,2), a2;
+  a2 = Fp_sqr(a,p);
+  return b? Fp_sub(a2, Fp_mul(D, Fp_sqr(b, p), p), p): a2;
+}
+
+static GEN
+Fp2_sqrt(GEN z, GEN D, GEN p)
+{
+  GEN a = gel(z,1), b = gel(z,2), as2, u, v, s;
+  if (signe(b)==0)
+    return kronecker(a, p)==1 ? mkvec2(Fp_sqrt_i(a, D, p), gen_0)
+                              : mkvec2(gen_0,Fp_sqrt_i(Fp_div(a, D, p), D, p));
+  s = Fp_sqrt_i(Fp2_norm(z, D, p), D, p);
+  if(!s) return NULL;
+  as2 = Fp_halve(Fp_add(a, s, p), p);
+  if (kronecker(as2, p)==-1) as2 = Fp_sub(as2,s,p);
+  u = Fp_sqrt_i(as2, D, p);
+  v = Fp_div(b, Fp_mulu(u, 2, p), p);
+  return mkvec2(u,v);
+}
+
+GEN
+FpXQ_sqrt(GEN z, GEN T, GEN p)
+{
+   pari_sp av = avma;
+  long d = get_FpX_degree(T);
+  if (lgefint(p)==3)
+  {
+    if (uel(p,2) == 2)
+    {
+      GEN r = F2xq_sqrt(ZX_to_F2x(z), ZX_to_F2x(get_FpX_mod(T)));
+      return gerepileupto(av, F2x_to_ZX(r));
+    } else
+    {
+      ulong pp = to_Flxq(&z, &T, p);
+      z = Flxq_sqrt(z, T, pp);
+      if (!z) return NULL;
+      return gerepileupto(av, Flx_to_ZX(z));
+    }
+  }
+  if (d==2)
+  {
+    GEN P = get_FpX_mod(T);
+    GEN c = gel(P,2), b = gel(P,3), a = gel(P,4), b2 = Fp_halve(b, p);
+    GEN t = Fp_div(b2, a, p);
+    GEN D = Fp_sub(Fp_sqr(b2, p), Fp_mul(a, c, p), p);
+    GEN x = degpol(z)<1 ? constant_coeff(z): Fp_sub(gel(z,2), Fp_mul(gel(z,3), t, p), p);
+    GEN y = degpol(z)<1 ? gen_0: gel(z,3);
+    GEN r = Fp2_sqrt(mkvec2(x, y), D, p), s;
+    if (!r) return gc_NULL(av);
+    s = deg1pol_shallow(gel(r,2),Fp_add(gel(r,1), Fp_mul(gel(r,2),t,p), p), varn(P));
+    return gerepilecopy(av, s);
+  }
+  if (lgpol(z)<=1 && odd(d))
+  {
+    pari_sp av = avma;
+    GEN s = Fp_sqrt(constant_coeff(z), p);
+    if (!s) return gc_NULL(av);
+    return gerepilecopy(av, scalarpol_shallow(s, get_FpX_var(T)));
+  }
+  return FpXQ_sqrtn(z, gen_2, T, p, NULL);
 }
 
 GEN
