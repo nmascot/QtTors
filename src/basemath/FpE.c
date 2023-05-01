@@ -764,9 +764,8 @@ Fp_elljissupersingular(GEN j, GEN p)
   if (CM < 0) return krosi(CM, p) < 0; /* valid if p > 3 */
   else
   {
-    GEN S = init_Fq(p, 2, fetch_var());
-    int res = jissupersingular(j, S, p);
-    (void)delete_var(); return gc_bool(ltop, res);
+    GEN S = init_Fq(p, 2, 1);
+    return gc_bool(ltop, jissupersingular(j, S, p));
   }
 }
 
