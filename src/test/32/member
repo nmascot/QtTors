@@ -250,8 +250,8 @@ ELLFq
 .c6: 3
 .cyc: [195]
 .disc: 10
-.gen: [[6*x + 1, x + 6]]
-.group: [195, [195], [[6*x + 1, x + 6]]]
+.gen: [[10*x + 11, 2*x + 6]]
+.group: [195, [195], [[10*x + 11, 2*x + 6]]]
 .j: 9
 .no: 195
 .p: 13
@@ -353,4 +353,4 @@ BID (nogen)
 MF
 .mod: t^2 + t + 1
 .mod: Mod(1, t^2 + t + 1)*y^2 + Mod(-2*t, t^2 + t + 1)
-Total time spent: 59
+Total time spent: 47

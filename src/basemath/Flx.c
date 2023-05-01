@@ -3455,8 +3455,44 @@ Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
 }
 
 GEN
+Flxq_sqrt_pre(GEN z, GEN T, ulong p, ulong pi)
+{
+  pari_sp av = avma;
+  if (p==2)
+  {
+    GEN r = F2xq_sqrt(Flx_to_F2x(z), Flx_to_F2x(get_Flx_mod(T)));
+    return gerepileupto(av, F2x_to_Flx(r));
+  }
+  if (get_Flx_degree(T)==2)
+  {
+    GEN P = get_Flx_mod(T), s;
+    ulong c = uel(P,2), b = uel(P,3), a = uel(P,4);
+    ulong y = degpol(z)<1 ? 0: uel(z,3);
+    if (a==1 && b==0)
+    {
+      ulong x = degpol(z)<1 ? Flx_constant(z): uel(z,2);
+      GEN r = Fl2_sqrt_pre(mkvecsmall2(x, y), Fl_neg(c, p), p, pi);
+      if (!r) return gc_NULL(av);
+      s = mkvecsmall3(P[1], uel(r,1), uel(r,2));
+    }
+    else
+    {
+      ulong b2 = Fl_halve(b, p), t = Fl_div(b2, a, p);
+      ulong D = Fl_sub(Fl_sqr(b2, p), Fl_mul(a, c, p), p);
+      ulong x = degpol(z)<1 ? Flx_constant(z): Fl_sub(uel(z,2), Fl_mul(uel(z,3), t, p), p);
+      GEN r = Fl2_sqrt_pre(mkvecsmall2(x, y), D, p, pi);
+      if (!r) return gc_NULL(av);
+      s = mkvecsmall3(P[1], Fl_add(uel(r,1), Fl_mul(uel(r,2),t,p), p), uel(r,2));
+    }
+    return gerepileuptoleaf(av, Flx_renormalize(s, 4));
+  }
+  else
+    return Flxq_sqrtn(z, gen_2, T, p, NULL);
+}
+
+GEN
 Flxq_sqrt(GEN a, GEN T, ulong p)
-{ return Flxq_sqrtn(a, gen_2, T, p, NULL); }
+{ return Flxq_sqrt_pre(a, T, p, SMALL_ULONG(p)? 0: get_Fl_red(p)); }
 
 /* assume T irreducible mod p */
 int

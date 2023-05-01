@@ -527,6 +527,7 @@ GEN     Flxq_powers_pre(GEN x, long l, GEN T, ulong p, ulong pi);
 GEN     Flxq_sqr(GEN y,GEN T,ulong p);
 GEN     Flxq_sqr_pre(GEN y,GEN T,ulong p,ulong pi);
 GEN     Flxq_sqrt(GEN a, GEN T, ulong p);
+GEN     Flxq_sqrt_pre(GEN z, GEN T, ulong p, ulong pi);
 GEN     Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zetan);
 ulong   Flxq_trace(GEN x, GEN T, ulong p);
 GEN     FlxqC_Flxq_mul(GEN x, GEN y, GEN T, ulong p);
