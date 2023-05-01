@@ -4343,6 +4343,23 @@ _Fl2_rand(void *data)
   return mkF2(a,b);
 }
 
+GEN
+Fl2_sqrt_pre(GEN z, ulong D, ulong p, ulong pi)
+{
+  ulong a = uel(z,1), b = uel(z,2), as2, u, v, s;
+  ulong y = Fl_2gener_pre_i(D, p, pi);
+  if (b == 0)
+    return krouu(a, p)==1 ? mkF2(Fl_sqrt_pre_i(a, y, p, pi), 0)
+                          : mkF2(0, Fl_sqrt_pre_i(Fl_div(a, D, p), y, p, pi));
+  s = Fl_sqrt_pre_i(Fl2_norm_pre(z, D, p, pi), y, p, pi);
+  if (s==~0UL) return NULL;
+  as2 = Fl_halve(Fl_add(a, s, p), p);
+  if (krouu(as2, p)==-1) as2 = Fl_sub(as2, s, p);
+  u = Fl_sqrt_pre_i(as2, y, p, pi);
+  v = Fl_div(b, Fl_double(u, p), p);
+  return mkF2(u,v);
+}
+
 static const struct bb_group Fl2_star={_Fl2_mul, _Fl2_pow, _Fl2_rand,
        hash_GEN, zv_equal, Fl2_equal1, NULL};
 
