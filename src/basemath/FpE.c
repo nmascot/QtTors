@@ -764,7 +764,7 @@ Fp_elljissupersingular(GEN j, GEN p)
   if (CM < 0) return krosi(CM, p) < 0; /* valid if p > 3 */
   else
   {
-    GEN S = init_Fq(p, 2, 1);
+    GEN S = deg2pol_shallow(gen_1,gen_0,Fp_neg(Fp_2gener(p),p),1);
     return gc_bool(ltop, jissupersingular(j, S, p));
   }
 }
