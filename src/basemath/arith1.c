@@ -746,6 +746,15 @@ Fl_2gener_pre(ulong p, ulong pi)
   return Fl_powu_pre(nonsquare1_Fl(p), p1 >> e, p, pi);
 }
 
+ulong
+Fl_2gener_pre_i(ulong  ns, ulong p, ulong pi)
+{
+  ulong p1 = p-1;
+  long e = vals(p1);
+  if (e == 1) return p1;
+  return Fl_powu_pre(ns, p1 >> e, p, pi);
+}
+
 static ulong
 Fl_sqrt_i(ulong a, ulong y, ulong p)
 {

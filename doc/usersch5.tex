@@ -2280,6 +2280,9 @@ We assume \var{pi} is the pseudoinverse of $p$, or $0$ in which case we
 either use ordinary divisions if $p < B^{1/2}$ is small and call
 \kbd{get\_Fl\_red} ourselves otherwise.
 
+\fun{ulong}{Fl_2gener_pre_i}{ulong ns, ulong p, ulong pi}
+as \kbd{Fl\_2gener\_pre} where \kbd{ns} is a non-square modulo $p$.
+
 \fun{ulong}{Fl_sqrt_pre_i}{ulong x, ulong s2, ulong p, ulong pi}
 as \kbd{Fl\_sqrt\_pre} where \kbd{s2} is the element returned by
 \kbd{Fl\_2gener\_pre}. We assume \var{pi} is the pseudoinverse of $p$, or $0$

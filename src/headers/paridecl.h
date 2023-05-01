@@ -2088,6 +2088,7 @@ GEN     quadpoly0(GEN x, long v);
 /* arith1.c */
 
 ulong   Fl_2gener_pre(ulong p, ulong pi);
+ulong   Fl_2gener_pre_i(ulong  ns, ulong p, ulong pi);
 ulong   Fl_log(ulong a, ulong g, ulong ord, ulong p);
 ulong   Fl_log_pre(ulong a, ulong g, ulong ord, ulong p, ulong pi);
 ulong   Fl_order(ulong a, ulong o, ulong p);
