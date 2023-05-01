@@ -226,17 +226,20 @@ RgXY_squff(GEN f)
 static int
 RgX_cmbf(GEN p, long i, GEN BLOC, GEN Lmod, GEN Lfac, GEN *F)
 {
+  pari_sp av;
   GEN q;
   if (i == lg(Lmod)) return 0;
   if (RgX_cmbf(p, i+1, BLOC, Lmod, Lfac, F) && p) return 1;
   if (!gel(Lmod,i)) return 0;
   p = p? RgX_mul(p, gel(Lmod,i)): gel(Lmod,i);
+  av = avma;
   q = RgV_to_RgX(RgX_digits(p, BLOC), varn(*F));
   if (degpol(q))
   {
     GEN R, Q = RgX_divrem(*F, q, &R);
     if (signe(R)==0) { vectrunc_append(Lfac, q); *F = Q; return 1; }
   }
+  set_avma(av);
   if (RgX_cmbf(p, i+1, BLOC, Lmod, Lfac, F)) { gel(Lmod,i) = NULL; return 1; }
   return 0;
 }
