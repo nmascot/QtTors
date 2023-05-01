@@ -42,12 +42,36 @@ test(precprime(2^32), 3)
 test(nextprime(2^32), 3)
 
 default(echo,0);
+stest(p,n)=
+{
+  my(a=ffgen(ffinit(p,n),'a)^2);
+  if(sqrt(a)^2!=a,error([p,n]));
+}
+
 ftest(p,n,r)=
 {
   my(a=ffgen(ffinit(p,n),'a)^r);
   if(sqrtn(a,r)^r!=a,error([p,n,r]));
 }
 default(echo,1);
+
+stest(2,1005);
+stest(17,2);
+stest(17,3);
+stest(17,4);
+
+stest(nextprime(2^31),2);
+stest(nextprime(2^31),3);
+stest(nextprime(2^31),4);
+
+
+stest(nextprime(2^63),2);
+stest(nextprime(2^63),3);
+stest(nextprime(2^63),4);
+
+stest(nextprime(2^65),2);
+stest(nextprime(2^65),3);
+stest(nextprime(2^65),4);
 
 ftest(2,1005,7);
 ffgen(ffinit(2^32-5,101),'a)^10000

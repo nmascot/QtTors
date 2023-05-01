@@ -71,6 +71,19 @@ x^2 + Mod(4294967309, 4294967311)*x + Mod(4294967310, 4294967311), [a, a^2 +
 743*a^2 + 2459390605*a + 1304316254, 4026574568*a^2 + 1835576706*a + 2990651
 056]~]
 ? default(echo,0);
+? stest(2,1005);
+? stest(17,2);
+? stest(17,3);
+? stest(17,4);
+? stest(nextprime(2^31),2);
+? stest(nextprime(2^31),3);
+? stest(nextprime(2^31),4);
+? stest(nextprime(2^63),2);
+? stest(nextprime(2^63),3);
+? stest(nextprime(2^63),4);
+? stest(nextprime(2^65),2);
+? stest(nextprime(2^65),3);
+? stest(nextprime(2^65),4);
 ? ftest(2,1005,7);
 ? ffgen(ffinit(2^32-5,101),'a)^10000
 2904925334*a^100 + 700105542*a^99 + 1727200511*a^98 + 1173808205*a^97 + 9542
@@ -362,4 +375,4 @@ error("incorrect type in ffextend (t_POL).")
   ***                 ^-------------------
   *** fforder: domain error in fforder: x = 0
 ? print("Total time spent: ",gettime);
-Total time spent: 2612
+Total time spent: 872
