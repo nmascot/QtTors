@@ -2106,6 +2106,7 @@ ulong   Fl_sqrtl_pre(ulong a, ulong l, ulong p, ulong pi);
 ulong   Fl_sqrtn(ulong a, long n, ulong p, ulong *zetan);
 ulong   Fl_sqrtn_pre(ulong a, long n, ulong p, ulong pi, ulong *zetan);
 GEN     Fp_2gener(GEN p);
+GEN     Fp_2gener_i(GEN ns, GEN p);
 GEN     Fp_factored_order(GEN a, GEN o, GEN p);
 int     Fp_ispower(GEN x, GEN K, GEN p);
 GEN     Fp_log(GEN a, GEN g, GEN ord, GEN p);

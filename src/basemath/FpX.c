@@ -2706,14 +2706,15 @@ static GEN
 Fp2_sqrt(GEN z, GEN D, GEN p)
 {
   GEN a = gel(z,1), b = gel(z,2), as2, u, v, s;
+  GEN y = Fp_2gener_i(D, p);
   if (signe(b)==0)
-    return kronecker(a, p)==1 ? mkvec2(Fp_sqrt_i(a, D, p), gen_0)
-                              : mkvec2(gen_0,Fp_sqrt_i(Fp_div(a, D, p), D, p));
-  s = Fp_sqrt_i(Fp2_norm(z, D, p), D, p);
+    return kronecker(a, p)==1 ? mkvec2(Fp_sqrt_i(a, y, p), gen_0)
+                              : mkvec2(gen_0,Fp_sqrt_i(Fp_div(a, D, p), y, p));
+  s = Fp_sqrt_i(Fp2_norm(z, D, p), y, p);
   if(!s) return NULL;
   as2 = Fp_halve(Fp_add(a, s, p), p);
   if (kronecker(as2, p)==-1) as2 = Fp_sub(as2,s,p);
-  u = Fp_sqrt_i(as2, D, p);
+  u = Fp_sqrt_i(as2, y, p);
   v = Fp_div(b, Fp_mulu(u, 2, p), p);
   return mkvec2(u,v);
 }
