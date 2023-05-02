@@ -2697,9 +2697,9 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
 static GEN
 Fp2_norm(GEN x, GEN D, GEN p)
 {
-  GEN a = gel(x,1), b = gel(x,2), a2;
-  a2 = Fp_sqr(a,p);
-  return b? Fp_sub(a2, Fp_mul(D, Fp_sqr(b, p), p), p): a2;
+  GEN a = gel(x,1), b = gel(x,2);
+  if (signe(b)==0) return Fp_sqr(a,p);
+  return Fp_sub(sqri(a), mulii(D, Fp_sqr(b, p)), p);
 }
 
 static GEN
