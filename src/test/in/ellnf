@@ -43,7 +43,7 @@ E = ellinit([1/4*x^2+3,-7/4*x^2-1,-3/16*x^3-5/4*x^2-1/2,-1/4*x^3-3/4*x^2-x,-3/16
 ellgroup(E,P2,1)
 ellgroup(E,P3,1)
 P=idealprimedec(K,209844281664738991);
-for(i=1,4, if(idealval(K,E.disc,P[i])>0,print(ellgroup(E,P[i],1))));
+for(i=1,4, if(idealval(K,E.disc,P[i])>0,print(ellgroup(E,P[i],1)[1..2])));
 K=bnfinit(a^2 - 2*3*5*29);
 e = ellinit([a,1], K);
 E = ellchangecurve(e, Mod([2^3 * 3 * a, a+123, 17*a+2, 16*a+3], K.pol));
