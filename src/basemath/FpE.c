@@ -691,13 +691,23 @@ FqX_quad_root(GEN x, GEN T, GEN p)
   return Fq_halve(Fq_sub(s, b, T, p), T, p);
 }
 
+static GEN
+FpX_quad_root(GEN x, GEN p)
+{
+  GEN s, b = gel(x,3), c = gel(x,2);
+  GEN D = Fp_sub(Fp_sqr(b, p), shifti(c,2), p);
+  if (kronecker(D,p) == -1) return NULL;
+  s = Fp_sqrt(D,p);
+  return Fp_halve(Fp_sub(s, b, p), p);
+}
+
 /*
  * pol is the modular polynomial of level 2 modulo p.
  *
  * (T, p) defines the field FF_{p^2} in which j_prev and j live.
  */
 static long
-path_extends_to_floor(GEN j_prev, GEN j, GEN T, GEN p, GEN Phi2, ulong max_len)
+Fq_path_extends_to_floor(GEN j_prev, GEN j, GEN T, GEN p, GEN Phi2, ulong max_len)
 {
   pari_sp ltop = avma;
   long d, i, l = lg(j);
@@ -721,6 +731,59 @@ path_extends_to_floor(GEN j_prev, GEN j, GEN T, GEN p, GEN Phi2, ulong max_len)
   return gc_long(ltop, 0);
 }
 
+static long
+Fp_path_extends_to_floor(GEN j_prev, GEN j, GEN p, GEN Phi2, ulong max_len, GEN *pt_j, GEN *pt_j_prev)
+{
+  pari_sp ltop = avma;
+  long d, i, l = lg(j);
+
+  /* A path made its way to the floor if (i) its length was cut off
+   * before reaching max_path_len, or (ii) it reached max_path_len but
+   * only has one neighbour. */
+  for (d = 1; d <= max_len; ++d)
+  {
+    for (i = 1; i < l; i++)
+    {
+      GEN Phi2_j = FpX_div_by_X_x(FpXY_evalx(Phi2, gel(j,i), p), gel(j_prev,i), p, NULL);
+      GEN j_next = FpX_quad_root(Phi2_j, p);
+      if (!j_next)
+      {
+        *pt_j = gel(j,i);
+        *pt_j_prev = gel(j_prev,i);
+        return 1;
+      }
+      gel(j_prev,i) = gel(j, i); gel(j,i) = j_next;
+    }
+    if (gc_needed(ltop, 2))
+      gerepileall(ltop, 2, &j, &j_prev);
+  }
+  return gc_long(ltop, 0);
+}
+
+
+static int
+Fp_jissupersingular(GEN j, GEN p)
+{
+  long max_path_len = expi(p)+1;
+  GEN Phi2 = FpXX_red(polmodular_ZXX(2,0,0,1), p);
+  GEN Phi2_j = FpXY_evalx(Phi2, j, p);
+  GEN roots = FpX_roots(Phi2_j, p);
+  long nbroots = lg(roots)-1;
+  GEN S, j_prev = NULL;
+
+  /* Every node in a supersingular L-volcano has L + 1 neighbours. */
+  /* Note: a multiple root only occur when j has CM by sqrt(-15). */
+  if (nbroots==0)
+    return 0;
+  S = deg2pol_shallow(gen_1, gen_0, Fp_neg(Fp_2gener(p),p),1);
+  if (nbroots==1 && FpX_is_squarefree(Phi2_j, p))
+  { j_prev = j; j = FqX_quad_root(FpX_div_by_X_x(Phi2_j, gel(roots,1), p, NULL), S, p); }
+  else
+    if (!Fp_path_extends_to_floor(const_vec(nbroots,j), roots, p, Phi2, max_path_len, &j, &j_prev))
+      return 1;
+  return !Fq_path_extends_to_floor(mkvec(j_prev), mkvec(j), S, p, Phi2, max_path_len);
+}
+
 static int
 jissupersingular(GEN j, GEN S, GEN p)
 {
@@ -735,22 +798,18 @@ jissupersingular(GEN j, GEN S, GEN p)
   if (nbroots==0 || (nbroots==1 && FqX_is_squarefree(Phi2_j, S, p)))
     return 0;
   else
-    return !path_extends_to_floor(const_vec(nbroots,j), roots, S, p, Phi2, max_path_len);
+    return !Fq_path_extends_to_floor(const_vec(nbroots,j), roots, S, p, Phi2, max_path_len);
 }
 
 int
 Fp_elljissupersingular(GEN j, GEN p)
 {
-  pari_sp ltop = avma;
   long CM;
   if (abscmpiu(p, 5) <= 0) return signe(j) == 0; /* valid if p <= 5 */
   CM = Fp_ellj_get_CM(j, gen_1, p);
   if (CM < 0) return krosi(CM, p) < 0; /* valid if p > 3 */
   else
-  {
-    GEN S = deg2pol_shallow(gen_1,gen_0,Fp_neg(Fp_2gener(p),p),1);
-    return gc_bool(ltop, jissupersingular(j, S, p));
-  }
+    return Fp_jissupersingular(j, p);
 }
 
 /***********************************************************************/
