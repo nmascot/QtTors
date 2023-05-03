@@ -688,7 +688,7 @@ FqX_quad_root(GEN x, GEN T, GEN p)
   GEN D = Fq_sub(Fq_sqr(b, T, p), Fq_mulu(c,4, T, p), T, p);
   GEN s = Fq_sqrt(D,T, p);
   if (!s) return NULL;
-  return Fq_Fp_mul(Fq_sub(s, b, T, p), shifti(addiu(p, 1),-1),T, p);
+  return Fq_halve(Fq_sub(s, b, T, p), T, p);
 }
 
 /*
