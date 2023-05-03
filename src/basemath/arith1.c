@@ -1087,7 +1087,7 @@ Fp_2gener_i(GEN ns, GEN p)
   GEN p1 = subiu(p,1);
   long e = vali(p1);
   if (e == 1) return p1;
-  return Fp_pow(ns, shifti(p1,e), p);
+  return Fp_pow(ns, shifti(p1,-e), p);
 }
 
 /* smallest square root */
