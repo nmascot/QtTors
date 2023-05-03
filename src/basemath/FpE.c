@@ -700,34 +700,25 @@ static long
 path_extends_to_floor(GEN j_prev, GEN j, GEN T, GEN p, GEN Phi2, ulong max_len)
 {
   pari_sp ltop = avma;
-  GEN Phi2_j;
-  ulong mult, d;
+  long d, i, l = lg(j);
 
   /* A path made its way to the floor if (i) its length was cut off
    * before reaching max_path_len, or (ii) it reached max_path_len but
    * only has one neighbour. */
-  for (d = 1; d < max_len; ++d) {
-    GEN j_next;
-
-    Phi2_j = FqX_div_by_X_x(FqXY_evalx(Phi2, j, T, p), j_prev, T, p, NULL);
-    j_next = FqX_quad_root(Phi2_j, T, p);
-    if (!j_next)
-    { /* j is on the floor */
-      set_avma(ltop);
-      return 1;
+  for (d = 1; d <= max_len; ++d)
+  {
+    for (i = 1; i < l; i++)
+    {
+      GEN Phi2_j = FqX_div_by_X_x(FqXY_evalx(Phi2, gel(j,i), T, p), gel(j_prev,i), T, p, NULL);
+      GEN j_next = FqX_quad_root(Phi2_j, T, p);
+      if (!j_next)
+        return  gc_long(ltop, 1);
+      gel(j_prev,i) = gel(j, i); gel(j,i) = j_next;
     }
-
-    j_prev = j; j = j_next;
     if (gc_needed(ltop, 2))
       gerepileall(ltop, 2, &j, &j_prev);
   }
-
-  /* Check that we didn't end up at the floor on the last step (j will
-   * point to the last element in the path. */
-  Phi2_j = FqX_div_by_X_x(FqXY_evalx(Phi2, j, T, p), j_prev, T, p, NULL);
-  mult = FqX_nbroots(Phi2_j, T, p);
-  set_avma(ltop);
-  return mult == 0;
+  return gc_long(ltop, 0);
 }
 
 static int
@@ -743,15 +734,8 @@ jissupersingular(GEN j, GEN S, GEN p)
   /* Note: a multiple root only occur when j has CM by sqrt(-15). */
   if (nbroots==0 || (nbroots==1 && FqX_is_squarefree(Phi2_j, S, p)))
     return 0;
-  else {
-    long i, l = lg(roots);
-    for (i = 1; i < l; ++i)
-      if (path_extends_to_floor(j, gel(roots, i), S, p, Phi2, max_path_len))
-        return 0;
-  }
-  /* If none of the paths reached the floor, then the j-invariant is
-   * supersingular. */
-  return 1;
+  else
+    return !path_extends_to_floor(const_vec(nbroots,j), roots, S, p, Phi2, max_path_len);
 }
 
 int
