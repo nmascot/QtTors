@@ -172,32 +172,33 @@ get_FqE_group(void ** pt_E, GEN a4, GEN a6, GEN T, GEN p)
 /**                                                                   **/
 /***********************************************************************/
 
-/* Return the list of discriminants D such that
-   polclass(D) divides poldisc(polmodular(l))
-*/
-
+/* l odd prime. Return the list of discriminants D such that
+ *   polclass(D) | poldisc(polmodular(l)) */
 static GEN
 list_singular_discs(long l)
 {
   const long _4l2 = 4*l*l;
   long v;
-  GEN V = zero_F2v(4*l*l);
-  for (v = 0; v < 2*l; v++)
-  {
-    GEN F = factoru(_4l2-v*v), P, E, c;
-    ulong d = coredisc2u_fact(F, -1, &P, &E);
-    long i, lP = lg(P), lc;
-    for (i = 1; i < lP; i++)
-      if (uel(P,i)==l) uel(E,i) = 0;
-    c = divisorsu_fact(mkvec2(P,E));
-    lc = lg(c);
-    for (i = 1; i < lc; i++)
-      F2v_set(V,d*uel(c,i)*uel(c,i));
-  }
+  GEN V = zero_F2v(_4l2);
+  /* special cased for efficiency + remove factor l^2 from conductor */
+  F2v_set(V, 4); /* v = 0 */
+  F2v_set(V, 3); /* v = l */
+  for (v = 1; v < 2*l; v++)
+    if (v != l)
+    { /* l does not divide _4l2 - v*v */
+      GEN F = factoru(_4l2 - v*v), P, E, c;
+      ulong d = coredisc2u_fact(F, -1, &P, &E);
+      long i, lc;
+      c = divisorsu_fact(mkvec2(P,E));
+      lc = lg(c);
+      for (i = 1; i < lc; i++)
+        F2v_set(V, d * uel(c,i)*uel(c,i));
+    }
   return V;
 }
 
-/* Find D such that j has CM by D, assuming subst(polmodular(l),x,j) has a double root */
+/* l odd prime. Find D such that j has CM by D, assuming
+ * subst(polmodular(l),x,j) has a double root */
 static long
 find_CM(long l, GEN j, GEN T, GEN p)
 {
@@ -1502,7 +1503,7 @@ find_trace_lp1_roots(long ell, GEN q)
   return mkvecsmall2(pa, ell2 - pa);
 }
 
-/*trace modulo ell^k: [], [t] or [t1,...,td] */
+/*ell odd prime; trace modulo ell^k: [], [t] or [t1,...,td] */
 static GEN
 find_trace(GEN a4, GEN a6, GEN j, ulong ell, GEN q, GEN T, GEN p, long *ptr_kt,
   long smallfact, long vx, long vy)
