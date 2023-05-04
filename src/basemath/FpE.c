@@ -1918,6 +1918,21 @@ FpXQ_ellj(GEN a4, GEN a6, GEN T, GEN p)
   }
 }
 
+static GEN
+FpXQ_is_quad(GEN x, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  GEN K;
+  long d = degpol(T);
+  x = FpXQ_red(x,T,p);
+  if (lgpol(x)<=1) return NULL;
+  if (d==2) return FpXQ_minpoly(x, T, p);
+  if (odd(degpol(T))) return NULL;
+  K = FpM_ker(FpXQ_matrix_pow(x, d, 3, T, p), p);
+  if (lg(K)!=2) return gc_NULL(av);
+  return RgV_to_RgX(gel(K,1), get_FpX_var(T));
+}
+
 int
 FpXQ_elljissupersingular(GEN j, GEN T, GEN p)
 {
@@ -1929,26 +1944,20 @@ FpXQ_elljissupersingular(GEN j, GEN T, GEN p)
    * the j-invariants are in FF_{p^{2 - e}}. */
   ulong d = get_FpX_degree(T);
   GEN S;
-
   if (degpol(j) <= 0) return Fp_elljissupersingular(constant_coeff(j), p);
-  if (abscmpiu(p, 5) <= 0) return 0; /* j != 0*/
-
+  j = FpXQ_red(j, T, p);
+  if (degpol(j) <= 0) return gc_bool(ltop, Fp_elljissupersingular(constant_coeff(j), p));
+  /* Now j is not in F_p */
+  if (abscmpiu(p, 5) <= 0) return gc_bool(ltop,0); /* j != 0*/
+  if (odd(d)) return 0;
   /* Set S so that FF_p[T]/(S) is isomorphic to FF_{p^2}: */
   if (d == 2)
     S = T;
-  else { /* d > 2 */
-    /* We construct FF_{p^2} = FF_p[t]/((T - j)(T - j^p)) which
-     * injects into FF_{p^d} via the map T |--> j. */
-    GEN j_pow_p = FpXQ_pow(j, p, T, p);
-    GEN j_sum = FpX_add(j, j_pow_p, p), j_prod;
-    long var = varn(T);
-    if (degpol(j_sum) > 0) return gc_bool(ltop,0); /* j not in Fp^2 */
-    j_prod = FpXQ_mul(j, j_pow_p, T, p);
-    if (degpol(j_prod) > 0 ) return gc_bool(ltop,0); /* j not in Fp^2 */
-    j_sum = constant_coeff(j_sum); j_prod = constant_coeff(j_prod);
-    S = mkpoln(3, gen_1, Fp_neg(j_sum, p), j_prod);
-    setvarn(S, var);
-    j = pol_x(var);
+  else /* d > 2 */
+  {
+    S = FpXQ_is_quad(j, T, p);
+    if (!S) return gc_bool(ltop,0);
+    j = pol_x(varn(S));
   }
   return gc_bool(ltop, jissupersingular(j,S,p));
 }
