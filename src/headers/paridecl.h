@@ -764,6 +764,7 @@ GEN     FpXQE_order(GEN z, GEN o, GEN a4, GEN T, GEN p);
 GEN     FpXQE_sub(GEN P, GEN Q, GEN a4, GEN T, GEN p);
 GEN     FpXQE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN T, GEN p);
 GEN     FpXQE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN T, GEN p);
+int     Fq_elljissupersingular(GEN j, GEN T, GEN p);
 GEN     RgE_to_FpE(GEN x, GEN p);
 GEN     RgE_to_FpXQE(GEN x, GEN T, GEN p);
 const struct bb_group * get_FpE_group(void **E, GEN a4, GEN a6, GEN p);

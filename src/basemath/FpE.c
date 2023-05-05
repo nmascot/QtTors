@@ -1962,6 +1962,11 @@ FpXQ_elljissupersingular(GEN j, GEN T, GEN p)
   return gc_bool(ltop, jissupersingular(j,S,p));
 }
 
+int
+Fq_elljissupersingular(GEN j, GEN T, GEN p)
+{ return typ(j)==t_INT? Fp_elljissupersingular(j, p)
+                      : FpXQ_elljissupersingular(j, T, p); }
+
 /***********************************************************************/
 /**                                                                   **/
 /**                           Point counting                          **/
