@@ -2036,7 +2036,10 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
     trace_mod = find_trace(a4, a6, j, ell, q, T, p, &kt, smallfact, vx,vy);
     if (!trace_mod) continue;
     if (typ(trace_mod)==t_INT)
+    {
+      delete_var(); delete_var();
       return gerepileuptoint(ltop, trace_mod);
+    }
     nbtrace = lg(trace_mod) - 1;
     ellkt = (long)upowuu(ell, kt);
     if (nbtrace == 1)
@@ -2054,9 +2057,8 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
           if (DEBUGLEVEL)
             err_printf("\nAborting: #E%s(Fq) divisible by %ld\n",
                        tcard_mod_ell ? "" : "_twist", ell);
-          delete_var();
-          delete_var();
-          set_avma(ltop); return gen_0;
+          delete_var(); delete_var();
+          return gc_const(ltop, gen_0);
         }
       }
       (void)Z_incremental_CRT(&TR, t_mod_ellkt, &TR_mod, ellkt);
@@ -2073,8 +2075,7 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
       GEN bound_tr;
       if (!nb_atkin)
       {
-        delete_var();
-        delete_var();
+        delete_var(); delete_var();
         return gerepileuptoint(ltop, subii(addiu(q, 1), TR));
       }
       bound_tr = mulrr(bound_bsgs, dbltor(bound_gr));
