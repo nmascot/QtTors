@@ -36,6 +36,7 @@ BA   8- [libpari] random_Fq
 BA  10- [libpari] FlxqX_div_by_X_x, FlxqX_div_by_X_x_pre
 BA  11- [libpari] Fl_2gener_pre_i, Fp_2gener_i, Fl2_sqrt_pre, Flxq_sqrt_pre
 BA  12- [libpari] Fq_elljissupersingular
+BA  13- [libpari] FpXQ_ellcard_supersingular, Fq_ellcard_supersingular
 
 Done for version 2.16.0 (released 25/02/2023):
   Fixed

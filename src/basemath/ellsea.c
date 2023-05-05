@@ -1999,6 +1999,8 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
   if (signe(j) == 0 || signe(Fq_sub(j, utoi(1728), T, p)) == 0)
     return T ? FpXQ_ellcard(Fq_to_FpXQ(a4, T, p), Fq_to_FpXQ(a6, T, p), T, p)
              : Fp_ellcard(a4, a6, p);
+  if (Fq_elljissupersingular(j, T, p))
+    return Fq_ellcard_supersingular(a4, a6, T, p);
   /*First compute the trace modulo 2 */
   switch(FqX_nbroots(rhs(a4, a6, 0), T, p))
   {

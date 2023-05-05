@@ -2069,6 +2069,43 @@ FpXQ_ffellcard(GEN a4, GEN a6, GEN M, GEN q, GEN T, GEN p, long n)
   return FpXQ_issquare(l,T,p) ? subii(q1, te): addii(q1, te);
 }
 
+static int
+FpXQ_is4power(GEN x, GEN T, GEN p)
+{
+  long d = get_FpX_degree(T);
+  if (lg(x) == 2 || absequalui(2, p)) return 1;
+  if (Mod4(p)==1)
+    return equali1(Fp_pow(FpXQ_norm(x,T,p),shifti(p,-2), p));
+  if (odd(d))
+    return FpXQ_issquare(x, T, p);
+  return ZX_equal1(FpXQ_pow(x, shifti(powiu(p, d),-2), T, p));
+}
+
+/* http://www.numdam.org/article/ASENS_1969_4_2_4_521_0.pdf */
+
+GEN
+FpXQ_ellcard_supersingular(GEN a4, GEN a6, GEN T, GEN p)
+{
+  long d = get_FpX_degree(T);
+  GEN t, D, q = powiu(p, d);
+  if (equaliu(p,3))
+    return Flxq_ellcard(ZX_to_Flx(a4,3), ZX_to_Flx(a6,3), ZXT_to_FlxT(T,3), 3);
+  if (signe(a4)==0)
+      return FpXQ_ellcardj(a4, a6, gen_0, T, q, p, d);
+  if (signe(a6)==0)
+      return FpXQ_ellcardj(a4, a6, modsi(1728,p), T, q, p, d);
+  if (odd(d)) return gen_0;
+  t = shifti(powiu(p, d>>1), 1);
+  D = FpX_sub(FpX_Fp_mul(FpXQ_powu(a4,3,T,p), stoi(-4), p),
+              FpX_mulu(FpXQ_sqr(a6,T,p), 27, p), p);
+  return (odd(d>>1) && Mod4(p)==3) ^ FpXQ_is4power(D, T, p) ? subii(addiu(q, 1), t)
+                                                            : addii(addiu(q, 1), t);
+}
+
+GEN
+Fq_ellcard_supersingular(GEN a4, GEN a6, GEN T, GEN p)
+{ return T ? FpXQ_ellcard_supersingular(a4, a6, T, p) : addiu(p, 1); }
+
 static GEN
 FpXQ_ellcard_i(GEN a4, GEN a6, GEN T, GEN p)
 {
