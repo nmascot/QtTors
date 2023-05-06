@@ -707,7 +707,7 @@ FpX_quad_root(GEN x, GEN p)
  * (T, p) defines the field FF_{p^2} in which j_prev and j live.
  */
 static long
-Fq_path_extends_to_floor(GEN j_prev, GEN j, GEN T, GEN p, GEN Phi2, ulong max_len)
+Fq_path_extends_to_floor(GEN j_prev, GEN j, GEN T, GEN p, GEN Phi2, long max_len)
 {
   pari_sp ltop = avma;
   long d, i, l = lg(j);
@@ -732,7 +732,7 @@ Fq_path_extends_to_floor(GEN j_prev, GEN j, GEN T, GEN p, GEN Phi2, ulong max_le
 }
 
 static long
-Fp_path_extends_to_floor(GEN j_prev, GEN j, GEN p, GEN Phi2, ulong max_len, GEN *pt_j, GEN *pt_j_prev)
+Fp_path_extends_to_floor(GEN j_prev, GEN j, GEN p, GEN Phi2, long max_len, GEN *pt_j, GEN *pt_j_prev)
 {
   pari_sp ltop = avma;
   long d, i, l = lg(j);
