@@ -1868,7 +1868,7 @@ tPicInit(GEN f, GEN Auts, ulong g, ulong d0, GEN L, GEN bad, GEN p, GEN AT, long
   nZ = 5*d0+1; /* min required #pts */
 
   Get_ff_aT(AT,p,&a,&T);
-  pari_printf("vars=%Ps, a=%lu, T=%Ps\n",vars,a,T);
+  if(DEBUGLEVEL>=4) pari_printf("vars=%Ps, a=%lu, T=%Ps\n",vars,a,T);
   pe = powis(p,e);
   FrobMat = ZpXQ_FrobMat(T,p,e,pe);
 
@@ -2616,7 +2616,7 @@ tPicLiftTors(GEN J, GEN W, GEN l, long hini)
       }
       Ktors = ZqXnM_ker(clifts,T,pe,p,e); /* Find comb with coord = 0 */
       n = lg(Ktors)-1;
-      printf("dim Ktors = %lu\n",n);
+      if(DEBUGLEVEL>=2) printf("dim Ktors = %lu\n",n);
       if(n!=1)
       { /* l-tors is etale, so this can only happen if Chart is not diffeo - > change chart */
         P0++; /* New chart */
