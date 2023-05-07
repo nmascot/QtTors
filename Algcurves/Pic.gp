@@ -135,15 +135,15 @@ CrvPicRR(C)= \\ RR spaces needed for picinit
     if(#E>=2,break);
   );
   print("Using d0=",d0);
-  print("D0=",D0);
+  \\print("D0=",D0);
   D2 = D0;
   for(i=1,#D2~,D2[i,2]*=2); \\ 2*D0;
-  print("E1=",E[1]);
+  \\print("E1=",E[1]);
   E[1] = BDivSub(D2,E[1]);
-  print("2D0-E1=",E[1]);
-  print("E2=",E[2]);
+  \\print("2D0-E1=",E[1]);
+  \\print("E2=",E[2]);
   E[2] = BDivSub(D2,E[2]);
-  print("2D0-E2=",E[2]);
+  \\print("2D0-E2=",E[2]);
   L = RiemannRoch(C,D0);
   LL = RiemannRoch(C,D2);
   L1 = RiemannRoch(C,E[1]);
@@ -192,7 +192,7 @@ CrvGalRep(f,l,P,D)=
 			);
 			Lp = CrvCharpoly(Cp);
   		a = rootorder(Lp,l)[2];
-			print("Requires residual degree ",a);
+			print("Requires residual degree a=",a);
 			if(best==0 || a<best[2],
 				print("Best prime so far");
 				best = [p,a,Lp];
@@ -205,7 +205,7 @@ CrvGalRep(f,l,P,D)=
     \\ TODO handle list of those
 	);
   e = ceil((D*log(10)+log(2))/log(p));
-  print("Working mod ",p,"^",e," in deg ",a);
+  print("Working mod ",p,"^",e," in residual degree a=",a);
 	J = picinit(f,[],g,d0,L,bad,p,a,e,Lp);
   pictorsgalrep(J,l,Chi);
 }
