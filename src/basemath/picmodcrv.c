@@ -1963,7 +1963,7 @@ ModPicInit(ulong N, GEN H, GEN p, ulong a, long e, GEN Lp, long UseTp, ulong nbE
   gel(J,7) = ie;
   if(DEBUGLEVEL) printf("modpicinit: Computing equation matrices\n");
   gel(J,12) = KV = cgetg(4,t_VEC);
-  worker = strtofunction("_mateqnpadic");
+  worker = strtofunction("_ZqM_eqn");
   params = cgetg(6,t_VEC);
   gel(params,2) = T;
   gel(params,3) = pe;

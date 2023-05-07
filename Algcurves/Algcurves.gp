@@ -1,5 +1,5 @@
-install("TotalDegree","lG");
-install("PolHomogenise","GGL");
+install("TotalDegree","lGD&");
+install("PolHomogenise","GGLD&");
 install("ZXY_disc","GL");
 
 PolRoot1(f)=-polcoef(f,0)/polcoef(f,1);
