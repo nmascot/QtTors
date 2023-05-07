@@ -1733,8 +1733,13 @@ zk_embed(GEN M, GEN x, long k)
  * [0/+, 1/- and -1 for FAIL] */
 static long
 eval_sign_embed(GEN z)
-{ /* dubious, fail */
-  if (typ(z) == t_REAL && realprec(z) <= LOWDEFAULTPREC) return -1;
+{
+  if (typ(z) == t_REAL)
+  {
+    long l = realprec(z);
+    if (l <= LOWDEFAULTPREC || (l == LOWDEFAULTPREC + 1 && !z[LOWDEFAULTPREC]))
+      return -1; /* dubious, fail */
+  }
   return (signe(z) < 1)? 1: 0;
 }
 /* return v such that (-1)^v = sign(sigma_k(x)), x primitive ZC */
