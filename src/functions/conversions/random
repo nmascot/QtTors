@@ -77,5 +77,23 @@ Doc:
  Simard, but is not suitable for cryptographic purposes: one can reconstruct
  the state vector from a small sample of consecutive values, thus predicting
  the entire sequence.
+
+ \misctitle{Parallelism} In multi-threaded programs, each thread has a
+ separate generator. They all start in the same \kbd{setrand(1)} state, so
+ will all produce the same sequence of pseudo-random numbers although
+ the various states are not shared. To avoid this, use \kbd{setrand} to
+ provide a different starting state to each thread:
+ \bprog
+ \\ with 8 threads
+ ? parvector(8, i, random()) \\ all 8 threads return the same number
+ %1 = [1546275796, 1546275796, ... , 1546275796]
+ ? parvector(8, i, random()) \\ ... and again since they are restarted
+ %2 = [1546275796, 1546275796, ... , 1546275796]
+
+ ? s = [1..8]; \\ 8 random seeds; we could use vector(8,i,random())
+ ? parvector(8, i, setrand(s[i]); random())
+ \\ now we get 8 different numbers
+ @eprog
+
 Variant:
   Also available: \fun{GEN}{ellrandom}{GEN E} and \fun{GEN}{ffrandom}{GEN a}.
