@@ -108,7 +108,7 @@ PtsOO(F,a)=
 W1=[[w],d], where the w/d*dx form basis of holo diffs
 */
 
-CrvInit(f0,z=z,t=t,a=a)=
+CrvInit(f0,z=z,t='t,a='a)=
 {
 	my(f,F,lf,x,y,z,p,B,SB,D,faD,U,BU,P,g,W1,OC);
 	[f,F]=APeqns(f0,z); \\ Affine and proj eqns
