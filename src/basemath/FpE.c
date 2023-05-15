@@ -2086,20 +2086,28 @@ FpXQ_is4power(GEN x, GEN T, GEN p)
 GEN
 FpXQ_ellcard_supersingular(GEN a4, GEN a6, GEN T, GEN p)
 {
+  pari_sp av = avma;
   long d = get_FpX_degree(T);
-  GEN t, D, q = powiu(p, d);
+  GEN r;
   if (equaliu(p,3))
-    return Flxq_ellcard(ZX_to_Flx(a4,3), ZX_to_Flx(a6,3), ZXT_to_FlxT(T,3), 3);
-  if (signe(a4)==0)
-      return FpXQ_ellcardj(a4, a6, gen_0, T, q, p, d);
-  if (signe(a6)==0)
-      return FpXQ_ellcardj(a4, a6, modsi(1728,p), T, q, p, d);
-  if (odd(d)) return gen_0;
-  t = shifti(powiu(p, d>>1), 1);
-  D = FpX_sub(FpX_Fp_mul(FpXQ_powu(a4,3,T,p), stoi(-4), p),
-              FpX_mulu(FpXQ_sqr(a6,T,p), 27, p), p);
-  return (odd(d>>1) && Mod4(p)==3) ^ FpXQ_is4power(D, T, p) ? subii(addiu(q, 1), t)
-                                                            : addii(addiu(q, 1), t);
+    r = Flxq_ellcard(ZX_to_Flx(a4,3), ZX_to_Flx(a6,3), ZXT_to_FlxT(T,3), 3);
+  else if (signe(a4)==0)
+    r = FpXQ_ellcardj(a4, a6, gen_0, T, powiu(p, d), p, d);
+  else if (signe(a6)==0)
+    r = FpXQ_ellcardj(a4, a6, modsi(1728,p), T, powiu(p, d), p, d);
+  else
+  {
+    GEN q, q2, t, D;
+    long qm4 = (odd(d>>1) && Mod4(p)==3);
+    if (odd(d)) return gen_0;
+    q2 = powiu(p, d>>1); q = sqri(q2);
+    t = shifti(q2, 1);
+    D = FpX_sub(FpX_Fp_mul(FpXQ_powu(a4,3,T,p), stoi(-4), p),
+                FpX_mulu(FpXQ_sqr(a6,T,p), 27, p), p);
+    r = qm4 ^ FpXQ_is4power(D, T, p) ? subii(addiu(q, 1), t)
+                                     : addii(addiu(q, 1), t);
+  }
+  return gerepileuptoint(av, r);
 }
 
 GEN
