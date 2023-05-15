@@ -1433,7 +1433,7 @@ find_points_work(ratpoints_args *args,
       {
         long n;
         args->flags |= RATPOINTS_REVERSED;
-        for (n = 1; n < degree>>1; n++) swap(pel(c,n),pel(c,degree+1-n));
+        for (n = 1; n <= degree>>1; n++) swap(pel(c,n),pel(c,degree+1-n));
       }
     }
   }
