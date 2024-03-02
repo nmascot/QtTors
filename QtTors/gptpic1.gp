@@ -35,7 +35,7 @@ install("tAllPols","GGUG");
 f = t*(1+2*t-t^2)*(x^2-1)*((t*x)^2-1); \\ Family of curves of genus 1
 t0 = 2;
 f = subst(f,t,t0+t); \\ Shift so as to have good reductino at t=0
-l=3;Chi=0;p=7;e=16;pe=p^e;h=32; \\ 3-torsion, 7-adically, prec O(7^16), O(t^32)
+l=3;Chi=0;p=29;e=16;pe=p^e;h=32; \\ 3-torsion, 7-adically, prec O(7^16), O(t^32)
 f0 = subst(f,t,0); \\ Fibre at t=0
 P1 = [-1,0]; \\ Need two Q(t)-points 
 P2 = [1,0];
